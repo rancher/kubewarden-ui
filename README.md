@@ -78,9 +78,9 @@ Rancher has a Cluster Tool for Monitoring that uses Grafana and Prometheus. You 
 **To install**:
 
 1. In the cluster explorer click on `Cluster Tools` from the side navigation
-  1a. `Install` the Monitoring tool
-  1b. Edit the YAML to include a Service Monitor for Kubewarden
-  1c. You need to specify the correct namespace where you installed Kubewarden
+  - `Install` the Monitoring tool
+  - Edit the YAML to include a Service Monitor for Kubewarden
+  - You need to specify the correct namespace where you installed Kubewarden
 
 > Adapted from [here](https://docs.kubewarden.io/operator-manual/telemetry/metrics/01-quickstart.html#install-prometheus)
 
@@ -103,12 +103,12 @@ prometheus:
 ```
 
 2. Add the [ConfigMap](https://grafana.com/grafana/dashboards/15314)
-  2a. Navigate to More Resources -> Core -> ConfigMaps
-  2b. Click `Create`
-  2c. Be sure to select the `cattle-dashboards` namespace
-  2d. Download the [JSON](https://grafana.com/api/dashboards/15314/revisions/1/download) for the Kubewarden Grafana dashboard
-  2e. Choose `Read from File` and select the JSON file you downloaded
-  2f. Add the necessary Annotations and Labels for Rancher monitoring
+  - Navigate to More Resources -> Core -> ConfigMaps
+  - Click `Create`
+  - Be sure to select the `cattle-dashboards` namespace
+  - Download the [JSON](https://grafana.com/api/dashboards/15314/revisions/1/download) for the Kubewarden Grafana dashboard
+  - Choose `Read from File` and select the JSON file you downloaded
+  - Add the necessary Annotations and Labels for Rancher monitoring
 
 ```yml
 annotations:
@@ -127,9 +127,9 @@ labels:
 ```
 
 3. Enable telemetry for your `kubewarden-controller` resource
-  3a. Navigate to Apps & Marketplace -> Installed Apps
-  3b. Select the `Edit/Upgrade` action for your `kubewarden-controller` resource
-  3c. Edit the YAML for `telemetry` to be `enabled: "true"` and ensure the metrics port is correct
+  - Navigate to Apps & Marketplace -> Installed Apps
+  - Select the `Edit/Upgrade` action for your `kubewarden-controller` resource
+  - Edit the YAML for `telemetry` to be `enabled: "true"` and ensure the metrics port is correct
 
 ```yml
 telemetry:
