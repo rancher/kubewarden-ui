@@ -34,7 +34,7 @@ docker run -d --name kubewarden \
 To add Kubewarden to Rancher you will need to install [`cert-manager`](https://cert-manager.io/docs/installation/).
 
 
-From your local cluster open the `kubectl` shell (ctrl+\`) and input:
+Within your cluster open the `kubectl` shell (ctrl+\`) and input:
 
 ```sh
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
@@ -47,15 +47,15 @@ There are two ways you can install Kubewarden into Rancher, through the UI or us
 
 #### 1. Installing from the UI
 
-- From within your cluster, navigate to Apps & Marketplace -> Repositories
+- Within your cluster, navigate to Apps & Marketplace -> Repositories
 - Create a new Repo with the type: `http` and the Index URL: `https://charts.kubewarden.io`
 - Navigate to Apps & Marketplace -> Charts
 - Filter for your new Repo and install the `kubewarden-crds` resource first
-- After `kubewarden-crds` has finished installing, navigate back to the Charts screen and install the `kubewarden-controller` resource
+- After the `kubewarden-crds` resource has finished installing, navigate back to the Charts screen and install the `kubewarden-controller` resource
 
 #### 2. Installing with Helm
 
-- Open the `kubectl` shell for your cluster (`ctrl+\``)
+- Open the `kubectl` shell for your cluster (ctrl+\`)
 - Paste the following:
 
 ```sh
