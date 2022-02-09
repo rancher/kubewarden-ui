@@ -6,7 +6,7 @@
 
 The first distribution of the UI will be alongside the Rancher Dashboard. Currently it's being built in a [forked repo](https://github.com/jordojordo/dashboard/tree/kubewarden), but is able to be tested with a [Docker image](https://hub.docker.com/repository/docker/jordonleach/kubewarden).
 
-## Run Rancher UI
+## Run the Rancher UI
 
 Run the latest [Docker image](https://hub.docker.com/repository/docker/jordonleach/kubewarden) with 1 environment variable:
 
@@ -29,16 +29,41 @@ docker run -d --name kubewarden \
 
 > Adapted from the [Kubewarden helm chart](https://charts.kubewarden.io/) install.
 
-To add Kubewarden to Rancher you will need to install [`cert-manager`](https://cert-manager.io/docs/installation/), and then install the kubewarden-controller chart.
+### **Prerequisites**
+
+To add Kubewarden to Rancher you will need to install [`cert-manager`](https://cert-manager.io/docs/installation/).
+
 
 From your local cluster open the `kubectl` shell (ctrl+\`) and input:
 
 ```sh
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
+kubectl wait --for=condition=Available deployment --timeout=2m -n cert-manager --all
+```
+
+### **To Install**:
+
+There are two ways you can install Kubewarden into Rancher, through the UI or using Helm. Installing it through the UI will help down the line if you choose to install [metrics monitoring](#enabling-metrics) or tracing logging for your policies.
+
+#### 1. Installing from the UI
+
+- From within your cluster, navigate to Apps & Marketplace -> Repositories
+- Create a new Repo with the type: `http` and the Index URL: `https://charts.kubewarden.io`
+- Navigate to Apps & Marketplace -> Charts
+- Filter for your new Repo and install the `kubewarden-crds` resource first
+- After `kubewarden-crds` has finished installing, navigate back to the Charts screen and install the `kubewarden-controller` resource
+
+#### 2. Installing with Helm
+
+- Open the `kubectl` shell for your cluster (`ctrl+\``)
+- Paste the following:
+
+```sh
 helm repo add kubewarden https://charts.kubewarden.io
 helm install --create-namespace -n kubewarden kubewarden-crds kubewarden/kubewarden-crds
 helm install --wait -n kubewarden kubewarden-controller kubewarden/kubewarden-controller
 ```
+---
 
 ### Adding Cluster Admission Policies
 
@@ -69,15 +94,24 @@ EOF
 
 ---
 
-### Enabling metrics
+## Enabling metrics
 
 Rancher has a Cluster Tool for Monitoring that uses Grafana and Prometheus. You can utilize this tool and integrate it with Kubewarden to view certain metrics pertaining to a given policy.
 
-> _Note_: You will need a cluster with 4 or more cores to install the Monitoring tool
+> _Note_: You will need a cluster with at least 4 cores to install the Monitoring tool
 
-**To install**:
+### **Prerequisites**
 
-1. In the cluster explorer click on `Cluster Tools` from the side navigation
+The OpenTelemetry Operator is necessary to manage the automatic injection of the OpenTelemetry Collector sidecar inside of the PolicyServer pod. This requires [`cert-manager`](https://cert-manager.io/docs/installation/) to be installed inside of the cluster, which we did covered in a previous step.
+
+```sh
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
+kubectl wait --for=condition=Available deployment --timeout=2m -n opentelemetry-operator-system --all
+```
+
+### **To install**:
+
+#### 1. From the cluster explorer click on `Cluster Tools` in the side navigation
   - `Install` the Monitoring tool
   - Edit the YAML to include a Service Monitor for Kubewarden
   - You need to specify the correct namespace where you installed Kubewarden
@@ -102,13 +136,13 @@ prometheus:
   annotations: {}
 ```
 
-2. Add the [ConfigMap](https://grafana.com/grafana/dashboards/15314)
+#### 2. Add the [ConfigMap](https://grafana.com/grafana/dashboards/15314)
   - Navigate to More Resources -> Core -> ConfigMaps
   - Click `Create`
   - Be sure to select the `cattle-dashboards` namespace
   - Download the [JSON](https://grafana.com/api/dashboards/15314/revisions/1/download) for the Kubewarden Grafana dashboard
   - Choose `Read from File` and select the JSON file you downloaded
-  - Add the necessary Annotations and Labels for Rancher monitoring
+  - Add the necessary Annotations and Labels for Rancher monitoring, then `Create`
 
 ```yml
 annotations:
@@ -126,7 +160,7 @@ labels:
   release: rancher-monitoring
 ```
 
-3. Enable telemetry for your `kubewarden-controller` resource
+#### 3. Enable telemetry for your `kubewarden-controller` resource
   - Navigate to Apps & Marketplace -> Installed Apps
   - Select the `Edit/Upgrade` action for your `kubewarden-controller` resource
   - Edit the YAML for `telemetry` to be `enabled: "true"` and ensure the metrics port is correct
