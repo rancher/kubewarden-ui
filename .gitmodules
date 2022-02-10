@@ -1,0 +1,4 @@
+[submodule "dashboard"]
+	path = dashboard
+	url = https://github.com/jordojordo/dashboard.git
+	branch = kubewarden
