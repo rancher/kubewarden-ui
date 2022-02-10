@@ -1,10 +1,10 @@
 # Kubewarden UI
 
-> _Note_: The UI is still in development and has not yet been fully released
+> _Note_: The UI is still in development and has not yet been fully released.
 
 ## Install
 
-The first distribution of the UI will be alongside the Rancher Dashboard. Currently it's being built in a [forked repo](https://github.com/jordojordo/dashboard/tree/kubewarden), but is able to be tested with a [Docker image](https://hub.docker.com/repository/docker/jordonleach/kubewarden).
+The first release of the UI will be alongside the Rancher Dashboard. Currently it's being built in a [forked repo](https://github.com/jordojordo/dashboard/tree/kubewarden) and is able to be tested with a [Docker image](https://hub.docker.com/repository/docker/jordonleach/kubewarden).
 
 ## Run the Rancher UI
 
@@ -29,7 +29,7 @@ docker run -d --name kubewarden \
 
 > Adapted from the [Kubewarden helm chart](https://charts.kubewarden.io/) install.
 
-### **Prerequisites**
+### **Kubewarden Prerequisites**
 
 To add Kubewarden to Rancher you will need to install [`cert-manager`](https://cert-manager.io/docs/installation/).
 
@@ -41,7 +41,7 @@ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5
 kubectl wait --for=condition=Available deployment --timeout=2m -n cert-manager --all
 ```
 
-### **To Install**:
+### **Install Kubewarden**
 
 There are two ways you can install Kubewarden into Rancher, through the UI or using Helm. Installing it through the UI will help down the line if you choose to install [metrics monitoring](#enabling-metrics) or tracing logging for your policies.
 
@@ -96,20 +96,15 @@ EOF
 
 ## Enabling metrics
 
+> _Note_: You will need a cluster with at least 4 cores to install the Monitoring tool.
+
 Rancher has a Cluster Tool for Monitoring that uses Grafana and Prometheus. You can utilize this tool and integrate it with Kubewarden to view certain metrics pertaining to a given policy.
 
-> _Note_: You will need a cluster with at least 4 cores to install the Monitoring tool
+### **Metrics Prerequisites**
 
-### **Prerequisites**
+The OpenTelemetry Operator is necessary to manage the automatic injection of the OpenTelemetry Collector sidecar inside of the PolicyServer pod. This requires [`cert-manager`](https://cert-manager.io/docs/installation/) to be installed inside of the cluster, which we covered in a [previous step](#kubewarden-prerequisites).
 
-The OpenTelemetry Operator is necessary to manage the automatic injection of the OpenTelemetry Collector sidecar inside of the PolicyServer pod. This requires [`cert-manager`](https://cert-manager.io/docs/installation/) to be installed inside of the cluster, which we did covered in a previous step.
-
-```sh
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
-kubectl wait --for=condition=Available deployment --timeout=2m -n opentelemetry-operator-system --all
-```
-
-### **To install**:
+### **Install Metrics**
 
 #### 1. From the cluster explorer click on `Cluster Tools` in the side navigation
   - `Install` the Monitoring tool
