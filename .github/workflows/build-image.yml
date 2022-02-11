@@ -1,0 +1,36 @@
+name: Dispatch Kubewarden image
+
+on:
+  repository_dispatch:
+    types: [dispatch-ui]
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build UI image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.WORKLOAD_PAT }}
+          submodules: recursive
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push UI image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./dashboard
+          file: ./dashboard/Dockerfile.kubewarden
+          push: true
+          tags: |
+            ghrc.io/${{ github.repository_owner }}/ui:latest
