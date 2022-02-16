@@ -25,7 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.DASHBOARD_PAT }}
+          token: ${{ secrets.WORKFLOW_PAT }}
           submodules: recursive
           
       - name: Set up QEMU
