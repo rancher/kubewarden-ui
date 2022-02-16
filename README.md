@@ -4,11 +4,11 @@
 
 ## Install
 
-The first release of the UI will be alongside the Rancher Dashboard. Currently it's being built in a [forked repo](https://github.com/jordojordo/dashboard/tree/kubewarden) and is able to be tested with a [Docker image](https://hub.docker.com/repository/docker/jordonleach/kubewarden).
+The first release of the UI will be alongside the Rancher Dashboard. Currently it's being built in a [forked repo](https://github.com/jordojordo/dashboard/tree/kubewarden) and is able to be tested with a [package image](https://github.com/kubewarden/ui/pkgs/container/ui).
 
 ## Run the Rancher UI
 
-Run the latest [Docker image](https://hub.docker.com/repository/docker/jordonleach/kubewarden) with 1 environment variable:
+Run the latest [package image](https://github.com/kubewarden/ui/pkgs/container/ui) with 1 environment variable:
 
 - `CATTLE_UI_DASHBOARD_INDEX` - This must be set to ensure the dashboard is using the prebuilt dashboard with the Kubewarden branch. (e.g. `https://localhost/dashboard/index.html`)
 
@@ -20,7 +20,7 @@ docker run -d --name kubewarden \
   --privileged \
   -p 80:80 -p 443:443 \
   -e CATTLE_UI_DASHBOARD_INDEX=https://localhost/dashboard/index.html \
-  jordonleach/kubewarden:latest
+  ghcr.io/kubewarden/ui:latest
 ```
 
 ---
