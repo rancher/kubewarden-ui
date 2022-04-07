@@ -9,4 +9,4 @@ docker run --volumes-from rancher-data -v "$PWD:/backup" --rm busybox tar zcvf /
 
 docker pull ghcr.io/kubewarden/ui:latest
 
-docker run -d --volumes-from rancher-data --name $1 --restart unless-stopped --privileged -p 80:80 -p 443:443 -e CATTLE_UI_DASHBOARD_INDEX=https://localhost/dashboard/index.html ghcr.io/kubewarden/ui:latest
+docker run -d --volumes-from rancher-data --restart unless-stopped --privileged -p 80:80 -p 443:443 -e CATTLE_UI_DASHBOARD_INDEX=https://localhost/dashboard/index.html ghcr.io/kubewarden/ui:latest
