@@ -54,7 +54,7 @@ kubectl wait --for=condition=Available deployment --timeout=2m -n opentelemetry-
 
 ### **Install Kubewarden**
 
-There are two ways you can install Kubewarden into Rancher, through the UI or using Helm. Installing it through the UI will help down the line if you choose to install [metrics monitoring](#enabling-metrics) or [tracing](#enabling-tracing) for your policies.
+There are two ways you can install Kubewarden into Rancher, through the UI or using Helm. Installing it through the UI will help down the line if you choose to install [metrics monitoring](https://github.com/kubewarden/ui/wiki/Metrics) or [tracing](https://github.com/kubewarden/ui/wiki/Tracing) for your policies.
 
 #### Option 1. Installing from the UI
 
