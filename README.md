@@ -10,9 +10,10 @@ The first release of the UI will be alongside the Rancher Dashboard. Currently i
 
 ## Run the UI
 
-Run the latest [package image](https://github.com/kubewarden/ui/pkgs/container/ui) with 1 environment variable:
+Run the latest [package image](https://github.com/kubewarden/ui/pkgs/container/ui) with 2 environment variables:
 
 - `CATTLE_UI_DASHBOARD_INDEX` - This must be set to ensure the dashboard is using the prebuilt dashboard with the Kubewarden branch. (e.g. `https://localhost/dashboard/index.html`)
+- `CATTLE_BOOTSTRAP_PASSWORD` - This is the initial password needed to access the Dashboard
 
 ```sh
 docker run -d --name kubewarden \
@@ -20,6 +21,7 @@ docker run -d --name kubewarden \
   --privileged \
   -p 80:80 -p 443:443 \
   -e CATTLE_UI_DASHBOARD_INDEX=https://localhost/dashboard/index.html \
+  -e CATTLE_BOOTSTRAP_PASSWORD=<my-password> \
   ghcr.io/kubewarden/ui:latest
 ```
 
