@@ -47,7 +47,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push UI image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         env:
           ACTIONS_STEP_DEBUG: true
         with:
