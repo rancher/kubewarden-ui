@@ -13,13 +13,12 @@
     "@vue/cli-plugin-typescript": "^5.0.8",
     "core-js": "^3.20.3",
     "css-loader": "4.3.0",
-    "lodash": "^4.17.21"
+    "webpack-bundle-analyzer": "^4.6.0"
   },
-  "scripts": {
-    "build-pkg": "./scripts/build-pkg.sh",
-    "dev": "./node_modules/.bin/nuxt dev",
-    "nuxt": "./node_modules/.bin/nuxt",
-    "build": "./node_modules/.bin/nuxt build"
-  },
-  "devDependencies": {}
+  "devDependencies": {},
+  "files": [
+    "**/*"
+  ],
+  "rancher": true,
+  "main": "kubewarden-0.1.0.umd.min.js"
 }

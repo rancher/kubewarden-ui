@@ -1,1 +1,18 @@
-module.exports = require('./.shell/pkg/babel.config.js');
+module.exports = {
+  env: {
+    test: {
+      plugins: [
+        [
+          'module-resolver',
+          {
+            root:  ['.'],
+            alias: {
+              '@': '.',
+              '~': '.',
+            },
+          },
+        ],
+      ],
+    },
+  },
+};
