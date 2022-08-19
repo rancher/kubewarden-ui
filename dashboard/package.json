@@ -1,0 +1,19 @@
+{
+  "name": "kubewarden",
+  "version": "0.1.0",
+  "private": false,
+  "engines": {
+    "node": ">=12"
+  },
+  "dependencies": {
+    "@rancher/components": "^0.1.0-alpha.1",
+    "@rancher/shell": "^0.1.1",
+    "core-js": "^3.20.3",
+    "css-loader": "4.3.0"
+  },
+  "scripts": {
+    "dev": "./node_modules/.bin/nuxt dev",
+    "nuxt": "./node_modules/.bin/nuxt",
+    "build": "./node_modules/.bin/nuxt build"
+  }
+}

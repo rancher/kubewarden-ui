@@ -1,0 +1,625 @@
+[
+  {
+    "name": "about",
+    "path": "/about",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/about.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/about",
+    "_name": "_7ef31aa1"
+  },
+  {
+    "name": "account",
+    "path": "/account",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/account/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/account/index",
+    "_name": "_b79717f8"
+  },
+  {
+    "name": "c",
+    "path": "/c",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/index",
+    "_name": "_6721e88c"
+  },
+  {
+    "name": "clusters",
+    "path": "/clusters",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/clusters/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/clusters/index",
+    "_name": "_3d7aca18"
+  },
+  {
+    "name": "diagnostic",
+    "path": "/diagnostic",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/diagnostic.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/diagnostic",
+    "_name": "_781a0d43"
+  },
+  {
+    "name": "fail-whale",
+    "path": "/fail-whale",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/fail-whale.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/fail-whale",
+    "_name": "_2ab739d6"
+  },
+  {
+    "name": "home",
+    "path": "/home",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/home.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/home",
+    "_name": "_a05c050a"
+  },
+  {
+    "name": "plugins",
+    "path": "/plugins",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/plugins.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/plugins",
+    "_name": "_75a54398"
+  },
+  {
+    "name": "prefs",
+    "path": "/prefs",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/prefs.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/prefs",
+    "_name": "_fb395f78"
+  },
+  {
+    "name": "support",
+    "path": "/support",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/support/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/support/index",
+    "_name": "_261e4726"
+  },
+  {
+    "name": "account-create-key",
+    "path": "/account/create-key",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/account/create-key.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/account/create-key",
+    "_name": "_5859704c"
+  },
+  {
+    "name": "auth-login",
+    "path": "/auth/login",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/auth/login.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/auth/login",
+    "_name": "_0383bf44"
+  },
+  {
+    "name": "auth-logout",
+    "path": "/auth/logout",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/auth/logout.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/auth/logout",
+    "_name": "_1696f3e5"
+  },
+  {
+    "name": "auth-setup",
+    "path": "/auth/setup",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/auth/setup.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/auth/setup",
+    "_name": "_7cce7d1c"
+  },
+  {
+    "name": "auth-verify",
+    "path": "/auth/verify",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/auth/verify.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/auth/verify",
+    "_name": "_12835158"
+  },
+  {
+    "name": "docs-toc",
+    "path": "/docs/toc",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/docs/toc.js",
+    "chunkName": "node_modules/@rancher/shell/pages/docs/toc",
+    "_name": "_2701edff"
+  },
+  {
+    "name": "rio-mesh",
+    "path": "/rio/mesh",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/rio/mesh.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/rio/mesh",
+    "_name": "_62002ec0"
+  },
+  {
+    "name": "c-cluster",
+    "path": "/c/:cluster",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/index",
+    "_name": "_7f787a74"
+  },
+  {
+    "name": "docs-doc",
+    "path": "/docs/:doc?",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/docs/_doc.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/docs/_doc",
+    "_name": "_8ba9ee3e"
+  },
+  {
+    "name": "c-cluster-apps",
+    "path": "/c/:cluster/apps",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/apps/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/apps/index",
+    "_name": "_65c50431"
+  },
+  {
+    "name": "c-cluster-auth",
+    "path": "/c/:cluster/auth",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/auth/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/auth/index",
+    "_name": "_7171e832"
+  },
+  {
+    "name": "c-cluster-backup",
+    "path": "/c/:cluster/backup",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/backup/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/backup/index",
+    "_name": "_de67dafe"
+  },
+  {
+    "name": "c-cluster-cis",
+    "path": "/c/:cluster/cis",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/cis/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/cis/index",
+    "_name": "_ec76c3f8"
+  },
+  {
+    "name": "c-cluster-ecm",
+    "path": "/c/:cluster/ecm",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/ecm/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/ecm/index",
+    "_name": "_8976cb74"
+  },
+  {
+    "name": "c-cluster-explorer",
+    "path": "/c/:cluster/explorer",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/explorer/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/explorer/index",
+    "_name": "_00ac43be"
+  },
+  {
+    "name": "c-cluster-fleet",
+    "path": "/c/:cluster/fleet",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/fleet/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/fleet/index",
+    "_name": "_fb29f376"
+  },
+  {
+    "name": "c-cluster-gatekeeper",
+    "path": "/c/:cluster/gatekeeper",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/gatekeeper/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/gatekeeper/index",
+    "_name": "_4b5af07c"
+  },
+  {
+    "name": "c-cluster-harvester",
+    "path": "/c/:cluster/harvester",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/harvester/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/harvester/index",
+    "_name": "_9bf2da66"
+  },
+  {
+    "name": "c-cluster-harvesterManager",
+    "path": "/c/:cluster/harvesterManager",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/harvesterManager/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/harvesterManager/index",
+    "_name": "_c06d2b14"
+  },
+  {
+    "name": "c-cluster-istio",
+    "path": "/c/:cluster/istio",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/istio/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/istio/index",
+    "_name": "_25eb7cb2"
+  },
+  {
+    "name": "c-cluster-legacy",
+    "path": "/c/:cluster/legacy",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/legacy/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/legacy/index",
+    "_name": "_a05c1870"
+  },
+  {
+    "name": "c-cluster-logging",
+    "path": "/c/:cluster/logging",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/logging/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/logging/index",
+    "_name": "_8d8a67d4"
+  },
+  {
+    "name": "c-cluster-longhorn",
+    "path": "/c/:cluster/longhorn",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/longhorn/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/longhorn/index",
+    "_name": "_1e1cd97e"
+  },
+  {
+    "name": "c-cluster-manager",
+    "path": "/c/:cluster/manager",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/manager/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/manager/index",
+    "_name": "_214686e4"
+  },
+  {
+    "name": "c-cluster-mcapps",
+    "path": "/c/:cluster/mcapps",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/mcapps/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/mcapps/index",
+    "_name": "_72d0da47"
+  },
+  {
+    "name": "c-cluster-monitoring",
+    "path": "/c/:cluster/monitoring",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/monitoring/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/monitoring/index",
+    "_name": "_3b00c0f2"
+  },
+  {
+    "name": "c-cluster-neuvector",
+    "path": "/c/:cluster/neuvector",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/neuvector/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/neuvector/index",
+    "_name": "_914448d0"
+  },
+  {
+    "name": "c-cluster-settings",
+    "path": "/c/:cluster/settings",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/settings/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/settings/index",
+    "_name": "_8f91cabc"
+  },
+  {
+    "name": "c-cluster-apps-charts",
+    "path": "/c/:cluster/apps/charts",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/apps/charts/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/apps/charts/index",
+    "_name": "_4f154589"
+  },
+  {
+    "name": "c-cluster-auth-config",
+    "path": "/c/:cluster/auth/config",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/auth/config/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/auth/config/index",
+    "_name": "_09679fc0"
+  },
+  {
+    "name": "c-cluster-auth-roles",
+    "path": "/c/:cluster/auth/roles",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/auth/roles/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/auth/roles/index",
+    "_name": "_40540555"
+  },
+  {
+    "name": "c-cluster-explorer-ConfigBadge",
+    "path": "/c/:cluster/explorer/ConfigBadge",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/explorer/ConfigBadge.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/explorer/ConfigBadge",
+    "_name": "_282275cd"
+  },
+  {
+    "name": "c-cluster-explorer-EventsTable",
+    "path": "/c/:cluster/explorer/EventsTable",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/explorer/EventsTable.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/explorer/EventsTable",
+    "_name": "_6ea766fe"
+  },
+  {
+    "name": "c-cluster-explorer-explorer-utils",
+    "path": "/c/:cluster/explorer/explorer-utils",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/explorer/explorer-utils.js",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/explorer/explorer-utils",
+    "_name": "_1e08aec8"
+  },
+  {
+    "name": "c-cluster-explorer-tools",
+    "path": "/c/:cluster/explorer/tools",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/explorer/tools/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/explorer/tools/index",
+    "_name": "_99a9a4ec"
+  },
+  {
+    "name": "c-cluster-fleet-GitRepoGraphConfig",
+    "path": "/c/:cluster/fleet/GitRepoGraphConfig",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/fleet/GitRepoGraphConfig.js",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/fleet/GitRepoGraphConfig",
+    "_name": "_773a8486"
+  },
+  {
+    "name": "c-cluster-gatekeeper-constraints",
+    "path": "/c/:cluster/gatekeeper/constraints",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/gatekeeper/constraints/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/gatekeeper/constraints/index",
+    "_name": "_172bf63a"
+  },
+  {
+    "name": "c-cluster-harvester-airgapupgrade",
+    "path": "/c/:cluster/harvester/airgapupgrade",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/harvester/airgapupgrade/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/harvester/airgapupgrade/index",
+    "_name": "_3fc584e4"
+  },
+  {
+    "name": "c-cluster-harvester-support",
+    "path": "/c/:cluster/harvester/support",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/harvester/support/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/harvester/support/index",
+    "_name": "_4e158d8d"
+  },
+  {
+    "name": "c-cluster-legacy-project",
+    "path": "/c/:cluster/legacy/project",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/legacy/project/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/legacy/project/index",
+    "_name": "_59517a52"
+  },
+  {
+    "name": "c-cluster-manager-cloudCredential",
+    "path": "/c/:cluster/manager/cloudCredential",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/manager/cloudCredential/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/manager/cloudCredential/index",
+    "_name": "_7d23a501"
+  },
+  {
+    "name": "c-cluster-monitoring-alertmanagerconfig",
+    "path": "/c/:cluster/monitoring/alertmanagerconfig",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/monitoring/alertmanagerconfig/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/monitoring/alertmanagerconfig/index",
+    "_name": "_2c383071"
+  },
+  {
+    "name": "c-cluster-monitoring-monitor",
+    "path": "/c/:cluster/monitoring/monitor",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/monitoring/monitor/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/monitoring/monitor/index",
+    "_name": "_3dfe4c12"
+  },
+  {
+    "name": "c-cluster-monitoring-route-receiver",
+    "path": "/c/:cluster/monitoring/route-receiver",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/monitoring/route-receiver/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/monitoring/route-receiver/index",
+    "_name": "_77dfd591"
+  },
+  {
+    "name": "c-cluster-settings-banners",
+    "path": "/c/:cluster/settings/banners",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/settings/banners.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/settings/banners",
+    "_name": "_051f2817"
+  },
+  {
+    "name": "c-cluster-settings-brand",
+    "path": "/c/:cluster/settings/brand",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/settings/brand.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/settings/brand",
+    "_name": "_8d284a52"
+  },
+  {
+    "name": "c-cluster-settings-performance",
+    "path": "/c/:cluster/settings/performance",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/settings/performance.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/settings/performance",
+    "_name": "_7839ce00"
+  },
+  {
+    "name": "c-cluster-apps-charts-chart",
+    "path": "/c/:cluster/apps/charts/chart",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/apps/charts/chart.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/apps/charts/chart",
+    "_name": "_4510e2d6"
+  },
+  {
+    "name": "c-cluster-apps-charts-install",
+    "path": "/c/:cluster/apps/charts/install",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/apps/charts/install.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/apps/charts/install",
+    "_name": "_4d7e6a12"
+  },
+  {
+    "name": "c-cluster-auth-group.principal-assign-edit",
+    "path": "/c/:cluster/auth/group.principal/assign-edit",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/auth/group.principal/assign-edit.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/auth/group.principal/assign-edit",
+    "_name": "_64cb2426"
+  },
+  {
+    "name": "c-cluster-legacy-project-pipelines",
+    "path": "/c/:cluster/legacy/project/pipelines",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/legacy/project/pipelines.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/legacy/project/pipelines",
+    "_name": "_cb2bdfde"
+  },
+  {
+    "name": "c-cluster-manager-cloudCredential-create",
+    "path": "/c/:cluster/manager/cloudCredential/create",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/manager/cloudCredential/create.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/manager/cloudCredential/create",
+    "_name": "_4f0545dd"
+  },
+  {
+    "name": "c-cluster-monitoring-monitor-create",
+    "path": "/c/:cluster/monitoring/monitor/create",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/monitoring/monitor/create.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/monitoring/monitor/create",
+    "_name": "_ad00fe28"
+  },
+  {
+    "name": "c-cluster-monitoring-route-receiver-create",
+    "path": "/c/:cluster/monitoring/route-receiver/create",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/monitoring/route-receiver/create.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/monitoring/route-receiver/create",
+    "_name": "_a861b166"
+  },
+  {
+    "name": "c-cluster-explorer-tools-pages-page",
+    "path": "/c/:cluster/explorer/tools/pages/:page?",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/explorer/tools/pages/_page.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/explorer/tools/pages/_page",
+    "_name": "_80652cca"
+  },
+  {
+    "name": "c-cluster-auth-config-id",
+    "path": "/c/:cluster/auth/config/:id",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/auth/config/_id.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/auth/config/_id",
+    "_name": "_344adbb0"
+  },
+  {
+    "name": "c-cluster-legacy-pages-page",
+    "path": "/c/:cluster/legacy/pages/:page?",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/legacy/pages/_page.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/legacy/pages/_page",
+    "_name": "_098a0959"
+  },
+  {
+    "name": "c-cluster-legacy-project-page",
+    "path": "/c/:cluster/legacy/project/:page",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/legacy/project/_page.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/legacy/project/_page",
+    "_name": "_7bda8224"
+  },
+  {
+    "name": "c-cluster-manager-cloudCredential-id",
+    "path": "/c/:cluster/manager/cloudCredential/:id",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/manager/cloudCredential/_id.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/manager/cloudCredential/_id",
+    "_name": "_d8ae18ae"
+  },
+  {
+    "name": "c-cluster-manager-pages-page",
+    "path": "/c/:cluster/manager/pages/:page?",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/manager/pages/_page.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/manager/pages/_page",
+    "_name": "_dd9a5116"
+  },
+  {
+    "name": "c-cluster-mcapps-pages-page",
+    "path": "/c/:cluster/mcapps/pages/:page?",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/mcapps/pages/_page.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/mcapps/pages/_page",
+    "_name": "_2d7bd498"
+  },
+  {
+    "name": "c-cluster-monitoring-alertmanagerconfig-alertmanagerconfigid",
+    "path": "/c/:cluster/monitoring/alertmanagerconfig/:alertmanagerconfigid",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/monitoring/alertmanagerconfig/_alertmanagerconfigid/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/monitoring/alertmanagerconfig/_alertmanagerconfigid/index",
+    "_name": "_2197bba2"
+  },
+  {
+    "name": "c-cluster-monitoring-route-receiver-id",
+    "path": "/c/:cluster/monitoring/route-receiver/:id?",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/monitoring/route-receiver/_id.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/monitoring/route-receiver/_id",
+    "_name": "_5dd80839"
+  },
+  {
+    "name": "c-cluster-auth-roles-resource-create",
+    "path": "/c/:cluster/auth/roles/:resource/create",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/auth/roles/_resource/create.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/auth/roles/_resource/create",
+    "_name": "_8bab70aa"
+  },
+  {
+    "name": "c-cluster-harvester-console-uid-serial",
+    "path": "/c/:cluster/harvester/console/:uid?/serial",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/harvester/console/_uid/serial.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/harvester/console/_uid/serial",
+    "_name": "_36c7da35"
+  },
+  {
+    "name": "c-cluster-harvester-console-uid-vnc",
+    "path": "/c/:cluster/harvester/console/:uid?/vnc",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/harvester/console/_uid/vnc.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/harvester/console/_uid/vnc",
+    "_name": "_a5ee9a8c"
+  },
+  {
+    "name": "c-cluster-monitoring-alertmanagerconfig-alertmanagerconfigid-receiver",
+    "path": "/c/:cluster/monitoring/alertmanagerconfig/:alertmanagerconfigid/receiver",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/monitoring/alertmanagerconfig/_alertmanagerconfigid/receiver.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/monitoring/alertmanagerconfig/_alertmanagerconfigid/receiver",
+    "_name": "_260c3b22"
+  },
+  {
+    "name": "c-cluster-auth-roles-resource-id",
+    "path": "/c/:cluster/auth/roles/:resource/:id?",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/auth/roles/_resource/_id.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/auth/roles/_resource/_id",
+    "_name": "_075c16ca"
+  },
+  {
+    "name": "c-cluster-monitoring-monitor-namespace-id",
+    "path": "/c/:cluster/monitoring/monitor/:namespace/:id?",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/monitoring/monitor/_namespace/_id.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/monitoring/monitor/_namespace/_id",
+    "_name": "_60804912"
+  },
+  {
+    "name": "c-cluster-navlinks-group",
+    "path": "/c/:cluster/navlinks/:group?",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/navlinks/_group.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/navlinks/_group",
+    "_name": "_a8545ea6"
+  },
+  {
+    "name": "c-cluster-product",
+    "path": "/c/:cluster/:product",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/_product/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/_product/index",
+    "_name": "_3be0f422"
+  },
+  {
+    "name": "c-cluster-product-members",
+    "path": "/c/:cluster/:product/members",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/_product/members/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/_product/members/index",
+    "_name": "_51c2f379"
+  },
+  {
+    "name": "c-cluster-product-namespaces",
+    "path": "/c/:cluster/:product/namespaces",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/_product/namespaces.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/_product/namespaces",
+    "_name": "_6a9614ab"
+  },
+  {
+    "name": "c-cluster-product-projectsnamespaces",
+    "path": "/c/:cluster/:product/projectsnamespaces",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/_product/projectsnamespaces.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/_product/projectsnamespaces",
+    "_name": "_384e04a5"
+  },
+  {
+    "name": "c-cluster-product-resource",
+    "path": "/c/:cluster/:product/:resource",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/_product/_resource/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/_product/_resource/index",
+    "_name": "_3e7f398d"
+  },
+  {
+    "name": "c-cluster-product-resource-create",
+    "path": "/c/:cluster/:product/:resource/create",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/_product/_resource/create.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/_product/_resource/create",
+    "_name": "_8dc77a5e"
+  },
+  {
+    "name": "c-cluster-product-resource-id",
+    "path": "/c/:cluster/:product/:resource/:id",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/_product/_resource/_id.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/_product/_resource/_id",
+    "_name": "_1bb83b35"
+  },
+  {
+    "name": "c-cluster-product-resource-namespace-id",
+    "path": "/c/:cluster/:product/:resource/:namespace/:id?",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/c/_cluster/_product/_resource/_namespace/_id.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/c/_cluster/_product/_resource/_namespace/_id",
+    "_name": "_877a2f48"
+  },
+  {
+    "name": "index",
+    "path": "/",
+    "component": "/home/jordon/Documents/pkg/kubewarden/node_modules/@rancher/shell/pages/index.vue",
+    "chunkName": "node_modules/@rancher/shell/pages/index",
+    "_name": "_c2aa1534"
+  }
+]
