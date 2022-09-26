@@ -4,6 +4,7 @@
     ":disableDependencyDashboard"
   ],
   "ignoreDeps": [
-    "./dashboard"
+    "./dashboard",
+    "core-js"
   ]
 }
