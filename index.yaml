@@ -10,12 +10,12 @@ entries:
       catalog.cattle.io/ui-component: plugins
     apiVersion: v1
     appVersion: 0.1.0
-    created: "2022-10-05T14:43:41.147699721-04:00"
+    created: "2022-10-05T15:08:19.428575308-04:00"
     description: kubewarden plugin
-    digest: 44fb261e7c4b41d07231c55f352aef4996291ca7b40732bc1deb21f06970f3b4
+    digest: 09e71b356c7fcbf202acf2e4784f94509187ccce2231093d6ea6d0054a82b726
     name: kubewarden
     type: application
     urls:
     - https://raw.githubusercontent.com/https:/github.com/jordojordo/ui.git/main/assets/kubewarden/kubewarden-0.1.0.tgz
     version: 0.1.0
-generated: "2022-10-05T14:43:41.147255403-04:00"
+generated: "2022-10-05T15:08:19.428128474-04:00"
