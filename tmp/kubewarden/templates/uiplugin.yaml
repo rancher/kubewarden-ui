@@ -1,0 +1,10 @@
+apiVersion: catalog.cattle.io/v1
+kind: UIPlugin
+metadata:
+  name: kubewarden
+  namespace: cattle-ui-plugin-system
+spec:
+  plugin:
+    name: kubewarden
+    version: 0.1.0
+    description: kubewarden plugin

@@ -13,7 +13,7 @@ VERSION=$(jq -r .version package.json)
 
 echo "Version: $VERSION"
 
-which git
+which gh
 if [ $? -ne 0 ]; then
   echo "You need to install the GitHub CLI tool (gh) and ensure it is on the path"
   exit 1
@@ -31,7 +31,7 @@ echo "GitHub Repository: ${REPO}"
 
 # Check that release does not already exist
 
-git release view -R ${REPO} ${VERSION} > /dev/null
+gh release view -R ${REPO} ${VERSION} > /dev/null
 if [ $? -eq 0 ]; then
   echo "Release already exists on GitHub; update package.json to change the version number"
   exit 1
@@ -77,8 +77,8 @@ done
 echo "Creating GitHub Release"
 
 # Create release and uplaod Helm charts to the GitHub release
-git release create -R ${REPO} ${VERSION} --generate-notes -t "Release ${VERSION}" ./dist-pkg/*.tgz
-git release upload -R ${REPO} ${VERSION} ./tmp/_charts/*.tgz
+gh release create -R ${REPO} ${VERSION} --generate-notes -t "Release ${VERSION}" ./dist-pkg/*.tgz
+gh release upload -R ${REPO} ${VERSION} ./tmp/_charts/*.tgz
 
 CHARTS_DIR=$(cd ./tmp/_charts && pwd)
 
@@ -90,7 +90,7 @@ popd > /dev/null
 
 BASE_URL="https://github.com/${REPO}/releases/download/${PKG_VERSION}/"
 
-# Clone the same Git repo into a temporary folder
+# Clone the same git repo into a temporary folder
 
 GIT_URL=$(git config --get remote.origin.url)
 GIT_REPO=${PWD##*/}
