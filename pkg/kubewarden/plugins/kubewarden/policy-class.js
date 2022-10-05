@@ -3,11 +3,11 @@ import flatMap from 'lodash/flatMap';
 import matches from 'lodash/matches';
 
 import SteveModel from '@shell/plugins/steve/steve-class';
-import { KUBEWARDEN } from '../../types';
 import { SERVICE } from '@shell/config/types';
 import { proxyUrlFromParts } from '@shell/models/service';
 import { findBy, isArray } from '@shell/utils/array';
 import { addParam } from '@shell/utils/url';
+import { KUBEWARDEN } from '../../types';
 
 export const TRACE_HEADERS = [
   {
