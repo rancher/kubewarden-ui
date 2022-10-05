@@ -1,0 +1,7 @@
+apiVersion: v2
+name: kubewarden
+version: 0.1.0
+appVersion: 0.1.0
+description: kubewarden plugin
+annotations:
+  uipluign.cattle.io: 'true'

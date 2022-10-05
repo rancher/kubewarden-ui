@@ -41,7 +41,7 @@ export function init($plugin, store) {
   } = KUBEWARDEN;
 
   product({
-    ifHaveGroup:         KUBEWARDEN_PRODUCT_GROUP,
+    // ifHaveGroup:         KUBEWARDEN_PRODUCT_GROUP,
     inStore:             'cluster',
     inExplorer:          true,
     icon:                'kubewarden',

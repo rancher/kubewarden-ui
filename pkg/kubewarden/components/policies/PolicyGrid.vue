@@ -1,10 +1,10 @@
 <script>
 import { _CREATE, CATEGORY, SEARCH_QUERY } from '@shell/config/query-params';
-import { CATEGORY_MAP, RESOURCE_MAP } from '../../plugins/kubewarden/policy-class';
 import { ensureRegex } from '@shell/utils/string';
 import { sortBy } from '@shell/utils/sort';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
+import { CATEGORY_MAP, RESOURCE_MAP } from '../../plugins/kubewarden/policy-class';
 
 export default {
   props: {
@@ -76,11 +76,11 @@ export default {
     },
 
     keywordOptions() {
-      const flattened = this.value.flatMap((subtype) => {
+      const flattened = this.value?.flatMap((subtype) => {
         return subtype.keywords;
       });
 
-      return [...new Set(flattened)];
+      return [...new Set(flattened)] || [];
     },
   },
 
