@@ -7,17 +7,16 @@
     ".eslintcache": true,
     ".eslintignore": true,
     ".eslintrc.js": true,
-    ".gitignore": true,
     ".nuxt*": true,
     ".nyc_output": true,
-    "Dockerfile": true,
     ".vscode": true,
+    "babel.config.js": true,
+    "Dockerfile": true,
+    "jsconfig.json": true,
     "LICENSE": true,
     "node_modules": true,
-    "babel.config.js": true,
-    "jsconfig.json": true,
-    "yarn-error.log": true,
     "pkg/**/.shell": true,
-    "pkg/**/node_modules": true
+    "pkg/**/node_modules": true,
+    "yarn-error.log": true
   }
 }
