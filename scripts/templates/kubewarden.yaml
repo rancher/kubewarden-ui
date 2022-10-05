@@ -1,10 +1,10 @@
 apiVersion: catalog.cattle.io/v1
-kind: UIPlugin
+kind: Kubewarden
 metadata:
-  name: NAME
+  name: Kubewarden UI
   namespace: cattle-ui-plugin-system
 spec:
   plugin: # should initially follow the design of the Helm Chart.yaml fields, could discuss modifying this
-    name: NAME
-    version: VERSION
-    description: DESCRIPTION
+    name: Kubewarden
+    version: v0.1.0
+    description: Kubewarden's User Interface
