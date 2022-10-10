@@ -5,9 +5,9 @@ kubewarden:
     notInstalled: Kubewarden is not installed
     description: |
       Kubewarden is a policy engine for Kubernetes. It helps with keeping your Kubernetes clusters secure and compliant. Kubewarden policies can be written using regular programming languages or Domain Specific Languages (DSL). Policies are compiled into WebAssembly modules that are then distributed using traditional container registries.
-    instructions:
-      title: Installation
-      prerequisites: Prerequisites
+    getStarted: Get Started
+    prerequisites:
+      title: Prerequisites
       certManager:
         description: Currently, the kubewarden-controller depends on cert-manager. Make sure you have cert-manager installed before installing the kubewarden-controller chart.
         step: 'Run the <code>kubectl</code> command below on to install the latest version of cert-manager:'

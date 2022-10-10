@@ -2,8 +2,8 @@ import { STATE, NAME as NAME_HEADER } from '@shell/config/table-headers';
 import {
   KUBEWARDEN,
   KUBEWARDEN_DASHBOARD,
-  KUBEWARDEN_PRODUCT_NAME,
-  KUBEWARDEN_PRODUCT_GROUP
+  // KUBEWARDEN_PRODUCT_NAME,
+  // KUBEWARDEN_PRODUCT_GROUP
 } from '../types';
 import { createKubewardenRoute, rootKubewardenRoute } from '../utils/custom-routing';
 
@@ -56,13 +56,13 @@ export function init($plugin, store) {
   });
 
   virtualType({
-    // ifHaveGroup: KUBEWARDEN_PRODUCT_GROUP,
     label:       store.getters['i18n/t']('kubewarden.dashboard'),
     icon:        'kubewarden',
     name:        KUBEWARDEN_DASHBOARD,
     namespaced:  false,
     weight:      99,
-    route:       createKubewardenRoute('c-cluster-resource', { resource: KUBEWARDEN_DASHBOARD })
+    route:       createKubewardenRoute('c-cluster-kubewarden'),
+    overview:    true
   });
   basicType([KUBEWARDEN_DASHBOARD]);
 
