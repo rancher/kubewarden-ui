@@ -1,9 +1,11 @@
 <script>
 import { _CREATE, _EDIT } from '@shell/config/query-params';
-import { KUBEWARDEN } from '../../types';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import CruResource from '@shell/components/CruResource';
+
+import { KUBEWARDEN } from '../../types';
+
 import Config from './Config';
 import Create from './Create';
 

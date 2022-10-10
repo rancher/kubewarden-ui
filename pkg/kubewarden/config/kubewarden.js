@@ -1,6 +1,11 @@
 import { STATE, NAME as NAME_HEADER } from '@shell/config/table-headers';
-import { KUBEWARDEN, KUBEWARDEN_PRODUCT_GROUP } from '../types';
-import { createKubewardenRoute } from '../utils/custom-routing';
+import {
+  KUBEWARDEN,
+  KUBEWARDEN_DASHBOARD,
+  // KUBEWARDEN_PRODUCT_NAME,
+  // KUBEWARDEN_PRODUCT_GROUP
+} from '../types';
+import { createKubewardenRoute, rootKubewardenRoute } from '../utils/custom-routing';
 
 export const CHART_NAME = 'rancher-kubewarden';
 
@@ -30,6 +35,7 @@ export function init($plugin, store) {
     configureType,
     spoofedType,
     weightType,
+    virtualType,
     headers,
   } = $plugin.DSL(store, $plugin.name);
 
@@ -41,13 +47,24 @@ export function init($plugin, store) {
   } = KUBEWARDEN;
 
   product({
-    // ifHaveGroup:         KUBEWARDEN_PRODUCT_GROUP,
     inStore:             'cluster',
     inExplorer:          true,
     icon:                'kubewarden',
     removeable:          false,
     showNamespaceFilter: true,
+    to:                  rootKubewardenRoute()
   });
+
+  virtualType({
+    label:       store.getters['i18n/t']('kubewarden.dashboard'),
+    icon:        'kubewarden',
+    name:        KUBEWARDEN_DASHBOARD,
+    namespaced:  false,
+    weight:      99,
+    route:       createKubewardenRoute('c-cluster-kubewarden'),
+    overview:    true
+  });
+  basicType([KUBEWARDEN_DASHBOARD]);
 
   configureType(POLICY_SERVER, {
     isCreatable:    true,
@@ -133,9 +150,9 @@ export function init($plugin, store) {
     CLUSTER_ADMISSION_POLICY
   ]);
 
-  weightType(POLICY_SERVER, 99, true);
-  weightType(CLUSTER_ADMISSION_POLICY, 98, true);
-  weightType(ADMISSION_POLICY, 97, true);
+  weightType(POLICY_SERVER, 98, true);
+  weightType(CLUSTER_ADMISSION_POLICY, 97, true);
+  weightType(ADMISSION_POLICY, 96, true);
 
   headers(POLICY_SERVER, [
     STATE,

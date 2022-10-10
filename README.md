@@ -2,7 +2,7 @@
 
 This is a plugin for the [Rancher Dashboard](https://github.com/rancher/dashboard) which allows you to interact with Kubewarden.
 
-View the [Wiki](https://github.com/kubewarden/ui/wiki) for more in-depth info on how to use the UI. Visit the [Kubewarden docs](https://docs.kubewarden.io/introduction.html) for how Kubewarden works.
+View the [Wiki](https://github.com/kubewarden/ui/wiki) for more in-depth info on how to use the UI. Visit the [Kubewarden docs](https://docs.kubewarden.io) for how Kubewarden works.
 
 > _Note_: The UI is still in development and has not yet been fully released.
 

@@ -1,0 +1,21 @@
+apiVersion: v1
+entries:
+  kubewarden:
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/namespace: cattle-ui-plugin-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/permits-os: linux, windows
+      catalog.cattle.io/scope: management
+      catalog.cattle.io/ui-component: plugins
+    apiVersion: v1
+    appVersion: v0.1.0
+    created: "2022-10-05T17:04:27.923711534-04:00"
+    description: kubewarden plugin
+    digest: 2f64eccd0b263bbb037c15670347808b6fe511929423803b99cfcb0302668b77
+    name: kubewarden
+    type: application
+    urls:
+    - https://raw.githubusercontent.com/https:/github.com/jordojordo/ui.git/main/assets/kubewarden/kubewarden-v0.1.0.tgz
+    version: v0.1.0
+generated: "2022-10-05T17:04:27.923247169-04:00"

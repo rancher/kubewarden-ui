@@ -3,17 +3,18 @@ import jsyaml from 'js-yaml';
 import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
 import isEmpty from 'lodash/isEmpty';
-import { NAMESPACE_SELECTOR } from '../../plugins/kubewarden/policy-class';
 import ChartMixin from '@shell/mixins/chart';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { _CREATE, CHART, REPO, REPO_TYPE } from '@shell/config/query-params';
-import { KUBEWARDEN } from '../../types';
 import { saferDump } from '@shell/utils/create-yaml';
 import { set } from '@shell/utils/object';
 
 import Loading from '@shell/components/Loading';
 import Markdown from '@shell/components/Markdown';
 import Wizard from '@shell/components/Wizard';
+
+import { NAMESPACE_SELECTOR } from '../../plugins/kubewarden/policy-class';
+import { KUBEWARDEN } from '../../types';
 
 import PolicyGrid from './PolicyGrid';
 import Values from './Values';
