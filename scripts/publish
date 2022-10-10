@@ -54,8 +54,8 @@ echo -e "${CYAN}${BOLD}Publishing UI Plugins${RESET}"
 
 pushd ${BASE_DIR} > /dev/null
 
-# VERSION=$(jq -r .version package.json)
-# echo "Version: $VERSION"
+VERSION=$(jq -r .version package.json)
+echo "Version: $VERSION"
 
 # --------------------------------------------------------------------------------
 # Check that we have the required commands avaialble for this script
@@ -222,13 +222,25 @@ for d in pkg/*/ ; do
   fi
 done
 
+
+echo -e "${CYAN}Creating GitHub Release${RESET}"
+
+# Create release and upload Helm charts to the GitHub release
+gh release create -R ${REPO} ${VERSION} --generate-notes -t "Release ${VERSION}" ${CHART_TMP}/*.tgz
+gh release upload -R ${REPO} ${VERSION} ${CHART_TMP}/*.tgz
+
+#cat index.yaml
+git add index.yaml
+git commit -m "Update Helm repository index for version ${VERSION}"
+git push origin HEAD:gh-pages -f
+
 if [ "${BUILT}" == "true" ]; then
   echo "One or more packages built"
 fi
 
 popd > /dev/null
 
-# Clean ip
+# Clean up
 rm -rf ${CHART_TMP}
 rm -rf ${TMP}
 

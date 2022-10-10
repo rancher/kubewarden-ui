@@ -1,10 +1,11 @@
 <script>
-import { MODE_MAP, TRACE_HEADERS, OPERATION_MAP } from '../plugins/kubewarden/policy-class';
-import { KUBEWARDEN } from '../types';
 import { isEmpty } from '@shell/utils/object';
 
 import { BadgeState } from '@components/BadgeState';
 import SortableTable from '@shell/components/SortableTable';
+
+import { MODE_MAP, TRACE_HEADERS, OPERATION_MAP } from '../plugins/kubewarden/policy-class';
+import { KUBEWARDEN } from '../types';
 
 export default {
   props: {

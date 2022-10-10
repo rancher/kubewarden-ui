@@ -1,13 +1,14 @@
 <script>
 import { _CREATE } from '@shell/config/query-params';
 import { set } from '@shell/utils/object';
-import { KUBEWARDEN } from '../../../types';
 
 import NameNsDescription from '@shell/components/form/NameNsDescription';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
+
+import { KUBEWARDEN } from '../../../types';
 
 export default {
   name: 'General',

@@ -2,12 +2,18 @@ import { RouteConfig } from 'vue-router';
 
 import { KUBEWARDEN_PRODUCT_NAME } from '../types';
 
+import ListKubewarden from '../pages/index.vue';
 import KubewardenResourcedList from '../pages/c/_cluster/_resource/index.vue';
 import CreateKubewardenResource from '../pages/c/_cluster/_resource/create.vue';
 import ViewKubewardenResource from '../pages/c/_cluster/_resource/_id.vue';
 import ViewKubewardenNsResource from '../pages/c/_cluster/_resource/_namespace/_id.vue';
 
 const routes: RouteConfig[] = [
+  {
+    name:      `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource`,
+    path:      `/:product/c/:cluster`,
+    component: ListKubewarden,
+  },
   {
     name:       `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource`,
     path:       `/:product/c/:cluster/:resource`,

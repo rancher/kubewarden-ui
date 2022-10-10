@@ -1,8 +1,8 @@
 <script>
-import { RULE_HEADERS } from '../plugins/kubewarden/policy-class';
-
 import { Banner } from '@components/Banner';
 import SortableTable from '@shell/components/SortableTable';
+
+import { RULE_HEADERS } from '../plugins/kubewarden/policy-class';
 
 export default {
   props: {

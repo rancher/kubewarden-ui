@@ -1,7 +1,7 @@
 export const KUBEWARDEN_PRODUCT_NAME = 'kubewarden';
 export const KUBEWARDEN_PRODUCT_GROUP = 'policies.kubewarden.io';
 
-export const KUBEWARDEN_MGMT_STORE = 'kubewardenmgmt';
+export const KUBEWARDEN_DASHBOARD = 'dashboard';
 
 export const KUBEWARDEN = {
   ADMISSION_POLICY:         'policies.kubewarden.io.admissionpolicy',

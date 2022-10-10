@@ -1,7 +1,6 @@
 <script>
 import { mapGetters } from 'vuex';
 import { _CREATE } from '@shell/config/query-params';
-import { RELATED_HEADERS } from '../models/policies.kubewarden.io.policyserver';
 import { dashboardExists } from '@shell/utils/grafana';
 import { monitoringStatus } from '@shell/utils/monitoring';
 import CreateEditView from '@shell/mixins/create-edit-view';
@@ -12,6 +11,8 @@ import Loading from '@shell/components/Loading';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
 import ResourceTable from '@shell/components/ResourceTable';
 import Tab from '@shell/components/Tabbed/Tab';
+
+import { RELATED_HEADERS } from '../models/policies.kubewarden.io.policyserver';
 
 import TraceTable from '../components/TraceTable';
 
