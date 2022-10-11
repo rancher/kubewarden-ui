@@ -252,7 +252,7 @@ for d in pkg/*/ ; do
       mv cr.yaml temp.cr
       rm *.yaml
       mv temp.cr cr.yaml
-      ENDPOINT=https://raw.githubusercontent.com/jordojordo/ui/main/extensions/${pkg}/${PKG_VERSION}
+      ENDPOINT=https://raw.githubusercontent.com/kubewarden/ui/main/extensions/${pkg}/${PKG_VERSION}
       sed -i.bak -e 's@endpoint: .*@endpoint: '"${ENDPOINT}"'@g' cr.yaml       
       rm *.bak
       popd > /dev/null
