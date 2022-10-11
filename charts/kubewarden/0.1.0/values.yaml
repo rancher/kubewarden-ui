@@ -10,7 +10,7 @@ nameOverride: ''
 fullnameOverride: ''
 pluginServer:
   image:
-    repository: 'https://github.com/jordojordo/ui-extension-kubewarden'
+    repository: nwmac/ui-extension-kubewarden
     pullPolicy: Always
     tag: 0.1.0
   service:

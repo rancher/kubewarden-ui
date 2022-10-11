@@ -9,13 +9,8 @@ annotations:
   catalog.cattle.io/ui-component: plugins
 apiVersion: v2
 appVersion: "0.1.0"
-description: homepage plugin
-name: ui-plugin-server
+description: Kubewarden extension for Rancher Manager
+name: kubewarden
 type: application
-keywords:
-  - applications
-  - infrastructure
-  - example
 version: 0.1.0
-icon: https://docs.ranchermanager.rancher.io/img/rancher-logo-horiz-color.svg
-home: https://rancher.com
+icon: https://raw.githubusercontent.com/kubewarden/ui/main/pkg/kubewarden/assets/icon-kubewarden.svg

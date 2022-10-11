@@ -66,8 +66,7 @@ if (!fs.existsSync(chartFolder)) {
 
 const values = yaml.load(fs.readFileSync(valuesFile, 'utf8'));
 
-values.pluginServer.image.repository = `${ image }`;
+values.pluginServer.image.repository = `${image}`;
 
-const valuesYaml = yaml.dump(values, { quotingType: '"' });
-
+const valuesYaml = yaml.dump(values, {quotingType: '"' });
 fs.writeFileSync(valuesFile, valuesYaml, 'utf8');
