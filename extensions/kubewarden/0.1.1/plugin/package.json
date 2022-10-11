@@ -5,10 +5,6 @@
   "version": "0.1.1",
   "private": false,
   "rancher": true,
-  "scripts": {
-    "dev": "./node_modules/.bin/nuxt dev",
-    "nuxt": "./node_modules/.bin/nuxt"
-  },
   "engines": {
     "node": ">=12"
   },
@@ -22,9 +18,8 @@
     "@vue/cli-service": "5.0.8",
     "@vue/cli-plugin-typescript": "5.0.8"
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+  "files": [
+    "**/*"
+  ],
+  "main": "kubewarden-0.1.1.umd.min.js"
 }
