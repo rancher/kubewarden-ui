@@ -8,6 +8,7 @@ kubewarden:
     getStarted: Get Started
     prerequisites:
       title: Prerequisites
+      repositoryWarning: You will need to add the Kubewarden repository `https://charts.kubewarden.io` before installing.
       certManager:
         description: Currently, the kubewarden-controller depends on cert-manager. Make sure you have cert-manager installed before installing the kubewarden-controller chart.
         step: 'Run the <code>kubectl</code> command below on to install the latest version of cert-manager:'
