@@ -9,9 +9,11 @@ kubewarden:
     prerequisites:
       title: Prerequisites
       certManager:
-        description: Currently, the kubewarden-controller depends on cert-manager. Make sure you have cert-manager installed before installing the kubewarden-controller chart.
-        step: 'Run the <code>kubectl</code> command below on to install the latest version of cert-manager:'
-        applyCommand: 'kubectl apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml'
+        title: Cert-Manager
+        description: The kubewarden-controller depends on cert-manager. You need cert-manager to be installed before installing the kubewarden-controller chart.
+      repository:
+        title: Repository
+        description: You will need the Kubewarden helm repository (https://charts.kubewarden.io) to install the `kubewarden` chart.
 
     tabs:
       general:
@@ -309,3 +311,13 @@ kubewarden:
         PSP
         Volumes
         Pod
+
+asyncButton:
+  certManager:
+    action: Apply Cert-Manager Package
+    success: Applied
+    waiting: Downloading&hellip;
+  kubewardenRepository:
+    action: Add Kubewarden Repository
+    success: Added
+    waiting: Adding&hellip;
