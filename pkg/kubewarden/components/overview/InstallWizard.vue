@@ -124,14 +124,14 @@ export default {
       </ul>
     </div>
 
-    <hr class="m-20" />
+    <hr class="mt-20" />
 
-    <slot class="step-container" name="stepContainer" :activeStep="activeStep">
+    <slot name="stepContainer" :activeStep="activeStep">
       <template v-for="step in steps">
         <div
           v-if="step.name === activeStep.name || step.hidden"
           :key="step.name"
-          class="step-container__step"
+          class="step-container"
           :class="{ hide: step.name !== activeStep.name && step.hidden }"
         >
           <slot :step="step" :name="step.name" />
@@ -179,7 +179,7 @@ export default {
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 40px;
+        width: 100px;
         overflow: visible;
         padding-top: 15px;
       }
@@ -210,5 +210,12 @@ export default {
       top: 28px;
     }
   }
+}
+
+.step-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 </style>

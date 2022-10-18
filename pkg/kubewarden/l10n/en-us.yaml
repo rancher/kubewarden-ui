@@ -3,9 +3,13 @@ kubewarden:
   dashboard: Dashboard
   install:
     notInstalled: Kubewarden is not installed
+    button: Install Kubewarden
     description: |
       Kubewarden is a policy engine for Kubernetes. It helps with keeping your Kubernetes clusters secure and compliant. Kubewarden policies can be written using regular programming languages or Domain Specific Languages (DSL). Policies are compiled into WebAssembly modules that are then distributed using traditional container registries.
-    getStarted: Get Started
+    appInstall:
+      title: App Install
+      description: This will take you to the app installation page for Kubewarden.
+      button: Install App
     prerequisites:
       title: Prerequisites
       certManager:
