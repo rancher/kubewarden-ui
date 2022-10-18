@@ -9,14 +9,17 @@
     ".eslintrc.js": true,
     ".nuxt*": true,
     ".nyc_output": true,
-    ".vscode": true,
+    ".vscode": false,
+    "assets": true,
     "babel.config.js": true,
-    "Dockerfile": true,
+    "charts": true,
+    "extensions": true,
     "jsconfig.json": true,
     "LICENSE": true,
     "node_modules": true,
     "pkg/**/.shell": true,
     "pkg/**/node_modules": true,
-    "yarn-error.log": true
+    "yarn-error.log": true,
+    "CODEOWNERS": true
   }
 }

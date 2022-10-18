@@ -3,15 +3,21 @@ kubewarden:
   dashboard: Dashboard
   install:
     notInstalled: Kubewarden is not installed
+    button: Install Kubewarden
     description: |
       Kubewarden is a policy engine for Kubernetes. It helps with keeping your Kubernetes clusters secure and compliant. Kubewarden policies can be written using regular programming languages or Domain Specific Languages (DSL). Policies are compiled into WebAssembly modules that are then distributed using traditional container registries.
-    getStarted: Get Started
+    appInstall:
+      title: App Install
+      description: This will take you to the app installation page for Kubewarden.
+      button: Install App
     prerequisites:
       title: Prerequisites
       certManager:
-        description: Currently, the kubewarden-controller depends on cert-manager. Make sure you have cert-manager installed before installing the kubewarden-controller chart.
-        step: 'Run the <code>kubectl</code> command below on to install the latest version of cert-manager:'
-        applyCommand: 'kubectl apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml'
+        title: Cert-Manager
+        description: The kubewarden-controller depends on cert-manager. You need cert-manager to be installed before installing the kubewarden-controller chart.
+      repository:
+        title: Repository
+        description: You will need the Kubewarden helm repository (https://charts.kubewarden.io) to install the `kubewarden` chart.
 
     tabs:
       general:
@@ -309,3 +315,13 @@ kubewarden:
         PSP
         Volumes
         Pod
+
+asyncButton:
+  certManager:
+    action: Apply Cert-Manager Package
+    success: Applied
+    waiting: Downloading&hellip;
+  kubewardenRepository:
+    action: Add Kubewarden Repository
+    success: Added
+    waiting: Adding&hellip;
