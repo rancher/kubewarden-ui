@@ -2,8 +2,6 @@
 import { _CREATE } from '@shell/config/query-params';
 
 import NameNsDescription from '@shell/components/form/NameNsDescription';
-import { LabeledInput } from '@components/Form/LabeledInput';
-import { RadioGroup } from '@components/Form/Radio';
 
 export default {
   props: {
@@ -18,9 +16,7 @@ export default {
     }
   },
 
-  components: {
-    LabeledInput, NameNsDescription, RadioGroup
-  },
+  components: { NameNsDescription },
 
   data() {
     return {

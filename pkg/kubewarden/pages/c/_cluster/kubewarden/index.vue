@@ -2,12 +2,13 @@
 import { mapGetters } from 'vuex';
 
 import { CATALOG, MANAGEMENT, SERVICE } from '@shell/config/types';
-import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 
 import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
 
-import InstallWizard from '~/pkg/kubewarden/components/overview/InstallWizard';
+import { KUBEWARDEN } from '../../../../types';
+
+import InstallWizard from '../../../../components/overview/InstallWizard';
 
 const KUBEWARDEN_REPO = 'https://charts.kubewarden.io';
 
@@ -21,6 +22,8 @@ export default {
   },
 
   async fetch() {
+    this.hasSchema = this.$store.getters['cluster/schemaFor'](KUBEWARDEN.POLICY_SERVER);
+
     await this.updateWhitelist('github.com');
 
     const allServices = await this.$store.dispatch('management/findAll', { type: SERVICE });
@@ -38,8 +41,6 @@ export default {
     if ( this.kubewardenRepo ) {
       certService ? this.initStepIndex = 2 : this.initStepIndex = 0;
       this.installSteps[1].ready = true;
-
-      await this.setChartRoute();
     }
   },
 
@@ -68,8 +69,8 @@ export default {
       allRepos:        null,
       controllerChart: null,
       kubewardenRepo:  null,
+      hasSchema:       null,
 
-      getStartedLink:  null,
       initStepIndex:   0,
       install:         false,
       installSteps,
@@ -118,7 +119,6 @@ export default {
         });
 
         await repoObj.save();
-        await this.setChartRoute();
         await this.updateWhitelist('artifacthub.io');
 
         btnCb(true);
@@ -142,19 +142,7 @@ export default {
       );
 
       if ( controllerChart ) {
-        this.getStartedLink = {
-          name:   'c-cluster-apps-charts-install',
-          params: {
-            cluster: this.$route.params.cluster,
-            product: CATALOG.APP,
-          },
-          query: {
-            [REPO_TYPE]: controllerChart.repoType,
-            [REPO]:      controllerChart.repoName,
-            [CHART]:     controllerChart.chartName,
-            [VERSION]:   controllerChart.versions[0].version,
-          },
-        };
+        controllerChart.goToInstall('kubewarden');
       }
     },
 
@@ -193,16 +181,19 @@ export default {
   <div v-else class="main">
     <div class="container">
       <div v-if="!install" class="title p-10">
-        <div class="logo mt-20 mb-20">
+        <div class="logo mt-20 mb-10">
           <img
-            src="https://www.kubewarden.io/images/logo-kubewarden.svg"
+            src="../../../../assets/icon-kubewarden.svg"
             height="64"
           />
         </div>
+        <h1 class="mb-20">
+          {{ t("kubewarden.title") }}
+        </h1>
         <div class="description">
           {{ t("kubewarden.install.description") }}
         </div>
-        <button class="btn role-primary mt-20" @click="install = true">
+        <button v-if="!hasSchema" class="btn role-primary mt-20" @click="install = true">
           {{ t("kubewarden.install.button") }}
         </button>
       </div>
@@ -237,12 +228,12 @@ export default {
           <p class="mb-20">
             {{ t('kubewarden.install.appInstall.description') }}
           </p>
-          <nuxt-link
-            :to="getStartedLink"
+          <button
             class="btn role-secondary mt-20"
+            @click.prevent="setChartRoute"
           >
             {{ t('kubewarden.install.appInstall.button') }}
-          </nuxt-link>
+          </button>
         </template>
       </InstallWizard>
     </div>

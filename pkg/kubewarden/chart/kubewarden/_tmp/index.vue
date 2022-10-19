@@ -5,6 +5,8 @@ import { allHash } from '@shell/utils/promise';
 
 import Tab from '@shell/components/Tabbed/Tab';
 
+import General from './General';
+
 export default {
   props: {
     chart: {
@@ -23,7 +25,7 @@ export default {
     },
   },
 
-  components: { Tab },
+  components: { General, Tab },
 
   async fetch() {
     const requests = { rancherClusters: this.$store.dispatch('management/findAll', { type: CAPI.RANCHER_CLUSTER }) };

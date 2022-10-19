@@ -1,5 +1,3 @@
-// import { RouteConfig } from 'vue-router';
-
 import { KUBEWARDEN_PRODUCT_NAME } from '../types';
 
 import ListKubewarden from '../pages/c/_cluster/kubewarden/index.vue';
@@ -10,28 +8,28 @@ import ViewKubewardenNsResource from '../pages/c/_cluster/kubewarden/_resource/_
 
 const routes = [
   {
-    name:       `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-kubewarden`,
-    path:       `/:product/c/:cluster/kubewarden`,
+    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }`,
+    path:       `/c/:cluster/kubewarden`,
     component:  ListKubewarden,
   },
   {
-    name:       `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource`,
-    path:       `/:product/c/:cluster/:resource`,
+    name:       `c-cluster-product-resource`,
+    path:       `/c/:cluster/:product/:resource`,
     component:  KubewardenResourcedList
   },
   {
-    name:       `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource-create`,
-    path:       `/:product/c/:cluster/:resource/create`,
+    name:       `c-cluster-product-resource-create`,
+    path:       `/c/:cluster/:product/:resource/create`,
     component:  CreateKubewardenResource,
   },
   {
-    name:       `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource-id`,
-    path:       `/:product/c/:cluster/:resource/:id`,
+    name:       `c-cluster-product-resource-id`,
+    path:       `/c/:cluster/:product/:resource/:id`,
     component:  ViewKubewardenResource,
   },
   {
-    name:       `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource-namespace-id`,
-    path:       `/:product/c/:cluster/:resource/:namespace/:id`,
+    name:       `c-cluster-product-resource-namespace-id`,
+    path:       `/c/:cluster/:product/:resource/:namespace/:id`,
     component:  ViewKubewardenNsResource,
   }
 ];

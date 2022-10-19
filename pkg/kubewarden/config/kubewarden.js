@@ -1,11 +1,8 @@
 import { STATE, NAME as NAME_HEADER } from '@shell/config/table-headers';
 import {
   KUBEWARDEN,
-  KUBEWARDEN_DASHBOARD,
-  // KUBEWARDEN_PRODUCT_NAME,
-  // KUBEWARDEN_PRODUCT_GROUP
+  KUBEWARDEN_DASHBOARD
 } from '../types';
-import { createKubewardenRoute, rootKubewardenRoute } from '../utils/custom-routing';
 
 export const CHART_NAME = 'rancher-kubewarden';
 
@@ -32,7 +29,6 @@ export function init($plugin, store) {
   const {
     product,
     basicType,
-    configureType,
     spoofedType,
     weightType,
     virtualType,
@@ -51,8 +47,7 @@ export function init($plugin, store) {
     inExplorer:          true,
     icon:                'kubewarden',
     removeable:          false,
-    showNamespaceFilter: true,
-    to:                  rootKubewardenRoute()
+    showNamespaceFilter: true
   });
 
   virtualType({
@@ -61,46 +56,13 @@ export function init($plugin, store) {
     name:        KUBEWARDEN_DASHBOARD,
     namespaced:  false,
     weight:      99,
-    route:       createKubewardenRoute('c-cluster-kubewarden'),
+    route:      { name: 'c-cluster-kubewarden' },
     overview:    true
   });
   basicType([KUBEWARDEN_DASHBOARD]);
 
-  configureType(POLICY_SERVER, {
-    isCreatable:    true,
-    isEditable:     true,
-    isRemovable:    true,
-    showConfigView: true,
-    showState:      false,
-    canYaml:        true,
-    customRoute:    createKubewardenRoute('c-cluster-resource', { resource: POLICY_SERVER }),
-    resourceEdit:   POLICY_SERVER,
-  });
-
-  configureType(ADMISSION_POLICY, {
-    isCreatable:    true,
-    isEditable:     true,
-    isRemovable:    true,
-    showConfigView: true,
-    showState:      false,
-    canYaml:        true,
-    customRoute:    createKubewardenRoute('c-cluster-resource', { resource: ADMISSION_POLICY }),
-    resourceEdit:   ADMISSION_POLICY,
-  });
-
-  configureType(CLUSTER_ADMISSION_POLICY, {
-    isCreatable:    true,
-    isEditable:     true,
-    isRemovable:    true,
-    showConfigView: true,
-    showState:      false,
-    canYaml:        true,
-    customRoute:    createKubewardenRoute('c-cluster-resource', { resource: CLUSTER_ADMISSION_POLICY }),
-    resourceEdit:   CLUSTER_ADMISSION_POLICY,
-  });
-
   /*
-    TODO: remove these when artifacthub integration is complete
+    TODO: remove these when rancher-charts integration is complete
   */
   // These are policies from the Policy Hub
   spoofedType({
