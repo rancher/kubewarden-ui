@@ -229,7 +229,7 @@ export default {
             {{ t('kubewarden.install.appInstall.description') }}
           </p>
           <button
-            class="btn role-secondary mt-20"
+            class="btn role-primary mt-20"
             @click.prevent="setChartRoute"
           >
             {{ t('kubewarden.install.appInstall.button') }}

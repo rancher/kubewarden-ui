@@ -3,17 +3,17 @@ kubewarden:
   dashboard: Dashboard
   install:
     notInstalled: Kubewarden is not installed
-    button: Install Kubewarden
+    button: Install Kubewarden Prerequisites
     description: |
       Kubewarden is a policy engine for Kubernetes. It helps with keeping your Kubernetes clusters secure and compliant. Kubewarden policies can be written using regular programming languages or Domain Specific Languages (DSL). Policies are compiled into WebAssembly modules that are then distributed using traditional container registries.
     appInstall:
-      title: App Install
+      title: Kubewarden App Install
       description: This will take you to the app installation page for Kubewarden.
-      button: Install App
+      button: Install Kubewarden
     prerequisites:
       title: Prerequisites
       certManager:
-        title: Cert-Manager
+        title: Install Cert-Manager Package
         description: The kubewarden-controller depends on cert-manager. You need cert-manager to be installed before installing the kubewarden-controller chart.
       repository:
         title: Repository
@@ -320,7 +320,7 @@ asyncButton:
   certManager:
     action: Apply Cert-Manager Package
     success: Applied
-    waiting: Downloading&hellip;
+    waiting: Installing&hellip;
   kubewardenRepository:
     action: Add Kubewarden Repository
     success: Added
