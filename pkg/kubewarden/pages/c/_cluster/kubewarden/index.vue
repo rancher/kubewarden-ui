@@ -7,7 +7,7 @@ import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
 
-import InstallWizard from '~/pkg/kubewarden/components/overview/InstallWizard';
+import InstallWizard from '../../../../components/overview/InstallWizard';
 
 const KUBEWARDEN_REPO = 'https://charts.kubewarden.io';
 
