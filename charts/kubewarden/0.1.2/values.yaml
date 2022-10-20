@@ -10,7 +10,7 @@ nameOverride: ''
 fullnameOverride: ''
 pluginServer:
   image:
-    repository: /ui-extension-kubewarden
+    repository: kubewarden/ui
     pullPolicy: Always
     tag: 0.1.2
   service:
