@@ -14,4 +14,3 @@ name: kubewarden
 type: application
 version: 0.1.2
 icon: https://raw.githubusercontent.com/kubewarden/ui/main/pkg/kubewarden/assets/icon-kubewarden.svg
-home: https://kubewarden.io
