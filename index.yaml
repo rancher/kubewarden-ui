@@ -11,8 +11,29 @@ entries:
       catalog.cattle.io/scope: management
       catalog.cattle.io/ui-component: plugins
     apiVersion: v2
+    appVersion: 0.1.2
+    created: "2022-10-20T08:16:06.194238927-04:00"
+    description: Kubewarden extension for Rancher Manager
+    digest: 822ec9d5ce653d2827a36b709b0f31c75016139f87516cd2671e109592774d4b
+    home: https://kubewarden.io
+    icon: https://raw.githubusercontent.com/kubewarden/ui/main/pkg/kubewarden/assets/icon-kubewarden.svg
+    name: kubewarden
+    type: application
+    urls:
+    - assets/kubewarden/kubewarden-0.1.2.tgz
+    version: 0.1.2
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/kube-version: '>= 1.16.0-0 < 1.25.0-0'
+      catalog.cattle.io/namespace: cattle-ui-plugin-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/permits-os: linux, windows
+      catalog.cattle.io/rancher-version: '>= 2.7.0-0 < 2.8.0-0'
+      catalog.cattle.io/scope: management
+      catalog.cattle.io/ui-component: plugins
+    apiVersion: v2
     appVersion: 0.1.1
-    created: "2022-10-20T07:53:14.548035193-04:00"
+    created: "2022-10-20T08:16:06.193959591-04:00"
     description: Kubewarden extension for Rancher Manager
     digest: 3d60013db07e1f137a49272a0f188f2d172c18123e3a48340fc25f4a9f2fd9b4
     icon: https://raw.githubusercontent.com/kubewarden/ui/main/pkg/kubewarden/assets/icon-kubewarden.svg
@@ -32,7 +53,7 @@ entries:
       catalog.cattle.io/ui-component: plugins
     apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-10-20T07:53:14.547724909-04:00"
+    created: "2022-10-20T08:16:06.193665523-04:00"
     description: Kubewarden extension for Rancher Manager
     digest: 8c9773504a949dc57efd5a0430c7c665eadf0077e1b309112db3eb585c163066
     icon: https://raw.githubusercontent.com/kubewarden/ui/main/pkg/kubewarden/assets/icon-kubewarden.svg
@@ -41,30 +62,4 @@ entries:
     urls:
     - assets/kubewarden/kubewarden-0.1.0.tgz
     version: 0.1.0
-  ui-plugin-server:
-  - annotations:
-      catalog.cattle.io/certified: rancher
-      catalog.cattle.io/kube-version: '>= 1.16.0-0 < 1.25.0-0'
-      catalog.cattle.io/namespace: cattle-ui-plugin-system
-      catalog.cattle.io/os: linux
-      catalog.cattle.io/permits-os: linux, windows
-      catalog.cattle.io/rancher-version: '>= 2.7.0-0 < 2.8.0-0'
-      catalog.cattle.io/scope: management
-      catalog.cattle.io/ui-component: plugins
-    apiVersion: v2
-    appVersion: 0.1.0
-    created: "2022-10-20T07:53:14.548350124-04:00"
-    description: homepage plugin
-    digest: bd406f6bda9dbdd6e0a41ebc6a1dba461f885aa671609f3d9574167ea5ed140c
-    home: https://rancher.com
-    icon: https://docs.ranchermanager.rancher.io/img/rancher-logo-horiz-color.svg
-    keywords:
-    - applications
-    - infrastructure
-    - example
-    name: ui-plugin-server
-    type: application
-    urls:
-    - assets/kubewarden/ui-plugin-server-0.1.0.tgz
-    version: 0.1.0
-generated: "2022-10-20T07:53:14.547192835-04:00"
+generated: "2022-10-20T08:16:06.193277143-04:00"
