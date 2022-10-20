@@ -12,7 +12,7 @@ entries:
       catalog.cattle.io/ui-component: plugins
     apiVersion: v2
     appVersion: 0.1.1
-    created: "2022-10-19T09:25:19.134250975-04:00"
+    created: "2022-10-20T07:53:14.548035193-04:00"
     description: Kubewarden extension for Rancher Manager
     digest: 3d60013db07e1f137a49272a0f188f2d172c18123e3a48340fc25f4a9f2fd9b4
     icon: https://raw.githubusercontent.com/kubewarden/ui/main/pkg/kubewarden/assets/icon-kubewarden.svg
@@ -32,7 +32,7 @@ entries:
       catalog.cattle.io/ui-component: plugins
     apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-10-19T09:25:19.133949908-04:00"
+    created: "2022-10-20T07:53:14.547724909-04:00"
     description: Kubewarden extension for Rancher Manager
     digest: 8c9773504a949dc57efd5a0430c7c665eadf0077e1b309112db3eb585c163066
     icon: https://raw.githubusercontent.com/kubewarden/ui/main/pkg/kubewarden/assets/icon-kubewarden.svg
@@ -53,9 +53,9 @@ entries:
       catalog.cattle.io/ui-component: plugins
     apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-10-19T09:25:19.134602344-04:00"
+    created: "2022-10-20T07:53:14.548350124-04:00"
     description: homepage plugin
-    digest: 13f66e6533a9bb95b19a0c1254c7d3eaa3599e1cd2463f6020c82a33164e3840
+    digest: bd406f6bda9dbdd6e0a41ebc6a1dba461f885aa671609f3d9574167ea5ed140c
     home: https://rancher.com
     icon: https://docs.ranchermanager.rancher.io/img/rancher-logo-horiz-color.svg
     keywords:
@@ -67,4 +67,4 @@ entries:
     urls:
     - assets/kubewarden/ui-plugin-server-0.1.0.tgz
     version: 0.1.0
-generated: "2022-10-19T09:25:19.133533346-04:00"
+generated: "2022-10-20T07:53:14.547192835-04:00"
