@@ -90,8 +90,8 @@ export default {
 
         const yaml = res?.data;
 
-        await this.updateWhitelist('github.com', true);
         await this.currentCluster.doAction('apply', { yaml, defaultNamespace: 'cert-manager' });
+        await this.updateWhitelist('github.com', true);
 
         btnCb(true);
 
