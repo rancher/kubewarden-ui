@@ -1,12 +1,14 @@
 <script>
 import { mapGetters } from 'vuex';
 
-import { CATALOG, MANAGEMENT, SERVICE } from '@shell/config/types';
+import { CATALOG, SERVICE } from '@shell/config/types';
 
 import AsyncButton from '@shell/components/AsyncButton';
+import CopyCode from '@shell/components/CopyCode';
 import Loading from '@shell/components/Loading';
 
 import { KUBEWARDEN } from '../../../../types';
+import { updateWhitelist } from '../../../../plugins/kubewarden/policy-class';
 
 import InstallWizard from '../../../../components/overview/InstallWizard';
 
@@ -17,6 +19,7 @@ export default {
 
   components: {
     AsyncButton,
+    CopyCode,
     InstallWizard,
     Loading,
   },
@@ -24,10 +27,9 @@ export default {
   async fetch() {
     this.hasSchema = this.$store.getters['cluster/schemaFor'](KUBEWARDEN.POLICY_SERVER);
 
-    await this.updateWhitelist('github.com');
+    // await this.updateWhitelist('github.com');
 
-    const allServices = await this.$store.dispatch('management/findAll', { type: SERVICE });
-    const certService = allServices?.find(s => s.id === 'cert-manager/cert-manager');
+    const certService = this.allServices?.find(s => s.id === 'cert-manager/cert-manager');
 
     if ( certService ) {
       this.initStepIndex = 1;
@@ -77,7 +79,27 @@ export default {
     };
   },
 
-  computed: { ...mapGetters(['currentCluster']) },
+  watch: {
+    allServices(neu) {
+      if ( neu.find(s => s.id === 'cert-manager/cert-manager') ) {
+        this.installSteps[0].ready = true;
+
+        if ( this.kubewardenRepo ) {
+          this.$refs.wizard.goToStep(3);
+        } else {
+          this.$refs.wizard.goToStep(2);
+        }
+      }
+    }
+  },
+
+  computed: {
+    ...mapGetters(['currentCluster']),
+
+    allServices() {
+      return this.$store.getters['cluster/all'](SERVICE);
+    }
+  },
 
   methods: {
     async applyCertManager(btnCb) {
@@ -86,20 +108,23 @@ export default {
 
         // fetch cert-manager latest release and apply
         const url = '/meta/proxy/github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml';
-        const res = await this.$store.dispatch('management/request', { url, headers: { accept: 'application/yaml' } });
+        const res = await this.$store.dispatch('management/request', {
+          url,
+          headers:              { accept: 'application/yaml' },
+          redirectUnauthorized: false
+        }, { root: true });
 
         const yaml = res?.data;
 
+        await updateWhitelist('github.com', true);
         await this.currentCluster.doAction('apply', { yaml, defaultNamespace: 'cert-manager' });
-        await this.updateWhitelist('github.com', true);
 
         btnCb(true);
+        this.installSteps[0].ready = true;
 
         if ( this.kubewardenRepo ) {
-          this.installSteps[0].ready = true;
           this.$refs.wizard.goToStep(3);
         } else {
-          this.installSteps[0].ready = true;
           this.$refs.wizard.next();
         }
       } catch (err) {
@@ -119,7 +144,7 @@ export default {
         });
 
         await repoObj.save();
-        await this.updateWhitelist('artifacthub.io');
+        // await this.updateWhitelist('artifacthub.io');
 
         btnCb(true);
         this.installSteps[1].ready = true;
@@ -144,33 +169,6 @@ export default {
       if ( controllerChart ) {
         controllerChart.goToInstall('kubewarden');
       }
-    },
-
-    async updateWhitelist(url, remove) {
-      const whitelist = await this.$store.dispatch('management/find', { type: MANAGEMENT.SETTING, id: 'whitelist-domain' });
-      const whitelistValue = whitelist.value.split(',');
-
-      if ( remove && whitelistValue.includes(url) ) {
-        const out = whitelistValue.filter(domain => domain !== url);
-
-        whitelist.default = out.join();
-        whitelist.value = out.join();
-
-        try {
-          return whitelist.save();
-        } catch (e) {}
-      }
-
-      if ( !whitelistValue.includes(url) ) {
-        whitelistValue.push(url);
-
-        whitelist.default = whitelistValue.join();
-        whitelist.value = whitelistValue.join();
-
-        try {
-          return whitelist.save();
-        } catch (e) {}
-      }
     }
   }
 };
@@ -194,7 +192,7 @@ export default {
           {{ t("kubewarden.install.description") }}
         </div>
         <button v-if="!hasSchema" class="btn role-primary mt-20" @click="install = true">
-          {{ t("kubewarden.install.button") }}
+          {{ t("kubewarden.install.appInstall.button") }}
         </button>
       </div>
 
@@ -204,10 +202,16 @@ export default {
             {{ t("kubewarden.install.prerequisites.certManager.title") }}
           </h2>
           <p class="mb-20">
-            {{ t('kubewarden.install.prerequisites.certManager.description') }}
+            {{ t("kubewarden.install.prerequisites.certManager.description") }}
           </p>
 
-          <AsyncButton mode="certManager" @click="applyCertManager" />
+          <!-- Replacing with manual install step for now -->
+          <!-- <AsyncButton mode="certManager" @click="applyCertManager" /> -->
+
+          <p v-html="t('kubewarden.install.prerequisites.certManager.manualStep', null, true)"></p>
+          <CopyCode class="m-10 p-10">
+            {{ t("kubewarden.install.prerequisites.certManager.applyCommand") }}
+          </CopyCode>
         </template>
 
         <template #repository>
@@ -215,7 +219,7 @@ export default {
             {{ t("kubewarden.install.prerequisites.repository.title") }}
           </h2>
           <p class="mb-20">
-            {{ t('kubewarden.install.prerequisites.repository.description') }}
+            {{ t("kubewarden.install.prerequisites.repository.description") }}
           </p>
 
           <AsyncButton mode="kubewardenRepository" @click="addRepository" />
@@ -223,16 +227,16 @@ export default {
 
         <template #install>
           <h2 class="mt-20 mb-10">
-            {{ t('kubewarden.install.appInstall.title') }}
+            {{ t("kubewarden.install.appInstall.title") }}
           </h2>
           <p class="mb-20">
-            {{ t('kubewarden.install.appInstall.description') }}
+            {{ t("kubewarden.install.appInstall.description") }}
           </p>
           <button
             class="btn role-primary mt-20"
             @click.prevent="setChartRoute"
           >
-            {{ t('kubewarden.install.appInstall.button') }}
+            {{ t("kubewarden.install.appInstall.button") }}
           </button>
         </template>
       </InstallWizard>

@@ -15,6 +15,9 @@ kubewarden:
       certManager:
         title: Install Cert-Manager Package
         description: The kubewarden-controller depends on cert-manager. You need cert-manager to be installed before installing the kubewarden-controller chart.
+        manualStep: |
+          Follow the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/quick-start#installation">Documentation</a>, or run the <code>kubectl</code> command below on to install the latest version of cert-manager:
+        applyCommand: 'kubectl apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml'
       repository:
         title: Repository
         description: You will need the Kubewarden helm repository (https://charts.kubewarden.io) to install the `kubewarden` chart.
