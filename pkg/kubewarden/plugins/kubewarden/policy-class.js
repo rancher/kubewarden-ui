@@ -3,10 +3,11 @@ import flatMap from 'lodash/flatMap';
 import matches from 'lodash/matches';
 
 import SteveModel from '@shell/plugins/steve/steve-class';
-import { SERVICE } from '@shell/config/types';
+import { MANAGEMENT, SERVICE } from '@shell/config/types';
 import { proxyUrlFromParts } from '@shell/models/service';
 import { findBy, isArray } from '@shell/utils/array';
 import { addParam } from '@shell/utils/url';
+
 import { KUBEWARDEN } from '../../types';
 
 export const TRACE_HEADERS = [
@@ -462,4 +463,31 @@ export function stateSort(color, display) {
   color = color.replace(/^(text|bg)-/, '');
 
   return `${ SORT_ORDER[color] || SORT_ORDER['other'] } ${ display }`;
+}
+
+export async function updateWhitelist(url, remove) {
+  const whitelist = await this.$store.dispatch('management/find', { type: MANAGEMENT.SETTING, id: 'whitelist-domain' });
+  const whitelistValue = whitelist.value.split(',');
+
+  if ( remove && whitelistValue.includes(url) ) {
+    const out = whitelistValue.filter(domain => domain !== url);
+
+    whitelist.default = out.join();
+    whitelist.value = out.join();
+
+    try {
+      return whitelist.save();
+    } catch (e) {}
+  }
+
+  if ( !whitelistValue.includes(url) ) {
+    whitelistValue.push(url);
+
+    whitelist.default = whitelistValue.join();
+    whitelist.value = whitelistValue.join();
+
+    try {
+      return whitelist.save();
+    } catch (e) {}
+  }
 }
