@@ -281,7 +281,7 @@ for d in pkg/*/ ; do
     fi
 
     # Additional patches
-    ${SCRIPT_DIR}/helmpatch ${CHART_FOLDER} "${BASE_DIR}/pkg/${pkg}/package.json" "${REGISTRY}${REGISTRY_ORG}/${IMAGE_PREFIX}${pkg}"
+    ${SCRIPT_DIR}/helmpatch ${CHART_FOLDER} "${BASE_DIR}/pkg/${pkg}/package.json" "${GITHUB_SOURCE}"
 
     # Package into a .tgz helm chart
     helm package ${CHART_FOLDER} -d ${ASSETS}/${pkg}
