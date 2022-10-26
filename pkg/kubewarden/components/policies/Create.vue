@@ -65,7 +65,7 @@ export default ({
         // This object will need to be refactored when helm charts exist for policies
         this.chartValues = { questions: _questions };
       } catch (e) {
-        console.error(`Error importing questions ${ e }`); // eslint-disable-line no-console
+        console.warn(`Error importing questions ${ e }`); // eslint-disable-line no-console
       }
     }
 
@@ -229,7 +229,11 @@ export default ({
       if ( this.repository && this.repository.packages.length > 0 ) {
         const promises = this.repository.packages.map(pkg => this.packageDetails(pkg));
 
-        this.packages = await Promise.all(promises);
+        try {
+          this.packages = await Promise.all(promises);
+        } catch (e) {
+          console.warn(`Error fetching packages: ${ e }`); // eslint-disable-line no-console
+        }
       }
     },
 

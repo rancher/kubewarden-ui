@@ -110,7 +110,7 @@ export default {
     },
 
     resourceColor(type) {
-      return this.RESOURCE_MAP[type?.toLowerCase()] || 'var(--info)';
+      return this.RESOURCE_MAP[type?.toLowerCase()] || 'var(--warning)';
     },
 
     resourceType(type) {

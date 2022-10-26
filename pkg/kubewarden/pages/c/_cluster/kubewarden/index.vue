@@ -1,5 +1,6 @@
 <script>
 import { mapGetters } from 'vuex';
+import { filterBy } from '@shell/utils/array';
 
 import { CATALOG, SERVICE } from '@shell/config/types';
 
@@ -27,11 +28,10 @@ export default {
   async fetch() {
     this.hasSchema = this.$store.getters['cluster/schemaFor'](KUBEWARDEN.POLICY_SERVER);
 
+    await this.$store.dispatch('cluster/findAll', { type: SERVICE });
     // await this.updateWhitelist('github.com');
 
-    const certService = this.allServices?.find(s => s.id === 'cert-manager/cert-manager');
-
-    if ( certService ) {
+    if ( this.certService ) {
       this.initStepIndex = 1;
       this.installSteps[0].ready = true;
     }
@@ -41,7 +41,7 @@ export default {
     this.kubewardenRepo = allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
 
     if ( this.kubewardenRepo ) {
-      certService ? this.initStepIndex = 2 : this.initStepIndex = 0;
+      this.certService ? this.initStepIndex = 2 : this.initStepIndex = 0;
       this.installSteps[1].ready = true;
     }
   },
@@ -80,15 +80,13 @@ export default {
   },
 
   watch: {
-    allServices(neu) {
-      if ( neu.find(s => s.id === 'cert-manager/cert-manager') ) {
-        this.installSteps[0].ready = true;
+    certService() {
+      this.installSteps[0].ready = true;
 
-        if ( this.kubewardenRepo ) {
-          this.$refs.wizard.goToStep(3);
-        } else {
-          this.$refs.wizard.goToStep(2);
-        }
+      if ( this.kubewardenRepo ) {
+        this.$refs.wizard?.goToStep(3);
+      } else {
+        this.$refs.wizard?.goToStep(2);
       }
     }
   },
@@ -96,8 +94,8 @@ export default {
   computed: {
     ...mapGetters(['currentCluster']),
 
-    allServices() {
-      return this.$store.getters['cluster/all'](SERVICE);
+    certService() {
+      return this.$store.getters['cluster/all'](SERVICE).find(s => s.metadata?.labels?.['app'] === 'cert-manager');
     }
   },
 

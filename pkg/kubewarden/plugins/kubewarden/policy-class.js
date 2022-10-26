@@ -191,8 +191,22 @@ export default class KubewardenModel extends SteveModel {
 
         return this.$dispatch('management/request', { url, redirectUnauthorized: false }, { root: true });
       } catch (e) {
-        console.error(`Error fetching pkg: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Error fetching pkg: ${ e }`); // eslint-disable-line no-console
       }
+    };
+  }
+
+  get certManagerService() {
+    return async() => {
+      try {
+        const all = await this.allServices();
+
+        return all.find(s => s.metadata?.labels?.['app'] === 'cert-manager');
+      } catch (e) {
+        console.warn(`Error fetching cert-manager service: ${ e }`); // eslint-disable-line no-console
+      }
+
+      return null;
     };
   }
 
@@ -211,7 +225,7 @@ export default class KubewardenModel extends SteveModel {
           }
         }
       } catch (e) {
-        console.error(`Error fetching metrics service: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Error fetching metrics service: ${ e }`); // eslint-disable-line no-console
       }
 
       return null;
@@ -233,7 +247,7 @@ export default class KubewardenModel extends SteveModel {
           });
         }
       } catch (e) {
-        console.error(`Error fetching services: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Error fetching services: ${ e }`); // eslint-disable-line no-console
       }
 
       return null;
@@ -279,7 +293,7 @@ export default class KubewardenModel extends SteveModel {
 
         return out;
       } catch (e) {
-        console.error(`Error fetching Jaeger service: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Error fetching Jaeger service: ${ e }`); // eslint-disable-line no-console
       }
 
       return null;
