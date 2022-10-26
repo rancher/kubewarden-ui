@@ -9,6 +9,9 @@ import { _CREATE, CHART, REPO, REPO_TYPE } from '@shell/config/query-params';
 import { saferDump } from '@shell/utils/create-yaml';
 import { set } from '@shell/utils/object';
 
+import { Banner } from '@components/Banner';
+
+import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
 import Markdown from '@shell/components/Markdown';
 import Wizard from '@shell/components/Wizard';
@@ -23,6 +26,8 @@ export default ({
   name: 'Create',
 
   components: {
+    AsyncButton,
+    Banner,
     Loading,
     Markdown,
     Wizard,
@@ -47,12 +52,8 @@ export default ({
   async fetch() {
     this.errors = [];
 
-    this.repository = await this.value.artifactHubRepo();
-
-    if ( this.repository && this.repository.packages.length > 0 ) {
-      const promises = this.repository.packages.map(pkg => this.packageDetails(pkg));
-
-      this.packages = await Promise.all(promises);
+    if ( this.hasArtifactHub ) {
+      await this.getPackages();
     }
 
     if ( !this.chartValues ) {
@@ -133,6 +134,21 @@ export default ({
       return !!this.type;
     },
 
+    hasArtifactHub() {
+      if ( this.whitelistSetting ) {
+        const whitelistValue = this.whitelistSetting.value.split(',');
+        const hasSetting = whitelistValue.includes('artifacthub.io');
+
+        if ( hasSetting ) {
+          this.getPackages();
+        }
+
+        return hasSetting;
+      }
+
+      return false;
+    },
+
     readme() {
       if ( this.type ) {
         const pkg = this.packages?.find(p => p.name === this.type);
@@ -153,10 +169,24 @@ export default ({
       );
 
       return steps.sort((a, b) => b.weight - a.weight);
+    },
+
+    whitelistSetting() {
+      return this.value.whitelistSetting;
     }
   },
 
   methods: {
+    async addArtifactHub(btnCb) {
+      try {
+        await this.value.updateWhitelist('artifacthub.io');
+        btnCb(true);
+      } catch (err) {
+        this.errors = err;
+        btnCb(false);
+      }
+    },
+
     done() {
       this.$router.replace({
         name:   'c-cluster-product-resource',
@@ -189,6 +219,16 @@ export default ({
         await this.save(event);
       } catch (e) {
         this.errors.push(e);
+      }
+    },
+
+    async getPackages() {
+      this.repository = await this.value.artifactHubRepo();
+
+      if ( this.repository && this.repository.packages.length > 0 ) {
+        const promises = this.repository.packages.map(pkg => this.packageDetails(pkg));
+
+        this.packages = await Promise.all(promises);
       }
     },
 
@@ -285,6 +325,20 @@ export default ({
     >
       <template #policies>
         <PolicyGrid :value="packages" @selectType="selectType($event)">
+          <template v-if="!hasArtifactHub" #whitelistBanner>
+            <Banner
+              class="type-banner mb-20 mt-0"
+              color="warning"
+            >
+              <div>
+                <p class="mb-10">
+                  {{ t('kubewarden.policies.noArtifactHub') }}
+                </p>
+                <AsyncButton mode="artifactHub" @click="addArtifactHub" />
+              </div>
+            </Banner>
+          </template>
+
           <template #customSubtype>
             <div class="subtype" @click="selectType('custom')">
               <div class="subtype__metadata">

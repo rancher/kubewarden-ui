@@ -4,7 +4,7 @@ import { ensureRegex } from '@shell/utils/string';
 import { sortBy } from '@shell/utils/sort';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
-import { CATEGORY_MAP, RESOURCE_MAP } from '../../plugins/kubewarden/policy-class';
+import { RESOURCE_MAP } from '../../plugins/kubewarden/policy-class';
 
 export default {
   props: {
@@ -37,7 +37,6 @@ export default {
       keywords:          [],
       searchQuery:       null,
 
-      CATEGORY_MAP,
       RESOURCE_MAP
     };
   },
@@ -47,7 +46,7 @@ export default {
       const subtypes = ( this.value || [] );
 
       const out = subtypes.filter((subtype) => {
-        if ( this.category && !subtype.resourceType.includes(this.category) ) {
+        if ( this.category && !subtype.data?.['kubewarden/resources']?.includes(this.category) ) {
           return false;
         }
 
@@ -55,7 +54,7 @@ export default {
           const searchTokens = this.searchQuery.split(/\s*[, ]\s*/).map(x => ensureRegex(x, false));
 
           for ( const token of searchTokens ) {
-            if ( !subtype.label.match(token) && (subtype.description && !subtype.description.match(token)) ) {
+            if ( !subtype.label?.match(token) && (subtype.description && !subtype.description.match(token)) ) {
               return false;
             }
           }
@@ -82,6 +81,25 @@ export default {
 
       return [...new Set(flattened)] || [];
     },
+
+    resourceOptions() {
+      const out = [];
+      const resources = this.value?.flatMap((subtype) => {
+        return subtype.data?.['kubewarden/resources'];
+      });
+
+      resources?.flatMap((resource) => {
+        const split = resource.split(',');
+
+        if ( split.length > 1 ) {
+          split.forEach(s => out.push(s));
+        } else {
+          out.push(resource);
+        }
+      });
+
+      return [...new Set(out)] || [];
+    },
   },
 
   methods: {
@@ -92,7 +110,17 @@ export default {
     },
 
     resourceColor(type) {
-      return this.RESOURCE_MAP[type.toLowerCase()];
+      return this.RESOURCE_MAP[type?.toLowerCase()] || 'var(--info)';
+    },
+
+    resourceType(type) {
+      const t = type.split(',');
+
+      if ( t.length > 1 ) {
+        return 'Multiple';
+      }
+
+      return type === '*' ? 'Global' : type;
     }
   }
 };
@@ -102,6 +130,8 @@ export default {
   <form
     class="create-resource-container step__policies"
   >
+    <slot name="whitelistBanner"></slot>
+
     <div class="filter">
       <LabeledSelect
         v-model="keywords"
@@ -118,16 +148,13 @@ export default {
         v-model="category"
         :clearable="true"
         :searchable="false"
-        :options="CATEGORY_MAP"
+        :options="resourceOptions"
+        :mode="mode"
+        :multiple="true"
         placement="bottom"
         class="filter__category"
         label="Filter by Resource Type"
-        :reduce="opt => opt.value"
-      >
-        <template #option="opt">
-          {{ opt.label }}
-        </template>
-      </LabeledSelect>
+      />
 
       <input
         ref="searchQuery"
@@ -157,7 +184,7 @@ export default {
       >
         <div class="subtype__metadata">
           <div class="subtype__badge" :style="{ 'background-color': resourceColor(subtype.data['kubewarden/resources']) }">
-            <label>{{ subtype.data['kubewarden/resources'] === '*' ? 'Global' : subtype.data['kubewarden/resources'] }}</label>
+            <label>{{ resourceType(subtype.data['kubewarden/resources']) }}</label>
           </div>
 
           <div v-if="subtype.signed" class="subtype__signed">
