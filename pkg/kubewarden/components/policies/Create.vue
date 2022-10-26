@@ -69,9 +69,9 @@ export default ({
       }
     }
 
-    const defaultPolicy = require(`../../questions/policies/defaultPolicy.json`);
+    this.defaultPolicy = require(`../../questions/policies/defaultPolicy.json`);
 
-    this.yamlValues = saferDump(defaultPolicy);
+    this.yamlValues = saferDump(this.defaultPolicy);
 
     this.value.apiVersion = `${ this.schema?.attributes?.group }.${ this.schema?.attributes?.version }`;
     this.value.kind = this.schema?.attributes?.kind;
@@ -90,6 +90,7 @@ export default ({
 
       chartValues:       null,
       yamlValues:        null,
+      defaultPolicy:     null,
 
       hasCustomRegistry: false,
 
@@ -240,11 +241,16 @@ export default ({
 
     policyQuestions(isCustom) {
       const shortType = !!isCustom ? 'defaultPolicy' : this.type?.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '');
-      const match = require(`../../questions/policies/${ shortType }.json`);
+      let match;
 
-      if ( match ) {
-        set(this.chartValues, 'policy', match);
+      try {
+        match = require(`../../questions/policies/${ shortType }.json`);
+      } catch (e) {
+        console.warn('Error when matching questions, falling back to default'); // eslint-disable-line no-console
+        match = this.defaultPolicy;
       }
+
+      set(this.chartValues, 'policy', match);
 
       // Spoofing the questions object from hard-typed questions json for each policy
       if ( match?.spec?.settings && !isEmpty(match.spec.settings) ) {
@@ -299,7 +305,7 @@ export default ({
       this.stepPolicies.ready = true;
       this.$refs.wizard.next();
       this.splitType = type.split('policies.kubewarden.io.policies.')[1];
-      this.typeModule = this.chartValues.policy.spec.module;
+      this.typeModule = this.chartValues?.policy?.spec.module;
     }
   }
 
