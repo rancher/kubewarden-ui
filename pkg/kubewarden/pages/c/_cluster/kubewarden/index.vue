@@ -8,7 +8,7 @@ import CopyCode from '@shell/components/CopyCode';
 import Loading from '@shell/components/Loading';
 
 import { KUBEWARDEN } from '../../../../types';
-import { updateWhitelist } from '../../../../plugins/kubewarden/policy-class';
+// import { updateWhitelist } from '../../../../plugins/kubewarden/policy-class';
 
 import InstallWizard from '../../../../components/overview/InstallWizard';
 
@@ -116,7 +116,7 @@ export default {
 
         const yaml = res?.data;
 
-        await updateWhitelist('github.com', true);
+        // await updateWhitelist('github.com', true);
         await this.currentCluster.doAction('apply', { yaml, defaultNamespace: 'cert-manager' });
 
         btnCb(true);

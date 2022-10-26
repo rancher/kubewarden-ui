@@ -82,29 +82,6 @@ export const RULE_HEADERS = [
   },
 ];
 
-export const CATEGORY_MAP = [
-  {
-    label: 'All',
-    value: ''
-  },
-  {
-    label: '*',
-    value: 'Global'
-  },
-  {
-    label: 'Ingress',
-    value: 'Ingress'
-  },
-  {
-    label: 'Pod',
-    value: 'Pod'
-  },
-  {
-    label: 'Service',
-    value: 'Service'
-  }
-];
-
 export const MODE_MAP = {
   monitor: 'bg-success',
   protect: 'bg-warning'
@@ -185,6 +162,10 @@ export default class KubewardenModel extends SteveModel {
     }
   }
 
+  get whitelistSetting() {
+    return this.$rootGetters['management/all'](MANAGEMENT.SETTING).find(s => s.id === 'whitelist-domain');
+  }
+
   /*
     Fetches all of the packages from the kubewarden org
   */
@@ -194,7 +175,7 @@ export default class KubewardenModel extends SteveModel {
       const packages = 'packages/search';
 
       url += `${ ARTIFACTHUB_ENDPOINT }/${ packages }`;
-      url = addParam(url, 'org', 'kubewarden');
+      url = addParam(url, 'kind', '13');
 
       return await this.$dispatch('management/request', { url, redirectUnauthorized: false }, { root: true });
     };
@@ -432,6 +413,33 @@ export default class KubewardenModel extends SteveModel {
 
     return out;
   }
+
+  updateWhitelist(url, remove) {
+    const whitelist = this.whitelistSetting;
+    const whitelistValue = whitelist?.value.split(',');
+
+    if ( remove && whitelistValue.includes(url) ) {
+      const out = whitelistValue.filter(domain => domain !== url);
+
+      whitelist.default = out.join();
+      whitelist.value = out.join();
+
+      try {
+        return whitelist.save();
+      } catch (e) {}
+    }
+
+    if ( !whitelistValue.includes(url) ) {
+      whitelistValue.push(url);
+
+      whitelist.default = whitelistValue.join();
+      whitelist.value = whitelistValue.join();
+
+      try {
+        return whitelist.save();
+      } catch (e) {}
+    }
+  }
 }
 
 export function colorForStatus(status) {
@@ -463,31 +471,4 @@ export function stateSort(color, display) {
   color = color.replace(/^(text|bg)-/, '');
 
   return `${ SORT_ORDER[color] || SORT_ORDER['other'] } ${ display }`;
-}
-
-export async function updateWhitelist(url, remove) {
-  const whitelist = await this.$store.dispatch('management/find', { type: MANAGEMENT.SETTING, id: 'whitelist-domain' });
-  const whitelistValue = whitelist.value.split(',');
-
-  if ( remove && whitelistValue.includes(url) ) {
-    const out = whitelistValue.filter(domain => domain !== url);
-
-    whitelist.default = out.join();
-    whitelist.value = out.join();
-
-    try {
-      return whitelist.save();
-    } catch (e) {}
-  }
-
-  if ( !whitelistValue.includes(url) ) {
-    whitelistValue.push(url);
-
-    whitelist.default = whitelistValue.join();
-    whitelist.value = whitelistValue.join();
-
-    try {
-      return whitelist.save();
-    } catch (e) {}
-  }
 }

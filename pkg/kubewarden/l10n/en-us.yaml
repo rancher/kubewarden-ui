@@ -69,6 +69,7 @@ kubewarden:
     title: Custom Policy
     description: A generic template for using your own policy.
   policies:
+    noArtifactHub: Official Kubewarden policies are hosted on ArtifactHub, in order to show these you will need to add `artifacthub.io` to the whitelist-domain setting.
     noRules: There are no rules configured for this policy.
     namespaceWarning: This policy is targeting Rancher specific namespaces which will cause catastrophic failures with your Rancher deployment.
   utils:
@@ -320,6 +321,10 @@ kubewarden:
         Pod
 
 asyncButton:
+  artifactHub:
+    action: Add ArtifactHub To Whitelist
+    success: Added
+    waiting: Adding&hellip;
   certManager:
     action: Apply Cert-Manager Package
     success: Applied
