@@ -1,11 +1,11 @@
 {
-  "apiVersion": "policies.kubewarden.io/v1alpha2",
+  "apiVersion": "v2",
   "kind": "",
   "metadata": {
     "name": "safe-annotations"
   },
   "spec": {
-    "policyServer": "default",
+    "policyServer": "",
     "module": "ghcr.io/kubewarden/policies/safe-annotations:v0.1.1",
     "rules": [
       {

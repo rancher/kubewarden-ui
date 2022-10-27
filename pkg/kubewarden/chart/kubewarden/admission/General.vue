@@ -46,6 +46,10 @@ export default {
     if ( this.isGlobal ) {
       set(this.policy, 'ignoreRancherNamespaces', this.hasNamespaceSelector);
     }
+
+    if ( this.isCreate ) {
+      set(this.policy.spec, 'mode', 'protect');
+    }
   },
 
   data() {

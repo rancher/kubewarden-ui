@@ -103,8 +103,9 @@ export default {
         })[0];
 
         const filtered = schemas?.filter(s => s.attributes?.resource);
+        const resourceSet = [...new Set(filtered?.map(f => f.attributes.kind))];
 
-        return filtered?.map(f => f.attributes.resource);
+        return resourceSet.sort();
       }
 
       return null;
@@ -172,6 +173,7 @@ export default {
         :mode="mode"
         :multiple="true"
         :options="resourceOptions || []"
+        :searchable="true"
         :tooltip="t('kubewarden.policyConfig.resources.tooltip')"
       />
     </div>
