@@ -4,7 +4,6 @@ import { ensureRegex } from '@shell/utils/string';
 import { sortBy } from '@shell/utils/sort';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
-import { RESOURCE_MAP } from '../../plugins/kubewarden/policy-class';
 
 export default {
   props: {
@@ -35,9 +34,7 @@ export default {
     return {
       category:          null,
       keywords:          [],
-      searchQuery:       null,
-
-      RESOURCE_MAP
+      searchQuery:       null
     };
   },
 
@@ -107,10 +104,6 @@ export default {
       this.category = null;
       this.keywords = [];
       this.searchQuery = null;
-    },
-
-    resourceColor(type) {
-      return this.RESOURCE_MAP[type?.toLowerCase()] || 'var(--warning)';
     },
 
     resourceType(type) {
@@ -183,7 +176,7 @@ export default {
         @click="$emit('selectType', subtype.name)"
       >
         <div class="subtype__metadata">
-          <div class="subtype__badge" :style="{ 'background-color': resourceColor(subtype.data['kubewarden/resources']) }">
+          <div class="subtype__badge">
             <label>{{ resourceType(subtype.data['kubewarden/resources']) }}</label>
           </div>
 
@@ -297,6 +290,10 @@ $margin: 10px;
 }
 
 .subtype {
+  &__badge {
+    background-color: var(--darker);
+  }
+
   &__signed, &__mutation, &__aware {
     position: absolute;
     bottom: 5px;

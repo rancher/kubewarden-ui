@@ -245,12 +245,12 @@ export default ({
 
     policyQuestions(isCustom) {
       const shortType = !!isCustom ? 'defaultPolicy' : this.type?.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '');
-      let match;
+      let match, questionsMatch;
 
       try {
         match = require(`../../questions/policies/${ shortType }.json`);
       } catch (e) {
-        console.warn('Error when matching questions, falling back to default'); // eslint-disable-line no-console
+        console.warn('Error when matching policy chart, falling back to default'); // eslint-disable-line no-console
         match = this.defaultPolicy;
       }
 
@@ -258,7 +258,11 @@ export default ({
 
       // Spoofing the questions object from hard-typed questions json for each policy
       if ( match?.spec?.settings && !isEmpty(match.spec.settings) ) {
-        const questionsMatch = require(`../../questions/policy-questions/${ shortType }.json`);
+        try {
+          questionsMatch = require(`../../questions/policy-questions/${ shortType }.json`);
+        } catch (e) {
+          console.warn('Error when matching policy questions'); // eslint-disable-line no-console
+        }
 
         if ( questionsMatch ) {
           set(this.chartValues.questions, 'questions', questionsMatch);

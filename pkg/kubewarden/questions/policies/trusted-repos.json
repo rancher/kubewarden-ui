@@ -1,11 +1,11 @@
 {
-  "apiVersion": "policies.kubewarden.io/v1alpha2",
+  "apiVersion": "v2",
   "kind": "",
   "metadata": {
     "name": "trusted-repos"
   },
   "spec": {
-    "policyServer": "default",
+    "policyServer": "",
     "module": "ghcr.io/kubewarden/policies/trusted-repos:v0.1.7",
     "rules": [
       {

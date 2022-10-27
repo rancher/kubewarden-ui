@@ -93,13 +93,6 @@ export const OPERATION_MAP = {
   DELETE: 'bg-error'
 };
 
-export const RESOURCE_MAP = {
-  pod:     'var(--info)',
-  ingress: 'var(--success)',
-  '*':     'var(--warning)',
-  service: 'var(--error)'
-};
-
 export const RANCHER_NAMESPACES = [
   'calico-system',
   'cattle-alerting',
