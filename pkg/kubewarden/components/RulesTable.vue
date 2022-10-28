@@ -22,7 +22,6 @@ export default {
     joinColumn(resource) {
       return resource?.join(', ') || '';
     }
-
   }
 };
 </script>
@@ -40,13 +39,13 @@ export default {
     >
       <template #col:apiGroup="{row}">
         <td>
-          <span>{{ row.apiGroups }}</span>
+          <span>{{ row.apiGroups || '-' }}</span>
         </td>
       </template>
 
       <template #col:apiVersion="{row}">
         <td>
-          <span>{{ row.apiVersions }}</span>
+          <span>{{ row.apiVersions || '-' }}</span>
         </td>
       </template>
 

@@ -58,6 +58,10 @@ kubewarden:
           placeholder: all-in-one-collector.jaeger.svc.cluster.local:14250
   policyServer:
     title: Policy Servers
+    noDefaultsInstalled:
+      description: |
+        The default PolicyServer and policies are not installed, click the button below to begin installing this chart. See the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/quick-start#installation">documentation</a> for more information on installing charts.
+      button: Install Chart
   admissionPolicy:
     title: Admission Policies
     description: AdmissionPolicy is a namespace-wide resource. These policies will process only the requests that are targeting the Namespace where the AdmissionPolicy is defined.
@@ -134,7 +138,7 @@ kubewarden:
         file: Read Certificate from File
     verification:
       label: Verification Config
-      description: This is the name of a VerificationConfig configmap within the same namespace, containing a Sigstore verification configuration. The configuration must be under a key named verification-config in the Configmap. More information can be found <a href="https://docs.kubewarden.io/distributing-policies/secure-supply-chain#configuring-the-policy-server-to-check-policy-signatures" target="_blank" rel="noopener noreferrer nofollow">here</a>.
+      description: This is the name of a VerificationConfig configmap within the same namespace, containing a Sigstore verification configuration. The configuration must be under a key named verification-config in the Configmap. More information can be found in the <a href="https://docs.kubewarden.io/distributing-policies/secure-supply-chain#configuring-the-policy-server-to-check-policy-signatures" target="_blank" rel="noopener noreferrer nofollow">Kubewarden docs</a>.
   policyCharts:
     signedPolicy: This policy has been signed with cosign (Sigstore).
     mutationPolicy: Mutation Policy

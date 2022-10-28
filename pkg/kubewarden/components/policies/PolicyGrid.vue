@@ -206,8 +206,6 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-$padding: 5px;
-$height: 110px;
 $margin: 10px;
 
 .step {
@@ -292,6 +290,7 @@ $margin: 10px;
 .subtype {
   &__badge {
     background-color: var(--darker);
+    padding: 4px 5px;
   }
 
   &__signed, &__mutation, &__aware {

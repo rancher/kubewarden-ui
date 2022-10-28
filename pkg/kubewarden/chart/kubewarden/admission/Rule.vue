@@ -1,5 +1,7 @@
 <script>
 import flatMap from 'lodash/flatMap';
+import isEmpty from 'lodash/isEmpty';
+
 import { _CREATE } from '@shell/config/query-params';
 import { SCHEMA } from '@shell/config/types';
 
@@ -40,7 +42,8 @@ export default {
     const operationOptions = [
       'CREATE',
       'UPDATE',
-      'DELETE'
+      'DELETE',
+      'CONNECT'
     ];
 
     return {
@@ -54,7 +57,7 @@ export default {
 
   computed: {
     apiGroupOptions() {
-      if ( this.apiGroups?.length > 0 ) {
+      if ( !isEmpty(this.apiGroups) ) {
         const out = [];
 
         this.apiGroups.map(g => out.push(g.id));
@@ -66,49 +69,32 @@ export default {
     },
 
     apiVersionOptions() {
-      if ( this.value?.apiGroups ) {
-        const groups = this.value.apiGroups;
-        let versionsByGroup = [];
+      let out = [];
 
-        groups.forEach((group) => {
-          this.apiGroups.find((g) => {
-            if ( g.id === group ) {
-              const out = flatMap(g.versions, (v) => {
-                return v.groupVersion;
-              });
-
-              versionsByGroup = [...versionsByGroup, out];
-            }
-          });
-        });
-
-        return flatMap(versionsByGroup);
+      if ( !isEmpty(this.value?.apiGroups) ) {
+        out = this.apiVersions(this.value.apiGroups, true);
+      } else if ( !isEmpty(this.value?.resources) ) {
+        out = this.apiVersions(this.value.resources, false);
       }
 
-      return [];
+      return out;
     },
 
     resourceOptions() {
-      if ( this.value?.apiGroups?.length > 0 ) {
-        const schemas = this.value.apiGroups.map((g) => {
-          /*
-            If 'core' is selected we want to show all of the available resources
-            Comparable to `kubectl api-resources -o wide`
-          */
-          if ( g === 'core' ) {
-            return this.schemas;
-          }
+      /*
+        If no apiGroup or 'core' is selected we want to show all of the available resources
+        Comparable to `kubectl api-resources -o wide`
+      */
+      let schemas = this.schemas;
 
-          return this.schemaForGroup(g);
-        })[0];
-
-        const filtered = schemas?.filter(s => s.attributes?.resource);
-        const resourceSet = [...new Set(filtered?.map(f => f.attributes.kind))];
-
-        return resourceSet.sort();
+      if ( this.value?.apiGroups?.length > 0 && !this.value.apiGroups.includes('core') ) {
+        schemas = this.value.apiGroups.map(g => this.schemaForGroup(g))[0];
       }
 
-      return null;
+      const filtered = schemas?.filter(s => s?.attributes?.resource);
+      const resourceSet = [...new Set(filtered?.map(f => f.attributes.resource))];
+
+      return resourceSet.sort();
     }
   },
 
@@ -121,6 +107,25 @@ export default {
       }
 
       return null;
+    },
+
+    // Determine which apiVersions to show, either from the apiGroup or targeted resource
+    apiVersions(types, isGroup) {
+      let versions = [];
+
+      types?.forEach((type) => {
+        const toFind = isGroup ? this.apiGroups : this.schemas;
+
+        toFind.find((f) => {
+          if ( isGroup && f.id === type ) {
+            versions = [...versions, flatMap(f.versions, v => v.groupVersion)];
+          } else if ( f.attributes?.resource === type ) {
+            versions = [...versions, f.attributes.version];
+          }
+        });
+      });
+
+      return [...new Set(flatMap(versions))];
     }
   }
 };
@@ -146,6 +151,7 @@ export default {
         :mode="mode"
         :multiple="true"
         :options="apiVersionOptions || []"
+        :required="true"
         placement="bottom"
         :label="t('kubewarden.policyConfig.apiVersions.label')"
       >
@@ -161,6 +167,7 @@ export default {
         :label="t('kubewarden.policyConfig.operations.label')"
         :mode="mode"
         :multiple="true"
+        :required="true"
         :options="operationOptions || []"
         :tooltip="t('kubewarden.policyConfig.operations.tooltip')"
       />
@@ -174,6 +181,7 @@ export default {
         :multiple="true"
         :options="resourceOptions || []"
         :searchable="true"
+        :required="true"
         :tooltip="t('kubewarden.policyConfig.resources.tooltip')"
       />
     </div>

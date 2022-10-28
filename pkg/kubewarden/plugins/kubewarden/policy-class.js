@@ -88,9 +88,10 @@ export const MODE_MAP = {
 };
 
 export const OPERATION_MAP = {
-  CREATE: 'bg-info',
-  UPDATE: 'bg-warning',
-  DELETE: 'bg-error'
+  CREATE:  'bg-info',
+  UPDATE:  'bg-warning',
+  DELETE:  'bg-error',
+  CONNECT: 'bg-success'
 };
 
 export const RANCHER_NAMESPACES = [
