@@ -39,6 +39,11 @@ export default {
   },
 
   data() {
+    const scopeOptions = [
+      '*',
+      'Cluster',
+      'Namespaced'
+    ];
     const operationOptions = [
       'CREATE',
       'UPDATE',
@@ -47,6 +52,7 @@ export default {
     ];
 
     return {
+      scopeOptions,
       operationOptions,
 
       inStore:           null,
@@ -80,6 +86,12 @@ export default {
       return out;
     },
 
+    isGroupCore() {
+      const groups = this.value.apiGroups;
+
+      return groups.includes('core') || groups.includes('') ;
+    },
+
     resourceOptions() {
       /*
         If no apiGroup or 'core' is selected we want to show all of the available resources
@@ -87,7 +99,7 @@ export default {
       */
       let schemas = this.schemas;
 
-      if ( this.value?.apiGroups?.length > 0 && !this.value.apiGroups.includes('core') ) {
+      if ( this.value?.apiGroups?.length > 0 && !this.isGroupCore ) {
         schemas = this.value.apiGroups.map(g => this.schemaForGroup(g))[0];
       }
 
@@ -135,8 +147,20 @@ export default {
   <div v-if="value" class="rules-row mt-40 mb-20">
     <div>
       <LabeledSelect
+        v-model="value.scope"
+        :label="t('kubewarden.policyConfig.scope.label')"
+        :tooltip="t('kubewarden.policyConfig.scope.tooltip')"
+        :mode="mode"
+        :multiple="false"
+        :options="scopeOptions || []"
+      />
+    </div>
+
+    <div>
+      <LabeledSelect
         v-model="value.apiGroups"
         :label="t('kubewarden.policyConfig.apiGroups.label')"
+        :tooltip="t('kubewarden.policyConfig.apiGroups.tooltip')"
         :mode="mode"
         :multiple="true"
         :options="apiGroupOptions || []"
@@ -154,11 +178,8 @@ export default {
         :required="true"
         placement="bottom"
         :label="t('kubewarden.policyConfig.apiVersions.label')"
-      >
-        <template #options="opt">
-          <span>{{ opt }}</span>
-        </template>
-      </LabeledSelect>
+        :tooltip="t('kubewarden.policyConfig.apiVersions.tooltip')"
+      />
     </div>
 
     <div>
@@ -193,7 +214,7 @@ export default {
 <style lang="scss" scoped>
 .rules-row{
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: .5fr 1fr 1fr 1fr 1fr .5fr;
   grid-column-gap: $column-gutter;
   align-items: center;
 }
