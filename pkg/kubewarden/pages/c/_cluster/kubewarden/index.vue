@@ -1,12 +1,13 @@
 <script>
 import { mapGetters } from 'vuex';
-import { filterBy } from '@shell/utils/array';
 
 import { CATALOG, SERVICE } from '@shell/config/types';
 
 import AsyncButton from '@shell/components/AsyncButton';
 import CopyCode from '@shell/components/CopyCode';
 import Loading from '@shell/components/Loading';
+
+import { Banner } from '@components/Banner';
 
 import { KUBEWARDEN } from '../../../../types';
 // import { updateWhitelist } from '../../../../plugins/kubewarden/policy-class';
@@ -20,6 +21,7 @@ export default {
 
   components: {
     AsyncButton,
+    Banner,
     CopyCode,
     InstallWizard,
     Loading,
@@ -96,7 +98,11 @@ export default {
 
     certService() {
       return this.$store.getters['cluster/all'](SERVICE).find(s => s.metadata?.labels?.['app'] === 'cert-manager');
-    }
+    },
+
+    shellEnabled() {
+      return !!this.currentCluster?.links?.shell;
+    },
   },
 
   methods: {
@@ -210,6 +216,23 @@ export default {
           <CopyCode class="m-10 p-10">
             {{ t("kubewarden.install.prerequisites.certManager.applyCommand") }}
           </CopyCode>
+          <button
+            :disabled="!shellEnabled"
+            type="button"
+            class="btn role-secondary"
+            @shortkey="currentCluster.openShell()"
+            @click="currentCluster.openShell()"
+          >
+            <i class="icon icon-terminal icon-lg" />{{ t("kubewarden.install.prerequisites.certManager.openShell") }}
+          </button>
+
+          <slot>
+            <Banner
+              class="mb-20 mt-20"
+              color="info"
+              :label="t('kubewarden.install.prerequisites.certManager.stepProgress')"
+            />
+          </slot>
         </template>
 
         <template #repository>
