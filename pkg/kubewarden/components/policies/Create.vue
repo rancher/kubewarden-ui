@@ -201,15 +201,6 @@ export default ({
 
     async finish(event) {
       try {
-        /*
-          This empty string is necessary for the policy to become active.
-          TODO: open issue to fix this on kubewarden side, should be able to have null
-                for apiGroups and apiVersions
-        */
-        if ( isEmpty(this.chartValues?.policy?.spec?.rules[0]?.apiGroups) ) {
-          this.chartValues.policy.spec.rules[0].apiGroups.push('');
-        }
-
         const { ignoreRancherNamespaces } = this.chartValues.policy;
 
         if ( ignoreRancherNamespaces ) {

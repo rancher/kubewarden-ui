@@ -34,7 +34,6 @@ export default {
 
   fetch() {
     this.inStore = this.$store.getters['currentStore']();
-
     this.schemas = this.$store.getters[`${ this.inStore }/all`](SCHEMA);
   },
 
@@ -63,21 +62,23 @@ export default {
 
   computed: {
     apiGroupOptions() {
-      if ( !isEmpty(this.apiGroups) ) {
-        const out = [];
+      const out = ['*'];
 
+      if ( !isEmpty(this.apiGroups) ) {
         this.apiGroups.map(g => out.push(g.id));
 
         return out;
       }
 
-      return this.apiGroups;
+      out.push(this.apiGroups);
+
+      return out;
     },
 
     apiVersionOptions() {
       let out = [];
 
-      if ( !isEmpty(this.value?.apiGroups) ) {
+      if ( !isEmpty(this.value?.apiGroups) && !this.isGroupCore ) {
         out = this.apiVersions(this.value.apiGroups, true);
       } else if ( !isEmpty(this.value?.resources) ) {
         out = this.apiVersions(this.value.resources, false);
@@ -88,8 +89,9 @@ export default {
 
     isGroupCore() {
       const groups = this.value.apiGroups;
+      const options = ['core', '*', ''];
 
-      return groups.includes('core') || groups.includes('') ;
+      return options.some(o => groups.includes(o));
     },
 
     resourceOptions() {
@@ -164,6 +166,7 @@ export default {
         :mode="mode"
         :multiple="true"
         :options="apiGroupOptions || []"
+        :required="true"
       />
     </div>
 
