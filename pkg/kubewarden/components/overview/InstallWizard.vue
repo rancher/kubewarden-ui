@@ -83,50 +83,68 @@ export default {
 
 <template>
   <div>
-    <div class="step-sequence mt-20">
-      <ul class="steps" tabindex="0">
-        <template v-for="(step, idx) in steps">
-          <li
-            :id="step.name"
-            :key="step.name + 'li'"
-            :class="{
-              step: true,
-              active: step.name === activeStep.name,
-              disabled: !isAvailable(step),
-            }"
-            role="presentation"
-          >
-            <span
-              :aria-controls="'step' + idx + 1"
-              :aria-selected="step.name === activeStep.name"
-              role="tab"
-              class="controls"
-              @click.prevent="goToStep(idx + 1, true)"
+    <div class="header mt-20 mb-20">
+      <div class="title">
+        <div class="product-image">
+          <img src="../../assets/icon-kubewarden.svg" class="logo" />
+        </div>
+        <div class="subtitle mr-20">
+          <h2>
+            {{ t('kubewarden.title') }}
+          </h2>
+          <span class="subtext">{{ t('kubewarden.install.title') }}</span>
+        </div>
+        <div class="subtitle">
+          <h2>{{ t('wizard.step', {number: activeStepIndex + 1}) }}</h2>
+          <slot name="bannerSubtext">
+            <span class="subtext">{{ activeStep.label }}</span>
+          </slot>
+        </div>
+      </div>
+
+      <div class="step-sequence">
+        <ul class="steps" tabindex="0">
+          <template v-for="(step, idx) in steps">
+            <li
+              :id="step.name"
+              :key="step.name + 'li'"
+              :class="{
+                step: true,
+                active: step.name === activeStep.name,
+                disabled: !isAvailable(step),
+              }"
+              role="presentation"
             >
               <span
-                class="icon icon-lg"
-                :class="{
-                  'icon-dot': step.name === activeStep.name,
-                  'icon-dot-open': step.name !== activeStep.name,
-                }"
-              />
-              <span>
-                {{ step.label }}
+                :aria-controls="'step' + idx + 1"
+                :aria-selected="step.name === activeStep.name"
+                role="tab"
+                class="controls"
+                @click.prevent="goToStep(idx + 1, true)"
+              >
+                <span
+                  class="icon icon-lg"
+                  :class="{
+                    'icon-dot': step.name === activeStep.name,
+                    'icon-dot-open': step.name !== activeStep.name,
+                  }"
+                />
+                <span>
+                  {{ step.label }}
+                </span>
               </span>
-            </span>
-          </li>
-          <div
-            v-if="idx !== steps.length - 1"
-            :key="step.name"
-            class="divider"
-          />
-        </template>
-      </ul>
+            </li>
+            <div
+              v-if="idx !== steps.length - 1"
+              :key="step.name"
+              class="divider"
+            />
+          </template>
+        </ul>
+      </div>
     </div>
 
-    <hr class="mt-20" />
-
-    <slot name="stepContainer" :activeStep="activeStep">
+    <slot name="stepContainer mt-20" :activeStep="activeStep">
       <template v-for="step in steps">
         <div
           v-if="step.name === activeStep.name || step.hidden"
@@ -142,6 +160,27 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+.header {
+  display: flex;
+
+  & .title {
+    display: flex;
+    flex-basis: 40%;
+    align-items: center;
+
+    & .product-image {
+      min-width: 50px;
+      height: 50px;
+      margin: 10px 10px 10px 0;
+      overflow: hidden;
+      .logo {
+        min-width: 50px;
+        height: 50px;
+      }
+    }
+  }
+}
+
 .step-sequence {
   flex: 1;
   min-height: 60px;
@@ -179,9 +218,15 @@ export default {
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 100px;
+        width: 40px;
         overflow: visible;
         padding-top: 15px;
+
+        & > span {
+          padding-bottom: 5px;
+          margin-bottom: 5px;
+          white-space: nowrap;
+        }
       }
 
       &.active .controls {
@@ -207,7 +252,7 @@ export default {
       flex-basis: 100%;
       border-top: 1px solid var(--border);
       position: relative;
-      top: 28px;
+      top: 22px;
     }
   }
 }
