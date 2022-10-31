@@ -65,7 +65,7 @@ export default {
         :api-groups="apiGroups"
       >
         <template v-if="!isView" #removeRule>
-          <button type="button" class="btn role-link" @click="removeRule(index)">
+          <button type="button" class="btn role-link p-0" @click="removeRule(index)">
             {{ t('kubewarden.policyConfig.rules.remove') }}
           </button>
         </template>
