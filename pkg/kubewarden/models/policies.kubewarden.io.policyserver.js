@@ -1,4 +1,6 @@
-import { POD } from '@shell/config/types';
+import isEmpty from 'lodash/isEmpty';
+
+import { POD, WORKLOAD_TYPES } from '@shell/config/types';
 
 import KubewardenModel from '../plugins/kubewarden/policy-class';
 import { ADMISSION_POLICY_STATE } from '../config/kubewarden';
@@ -77,7 +79,7 @@ export default class PolicyServer extends KubewardenModel {
           return out.flatMap(o => o).filter(f => f.spec?.policyServer === this.metadata?.name);
         }
       } catch (e) {
-        console.error(`Error fetching related policies: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Error fetching related policies: ${ e }`); // eslint-disable-line no-console
       }
     };
   }
@@ -125,6 +127,36 @@ export default class PolicyServer extends KubewardenModel {
     };
   }
 
+  get matchingDeployment() {
+    return async() => {
+      try {
+        const inStore = this.$rootGetters['currentProduct'].inStore;
+
+        return await this.$dispatch(`${ inStore }/findMatching`, {
+          type:     WORKLOAD_TYPES.DEPLOYMENT,
+          selector: `kubewarden/policy-server=${ this.metadata?.name }`
+        }, { root: true });
+      } catch (e) {
+        console.warn('Error matching policy-server to deployment', e); // eslint-disable-line no-console
+      }
+    };
+  }
+
+  get matchingPods() {
+    return async() => {
+      try {
+        const inStore = this.$rootGetters['currentProduct'].inStore;
+
+        return await this.$dispatch(`${ inStore }/findMatching`, {
+          type:     POD,
+          selector: `app=kubewarden-policy-server-${ this.metadata?.name }` // kubewarden-policy-server is hardcoded from the kubewarden-controller
+        }, { root: true });
+      } catch (e) {
+        console.warn('Error matching policy-server to pod', e); // eslint-disable-line no-console
+      }
+    };
+  }
+
   jaegerPolicyNameByPolicy(policy) {
     let out = null;
 
@@ -146,14 +178,9 @@ export default class PolicyServer extends KubewardenModel {
 
   async openLogs() {
     try {
-      const inStore = this.$rootGetters['currentProduct'].inStore;
+      const pod = await this.matchingPods();
 
-      const pod = await this.$dispatch(`${ inStore }/findMatching`, {
-        type:     POD,
-        selector: `app=kubewarden-policy-server-${ this.metadata?.name }` // kubewarden-policy-server is hardcoded from the kubewarden-controller
-      }, { root: true });
-
-      if ( pod ) {
+      if ( !isEmpty(pod) ) {
         this.$dispatch('wm/open', {
           id:        `${ this.id }-logs`,
           label:     this.nameDisplay,
@@ -163,7 +190,7 @@ export default class PolicyServer extends KubewardenModel {
         }, { root: true });
       }
     } catch (e) {
-      console.error('Error dispatching console for pod', e); // eslint-disable-line no-console
+      console.warn('Error dispatching console for pod', e); // eslint-disable-line no-console
     }
   }
 }

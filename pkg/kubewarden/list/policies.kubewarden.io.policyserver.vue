@@ -31,7 +31,7 @@ export default {
     const apps = await this.$store.dispatch('cluster/findAll', { type: CATALOG.APP });
 
     this.hasDefaults = apps.find((a) => {
-      return a.spec.chart.metadata.annotations[CATALOG_ANNOTATIONS.RELEASE_NAME] === 'rancher-kubewarden-defaults';
+      return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === 'rancher-kubewarden-defaults';
     });
   },
 
