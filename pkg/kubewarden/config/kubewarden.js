@@ -118,7 +118,14 @@ export function init($plugin, store) {
 
   headers(POLICY_SERVER, [
     STATE,
-    NAME_HEADER,
+    {
+      name:          'name',
+      labelKey:      'tableHeaders.name',
+      value:         'nameDisplay',
+      sort:          ['nameSort'],
+      formatter:     'PolicyServerDeployment',
+      canBeVariable: true,
+    },
     {
       name:          'kubewardenPolicyServers',
       label:         'Image',
