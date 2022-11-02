@@ -97,7 +97,7 @@ export default {
 
     resourceOptions() {
       /*
-        If no apiGroup or 'core' is selected we want to show all of the available resources
+        If no apiGroup, 'core', or '*' is selected we want to show all of the available resources
         Comparable to `kubectl api-resources -o wide`
       */
       let schemas = this.schemas;

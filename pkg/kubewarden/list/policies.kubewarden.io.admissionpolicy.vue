@@ -21,7 +21,11 @@ export default {
   },
 
   async fetch() {
-    this.rows = await this.$store.dispatch('cluster/findAll', { type: this.resource });
+    const inStore = this.$store.getters['currentStore'](this.resource);
+
+    await this.$store.dispatch(`${ inStore }/findAll`, { type: this.resource });
+
+    this.rows = this.$store.getters[`${ inStore }/all`](this.resource);
   },
 
   data() {
