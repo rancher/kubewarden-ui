@@ -68,7 +68,7 @@ export default {
 
 </script>
 <template>
-  <span class="cluster-link">
+  <span class="deployment">
     <n-link v-if="to" :to="to">
       {{ value }}
     </n-link>
@@ -82,7 +82,7 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-  .cluster-link {
+  .deployment {
     display: flex;
     align-items: center;
   }
