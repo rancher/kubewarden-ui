@@ -23,12 +23,15 @@ export default {
   },
 
   async fetch() {
-    this.rows = await this.$store.dispatch('cluster/findAll', { type: this.resource });
+    const inStore = this.$store.getters['currentStore'](this.resource);
+
+    await this.$store.dispatch(`${ inStore }/findAll`, { type: this.resource });
+    this.rows = this.$store.getters[`${ inStore }/all`](this.resource);
 
     await this.$store.dispatch('catalog/load');
 
     // Determine if the default PolicyServer is installed from the `kubewarden-defaults` chart
-    const apps = await this.$store.dispatch('cluster/findAll', { type: CATALOG.APP });
+    const apps = await this.$store.dispatch(`${ inStore }/findAll`, { type: CATALOG.APP });
 
     this.hasDefaults = apps.find((a) => {
       return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === 'rancher-kubewarden-defaults';
