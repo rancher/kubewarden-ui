@@ -44,6 +44,7 @@ export default {
       'Namespaced'
     ];
     const operationOptions = [
+      '*',
       'CREATE',
       'UPDATE',
       'DELETE',
