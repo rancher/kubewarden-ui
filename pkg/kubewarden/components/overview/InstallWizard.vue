@@ -252,7 +252,7 @@ export default {
       flex-basis: 100%;
       border-top: 1px solid var(--border);
       position: relative;
-      top: 22px;
+      top: 25px;
     }
   }
 }

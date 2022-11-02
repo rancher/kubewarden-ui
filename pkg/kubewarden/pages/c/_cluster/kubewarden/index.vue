@@ -171,6 +171,8 @@ export default {
       );
 
       if ( controllerChart ) {
+        this.installSteps[2].ready = true;
+
         controllerChart.goToInstall('kubewarden');
       }
     }

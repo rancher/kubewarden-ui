@@ -88,6 +88,7 @@ export const MODE_MAP = {
 };
 
 export const OPERATION_MAP = {
+  '*':     'bg-darker',
   CREATE:  'bg-info',
   UPDATE:  'bg-warning',
   DELETE:  'bg-error',
