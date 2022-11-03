@@ -1,0 +1,76 @@
+name: Build Kubewarden Extension
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - ".github/workflows/**"
+      - "README.md"
+  pull_request:
+    branches: [main]
+    
+env:
+  ACTIONS_RUNNER_DEBUG: true
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+      contents: write
+    env:
+      CI_COMMIT_MESSAGE: CI Build Artifacts
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.8.0
+
+      - name: Setup yq
+        uses: chrisdickinson/setup-yq@latest
+
+      - name: Setup Nodejs and npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+
+      - name: Setup yarn
+        run: npm install -g yarn
+
+      - name: Setup Nodejs with yarn caching
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Run build script
+        run: |
+          chmod +x ./scripts/publish
+          ./scripts/publish -s kubewarden/ui -b main -f
+        shell: bash
+
+      - name: Commit build
+        if: github.event_name == 'push'
+        run: |
+          git add .
+          git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
+          git push
