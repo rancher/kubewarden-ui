@@ -43,7 +43,9 @@ jobs:
           version: v3.8.0
 
       - name: Setup yq
-        uses: chrisdickinson/setup-yq@latest
+        uses: chrisdickinson/setup-yq@v1.0.1
+        with:
+          yq-version: v4.28.2  
 
       - name: Setup Nodejs and npm
         uses: actions/setup-node@v3
