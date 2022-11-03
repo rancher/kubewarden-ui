@@ -6,8 +6,6 @@ on:
     paths-ignore:
       - ".github/workflows/**"
       - "README.md"
-  pull_request:
-    branches: [main]
     
 env:
   ACTIONS_RUNNER_DEBUG: true
@@ -67,11 +65,11 @@ jobs:
       - name: Run build script
         run: |
           chmod +x ./scripts/publish
-          ./scripts/publish -s kubewarden/ui -b main -f
+          ./scripts/publish -s "${{ github.repository }}" -b main
         shell: bash
 
       - name: Commit build
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.repository_owner == 'kubewarden'
         run: |
           git add .
           git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
