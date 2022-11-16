@@ -38,7 +38,7 @@ export default {
       this.installSteps[0].ready = true;
     }
 
-    const allRepos = await this.$store.dispatch('management/findAll', { type: CATALOG.CLUSTER_REPO });
+    const allRepos = await this.$store.dispatch('cluster/findAll', { type: CATALOG.CLUSTER_REPO });
 
     this.kubewardenRepo = allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
 
@@ -141,7 +141,7 @@ export default {
       try {
         this.errors = [];
 
-        const repoObj = await this.$store.dispatch('management/create', {
+        const repoObj = await this.$store.dispatch('cluster/create', {
           type:     CATALOG.CLUSTER_REPO,
           metadata: { name: 'kubewarden-chart' },
           spec:     { url: 'https://charts.kubewarden.io' },
@@ -171,8 +171,6 @@ export default {
       );
 
       if ( controllerChart ) {
-        this.installSteps[2].ready = true;
-
         controllerChart.goToInstall('kubewarden');
       }
     }
