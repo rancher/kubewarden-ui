@@ -214,9 +214,7 @@ export default class KubewardenModel extends SteveModel {
           const grafana = findBy(services, 'id', 'cattle-monitoring-system/rancher-monitoring-grafana');
 
           if ( grafana ) {
-            // The uid in the proxy `r3Pw-107z` is setup in the configmap for the kubewarden dashboard
-            // It's the generic uid from the json here: https://grafana.com/grafana/dashboards/15314
-            return `${ grafana.proxyUrl('http', 80) }d/r3Pw-1O7z/kubewarden?orgId=1`;
+            return `${ grafana.proxyUrl('http', 80) }d/kubewarden-metrics-dashboard/kubewarden-main?orgId=1&kiosk`;
           }
         }
       } catch (e) {

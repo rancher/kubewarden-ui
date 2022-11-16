@@ -1,6 +1,8 @@
 <script>
 import { mapGetters } from 'vuex';
 import flatMap from 'lodash/flatMap';
+import isEmpty from 'lodash/isEmpty';
+
 import { _CREATE } from '@shell/config/query-params';
 import { monitoringStatus } from '@shell/utils/monitoring';
 import { dashboardExists } from '@shell/utils/grafana';
@@ -97,6 +99,10 @@ export default {
       return !!this.value.metadata?.relationships;
     },
 
+    hasRules() {
+      return !isEmpty(this.rulesRows[0]);
+    },
+
     rulesRows() {
       return this.value.spec?.rules;
     },
@@ -115,7 +121,7 @@ export default {
       <h3>{{ t('namespace.resources') }}</h3>
     </div>
     <ResourceTabs v-model="value" :mode="mode" :need-related="hasRelationships">
-      <Tab v-if="!!rulesRows" name="policy-rules" label="Rules" :weight="99">
+      <Tab v-if="hasRules" name="policy-rules" label="Rules" :weight="99">
         <RulesTable :rows="rulesRows" />
       </Tab>
       <Tab name="policy-tracing" label="Tracing" :weight="98">
@@ -128,7 +134,7 @@ export default {
           </template>
         </TraceTable>
       </Tab>
-      <Tab v-if="metricsService" name="policy-metrics" label="Metrics" :weight="97">
+      <Tab name="policy-metrics" label="Metrics" :weight="97">
         <template #default="props">
           <DashboardMetrics
             v-if="props.active"
