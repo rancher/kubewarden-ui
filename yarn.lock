@@ -2888,10 +2888,10 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.4.4.tgz#11d5db19bd178936ec89cd84519c4de439574398"
   integrity sha512-1oO6+dN5kdIA3sKPZhRGJTfGVP4SWV6KqlMOwry4J3HfyD68sl/3KmG7DeYUzvN+RbhXDnv/D8vNNB8168tAMg==
 
-"@rancher/shell@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@rancher/shell/-/shell-0.1.4.tgz#243381cc8ce4e49740a7699aad8169b1f97dda52"
-  integrity sha512-hwHhZAaAUEJBzE16pK+kRgppqxA4WLrwRSqBLbRt0l6D0SEAtNd/2CVg1RRewdwMczPLnvCYs4W7AY6XdXJ51w==
+"@rancher/shell@^0.2.5":
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/@rancher/shell/-/shell-0.2.5.tgz#d56cc9cb9d9bc62923127a10bf630f0b193c42a1"
+  integrity sha512-bxhtwF5YsqkSpjQtW26f15UZ1oHzARhLEhak1R/KeBRmkpQWog01JmurFqJM++jG6CgoocTro/4FSqK9uTNzDQ==
   dependencies:
     "@aws-sdk/client-ec2" "3.1.0"
     "@aws-sdk/client-eks" "3.1.0"
@@ -2974,7 +2974,7 @@
     nyc "15.1.0"
     papaparse "5.3.0"
     portal-vue "2.1.7"
-    rancher-icons rancher/icons#v2.0.3
+    rancher-icons rancher/icons#v2.0.9
     require-extension-hooks "0.3.3"
     require-extension-hooks-babel "1.0.0"
     require-extension-hooks-vue "3.0.0"
@@ -3316,6 +3316,11 @@
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@types/less/-/less-3.0.3.tgz#f9451dbb9548d25391107d65d6401a0cfb15db92"
   integrity sha512-1YXyYH83h6We1djyoUEqTlVyQtCfJAFXELSKW2ZRtjHD4hQ82CC4lvrv5D0l0FLcKBaiPbXyi3MpMsI9ZRgKsw==
+
+"@types/lodash@4.14.184":
+  version "4.14.184"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.184.tgz#23f96cd2a21a28e106dc24d825d4aa966de7a9fe"
+  integrity sha512-RoZphVtHbxPZizt4IcILciSWiC6dcn+eZ8oX9IWEYfDMcocdd42f7NPI6fQj+6zI8y4E0L7gu2pcZKLGTRaV9Q==
 
 "@types/memory-fs@*":
   version "0.3.3"
@@ -14101,9 +14106,9 @@ queue-microtask@^1.2.2:
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
 
-rancher-icons@rancher/icons#v2.0.3:
-  version "2.0.3"
-  resolved "https://codeload.github.com/rancher/icons/tar.gz/1c5a0af4020ee01d42babc004597904d5c4423b8"
+rancher-icons@rancher/icons#v2.0.9:
+  version "2.0.9"
+  resolved "https://codeload.github.com/rancher/icons/tar.gz/09048239918c9eccf49f7770948efef63fb04f24"
 
 randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5, randombytes@^2.1.0:
   version "2.1.0"
