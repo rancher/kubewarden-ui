@@ -8,7 +8,7 @@ on:
       - "README.md"
     
 env:
-  ACTIONS_RUNNER_DEBUG: true
+  ACTIONS_RUNNER_DEBUG: false
 
 defaults:
   run:
@@ -17,6 +17,7 @@ defaults:
 
 jobs:
   release:
+    if: github.repository_owner == 'kubewarden'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -68,8 +69,19 @@ jobs:
           ./scripts/publish -s "${{ github.repository }}" -b main
         shell: bash
 
+      - name: Generate container image files
+        run: |
+          ./scripts/extract_images ./charts/kubewarden
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.4.1
+        with:
+          charts_dir: ./charts/kubewarden
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_SKIP_EXISTING: true
+
       - name: Commit build
-        if: github.event_name == 'push' && github.repository_owner == 'kubewarden'
         run: |
           git add .
           git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
