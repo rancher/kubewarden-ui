@@ -6,7 +6,8 @@
     "node": ">=12"
   },
   "dependencies": {
-    "@rancher/shell": "^0.1.4",
+    "@rancher/shell": "^0.2.5",
+    "@types/lodash": "4.14.184",
     "core-js": "3.21.1",
     "css-loader": "4.3.0"
   },

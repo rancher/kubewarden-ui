@@ -28,12 +28,13 @@
     "typeRoots": [
       "./node_modules",
       "./node_modules/@rancher/shell/types"
-    ],    
+    ],
     "types": [
       "@types/node",
       "@nuxt/types",
       "cypress",
-      "rancher"
+      "rancher",
+      "shell"
     ]
   },
   "exclude": [

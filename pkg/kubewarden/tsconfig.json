@@ -20,8 +20,10 @@
     "types": [
       "node",
       "webpack-env",
+      "@types/lodash",
       "@nuxt/types",
-      "rancher"
+      "rancher",
+      "shell"
     ],
     "lib": [
       "esnext",
