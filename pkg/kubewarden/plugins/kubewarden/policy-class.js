@@ -214,7 +214,7 @@ export default class KubewardenModel extends SteveModel {
           const grafana = findBy(services, 'id', 'cattle-monitoring-system/rancher-monitoring-grafana');
 
           if ( grafana ) {
-            return `${ grafana.proxyUrl('http', 80) }d/kubewarden-metrics-dashboard/kubewarden-main?orgId=1&kiosk`;
+            return `${ grafana.proxyUrl('http', 80) }d/kubewarden-metrics-dashboard/kubewarden?orgId=1&kiosk`;
           }
         }
       } catch (e) {

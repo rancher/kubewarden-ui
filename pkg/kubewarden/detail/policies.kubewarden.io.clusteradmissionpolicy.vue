@@ -134,7 +134,7 @@ export default {
           </template>
         </TraceTable>
       </Tab>
-      <Tab name="policy-metrics" label="Metrics" :weight="97">
+      <Tab v-if="metricsService" name="policy-metrics" label="Metrics" :weight="97">
         <template #default="props">
           <DashboardMetrics
             v-if="props.active"

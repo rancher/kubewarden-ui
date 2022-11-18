@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - ".github/workflows/**"
+      # - ".github/workflows/**"
       - "README.md"
     
 env:
@@ -17,7 +17,7 @@ defaults:
 
 jobs:
   release:
-    if: github.repository_owner == 'kubewarden'
+    # if: github.repository_owner == 'kubewarden'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -64,14 +64,17 @@ jobs:
         run: yarn
 
       - name: Run build script
+        shell: bash
+        id: build_script
         run: |
           chmod +x ./scripts/publish
           ./scripts/publish -s "${{ github.repository }}" -b main
-        shell: bash
 
-      - name: Generate container image files
+      - name: Commit build
         run: |
-          ./scripts/extract_images ./charts/kubewarden
+          git add ./assets ./charts/kubewarden ./extensions ./index.yaml
+          git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
+          git push
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.4.1
@@ -80,9 +83,3 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           CR_SKIP_EXISTING: true
-
-      - name: Commit build
-        run: |
-          git add .
-          git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
-          git push
