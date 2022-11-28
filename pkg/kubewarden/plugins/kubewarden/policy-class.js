@@ -3,12 +3,14 @@ import flatMap from 'lodash/flatMap';
 import matches from 'lodash/matches';
 
 import SteveModel from '@shell/plugins/steve/steve-class';
-import { MANAGEMENT, SERVICE } from '@shell/config/types';
+import { CONFIG_MAP, MANAGEMENT, SERVICE } from '@shell/config/types';
 import { proxyUrlFromParts } from '@shell/models/service';
 import { findBy, isArray } from '@shell/utils/array';
 import { addParam } from '@shell/utils/url';
 
-import { KUBEWARDEN } from '../../types';
+import { KUBEWARDEN, METRICS_DASHBOARD } from '../../types';
+import policyServerDashboard from '../../assets/kubewarden-metrics-policyserver.json';
+import policyDashboard from '../../assets/kubewarden-metrics-policy.json';
 
 export const TRACE_HEADERS = [
   {
@@ -126,6 +128,23 @@ export const NAMESPACE_SELECTOR = {
 
 export const ARTIFACTHUB_ENDPOINT = 'artifacthub.io/api/v1';
 
+export const GRAFANA_DASHBOARD_ANNOTATIONS = {
+  'meta.helm.sh/release-name':      'rancher-monitoring',
+  'meta.helm.sh/release-namespace': 'cattle-monitoring-system'
+};
+
+export const GRAFANA_DASHBOARD_LABELS = {
+  app:                            'rancher-monitoring-grafana',
+  'app.kubernetes.io/instance':   'rancher-monitoring',
+  'app.kubernetes.io/managed-by': 'Helm',
+  'app.kubernetes.io/part-of':    'rancher-monitoring',
+  'app.kubernetes.io/version':    '101.0.0_up19.0.3',
+  chart:                          'rancher-monitoring-101.0.0_up19.0.3',
+  grafana_dashboard:              '1',
+  heritage:                       'Helm',
+  release:                        'rancher-monitoring'
+};
+
 export default class KubewardenModel extends SteveModel {
   async allServices() {
     const inStore = this.$rootGetters['currentProduct'].inStore;
@@ -205,7 +224,7 @@ export default class KubewardenModel extends SteveModel {
     };
   }
 
-  get grafanaProxy() {
+  get grafanaService() {
     return async() => {
       try {
         const services = await this.allServices();
@@ -213,12 +232,26 @@ export default class KubewardenModel extends SteveModel {
         if ( services ) {
           const grafana = findBy(services, 'id', 'cattle-monitoring-system/rancher-monitoring-grafana');
 
-          if ( grafana ) {
-            return `${ grafana.proxyUrl('http', 80) }d/kubewarden-metrics-dashboard/kubewarden?orgId=1&kiosk`;
-          }
+          return grafana;
         }
       } catch (e) {
-        console.warn(`Error fetching metrics service: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Error getting Grafana service: ${ e }`); // eslint-disable-line no-console
+      }
+    };
+  }
+
+  get grafanaProxy() {
+    return async(type) => {
+      const dashboardName = type === METRICS_DASHBOARD.POLICY_SERVER ? 'kubewarden-policy-server' : 'kubewarden-policy';
+
+      try {
+        const grafana = await this.grafanaService();
+
+        if ( grafana ) {
+          return `${ grafana.proxyUrl('http', 80) }d/${ type }/${ dashboardName }?orgId=1&kiosk`;
+        }
+      } catch (e) {
+        console.warn(`Error fetching Grafana proxy: ${ e }`); // eslint-disable-line no-console
       }
 
       return null;
@@ -350,6 +383,33 @@ export default class KubewardenModel extends SteveModel {
 
       return null;
     };
+  }
+
+  async addGrafanaDashboard(type) {
+    /*
+      There are 2 dashboards for Kubewarden:
+      - PolicyServer is the default one copied from https://grafana.com/grafana/dashboards/15314-kubewarden/
+      - Policies have a condensed version
+    */
+    const dashboard = type === METRICS_DASHBOARD.POLICY_SERVER ? policyServerDashboard : policyDashboard;
+    const fileKey = `${ type }.json`;
+
+    const configMapTemplate = await this.$dispatch('cluster/create', {
+      type:       CONFIG_MAP,
+      metadata: {
+        annotations: GRAFANA_DASHBOARD_ANNOTATIONS,
+        labels:      GRAFANA_DASHBOARD_LABELS,
+        name:        type,
+        namespace:   'cattle-dashboards'
+      },
+      data: { [fileKey]: JSON.stringify(dashboard) },
+    }, { root: true });
+
+    try {
+      await configMapTemplate.save();
+    } catch (e) {
+      console.warn(`Error creating dashboard configmap: ${ e }`); // eslint-disable-line no-console
+    }
   }
 
   haveComponent(name) {

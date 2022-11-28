@@ -3,7 +3,9 @@ import { mapGetters } from 'vuex';
 import flatMap from 'lodash/flatMap';
 import isEmpty from 'lodash/isEmpty';
 
-import { _CREATE } from '@shell/config/query-params';
+import {
+  _CREATE, CHART, REPO, REPO_TYPE, VERSION
+} from '@shell/config/query-params';
 import { monitoringStatus } from '@shell/utils/monitoring';
 import { dashboardExists } from '@shell/utils/grafana';
 import CreateEditView from '@shell/mixins/create-edit-view';
@@ -14,6 +16,9 @@ import Loading from '@shell/components/Loading';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
 import Tab from '@shell/components/Tabbed/Tab';
 
+import { METRICS_DASHBOARD } from '../types';
+
+import MetricsBanner from '../components/MetricsBanner';
 import RulesTable from '../components/RulesTable';
 import TraceTable from '../components/TraceTable';
 
@@ -21,7 +26,7 @@ export default {
   name: 'ClusterAdmissionPolicy',
 
   components: {
-    Banner, DashboardMetrics, Loading, ResourceTabs, RulesTable, Tab, TraceTable
+    Banner, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, RulesTable, Tab, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -44,17 +49,43 @@ export default {
   },
 
   async fetch() {
-    this.metricsProxy = await this.value.grafanaProxy();
-
+    // If monitoring is installed look for the dashboard for policies
     if ( this.monitoringStatus.installed ) {
       try {
-        this.metricsProxy = await this.value.grafanaProxy();
+        this.metricsProxy = await this.value.grafanaProxy(this.metricsType);
 
         if ( this.metricsProxy ) {
           this.metricsService = await dashboardExists(this.$store, this.currentCluster?.id, this.metricsProxy);
         }
       } catch (e) {
         console.error(`Error fetching Grafana service: ${ e }`); // eslint-disable-line no-console
+      }
+    } else {
+      // If not we need to direct the user to install monitoring
+      await this.$store.dispatch('catalog/load');
+
+      // Check to see that the chart we need are available
+      const charts = this.$store.getters['catalog/rawCharts'];
+      const chartValues = Object.values(charts);
+
+      const monitoringChart = chartValues.find(
+        chart => chart.chartName === 'rancher-monitoring'
+      );
+
+      if ( monitoringChart ) {
+        this.monitoringRoute = {
+          name:   'c-cluster-apps-charts-install',
+          params: {
+            cluster:  this.$route.params.cluster,
+            product:  this.$store.getters['productId'],
+          },
+          query: {
+            [REPO_TYPE]: 'cluster',
+            [REPO]:      'rancher-charts',
+            [CHART]:     'rancher-monitoring',
+            [VERSION]:   monitoringChart.versions[0]?.version,
+          }
+        };
       }
     }
 
@@ -68,10 +99,14 @@ export default {
 
   data() {
     return {
-      jaegerService:  null,
-      metricsProxy:   null,
-      metricsService: null,
-      traces:         null
+      jaegerService:   null,
+      metricsProxy:    null,
+      metricsService:  null,
+      monitoringRoute: null,
+      reloadRequired:  false,
+      traces:          null,
+
+      metricsType: METRICS_DASHBOARD.POLICY
     };
   },
 
@@ -91,10 +126,6 @@ export default {
       return true;
     },
 
-    hasMetricsTabs() {
-      return this.metricsService;
-    },
-
     hasRelationships() {
       return !!this.value.metadata?.relationships;
     },
@@ -110,6 +141,20 @@ export default {
     tracesRows() {
       return this.value.traceTableRows(this.traces);
     }
+  },
+
+  methods: {
+    async addDashboard(btnCb) {
+      try {
+        await this.value.addGrafanaDashboard(this.metricsType);
+        btnCb(true);
+
+        this.reloadRequired = true;
+      } catch (err) {
+        this.errors = err;
+        btnCb(false);
+      }
+    }
   }
 };
 </script>
@@ -124,6 +169,7 @@ export default {
       <Tab v-if="hasRules" name="policy-rules" label="Rules" :weight="99">
         <RulesTable :rows="rulesRows" />
       </Tab>
+
       <Tab name="policy-tracing" label="Tracing" :weight="98">
         <TraceTable :rows="tracesRows">
           <template #traceBanner>
@@ -134,8 +180,18 @@ export default {
           </template>
         </TraceTable>
       </Tab>
-      <Tab v-if="metricsService" name="policy-metrics" label="Metrics" :weight="97">
-        <template #default="props">
+
+      <Tab name="policy-metrics" label="Metrics" :weight="97">
+        <MetricsBanner
+          v-if="!monitoringStatus.installed || !metricsService"
+          :metrics-service="metricsService"
+          :metrics-type="metricsType"
+          :monitoring-route="monitoringRoute"
+          :reload-required="reloadRequired"
+          @add="addDashboard"
+        />
+
+        <template v-if="metricsService" #default="props">
           <DashboardMetrics
             v-if="props.active"
             :detail-url="metricsProxy"
