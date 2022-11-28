@@ -1,6 +1,8 @@
 <script>
 import { mapGetters } from 'vuex';
-import { _CREATE } from '@shell/config/query-params';
+import {
+  _CREATE, CHART, REPO, REPO_TYPE, VERSION
+} from '@shell/config/query-params';
 import { dashboardExists } from '@shell/utils/grafana';
 import { monitoringStatus } from '@shell/utils/monitoring';
 import CreateEditView from '@shell/mixins/create-edit-view';
@@ -12,15 +14,17 @@ import ResourceTabs from '@shell/components/form/ResourceTabs';
 import ResourceTable from '@shell/components/ResourceTable';
 import Tab from '@shell/components/Tabbed/Tab';
 
+import { METRICS_DASHBOARD } from '../types';
 import { RELATED_HEADERS } from '../models/policies.kubewarden.io.policyserver';
 
+import MetricsBanner from '../components/MetricsBanner';
 import TraceTable from '../components/TraceTable';
 
 export default {
   name: 'PolicyServer',
 
   components: {
-    Banner, DashboardMetrics, Loading, ResourceTabs, ResourceTable, Tab, TraceTable
+    Banner, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, ResourceTable, Tab, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -40,15 +44,43 @@ export default {
   async fetch() {
     this.relatedPolicies = await this.value.allRelatedPolicies();
 
+    // If monitoring is installed look for the dashboard for PolicyServers
     if ( this.monitoringStatus.installed ) {
       try {
-        this.metricsProxy = await this.value.grafanaProxy();
+        this.metricsProxy = await this.value.grafanaProxy(this.metricsType);
 
         if ( this.metricsProxy ) {
           this.metricsService = await dashboardExists(this.$store, this.currentCluster?.id, this.metricsProxy);
         }
       } catch (e) {
         console.error(`Error fetching Grafana service: ${ e }`); // eslint-disable-line no-console
+      }
+    } else {
+      // If not we need to direct the user to install monitoring
+      await this.$store.dispatch('catalog/load');
+
+      // Check to see that the chart we need are available
+      const charts = this.$store.getters['catalog/rawCharts'];
+      const chartValues = Object.values(charts);
+
+      const monitoringChart = chartValues.find(
+        chart => chart.chartName === 'rancher-monitoring'
+      );
+
+      if ( monitoringChart ) {
+        this.monitoringRoute = {
+          name:   'c-cluster-apps-charts-install',
+          params: {
+            cluster:  this.$route.params.cluster,
+            product:  this.$store.getters['productId'],
+          },
+          query: {
+            [REPO_TYPE]: 'cluster',
+            [REPO]:      'rancher-charts',
+            [CHART]:     'rancher-monitoring',
+            [VERSION]:   monitoringChart.versions[0]?.version,
+          }
+        };
       }
     }
 
@@ -63,8 +95,12 @@ export default {
       jaegerProxies:   null,
       metricsProxy:    null,
       metricsService:  null,
+      monitoringRoute: null,
       relatedPolicies: null,
-      traces:          null
+      reloadRequired:  false,
+      traces:          null,
+
+      metricsType: METRICS_DASHBOARD.POLICY_SERVER
     };
   },
 
@@ -86,9 +122,21 @@ export default {
   },
 
   methods: {
+    async addDashboard(btnCb) {
+      try {
+        await this.value.addGrafanaDashboard(this.metricsType);
+        btnCb(true);
+
+        this.reloadRequired = true;
+      } catch (err) {
+        this.errors = err;
+        btnCb(false);
+      }
+    },
+
     hasNamespaceSelector(row) {
       return row.namespaceSelector;
-    },
+    }
   }
 };
 </script>
@@ -134,8 +182,17 @@ export default {
         </template>
       </Tab>
 
-      <Tab v-if="metricsService" name="policy-metrics" label="Metrics" :weight="98">
-        <template #default="props">
+      <Tab name="policy-metrics" label="Metrics" :weight="98">
+        <MetricsBanner
+          v-if="!monitoringStatus.installed || !metricsService"
+          :metrics-service="metricsService"
+          :metrics-type="metricsType"
+          :monitoring-route="monitoringRoute"
+          :reload-required="reloadRequired"
+          @add="addDashboard"
+        />
+
+        <template v-if="metricsService" #default="props">
           <DashboardMetrics
             v-if="props.active"
             :detail-url="metricsProxy"

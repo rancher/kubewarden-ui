@@ -35,3 +35,8 @@ export const KUBEWARDEN = {
     VOLUMES_PSP:                    'policies.kubewarden.io.policies.volumes-psp'
   }
 };
+
+export const METRICS_DASHBOARD = {
+  POLICY_SERVER: 'kubewarden-dashboard-policyserver',
+  POLICY:        'kubewarden-dashboard-policy'
+};

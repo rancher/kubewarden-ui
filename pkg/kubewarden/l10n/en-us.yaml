@@ -83,9 +83,18 @@ kubewarden:
   utils:
     resetFilter: Reset Filter
   tracing:
-    noJaeger: No Jaeger service is installed, please follow the steps <a href="https://github.com/kubewarden/ui/wiki/Tracing" target="_blank" rel="noopener noreferrer nofollow">listed here</a> to setup tracing for your policies.
+    noJaeger: |
+      No Jaeger service is installed, please follow the steps <a href="https://github.com/kubewarden/ui/wiki/Tracing" target="_blank" rel="noopener noreferrer nofollow">listed here</a> to setup tracing for your policies.
     noRelatedTraces: No tracing data exists for the related policies.
     noTraces: No tracing data exists for this policy. 
+  monitoring:
+    notInstalled: |
+      The Monitoring app is not installed, this will will need to be installed and configured to enable metrics. Follow <a href="https://docs.kubewarden.io/operator-manual/telemetry/metrics/quickstart#install-prometheus" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to add the Kubewarden ServiceMonitor for Prometheus.
+    install: Install Monitoring
+  metrics:
+    notInstalled: The Grafana dashboard for this Kubewarden resource can not be found. You need to create the ConfigMap for the dashboard.
+    reload: Grafana dashboard created - reload required
+
   policyConfig:
     serverSelect:
       label: Policy Server
@@ -346,3 +355,7 @@ asyncButton:
     action: Add Kubewarden Repository
     success: Added
     waiting: Adding&hellip;
+  grafanaDashboard:
+    action: Add Grafana Dashboard
+    success: Added
+    wating: Adding&hellip;
