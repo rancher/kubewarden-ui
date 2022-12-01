@@ -3,9 +3,8 @@ name: Build Kubewarden Extension
 on:
   push:
     branches: [main]
-    paths-ignore:
-      # - ".github/workflows/**"
-      - "README.md"
+    paths:
+      - pkg/kubewarden/package.json
     
 env:
   ACTIONS_RUNNER_DEBUG: false
