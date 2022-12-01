@@ -84,7 +84,7 @@ kubewarden:
     resetFilter: Reset Filter
   tracing:
     noJaeger: |
-      No Jaeger service is installed, please follow the steps <a href="https://github.com/kubewarden/ui/wiki/Tracing" target="_blank" rel="noopener noreferrer nofollow">listed here</a> to setup tracing for your policies.
+      No Jaeger service is installed, please follow the steps <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart#install-jaeger" target="_blank" rel="noopener noreferrer nofollow">listed here</a> to setup tracing for your policies.
     noRelatedTraces: No tracing data exists for the related policies.
     noTraces: No tracing data exists for this policy. 
   monitoring:
