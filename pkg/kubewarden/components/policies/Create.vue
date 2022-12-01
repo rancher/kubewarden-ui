@@ -17,7 +17,7 @@ import Markdown from '@shell/components/Markdown';
 import Wizard from '@shell/components/Wizard';
 
 import { NAMESPACE_SELECTOR } from '../../plugins/kubewarden/policy-class';
-import { KUBEWARDEN } from '../../types';
+import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME } from '../../types';
 
 import PolicyGrid from './PolicyGrid';
 import Values from './Values';
@@ -43,7 +43,7 @@ export default ({
 
     value: {
       type:     Object,
-      required: true
+      default:  () => {}
     },
   },
 
@@ -92,7 +92,7 @@ export default ({
       yamlValues:        null,
       defaultPolicy:     null,
 
-      hasCustomRegistry: false,
+      hasCustomPolicy: false,
 
       // Steps
       stepPolicies: {
@@ -119,7 +119,7 @@ export default ({
   },
 
   watch: {
-    hasCustomRegistry(neu, old) {
+    hasCustomPolicy(neu, old) {
       if ( !old ) {
         this.policyQuestions(neu);
       }
@@ -133,6 +133,10 @@ export default ({
 
     isSelected() {
       return !!this.type;
+    },
+
+    customPolicy() {
+      return this.type === 'custom';
     },
 
     hasArtifactHub() {
@@ -193,7 +197,7 @@ export default ({
         name:   'c-cluster-product-resource',
         params: {
           cluster:  this.$route.params.cluster,
-          product:  'kubewarden',
+          product:  KUBEWARDEN_PRODUCT_NAME,
           resource: this.schema?.id
         }
       });
@@ -284,27 +288,25 @@ export default ({
 
     selectType(type) {
       this.type = type;
+      const isCustom = type === 'custom';
 
-      if ( type === 'custom' ) {
-        this.$set(this, 'hasCustomRegistry', true);
-
+      if ( isCustom ) {
         this.stepReadme.hidden = true;
-        this.stepPolicies.ready = true;
-        this.$refs.wizard.next();
-
-        return;
+        this.$set(this, 'hasCustomPolicy', true);
+      } else {
+        this.stepReadme.hidden = false;
+        this.$set(this, 'hasCustomPolicy', false);
       }
 
       this.$router.push({
         query: {
-          [REPO]:      'kubewarden',
+          [REPO]:      KUBEWARDEN_PRODUCT_NAME,
           [REPO_TYPE]: 'cluster',
-          [CHART]:     type.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, ''),
-        },
+          [CHART]:     isCustom ? 'custom' : type.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '')
+        }
       });
 
       this.policyQuestions();
-      this.stepReadme.hidden = false;
       this.stepPolicies.ready = true;
       this.$refs.wizard.next();
       this.splitType = type.split('policies.kubewarden.io.policies.')[1];
@@ -373,7 +375,7 @@ export default ({
       </template>
 
       <template #values>
-        <Values :value="value" :chart-values="chartValues" :mode="mode" />
+        <Values :value="value" :chart-values="chartValues" :mode="mode" :custom-policy="customPolicy" />
       </template>
     </Wizard>
   </div>
@@ -387,6 +389,16 @@ $color: var(--body-text) !important;
 
 ::v-deep .step-container {
   height: auto;
+}
+
+::v-deep .header {
+  .step-sequence {
+    .steps {
+      & .divider {
+        top: 22px;
+      }
+    }
+  }
 }
 
 ::v-deep .subtype {

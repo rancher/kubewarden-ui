@@ -37,9 +37,9 @@ export default {
       type:     Object,
       required: true
     },
-    hasReadme: {
-      type:     Boolean,
-      default:  false
+    customPolicy: {
+      type:    Boolean,
+      default: false
     },
     value: {
       type:     Object,
@@ -152,6 +152,7 @@ export default {
               :is="valuesComponent"
               v-model="chartValues"
               :mode="mode"
+              :custom-policy="customPolicy"
             />
           </Tabbed>
         </template>
