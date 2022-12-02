@@ -3,6 +3,7 @@ import jsyaml from 'js-yaml';
 import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
 import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
 import ChartMixin from '@shell/mixins/chart';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { _CREATE, CHART, REPO, REPO_TYPE } from '@shell/config/query-params';
@@ -139,6 +140,10 @@ export default ({
       return this.type === 'custom';
     },
 
+    canFinish() {
+      return !!this.chartValues.policy.spec.module && this.hasRequiredRules;
+    },
+
     hasArtifactHub() {
       if ( this.whitelistSetting ) {
         const whitelistValue = this.whitelistSetting.value.split(',');
@@ -149,6 +154,36 @@ export default ({
         }
 
         return hasSetting;
+      }
+
+      return false;
+    },
+
+    /*
+      Determines if the required rules are set, if not the resource can not be created
+    */
+    hasRequiredRules() {
+      const { rules } = this.chartValues.policy.spec;
+      const requiredProps = ['apiGroups', 'apiVersions', 'operations', 'resources'];
+
+      const acceptedRule = rules?.find((rule) => {
+        const match = [];
+
+        for ( const prop of requiredProps.values() ) {
+          if ( !isEmpty(rule[prop]) ) {
+            match.push(prop);
+          }
+        }
+
+        if ( isEqual(match, requiredProps) ) {
+          return rule;
+        }
+
+        return null;
+      });
+
+      if ( !isEmpty(acceptedRule) ) {
+        return true;
       }
 
       return false;
@@ -377,6 +412,14 @@ export default ({
       <template #values>
         <Values :value="value" :chart-values="chartValues" :mode="mode" :custom-policy="customPolicy" />
       </template>
+
+      <template #finish>
+        <AsyncButton
+          :disabled="!canFinish"
+          mode="finish"
+          @click="finish"
+        />
+      </template>
     </Wizard>
   </div>
 </template>
@@ -400,6 +443,12 @@ $color: var(--body-text) !important;
     }
   }
 }
+
+::v-deep .controls-row {
+    .controls-steps {
+      display: flex;
+    }
+  }
 
 ::v-deep .subtype {
   height: $height;
