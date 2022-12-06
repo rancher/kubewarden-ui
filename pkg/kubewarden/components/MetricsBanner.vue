@@ -42,7 +42,7 @@ export default {
 <template>
   <div v-if="!monitoringStatus.installed">
     <Banner color="warning">
-      <span v-html="t('kubewarden.monitoring.notInstalled', true)" />
+      <span v-html="t('kubewarden.monitoring.notInstalled', {}, true)" />
       <nuxt-link :to="monitoringRoute">
         {{ t('kubewarden.monitoring.install') }}
       </nuxt-link>

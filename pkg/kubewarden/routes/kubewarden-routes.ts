@@ -9,7 +9,7 @@ import ViewKubewardenNsResource from '../pages/c/_cluster/kubewarden/_resource/_
 const routes = [
   {
     name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }`,
-    path:       `/c/:cluster/kubewarden`,
+    path:       `/c/:cluster/:product/dashboard`,
     component:  ListKubewarden,
   },
   {
