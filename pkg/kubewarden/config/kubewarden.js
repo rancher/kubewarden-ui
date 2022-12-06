@@ -3,7 +3,6 @@ import {
   KUBEWARDEN,
   KUBEWARDEN_DASHBOARD
 } from '../types';
-import { rootKubewardenRoute } from '../utils/custom-routing';
 
 export const CHART_NAME = 'rancher-kubewarden';
 
@@ -57,10 +56,9 @@ export function init($plugin, store) {
     name:        KUBEWARDEN_DASHBOARD,
     namespaced:  false,
     weight:      99,
-    route:       rootKubewardenRoute(),
+    route:       { name: 'c-cluster-kubewarden' },
     overview:    true
   });
-  basicType([KUBEWARDEN_DASHBOARD]);
 
   /*
     TODO: remove these when rancher-charts integration is complete
@@ -108,6 +106,7 @@ export function init($plugin, store) {
   });
 
   basicType([
+    KUBEWARDEN_DASHBOARD,
     POLICY_SERVER,
     ADMISSION_POLICY,
     CLUSTER_ADMISSION_POLICY

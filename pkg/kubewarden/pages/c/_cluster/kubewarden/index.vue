@@ -10,7 +10,6 @@ import Loading from '@shell/components/Loading';
 import { Banner } from '@components/Banner';
 
 import { KUBEWARDEN } from '../../../../types';
-// import { updateWhitelist } from '../../../../plugins/kubewarden/policy-class';
 
 import InstallWizard from '../../../../components/overview/InstallWizard';
 
@@ -31,7 +30,6 @@ export default {
     this.hasSchema = this.$store.getters['cluster/schemaFor'](KUBEWARDEN.POLICY_SERVER);
 
     await this.$store.dispatch('cluster/findAll', { type: SERVICE });
-    // await this.updateWhitelist('github.com');
 
     if ( this.certService ) {
       this.initStepIndex = 1;
@@ -43,8 +41,7 @@ export default {
     this.kubewardenRepo = allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
 
     if ( this.kubewardenRepo ) {
-      this.certService ? this.initStepIndex = 2 : this.initStepIndex = 0;
-      this.installSteps[1].ready = true;
+      await this.getChartRoute();
     }
   },
 
@@ -53,11 +50,6 @@ export default {
       {
         name:  'certmanager',
         label: 'Cert-Manager',
-        ready: false,
-      },
-      {
-        name:  'repository',
-        label: 'Repository',
         ready: false,
       },
       {
@@ -85,11 +77,7 @@ export default {
     certService() {
       this.installSteps[0].ready = true;
 
-      if ( this.kubewardenRepo ) {
-        this.$refs.wizard?.goToStep(3);
-      } else {
-        this.$refs.wizard?.goToStep(2);
-      }
+      this.$refs.wizard?.goToStep(2);
     }
   },
 
@@ -98,6 +86,10 @@ export default {
 
     certService() {
       return this.$store.getters['cluster/all'](SERVICE).find(s => s.metadata?.labels?.['app'] === 'cert-manager');
+    },
+
+    installReady() {
+      return !!this.controllerChart;
     },
 
     shellEnabled() {
@@ -125,12 +117,7 @@ export default {
 
         btnCb(true);
         this.installSteps[0].ready = true;
-
-        if ( this.kubewardenRepo ) {
-          this.$refs.wizard.goToStep(3);
-        } else {
-          this.$refs.wizard.next();
-        }
+        this.$refs.wizard.next();
       } catch (err) {
         this.errors = err;
         btnCb(false);
@@ -143,35 +130,40 @@ export default {
 
         const repoObj = await this.$store.dispatch('cluster/create', {
           type:     CATALOG.CLUSTER_REPO,
-          metadata: { name: 'kubewarden-chart' },
+          metadata: { name: 'kubewarden-charts' },
           spec:     { url: 'https://charts.kubewarden.io' },
         });
 
         await repoObj.save();
-        // await this.updateWhitelist('artifacthub.io');
+
+        const allRepos = await this.$store.dispatch('cluster/findAll', { type: CATALOG.CLUSTER_REPO });
+
+        this.kubewardenRepo = allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
+
+        await this.getChartRoute();
 
         btnCb(true);
-        this.installSteps[1].ready = true;
-        this.$refs.wizard.next();
       } catch (err) {
         this.errors = err;
         btnCb(false);
       }
     },
 
-    async setChartRoute() {
+    async getChartRoute() {
       await this.$store.dispatch('catalog/load');
 
       // Check to see that the chart we need are available
       const charts = this.$store.getters['catalog/rawCharts'];
       const chartValues = Object.values(charts);
 
-      const controllerChart = chartValues.find(
+      this.controllerChart = chartValues.find(
         chart => chart.chartName === 'kubewarden-controller'
       );
+    },
 
-      if ( controllerChart ) {
-        controllerChart.goToInstall('kubewarden');
+    chartRoute() {
+      if ( this.controllerChart ) {
+        this.controllerChart.goToInstall('kubewarden');
       }
     }
   }
@@ -209,9 +201,6 @@ export default {
             {{ t("kubewarden.install.prerequisites.certManager.description") }}
           </p>
 
-          <!-- Replacing with manual install step for now -->
-          <!-- <AsyncButton mode="certManager" @click="applyCertManager" /> -->
-
           <p v-html="t('kubewarden.install.prerequisites.certManager.manualStep', null, true)"></p>
           <CopyCode class="m-10 p-10">
             {{ t("kubewarden.install.prerequisites.certManager.applyCommand") }}
@@ -235,30 +224,35 @@ export default {
           </slot>
         </template>
 
-        <template #repository>
-          <h2 class="mt-20 mb-10">
-            {{ t("kubewarden.install.prerequisites.repository.title") }}
-          </h2>
-          <p class="mb-20">
-            {{ t("kubewarden.install.prerequisites.repository.description") }}
-          </p>
-
-          <AsyncButton mode="kubewardenRepository" @click="addRepository" />
-        </template>
-
         <template #install>
-          <h2 class="mt-20 mb-10">
-            {{ t("kubewarden.install.appInstall.title") }}
-          </h2>
-          <p class="mb-20">
-            {{ t("kubewarden.install.appInstall.description") }}
-          </p>
-          <button
-            class="btn role-primary mt-20"
-            @click.prevent="setChartRoute"
-          >
-            {{ t("kubewarden.install.appInstall.button") }}
-          </button>
+          <template v-if="!kubewardenRepo">
+            <h2 class="mt-20 mb-10">
+              {{ t("kubewarden.install.prerequisites.repository.title") }}
+            </h2>
+            <p class="mb-20">
+              {{ t("kubewarden.install.prerequisites.repository.description") }}
+            </p>
+
+            <AsyncButton mode="kubewardenRepository" @click="addRepository" />
+          </template>
+
+          <template v-else>
+            <Loading v-if="!installReady" />
+            <template v-else>
+              <h2 class="mt-20 mb-10">
+                {{ t("kubewarden.install.appInstall.title") }}
+              </h2>
+              <p class="mb-20">
+                {{ t("kubewarden.install.appInstall.description") }}
+              </p>
+              <button
+                class="btn role-primary mt-20"
+                @click.prevent="chartRoute"
+              >
+                {{ t("kubewarden.install.appInstall.button") }}
+              </button>
+            </template>
+          </template>
         </template>
       </InstallWizard>
     </div>

@@ -1,6 +1,6 @@
 import { KUBEWARDEN_PRODUCT_NAME } from '../types';
 
-import ListKubewarden from '../pages/c/_cluster/kubewarden/index.vue';
+import Dashboard from '../pages/c/_cluster/kubewarden/index.vue';
 import KubewardenResourcedList from '../pages/c/_cluster/kubewarden/_resource/index.vue';
 import CreateKubewardenResource from '../pages/c/_cluster/kubewarden/_resource/create.vue';
 import ViewKubewardenResource from '../pages/c/_cluster/kubewarden/_resource/_id.vue';
@@ -9,8 +9,8 @@ import ViewKubewardenNsResource from '../pages/c/_cluster/kubewarden/_resource/_
 const routes = [
   {
     name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }`,
-    path:       `/c/:cluster/:product/dashboard`,
-    component:  ListKubewarden,
+    path:       `/c/:cluster/:product`,
+    component:  Dashboard,
   },
   {
     name:       `c-cluster-product-resource`,
