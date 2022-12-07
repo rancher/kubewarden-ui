@@ -40,3 +40,8 @@ export const METRICS_DASHBOARD = {
   POLICY_SERVER: 'kubewarden-dashboard-policyserver',
   POLICY:        'kubewarden-dashboard-policy'
 };
+
+export const VALUES_STATE = {
+  FORM: 'FORM',
+  YAML: 'YAML',
+};

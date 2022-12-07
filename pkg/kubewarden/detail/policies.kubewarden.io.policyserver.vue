@@ -8,6 +8,7 @@ import { monitoringStatus } from '@shell/utils/monitoring';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import { Banner } from '@components/Banner';
+import CountGauge from '@shell/components/CountGauge';
 import DashboardMetrics from '@shell/components/DashboardMetrics';
 import Loading from '@shell/components/Loading';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
@@ -24,7 +25,7 @@ export default {
   name: 'PolicyServer',
 
   components: {
-    Banner, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, ResourceTable, Tab, TraceTable
+    Banner, CountGauge, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, ResourceTable, Tab, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -43,6 +44,7 @@ export default {
 
   async fetch() {
     this.relatedPolicies = await this.value.allRelatedPolicies();
+    this.policyGauges = await this.value.policyGauges();
 
     // If monitoring is installed look for the dashboard for PolicyServers
     if ( this.monitoringStatus.installed ) {
@@ -96,6 +98,7 @@ export default {
       metricsProxy:    null,
       metricsService:  null,
       monitoringRoute: null,
+      policyGauges:    null,
       relatedPolicies: null,
       reloadRequired:  false,
       traces:          null,
@@ -144,9 +147,23 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else>
-    <div class="mb-20">
-      <h3>{{ t('namespace.resources') }}</h3>
-    </div>
+    <template v-if="policyGauges">
+      <h3>
+        {{ t('kubewarden.policyServer.policyGauge.byState') }}
+      </h3>
+      <div class="gauges mb-20">
+        <CountGauge
+          v-for="(group, key) in policyGauges"
+          :key="key"
+          :total="relatedPolicies.length"
+          :useful="group.count || 0"
+          :graphical="false"
+          :primary-color-var="`--sizzle-${group.color}`"
+          :name="key"
+        />
+      </div>
+    </template>
+
     <ResourceTabs v-model="value" :mode="mode">
       <Tab name="related-policies" label="Policies" :weight="99">
         <template #default>
@@ -230,6 +247,27 @@ export default {
       margin-left: 5px;
       font-size: 22px;
       color: var(--warning);
+    }
+  }
+}
+
+.gauges {
+  display: flex;
+  justify-content: space-around;
+
+  & > *{
+    flex: 1;
+    margin-right: $column-gutter;
+  }
+
+  &__pods {
+    flex-wrap: wrap;
+    justify-content: left;
+
+    .count-gauge {
+      width: 23%;
+      margin-bottom: 10px;
+      flex: initial;
     }
   }
 }

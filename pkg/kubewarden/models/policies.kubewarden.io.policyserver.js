@@ -84,6 +84,32 @@ export default class PolicyServer extends KubewardenModel {
     };
   }
 
+  get policyGauges() {
+    return async() => {
+      const out = {};
+      const relatedPolicies = await this.allRelatedPolicies();
+
+      if ( !relatedPolicies ) {
+        return out;
+      }
+
+      relatedPolicies?.map((policy) => {
+        const { colorForState, stateDisplay } = policy;
+
+        if ( out[stateDisplay] ) {
+          out[stateDisplay].count++;
+        } else {
+          out[stateDisplay] = {
+            color: colorForState.replace('text-', ''),
+            count: 1
+          };
+        }
+      });
+
+      return out;
+    };
+  }
+
   get jaegerProxies() {
     return async() => {
       const jaeger = await this.jaegerService();
