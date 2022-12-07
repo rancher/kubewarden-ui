@@ -14,7 +14,7 @@ import { Banner } from '@components/Banner';
 
 import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
-import Markdown from '@shell/components/Markdown';
+import ChartReadme from '@shell/components/ChartReadme';
 import Wizard from '@shell/components/Wizard';
 
 import { NAMESPACE_SELECTOR } from '../../plugins/kubewarden/policy-class';
@@ -30,7 +30,7 @@ export default ({
     AsyncButton,
     Banner,
     Loading,
-    Markdown,
+    ChartReadme,
     Wizard,
     PolicyGrid,
     Values
@@ -189,11 +189,11 @@ export default ({
       return false;
     },
 
-    readme() {
+    packageValues() {
       if ( this.type ) {
         const pkg = this.packages?.find(p => p.name === this.type);
 
-        return pkg?.readme;
+        return pkg;
       }
 
       return null;
@@ -284,7 +284,7 @@ export default ({
       try {
         match = require(`../../questions/policies/${ shortType }.json`);
       } catch (e) {
-        console.warn('Error when matching policy chart, falling back to default'); // eslint-disable-line no-console
+        console.warn('Unable to match policy chart, falling back to default'); // eslint-disable-line no-console
         match = this.defaultPolicy;
       }
 
@@ -304,20 +304,27 @@ export default ({
       }
     },
 
-    reset() {
+    reset(event) {
       this.$nextTick(() => {
-        const initialState = [
-          'errors',
-          'splitType',
-          'type',
-          'typeModule',
-          'chartValues.policy',
-          'yamlValues'
-        ];
+        if ( event.step?.name === this.stepPolicies.name ) {
+          const initialState = [
+            'errors',
+            'splitType',
+            'type',
+            'typeModule',
+            'version',
+            'chartValues.policy',
+            'yamlValues',
+            'hasCustomPolicy'
+          ];
 
-        initialState.forEach((i) => {
-          this[i] = null;
-        });
+          initialState.forEach((i) => {
+            this[i] = null;
+          });
+
+          this.stepPolicies.ready = false;
+          this.stepReadme.hidden = false;
+        }
       });
     },
 
@@ -329,7 +336,7 @@ export default ({
         this.stepReadme.hidden = true;
         this.$set(this, 'hasCustomPolicy', true);
       } else {
-        this.stepReadme.hidden = false;
+        !!this.packageValues ? this.stepReadme.hidden = false : this.stepReadme.hidden = true;
         this.$set(this, 'hasCustomPolicy', false);
       }
 
@@ -365,7 +372,7 @@ export default ({
       :banner-title="splitType"
       :banner-title-subtext="typeModule"
       class="wizard"
-      @back="reset"
+      @next="reset"
       @cancel="done"
       @finish="finish"
     >
@@ -406,7 +413,7 @@ export default ({
       </template>
 
       <template #readme>
-        <Markdown v-if="readme" :value="readme" class="mb-20" />
+        <ChartReadme v-if="packageValues" :version-info="packageValues" class="mb-20" />
       </template>
 
       <template #values>
