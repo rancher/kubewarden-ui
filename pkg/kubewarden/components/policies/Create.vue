@@ -290,9 +290,9 @@ export default ({
       try {
         if ( shortType !== 'custom' ) {
           match = require(`../../questions/policies/${ shortType }.json`);
+        } else {
+          match = defaultPolicy;
         }
-
-        match = defaultPolicy;
       } catch (e) {
         console.warn('Unable to match policy chart, falling back to default'); // eslint-disable-line no-console
       }
