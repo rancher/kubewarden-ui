@@ -15,6 +15,7 @@ import ResourceTabs from '@shell/components/form/ResourceTabs';
 import ResourceTable from '@shell/components/ResourceTable';
 import Tab from '@shell/components/Tabbed/Tab';
 
+import { isEmpty } from 'lodash';
 import { METRICS_DASHBOARD } from '../types';
 import { RELATED_HEADERS } from '../models/policies.kubewarden.io.policyserver';
 
@@ -87,21 +88,24 @@ export default {
     }
 
     this.jaegerService = await this.value.jaegerService();
-    this.traces = await this.value.jaegerProxies();
+
+    if ( !isEmpty(this.relatedPolicies) && this.jaegerService ) {
+      this.filteredValidations = await this.value.filteredValidations({ service: this.jaegerService });
+    }
   },
 
   data() {
     return {
       RELATED_HEADERS,
-      jaegerService:   null,
-      jaegerProxies:   null,
-      metricsProxy:    null,
-      metricsService:  null,
-      monitoringRoute: null,
-      policyGauges:    null,
-      relatedPolicies: null,
-      reloadRequired:  false,
-      traces:          null,
+      jaegerService:       null,
+      filteredValidations: null,
+      metricsProxy:        null,
+      metricsService:      null,
+      monitoringRoute:     null,
+      policyGauges:        null,
+      relatedPolicies:     null,
+      reloadRequired:      false,
+      traces:              null,
 
       metricsType: METRICS_DASHBOARD.POLICY_SERVER
     };
@@ -112,15 +116,15 @@ export default {
     ...monitoringStatus(),
 
     emptyTraces() {
-      if ( this.traces ) {
-        return !this.traces.find(t => t.data.length);
-      }
-
-      return true;
+      return isEmpty(this.filteredValidations);
     },
 
-    tracesRows() {
-      return this.value.traceTableRows(this.traces);
+    tracesGauges() {
+      if ( !this.emptyTraces ) {
+        return this.value.tracesGauges(this.filteredValidations);
+      }
+
+      return null;
     }
   },
 
@@ -148,19 +152,43 @@ export default {
   <Loading v-if="$fetchState.pending" />
   <div v-else>
     <template v-if="policyGauges">
-      <h3>
-        {{ t('kubewarden.policyServer.policyGauge.byState') }}
-      </h3>
-      <div class="gauges mb-20">
-        <CountGauge
-          v-for="(group, key) in policyGauges"
-          :key="key"
-          :total="relatedPolicies.length"
-          :useful="group.count || 0"
-          :graphical="false"
-          :primary-color-var="`--sizzle-${group.color}`"
-          :name="key"
-        />
+      <div class="row">
+        <template>
+          <div class="col span-6">
+            <h3>
+              {{ t('kubewarden.policyServer.policyGauge.byStatus') }}
+            </h3>
+            <div class="gauges mb-20">
+              <CountGauge
+                v-for="(group, key) in policyGauges"
+                :key="key"
+                :total="relatedPolicies.length"
+                :useful="group.count || 0"
+                :graphical="false"
+                :primary-color-var="`--sizzle-${group.color}`"
+                :name="key"
+              />
+            </div>
+          </div>
+        </template>
+        <template v-if="!emptyTraces">
+          <div class="col span-6">
+            <h3>
+              {{ t('kubewarden.policyServer.policyGauge.traces') }}
+            </h3>
+            <div class="gauges mb-20">
+              <CountGauge
+                v-for="(group, key) in tracesGauges"
+                :key="key"
+                :total="filteredValidations.length"
+                :useful="group.count || 0"
+                :graphical="false"
+                :primary-color-var="`--sizzle-${group.color}`"
+                :name="key"
+              />
+            </div>
+          </div>
+        </template>
       </div>
     </template>
 
@@ -222,7 +250,7 @@ export default {
       <Tab name="policy-tracing" label="Tracing" :weight="97">
         <template>
           <TraceTable
-            :rows="tracesRows"
+            :rows="filteredValidations"
           >
             <template #traceBanner>
               <Banner v-if="emptyTraces" color="warning">
@@ -251,24 +279,26 @@ export default {
   }
 }
 
+.gaugesContainer {
+  display: flex;
+}
+
 .gauges {
   display: flex;
   justify-content: space-around;
 
+  flex-wrap: wrap;
+  justify-content: left;
+
+  .count-gauge {
+    width: 46%;
+    margin-bottom: 10px;
+    flex: initial;
+  }
+
   & > *{
     flex: 1;
     margin-right: $column-gutter;
-  }
-
-  &__pods {
-    flex-wrap: wrap;
-    justify-content: left;
-
-    .count-gauge {
-      width: 23%;
-      margin-bottom: 10px;
-      flex: initial;
-    }
   }
 }
 </style>

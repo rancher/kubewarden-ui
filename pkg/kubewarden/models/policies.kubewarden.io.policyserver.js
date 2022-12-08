@@ -2,7 +2,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import { POD, WORKLOAD_TYPES } from '@shell/config/types';
 
-import KubewardenModel from '../plugins/kubewarden/policy-class';
+import KubewardenModel, { colorForTraceStatus } from '../plugins/kubewarden/policy-class';
 import { ADMISSION_POLICY_STATE } from '../config/kubewarden';
 import { KUBEWARDEN } from '../types';
 
@@ -110,46 +110,50 @@ export default class PolicyServer extends KubewardenModel {
     };
   }
 
-  get jaegerProxies() {
-    return async() => {
-      const jaeger = await this.jaegerService();
+  get tracesGauges() {
+    return (traces) => {
+      const out = {};
 
-      if ( jaeger ) {
-        const policies = await this.allRelatedPolicies();
-        const traceTypes = ['monitor', 'protect'];
-
-        const promises = policies?.flatMap((p) => {
-          const name = this.jaegerPolicyNameByPolicy(p);
-          const paths = [];
-
-          traceTypes.map((t) => {
-            let traceTags; let proxyPath = null;
-
-            switch (t) {
-            case 'monitor':
-              traceTags = `"policy_id"%3A"${ name }"`;
-              proxyPath = `api/traces?service=kubewarden-policy-server&operation=policy_eval&tags={${ traceTags }}`;
-
-              break;
-            case 'protect':
-              traceTags = `"allowed"%3A"false"%2C"policy_id"%3A"${ name }"`;
-              proxyPath = `api/traces?service=kubewarden-policy-server&operation=validation&tags={${ traceTags }}`;
-
-              break;
-            default:
-              break;
-            }
-
-            paths.push(`${ jaeger.proxyUrl('http', 16686) + proxyPath }`);
-          });
-
-          return paths.map(p => this.$dispatch('request', { url: p }));
-        });
-
-        return await Promise.all(promises);
+      if ( isEmpty(traces) ) {
+        return out;
       }
 
-      return null;
+      traces?.map((trace) => {
+        const { allowed, mode, mutated } = trace;
+
+        if ( mode === 'monitor' ) {
+          return;
+        }
+
+        if ( out['Denied'] && !allowed ) {
+          out['Denied'].count++;
+        } else if ( !allowed ) {
+          out['Denied'] = {
+            color: colorForTraceStatus('denied'),
+            count: 1
+          };
+        } else if ( out['Mutated'] && mutated ) {
+          out['Mutated'].count++;
+        } else if ( mutated && allowed ) {
+          out['Mutated'] = {
+            color: colorForTraceStatus('mutated'),
+            count: 1
+          };
+        }
+      });
+
+      return out;
+    };
+  }
+
+  get filteredValidations() {
+    return async({ service }) => {
+      const vals = await this.jaegerValidations({ jaegerService: service });
+
+      const traces = this.traceTableRows(vals);
+      const serviceName = `${ this.spec?.serviceAccountName }-${ this.metadata?.name }`;
+
+      return traces.filter(trace => trace.host.includes(serviceName));
     };
   }
 

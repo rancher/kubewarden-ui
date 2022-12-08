@@ -1,6 +1,5 @@
 <script>
 import { mapGetters } from 'vuex';
-import flatMap from 'lodash/flatMap';
 import isEmpty from 'lodash/isEmpty';
 
 import {
@@ -90,21 +89,20 @@ export default {
     }
 
     this.jaegerService = await this.value.jaegerService();
-    this.traces = await this.value.jaegerProxy() || [];
 
-    if ( this.traces.length > 1 ) {
-      this.traces = flatMap(this.traces);
+    if ( this.jaegerService ) {
+      this.filteredValidations = await this.value.jaegerSpecificValidations({ service: this.jaegerService });
     }
   },
 
   data() {
     return {
-      jaegerService:   null,
-      metricsProxy:    null,
-      metricsService:  null,
-      monitoringRoute: null,
-      reloadRequired:  false,
-      traces:          null,
+      jaegerService:       null,
+      metricsProxy:        null,
+      metricsService:      null,
+      monitoringRoute:     null,
+      reloadRequired:      false,
+      filteredValidations: null,
 
       metricsType: METRICS_DASHBOARD.POLICY
     };
@@ -121,11 +119,11 @@ export default {
     },
 
     emptyTraces() {
-      if ( this.traces ) {
-        return !this.traces.find(t => t.data.length);
+      if ( isEmpty(this.filteredValidations) ) {
+        return true;
       }
 
-      return true;
+      return false;
     },
 
     hasRelationships() {
@@ -141,7 +139,11 @@ export default {
     },
 
     tracesRows() {
-      return this.value.traceTableRows(this.traces);
+      if ( this.filteredValidations ) {
+        return this.value.traceTableRows(this.filteredValidations);
+      }
+
+      return [];
     }
   },
 
