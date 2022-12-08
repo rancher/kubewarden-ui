@@ -1,7 +1,7 @@
 <script>
 import { _CREATE, _VIEW } from '@shell/config/query-params';
 import { SCHEMA } from '@shell/config/types';
-import { createYaml } from '@shell/utils/create-yaml';
+import { createYaml, saferDump } from '@shell/utils/create-yaml';
 import { clone } from '@shell/utils/object';
 
 import ButtonGroup from '@shell/components/ButtonGroup';
@@ -9,10 +9,7 @@ import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
 
-const VALUES_STATE = {
-  FORM: 'FORM',
-  YAML: 'YAML',
-};
+import { VALUES_STATE } from '../../types';
 
 const YAML_OPTIONS = [
   {
@@ -44,6 +41,10 @@ export default {
     value: {
       type:     Object,
       required: true
+    },
+    yamlValues: {
+      type:    String,
+      default: ''
     }
   },
 
@@ -70,12 +71,13 @@ export default {
   data() {
     return {
       YAML_OPTIONS,
-      originalYamlValues:  null,
+      currentYamlValues:   '',
+      originalYamlValues:  '',
       showQuestions:       true,
       showValuesComponent: false,
       valuesComponent:     null,
       preYamlOption:       VALUES_STATE.FORM,
-      yamlOption:          VALUES_STATE.FORM,
+      yamlOption:          VALUES_STATE.FORM
     };
   },
 
@@ -84,10 +86,16 @@ export default {
       switch (neu) {
       case VALUES_STATE.FORM:
         this.showQuestions = true;
+        this.$emit('editor', neu);
 
         break;
       case VALUES_STATE.YAML:
+        if ( old === VALUES_STATE.FORM ) {
+          this.currentYamlValues = saferDump(this.chartValues.policy);
+        }
+
         this.showQuestions = false;
+        this.$emit('editor', neu);
 
         break;
       }
@@ -110,7 +118,11 @@ export default {
       const schemas = this.$store.getters[`${ inStore }/all`](SCHEMA);
       const cloned = this.chartValues?.policy ? clone(this.chartValues.policy) : this.value;
 
-      this.yamlValues = createYaml(schemas, this.value?.type, cloned);
+      if ( this.yamlValues?.length ) {
+        this.currentYamlValues = this.yamlValues;
+      } else {
+        this.currentYamlValues = createYaml(schemas, this.value?.type, cloned);
+      }
     },
 
     async loadValuesComponent() {
@@ -137,7 +149,7 @@ export default {
         :options="YAML_OPTIONS"
         inactive-class="bg-disabled btn-sm"
         active-class="bg-primary btn-sm"
-      ></ButtonGroup>
+      />
     </div>
     <div class="scroll__container">
       <div class="scroll__content">
@@ -159,7 +171,7 @@ export default {
         <template v-else-if="isCreate && !showQuestions">
           <YamlEditor
             ref="yaml"
-            v-model="yamlValues"
+            v-model="currentYamlValues"
             class="step__values__content"
             :scrolling="true"
             :initial-yaml-values="originalYamlValues"

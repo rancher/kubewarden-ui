@@ -18,7 +18,9 @@ import ChartReadme from '@shell/components/ChartReadme';
 import Wizard from '@shell/components/Wizard';
 
 import { NAMESPACE_SELECTOR } from '../../plugins/kubewarden/policy-class';
-import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME } from '../../types';
+import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME, VALUES_STATE } from '../../types';
+
+import defaultPolicy from '../../questions/policies/defaultPolicy.json';
 
 import PolicyGrid from './PolicyGrid';
 import Values from './Values';
@@ -70,9 +72,11 @@ export default ({
       }
     }
 
-    this.defaultPolicy = require(`../../questions/policies/defaultPolicy.json`);
-
-    this.yamlValues = saferDump(this.defaultPolicy);
+    if ( this.chartValues?.policy ) {
+      this.yamlValues = saferDump(this.chartValues.policy);
+    } else {
+      this.yamlValues = saferDump(defaultPolicy);
+    }
 
     this.value.apiVersion = `${ this.schema?.attributes?.group }.${ this.schema?.attributes?.version }`;
     this.value.kind = this.schema?.attributes?.kind;
@@ -90,10 +94,11 @@ export default ({
       version:           null,
 
       chartValues:       null,
-      yamlValues:        null,
-      defaultPolicy:     null,
+      yamlValues:        '',
+      // defaultPolicy:     '',
 
       hasCustomPolicy: false,
+      yamlOption:      VALUES_STATE.FORM,
 
       // Steps
       stepPolicies: {
@@ -119,14 +124,6 @@ export default ({
     };
   },
 
-  watch: {
-    hasCustomPolicy(neu, old) {
-      if ( !old ) {
-        this.policyQuestions(neu);
-      }
-    }
-  },
-
   computed: {
     isCreate() {
       return this.realMode === _CREATE;
@@ -141,6 +138,10 @@ export default ({
     },
 
     canFinish() {
+      if ( this.yamlOption === VALUES_STATE.YAML ) {
+        return true;
+      }
+
       return !!this.chartValues.policy.spec.module && this.hasRequiredRules;
     },
 
@@ -240,6 +241,7 @@ export default ({
 
     async finish(event) {
       try {
+        let out;
         const { ignoreRancherNamespaces } = this.chartValues.policy;
 
         if ( ignoreRancherNamespaces ) {
@@ -247,7 +249,11 @@ export default ({
           delete this.chartValues.policy.ignoreRancherNamespaces;
         }
 
-        const out = this.chartValues?.policy ? this.chartValues.policy : jsyaml.load(this.yamlValues);
+        if ( this.yamlOption === VALUES_STATE.YAML ) {
+          out = jsyaml.load(this.yamlValues);
+        } else {
+          out = this.chartValues?.policy ? this.chartValues.policy : jsyaml.load(this.yamlValues);
+        }
 
         merge(this.value, out);
 
@@ -277,15 +283,18 @@ export default ({
       } catch (e) {}
     },
 
-    policyQuestions(isCustom) {
-      const shortType = !!isCustom ? 'defaultPolicy' : this.type?.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '');
+    policyQuestions() {
+      const shortType = this.type?.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '');
       let match, questionsMatch;
 
       try {
-        match = require(`../../questions/policies/${ shortType }.json`);
+        if ( shortType !== 'custom' ) {
+          match = require(`../../questions/policies/${ shortType }.json`);
+        } else {
+          match = defaultPolicy;
+        }
       } catch (e) {
         console.warn('Unable to match policy chart, falling back to default'); // eslint-disable-line no-console
-        match = this.defaultPolicy;
       }
 
       set(this.chartValues, 'policy', match);
@@ -314,8 +323,7 @@ export default ({
             'typeModule',
             'version',
             'chartValues.policy',
-            'yamlValues',
-            'hasCustomPolicy'
+            'hasCustomPolicy',
           ];
 
           initialState.forEach((i) => {
@@ -324,6 +332,8 @@ export default ({
 
           this.stepPolicies.ready = false;
           this.stepReadme.hidden = false;
+          this.yamlOption = VALUES_STATE.FORM;
+          this.yamlValues = '';
         }
       });
     },
@@ -417,7 +427,14 @@ export default ({
       </template>
 
       <template #values>
-        <Values :value="value" :chart-values="chartValues" :mode="mode" :custom-policy="customPolicy" />
+        <Values
+          :value="value"
+          :chart-values="chartValues"
+          :yaml-values="yamlValues"
+          :mode="mode"
+          :custom-policy="customPolicy"
+          @editor="$event => yamlOption = $event"
+        />
       </template>
 
       <template #finish>

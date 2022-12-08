@@ -1,5 +1,4 @@
 import filter from 'lodash/filter';
-import flatMap from 'lodash/flatMap';
 import matches from 'lodash/matches';
 
 import SteveModel from '@shell/plugins/steve/steve-class';
@@ -145,6 +144,19 @@ export const GRAFANA_DASHBOARD_LABELS = {
   release:                        'rancher-monitoring'
 };
 
+export const VALIDATION_KEYS = [
+  'allowed',
+  'host',
+  'kind',
+  'mutated',
+  'name',
+  'namespace',
+  'operation',
+  'policy_id',
+  'response_message',
+  'response_code'
+];
+
 export default class KubewardenModel extends SteveModel {
   async allServices() {
     const inStore = this.$rootGetters['currentProduct'].inStore;
@@ -280,33 +292,40 @@ export default class KubewardenModel extends SteveModel {
     };
   }
 
-  get jaegerProxy() {
-    return async() => {
-      try {
-        const service = await this.jaegerService();
+  get jaegerValidations() {
+    return async({ jaegerService, denied, time }) => {
+      const lookbackTime = time || '2d';
 
+      const traceTags = `tags={"allowed"%3A"false"}`;
+      const proxyPath = `api/traces?service=kubewarden-policy-server&operation=validation&limit=1000&lookback=${ lookbackTime }`;
+
+      if ( denied ) {
+        proxyPath.concat('&', traceTags);
+      }
+
+      const url = `${ jaegerService?.proxyUrl('http', 16686) + proxyPath }`;
+
+      return await this.$dispatch('request', { url });
+    };
+  }
+
+  get jaegerSpecificValidations() {
+    return async({ time, service }) => {
+      try {
         const traceTypes = ['monitor', 'protect'];
 
         const promises = traceTypes.map((t) => {
-          let traceTags; let proxyPath = null;
+          let proxyPath = null;
+
           const name = this.jaegerPolicyName;
+          const lookbackTime = time || '2d';
 
-          switch (t) {
-          case 'monitor':
-            traceTags = `"policy_id"%3A"${ name }"`;
-            proxyPath = `api/traces?service=kubewarden-policy-server&operation=policy_eval&tags={${ traceTags }}`;
+          const options = `lookback=${ lookbackTime }&tags={"policy_id"%3A"${ name }"}`;
+          const operation = t === 'monitor' ? 'policy_eval' : 'validation';
 
-            break;
-          case 'protect':
-            traceTags = `"allowed"%3A"false"%2C"policy_id"%3A"${ name }"`;
-            proxyPath = `api/traces?service=kubewarden-policy-server&operation=validation&tags={${ traceTags }}`;
+          proxyPath = `api/traces?service=kubewarden-policy-server&operation=${ operation }&${ options }`;
 
-            break;
-          default:
-            break;
-          }
-
-          const JAEGER_PATH = `${ service.proxyUrl('http', 16686) + proxyPath }`;
+          const JAEGER_PATH = `${ service?.proxyUrl('http', 16686) + proxyPath }`;
 
           return this.$dispatch('request', { url: JAEGER_PATH });
         });
@@ -314,12 +333,12 @@ export default class KubewardenModel extends SteveModel {
         let out = await Promise.all(promises);
 
         if ( out.length > 1 ) {
-          out = flatMap(out);
+          out = [...new Set(out.flatMap(o => o.data))];
         }
 
         return out;
       } catch (e) {
-        console.warn(`Error fetching Jaeger service: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Error fetching Jaeger traces: ${ e }`); // eslint-disable-line no-console
       }
 
       return null;
@@ -431,18 +450,18 @@ export default class KubewardenModel extends SteveModel {
   }
 
   traceTableRows(traces) {
-    const traceArray = [];
+    let traceArray = [];
 
     // If a policy is in monitor mode it will pass multiple trace objects
     if ( isArray(traces) ) {
-      traces?.map(t => traceArray.push(t.data));
+      traceArray = [...new Map(traces.map(trace => [trace['traceID'], trace])).values()];
     } else {
       Object.assign(traceArray, traces?.data);
     }
 
-    const out = traceArray.flatMap(trace => trace.map((t) => {
-      const eSpan = t.spans?.find(s => s.operationName === 'policy_eval'); // span needed for Monitor mode
-      const vSpan = t.spans?.find(s => s.operationName === 'validation'); // main validation span
+    const out = traceArray.flatMap((trace) => {
+      const eSpan = trace.spans?.find(s => s.operationName === 'policy_eval'); // policy in Monitor mode evaluation span
+      const vSpan = trace.spans?.find(s => s.operationName === 'validation'); // policy in Protect mode validation span
 
       if ( vSpan ) {
         const date = new Date(vSpan.startTime / 1000);
@@ -451,7 +470,6 @@ export default class KubewardenModel extends SteveModel {
         vSpan.startTime = date.toUTCString();
         vSpan.duration = duration.toFixed(2);
 
-        const vKeys = ['kind', 'mutated', 'name', 'namespace', 'operation', 'policy_id', 'response_message', 'response_code'];
         const logs = {};
         let mode = 'protect'; // defaults to Protect mode for "Mode" trace header
 
@@ -468,7 +486,7 @@ export default class KubewardenModel extends SteveModel {
           });
         }
 
-        const tags = vKeys.map(vKey => vSpan.tags.find(tag => tag.key === vKey));
+        const tags = VALIDATION_KEYS.map(vKey => vSpan.tags.find(tag => tag.key === vKey));
 
         return tags?.reduce((tag, item) => ({
           ...vSpan, ...tag, [item?.key]: item?.value, mode, logs
@@ -476,9 +494,9 @@ export default class KubewardenModel extends SteveModel {
       }
 
       return null;
-    }));
+    });
 
-    return out;
+    return [...new Set(out)];
   }
 
   updateWhitelist(url, remove) {
@@ -538,4 +556,19 @@ export function stateSort(color, display) {
   color = color.replace(/^(text|bg)-/, '');
 
   return `${ SORT_ORDER[color] || SORT_ORDER['other'] } ${ display }`;
+}
+
+export function colorForTraceStatus(status) {
+  switch ( status ) {
+  case 'allowed':
+    return 'success';
+  case 'denied':
+    return 'error';
+  case 'mutated':
+    return 'warning';
+  default:
+    break;
+  }
+
+  return 'success'; // 'unscheduled' is the default state
 }

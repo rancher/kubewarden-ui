@@ -8,12 +8,14 @@ import { monitoringStatus } from '@shell/utils/monitoring';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import { Banner } from '@components/Banner';
+import CountGauge from '@shell/components/CountGauge';
 import DashboardMetrics from '@shell/components/DashboardMetrics';
 import Loading from '@shell/components/Loading';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
 import ResourceTable from '@shell/components/ResourceTable';
 import Tab from '@shell/components/Tabbed/Tab';
 
+import { isEmpty } from 'lodash';
 import { METRICS_DASHBOARD } from '../types';
 import { RELATED_HEADERS } from '../models/policies.kubewarden.io.policyserver';
 
@@ -24,7 +26,7 @@ export default {
   name: 'PolicyServer',
 
   components: {
-    Banner, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, ResourceTable, Tab, TraceTable
+    Banner, CountGauge, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, ResourceTable, Tab, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -43,6 +45,7 @@ export default {
 
   async fetch() {
     this.relatedPolicies = await this.value.allRelatedPolicies();
+    this.policyGauges = await this.value.policyGauges();
 
     // If monitoring is installed look for the dashboard for PolicyServers
     if ( this.monitoringStatus.installed ) {
@@ -85,20 +88,24 @@ export default {
     }
 
     this.jaegerService = await this.value.jaegerService();
-    this.traces = await this.value.jaegerProxies();
+
+    if ( !isEmpty(this.relatedPolicies) && this.jaegerService ) {
+      this.filteredValidations = await this.value.filteredValidations({ service: this.jaegerService });
+    }
   },
 
   data() {
     return {
       RELATED_HEADERS,
-      jaegerService:   null,
-      jaegerProxies:   null,
-      metricsProxy:    null,
-      metricsService:  null,
-      monitoringRoute: null,
-      relatedPolicies: null,
-      reloadRequired:  false,
-      traces:          null,
+      jaegerService:       null,
+      filteredValidations: null,
+      metricsProxy:        null,
+      metricsService:      null,
+      monitoringRoute:     null,
+      policyGauges:        null,
+      relatedPolicies:     null,
+      reloadRequired:      false,
+      traces:              null,
 
       metricsType: METRICS_DASHBOARD.POLICY_SERVER
     };
@@ -109,15 +116,15 @@ export default {
     ...monitoringStatus(),
 
     emptyTraces() {
-      if ( this.traces ) {
-        return !this.traces.find(t => t.data.length);
-      }
-
-      return true;
+      return isEmpty(this.filteredValidations);
     },
 
-    tracesRows() {
-      return this.value.traceTableRows(this.traces);
+    tracesGauges() {
+      if ( !this.emptyTraces ) {
+        return this.value.tracesGauges(this.filteredValidations);
+      }
+
+      return null;
     }
   },
 
@@ -144,9 +151,47 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else>
-    <div class="mb-20">
-      <h3>{{ t('namespace.resources') }}</h3>
-    </div>
+    <template v-if="policyGauges">
+      <div class="row">
+        <template>
+          <div class="col span-6">
+            <h3>
+              {{ t('kubewarden.policyServer.policyGauge.byStatus') }}
+            </h3>
+            <div class="gauges mb-20">
+              <CountGauge
+                v-for="(group, key) in policyGauges"
+                :key="key"
+                :total="relatedPolicies.length"
+                :useful="group.count || 0"
+                :graphical="false"
+                :primary-color-var="`--sizzle-${group.color}`"
+                :name="key"
+              />
+            </div>
+          </div>
+        </template>
+        <template v-if="!emptyTraces">
+          <div class="col span-6">
+            <h3>
+              {{ t('kubewarden.policyServer.policyGauge.traces') }}
+            </h3>
+            <div class="gauges mb-20">
+              <CountGauge
+                v-for="(group, key) in tracesGauges"
+                :key="key"
+                :total="filteredValidations.length"
+                :useful="group.count || 0"
+                :graphical="false"
+                :primary-color-var="`--sizzle-${group.color}`"
+                :name="key"
+              />
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+
     <ResourceTabs v-model="value" :mode="mode">
       <Tab name="related-policies" label="Policies" :weight="99">
         <template #default>
@@ -205,7 +250,7 @@ export default {
       <Tab name="policy-tracing" label="Tracing" :weight="97">
         <template>
           <TraceTable
-            :rows="tracesRows"
+            :rows="filteredValidations"
           >
             <template #traceBanner>
               <Banner v-if="emptyTraces" color="warning">
@@ -231,6 +276,29 @@ export default {
       font-size: 22px;
       color: var(--warning);
     }
+  }
+}
+
+.gaugesContainer {
+  display: flex;
+}
+
+.gauges {
+  display: flex;
+  justify-content: space-around;
+
+  flex-wrap: wrap;
+  justify-content: left;
+
+  .count-gauge {
+    width: 46%;
+    margin-bottom: 10px;
+    flex: initial;
+  }
+
+  & > *{
+    flex: 1;
+    margin-right: $column-gutter;
   }
 }
 </style>

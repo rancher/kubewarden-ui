@@ -1,5 +1,6 @@
 <script>
 import { _VIEW } from '@shell/config/query-params';
+import { saferDump } from '@shell/utils/create-yaml';
 
 import Values from './Values.vue';
 
@@ -25,6 +26,8 @@ export default {
       questions: null
     };
 
+    this.yamlValues = saferDump(this.value);
+
     let questionsJson = null;
 
     if ( this.value.spec?.settings ) {
@@ -35,11 +38,14 @@ export default {
   },
 
   data() {
-    return { chartValues: null };
+    return {
+      chartValues: null,
+      yamlValues:  ''
+    };
   }
 };
 </script>
 
 <template>
-  <Values :value="value" :chart-values="chartValues" :mode="mode" />
+  <Values :value="value" :chart-values="chartValues" :yaml-values="yamlValues" :mode="mode" />
 </template>

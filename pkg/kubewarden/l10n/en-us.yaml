@@ -66,6 +66,9 @@ kubewarden:
       description: |
         The default PolicyServer and policies are not installed, click the button below to begin installing this chart. See the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/quick-start#installation">documentation</a> for more information on installing charts.
       button: Install Chart
+    policyGauge:
+      byStatus: Policies by Status
+      traces: Policy Validations
   admissionPolicy:
     title: Admission Policies
     description: AdmissionPolicy is a namespace-wide resource. These policies will process only the requests that are targeting the Namespace where the AdmissionPolicy is defined.

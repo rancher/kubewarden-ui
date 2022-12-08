@@ -21,8 +21,7 @@ export const RELATED_POLICY_SUMMARY = {
   value:     'allRelatedPolicies.length',
   sort:      false,
   search:    false,
-  formatter: 'PolicySummaryGraph',
-  align:     'center',
+  formatter: 'PolicySummaryGraph'
 };
 
 export function init($plugin, store) {
