@@ -31,6 +31,12 @@ export default {
 
       immediate: true
     }
+  },
+
+  methods: {
+    capitalizeMessage(m) {
+      return m?.charAt(0).toUpperCase() + m?.slice(1);
+    },
   }
 };
 </script>
@@ -40,7 +46,7 @@ export default {
     <BadgeState
       v-if="value"
       :color="stateBackground"
-      :label="stateDisplay"
+      :label="capitalizeMessage(stateDisplay)"
     />
   </div>
 </template>

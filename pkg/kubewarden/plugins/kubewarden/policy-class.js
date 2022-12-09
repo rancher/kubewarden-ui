@@ -333,7 +333,7 @@ export default class KubewardenModel extends SteveModel {
         let out = await Promise.all(promises);
 
         if ( out.length > 1 ) {
-          out = [...new Set(out.flatMap(o => o.data))];
+          out = out.flatMap(o => o.data);
         }
 
         return out;
@@ -496,7 +496,7 @@ export default class KubewardenModel extends SteveModel {
       return null;
     });
 
-    return [...new Set(out)];
+    return out;
   }
 
   updateWhitelist(url, remove) {

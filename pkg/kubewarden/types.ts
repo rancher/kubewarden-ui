@@ -1,6 +1,8 @@
 export const KUBEWARDEN_PRODUCT_NAME = 'kubewarden';
 export const KUBEWARDEN_PRODUCT_GROUP = 'policies.kubewarden.io';
 
+export const CHART_NAME = 'rancher-kubewarden';
+
 export const KUBEWARDEN_DASHBOARD = 'dashboard';
 
 export const KUBEWARDEN = {
@@ -45,3 +47,72 @@ export const VALUES_STATE = {
   FORM: 'FORM',
   YAML: 'YAML',
 };
+
+export const YAML_OPTIONS = [
+  {
+    labelKey: 'catalog.install.section.chartOptions',
+    value:    VALUES_STATE.FORM,
+  },
+  {
+    labelKey: 'catalog.install.section.valuesYaml',
+    value:    VALUES_STATE.YAML,
+  }
+];
+
+export const ADMISSION_POLICY_STATE = {
+  name:      'policyStatus',
+  sort:      ['stateSort', 'nameSort'],
+  value:     'status.policyStatus',
+  label:     'Status',
+  width:     100,
+  formatter: 'PolicyStatus',
+};
+
+export const ADMISSION_POLICY_MODE = {
+  name:      'mode',
+  label:     'Mode',
+  value:     'spec.mode',
+  formatter: 'PolicyMode'
+};
+
+export const ADMISSION_POLICY_RESOURCES = {
+  name:      'resources',
+  label:     'Resources',
+  value:     'spec.rules',
+  formatter: 'PolicyResources'
+};
+
+export const ADMISSION_POLICY_OPERATIONS = {
+  name:      'operations',
+  label:     'Operations',
+  value:     'spec.rules',
+  formatter: 'PolicyResources'
+};
+
+export const RELATED_POLICY_SUMMARY = {
+  name:      'summary',
+  label:     'Policies',
+  value:     'allRelatedPolicies.length',
+  sort:      false,
+  search:    false,
+  formatter: 'PolicySummaryGraph'
+};
+
+export const RELATED_HEADERS = [
+  ADMISSION_POLICY_STATE,
+  {
+    name:   'name',
+    value:  'metadata.name',
+    label:  'Name',
+    sort:   'name:desc'
+  },
+  ADMISSION_POLICY_MODE,
+  ADMISSION_POLICY_RESOURCES,
+  ADMISSION_POLICY_OPERATIONS,
+  {
+    name:      'psCreated',
+    label:     'Created',
+    value:     'metadata.creationTimestamp',
+    formatter: 'LiveDate'
+  }
+];

@@ -1,28 +1,13 @@
 import { STATE, NAME as NAME_HEADER } from '@shell/config/table-headers';
 import {
   KUBEWARDEN,
-  KUBEWARDEN_DASHBOARD
+  KUBEWARDEN_DASHBOARD,
+  ADMISSION_POLICY_STATE,
+  ADMISSION_POLICY_MODE,
+  ADMISSION_POLICY_RESOURCES,
+  ADMISSION_POLICY_OPERATIONS,
+  RELATED_POLICY_SUMMARY
 } from '../types';
-
-export const CHART_NAME = 'rancher-kubewarden';
-
-export const ADMISSION_POLICY_STATE = {
-  name:      'policyStatus',
-  sort:      ['stateSort', 'nameSort'],
-  value:     'status.policyStatus',
-  label:     'Status',
-  width:     100,
-  formatter: 'PolicyStatus',
-};
-
-export const RELATED_POLICY_SUMMARY = {
-  name:      'summary',
-  label:     'Policies',
-  value:     'allRelatedPolicies.length',
-  sort:      false,
-  search:    false,
-  formatter: 'PolicySummaryGraph'
-};
 
 export function init($plugin, store) {
   const {
@@ -149,28 +134,14 @@ export function init($plugin, store) {
   headers(ADMISSION_POLICY, [
     ADMISSION_POLICY_STATE,
     NAME_HEADER,
+    ADMISSION_POLICY_MODE,
     {
       name:  'capPolicyServer',
       label: 'Policy Server',
       value: 'spec.policyServer'
     },
-    {
-      name:  'mode',
-      label: 'Mode',
-      value: 'spec.mode'
-    },
-    {
-      name:          'kubewardenAdmissionPolicies',
-      label:         'Module',
-      value:         'spec.module',
-      formatterOpts: {
-        options: { internal: true },
-        to:      {
-          name:   'c-cluster-product-resource-id',
-          params: { resource: ADMISSION_POLICY }
-        }
-      },
-    },
+    ADMISSION_POLICY_RESOURCES,
+    ADMISSION_POLICY_OPERATIONS,
     {
       name:      'capCreated',
       label:     'Created',
@@ -182,28 +153,14 @@ export function init($plugin, store) {
   headers(CLUSTER_ADMISSION_POLICY, [
     ADMISSION_POLICY_STATE,
     NAME_HEADER,
+    ADMISSION_POLICY_MODE,
     {
       name:  'capPolicyServer',
       label: 'Policy Server',
       value: 'spec.policyServer'
     },
-    {
-      name:  'mode',
-      label: 'Mode',
-      value: 'spec.mode'
-    },
-    {
-      name:          'kubewardenClusterAdmissionPolicies',
-      label:         'Module',
-      value:         'spec.module',
-      formatterOpts: {
-        options: { internal: true },
-        to:      {
-          name:   'c-cluster-product-resource-id',
-          params: { resource: CLUSTER_ADMISSION_POLICY }
-        }
-      },
-    },
+    ADMISSION_POLICY_RESOURCES,
+    ADMISSION_POLICY_OPERATIONS,
     {
       name:      'capCreated',
       label:     'Created',

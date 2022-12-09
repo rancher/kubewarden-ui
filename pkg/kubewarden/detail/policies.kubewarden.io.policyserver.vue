@@ -16,8 +16,7 @@ import ResourceTable from '@shell/components/ResourceTable';
 import Tab from '@shell/components/Tabbed/Tab';
 
 import { isEmpty } from 'lodash';
-import { METRICS_DASHBOARD } from '../types';
-import { RELATED_HEADERS } from '../models/policies.kubewarden.io.policyserver';
+import { METRICS_DASHBOARD, RELATED_HEADERS } from '../types';
 
 import MetricsBanner from '../components/MetricsBanner';
 import TraceTable from '../components/TraceTable';

@@ -23,31 +23,10 @@ export default {
     },
   },
 
-  fetch() {
-    if ( this.rows ) {
-      const flatRules = this.rows.flatMap((row) => {
-        return flattenDeep(row.spec.rules);
-      });
-
-      const resources = flatRules.flatMap(r => r.resources);
-      const operations = flatRules.flatMap(r => r.operations);
-
-      if ( resources ) {
-        this.resources = [...new Set(resources)];
-      }
-
-      if ( operations ) {
-        this.operations = [...new Set(operations)];
-      }
-    }
-  },
-
   data() {
     return {
-      resources:         null,
-      operations:        null,
-      filteredResource:  null,
-      filteredOperation: null
+      resources:        null,
+      operations:       null
     };
   },
 
@@ -64,63 +43,82 @@ export default {
         const flatResources = flatRules.flatMap(r => r.resources);
         const flatOperations = flatRules.flatMap(r => r.operations);
 
-        if ( this.filteredResource && !flatResources.includes(this.filteredResource) ) {
-          return false;
+        if ( this.operations ) {
+          for ( const selected of this.operations ) {
+            if ( !flatOperations.includes(selected) ) {
+              return false;
+            }
+          }
         }
 
-        if ( this.filteredOperation && !flatOperations.includes(this.filteredOperation) ) {
-          return false;
+        if ( this.resources ) {
+          for ( const selected of this.resources ) {
+            if ( !flatResources.includes(selected) ) {
+              return false;
+            }
+          }
         }
 
         return true;
       });
 
-      return sortBy(out, 'id');
+      return sortBy(out, ['id']);
+    },
+
+    resourceOptions() {
+      return this.flattenRule('resources');
+    },
+
+    operationOptions() {
+      return this.flattenRule('operations');
     }
   },
 
   methods: {
+    flattenRule(option) {
+      const flattened = this.rows?.flatMap((row) => {
+        const flatRules = flattenDeep(row.spec?.rules);
+
+        return flatRules.flatMap(r => r[option]);
+      });
+
+      return [...new Set(flattened)] || [];
+    },
+
     hasNamespaceSelector(row) {
       return row.namespaceSelector;
     },
 
     resetFilter() {
-      this.$set(this, 'filteredResource', null);
-      this.$set(this, 'filteredOperation', null);
-    },
+      this.$set(this, 'resources', null);
+      this.$set(this, 'operations', null);
+    }
   }
 };
 </script>
 
 <template>
   <div>
-    <div class="row mb-20">
-      <div class="col span-3">
-        <LabeledSelect
-          v-model="filteredResource"
-          :options="resources"
-          label="Resources"
-          style="min-width: 200px;"
-        >
-          <template #option="opt">
-            {{ opt.label }}
-          </template>
-        </LabeledSelect>
-      </div>
-
-      <div class="col span-3">
-        <LabeledSelect
-          v-model="filteredOperation"
-          :options="operations"
-          label="Operations"
-          style="min-width: 200px;"
-        >
-          <template #option="opt">
-            {{ opt.label }}
-          </template>
-        </LabeledSelect>
-      </div>
-
+    <div class="filter">
+      <LabeledSelect
+        v-model="resources"
+        :clearable="true"
+        :taggable="true"
+        :multiple="true"
+        class="filter__resources"
+        label="Filter by Resource"
+        :options="resourceOptions"
+      />
+      <LabeledSelect
+        v-model="operations"
+        :clearable="true"
+        :searchable="false"
+        :options="operationOptions"
+        :multiple="true"
+        placement="bottom"
+        class="filter__operations"
+        label="Filter by Operations"
+      />
       <button
         ref="btn"
         class="btn, btn-sm, role-primary"
@@ -149,6 +147,34 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+.filter {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-self: flex-end;
+
+  & > * {
+    margin: 10px;
+  }
+  & > *:first-child {
+    margin-left: 0;
+  }
+  & > *:last-child {
+    margin-right: 0;
+  }
+}
+
+@media only screen and (min-width: map-get($breakpoints, '--viewport-4')) {
+  .filter {
+    width: 100%;
+  }
+}
+@media only screen and (min-width: map-get($breakpoints, '--viewport-12')) {
+  .filter {
+    width: 75%;
+  }
+}
+
 .policy {
   &__mode {
     display: flex;

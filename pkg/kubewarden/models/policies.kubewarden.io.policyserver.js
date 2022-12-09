@@ -3,52 +3,7 @@ import isEmpty from 'lodash/isEmpty';
 import { POD, WORKLOAD_TYPES } from '@shell/config/types';
 
 import KubewardenModel, { colorForTraceStatus } from '../plugins/kubewarden/policy-class';
-import { ADMISSION_POLICY_STATE } from '../config/kubewarden';
 import { KUBEWARDEN } from '../types';
-
-export const RELATED_HEADERS = [
-  ADMISSION_POLICY_STATE,
-  {
-    name:   'name',
-    value:  'metadata.name',
-    label:  'Name',
-    sort:   'name:desc'
-  },
-  {
-    name:   'module',
-    value:  'spec.module',
-    label:  'Module',
-    sort:   'module'
-  },
-  {
-    name:   'mode',
-    value:  'spec.mode',
-    label:  'Mode',
-    sort:   'mode'
-  },
-  {
-    name:      'psCreated',
-    label:     'Created',
-    value:     'metadata.creationTimestamp',
-    formatter: 'LiveDate'
-  }
-];
-
-export const VALUES_STATE = {
-  FORM: 'FORM',
-  YAML: 'YAML',
-};
-
-export const YAML_OPTIONS = [
-  {
-    labelKey: 'catalog.install.section.chartOptions',
-    value:    VALUES_STATE.FORM,
-  },
-  {
-    labelKey: 'catalog.install.section.valuesYaml',
-    value:    VALUES_STATE.YAML,
-  }
-];
 
 export default class PolicyServer extends KubewardenModel {
   get _availableActions() {
