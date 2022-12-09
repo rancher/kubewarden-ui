@@ -1,6 +1,5 @@
 <script>
 import { mapGetters } from 'vuex';
-import flatMap from 'lodash/flatMap';
 import isEmpty from 'lodash/isEmpty';
 
 import {

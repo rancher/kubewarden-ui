@@ -9,18 +9,7 @@ import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
 
-import { VALUES_STATE } from '../../types';
-
-const YAML_OPTIONS = [
-  {
-    labelKey: 'catalog.install.section.chartOptions',
-    value:    VALUES_STATE.FORM,
-  },
-  {
-    labelKey: 'catalog.install.section.valuesYaml',
-    value:    VALUES_STATE.YAML,
-  }
-];
+import { VALUES_STATE, YAML_OPTIONS } from '../../types';
 
 export default {
   name: 'Values',
