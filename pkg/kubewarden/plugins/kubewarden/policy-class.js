@@ -528,7 +528,9 @@ export default class KubewardenModel extends SteveModel {
 }
 
 export function colorForStatus(status) {
-  switch ( status ) {
+  const lowStatus = status.toLowerCase();
+
+  switch ( lowStatus ) {
   case 'unschedulable':
     return 'text-error';
   case 'pending':

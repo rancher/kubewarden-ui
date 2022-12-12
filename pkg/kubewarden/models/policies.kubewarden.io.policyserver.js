@@ -2,7 +2,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import { POD, WORKLOAD_TYPES } from '@shell/config/types';
 
-import KubewardenModel, { colorForTraceStatus } from '../plugins/kubewarden/policy-class';
+import KubewardenModel, { colorForStatus, colorForTraceStatus } from '../plugins/kubewarden/policy-class';
 import { KUBEWARDEN } from '../types';
 
 export default class PolicyServer extends KubewardenModel {
@@ -42,23 +42,28 @@ export default class PolicyServer extends KubewardenModel {
   get policyGauges() {
     return async() => {
       const out = {};
+      const states = ['Active', 'Pending'];
       const relatedPolicies = await this.allRelatedPolicies();
 
       if ( !relatedPolicies ) {
         return out;
       }
 
-      relatedPolicies?.map((policy) => {
-        const { colorForState, stateDisplay } = policy;
-
-        if ( out[stateDisplay] ) {
-          out[stateDisplay].count++;
-        } else {
-          out[stateDisplay] = {
-            color: colorForState.replace('text-', ''),
-            count: 1
+      // Set defaults for gauges
+      for ( const stateType of states.values() ) {
+        if ( !out[stateType] ) {
+          out[stateType] = {
+            color: colorForStatus(stateType).replace('text-', ''),
+            count: 0
           };
         }
+      }
+
+      // Add policy states to gauge
+      relatedPolicies?.map((policy) => {
+        const { stateDisplay } = policy;
+
+        out[stateDisplay].count++;
       });
 
       return out;
