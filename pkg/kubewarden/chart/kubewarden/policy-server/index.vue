@@ -4,9 +4,9 @@ import { CAPI, CONFIG_MAP, SERVICE_ACCOUNT } from '@shell/config/types';
 import { allHash } from '@shell/utils/promise';
 
 import Tab from '@shell/components/Tabbed/Tab';
+import Labels from '@shell/components/form/Labels';
 
 import General from './General';
-import Labels from './Labels';
 import Registry from './Registry/Index';
 import Verification from './Verification';
 
