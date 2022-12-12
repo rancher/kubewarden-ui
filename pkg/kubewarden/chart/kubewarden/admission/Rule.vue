@@ -7,6 +7,8 @@ import { SCHEMA } from '@shell/config/types';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 
+import { KUBEWARDEN } from '../../../types';
+
 export default {
   name: 'Rule',
 
@@ -35,9 +37,15 @@ export default {
   fetch() {
     this.inStore = this.$store.getters['currentStore']();
     this.schemas = this.$store.getters[`${ this.inStore }/all`](SCHEMA);
+
+    if ( this.isCreate && isEmpty(this.value?.apiGroups) ) {
+      this.value.apiGroups.push('*');
+    }
   },
 
   data() {
+    const apiGroupValues = this.value.apiGroups || [];
+
     const scopeOptions = [
       '*',
       'Cluster',
@@ -54,6 +62,7 @@ export default {
     return {
       scopeOptions,
       operationOptions,
+      apiGroupValues,
 
       inStore:           null,
       noResourceOptions: false,
@@ -68,18 +77,25 @@ export default {
       if ( !isEmpty(this.apiGroups) ) {
         this.apiGroups.map(g => out.push(g.id));
 
-        return out;
+        const coreIndex = out.indexOf('core');
+
+        if ( coreIndex ) {
+          // Removing core from apiGroups as this leads to zero resources
+          out.splice(coreIndex, 1);
+        }
+
+        return out.sort();
       }
 
       out.push(this.apiGroups);
 
-      return out;
+      return out.sort();
     },
 
     apiVersionOptions() {
       let out = [];
 
-      if ( !isEmpty(this.value?.apiGroups) && !this.isGroupCore ) {
+      if ( !isEmpty(this.value?.apiGroups) && !this.isGroupAll ) {
         out = this.apiVersions(this.value.apiGroups, true);
       } else if ( !isEmpty(this.value?.resources) ) {
         out = this.apiVersions(this.value.resources, false);
@@ -88,21 +104,32 @@ export default {
       return out;
     },
 
-    isGroupCore() {
-      const groups = this.value.apiGroups;
-      const options = ['core', '*', ''];
+    isCreate() {
+      return this.mode === _CREATE;
+    },
 
-      return options.some(o => groups.includes(o));
+    isGlobalRule() {
+      return this.chartType === KUBEWARDEN.CLUSTER_ADMISSION_POLICY;
+    },
+
+    isGroupAll() {
+      const groups = this.value?.apiGroups;
+
+      if ( groups.length === 0 || groups.includes('*') ) {
+        return true;
+      }
+
+      return false;
     },
 
     resourceOptions() {
       /*
-        If no apiGroup, 'core', or '*' is selected we want to show all of the available resources
+        If no apiGroup or '*' is selected we want to show all of the available resources
         Comparable to `kubectl api-resources -o wide`
       */
       let schemas = this.schemas;
 
-      if ( this.value?.apiGroups?.length > 0 && !this.isGroupCore ) {
+      if ( this.value?.apiGroups?.length > 0 && !this.isGroupAll ) {
         schemas = this.value.apiGroups.map(g => this.schemaForGroup(g))[0];
       }
 
@@ -141,14 +168,30 @@ export default {
       });
 
       return [...new Set(flatMap(versions))];
+    },
+
+    setGroup(event) {
+      if ( this.value.apiGroups.includes(event) ) {
+        return;
+      }
+
+      if ( !this.value.apiGroups.includes(event) ) {
+        this.value.apiGroups.pop();
+      }
+
+      this.value.apiGroups.push(event);
     }
   }
 };
 </script>
 
 <template>
-  <div v-if="value" class="rules-row mt-40 mb-20">
-    <div>
+  <div
+    v-if="value"
+    class="rules-row mt-40 mb-20"
+    :class="{ 'global-rules': isGlobalRule, 'namespaced-rules': !isGlobalRule }"
+  >
+    <div v-if="isGlobalRule">
       <LabeledSelect
         v-model="value.scope"
         :label="t('kubewarden.policyConfig.scope.label')"
@@ -161,13 +204,27 @@ export default {
 
     <div>
       <LabeledSelect
-        v-model="value.apiGroups"
+        v-model="apiGroupValues"
         :label="t('kubewarden.policyConfig.apiGroups.label')"
         :tooltip="t('kubewarden.policyConfig.apiGroups.tooltip')"
         :mode="mode"
-        :multiple="true"
+        :multiple="false"
         :options="apiGroupOptions || []"
         :required="true"
+        @selecting="setGroup"
+      />
+    </div>
+
+    <div>
+      <LabeledSelect
+        v-model="value.resources"
+        :label="t('kubewarden.policyConfig.resources.label')"
+        :mode="mode"
+        :multiple="true"
+        :options="resourceOptions || []"
+        :searchable="true"
+        :required="true"
+        :tooltip="t('kubewarden.policyConfig.resources.tooltip')"
       />
     </div>
 
@@ -198,28 +255,23 @@ export default {
       />
     </div>
 
-    <div>
-      <LabeledSelect
-        v-model="value.resources"
-        :label="t('kubewarden.policyConfig.resources.label')"
-        :mode="mode"
-        :multiple="true"
-        :options="resourceOptions || []"
-        :searchable="true"
-        :required="true"
-        :tooltip="t('kubewarden.policyConfig.resources.tooltip')"
-      />
-    </div>
-
     <slot name="removeRule" />
   </div>
 </template>
 
 <style lang="scss" scoped>
-.rules-row{
+.rules-row {
   display: grid;
   grid-template-columns: .5fr 1fr 1fr 1fr 1fr .5fr;
   grid-column-gap: $column-gutter;
   align-items: center;
+}
+
+.global-rules {
+  grid-template-columns: .5fr 1fr 1fr 1fr 1fr .5fr;
+}
+
+.namespaced-rules {
+  grid-template-columns: 1fr 1fr 1fr 1fr .5fr;
 }
 </style>
