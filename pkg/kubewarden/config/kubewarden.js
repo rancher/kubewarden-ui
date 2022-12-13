@@ -1,4 +1,4 @@
-import { STATE, NAME as NAME_HEADER } from '@shell/config/table-headers';
+import { AGE, STATE, NAME as NAME_HEADER } from '@shell/config/table-headers';
 import {
   KUBEWARDEN,
   KUBEWARDEN_DASHBOARD,
@@ -123,12 +123,7 @@ export function init($plugin, store) {
       },
     },
     RELATED_POLICY_SUMMARY,
-    {
-      name:      'psAge',
-      label:     'Age',
-      value:     'metadata.creationTimestamp',
-      formatter: 'LiveDate'
-    }
+    AGE
   ]);
 
   headers(ADMISSION_POLICY, [
@@ -142,12 +137,7 @@ export function init($plugin, store) {
     },
     ADMISSION_POLICY_RESOURCES,
     ADMISSION_POLICY_OPERATIONS,
-    {
-      name:      'capCreated',
-      label:     'Created',
-      value:     'metadata.creationTimestamp',
-      formatter: 'LiveDate'
-    }
+    AGE
   ]);
 
   headers(CLUSTER_ADMISSION_POLICY, [
@@ -161,11 +151,6 @@ export function init($plugin, store) {
     },
     ADMISSION_POLICY_RESOURCES,
     ADMISSION_POLICY_OPERATIONS,
-    {
-      name:      'capCreated',
-      label:     'Created',
-      value:     'metadata.creationTimestamp',
-      formatter: 'LiveDate'
-    }
+    AGE
   ]);
 }

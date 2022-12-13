@@ -25,9 +25,13 @@ export default {
 
   data() {
     return {
-      resources:        null,
-      operations:       null
+      mode:             null,
+      resources:        null
     };
+  },
+
+  created() {
+    this.mode = 'All';
   },
 
   computed: {
@@ -41,14 +45,10 @@ export default {
       const out = rows.filter((row) => {
         const flatRules = flattenDeep(row.spec.rules);
         const flatResources = flatRules.flatMap(r => r.resources);
-        const flatOperations = flatRules.flatMap(r => r.operations);
+        const rowMode = row.spec.mode;
 
-        if ( this.operations ) {
-          for ( const selected of this.operations ) {
-            if ( !flatOperations.includes(selected) ) {
-              return false;
-            }
-          }
+        if ( this.mode && this.mode !== 'All' && this.mode !== rowMode ) {
+          return false;
         }
 
         if ( this.resources ) {
@@ -65,12 +65,16 @@ export default {
       return sortBy(out, ['id']);
     },
 
-    resourceOptions() {
-      return this.flattenRule('resources');
+    modeOptions() {
+      const out = this.rows?.map(row => row.spec?.mode) || [];
+
+      out.unshift('All');
+
+      return [...new Set(out)];
     },
 
-    operationOptions() {
-      return this.flattenRule('operations');
+    resourceOptions() {
+      return this.flattenRule('resources');
     }
   },
 
@@ -91,7 +95,7 @@ export default {
 
     resetFilter() {
       this.$set(this, 'resources', null);
-      this.$set(this, 'operations', null);
+      this.$set(this, 'mode', 'All');
     }
   }
 };
@@ -106,18 +110,18 @@ export default {
         :taggable="true"
         :multiple="true"
         class="filter__resources"
-        label="Filter by Resource"
+        label="Search by Resource"
         :options="resourceOptions"
       />
       <LabeledSelect
-        v-model="operations"
+        v-model="mode"
         :clearable="true"
         :searchable="false"
-        :options="operationOptions"
-        :multiple="true"
+        :options="modeOptions"
+        :multiple="false"
         placement="bottom"
-        class="filter__operations"
-        label="Filter by Operations"
+        class="filter__mode"
+        label="Search by Mode"
       />
       <button
         ref="btn"
