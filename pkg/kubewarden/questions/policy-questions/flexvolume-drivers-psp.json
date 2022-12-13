@@ -5,7 +5,6 @@
     "tooltip": "The `Key` needs to be `driver`, then provide a flex volume driver as the `Value`. (e.g. `driver: example/lvm`)",
     "group": "Settings",
     "label": "Allowed flex volumes",
-    "target": true,
     "type": "map[",
     "variable": "allowed_flex_volumes"
   }

@@ -2,11 +2,11 @@
   "apiVersion": "v2",
   "kind": "",
   "metadata": {
-    "name": "ingress"
+    "name": "deprecated-api-versions"
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/ingress:v0.1.11",
+    "module": "ghcr.io/kubewarden/policies/deprecated-api-versions:latest",
     "rules": [
       {
         "apiGroups": [],
@@ -17,9 +17,8 @@
     ],
     "mutating": false,
     "settings": {
-      "requireTLS": false,
-      "allowPorts": [],
-      "denyPorts": []
+      "kubernetes_version": "",
+      "deny_on_deprecation": true
     }
   }
 }

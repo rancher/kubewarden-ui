@@ -6,7 +6,7 @@
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/environment-variable-policy:v0.1.1",
+    "module": "ghcr.io/kubewarden/policies/environment-variable-policy:latest",
     "rules": [
       {
         "apiGroups": [],
@@ -16,6 +16,18 @@
       }
     ],
     "mutating": false,
-    "settings": {}
+    "settings": {
+      "rules": [
+        {
+          "reject": "",
+          "environmentVariables": [
+            {
+              "name": "",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    }
   }
 }

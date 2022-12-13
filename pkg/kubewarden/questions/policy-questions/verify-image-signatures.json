@@ -4,8 +4,8 @@
     "description": "This policy validates Sigstore signatures for containers, init container and ephemeral container that match the name provided in the image settings field. It will reject the Pod if any validation fails. If all signature validation pass or there is no container that matches the image name, the Pod will be accepted.",
     "group": "Settings",
     "required": false,
-    "targeted": false,
-    "type": "map",
+    "hide_input": true,
+    "type": "string",
     "variable": "description"
   },
   {
@@ -27,8 +27,8 @@
     "group": "Settings",
     "label": "Public key signature",
     "show_if": "rule=PublicKey",
-    "target": false,
-    "type": "map",
+    "hide_input": true,
+    "type": "map[",
     "variable": "signatures",
     "subquestions": [
       {
@@ -62,8 +62,8 @@
     "group": "Settings",
     "label": "Keyless signature",
     "show_if": "rule=Keyless",
-    "target": false,
-    "type": "map",
+    "hide_input": true,
+    "type": "map[",
     "variable": "signatures",
     "subquestions": [
       {
@@ -78,9 +78,9 @@
         "default": [],
         "group": "Settings",
         "label": "Keyless",
-        "target": false,
+        "hide_input": true,
         "show_if": "rule=Keyless",
-        "type": "map",
+        "type": "map[",
         "variable": "signatures.keyless",
         "subquestions": [
           {

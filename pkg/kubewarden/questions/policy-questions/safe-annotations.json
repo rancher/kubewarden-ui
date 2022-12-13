@@ -3,9 +3,10 @@
     "default": null,
     "description": "This policy validates the annotations of generic Kubernetes objects. It rejects all the resources that use one or more annotations on the deny list. It also allows you to put constraints on specific annotations. The constraints are expressed as regular expression.",
     "group": "Settings",
+    "label": "Description",
     "required": false,
-    "target": false,
-    "type": "map",
+    "hide_input": true,
+    "type": "string",
     "variable": "description"
   },
   {

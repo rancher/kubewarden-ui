@@ -3,9 +3,10 @@
     "default": null,
     "description": "This policy is a replacement for the Kubernetes Pod Security Policy that controls containers user and groups.",
     "group": "Settings",
+    "label": "Description",
     "required": false,
-    "targeted": false,
-    "type": "map",
+    "hide_input": true,
+    "type": "string",
     "variable": "description"
   },
   {
@@ -13,8 +14,8 @@
     "description": "Controls which user ID the containers are run with.",
     "group": "Settings",
     "label": "Run as user",
-    "target": false,
-    "type": "map",
+    "hide_input": true,
+    "type": "map[",
     "variable": "run_as_user",
     "subquestions": [
       {
@@ -46,8 +47,8 @@
         "group": "Settings",
         "label": "Ranges",
         "show_if": "run_as_user.rule=MustRunAs||run_as_user.rule=MustRunAsNonRoot",
-        "target": false,
-        "type": "map",
+        "hide_input": true,
+        "type": "map[",
         "variable": "run_as_user.ranges",
         "subquestions": [
           {
@@ -77,8 +78,8 @@
     "description": "Controls which primary group ID the containers are run with.",
     "group": "Settings",
     "label": "Run as group",
-    "target": false,
-    "type": "map",
+    "hide_input": true,
+    "type": "map[",
     "variable": "run_as_group",
     "subquestions": [
       {
@@ -108,8 +109,8 @@
         "group": "Settings",
         "label": "Ranges",
         "show_if": "run_as_group.rule=MustRunAs||run_as_group.rule=MustRunAsNonRoot",
-        "target": false,
-        "type": "map",
+        "hide_input": true,
+        "type": "map[",
         "variable": "run_as_group.ranges",
         "subquestions": [
           {
@@ -139,8 +140,8 @@
     "description": "Controls which group IDs containers add.",
     "group": "Settings",
     "label": "Supplemental groups",
-    "target": false,
-    "type": "map",
+    "hide_input": true,
+    "type": "map[",
     "variable": "supplemental_groups",
     "subquestions": [
       {
@@ -170,8 +171,8 @@
         "group": "Settings",
         "label": "Ranges",
         "show_if": "supplemental_groups.rule=MustRunAs||supplemental_groups.rule=MustRunAsNonRoot",
-        "target": false,
-        "type": "map",
+        "hide_input": true,
+        "type": "map[",
         "variable": "supplemental_groups.ranges",
         "subquestions": [
           {

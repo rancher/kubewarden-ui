@@ -2,11 +2,11 @@
   "apiVersion": "v2",
   "kind": "",
   "metadata": {
-    "name": "capabilities-psp"
+    "name": "volumeMounts"
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/capabilities-psp:latest",
+    "module": "ghcr.io/kubewarden/policies/volumemounts:latest",
     "rules": [
       {
         "apiGroups": [],
@@ -17,9 +17,8 @@
     ],
     "mutating": false,
     "settings": {
-      "allowed_capabilities": [""],
-      "required_drop_capabilities": [""],
-      "default_add_capabilities": [""]
+      "reject": "",
+      "volumeMountsNames": [""]
     }
   }
 }

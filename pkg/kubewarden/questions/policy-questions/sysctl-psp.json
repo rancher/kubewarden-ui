@@ -3,9 +3,10 @@
     "default": null,
     "description": "This policy validates which sysctls can get set in pods by specifying lists of sysctls or sysctl patterns to be allowed or forbidden. You can then modify the securityContext of Pods to make use of the Sysctls as permitted by this policy.",
     "group": "Settings",
+    "label": "Description",
     "required": false,
-    "targeted": false,
-    "type": "map",
+    "hide_input": true,
+    "type": "string",
     "variable": "description"
   },
   {

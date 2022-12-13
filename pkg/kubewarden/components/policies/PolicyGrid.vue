@@ -74,7 +74,7 @@ export default {
     keywordOptions() {
       const flattened = this.value?.flatMap((subtype) => {
         return subtype.keywords;
-      });
+      }).sort();
 
       return [...new Set(flattened)] || [];
     },
@@ -93,7 +93,7 @@ export default {
         } else {
           out.push(resource);
         }
-      });
+      }).sort();
 
       return [...new Set(out)] || [];
     },

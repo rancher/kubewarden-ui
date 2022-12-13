@@ -6,7 +6,7 @@
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/sysctl-psp:v0.1.7",
+    "module": "ghcr.io/kubewarden/policies/sysctl-psp:latest",
     "rules": [
       {
         "apiGroups": [],

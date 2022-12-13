@@ -6,7 +6,7 @@
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/pod-privileged:v0.1.10",
+    "module": "ghcr.io/kubewarden/policies/pod-privileged:latest",
     "rules": [
       {
         "apiGroups": [],
