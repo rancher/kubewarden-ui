@@ -6,7 +6,7 @@
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/selinux-psp:v0.1.5",
+    "module": "ghcr.io/kubewarden/policies/selinux-psp:latest",
     "rules": [
       {
         "apiGroups": [],

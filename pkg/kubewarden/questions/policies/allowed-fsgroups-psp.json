@@ -6,7 +6,7 @@
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/allowed-fsgroups-psp:v0.1.4",
+    "module": "ghcr.io/kubewarden/policies/allowed-fsgroups-psp:latest",
     "rules": [
       {
         "apiGroups": [],

@@ -104,7 +104,6 @@ export default {
       policyGauges:        null,
       relatedPolicies:     null,
       reloadRequired:      false,
-      traces:              null,
 
       metricsType: METRICS_DASHBOARD.POLICY_SERVER
     };

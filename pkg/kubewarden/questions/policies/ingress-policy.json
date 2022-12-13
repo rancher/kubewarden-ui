@@ -2,11 +2,11 @@
   "apiVersion": "v2",
   "kind": "",
   "metadata": {
-    "name": "environment-variable-secrets-scanner"
+    "name": "ingress"
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/env-variable-secrets-scanner-policy:v0.1.0",
+    "module": "ghcr.io/kubewarden/policies/ingress:latest",
     "rules": [
       {
         "apiGroups": [],
@@ -16,6 +16,10 @@
       }
     ],
     "mutating": false,
-    "settings": {}
+    "settings": {
+      "requireTLS": false,
+      "allowPorts": [],
+      "denyPorts": []
+    }
   }
 }

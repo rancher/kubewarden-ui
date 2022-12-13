@@ -6,7 +6,7 @@
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/verify-image-signatures:v0.1.2",
+    "module": "ghcr.io/kubewarden/policies/verify-image-signatures:latest",
     "rules": [
       {
         "apiGroups": [],

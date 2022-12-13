@@ -3,8 +3,9 @@
     "default": null,
     "description": "This policy provides a replacement for the Pod Security Policy that deals with seccomp profiles. Prior to Kubernetes 1.19, seccomp profiles could be defined only via Pod annotations. Starting from Kubernetes 1.19 the seccomp profiles can be managed via the securityContext field of Pods and Containers. Note: the seccomp annotations are deprecated and will be dropped starting from Kubernetes 1.25.",
     "group": "Settings",
+    "label": "Description",
     "required": false,
-    "target": false,
+    "hide_input": true,
     "type": "map",
     "variable": "description"
   },

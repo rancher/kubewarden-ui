@@ -3,9 +3,10 @@
     "default": null,
     "description": "This policy is a replacement for the Kubernetes Pod Security Policy that controls the usage of SELinux in the pod security context and on containers, init containers and ephemeral containers. This policy will inspect the `.spec.securityContext.seLinuxOptions` of the pod  if the container has no specific `.spec.securityContext.seLinuxOptions`. In other words, the `seLinuxOptions` of the container, init container and ephemeral containers take precendence over the pod `seLinuxOptions`, if any.",
     "group": "Settings",
+    "label": "Description",
     "required": false,
-    "target": false,
-    "type": "map",
+    "hide_input": true,
+    "type": "string",
     "variable": "description"
   },
   {
@@ -27,8 +28,8 @@
     "group": "Settings",
     "label": "Must run as",
     "show_if": "rule=MustRunAs",
-    "target": false,
-    "type": "map",
+    "hide_input": true,
+    "type": "map[",
     "variable": "MustRunAs",
     "subquestions": [
       {

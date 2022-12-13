@@ -3,8 +3,9 @@
     "default": null,
     "description": "This policy validates the labels of generic Kubernetes objects. It rejects all the resources that use one or more labels on the deny list. It also allows you to put constraints on specific labels. The constraints are expressed as regular expression. It will also allow you to require specific labels to be part of the resource.",
     "group": "Settings",
+    "label": "Description",
     "required": false,
-    "target": false,
+    "hide_input": true,
     "type": "map",
     "variable": "description"
   },

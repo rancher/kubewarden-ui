@@ -6,7 +6,7 @@
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/flexvolume-drivers-psp:v0.1.2",
+    "module": "ghcr.io/kubewarden/policies/flexvolume-drivers-psp:latest",
     "rules": [
       {
         "apiGroups": [],

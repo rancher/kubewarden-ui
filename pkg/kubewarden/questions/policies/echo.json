@@ -2,11 +2,11 @@
   "apiVersion": "v2",
   "kind": "",
   "metadata": {
-    "name": "capabilities-psp"
+    "name": "echo"
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/capabilities-psp:latest",
+    "module": "ghcr.io/kubewarden/policies/echo:latest",
     "rules": [
       {
         "apiGroups": [],
@@ -16,10 +16,6 @@
       }
     ],
     "mutating": false,
-    "settings": {
-      "allowed_capabilities": [""],
-      "required_drop_capabilities": [""],
-      "default_add_capabilities": [""]
-    }
+    "settings": {}
   }
 }

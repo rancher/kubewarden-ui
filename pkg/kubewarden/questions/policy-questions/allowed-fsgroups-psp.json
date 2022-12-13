@@ -20,8 +20,8 @@
     "group": "Settings",
     "label": "User ID Ranges",
     "show_if": "rule=MustRunAs||rule=MayRunAs",
-    "target": false,
-    "type": "map",
+    "hide_input": true,
+    "type": "map[",
     "variable": "ranges",
     "subquestions": [
       {

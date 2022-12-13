@@ -5,10 +5,11 @@ import jsyaml from 'js-yaml';
 import { _CREATE, _VIEW } from '@shell/config/query-params';
 import { saferDump } from '@shell/utils/create-yaml';
 
-import Questions from '@shell/components/Questions';
 import Tab from '@shell/components/Tabbed/Tab';
 import YamlEditor from '@shell/components/YamlEditor';
 
+// Using this custom Questions component until `hide_input` changes are made to @shell version
+import Questions from '../../../components/Questions';
 import General from './General';
 import Rules from './Rules';
 

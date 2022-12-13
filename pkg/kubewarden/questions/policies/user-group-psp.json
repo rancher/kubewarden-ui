@@ -6,7 +6,7 @@
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/user-group-psp:v0.2.0",
+    "module": "ghcr.io/kubewarden/policies/user-group-psp:latest",
     "rules": [
       {
         "apiGroups": [],

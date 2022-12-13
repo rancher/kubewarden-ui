@@ -63,7 +63,6 @@ export default {
       currentYamlValues:   '',
       originalYamlValues:  '',
       showQuestions:       true,
-      showValuesComponent: false,
       valuesComponent:     null,
       preYamlOption:       VALUES_STATE.FORM,
       yamlOption:          VALUES_STATE.FORM
@@ -116,10 +115,9 @@ export default {
 
     async loadValuesComponent() {
       if ( this.value?.haveComponent('kubewarden/admission') ) {
-        this.valuesComponent = this.value.importComponent('kubewarden/admission');
-        await this.valuesComponent();
+        this.valuesComponent = this.value?.importComponent('kubewarden/admission');
 
-        this.showValuesComponent = true;
+        await this.valuesComponent();
       }
     },
 
@@ -149,12 +147,14 @@ export default {
             class="step__values__content"
             @changed="tabChanged($event)"
           >
-            <component
-              :is="valuesComponent"
-              v-model="chartValues"
-              :mode="mode"
-              :custom-policy="customPolicy"
-            />
+            <template v-if="valuesComponent">
+              <component
+                :is="valuesComponent"
+                v-model="chartValues"
+                :mode="mode"
+                :custom-policy="customPolicy"
+              />
+            </template>
           </Tabbed>
         </template>
         <template v-else-if="isCreate && !showQuestions">

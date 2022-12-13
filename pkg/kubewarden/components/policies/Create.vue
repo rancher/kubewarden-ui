@@ -142,7 +142,7 @@ export default ({
         return true;
       }
 
-      return !!this.chartValues.policy.spec.module && this.hasRequiredRules;
+      return !!this.chartValues?.policy?.spec?.module && this.hasRequiredRules;
     },
 
     hasArtifactHub() {
@@ -164,7 +164,7 @@ export default ({
       Determines if the required rules are set, if not the resource can not be created
     */
     hasRequiredRules() {
-      const { rules } = this.chartValues.policy.spec;
+      const { rules } = this.chartValues?.policy?.spec;
       const requiredProps = ['apiGroups', 'apiVersions', 'operations', 'resources'];
 
       const acceptedRule = rules?.find((rule) => {
@@ -294,7 +294,7 @@ export default ({
           match = defaultPolicy;
         }
       } catch (e) {
-        console.warn('Unable to match policy chart, falling back to default'); // eslint-disable-line no-console
+        console.warn(`Unable to match policy chart ${ shortType }, falling back to default`); // eslint-disable-line no-console
       }
 
       set(this.chartValues, 'policy', match);
@@ -332,6 +332,7 @@ export default ({
 
           this.stepPolicies.ready = false;
           this.stepReadme.hidden = false;
+          this.chartValues.questions.questions = [];
           this.yamlOption = VALUES_STATE.FORM;
           this.yamlValues = '';
         }

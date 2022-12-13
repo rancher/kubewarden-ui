@@ -5,7 +5,7 @@ import SteveModel from '@shell/plugins/steve/steve-class';
 import { CONFIG_MAP, MANAGEMENT, SERVICE } from '@shell/config/types';
 import { proxyUrlFromParts } from '@shell/models/service';
 import { findBy, isArray } from '@shell/utils/array';
-import { addParam } from '@shell/utils/url';
+import { addParams } from '@shell/utils/url';
 
 import { KUBEWARDEN, METRICS_DASHBOARD } from '../../types';
 import policyServerDashboard from '../../assets/kubewarden-metrics-policyserver.json';
@@ -199,9 +199,13 @@ export default class KubewardenModel extends SteveModel {
     return async() => {
       let url = '/meta/proxy/';
       const packages = 'packages/search';
+      const params = {
+        kind:  13, // Kind for Kubewarden policies https://artifacthub.io/packages/search?kind=13
+        limit: 50 // Limit request count
+      };
 
       url += `${ ARTIFACTHUB_ENDPOINT }/${ packages }`;
-      url = addParam(url, 'kind', '13');
+      url = addParams(url, params);
 
       return await this.$dispatch('management/request', { url, redirectUnauthorized: false }, { root: true });
     };

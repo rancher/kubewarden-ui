@@ -6,7 +6,7 @@
   },
   "spec": {
     "policyServer": "",
-    "module": "ghcr.io/kubewarden/policies/safe-labels:v0.1.7",
+    "module": "ghcr.io/kubewarden/policies/safe-labels:latest",
     "rules": [
       {
         "apiGroups": [],
