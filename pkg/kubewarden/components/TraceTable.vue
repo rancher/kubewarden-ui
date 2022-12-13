@@ -79,7 +79,6 @@ export default {
       v-if="rows"
       :rows="rows"
       :headers="TRACE_HEADERS"
-      :group-by="groupField"
       :table-actions="false"
       :row-actions="false"
       key-field="traceID"
