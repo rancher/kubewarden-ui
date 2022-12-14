@@ -1,4 +1,5 @@
 import { AGE, STATE, NAME as NAME_HEADER } from '@shell/config/table-headers';
+
 import {
   KUBEWARDEN,
   KUBEWARDEN_DASHBOARD,
@@ -8,6 +9,7 @@ import {
   ADMISSION_POLICY_OPERATIONS,
   RELATED_POLICY_SUMMARY
 } from '../types';
+import { rootKubewardenRoute } from '../utils/custom-routing';
 
 export function init($plugin, store) {
   const {
@@ -40,7 +42,7 @@ export function init($plugin, store) {
     name:        KUBEWARDEN_DASHBOARD,
     namespaced:  false,
     weight:      99,
-    route:       { name: 'c-cluster-kubewarden' },
+    route:       rootKubewardenRoute(),
     overview:    true
   });
 
