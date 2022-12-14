@@ -4,6 +4,21 @@ import { get } from '@shell/utils/object';
 import KubewardenModel, { colorForStatus } from '../plugins/kubewarden/policy-class';
 
 export default class AdmissionPolicy extends KubewardenModel {
+  get _availableActions() {
+    const out = super._availableActions;
+
+    const policyMode = {
+      action:  'toggleUpdateMode',
+      enabled: this.spec.mode === 'monitor',
+      icon:    'icon icon-fw icon-notifier',
+      label:   'Update Mode',
+    };
+
+    out.unshift(policyMode);
+
+    return out;
+  }
+
   get stateDisplay() {
     const status = get(this, 'status.policyStatus');
 

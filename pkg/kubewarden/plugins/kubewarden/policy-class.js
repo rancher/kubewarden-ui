@@ -84,7 +84,7 @@ export const RULE_HEADERS = [
 ];
 
 export const MODE_MAP = {
-  monitor: 'bg-success',
+  monitor: 'bg-info',
   protect: 'bg-warning'
 };
 
@@ -501,6 +501,13 @@ export default class KubewardenModel extends SteveModel {
     });
 
     return out;
+  }
+
+  toggleUpdateMode( resources = this ) {
+    this.$dispatch('cluster/promptModal', {
+      resources,
+      component: 'UpdateModeDialog'
+    }, { root: true });
   }
 
   updateWhitelist(url, remove) {

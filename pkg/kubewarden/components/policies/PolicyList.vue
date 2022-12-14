@@ -133,20 +133,7 @@ export default {
       </button>
     </div>
 
-    <ResourceTable :schema="schema" :rows="filteredRows" :headers="headers">
-      <template #col:mode="{ row }">
-        <td>
-          <span class="policy__mode">
-            <span class="text-capitalize">{{ row.spec.mode }}</span>
-            <i
-              v-if="hasNamespaceSelector(row)"
-              v-tooltip.bottom="t('kubewarden.policies.namespaceWarning')"
-              class="icon icon-warning"
-            />
-          </span>
-        </td>
-      </template>
-    </ResourceTable>
+    <ResourceTable :schema="schema" :rows="filteredRows" :headers="headers" />
   </div>
 </template>
 

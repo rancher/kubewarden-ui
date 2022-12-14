@@ -2,6 +2,7 @@ import { importTypes } from '@rancher/auto-import';
 import { IPlugin } from '@shell/core/types';
 
 import kubewardenRoutes from './routes/kubewarden-routes';
+import kubewardenStore from './store/kubewarden';
 
 // Init the package
 export default function(plugin: IPlugin) {
@@ -13,6 +14,9 @@ export default function(plugin: IPlugin) {
 
   // Load product
   plugin.addProduct(require('./config/kubewarden'));
+
+  // Add Vuex store
+  plugin.addDashboardStore(kubewardenStore.config.namespace, kubewardenStore.specifics, kubewardenStore.config);
 
   // Routes
   plugin.addRoutes(kubewardenRoutes);
