@@ -29,18 +29,14 @@ export default {
   async fetch() {
     this.hasSchema = this.$store.getters['cluster/schemaFor'](KUBEWARDEN.POLICY_SERVER);
 
-    await this.$store.dispatch('cluster/findAll', { type: SERVICE });
+    if ( !this.hasSchema ) {
+      await this.$store.dispatch('cluster/findAll', { type: SERVICE });
 
-    if ( this.certService ) {
-      this.initStepIndex = 1;
-      this.installSteps[0].ready = true;
-    }
+      if ( this.certService ) {
+        this.initStepIndex = 1;
+        this.installSteps[0].ready = true;
+      }
 
-    const allRepos = await this.$store.dispatch('cluster/findAll', { type: CATALOG.CLUSTER_REPO });
-
-    this.kubewardenRepo = allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
-
-    if ( this.kubewardenRepo ) {
       await this.getChartRoute();
     }
   },
@@ -136,10 +132,6 @@ export default {
 
         await repoObj.save();
 
-        const allRepos = await this.$store.dispatch('cluster/findAll', { type: CATALOG.CLUSTER_REPO });
-
-        this.kubewardenRepo = allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
-
         await this.getChartRoute();
 
         btnCb(true);
@@ -150,6 +142,14 @@ export default {
     },
 
     async getChartRoute() {
+      const allRepos = await this.$store.dispatch('cluster/findAll', { type: CATALOG.CLUSTER_REPO });
+
+      this.kubewardenRepo = allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
+
+      if ( !this.kubewardenRepo ) {
+        return;
+      }
+
       await this.$store.dispatch('catalog/load');
 
       // Check to see that the chart we need are available
@@ -161,10 +161,22 @@ export default {
       );
     },
 
-    chartRoute() {
-      if ( this.controllerChart ) {
-        this.controllerChart.goToInstall('kubewarden');
+    async chartRoute() {
+      if ( !this.controllerChart ) {
+        try {
+          await this.getChartRoute();
+
+          if ( this.controllerChart ) {
+
+          }
+        } catch (err) {
+          this.errors = err;
+
+          return;
+        }
       }
+
+      this.controllerChart.goToInstall('kubewarden');
     }
   }
 };
@@ -237,21 +249,18 @@ export default {
           </template>
 
           <template v-else>
-            <Loading v-if="!installReady" />
-            <template v-else>
-              <h2 class="mt-20 mb-10">
-                {{ t("kubewarden.install.appInstall.title") }}
-              </h2>
-              <p class="mb-20">
-                {{ t("kubewarden.install.appInstall.description") }}
-              </p>
-              <button
-                class="btn role-primary mt-20"
-                @click.prevent="chartRoute"
-              >
-                {{ t("kubewarden.install.appInstall.button") }}
-              </button>
-            </template>
+            <h2 class="mt-20 mb-10">
+              {{ t("kubewarden.install.appInstall.title") }}
+            </h2>
+            <p class="mb-20">
+              {{ t("kubewarden.install.appInstall.description") }}
+            </p>
+            <button
+              class="btn role-primary mt-20"
+              @click.prevent="chartRoute"
+            >
+              {{ t("kubewarden.install.appInstall.button") }}
+            </button>
           </template>
         </template>
       </InstallWizard>
