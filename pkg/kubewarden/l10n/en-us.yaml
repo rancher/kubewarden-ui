@@ -112,6 +112,10 @@ kubewarden:
       label: Mode
       tooltip: The monitor mode is a way to deploy policies to the cluster in a way that all requests that go through the policy will be accepted, as if the policy didn't exist. Defaults to 'Protect'.
       warning: Once the policy mode has been switched to Protect, you will not be able to revert this change.
+      update:
+        checkbox: Update to Protect Mode
+        title: Update Policy Mode
+        body: The monitor mode is a way to view the behavior of a policy without letting it make the final decision on requests that are validated by the policy.
     ignoreRancherNamespaces:
       label: Ignore Rancher Namespaces
       tooltip: Certain policies will break core services of Rancher, this will add a default list of namespaces to ignore.

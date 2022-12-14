@@ -208,19 +208,6 @@ export default {
                 />
               </td>
             </template>
-
-            <template #col:mode="{ row }">
-              <td>
-                <span class="policy__mode">
-                  <span class="text-capitalize">{{ row.spec.mode }}</span>
-                  <i
-                    v-if="hasNamespaceSelector(row)"
-                    v-tooltip.bottom="t('kubewarden.policies.namespaceWarning')"
-                    class="icon icon-warning"
-                  />
-                </span>
-              </td>
-            </template>
           </ResourceTable>
         </template>
       </Tab>
