@@ -165,10 +165,6 @@ export default {
       if ( !this.controllerChart ) {
         try {
           await this.getChartRoute();
-
-          if ( this.controllerChart ) {
-
-          }
         } catch (err) {
           this.errors = err;
 
