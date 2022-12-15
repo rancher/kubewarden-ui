@@ -101,10 +101,13 @@ export const RELATED_POLICY_SUMMARY = {
 export const RELATED_HEADERS = [
   ADMISSION_POLICY_STATE,
   {
-    name:   'name',
-    value:  'metadata.name',
-    label:  'Name',
-    sort:   'name:desc'
+    name:          'name',
+    labelKey:      'tableHeaders.name',
+    value:         'metadata.name',
+    getValue:      (row: any) => row.metadata.name,
+    sort:          ['nameSort'],
+    formatter:     'LinkDetail',
+    canBeVariable: true,
   },
   ADMISSION_POLICY_MODE,
   ADMISSION_POLICY_RESOURCES,
