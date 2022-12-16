@@ -44,7 +44,7 @@ export default {
   },
 
   data() {
-    const apiGroupValues = this.value.apiGroups || [];
+    const apiGroupValues = this.value?.apiGroups || [];
 
     const scopeOptions = [
       '*',
@@ -171,15 +171,15 @@ export default {
     },
 
     setGroup(event) {
-      if ( this.value.apiGroups.includes(event) ) {
+      if ( this.value?.apiGroups?.includes(event) ) {
         return;
       }
 
-      if ( !this.value.apiGroups.includes(event) ) {
+      if ( !this.value?.apiGroups?.includes(event) ) {
         this.value.apiGroups.pop();
       }
 
-      this.value.apiGroups.push(event);
+      this.value?.apiGroups?.push(event);
     }
   }
 };

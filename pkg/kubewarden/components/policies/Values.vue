@@ -2,7 +2,7 @@
 import { _CREATE, _VIEW } from '@shell/config/query-params';
 import { SCHEMA } from '@shell/config/types';
 import { createYaml, saferDump } from '@shell/utils/create-yaml';
-import { clone } from '@shell/utils/object';
+import { clone, set } from '@shell/utils/object';
 
 import ButtonGroup from '@shell/components/ButtonGroup';
 import ResourceCancelModal from '@shell/components/ResourceCancelModal';
@@ -42,6 +42,16 @@ export default {
   },
 
   async fetch() {
+    if ( !this.chartValues.questions && this.chartValues?.policy?.spec?.settings ) {
+      try {
+        const questions = await this.value.policyQuestions();
+
+        set(this.chartValues, 'questions', questions);
+      } catch (e) {
+        console.warn(`Unable to fetch chart questions: ${ e }`); // eslint-disable-line no-console
+      }
+    }
+
     try {
       this.version = this.$store.getters['catalog/version']({
         repoType:      'cluster',
@@ -51,7 +61,7 @@ export default {
 
       await this.loadValuesComponent();
     } catch (e) {
-      console.error(`Unable to fetch Version: ${ e }`); // eslint-disable-line no-console
+      console.warn(`Unable to fetch Version: ${ e }`); // eslint-disable-line no-console
     }
 
     this.generateYaml();

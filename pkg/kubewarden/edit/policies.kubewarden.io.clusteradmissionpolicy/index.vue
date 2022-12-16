@@ -67,6 +67,6 @@ export default {
     :mode="realMode"
     @finish="finish"
   >
-    <Config :value="value" :mode="mode" />
+    <Config :value="value" :mode="realMode" />
   </CruResource>
 </template>

@@ -17,8 +17,12 @@ export const KUBEWARDEN = {
     ALLOWED_PROC_MOUNT_TYPES_PSP:   'policies.kubewarden.io.policies.allowed-proc-mount-types-psp',
     APPARMOR_PSP:                   'policies.kubewarden.io.policies.apparmor-psp',
     CAPABILITIES_PSP:               'policies.kubewarden.io.policies.capabilities-psp',
+    DEPRECATED_API_VERSIONS:        'policies.kubewarden.io.policies.deprecated-api-versions',
     DISALLOW_SERVICE_LOADBALANCER:  'policies.kubewarden.io.policies.disallow-service-loadbalancer',
     DISALLOW_SERVICE_NODEPORT:      'policies.kubewarden.io.policies.disallow-service-nodeport',
+    ECHO:                           'policies.kubewarden.io.policies.echo',
+    ENV_VARIABLE_SECRETS_SCANNER:   'policies.kubewarden.io.policies.env-variable-secrets-scanner',
+    ENVIRONMENT_VARIABLE_POLICY:    'policies.kubewarden.io.policies.environment-variable-policy',
     FLEXVOLUME_DRIVERS_PSP:         'policies.kubewarden.io.policies.flexvolume-drivers-psp',
     HOST_NAMESPACES_PSP:            'policies.kubewarden.io.policies.host-namespaces-psp',
     HOSTPATHS_PSP:                  'policies.kubewarden.io.policies.hostpaths-psp',
@@ -34,6 +38,7 @@ export const KUBEWARDEN = {
     TRUSTED_REPOS:                  'policies.kubewarden.io.policies.trusted-repos',
     USER_GROUP_PSP:                 'policies.kubewarden.io.policies.user-group-psp',
     VERIFY_IMAGE_SIGNATURES:        'policies.kubewarden.io.policies.verify-image-signatures',
+    VOLUMEMOUNTS:                   'policies.kubewarden.io.policies.volumemounts',
     VOLUMES_PSP:                    'policies.kubewarden.io.policies.volumes-psp'
   }
 };

@@ -1,0 +1,50 @@
+questions:
+- default: null
+  description: >-
+    Each rule defined in the policy settings is composed by a reject operator
+    and a set of the environment variables used with the operator against the
+    environment variables from the resources. The rules are evaluated in the
+    order that they are defined. The resource is denied in the first failed
+    evaluated rule.
+  group: Settings
+  label: Description
+  required: false
+  hide_input: true
+  type: string
+  variable: description
+- default: []
+  group: Settings
+  label: Rules
+  hide_input: true
+  type: map[
+  variable: rules
+  subquestions:
+    - default: anyIn
+      group: Settings
+      label: Reject Operator
+      options:
+        - anyIn
+        - anyNotIn
+        - allAreUsed
+        - notAllAreUsed
+      required: false
+      type: enum
+      variable: rules.reject
+    - default: []
+      description: ''
+      group: Settings
+      label: Environment Variables
+      hide_input: true
+      type: map[
+      variable: rules.environmentVariables
+      subquestions:
+        - default: ''
+          group: Settings
+          label: Name
+          type: string
+          variable: rules.environmentVariables.name
+        - default: ''
+          group: Settings
+          label: Value
+          type: string
+          variable: rules.environmentVariables.value

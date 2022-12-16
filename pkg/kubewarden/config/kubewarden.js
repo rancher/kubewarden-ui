@@ -47,9 +47,12 @@ export function init($plugin, store) {
   });
 
   /*
-    TODO: remove these when rancher-charts integration is complete
+    TODO: remove these when artifacthub supplies the necessary info
+          for the policy scaffold and questions
+
+    These are being spoofed to iterate over the questions provided
+    in ./questions/policy-questions
   */
-  // These are policies from the Policy Hub
   spoofedType({
     label:   'Policies',
     type:    SPOOFED.POLICIES,
@@ -68,8 +71,12 @@ export function init($plugin, store) {
           allowed_proc_mount_types_psp:   { type: SPOOFED.ALLOWED_PROC_MOUNT_TYPES_PSP },
           apparmor_psp:                   { type: SPOOFED.APPARMOR_PSP },
           capabilities_psp:               { type: SPOOFED.CAPABILITIES_PSP },
+          deprecated_api_versions:        { type: SPOOFED.DEPRECATED_API_VERSIONS },
           disallow_service_loadbalancer:  { type: SPOOFED.DISALLOW_SERVICE_LOADBALANCER },
           disallow_service_nodeport:      { type: SPOOFED.DISALLOW_SERVICE_NODEPORT },
+          echo:                           { type: SPOOFED.ECHO },
+          env_variable_secrets_scanner:   { type: SPOOFED.ENV_VARIABLE_SECRETS_SCANNER },
+          environment_variable_policy:    { type: SPOOFED.ENVIRONMENT_VARIABLE_POLICY },
           flexvolume_drivers_psp:         { type: SPOOFED.FLEXVOLUME_DRIVERS_PSP },
           host_namespaces_psp:            { type: SPOOFED.HOST_NAMESPACES_PSP },
           hostpaths_psp:                  { type: SPOOFED.HOSTPATHS_PSP },
@@ -85,6 +92,7 @@ export function init($plugin, store) {
           trusted_repos:                  { type: SPOOFED.TRUSTED_REPOS },
           user_group_psp:                 { type: SPOOFED.USER_GROUP_PSP },
           verify_image_signatures:        { type: SPOOFED.VERIFY_IMAGE_SIGNATURES },
+          volumemounts:                   { type: SPOOFED.VOLUMEMOUNTS },
           volumes_psp:                    { type: SPOOFED.VOLUMES_PSP },
         }
       }
