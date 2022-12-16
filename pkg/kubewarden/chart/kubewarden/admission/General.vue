@@ -1,4 +1,6 @@
 <script>
+import isEmpty from 'lodash/isEmpty';
+
 import { _CREATE } from '@shell/config/query-params';
 import { set } from '@shell/utils/object';
 
@@ -39,7 +41,9 @@ export default {
   },
 
   async fetch() {
-    this.policyMode = this.value?.policy?.spec?.mode;
+    if ( this.value?.policy?.spec ) {
+      this.policyMode = this.value.policy.spec.mode;
+    }
 
     this.policyServers = await this.$store.dispatch('cluster/findAll', { type: KUBEWARDEN.POLICY_SERVER });
 
@@ -47,7 +51,7 @@ export default {
       set(this.policy, 'ignoreRancherNamespaces', this.hasNamespaceSelector);
     }
 
-    if ( this.isCreate ) {
+    if ( this.isCreate && !isEmpty(this.policy.spec) ) {
       set(this.policy.spec, 'mode', 'protect');
     }
   },
@@ -55,10 +59,10 @@ export default {
   data() {
     let policy = null;
 
-    if ( this.value.policy ) {
+    if ( this.value?.policy ) {
       policy = this.value.policy;
     } else {
-      policy = this.value;
+      policy = this.value || {};
     }
 
     return {
@@ -71,7 +75,7 @@ export default {
   computed: {
     hasNamespaceSelector() {
       if ( !this.isCreate ) {
-        return this.value.policy.namespaceSelector;
+        return this.value?.policy?.namespaceSelector;
       }
 
       return true;
@@ -131,54 +135,57 @@ export default {
         />
       </div>
     </div>
-    <div class="row mb-20">
-      <div class="col span-6">
-        <LabeledSelect
-          v-model="policy.spec.policyServer"
-          :value="value"
-          :mode="mode"
-          :options="policyServerOptions"
-          :label="t('kubewarden.policyConfig.serverSelect.label')"
-          :tooltip="t('kubewarden.policyConfig.serverSelect.tooltip')"
-        />
+    <template v-if="policy.spec">
+      <div class="row mb-20">
+        <div class="col span-6">
+          <LabeledSelect
+            v-model="policy.spec.policyServer"
+            :value="value"
+            :mode="mode"
+            :options="policyServerOptions"
+            :label="t('kubewarden.policyConfig.serverSelect.label')"
+            :tooltip="t('kubewarden.policyConfig.serverSelect.tooltip')"
+          />
+        </div>
+        <div class="col span-6">
+          <LabeledInput
+            v-model="policy.spec.module"
+            :mode="mode"
+            :label="t('kubewarden.policyConfig.module.label')"
+            :tooltip="t('kubewarden.policyConfig.module.tooltip')"
+            :required="true"
+          />
+        </div>
       </div>
-      <div class="col span-6">
-        <LabeledInput
-          v-model="policy.spec.module"
-          :mode="mode"
-          :label="t('kubewarden.policyConfig.module.label')"
-          :tooltip="t('kubewarden.policyConfig.module.tooltip')"
-          :required="true"
-        />
+      <div class="row mb-20">
+        <div class="col span-6">
+          <RadioGroup
+            v-model="policy.spec.mutating"
+            name="mutating"
+            :options="[false, true]"
+            :mode="mode"
+            :label="t('kubewarden.policyConfig.mutating.label')"
+            :labels="['No', 'Yes']"
+            :tooltip="t('kubewarden.policyConfig.mutating.tooltip')"
+            required
+          />
+        </div>
+        <div class="col span-6">
+          <RadioGroup
+            v-model="policy.spec.mode"
+            name="mode"
+            :disabled="modeDisabled"
+            :options="['monitor', 'protect']"
+            :mode="mode"
+            :label="t('kubewarden.policyConfig.mode.label')"
+            :labels="['Monitor', 'Protect']"
+            :tooltip="t('kubewarden.policyConfig.mode.tooltip')"
+          />
+          <Banner v-if="showModeBanner" color="warning" :label="t('kubewarden.policyConfig.mode.warning')" />
+        </div>
       </div>
-    </div>
-    <div class="row mb-20">
-      <div class="col span-6">
-        <RadioGroup
-          v-model="policy.spec.mutating"
-          name="mutating"
-          :options="[false, true]"
-          :mode="mode"
-          :label="t('kubewarden.policyConfig.mutating.label')"
-          :labels="['No', 'Yes']"
-          :tooltip="t('kubewarden.policyConfig.mutating.tooltip')"
-          required
-        />
-      </div>
-      <div class="col span-6">
-        <RadioGroup
-          v-model="policy.spec.mode"
-          name="mode"
-          :disabled="modeDisabled"
-          :options="['monitor', 'protect']"
-          :mode="mode"
-          :label="t('kubewarden.policyConfig.mode.label')"
-          :labels="['Monitor', 'Protect']"
-          :tooltip="t('kubewarden.policyConfig.mode.tooltip')"
-        />
-        <Banner v-if="showModeBanner" color="warning" :label="t('kubewarden.policyConfig.mode.warning')" />
-      </div>
-    </div>
+    </template>
+
     <template v-if="isGlobal">
       <div class="row mb-20">
         <div class="col span-6">

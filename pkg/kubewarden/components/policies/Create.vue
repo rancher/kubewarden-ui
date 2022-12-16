@@ -1,6 +1,5 @@
 <script>
 import jsyaml from 'js-yaml';
-import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
 import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
@@ -46,7 +45,7 @@ export default ({
 
     value: {
       type:     Object,
-      default:  () => {}
+      default:  () => ({})
     },
   },
 
@@ -62,8 +61,8 @@ export default ({
     if ( !this.chartValues ) {
       try {
         // Without importing this here the object would maintain the state
-        this.questions = await import(/* webpackChunkName: "questions-data" */ '../../questions/questions.json');
-        const _questions = cloneDeep(JSON.parse(JSON.stringify(this.questions)));
+        this.questions = (await import(/* webpackChunkName: "questions-data" */ '../../questions/questions.yml')).default;
+        const _questions = jsyaml.load(JSON.stringify(this.questions));
 
         // This object will need to be refactored when helm charts exist for policies
         this.chartValues = { questions: _questions };
@@ -76,6 +75,7 @@ export default ({
       this.yamlValues = saferDump(this.chartValues.policy);
     } else {
       this.yamlValues = saferDump(defaultPolicy);
+      this.$set(this.chartValues, 'policy', {});
     }
 
     this.value.apiVersion = `${ this.schema?.attributes?.group }.${ this.schema?.attributes?.version }`;
@@ -283,7 +283,12 @@ export default ({
       } catch (e) {}
     },
 
+    /*
+      TODO: When artifacthub is supplying the required metadata this will need to
+            be refactored to consume the policy scaffold and questions for settings
+    */
     policyQuestions() {
+      // Shortening the type name to find a corresponding policy scaffold
       const shortType = this.type?.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '');
       let match, questionsMatch;
 
@@ -299,16 +304,18 @@ export default ({
 
       set(this.chartValues, 'policy', match);
 
-      // Spoofing the questions object from hard-typed questions json for each policy
+      // Spoofing the questions object from hard-typed questions yml for each policy
       if ( match?.spec?.settings && !isEmpty(match.spec.settings) ) {
         try {
-          questionsMatch = require(`../../questions/policy-questions/${ shortType }.json`);
+          questionsMatch = require(`../../questions/policy-questions/${ shortType }.yml`);
         } catch (e) {
           console.warn('Error when matching policy questions'); // eslint-disable-line no-console
         }
 
         if ( questionsMatch ) {
-          set(this.chartValues.questions, 'questions', questionsMatch);
+          const serialized = jsyaml.load(JSON.stringify(questionsMatch));
+
+          set(this.chartValues, 'questions', serialized);
         }
       }
     },
@@ -332,7 +339,11 @@ export default ({
 
           this.stepPolicies.ready = false;
           this.stepReadme.hidden = false;
-          this.chartValues.questions.questions = [];
+
+          if ( this.chartValues?.questions?.questions ) {
+            this.chartValues.questions.questions = [];
+          }
+
           this.yamlOption = VALUES_STATE.FORM;
           this.yamlValues = '';
         }

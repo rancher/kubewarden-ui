@@ -2,6 +2,8 @@
 import { _VIEW } from '@shell/config/query-params';
 import { saferDump } from '@shell/utils/create-yaml';
 
+import Loading from '@shell/components/Loading';
+
 import Values from './Values.vue';
 
 export default {
@@ -18,23 +20,15 @@ export default {
     }
   },
 
-  components: { Values },
+  components: { Loading, Values },
 
-  async fetch() {
+  fetch() {
     this.chartValues = {
       policy:    this.value,
       questions: null
     };
 
     this.yamlValues = saferDump(this.value);
-
-    let questionsJson = null;
-
-    if ( this.value.spec?.settings ) {
-      questionsJson = await this.value.policyQuestions();
-
-      this.chartValues.questions = { questions: questionsJson };
-    }
   },
 
   data() {
@@ -47,5 +41,6 @@ export default {
 </script>
 
 <template>
-  <Values :value="value" :chart-values="chartValues" :yaml-values="yamlValues" :mode="mode" />
+  <Loading v-if="$fetchState.pending" />
+  <Values v-else :value="value" :chart-values="chartValues" :yaml-values="yamlValues" :mode="mode" />
 </template>

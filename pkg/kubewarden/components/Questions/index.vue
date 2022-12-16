@@ -8,13 +8,13 @@ import BooleanType from '@shell/components/Questions/Boolean';
 import EnumType from '@shell/components/Questions/Enum';
 import IntType from '@shell/components/Questions/Int';
 import FloatType from '@shell/components/Questions/Float';
-import ArrayType from '@shell/components/Questions/Array';
 import ReferenceType from '@shell/components/Questions/Reference';
 import CloudCredentialType from '@shell/components/Questions/CloudCredential';
 
 /*
   Replacing these components until we are able to hide inputs with `hide_input` property in questions
 */
+import ArrayType from './Array';
 import MapType from './QuestionMap';
 import StringType from './String';
 

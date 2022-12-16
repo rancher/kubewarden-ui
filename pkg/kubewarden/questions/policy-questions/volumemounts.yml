@@ -1,0 +1,32 @@
+questions:
+- default: null
+  description: >-
+    This policy inspects containers, init containers, or ephemeral containers,
+    and will restrict their usage of volumes by checking the volume name being
+    used in volumeMounts[*].name. The policy can target either Pods or workload
+    resources (Deployments, ReplicaSets, DaemonSets, ReplicationControllers,
+    Jobs, CronJobs) by setting the policy's spec.rules accordingly.
+  group: Settings
+  label: Description
+  required: false
+  hide_input: true
+  type: string
+  variable: description
+- default: anyIn
+  group: Settings
+  label: Reject
+  options:
+    - anyIn
+    - anyNotIn
+    - allAreUsed
+    - notAllAreUsed
+  required: false
+  type: enum
+  variable: reject
+- default: []
+  description: A list of Volume Mount names to match using the defined reject operator.
+  group: Settings
+  label: Volume Mount Names
+  required: false
+  type: array[
+  variable: volumeMountsNames

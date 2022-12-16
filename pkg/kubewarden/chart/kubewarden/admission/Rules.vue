@@ -25,8 +25,8 @@ export default {
     this.apiGroups = await this.$store.dispatch('cluster/findAll', { type: 'apigroup' });
     this.rules = [];
 
-    if ( !!this.value.policy ) {
-      this.rules = this.value.policy.spec.rules;
+    if ( !!this.value?.policy ) {
+      this.rules = this.value.policy?.spec?.rules;
     }
   },
 

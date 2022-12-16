@@ -1,3 +1,4 @@
+import jsyaml from 'js-yaml';
 import filter from 'lodash/filter';
 import matches from 'lodash/matches';
 
@@ -399,9 +400,10 @@ export default class KubewardenModel extends SteveModel {
       // Spoofing the questions object from hard-typed questions json for each policy
       if ( found ) {
         const short = found.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '');
-        const json = (await import(/* webpackChunkName: "policy-questions" */`../../questions/policy-questions/${ short }.json`)).default;
+        const yml = (await import(/* webpackChunkName: "policy-questions" */`../../questions/policy-questions/${ short }.yml`)).default;
+        const serialized = jsyaml.load(JSON.stringify(yml));
 
-        return json;
+        return serialized;
       }
 
       return null;
