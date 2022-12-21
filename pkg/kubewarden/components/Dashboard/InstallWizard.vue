@@ -92,7 +92,7 @@ export default {
           <h2>
             {{ t('kubewarden.title') }}
           </h2>
-          <span class="subtext">{{ t('kubewarden.install.title') }}</span>
+          <span class="subtext">{{ t('kubewarden.dashboard.install') }}</span>
         </div>
         <div class="subtitle">
           <h2>{{ t('wizard.step', {number: activeStepIndex + 1}) }}</h2>

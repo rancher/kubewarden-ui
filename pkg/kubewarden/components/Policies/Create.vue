@@ -16,7 +16,7 @@ import Loading from '@shell/components/Loading';
 import ChartReadme from '@shell/components/ChartReadme';
 import Wizard from '@shell/components/Wizard';
 
-import { NAMESPACE_SELECTOR } from '../../plugins/kubewarden/policy-class';
+import { NAMESPACE_SELECTOR } from '../../plugins/kubewarden-class';
 import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME, VALUES_STATE } from '../../types';
 
 import defaultPolicy from '../../questions/policies/defaultPolicy.json';

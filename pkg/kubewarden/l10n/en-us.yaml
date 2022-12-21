@@ -1,12 +1,36 @@
 kubewarden:
   title: Kubewarden
-  dashboard: Dashboard
-  install:
-    title: Install
+  dashboard:
+    title: Dashboard
+    install: Install
     notInstalled: Kubewarden is not installed
     button: Install Kubewarden Prerequisites
+    intro: Welcome to Kubewarden
+    blurb: A Dynamic Admission Controller for Kubernetes
     description: |
       Kubewarden is a policy engine for Kubernetes. It helps with keeping your Kubernetes clusters secure and compliant. Kubewarden policies can be written using regular programming languages or Domain Specific Languages (DSL). Policies are compiled into WebAssembly modules that are then distributed using traditional container registries.
+    getStarted: Get Started
+    issues: Issues
+    headers:
+      policyServer:
+        title: Policy Servers
+        description: Kubewarden uses Policy Servers to receive requests to be validated. It does that by executing Kubewarden's policies.
+        linkText: Create Policy Server
+        slotTitle: Deployments
+      admissionPolicy:
+        title: Admission Policies
+        description: An Admission Policy is a namespace-wide resource. The policy will process only the requests that are targeting the Namespace where the Admission Policy is defined.
+        linkText: Create Admission Policy
+        slotTitle: Policies
+      clusterAdmissionPolicy:
+        title: Cluster Admission Policies
+        description: The Cluster Admission Policy resource is the core of the Kubewarden stack. This resource defines how policies evaluate requests.
+        linkText: Create Cluster Admission Policy
+        slotTitle: Policies
+      modes:
+        title: Policy Modes
+        monitor: Monitor
+        protect: Protect
     appInstall:
       title: Kubewarden App Install
       description: This will take you to the app installation page for Kubewarden.

@@ -5,3 +5,9 @@ export const rootKubewardenRoute = () => ({
   params: { product: KUBEWARDEN_PRODUCT_NAME },
   meta:   { pkg: KUBEWARDEN_PRODUCT_NAME }
 });
+
+export const createKubewardenRoute = (name?: string, params?: Object, meta?: Object) => ({
+  name:   name || `c-cluster-product-resource`,
+  params: { ...rootKubewardenRoute().params, ...params },
+  meta:   { ...rootKubewardenRoute().meta, ...meta }
+});

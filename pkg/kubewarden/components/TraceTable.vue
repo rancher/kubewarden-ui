@@ -4,7 +4,8 @@ import { isEmpty } from '@shell/utils/object';
 import { BadgeState } from '@components/BadgeState';
 import SortableTable from '@shell/components/SortableTable';
 
-import { MODE_MAP, TRACE_HEADERS, OPERATION_MAP } from '../plugins/kubewarden/policy-class';
+import { MODE_MAP, OPERATION_MAP } from '../plugins/kubewarden-class';
+import { TRACE_HEADERS } from '../config/table-headers';
 import { KUBEWARDEN } from '../types';
 
 export default {

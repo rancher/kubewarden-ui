@@ -8,81 +8,9 @@ import { proxyUrlFromParts } from '@shell/models/service';
 import { findBy, isArray } from '@shell/utils/array';
 import { addParams } from '@shell/utils/url';
 
-import { KUBEWARDEN, METRICS_DASHBOARD } from '../../types';
-import policyServerDashboard from '../../assets/kubewarden-metrics-policyserver.json';
-import policyDashboard from '../../assets/kubewarden-metrics-policy.json';
-
-export const TRACE_HEADERS = [
-  {
-    name:  'operation',
-    value: 'operation',
-    label: 'Operation',
-    sort:  'operation'
-  },
-  {
-    name:  'mode',
-    value: 'mode',
-    label: 'Mode',
-    sort:  'mode'
-  },
-  {
-    name:  'kind',
-    value: 'kind',
-    label: 'Kind',
-    sort:  'kind'
-  },
-  {
-    name:  'name',
-    value: 'name',
-    label: 'Name',
-    sort:  'name'
-  },
-  {
-    name:  'namespace',
-    value: 'namespace',
-    label: 'Namespace',
-    sort:  'namespace'
-  },
-  {
-    name:  'startTime',
-    value: 'startTime',
-    label: 'Start Time',
-    sort:  'startTime:desc'
-  },
-  {
-    name:  'duration',
-    value: 'duration',
-    label: 'Duration (ms)',
-    sort:  'duration'
-  }
-];
-
-export const RULE_HEADERS = [
-  {
-    name:  'apiGroups',
-    value: 'apiGroups',
-    label: 'API Groups',
-    sort:  'apiGroups'
-  },
-  {
-    name:  'apiVersions',
-    value: 'apiVersions',
-    label: 'API Versions',
-    sort:  'apiVersions'
-  },
-  {
-    name:  'operations',
-    value: 'operations',
-    label: 'Operations',
-    sort:  'operations'
-  },
-  {
-    name:  'resources',
-    value: 'resources',
-    label: 'Resources',
-    sort:  'resources'
-  },
-];
+import { KUBEWARDEN, METRICS_DASHBOARD } from '../types';
+import policyServerDashboard from '../assets/kubewarden-metrics-policyserver.json';
+import policyDashboard from '../assets/kubewarden-metrics-policy.json';
 
 export const MODE_MAP = {
   monitor: 'bg-info',
@@ -171,7 +99,7 @@ export default class KubewardenModel extends SteveModel {
 
   get componentForBadge() {
     if ( this.detailPageHeaderBadgeOverride ) {
-      return require(`../../formatters/PolicyStatus.vue`).default;
+      return require(`../formatters/PolicyStatus.vue`).default;
     }
 
     return null;
@@ -400,7 +328,7 @@ export default class KubewardenModel extends SteveModel {
       // Spoofing the questions object from hard-typed questions json for each policy
       if ( found ) {
         const short = found.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '');
-        const yml = (await import(/* webpackChunkName: "policy-questions" */`../../questions/policy-questions/${ short }.yml`)).default;
+        const yml = (await import(/* webpackChunkName: "policy-questions" */`../questions/policy-questions/${ short }.yml`)).default;
         const serialized = jsyaml.load(JSON.stringify(yml));
 
         return serialized;
@@ -439,7 +367,7 @@ export default class KubewardenModel extends SteveModel {
 
   haveComponent(name) {
     try {
-      require.resolve(`../../chart/${ name }`);
+      require.resolve(`../chart/${ name }`);
 
       return true;
     } catch (e) {
@@ -452,7 +380,7 @@ export default class KubewardenModel extends SteveModel {
       throw new Error('Name required');
     }
 
-    return () => import(/* webpackChunkName: "chart" */ `../../chart/${ name }`);
+    return () => import(/* webpackChunkName: "chart" */ `../chart/${ name }`);
   }
 
   traceTableRows(traces) {
@@ -559,13 +487,14 @@ export function colorForStatus(status) {
 
 export function stateSort(color, display) {
   const SORT_ORDER = {
-    error:    1,
-    warning:  2,
-    info:     3,
-    success:  4,
-    ready:    5,
-    notready: 6,
-    other:    7,
+    error:         1,
+    warning:       2,
+    info:          3,
+    success:       4,
+    ready:         5,
+    notready:      6,
+    transitioning: 7,
+    other:         8,
   };
 
   color = color.replace(/^(text|bg)-/, '');
@@ -585,5 +514,5 @@ export function colorForTraceStatus(status) {
     break;
   }
 
-  return 'success'; // 'unscheduled' is the default state
+  return 'success';
 }
