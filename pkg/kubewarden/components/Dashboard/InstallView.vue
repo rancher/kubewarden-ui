@@ -60,6 +60,7 @@ export default {
       allRepos:        null,
       controllerChart: null,
       kubewardenRepo:  null,
+      install:         false,
 
       initStepIndex: 0,
       installSteps,
@@ -195,7 +196,7 @@ export default {
       </button>
     </div>
 
-    <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps">
+    <InstallWizard v-else ref="wizard" :init-step-index="initStepIndex" :steps="installSteps">
       <template #certmanager>
         <h2 class="mt-20 mb-10">
           {{ t("kubewarden.dashboard.prerequisites.certManager.title") }}
