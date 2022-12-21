@@ -1,8 +1,10 @@
 <script>
+import { mapGetters } from 'vuex';
+
 import { Banner } from '@components/Banner';
 import Loading from '@shell/components/Loading';
 
-import PolicyList from '../components/policies/PolicyList';
+import PolicyList from '../components/Policies/PolicyList';
 
 export default {
   components: {
@@ -21,15 +23,15 @@ export default {
   },
 
   async fetch() {
-    const inStore = this.$store.getters['currentStore'](this.resource);
-
-    await this.$store.dispatch(`${ inStore }/findAll`, { type: this.resource });
-
-    this.rows = this.$store.getters[`${ inStore }/all`](this.resource);
+    await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: this.resource });
   },
 
-  data() {
-    return { rows: null };
+  computed: {
+    ...mapGetters(['currentProduct']),
+
+    rows() {
+      return this.$store.getters[`${ this.currentProduct.inStore }/all`](this.resource);
+    }
   }
 };
 </script>

@@ -19,7 +19,7 @@ You will need to point the UI to a running instance of Rancher, here's a [quicks
 
 You will now have the Kubewarden Extension installed on your local cluster.
 
-5. Navigate to the Overview page by selecting the Kubewarden resource item and follow the steps to install the `Kubewarden` chart.
+5. Navigate to the Dashboard page by selecting the Kubewarden resource item and follow the steps to install the `Kubewarden` chart.
 
 ---
 

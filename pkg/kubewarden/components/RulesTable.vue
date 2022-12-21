@@ -2,7 +2,7 @@
 import { Banner } from '@components/Banner';
 import SortableTable from '@shell/components/SortableTable';
 
-import { RULE_HEADERS } from '../plugins/kubewarden/policy-class';
+import { RULE_HEADERS } from '../config/table-headers';
 
 export default {
   props: {

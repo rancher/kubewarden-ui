@@ -3,7 +3,7 @@ import { sortBy } from '@shell/utils/sort';
 
 import ProgressBarMulti from '@shell/components/ProgressBarMulti';
 
-import { colorForStatus, stateSort } from '../plugins/kubewarden/policy-class';
+import { colorForStatus, stateSort } from '../plugins/kubewarden-class';
 
 export default {
   components: { ProgressBarMulti },

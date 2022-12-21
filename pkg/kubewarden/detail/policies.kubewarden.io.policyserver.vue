@@ -5,6 +5,7 @@ import {
 } from '@shell/config/query-params';
 import { dashboardExists } from '@shell/utils/grafana';
 import { monitoringStatus } from '@shell/utils/monitoring';
+import { allHash } from '@shell/utils/promise';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import { Banner } from '@components/Banner';
@@ -16,7 +17,8 @@ import ResourceTable from '@shell/components/ResourceTable';
 import Tab from '@shell/components/Tabbed/Tab';
 
 import { isEmpty } from 'lodash';
-import { METRICS_DASHBOARD, RELATED_HEADERS } from '../types';
+import { METRICS_DASHBOARD } from '../types';
+import { RELATED_HEADERS } from '../config/table-headers';
 
 import MetricsBanner from '../components/MetricsBanner';
 import TraceTable from '../components/TraceTable';
@@ -43,8 +45,27 @@ export default {
   },
 
   async fetch() {
-    this.relatedPolicies = await this.value.allRelatedPolicies();
-    this.policyGauges = await this.value.policyGauges();
+    const hash = await allHash({
+      relatedPolicies:   this.value.allRelatedPolicies(),
+      policyGauges:      this.value.policyGauges(),
+      jaegerService:     this.value.jaegerService()
+    });
+
+    if ( !isEmpty(hash.relatedPolicies) ) {
+      this.relatedPolicies = hash.relatedPolicies;
+    }
+
+    if ( !isEmpty(hash.policyGauges) ) {
+      this.policyGauges = hash.policyGauges;
+    }
+
+    if ( !isEmpty(hash.jaegerService) ) {
+      this.jaegerService = hash.jaegerService;
+    }
+
+    if ( !isEmpty(this.relatedPolicies) && this.jaegerService ) {
+      this.filteredValidations = await this.value.filteredValidations({ service: this.jaegerService });
+    }
 
     // If monitoring is installed look for the dashboard for PolicyServers
     if ( this.monitoringStatus.installed ) {
@@ -84,12 +105,6 @@ export default {
           }
         };
       }
-    }
-
-    this.jaegerService = await this.value.jaegerService();
-
-    if ( !isEmpty(this.relatedPolicies) && this.jaegerService ) {
-      this.filteredValidations = await this.value.filteredValidations({ service: this.jaegerService });
     }
   },
 
