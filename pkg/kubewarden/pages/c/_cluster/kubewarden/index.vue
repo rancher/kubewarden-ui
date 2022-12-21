@@ -29,6 +29,6 @@ export default {
   <Loading v-if="$fetchState.pending" />
   <div v-else>
     <InstallView v-if="!hasSchema" :has-schema="hasSchema" />
-    <DashboardView />
+    <DashboardView v-else />
   </div>
 </template>
