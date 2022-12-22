@@ -1,6 +1,4 @@
 <script>
-import isEmpty from 'lodash/isEmpty';
-
 export default {
   props:      {
     col: {
@@ -30,26 +28,23 @@ export default {
   },
 
   computed: {
-    mainResource() {
-      if ( !isEmpty(this.resourceToShow) ) {
-        return this.resourceToShow[0];
-      }
-
-      return '-';
-    },
-
     resourceLabels() {
       if ( this.resourceToShow.length > 1 ) {
-        let out = '';
+        const out = [];
+        const last = this.resourceToShow[this.resourceToShow.length - 1];
 
         this.resourceToShow.forEach((resource) => {
-          out += `&#8226; ${ resource }<br>`;
+          if ( resource === last ) {
+            out.push(resource);
+          } else {
+            out.push(`${ resource }, `);
+          }
         });
 
         return out;
       }
 
-      return null;
+      return this.resourceToShow;
     },
   }
 };
@@ -57,14 +52,8 @@ export default {
 
 <template>
   <div>
-    <span>{{ mainResource }}</span>
-    <br>
-    <span
-      v-if="resourceToShow.length - 1 > 0"
-      v-tooltip.bottom="resourceLabels"
-      class="plus-more"
-    >
-      {{ t('generic.plusMore', { n: resourceToShow.length - 1 }) }}
+    <span v-for="(resource, i) in resourceLabels" :key="i">
+      {{ resource }}
     </span>
   </div>
 </template>

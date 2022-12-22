@@ -1,4 +1,5 @@
 <script>
+import { mapGetters } from 'vuex';
 import flatMap from 'lodash/flatMap';
 import isEmpty from 'lodash/isEmpty';
 
@@ -35,8 +36,7 @@ export default {
   components: { LabeledSelect },
 
   fetch() {
-    this.inStore = this.$store.getters['currentStore']();
-    this.schemas = this.$store.getters[`${ this.inStore }/all`](SCHEMA);
+    this.schemas = this.$store.getters[`${ this.currentProduct.inStore }/all`](SCHEMA);
 
     if ( this.isCreate && isEmpty(this.value?.apiGroups) ) {
       this.value.apiGroups.push('*');
@@ -64,13 +64,14 @@ export default {
       operationOptions,
       apiGroupValues,
 
-      inStore:           null,
       noResourceOptions: false,
       schemas:           null
     };
   },
 
   computed: {
+    ...mapGetters(['currentProduct']),
+
     apiGroupOptions() {
       const out = ['*'];
 

@@ -2,7 +2,7 @@ import { rootKubewardenRoute } from '../utils/custom-routing';
 import { KUBEWARDEN, KUBEWARDEN_DASHBOARD } from '../types';
 import { POLICY_SERVER_HEADERS, POLICY_HEADERS } from './table-headers';
 
-export function init($plugin, store) {
+export function init($plugin: any, store: any) {
   const {
     product,
     basicType,

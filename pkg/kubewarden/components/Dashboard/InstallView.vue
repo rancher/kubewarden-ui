@@ -29,7 +29,7 @@ export default {
 
   async fetch() {
     if ( !this.hasSchema ) {
-      await this.$store.dispatch('cluster/findAll', { type: SERVICE });
+      await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: SERVICE });
 
       if ( this.certService ) {
         this.initStepIndex = 1;
@@ -76,10 +76,10 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentCluster']),
+    ...mapGetters(['currentCluster', 'currentProduct']),
 
     certService() {
-      return this.$store.getters['cluster/all'](SERVICE).find(s => s.metadata?.labels?.['app'] === 'cert-manager');
+      return this.$store.getters[`${ this.currentProduct.inStore }/all`](SERVICE).find(s => s.metadata?.labels?.['app'] === 'cert-manager');
     },
 
     installReady() {
@@ -140,7 +140,7 @@ export default {
     },
 
     async getChartRoute() {
-      const allRepos = await this.$store.dispatch('cluster/findAll', { type: CATALOG.CLUSTER_REPO });
+      const allRepos = await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: CATALOG.CLUSTER_REPO });
 
       this.kubewardenRepo = allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
 

@@ -1,4 +1,5 @@
 <script>
+import { mapGetters } from 'vuex';
 import { _CREATE, _VIEW } from '@shell/config/query-params';
 import { removeAt } from '@shell/utils/array';
 
@@ -22,7 +23,8 @@ export default {
   components: { Rule },
 
   async fetch() {
-    this.apiGroups = await this.$store.dispatch('cluster/findAll', { type: 'apigroup' });
+    await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: 'apigroup' });
+
     this.rules = [];
 
     if ( !!this.value?.policy ) {
@@ -31,13 +33,16 @@ export default {
   },
 
   data() {
-    return {
-      apiGroups:  [],
-      rules:      null,
-    };
+    return { rules: null };
   },
 
   computed: {
+    ...mapGetters(['currentProduct']),
+
+    apiGroups() {
+      return this.$store.getters[`${ this.currentProduct.inStore }/all`]('apigroup');
+    },
+
     isView() {
       return this.mode === _VIEW;
     }
