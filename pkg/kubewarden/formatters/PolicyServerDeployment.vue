@@ -75,7 +75,7 @@ export default {
     <span v-else>{{ value }}</span>
     <i
       v-if="hasErrors"
-      v-tooltip="{ content: `<div>${formattedConditions}</div>`, html: true }"
+      v-tooltip="{ content: `<div>${ formattedConditions }</div>`, html: true }"
       class="conditions-alert-icon icon-error icon-lg"
     />
   </span>

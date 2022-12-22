@@ -1,4 +1,5 @@
 <script>
+import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 
 import { _CREATE } from '@shell/config/query-params';
@@ -41,11 +42,7 @@ export default {
   },
 
   async fetch() {
-    if ( this.value?.policy?.spec ) {
-      this.policyMode = this.value.policy.spec.mode;
-    }
-
-    this.policyServers = await this.$store.dispatch('cluster/findAll', { type: KUBEWARDEN.POLICY_SERVER });
+    await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: KUBEWARDEN.POLICY_SERVER });
 
     if ( this.isGlobal ) {
       set(this.policy, 'ignoreRancherNamespaces', this.hasNamespaceSelector);
@@ -67,12 +64,19 @@ export default {
 
     return {
       policy,
-      policyMode:     null,
-      policyServers:  []
+      initialPolicyMode: null
     };
   },
 
+  created() {
+    if ( this.policyMode ) {
+      this.initialPolicyMode = this.policyMode;
+    }
+  },
+
   computed: {
+    ...mapGetters(['currentProduct']),
+
     hasNamespaceSelector() {
       if ( !this.isCreate ) {
         return this.value?.policy?.namespaceSelector;
@@ -92,10 +96,18 @@ export default {
     modeDisabled() {
       // Kubewarden doesn't allow switching a policy from 'protect' to 'monitor'
       if ( !this.isCreate ) {
-        return this.policyMode === 'protect';
+        return this.initialPolicyMode === 'protect';
       }
 
       return false;
+    },
+
+    policyMode() {
+      return this.value?.policy?.spec?.mode;
+    },
+
+    policyServers() {
+      return this.$store.getters[`${ this.currentProduct.inStore }/all`](KUBEWARDEN.POLICY_SERVER);
     },
 
     policyServerOptions() {
@@ -111,7 +123,7 @@ export default {
     },
 
     showModeBanner() {
-      if ( !this.isCreate && this.policyMode !== this.value?.policy?.spec?.mode ) {
+      if ( !this.isCreate && ( this.initialPolicyMode === 'monitor' && this.policyMode === 'protect' ) ) {
         return true;
       }
 

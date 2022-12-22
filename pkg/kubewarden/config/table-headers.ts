@@ -1,4 +1,4 @@
-import { AGE, STATE, NAME as NAME_HEADER } from '@shell/config/table-headers';
+import { STATE, NAME as NAME_HEADER } from '@shell/config/table-headers';
 
 import { createKubewardenRoute } from '../utils/custom-routing';
 import { KUBEWARDEN } from '../types';
@@ -16,6 +16,7 @@ export const ADMISSION_POLICY_MODE = {
   name:      'mode',
   label:     'Mode',
   value:     'spec.mode',
+  sort:      ['nameSort'],
   formatter: 'PolicyMode'
 };
 
@@ -57,10 +58,15 @@ export const RELATED_HEADERS = [
   ADMISSION_POLICY_RESOURCES,
   ADMISSION_POLICY_OPERATIONS,
   {
-    name:      'psCreated',
-    label:     'Created',
-    value:     'metadata.creationTimestamp',
-    formatter: 'LiveDate'
+    name:      'age',
+    labelKey:  'tableHeaders.age',
+    value:     'creationTimestamp',
+    getValue:  (row: any) => row.creationTimestamp,
+    sort:      'creationTimestamp:desc',
+    search:    false,
+    formatter: 'LiveDate',
+    width:     100,
+    align:     'left'
   }
 ];
 
@@ -87,7 +93,17 @@ export const POLICY_SERVER_HEADERS = [
     },
   },
   RELATED_POLICY_SUMMARY,
-  AGE
+  {
+    name:      'age',
+    labelKey:  'tableHeaders.age',
+    value:     'creationTimestamp',
+    getValue:  (row: any) => row.creationTimestamp,
+    sort:      'creationTimestamp:desc',
+    search:    false,
+    formatter: 'LiveDate',
+    width:     100,
+    align:     'left'
+  }
 ];
 
 export const POLICY_HEADERS = [
@@ -95,13 +111,25 @@ export const POLICY_HEADERS = [
   NAME_HEADER,
   ADMISSION_POLICY_MODE,
   {
-    name:  'capPolicyServer',
-    label: 'Policy Server',
-    value: 'spec.policyServer'
+    name:   'capPolicyServer',
+    label:  'Policy Server',
+    value:  'spec.policyServer',
+    sort:   'spec.policyServer:desc',
+    search: true
   },
   ADMISSION_POLICY_RESOURCES,
   ADMISSION_POLICY_OPERATIONS,
-  AGE
+  {
+    name:      'age',
+    labelKey:  'tableHeaders.age',
+    value:     'creationTimestamp',
+    getValue:  (row: any) => row.creationTimestamp,
+    sort:      'creationTimestamp:desc',
+    search:    false,
+    formatter: 'LiveDate',
+    width:     100,
+    align:     'left'
+  }
 ];
 
 export const DASHBOARD_HEADERS = [
