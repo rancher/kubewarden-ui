@@ -148,7 +148,7 @@ export default {
         return;
       }
 
-      await this.$store.dispatch('catalog/load');
+      await this.$store.dispatch('catalog/load', { force: true });
 
       // Check to see that the chart we need are available
       const charts = this.$store.getters['catalog/rawCharts'];
@@ -249,6 +249,7 @@ export default {
           </p>
           <button
             class="btn role-primary mt-20"
+            :disabled="!installReady"
             @click.prevent="chartRoute"
           >
             {{ t("kubewarden.dashboard.appInstall.button") }}
