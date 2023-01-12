@@ -1,14 +1,17 @@
 <script>
+import { mapGetters } from 'vuex';
+
 import { CATALOG } from '@shell/config/types';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 
-import { Banner } from '@components/Banner';
 import Loading from '@shell/components/Loading';
 import ResourceTable from '@shell/components/ResourceTable';
 
+import DefaultsBanner from '../components/DefaultsBanner';
+
 export default {
   components: {
-    Banner, Loading, ResourceTable
+    DefaultsBanner, Loading, ResourceTable
   },
 
   props: {
@@ -23,43 +26,33 @@ export default {
   },
 
   async fetch() {
-    const inStore = this.$store.getters['currentStore'](this.resource);
-
-    await this.$store.dispatch(`${ inStore }/findAll`, { type: this.resource });
-    this.rows = this.$store.getters[`${ inStore }/all`](this.resource);
+    await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: this.resource });
 
     await this.$store.dispatch('catalog/load');
 
     // Determine if the default PolicyServer is installed from the `kubewarden-defaults` chart
-    const apps = await this.$store.dispatch(`${ inStore }/findAll`, { type: CATALOG.APP });
+    if ( !this.hideDefaultsBanner ) {
+      const apps = await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: CATALOG.APP });
 
-    this.hasDefaults = apps.find((a) => {
-      return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === 'rancher-kubewarden-defaults';
-    });
+      this.hasDefaults = apps.find((a) => {
+        return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === 'rancher-kubewarden-defaults';
+      });
+    }
   },
 
   data() {
-    return {
-      hasDefaults: null,
-      rows:        null
-    };
+    return { hasDefaults: null };
   },
 
-  methods: {
-    setChartRoute() {
-      // Check to see that `kubewarden-defaults` chart is available
-      const charts = this.$store.getters['catalog/rawCharts'];
-      const chartValues = Object.values(charts);
+  computed: {
+    ...mapGetters(['currentProduct']),
 
-      const controllerChart = chartValues.find(
-        chart => chart.chartName === 'kubewarden-defaults'
-      );
+    hideDefaultsBanner() {
+      return this.$store.getters['kubewarden/hideDefaultsBanner'];
+    },
 
-      if ( controllerChart ) {
-        return controllerChart.goToInstall('kubewarden-defaults');
-      }
-
-      return null;
+    rows() {
+      return this.$store.getters[`${ this.currentProduct.inStore }/all`](this.resource);
     }
   }
 };
@@ -68,20 +61,7 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else>
-    <Banner
-      v-if="!hasDefaults"
-      class="mb-20 mt-0"
-      color="info"
-      :closable="true"
-    >
-      <p v-html="t('kubewarden.policyServer.noDefaultsInstalled.description', {}, true)"></p>
-      <button
-        class="btn role-primary mt-10"
-        @click.prevent="setChartRoute"
-      >
-        {{ t("kubewarden.policyServer.noDefaultsInstalled.button") }}
-      </button>
-    </Banner>
+    <DefaultsBanner v-if="!hideDefaultsBanner && !hasDefaults" />
     <ResourceTable
       :schema="schema"
       :rows="rows"

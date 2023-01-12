@@ -2,8 +2,8 @@
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 
-import { WORKLOAD_TYPES } from '@shell/config/types';
-import { KUBERNETES } from '@shell/config/labels-annotations';
+import { CATALOG, WORKLOAD_TYPES } from '@shell/config/types';
+import { KUBERNETES, CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 import { allHash } from '@shell/utils/promise';
 
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
@@ -11,10 +11,13 @@ import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 import { DASHBOARD_HEADERS } from '../../config/table-headers';
 import { KUBEWARDEN } from '../../types';
 
+import DefaultsBanner from '../DefaultsBanner';
 import Card from './Card';
 
 export default {
-  components: { Card, ConsumptionGauge },
+  components: {
+    Card, ConsumptionGauge, DefaultsBanner
+  },
 
   async fetch() {
     const inStore = this.currentProduct.inStore;
@@ -23,7 +26,8 @@ export default {
       controller:         this.$store.dispatch(`${ inStore }/findMatching`, { type: WORKLOAD_TYPES.DEPLOYMENT, selector: `${ KUBERNETES.MANAGED_NAME }=kubewarden-controller` }),
       psDeployments:      this.$store.dispatch(`${ inStore }/findMatching`, { type: WORKLOAD_TYPES.DEPLOYMENT, selector: 'kubewarden/policy-server' }),
       globalPolicies:     this.$store.dispatch(`${ inStore }/findAll`, { type: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }),
-      namespacedPolicies: this.$store.dispatch(`${ inStore }/findAll`, { type: KUBEWARDEN.ADMISSION_POLICY })
+      namespacedPolicies: this.$store.dispatch(`${ inStore }/findAll`, { type: KUBEWARDEN.ADMISSION_POLICY }),
+      apps:               this.$store.dispatch(`${ inStore }/findAll`, { type: CATALOG.APP })
     });
 
     if ( !isEmpty(hash.controller) ) {
@@ -32,6 +36,13 @@ export default {
 
     if ( !isEmpty(hash.psDeployments) ) {
       this.psDeployments = hash.psDeployments;
+    }
+
+    // Determine if the default PolicyServer is installed from the `kubewarden-defaults` chart
+    if ( !this.hideDefaultsBanner && !isEmpty(hash.apps) ) {
+      this.hasDefaults = hash.apps.find((a) => {
+        return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === 'rancher-kubewarden-defaults';
+      });
     }
   },
 
@@ -45,7 +56,8 @@ export default {
       colorStops,
 
       controller:         null,
-      psDeployments:      null
+      hasDefaults:        null,
+      psDeployments:      null,
     };
   },
 
@@ -55,13 +67,16 @@ export default {
     deployments() {
       return this.psDeployments.reduce((ps, neu) => {
         return {
-          running:       ps.running + ( neu.metadata.state.name === 'active' ? 1 : 0 ),
-          stopped:       ps.stopped + ( neu.metadata.state.error ? 1 : 0 ),
-          transitioning: ps.transitioning + ( neu.metadata.state.transitioning ? 1 : 0 ),
+          running:       ps.status.running + ( neu.metadata.state.name === 'active' ? 1 : 0 ),
+          stopped:       ps.status.stopped + ( neu.metadata.state.error ? 1 : 0 ),
+          pending:       ps.status.transitioning + ( neu.metadata.state.transitioning ? 1 : 0 ),
           total:         ps.total + 1
         };
       }, {
-        running: 0, stopped: 0, transitioning: 0, total: 0
+        status: {
+          running: 0, stopped: 0, pending: 0
+        },
+        total: 0
       });
     },
 
@@ -71,6 +86,10 @@ export default {
 
     globalGuages() {
       return this.getPolicyGauges(this.globalPolicies);
+    },
+
+    hideDefaultsBanner() {
+      return this.$store.getters['kubewarden/hideDefaultsBanner'];
     },
 
     namespacedPolicies() {
@@ -147,10 +166,13 @@ export default {
       </div>
     </div>
 
+    <DefaultsBanner v-if="!hideDefaultsBanner && !hasDefaults" />
+
     <div class="get-started">
       <div
         v-for="(card, index) in DASHBOARD_HEADERS"
         :key="index"
+        class="card-container"
       >
         <Card v-if="card.isEnabled" :card="card">
           <!-- Policy Server deployments -->
@@ -161,7 +183,7 @@ export default {
                 :color-stops="colorStops"
                 :capacity="deployments.total"
                 :used-as-resource-name="true"
-                :used="deployments.running"
+                :used="deployments.status.running"
                 units="Deployments"
               />
             </slot>
@@ -259,6 +281,11 @@ export default {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     grid-gap: 20px;
+
+    .card-container {
+      min-height: 420px;
+      padding: 0;
+    }
   }
 }
 </style>
