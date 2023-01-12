@@ -9,7 +9,7 @@ import actions from './actions';
 const kubewardenFactory = (): CoreStoreSpecifics => {
   return {
     state() {
-      return {};
+      return { hideDefaultsBanner: false };
     },
 
     getters:   { ...getters },

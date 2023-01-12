@@ -55,6 +55,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  height: 100%;
   padding: $space-m;
   grid-auto-rows: 1fr;
   gap: $space-m;
