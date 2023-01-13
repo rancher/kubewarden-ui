@@ -139,7 +139,7 @@ export default {
       }
     },
 
-    async getChartRoute() {
+    async getChartRoute(retry = 0) {
       const allRepos = await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: CATALOG.CLUSTER_REPO });
 
       this.kubewardenRepo = allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
@@ -157,6 +157,10 @@ export default {
       this.controllerChart = chartValues.find(
         chart => chart.chartName === 'kubewarden-controller'
       );
+
+      if ( !this.controllerChart && retry === 0 ) {
+        await this.getChartRoute(retry + 1);
+      }
     },
 
     async chartRoute() {
