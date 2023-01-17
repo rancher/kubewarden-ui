@@ -29,14 +29,19 @@ export default {
 
   async fetch() {
     if ( !this.hasSchema ) {
-      await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: SERVICE });
+      const promises = [
+        this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: SERVICE }),
+        this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: CATALOG.CLUSTER_REPO })
+      ];
+
+      await Promise.all(promises);
 
       if ( this.certService ) {
         this.initStepIndex = 1;
         this.installSteps[0].ready = true;
       }
 
-      await this.getChartRoute();
+      await this.refreshCharts();
     }
   },
 
@@ -57,11 +62,7 @@ export default {
     return {
       errors: [],
 
-      allRepos:        null,
-      controllerChart: null,
-      kubewardenRepo:  null,
-      install:         false,
-
+      install:       false,
       initStepIndex: 0,
       installSteps,
     };
@@ -77,13 +78,22 @@ export default {
 
   computed: {
     ...mapGetters(['currentCluster', 'currentProduct']),
+    ...mapGetters({ allRepos: 'catalog/repos', rawCharts: 'catalog/rawCharts' }),
 
     certService() {
       return this.$store.getters[`${ this.currentProduct.inStore }/all`](SERVICE).find(s => s.metadata?.labels?.['app'] === 'cert-manager');
     },
 
+    controllerChart() {
+      return this.rawCharts[`cluster/${ this.kubewardenRepo?.id }/kubewarden-controller`];
+    },
+
     installReady() {
       return !!this.controllerChart;
+    },
+
+    kubewardenRepo() {
+      return this.allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
     },
 
     shellEnabled() {
@@ -106,7 +116,6 @@ export default {
 
         const yaml = res?.data;
 
-        // await updateWhitelist('github.com', true);
         await this.currentCluster.doAction('apply', { yaml, defaultNamespace: 'cert-manager' });
 
         btnCb(true);
@@ -130,7 +139,7 @@ export default {
 
         await repoObj.save();
 
-        await this.getChartRoute();
+        await this.refreshCharts();
 
         btnCb(true);
       } catch (err) {
@@ -139,34 +148,18 @@ export default {
       }
     },
 
-    async getChartRoute(retry = 0) {
-      const allRepos = await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: CATALOG.CLUSTER_REPO });
-
-      this.kubewardenRepo = allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
-
-      if ( !this.kubewardenRepo ) {
-        return;
-      }
-
-      await this.$store.dispatch('catalog/load', { force: true });
-
-      // Check to see that the chart we need are available
-      const charts = this.$store.getters['catalog/rawCharts'];
-      const chartValues = Object.values(charts);
-
-      this.controllerChart = chartValues.find(
-        chart => chart.chartName === 'kubewarden-controller'
-      );
+    async refreshCharts(retry = 0) {
+      await this.$store.dispatch('catalog/refresh');
 
       if ( !this.controllerChart && retry === 0 ) {
-        await this.getChartRoute(retry + 1);
+        await this.refreshCharts(retry + 1);
       }
     },
 
     async chartRoute() {
       if ( !this.controllerChart ) {
         try {
-          await this.getChartRoute();
+          await this.refreshCharts();
         } catch (err) {
           this.errors = err;
 
@@ -261,6 +254,10 @@ export default {
         </template>
       </template>
     </InstallWizard>
+
+    <Banner v-if="errors.length" color="warning">
+      {{ errors }}
+    </Banner>
   </div>
 </template>
 
