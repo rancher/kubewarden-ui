@@ -5,6 +5,7 @@ export const CHART_NAME = 'rancher-kubewarden';
 
 export const KUBEWARDEN_DASHBOARD = 'dashboard';
 export const KUBEWARDEN_REPO = 'https://charts.kubewarden.io';
+export const KUBEWARDEN_CHART = 'kubewarden-controller';
 
 export const KUBEWARDEN = {
   ADMISSION_POLICY:         'policies.kubewarden.io.admissionpolicy',

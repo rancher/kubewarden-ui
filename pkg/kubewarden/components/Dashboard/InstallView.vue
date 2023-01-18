@@ -6,9 +6,7 @@ import { CATALOG, SERVICE } from '@shell/config/types';
 import AsyncButton from '@shell/components/AsyncButton';
 import CopyCode from '@shell/components/CopyCode';
 
-import { Banner } from '@components/Banner';
-
-import { KUBEWARDEN_REPO } from '../../types';
+import { KUBEWARDEN_CHART, KUBEWARDEN_REPO } from '../../types';
 
 import InstallWizard from './InstallWizard';
 
@@ -22,7 +20,6 @@ export default {
 
   components: {
     AsyncButton,
-    Banner,
     CopyCode,
     InstallWizard
   },
@@ -41,7 +38,7 @@ export default {
         this.installSteps[0].ready = true;
       }
 
-      await this.refreshCharts();
+      await this.refreshCharts(1);
     }
   },
 
@@ -60,8 +57,6 @@ export default {
     ];
 
     return {
-      errors: [],
-
       install:       false,
       initStepIndex: 0,
       installSteps,
@@ -78,18 +73,14 @@ export default {
 
   computed: {
     ...mapGetters(['currentCluster', 'currentProduct']),
-    ...mapGetters({ allRepos: 'catalog/repos', rawCharts: 'catalog/rawCharts' }),
+    ...mapGetters({ allRepos: 'catalog/repos' }),
 
     certService() {
       return this.$store.getters[`${ this.currentProduct.inStore }/all`](SERVICE).find(s => s.metadata?.labels?.['app'] === 'cert-manager');
     },
 
     controllerChart() {
-      return this.rawCharts[`cluster/${ this.kubewardenRepo?.id }/kubewarden-controller`];
-    },
-
-    installReady() {
-      return !!this.controllerChart;
+      return this.$store.getters['catalog/chart']({ chartName: KUBEWARDEN_CHART });
     },
 
     kubewardenRepo() {
@@ -104,8 +95,6 @@ export default {
   methods: {
     async applyCertManager(btnCb) {
       try {
-        this.errors = [];
-
         // fetch cert-manager latest release and apply
         const url = '/meta/proxy/github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml';
         const res = await this.$store.dispatch('management/request', {
@@ -121,20 +110,18 @@ export default {
         btnCb(true);
         this.installSteps[0].ready = true;
         this.$refs.wizard.next();
-      } catch (err) {
-        this.errors = err;
+      } catch (e) {
+        this.$store.dispatch('growl/fromError', e);
         btnCb(false);
       }
     },
 
     async addRepository(btnCb) {
       try {
-        this.errors = [];
-
         const repoObj = await this.$store.dispatch('cluster/create', {
           type:     CATALOG.CLUSTER_REPO,
           metadata: { name: 'kubewarden-charts' },
-          spec:     { url: 'https://charts.kubewarden.io' },
+          spec:     { url: KUBEWARDEN_REPO },
         });
 
         await repoObj.save();
@@ -142,14 +129,18 @@ export default {
         await this.refreshCharts();
 
         btnCb(true);
-      } catch (err) {
-        this.errors = err;
+      } catch (e) {
+        this.$store.dispatch('growl/fromError', e);
         btnCb(false);
       }
     },
 
     async refreshCharts(retry = 0) {
-      await this.$store.dispatch('catalog/refresh');
+      try {
+        await this.$store.dispatch('catalog/load', { force: true, reset: true });
+      } catch (e) {
+        this.$store.dispatch('growl/fromError', e);
+      }
 
       if ( !this.controllerChart && retry === 0 ) {
         await this.refreshCharts(retry + 1);
@@ -160,8 +151,8 @@ export default {
       if ( !this.controllerChart ) {
         try {
           await this.refreshCharts();
-        } catch (err) {
-          this.errors = err;
+        } catch (e) {
+          this.$store.dispatch('growl/fromError', e);
 
           return;
         }
@@ -246,7 +237,7 @@ export default {
           </p>
           <button
             class="btn role-primary mt-20"
-            :disabled="!installReady"
+            :disabled="!controllerChart"
             @click.prevent="chartRoute"
           >
             {{ t("kubewarden.dashboard.appInstall.button") }}
@@ -254,10 +245,6 @@ export default {
         </template>
       </template>
     </InstallWizard>
-
-    <Banner v-if="errors.length" color="warning">
-      {{ errors }}
-    </Banner>
   </div>
 </template>
 
