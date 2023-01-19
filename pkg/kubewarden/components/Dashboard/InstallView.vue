@@ -6,7 +6,7 @@ import { CATALOG, SERVICE } from '@shell/config/types';
 import AsyncButton from '@shell/components/AsyncButton';
 import CopyCode from '@shell/components/CopyCode';
 
-import { KUBEWARDEN_CHART, KUBEWARDEN_REPO } from '../../types';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPO } from '../../types';
 
 import InstallWizard from './InstallWizard';
 
@@ -80,7 +80,7 @@ export default {
     },
 
     controllerChart() {
-      return this.$store.getters['catalog/chart']({ chartName: KUBEWARDEN_CHART });
+      return this.$store.getters['catalog/chart']({ chartName: KUBEWARDEN_CHARTS.CONTROLLER });
     },
 
     kubewardenRepo() {

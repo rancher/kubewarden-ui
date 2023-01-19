@@ -9,7 +9,7 @@ import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
 
-import { VALUES_STATE, YAML_OPTIONS } from '../../types';
+import { KUBEWARDEN_CHARTS, VALUES_STATE, YAML_OPTIONS } from '../../types';
 
 export default {
   name: 'Values',
@@ -56,7 +56,7 @@ export default {
       this.version = this.$store.getters['catalog/version']({
         repoType:      'cluster',
         repoName:      'kubewarden',
-        chartName:     'kubewarden-controller',
+        chartName:     KUBEWARDEN_CHARTS.CONTROLLER,
       });
 
       await this.loadValuesComponent();
