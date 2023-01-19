@@ -1,10 +1,19 @@
 <script>
-import { isEmpty } from 'lodash';
+import { mapGetters } from 'vuex';
 
 import { Banner } from '@components/Banner';
+import { KUBEWARDEN_CHARTS } from '../types';
 
 export default {
   components: { Banner },
+
+  computed: {
+    ...mapGetters({ allRepos: 'catalog/repos' }),
+
+    defaultsChart() {
+      return this.$store.getters['catalog/chart']({ chartName: KUBEWARDEN_CHARTS.DEFAULTS });
+    },
+  },
 
   methods: {
     async closeDefaultsBanner(retry = 0) {
@@ -15,25 +24,30 @@ export default {
       }
     },
 
-    async setChartRoute(retry = 0) {
-      // Check to see that `kubewarden-defaults` chart is available
-      const charts = this.$store.getters['catalog/rawCharts'];
-
-      if ( isEmpty(charts) && retry === 0 ) {
-        await this.$store.dispatch('catalog/load');
-
-        await this.setChartRoute(retry + 1);
+    async refreshCharts(retry = 0) {
+      try {
+        await this.$store.dispatch('catalog/load', { force: true, reset: true });
+      } catch (e) {
+        this.$store.dispatch('growl/fromError', e);
       }
 
-      const chartValues = Object.values(charts);
-
-      const controllerChart = chartValues.find(
-        chart => chart.chartName === 'kubewarden-defaults'
-      );
-
-      if ( controllerChart ) {
-        return controllerChart.goToInstall('kubewarden-defaults');
+      if ( !this.defaultsChart && retry === 0 ) {
+        await this.refreshCharts(retry + 1);
       }
+    },
+
+    async chartRoute() {
+      if ( !this.defaultsChart ) {
+        try {
+          await this.refreshCharts();
+        } catch (e) {
+          this.$store.dispatch('growl/fromError', e);
+
+          return;
+        }
+      }
+
+      this.defaultsChart.goToInstall(KUBEWARDEN_CHARTS.DEFAULTS);
     }
   }
 };
@@ -49,7 +63,7 @@ export default {
     <p v-html="t('kubewarden.policyServer.noDefaultsInstalled.description', {}, true)"></p>
     <button
       class="btn role-primary mt-10"
-      @click.prevent="setChartRoute"
+      @click.prevent="chartRoute"
     >
       {{ t("kubewarden.policyServer.noDefaultsInstalled.button") }}
     </button>

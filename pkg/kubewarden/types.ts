@@ -5,7 +5,16 @@ export const CHART_NAME = 'rancher-kubewarden';
 
 export const KUBEWARDEN_DASHBOARD = 'dashboard';
 export const KUBEWARDEN_REPO = 'https://charts.kubewarden.io';
-export const KUBEWARDEN_CHART = 'kubewarden-controller';
+
+export const KUBEWARDEN_CHARTS = {
+  CONTROLLER:       'kubewarden-controller',
+  DEFAULTS:         'kubewarden-defaults',
+};
+
+export const KUBEWARDEN_APPS = {
+  RANCHER_CONTROLLER: 'rancher-kubewarden-controller',
+  RANCHER_DEFAULTS:   'rancher-kubewarden-defaults'
+};
 
 export const KUBEWARDEN = {
   ADMISSION_POLICY:         'policies.kubewarden.io.admissionpolicy',

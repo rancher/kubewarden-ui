@@ -9,7 +9,7 @@ import { allHash } from '@shell/utils/promise';
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 
 import { DASHBOARD_HEADERS } from '../../config/table-headers';
-import { KUBEWARDEN } from '../../types';
+import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS } from '../../types';
 
 import DefaultsBanner from '../DefaultsBanner';
 import Card from './Card';
@@ -23,7 +23,7 @@ export default {
     const inStore = this.currentProduct.inStore;
 
     const hash = await allHash({
-      controller:         this.$store.dispatch(`${ inStore }/findMatching`, { type: WORKLOAD_TYPES.DEPLOYMENT, selector: `${ KUBERNETES.MANAGED_NAME }=kubewarden-controller` }),
+      controller:         this.$store.dispatch(`${ inStore }/findMatching`, { type: WORKLOAD_TYPES.DEPLOYMENT, selector: `${ KUBERNETES.MANAGED_NAME }=${ KUBEWARDEN_CHARTS.CONTROLLER }` }),
       psDeployments:      this.$store.dispatch(`${ inStore }/findMatching`, { type: WORKLOAD_TYPES.DEPLOYMENT, selector: 'kubewarden/policy-server' }),
       globalPolicies:     this.$store.dispatch(`${ inStore }/findAll`, { type: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }),
       namespacedPolicies: this.$store.dispatch(`${ inStore }/findAll`, { type: KUBEWARDEN.ADMISSION_POLICY }),
@@ -38,11 +38,8 @@ export default {
       this.psDeployments = hash.psDeployments;
     }
 
-    // Determine if the default PolicyServer is installed from the `kubewarden-defaults` chart
-    if ( !this.hideDefaultsBanner && !isEmpty(hash.apps) ) {
-      this.hasDefaults = hash.apps.find((a) => {
-        return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === 'rancher-kubewarden-defaults';
-      });
+    if ( !isEmpty(hash.apps) ) {
+      this.apps = hash.apps;
     }
   },
 
@@ -55,8 +52,8 @@ export default {
       DASHBOARD_HEADERS,
       colorStops,
 
+      apps:               null,
       controller:         null,
-      hasDefaults:        null,
       psDeployments:      null,
     };
   },
@@ -64,13 +61,23 @@ export default {
   computed: {
     ...mapGetters(['currentCluster', 'currentProduct']),
 
+    defaultsApp() {
+      return this.apps?.find((a) => {
+        return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
+      });
+    },
+
     deployments() {
-      return this.psDeployments.reduce((ps, neu) => {
+      const deps = this.psDeployments || [];
+
+      return deps.reduce((ps, neu) => {
         return {
-          running:       ps.status.running + ( neu.metadata.state.name === 'active' ? 1 : 0 ),
-          stopped:       ps.status.stopped + ( neu.metadata.state.error ? 1 : 0 ),
-          pending:       ps.status.transitioning + ( neu.metadata.state.transitioning ? 1 : 0 ),
-          total:         ps.total + 1
+          status: {
+            running:       ps.status.running + ( neu.metadata.state.name === 'active' ? 1 : 0 ),
+            stopped:       ps.status.stopped + ( neu.metadata.state.error ? 1 : 0 ),
+            pending:       ps.status.transitioning + ( neu.metadata.state.transitioning ? 1 : 0 )
+          },
+          total: ps.total + 1
         };
       }, {
         status: {
@@ -89,7 +96,7 @@ export default {
     },
 
     hideDefaultsBanner() {
-      return this.$store.getters['kubewarden/hideDefaultsBanner'];
+      return this.$store.getters['kubewarden/hideDefaultsBanner'] || !!this.defaultsApp;
     },
 
     namespacedPolicies() {
@@ -166,7 +173,7 @@ export default {
       </div>
     </div>
 
-    <DefaultsBanner v-if="!hideDefaultsBanner && !hasDefaults" />
+    <DefaultsBanner v-if="!hideDefaultsBanner" />
 
     <div class="get-started">
       <div
@@ -176,7 +183,7 @@ export default {
       >
         <Card v-if="card.isEnabled" :card="card">
           <!-- Policy Server deployments -->
-          <span v-if="index === 0 && psDeployments">
+          <span v-if="index === 0">
             <slot>
               <ConsumptionGauge
                 resource-name="Running"

@@ -7,6 +7,8 @@ import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations
 import Loading from '@shell/components/Loading';
 import ResourceTable from '@shell/components/ResourceTable';
 
+import { KUBEWARDEN_APPS } from '../types';
+
 import DefaultsBanner from '../components/DefaultsBanner';
 
 export default {
@@ -27,15 +29,17 @@ export default {
 
   async fetch() {
     await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: this.resource });
-
     await this.$store.dispatch('catalog/load');
 
-    // Determine if the default PolicyServer is installed from the `kubewarden-defaults` chart
+    /*
+      Determine if the default PolicyServer is installed from the `kubewarden-defaults` chart
+      When installed the App name will be `rancher-kubewarden-defaults`
+    */
     if ( !this.hideDefaultsBanner ) {
       const apps = await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: CATALOG.APP });
 
       this.hasDefaults = apps.find((a) => {
-        return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === 'rancher-kubewarden-defaults';
+        return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
       });
     }
   },
