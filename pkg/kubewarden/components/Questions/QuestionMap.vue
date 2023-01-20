@@ -16,10 +16,6 @@ export default {
 
   mixins: [Question],
 
-  data() {
-    return { questionValue: null };
-  },
-
   methods: {
     update(val) {
       this.$emit('input', val);
