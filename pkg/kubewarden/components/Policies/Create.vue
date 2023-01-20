@@ -16,10 +16,9 @@ import Loading from '@shell/components/Loading';
 import ChartReadme from '@shell/components/ChartReadme';
 import Wizard from '@shell/components/Wizard';
 
-import { NAMESPACE_SELECTOR } from '../../plugins/kubewarden-class';
-import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME, VALUES_STATE } from '../../types';
-
-import defaultPolicy from '../../questions/policies/defaultPolicy.json';
+import { ARTIFACTHUB_PKG_ANNOTATION, NAMESPACE_SELECTOR } from '../../plugins/kubewarden-class';
+import { DEFAULT_POLICY } from '../../plugins/policy-class';
+import { KUBEWARDEN_PRODUCT_NAME, VALUES_STATE } from '../../types';
 
 import PolicyGrid from './PolicyGrid';
 import Values from './Values';
@@ -58,26 +57,6 @@ export default ({
       await this.getPackages();
     }
 
-    if ( !this.chartValues ) {
-      try {
-        // Without importing this here the object would maintain the state
-        this.questions = (await import(/* webpackChunkName: "questions-data" */ '../../questions/questions.yml')).default;
-        const _questions = jsyaml.load(JSON.stringify(this.questions));
-
-        // This object will need to be refactored when helm charts exist for policies
-        this.chartValues = { questions: _questions };
-      } catch (e) {
-        console.warn(`Error importing questions ${ e }`); // eslint-disable-line no-console
-      }
-    }
-
-    if ( this.chartValues?.policy ) {
-      this.yamlValues = saferDump(this.chartValues.policy);
-    } else {
-      this.yamlValues = saferDump(defaultPolicy);
-      this.$set(this.chartValues, 'policy', {});
-    }
-
     this.value.apiVersion = `${ this.schema?.attributes?.group }.${ this.schema?.attributes?.version }`;
     this.value.kind = this.schema?.attributes?.kind;
   },
@@ -85,17 +64,18 @@ export default ({
   data() {
     return {
       errors:            null,
+      bannerTitle:       null,
       packages:          null,
-      questions:         null,
       repository:        null,
-      splitType:         null,
       type:              null,
       typeModule:        null,
       version:           null,
 
-      chartValues:       null,
-      yamlValues:        '',
-      // defaultPolicy:     '',
+      chartValues: {
+        policy:    {},
+        questions: {}
+      },
+      yamlValues: '',
 
       hasCustomPolicy: false,
       yamlOption:      VALUES_STATE.FORM,
@@ -146,18 +126,7 @@ export default ({
     },
 
     hasArtifactHub() {
-      if ( this.whitelistSetting ) {
-        const whitelistValue = this.whitelistSetting.value.split(',');
-        const hasSetting = whitelistValue.includes('artifacthub.io');
-
-        if ( hasSetting ) {
-          this.getPackages();
-        }
-
-        return hasSetting;
-      }
-
-      return false;
+      return this.value.artifactHubWhitelist;
     },
 
     /*
@@ -210,10 +179,6 @@ export default ({
       );
 
       return steps.sort((a, b) => b.weight - a.weight);
-    },
-
-    whitelistSetting() {
-      return this.value.whitelistSetting;
     }
   },
 
@@ -283,40 +248,43 @@ export default ({
       } catch (e) {}
     },
 
-    /*
-      TODO: When artifacthub is supplying the required metadata this will need to
-            be refactored to consume the policy scaffold and questions for settings
-    */
     policyQuestions() {
-      // Shortening the type name to find a corresponding policy scaffold
-      const shortType = this.type?.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '');
-      let match, questionsMatch;
+      const defaultPolicy = structuredClone(DEFAULT_POLICY);
 
-      try {
-        if ( shortType !== 'custom' ) {
-          match = require(`../../questions/policies/${ shortType }.json`);
-        } else {
-          match = defaultPolicy;
-        }
-      } catch (e) {
-        console.warn(`Unable to match policy chart ${ shortType }, falling back to default`); // eslint-disable-line no-console
+      if ( this.type === 'custom' ) {
+        set(this.chartValues, 'policy', defaultPolicy);
+        this.yamlValues = saferDump(defaultPolicy);
+
+        return;
       }
 
-      set(this.chartValues, 'policy', match);
+      const policyDetails = this.packages.find(pkg => pkg.name === this.type?.name);
+      const packageRules = this.value.parsePackageMetadata(policyDetails?.data?.['kubewarden/rules']);
+      const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.['kubewarden/questions-ui']);
+      const packageAnnotation = `${ policyDetails.repository.name }/${ policyDetails.name }/${ policyDetails.version }`;
 
-      // Spoofing the questions object from hard-typed questions yml for each policy
-      if ( match?.spec?.settings && !isEmpty(match.spec.settings) ) {
-        try {
-          questionsMatch = require(`../../questions/policy-questions/${ shortType }.yml`);
-        } catch (e) {
-          console.warn('Error when matching policy questions'); // eslint-disable-line no-console
+      const updatedPolicy = {
+        apiVersion: this.value.apiVersion,
+        kind:       this.value.kind,
+        metadata:   {
+          name:        policyDetails.name,
+          annotations: { [ARTIFACTHUB_PKG_ANNOTATION]: packageAnnotation }
+        },
+        spec:       {
+          module:       policyDetails.containers_images[0].image,
+          contextAware: JSON.parse(policyDetails?.data?.['kubewarden/contextAware']) || false,
+          mutating:     JSON.parse(policyDetails?.data?.['kubewarden/mutation']) || false,
+          rules:        packageRules?.rules || []
         }
+      };
 
-        if ( questionsMatch ) {
-          const serialized = jsyaml.load(JSON.stringify(questionsMatch));
+      merge(defaultPolicy, updatedPolicy);
+      set(this.chartValues, 'policy', defaultPolicy);
 
-          set(this.chartValues, 'questions', serialized);
-        }
+      this.yamlValues = saferDump(defaultPolicy);
+
+      if ( packageQuestions ) {
+        set(this.chartValues, 'questions', packageQuestions);
       }
     },
 
@@ -325,11 +293,10 @@ export default ({
         if ( event.step?.name === this.stepPolicies.name ) {
           const initialState = [
             'errors',
-            'splitType',
+            'bannerTitle',
             'type',
             'typeModule',
             'version',
-            'chartValues.policy',
             'hasCustomPolicy',
           ];
 
@@ -340,10 +307,10 @@ export default ({
           this.stepPolicies.ready = false;
           this.stepReadme.hidden = false;
 
-          if ( this.chartValues?.questions?.questions ) {
-            this.chartValues.questions.questions = [];
-          }
-
+          this.chartValues = {
+            policy:    {},
+            questions: {}
+          };
           this.yamlOption = VALUES_STATE.FORM;
           this.yamlValues = '';
         }
@@ -366,14 +333,14 @@ export default ({
         query: {
           [REPO]:      KUBEWARDEN_PRODUCT_NAME,
           [REPO_TYPE]: 'cluster',
-          [CHART]:     isCustom ? 'custom' : type.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '')
+          [CHART]:     isCustom ? 'custom' : type?.name
         }
       });
 
       this.policyQuestions();
       this.stepPolicies.ready = true;
       this.$refs.wizard.next();
-      this.splitType = type.split('policies.kubewarden.io.policies.')[1];
+      this.bannerTitle = isCustom ? 'Custom Policy' : type?.display_name;
       this.typeModule = this.chartValues?.policy?.spec.module;
     }
   }
@@ -391,7 +358,7 @@ export default ({
       :errors="errors"
       :steps="steps"
       :edit-first-step="true"
-      :banner-title="splitType"
+      :banner-title="bannerTitle"
       :banner-title-subtext="typeModule"
       class="wizard"
       @next="reset"
@@ -446,6 +413,7 @@ export default ({
           :mode="mode"
           :custom-policy="customPolicy"
           @editor="$event => yamlOption = $event"
+          @updateYamlValues="$event => yamlValues = $event"
         />
       </template>
 

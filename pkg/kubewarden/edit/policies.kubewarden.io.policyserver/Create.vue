@@ -1,5 +1,4 @@
 <script>
-import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
 import { _CREATE } from '@shell/config/query-params';
 import { SCHEMA } from '@shell/config/types';
@@ -10,7 +9,7 @@ import { clone } from '@shell/utils/object';
 import Loading from '@shell/components/Loading';
 import CruResource from '@shell/components/CruResource';
 
-import defaultPolicyServer from '../../questions/defaultPolicyServer.json';
+import { DEFAULT_POLICY_SERVER } from '../../models/policies.kubewarden.io.policyserver';
 import Values from './Values';
 
 export default {
@@ -37,9 +36,9 @@ export default {
   fetch() {
     this.errors = [];
 
-    const _defaultJson = cloneDeep(JSON.parse(JSON.stringify(defaultPolicyServer)));
+    const _defaultPolicyServer = structuredClone(DEFAULT_POLICY_SERVER);
 
-    this.chartValues = { questions: _defaultJson };
+    this.chartValues = { questions: _defaultPolicyServer };
 
     this.value.apiVersion = `${ this.schema?.attributes?.group }.${ this.schema?.attributes?.version }`;
     this.value.kind = this.schema?.attributes?.kind;

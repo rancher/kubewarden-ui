@@ -5,6 +5,26 @@ import { POD, WORKLOAD_TYPES } from '@shell/config/types';
 import KubewardenModel, { colorForStatus, colorForTraceStatus } from '../plugins/kubewarden-class';
 import { KUBEWARDEN } from '../types';
 
+export const DEFAULT_POLICY_SERVER = {
+  apiVersion: 'policies.kubewarden.io/v1alpha2',
+  kind:       'PolicyServer',
+  metadata:   { annotations: {}, labels: {} },
+  spec:       {
+    annotations: {},
+    env:         [
+      { name: 'KUBEWARDEN_ENABLE_METRICS', value: '1' },
+      { name: 'KUBEWARDEN_LOG_FMT', value: 'otlp' },
+      { name: 'KUBEWARDEN_LOG_LEVEL', value: 'info' }
+    ],
+    image:              'ghcr.io/kubewarden/policy-server:latest',
+    replicas:           1,
+    serviceAccountName: 'policy-server',
+    verificationConfig: '',
+    insecureSources:    [],
+    sourceAuthorities:  null
+  }
+};
+
 export default class PolicyServer extends KubewardenModel {
   get _availableActions() {
     const out = super._availableActions;

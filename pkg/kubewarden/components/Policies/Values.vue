@@ -1,8 +1,10 @@
 <script>
+import isEmpty from 'lodash/isEmpty';
+
 import { _CREATE, _VIEW } from '@shell/config/query-params';
 import { SCHEMA } from '@shell/config/types';
 import { createYaml, saferDump } from '@shell/utils/create-yaml';
-import { clone, set } from '@shell/utils/object';
+import { set } from '@shell/utils/object';
 
 import ButtonGroup from '@shell/components/ButtonGroup';
 import ResourceCancelModal from '@shell/components/ResourceCancelModal';
@@ -42,11 +44,17 @@ export default {
   },
 
   async fetch() {
-    if ( !this.chartValues.questions && this.chartValues?.policy?.spec?.settings ) {
+    if ( isEmpty(this.chartValues.questions) && !!this.chartValues?.policy?.spec?.settings ) {
       try {
-        const questions = await this.value.policyQuestions();
+        const pkg = await this.value.artifactHubPackageVersion();
 
-        set(this.chartValues, 'questions', questions);
+        if ( pkg && !pkg.error ) {
+          const packageQuestions = this.value.parsePackageMetadata(pkg?.data?.['kubewarden/questions-ui']);
+
+          if ( packageQuestions ) {
+            set(this.chartValues, 'questions', packageQuestions);
+          }
+        }
       } catch (e) {
         console.warn(`Unable to fetch chart questions: ${ e }`); // eslint-disable-line no-console
       }
@@ -72,7 +80,7 @@ export default {
       YAML_OPTIONS,
       currentYamlValues:   '',
       originalYamlValues:  '',
-      showQuestions:       true,
+      showForm:            true,
       valuesComponent:     null,
       preYamlOption:       VALUES_STATE.FORM,
       yamlOption:          VALUES_STATE.FORM
@@ -83,16 +91,17 @@ export default {
     yamlOption(neu, old) {
       switch (neu) {
       case VALUES_STATE.FORM:
-        this.showQuestions = true;
+        this.showForm = true;
         this.$emit('editor', neu);
 
         break;
       case VALUES_STATE.YAML:
         if ( old === VALUES_STATE.FORM ) {
           this.currentYamlValues = saferDump(this.chartValues.policy);
+          this.updateYamlValues();
         }
 
-        this.showQuestions = false;
+        this.showForm = false;
         this.$emit('editor', neu);
 
         break;
@@ -114,7 +123,7 @@ export default {
     generateYaml() {
       const inStore = this.$store.getters['currentStore'](this.value);
       const schemas = this.$store.getters[`${ inStore }/all`](SCHEMA);
-      const cloned = this.chartValues?.policy ? clone(this.chartValues.policy) : this.value;
+      const cloned = this.chartValues?.policy ? structuredClone(this.chartValues.policy) : this.value;
 
       if ( this.yamlValues?.length ) {
         this.currentYamlValues = this.yamlValues;
@@ -134,6 +143,10 @@ export default {
     tabChanged() {
       window.scrollTop = 0;
     },
+
+    updateYamlValues() {
+      this.$emit('updateYamlValues', this.currentYamlValues);
+    }
   }
 };
 </script>
@@ -150,7 +163,7 @@ export default {
     </div>
     <div class="scroll__container">
       <div class="scroll__content">
-        <template v-if="showQuestions">
+        <template v-if="showForm">
           <Tabbed
             ref="tabs"
             :side-tabs="true"
@@ -167,7 +180,7 @@ export default {
             </template>
           </Tabbed>
         </template>
-        <template v-else-if="isCreate && !showQuestions">
+        <template v-else-if="isCreate && !showForm">
           <YamlEditor
             ref="yaml"
             v-model="currentYamlValues"
@@ -176,6 +189,7 @@ export default {
             :initial-yaml-values="originalYamlValues"
             :editor-mode="editorMode"
             :hide-preview-buttons="true"
+            @onChanges="updateYamlValues"
           />
         </template>
 
