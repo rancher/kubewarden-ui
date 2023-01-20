@@ -1,4 +1,3 @@
-import jsyaml from 'js-yaml';
 import filter from 'lodash/filter';
 import matches from 'lodash/matches';
 
@@ -55,6 +54,8 @@ export const NAMESPACE_SELECTOR = {
 };
 
 export const ARTIFACTHUB_ENDPOINT = 'artifacthub.io/api/v1';
+
+export const ARTIFACTHUB_PKG_ANNOTATION = 'artifacthub/pkg';
 
 export const GRAFANA_DASHBOARD_ANNOTATIONS = {
   'meta.helm.sh/release-name':      'rancher-monitoring',
@@ -153,6 +154,12 @@ export default class KubewardenModel extends SteveModel {
         console.warn(`Error fetching pkg: ${ e }`); // eslint-disable-line no-console
       }
     };
+  }
+
+  get artifactHubWhitelist() {
+    const whitelistValue = this.whitelistSetting?.value?.split(',');
+
+    return whitelistValue.includes('artifacthub.io');
   }
 
   get certManagerService() {
@@ -313,29 +320,6 @@ export default class KubewardenModel extends SteveModel {
     const out = Object.values(KUBEWARDEN.SPOOFED);
 
     return out;
-  }
-
-  get policyQuestions() {
-    return async() => {
-      const module = this.spec.module;
-
-      const found = this.policyTypes.find((t) => {
-        if ( module.includes( t.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '') ) ) {
-          return t;
-        }
-      });
-
-      // Spoofing the questions object from hard-typed questions json for each policy
-      if ( found ) {
-        const short = found.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '');
-        const yml = (await import(/* webpackChunkName: "policy-questions" */`../questions/policy-questions/${ short }.yml`)).default;
-        const serialized = jsyaml.load(JSON.stringify(yml));
-
-        return serialized;
-      }
-
-      return null;
-    };
   }
 
   async addGrafanaDashboard(type) {

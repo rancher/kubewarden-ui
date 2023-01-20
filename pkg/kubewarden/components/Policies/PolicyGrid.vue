@@ -51,7 +51,7 @@ export default {
           const searchTokens = this.searchQuery.split(/\s*[, ]\s*/).map(x => ensureRegex(x, false));
 
           for ( const token of searchTokens ) {
-            if ( !subtype.label?.match(token) && (subtype.description && !subtype.description.match(token)) ) {
+            if ( !subtype.display_name?.match(token) && (subtype.description && !subtype.description.match(token)) ) {
               return false;
             }
           }
@@ -68,7 +68,7 @@ export default {
         return true;
       });
 
-      return sortBy(out, ['category', 'label', 'description']);
+      return sortBy(out, ['name']);
     },
 
     keywordOptions() {
@@ -173,7 +173,7 @@ export default {
         v-for="subtype in filteredSubtypes"
         :key="subtype.package_id"
         class="subtype"
-        @click="$emit('selectType', subtype.name)"
+        @click="$emit('selectType', subtype)"
       >
         <div class="subtype__metadata">
           <div class="subtype__badge">

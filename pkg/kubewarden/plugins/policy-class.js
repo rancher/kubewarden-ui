@@ -1,7 +1,31 @@
+import jsyaml from 'js-yaml';
+
 import { colorForState, stateDisplay } from '@shell/plugins/dashboard-store/resource-class';
 import { get } from '@shell/utils/object';
 
-import KubewardenModel, { colorForStatus } from './kubewarden-class';
+import KubewardenModel, { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION, colorForStatus } from './kubewarden-class';
+
+export const DEFAULT_POLICY = {
+  apiVersion: '',
+  kind:       '',
+  metadata:   {
+    name:      '',
+    namespace: ''
+  },
+  spec:       {
+    policyServer: '',
+    module:       '',
+    rules:        [{
+      apiGroups:   [],
+      apiVersions: [],
+      resources:   [],
+      operations:  []
+    }],
+    contextAware: false,
+    mutating:     false,
+    settings:     {}
+  }
+};
 
 export default class PolicyModel extends KubewardenModel {
   get _availableActions() {
@@ -37,5 +61,39 @@ export default class PolicyModel extends KubewardenModel {
     }
 
     return colorForState(this.state);
+  }
+
+  /*
+    If a the policy is from ArtifactHub we need to fetch the questions that correspond to the
+    version of the policy. This is saved as an annotation on the policy.
+  */
+  get artifactHubPackageVersion() {
+    return () => {
+      if ( !this.artifactHubWhitelist ) {
+        return { error: 'ArtifactHub.io has not been added to the `management.cattle.io.settings/whitelist-domain` setting' };
+      }
+
+      try {
+        const pkgAnnotation = this.metadata?.annotations?.[ARTIFACTHUB_PKG_ANNOTATION];
+
+        if ( pkgAnnotation ) {
+          const url = `/meta/proxy/${ ARTIFACTHUB_ENDPOINT }/packages/kubewarden/${ pkgAnnotation }`;
+
+          return this.$dispatch('management/request', { url, redirectUnauthorized: false }, { root: true });
+        }
+      } catch (e) {
+        console.warn(`Error fetching pkg version: ${ e }`); // eslint-disable-line no-console
+      }
+    };
+  }
+
+  parsePackageMetadata(data) {
+    if ( data ) {
+      const parsed = JSON.parse(JSON.stringify(data));
+
+      return jsyaml.load(parsed);
+    }
+
+    return null;
   }
 }
