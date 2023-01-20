@@ -3,9 +3,18 @@ import KeyValue from '@shell/components/form/KeyValue';
 import Question from './Question';
 
 export default {
-  name:       'QuestionMap',
+  name: 'QuestionMap',
+
+  props: {
+    value: {
+      type:    [Array, Object],
+      default: () => []
+    }
+  },
+
   components: { KeyValue },
-  mixins:     [Question],
+
+  mixins: [Question],
 
   methods: {
     update(val) {

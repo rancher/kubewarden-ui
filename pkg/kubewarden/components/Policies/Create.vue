@@ -160,8 +160,8 @@ export default ({
     },
 
     packageValues() {
-      if ( this.type ) {
-        const pkg = this.packages?.find(p => p.name === this.type);
+      if ( this.type?.name ) {
+        const pkg = this.packages?.find(p => p.name === this.type.name);
 
         return pkg;
       }
@@ -440,6 +440,8 @@ $color: var(--body-text) !important;
 
 ::v-deep .header {
   .step-sequence {
+    display: block;
+
     .steps {
       & .divider {
         top: 22px;
