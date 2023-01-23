@@ -235,7 +235,9 @@ export default ({
         const promises = this.repository.packages.map(pkg => this.packageDetails(pkg));
 
         try {
-          this.packages = await Promise.all(promises);
+          const packages = await Promise.all(promises);
+
+          this.packages = packages.filter(pkg => pkg?.data?.['rancher/hide-ui'] !== 'true');
         } catch (e) {
           console.warn(`Error fetching packages: ${ e }`); // eslint-disable-line no-console
         }
