@@ -1,8 +1,11 @@
 <script>
+import merge from 'lodash/merge';
 import { _CREATE } from '@shell/config/query-params';
 import { CAPI, CONFIG_MAP, SERVICE_ACCOUNT } from '@shell/config/types';
 import { allHash } from '@shell/utils/promise';
+import { clone } from '@shell/utils/object';
 
+import Loading from '@shell/components/Loading';
 import Tab from '@shell/components/Tabbed/Tab';
 import Labels from '@shell/components/form/Labels';
 
@@ -17,14 +20,19 @@ export default {
       default: _CREATE
     },
 
+    resource: {
+      type:    Object,
+      default: () => {}
+    },
+
     value: {
       type:     Object,
-      required: true
+      default:  () => {}
     }
   },
 
   components: {
-    General, Labels, Tab, Registry, Verification
+    General, Labels, Loading, Tab, Registry, Verification
   },
 
   async fetch() {
@@ -47,14 +55,28 @@ export default {
 
     this.configMaps = hash.configMaps || [];
     this.serviceAccounts = hash.serviceAccounts || [];
+
+    /*
+      Cloning the resource here to update the labels and annotations because the structuredClone
+      of the DEFAULT_POLICY will not contain the model functions: `setLabels`, `setAnnotations`.
+    */
+    this.resourceClone = clone(this.resource);
   },
 
   data() {
     return {
       chartValues:     this.value.questions,
+      resourceClone:   null,
       configMaps:      [],
       serviceAccounts: []
     };
+  },
+
+  watch: {
+    'resourceClone.metadata': {
+      deep:    true,
+      handler: 'update'
+    }
   },
 
   methods: {
@@ -73,23 +95,29 @@ export default {
         // eslint-disable-next-line no-console
         console.warn(`Error refreshing authority refs: ${ e }`);
       }
+    },
+
+    update(e) {
+      merge(this.chartValues.metadata, e);
     }
   }
 };
+
 </script>
 
 <template>
-  <div>
-    <Tab name="general" label="General" :weight="99">
+  <Loading v-if="$fetchState.pending" mode="relative" />
+  <div v-else>
+    <Tab name="general" label-key="kubewarden.tabs.general.label" :weight="99">
       <General v-model="chartValues" :mode="mode" :service-accounts="serviceAccounts" />
     </Tab>
-    <Tab name="labels" label="Labels & Annotations" :weight="98">
-      <Labels v-model="chartValues.metadata" :mode="mode" />
+    <Tab name="labels" label-key="generic.labelsAndAnnotations" :weight="98">
+      <Labels v-model="resourceClone" :mode="mode" />
     </Tab>
-    <Tab name="verification" label="Verification" :weight="97">
+    <Tab name="verification" label-key="kubewarden.tabs.verification.label" :weight="97">
       <Verification :value="chartValues.spec" :mode="mode" :config-maps="configMaps" />
     </Tab>
-    <Tab name="registry" label="Container Registry" :weight="96" @active="refresh">
+    <Tab name="registry" label-key="kubewarden.tabs.registry.label" :weight="96" @active="refresh">
       <Registry ref="registry" :value="chartValues.spec" :mode="mode" />
     </Tab>
   </div>

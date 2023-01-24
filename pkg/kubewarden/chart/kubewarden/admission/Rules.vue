@@ -3,6 +3,8 @@ import { mapGetters } from 'vuex';
 import { _CREATE, _VIEW } from '@shell/config/query-params';
 import { removeAt } from '@shell/utils/array';
 
+import Loading from '@shell/components/Loading';
+
 import Rule from './Rule';
 
 export default {
@@ -20,7 +22,7 @@ export default {
     }
   },
 
-  components: { Rule },
+  components: { Loading, Rule },
 
   async fetch() {
     await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: 'apigroup' });
@@ -61,7 +63,8 @@ export default {
 </script>
 
 <template>
-  <div>
+  <Loading v-if="$fetchState.pending" mode="relative" />
+  <div v-else>
     <div v-for="(rule, index) in rules" :key="'filtered-rule-' + index">
       <Rule
         ref="lastRule"

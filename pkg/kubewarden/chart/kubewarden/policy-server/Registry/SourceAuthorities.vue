@@ -14,7 +14,7 @@ export default {
 
     // chartValues.spec.sourceAuthorities
     value: {
-      type:     Object,
+      type:     [Array, Object],
       default:  () => {
         return {};
       }

@@ -1,6 +1,7 @@
 <script>
 import { _CREATE } from '@shell/config/query-params';
 
+import Loading from '@shell/components/Loading';
 import Tabbed from '@shell/components/Tabbed';
 
 export default {
@@ -14,7 +15,7 @@ export default {
 
     chartValues: {
       type:     Object,
-      required: true
+      default:  () => {}
     },
 
     value: {
@@ -23,9 +24,13 @@ export default {
     }
   },
 
-  components: { Tabbed },
+  components: { Loading, Tabbed },
 
   async fetch() {
+    if ( !this.isCreate && this.value ) {
+      this.configValues = { questions: this.value };
+    }
+
     try {
       await this.loadValuesComponent();
     } catch (e) {
@@ -35,6 +40,7 @@ export default {
 
   data() {
     return {
+      configValues:        null,
       showQuestions:       true,
       showValuesComponent: false,
       valuesComponent:     null
@@ -44,6 +50,10 @@ export default {
   computed: {
     isCreate() {
       return this.mode === _CREATE;
+    },
+
+    componentValue() {
+      return this.isCreate ? this.chartValues : this.configValues;
     }
   },
 
@@ -65,22 +75,22 @@ export default {
 </script>
 
 <template>
-  <div>
-    <div class="scroll__container">
-      <div class="scroll__content">
-        <Tabbed
-          ref="tabs"
-          :side-tabs="true"
-          class="step__values__content"
-          @changed="tabChanged($event)"
-        >
-          <component
-            :is="valuesComponent"
-            v-model="chartValues"
-            :mode="mode"
-          />
-        </Tabbed>
-      </div>
+  <Loading v-if="$fetchState.pending" mode="relative" />
+  <div v-else class="scroll__container">
+    <div class="scroll__content">
+      <Tabbed
+        ref="tabs"
+        :side-tabs="true"
+        class="step__values__content"
+        @changed="tabChanged($event)"
+      >
+        <component
+          :is="valuesComponent"
+          v-model="componentValue"
+          :resource="value"
+          :mode="mode"
+        />
+      </Tabbed>
     </div>
   </div>
 </template>

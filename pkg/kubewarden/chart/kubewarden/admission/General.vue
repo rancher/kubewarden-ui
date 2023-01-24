@@ -5,8 +5,9 @@ import isEmpty from 'lodash/isEmpty';
 import { _CREATE } from '@shell/config/query-params';
 import { set } from '@shell/utils/object';
 
-import NameNsDescription from '@shell/components/form/NameNsDescription';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
+import Loading from '@shell/components/Loading';
+import NameNsDescription from '@shell/components/form/NameNsDescription';
 import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
@@ -34,10 +35,11 @@ export default {
   },
 
   components: {
-    Banner,
-    NameNsDescription,
-    LabeledInput,
     LabeledSelect,
+    Loading,
+    NameNsDescription,
+    Banner,
+    LabeledInput,
     RadioGroup
   },
 
@@ -134,7 +136,8 @@ export default {
 </script>
 
 <template>
-  <div>
+  <Loading v-if="$fetchState.pending" mode="relative" />
+  <div v-else>
     <div class="row">
       <div class="col span-12">
         <NameNsDescription

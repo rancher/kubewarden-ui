@@ -8,7 +8,11 @@ import { KUBEWARDEN } from '../types';
 export const DEFAULT_POLICY_SERVER = {
   apiVersion: 'policies.kubewarden.io/v1alpha2',
   kind:       'PolicyServer',
-  metadata:   { annotations: {}, labels: {} },
+  metadata:   {
+    annotations: {},
+    labels:      {},
+    name:        ''
+  },
   spec:       {
     annotations: {},
     env:         [
@@ -18,10 +22,10 @@ export const DEFAULT_POLICY_SERVER = {
     ],
     image:              'ghcr.io/kubewarden/policy-server:latest',
     replicas:           1,
-    serviceAccountName: 'policy-server',
+    serviceAccountName: '',
     verificationConfig: '',
     insecureSources:    [],
-    sourceAuthorities:  null
+    sourceAuthorities:  {}
   }
 };
 

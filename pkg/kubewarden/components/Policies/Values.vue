@@ -7,6 +7,7 @@ import { createYaml, saferDump } from '@shell/utils/create-yaml';
 import { set } from '@shell/utils/object';
 
 import ButtonGroup from '@shell/components/ButtonGroup';
+import Loading from '@shell/components/Loading';
 import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
@@ -40,7 +41,7 @@ export default {
   },
 
   components: {
-    ButtonGroup, ResourceCancelModal, Tabbed, YamlEditor
+    ButtonGroup, Loading, ResourceCancelModal, Tabbed, YamlEditor
   },
 
   async fetch() {
@@ -152,7 +153,8 @@ export default {
 </script>
 
 <template>
-  <div>
+  <Loading v-if="$fetchState.pending" mode="relative" />
+  <div v-else>
     <div v-if="isCreate" class="step__values__controls">
       <ButtonGroup
         v-model="yamlOption"

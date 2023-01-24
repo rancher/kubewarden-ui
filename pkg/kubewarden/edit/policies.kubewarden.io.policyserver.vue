@@ -1,21 +1,20 @@
 <script>
 import { _CREATE, _EDIT } from '@shell/config/query-params';
-import ChartMixin from '@shell/mixins/chart';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import CruResource from '@shell/components/CruResource';
-import Config from '../../components/Policies/Config';
-import Create from '../../components/Policies/Create';
+
+import Values from '../components/PolicyServer/Values';
+import Create from '../components/PolicyServer/Create';
 
 export default {
-  name: 'AdmissionPolicy',
+  components: {
+    CruResource, Values, Create
+  },
+
+  mixins: [CreateEditView],
 
   props: {
-    value: {
-      type:     Object,
-      required: true
-    },
-
     mode: {
       type:    String,
       default: _EDIT
@@ -24,27 +23,22 @@ export default {
     realMode: {
       type:    String,
       default: _EDIT
-    }
+    },
+
+    value: {
+      type:     Object,
+      required: true
+    },
   },
 
-  components: {
-    CruResource, Config, Create
-  },
-
-  mixins: [ChartMixin, CreateEditView],
-
-  async fetch() {
-    await this.fetchChart();
-  },
-
-  provide() {
-    return { chartType: this.value.type };
+  data() {
+    return { errors: [] };
   },
 
   computed: {
     isCreate() {
       return this.realMode === _CREATE;
-    },
+    }
   },
 
   methods: {
@@ -54,7 +48,7 @@ export default {
       } catch (e) {
         this.errors.push(e);
       }
-    },
+    }
   }
 };
 </script>
@@ -65,8 +59,9 @@ export default {
     v-else
     :resource="value"
     :mode="realMode"
+    :errors="errors"
     @finish="finish"
   >
-    <Config :value="value" :mode="realMode" />
+    <Values :value="value" :mode="mode" />
   </CruResource>
 </template>

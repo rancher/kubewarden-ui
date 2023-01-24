@@ -1,12 +1,10 @@
 <script>
 import merge from 'lodash/merge';
+import jsyaml from 'js-yaml';
 import { _CREATE } from '@shell/config/query-params';
-import { SCHEMA } from '@shell/config/types';
 import CreateEditView from '@shell/mixins/create-edit-view';
-import { createYaml } from '@shell/utils/create-yaml';
 import { clone } from '@shell/utils/object';
 
-import Loading from '@shell/components/Loading';
 import CruResource from '@shell/components/CruResource';
 
 import { DEFAULT_POLICY_SERVER } from '../../models/policies.kubewarden.io.policyserver';
@@ -27,21 +25,19 @@ export default {
     }
   },
 
-  components: {
-    Loading, Values, CruResource
-  },
+  components: { Values, CruResource },
 
   mixins: [CreateEditView],
 
   fetch() {
     this.errors = [];
 
-    const _defaultPolicyServer = structuredClone(DEFAULT_POLICY_SERVER);
-
-    this.chartValues = { questions: _defaultPolicyServer };
+    this.chartValues = { questions: structuredClone(DEFAULT_POLICY_SERVER) };
 
     this.value.apiVersion = `${ this.schema?.attributes?.group }.${ this.schema?.attributes?.version }`;
     this.value.kind = this.schema?.attributes?.kind;
+
+    merge(this.chartValues.questions, this.value);
   },
 
   data() {
@@ -52,10 +48,6 @@ export default {
   },
 
   methods: {
-    clearErrors() {
-      this.errors = [];
-    },
-
     async finish(event) {
       try {
         merge(this.value, this.chartValues?.questions);
@@ -67,29 +59,23 @@ export default {
     },
 
     generateYaml() {
-      const inStore = this.$store.getters['currentStore'](this.value);
-      const schemas = this.$store.getters[`${ inStore }/all`](SCHEMA);
       const cloned = this.chartValues?.questions ? clone(this.chartValues.questions) : this.value;
 
-      const out = createYaml(schemas, this.value.type, cloned);
-
-      return out;
+      return jsyaml.dump(cloned);
     }
   }
 };
 </script>
 
 <template>
-  <Loading v-if="$fetchState.pending" mode="relative" />
   <CruResource
-    v-else
     :resource="value"
     :mode="realMode"
     :done-route="doneRoute"
     :errors="errors"
     :generate-yaml="generateYaml"
     @finish="finish"
-    @error="clearErrors"
+    @error="e => errors = e"
   >
     <Values :value="value" :chart-values="chartValues" :mode="mode" />
   </CruResource>

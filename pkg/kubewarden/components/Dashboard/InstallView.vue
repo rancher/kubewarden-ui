@@ -5,6 +5,7 @@ import { CATALOG, SERVICE } from '@shell/config/types';
 
 import AsyncButton from '@shell/components/AsyncButton';
 import CopyCode from '@shell/components/CopyCode';
+import Loading from '@shell/components/Loading';
 
 import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPO } from '../../types';
 
@@ -21,7 +22,8 @@ export default {
   components: {
     AsyncButton,
     CopyCode,
-    InstallWizard
+    InstallWizard,
+    Loading
   },
 
   async fetch() {
@@ -165,7 +167,8 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+  <Loading v-if="$fetchState.pending" />
+  <div v-else class="container">
     <div v-if="!install" class="title p-10">
       <div class="logo mt-20 mb-10">
         <img
