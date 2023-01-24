@@ -49,41 +49,44 @@ kubewarden:
       repository:
         title: Repository
         description: You will need the Kubewarden helm repository (https://charts.kubewarden.io) to install the `kubewarden` chart.
-
-    tabs:
-      general:
-        label: General
-        nameOverride:
-          label: nameOverride
-          description: Replaces the release name of the chart in Chart.yaml file when this is used to construct Kubernetes object names.
-        fullnameOverride:
-          label: fullnameOverride
-          description: Completely replaces the generated release name.
-        imagePullSecrets:
-          label: Image Pull Secrets
-          description: Secrets to pull container images from private registries.
-        image:
-          label: Image
-          description: Controller image to be used.
-          repository: Repository
-          tag: Tag
-        preDeleteJob: Kubectl image to be used in the pre-delete helm hook.
-        podAnnotations: Pod Annotations
-        nodeSelector: Node Selector
-        tolerations: Tolerations
-        affinity: Affinity
-        tls:
-          source: Source
-          certManagerIssuerName: Cert-Manager Issuer Name
-      telemetry:
-        label: Telemetry
-        checkbox: Enabled
-        port: Port
-        tracing:
-          label: Tracing
-          endpoint: Endpoint
-          jaeger: Jaeger endpoint to send traces.
-          placeholder: all-in-one-collector.jaeger.svc.cluster.local:14250
+  tabs:
+    general:
+      label: General
+      nameOverride:
+        label: nameOverride
+        description: Replaces the release name of the chart in Chart.yaml file when this is used to construct Kubernetes object names.
+      fullnameOverride:
+        label: fullnameOverride
+        description: Completely replaces the generated release name.
+      imagePullSecrets:
+        label: Image Pull Secrets
+        description: Secrets to pull container images from private registries.
+      image:
+        label: Image
+        description: Controller image to be used.
+        repository: Repository
+        tag: Tag
+      preDeleteJob: Kubectl image to be used in the pre-delete helm hook.
+      podAnnotations: Pod Annotations
+      nodeSelector: Node Selector
+      tolerations: Tolerations
+      affinity: Affinity
+      tls:
+        source: Source
+        certManagerIssuerName: Cert-Manager Issuer Name
+    telemetry:
+      label: Telemetry
+      checkbox: Enabled
+      port: Port
+      tracing:
+        label: Tracing
+        endpoint: Endpoint
+        jaeger: Jaeger endpoint to send traces.
+        placeholder: all-in-one-collector.jaeger.svc.cluster.local:14250
+    verification:
+      label: Verification
+    registry:
+      label: Container Registry
   policyServer:
     title: Policy Servers
     noDefaultsInstalled:

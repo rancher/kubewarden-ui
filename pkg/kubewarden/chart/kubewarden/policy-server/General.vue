@@ -1,7 +1,6 @@
 <script>
 import { _CREATE } from '@shell/config/query-params';
 
-import NameNsDescription from '@shell/components/form/NameNsDescription';
 import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
@@ -25,14 +24,11 @@ export default {
   },
 
   components: {
-    LabeledInput, NameNsDescription, RadioGroup, ServiceNameSelect
+    LabeledInput, RadioGroup, ServiceNameSelect
   },
 
   data() {
-    return {
-      defaultImage:          true,
-      defaultServiceAccount: this.value?.spec?.serviceAccountName || null,
-    };
+    return { defaultImage: true };
   },
 
   computed: {
@@ -46,13 +42,12 @@ export default {
 <template>
   <div>
     <div class="row mt-10">
-      <div class="col span-12">
-        <NameNsDescription
+      <div class="col span-6 mb-20">
+        <LabeledInput
+          v-model="value.metadata.name"
           :mode="mode"
-          :value="value"
-          :namespaced="false"
-          :description-hidden="true"
-          name-key="metadata.name"
+          :label="t('nameNsDescription.name.label')"
+          :placeholder="t('nameNsDescription.name.placeholder')"
         />
       </div>
     </div>

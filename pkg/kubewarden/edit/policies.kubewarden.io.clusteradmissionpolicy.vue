@@ -1,11 +1,10 @@
 <script>
 import { _CREATE, _EDIT } from '@shell/config/query-params';
-import ChartMixin from '@shell/mixins/chart';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import CruResource from '@shell/components/CruResource';
-import Config from '../../components/Policies/Config';
-import Create from '../../components/Policies/Create';
+import Config from '../components/Policies/Config';
+import Create from '../components/Policies/Create';
 
 export default {
   name: 'ClusterAdmissionPolicy',
@@ -31,11 +30,7 @@ export default {
     CruResource, Config, Create
   },
 
-  mixins: [ChartMixin, CreateEditView],
-
-  async fetch() {
-    await this.fetchChart();
-  },
+  mixins: [CreateEditView],
 
   provide() {
     return { chartType: this.value.type };

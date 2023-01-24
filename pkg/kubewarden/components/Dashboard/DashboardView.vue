@@ -7,6 +7,7 @@ import { KUBERNETES, CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels
 import { allHash } from '@shell/utils/promise';
 
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
+import Loading from '@shell/components/Loading';
 
 import { DASHBOARD_HEADERS } from '../../config/table-headers';
 import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS } from '../../types';
@@ -16,7 +17,7 @@ import Card from './Card';
 
 export default {
   components: {
-    Card, ConsumptionGauge, DefaultsBanner
+    Card, ConsumptionGauge, DefaultsBanner, Loading
   },
 
   async fetch() {
@@ -140,7 +141,8 @@ export default {
 </script>
 
 <template>
-  <div class="dashboard">
+  <Loading v-if="$fetchState.pending" />
+  <div v-else class="dashboard">
     <div class="head">
       <div class="head-title">
         <h1>{{ t('kubewarden.dashboard.intro') }}</h1>

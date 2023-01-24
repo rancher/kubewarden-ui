@@ -3,20 +3,18 @@ import { _CREATE, _EDIT } from '@shell/config/query-params';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import CruResource from '@shell/components/CruResource';
-
-import { KUBEWARDEN } from '../../types';
-
-import Config from './Config';
-import Create from './Create';
+import Config from '../components/Policies/Config';
+import Create from '../components/Policies/Create';
 
 export default {
-  components: {
-    CruResource, Config, Create
-  },
-
-  mixins: [CreateEditView],
+  name: 'AdmissionPolicy',
 
   props: {
+    value: {
+      type:     Object,
+      required: true
+    },
+
     mode: {
       type:    String,
       default: _EDIT
@@ -25,38 +23,31 @@ export default {
     realMode: {
       type:    String,
       default: _EDIT
-    },
-
-    value: {
-      type:     Object,
-      required: true
-    },
+    }
   },
 
-  async fetch() {
-    this.errors = [];
-
-    await this.$store.getters['cluster/schemaFor'](KUBEWARDEN.POLICY_SERVER);
+  components: {
+    CruResource, Config, Create
   },
 
-  data() {
-    return { errors: null };
+  mixins: [CreateEditView],
+
+  provide() {
+    return { chartType: this.value.type };
   },
 
   computed: {
     isCreate() {
       return this.realMode === _CREATE;
-    }
+    },
   },
 
   methods: {
     async finish(event) {
       try {
         await this.save(event);
-      } catch (e) {
-        this.errors.push(e);
-      }
-    }
+      } catch (e) {}
+    },
   }
 };
 </script>
@@ -67,9 +58,8 @@ export default {
     v-else
     :resource="value"
     :mode="realMode"
-    :errors="errors"
     @finish="finish"
   >
-    <Config :value="value" :mode="mode" />
+    <Config :value="value" :mode="realMode" />
   </CruResource>
 </template>

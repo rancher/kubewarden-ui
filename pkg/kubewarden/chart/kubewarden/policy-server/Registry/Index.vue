@@ -41,8 +41,8 @@ export default {
   },
 
   methods: {
-    update() {
-      this.$set(this.value, 'sourceAuthorities', this.sourceAuthorities);
+    update(prop) {
+      this.$set(this.value, [prop], this[prop]);
     }
   }
 };
@@ -70,6 +70,7 @@ export default {
             :add-allowed="true"
             :add-label="t('kubewarden.policyServerConfig.insecureSources.addLabel')"
             :value-placeholder="t('kubewarden.policyServerConfig.insecureSources.placeholder')"
+            @input="update('insecureSources')"
           />
         </div>
       </div>
@@ -80,7 +81,12 @@ export default {
     <template>
       <div class="row mb-20">
         <div class="col span-12">
-          <SourceAuthorities ref="sourceAuthorities" v-model="sourceAuthorities" :mode="mode" @update="update" />
+          <SourceAuthorities
+            ref="sourceAuthorities"
+            v-model="sourceAuthorities"
+            :mode="mode"
+            @update="update('sourceAuthorities')"
+          />
         </div>
       </div>
     </template>

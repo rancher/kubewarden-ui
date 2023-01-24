@@ -132,6 +132,14 @@ export default {
       return isEmpty(this.filteredValidations);
     },
 
+    relatedPoliciesTotal() {
+      if ( isEmpty(this.relatedPolicies) ) {
+        return 0;
+      }
+
+      return this.relatedPolicies.length;
+    },
+
     tracesGauges() {
       if ( !this.emptyTraces ) {
         return this.value.tracesGauges(this.filteredValidations);
@@ -175,7 +183,7 @@ export default {
               <CountGauge
                 v-for="(group, key) in policyGauges"
                 :key="key"
-                :total="relatedPolicies.length"
+                :total="relatedPoliciesTotal"
                 :useful="group.count || 0"
                 :graphical="false"
                 :primary-color-var="`--sizzle-${group.color}`"
@@ -209,7 +217,7 @@ export default {
       <Tab name="related-policies" label="Policies" :weight="99">
         <template #default>
           <ResourceTable
-            :rows="relatedPolicies"
+            :rows="relatedPolicies || []"
             :headers="RELATED_HEADERS"
             :groupable="true"
             group-by="kind"
