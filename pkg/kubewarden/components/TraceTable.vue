@@ -90,21 +90,18 @@ export default {
       :paging="true"
       :rows-per-page="rowsPerPage"
     >
-      <template #col:operation="{row}">
-        <td>
-          <BadgeState
-            :label="row.operation"
-            :color="opColor(row.operation)"
-          />
-        </td>
-      </template>
-
       <template #col:mode="{row}">
         <td>
           <BadgeState
             :label="capitalizeMessage(row.mode)"
             :color="modeColor(row.mode)"
           />
+        </td>
+      </template>
+
+      <template #col:operation="{row}">
+        <td>
+          {{ row.operation }}
         </td>
       </template>
 

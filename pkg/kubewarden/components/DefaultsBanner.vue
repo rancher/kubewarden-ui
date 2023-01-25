@@ -60,9 +60,9 @@ export default {
     :closable="true"
     @close="closeDefaultsBanner()"
   >
-    <p v-html="t('kubewarden.policyServer.noDefaultsInstalled.description', {}, true)"></p>
+    <span v-html="t('kubewarden.policyServer.noDefaultsInstalled.description', {}, true)" />
     <button
-      class="btn role-primary mt-10"
+      class="btn role-primary ml-10"
       @click.prevent="chartRoute"
     >
       {{ t("kubewarden.policyServer.noDefaultsInstalled.button") }}

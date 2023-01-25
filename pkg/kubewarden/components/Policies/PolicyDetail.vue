@@ -59,33 +59,6 @@ export default {
       } catch (e) {
         console.error(`Error fetching Grafana service: ${ e }`); // eslint-disable-line no-console
       }
-    } else {
-      // If not we need to direct the user to install monitoring
-      await this.$store.dispatch('catalog/load');
-
-      // Check to see that the chart we need are available
-      const charts = this.$store.getters['catalog/rawCharts'];
-      const chartValues = Object.values(charts);
-
-      const monitoringChart = chartValues.find(
-        chart => chart.chartName === 'rancher-monitoring'
-      );
-
-      if ( monitoringChart ) {
-        this.monitoringRoute = {
-          name:   'c-cluster-apps-charts-install',
-          params: {
-            cluster:  this.$route.params.cluster,
-            product:  this.$store.getters['productId'],
-          },
-          query: {
-            [REPO_TYPE]: 'cluster',
-            [REPO]:      'rancher-charts',
-            [CHART]:     'rancher-monitoring',
-            [VERSION]:   monitoringChart.versions[0]?.version,
-          }
-        };
-      }
     }
 
     this.jaegerService = await this.value.jaegerService();
@@ -100,7 +73,6 @@ export default {
       jaegerService:       null,
       metricsProxy:        null,
       metricsService:      null,
-      monitoringRoute:     null,
       reloadRequired:      false,
       filteredValidations: null,
 
@@ -188,7 +160,6 @@ export default {
           v-if="!monitoringStatus.installed || !metricsService"
           :metrics-service="metricsService"
           :metrics-type="metricsType"
-          :monitoring-route="monitoringRoute"
           :reload-required="reloadRequired"
           @add="addDashboard"
         />

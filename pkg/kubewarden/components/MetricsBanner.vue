@@ -16,10 +16,6 @@ export default {
       type:     String,
       required: true
     },
-    monitoringRoute: {
-      type:     Object,
-      default:  null
-    },
     reloadRequired: {
       type:     Boolean,
       default:  false
@@ -28,13 +24,23 @@ export default {
 
   components: { AsyncButton, Banner },
 
-  computed: { ...monitoringStatus() },
+  computed: {
+    ...monitoringStatus(),
+
+    monitoringChart() {
+      return this.$store.getters['catalog/chart']({ chartName: 'rancher-monitoring' });
+    },
+  },
 
   methods: {
     // Used when ConfigMap is added, reload to see updated Grafana dashboard
     reload() {
       this.$router.go();
     },
+
+    chartRoute() {
+      this.monitoringChart.goToInstall();
+    }
   }
 };
 </script>
@@ -43,9 +49,12 @@ export default {
   <div v-if="!monitoringStatus.installed">
     <Banner color="warning">
       <span v-html="t('kubewarden.monitoring.notInstalled', {}, true)" />
-      <nuxt-link :to="monitoringRoute">
-        {{ t('kubewarden.monitoring.install') }}
-      </nuxt-link>
+      <button
+        class="btn role-primary ml-10"
+        @click.prevent="chartRoute"
+      >
+        {{ t("kubewarden.policyServer.noDefaultsInstalled.button") }}
+      </button>
     </Banner>
   </div>
 

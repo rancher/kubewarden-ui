@@ -1,6 +1,6 @@
 import jsyaml from 'js-yaml';
 
-import { colorForState, stateDisplay } from '@shell/plugins/dashboard-store/resource-class';
+import { colorForState, stateBackground, stateDisplay } from '@shell/plugins/dashboard-store/resource-class';
 import { get } from '@shell/utils/object';
 
 import KubewardenModel, { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION, colorForStatus } from './kubewarden-class';
@@ -61,6 +61,16 @@ export default class PolicyModel extends KubewardenModel {
     }
 
     return colorForState(this.state);
+  }
+
+  get stateBackground() {
+    const color = this.colorForState;
+
+    if ( color ) {
+      return color.replace('text-', 'bg-');
+    }
+
+    return stateBackground();
   }
 
   /*
