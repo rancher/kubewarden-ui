@@ -170,28 +170,28 @@ export const DASHBOARD_HEADERS = [
 
 export const TRACE_HEADERS = [
   {
-    name:  'operation',
-    value: 'operation',
-    label: 'Operation',
-    sort:  'operation'
-  },
-  {
     name:  'mode',
     value: 'mode',
     label: 'Mode',
     sort:  'mode'
   },
   {
-    name:  'kind',
-    value: 'kind',
-    label: 'Kind',
-    sort:  'kind'
-  },
-  {
     name:  'name',
     value: 'name',
     label: 'Name',
     sort:  'name'
+  },
+  {
+    name:  'operation',
+    value: 'operation',
+    label: 'Operation',
+    sort:  'operation'
+  },
+  {
+    name:  'kind',
+    value: 'kind',
+    label: 'Kind',
+    sort:  'kind'
   },
   {
     name:  'namespace',

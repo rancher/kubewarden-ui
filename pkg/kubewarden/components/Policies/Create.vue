@@ -65,6 +65,7 @@ export default ({
     return {
       errors:            null,
       bannerTitle:       null,
+      loadingPackages:   false,
       packages:          null,
       repository:        null,
       type:              null,
@@ -185,11 +186,17 @@ export default ({
   methods: {
     async addArtifactHub(btnCb) {
       try {
+        this.loadingPackages = true;
+
         await this.value.updateWhitelist('artifacthub.io');
+        await this.getPackages();
+
         btnCb(true);
+        this.loadingPackages = false;
       } catch (err) {
         this.errors = err;
         btnCb(false);
+        this.loadingPackages = false;
       }
     },
 
@@ -353,8 +360,20 @@ export default ({
 <template>
   <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-else>
+    <template v-if="!hasArtifactHub">
+      <Banner
+        class="type-banner mb-20 mt-0"
+        color="warning"
+      >
+        <div>
+          <p class="mb-10" v-html="t('kubewarden.policies.noArtifactHub', {}, true)" />
+          <AsyncButton mode="artifactHub" @click="addArtifactHub" />
+        </div>
+      </Banner>
+    </template>
+    <Loading v-if="loadingPackages" />
     <Wizard
-      v-if="value"
+      v-if="value && !loadingPackages"
       ref="wizard"
       v-model="value"
       :errors="errors"
@@ -369,20 +388,6 @@ export default ({
     >
       <template #policies>
         <PolicyGrid :value="packages" @selectType="selectType($event)">
-          <template v-if="!hasArtifactHub" #whitelistBanner>
-            <Banner
-              class="type-banner mb-20 mt-0"
-              color="warning"
-            >
-              <div>
-                <p class="mb-10">
-                  {{ t('kubewarden.policies.noArtifactHub') }}
-                </p>
-                <AsyncButton mode="artifactHub" @click="addArtifactHub" />
-              </div>
-            </Banner>
-          </template>
-
           <template #customSubtype>
             <div class="subtype" @click="selectType('custom')">
               <div class="subtype__metadata">

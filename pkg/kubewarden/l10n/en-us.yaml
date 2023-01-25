@@ -107,7 +107,7 @@ kubewarden:
     title: Custom Policy
     description: A generic template for using your own policy.
   policies:
-    noArtifactHub: Official Kubewarden policies are hosted on ArtifactHub, in order to show these you will need to add `artifacthub.io` to the whitelist-domain setting.
+    noArtifactHub: Official Kubewarden policies are hosted on <a href="https://artifacthub.io/packages/search?kind=13" target="_blank" rel="noopener noreferrer nofollow">ArtifactHub</a>, in order to show these you will need to add `artifacthub.io` to the whitelist-domain setting.
     noRules: There are no rules configured for this policy.
     namespaceWarning: This policy is targeting Rancher specific namespaces which will cause catastrophic failures with your Rancher deployment.
   utils:
@@ -192,189 +192,13 @@ kubewarden:
       label: Verification Config
       description: This is the name of a VerificationConfig configmap within the same namespace, containing a Sigstore verification configuration. The configuration must be under a key named verification-config in the Configmap. More information can be found in the <a href="https://docs.kubewarden.io/distributing-policies/secure-supply-chain#configuring-the-policy-server-to-check-policy-signatures" target="_blank" rel="noopener noreferrer nofollow">Kubewarden docs</a>.
   policyCharts:
-    signedPolicy: This policy has been signed with cosign (Sigstore).
-    mutationPolicy: Mutation Policy
+    signedPolicy:
+      label: Signed
+      tooltip: This policy has been signed with cosign (Sigstore).
+    mutationPolicy:
+      label: Mutation
+      tooltip: Mutation Policy
     contextAware: Context Aware
-    allow-privilege-escalation-psp:
-      name: Allow Privilege Escalation PSP
-      description: A Pod Security Policy that controls usage of `allowPrivilegeEscalation`
-      resourceType: Pod
-      keywords: |
-        PSP
-        Container
-        Privilege Escalation
-    allowed-fsgroups-psp:
-      name: Allowed fsGroups PSP
-      description: Replacement for the Kubernetes Pod Security Policy that controls the usage of fsGroup in the pod security context
-      resourceType: Pod
-      keywords: |
-        PSP
-        Container
-        Runtime
-    allowed-proc-mount-types-psp:
-      name: Allowed Proc Mount Types PSP
-      description: Replacement for the Kubernetes Pod Security Policy that controls the usage of /proc mount types
-      resourceType: Pod
-      keywords: |
-        PSP
-        Container
-        Runtime
-    apparmor-psp:
-      name: AppArmor PSP
-      description: A Pod Security Policy that controls usage of AppArmor profiles
-      resourceType: Pod
-      keywords: |
-        PSP
-        AppArmor
-    capabilities-psp:
-      name: Capabilities PSP
-      description: A Pod Security Policy that controls Container Capabilities
-      resourceType: Pod
-      keywords: |
-        PSP
-        Container
-        Capability
-        Capabilities
-    disallow-service-loadbalancer:
-      name: Disallow Service LoadBalancer
-      description: A policy that prevents the creation of Service resources of type `LoadBalancer`
-      resourceType: Service
-      keywords: |
-        Service
-    disallow-service-nodeport:
-      name: Disallow Service NodePort
-      description: A policy that prevents the creation of Service resources of type `NodePort`
-      resourceType: Service
-      keywords: |
-        Service
-    flexvolume-drivers-psp:
-      name: FlexVolume Drivers PSP
-      description: Replacement for the Kubernetes Pod Security Policy that controls the allowed `flexVolume` drivers
-      resourceType: Pod
-      keywords: |
-        PSP
-        Container
-        Runtime
-        Flex Volume
-        Flex
-    host-namespaces-psp:
-      name: Host Namespaces PSP
-      description: A Pod Security Policy that controls the usage of host namespaces
-      resourceType: Pod
-      keywords: |
-        PSP
-        Container
-        Network
-    hostpaths-psp:
-      name: Hostpaths PSP
-      description: A Pod Security Policy that controls usage of hostPath volumes
-      resourceType: Pod
-      keywords: |
-        PSP
-        Hostpaths
-        Pod
-    ingress:
-      name: Ingress
-      description: Enforce requirements on Ingress resources
-      resourceType: Ingress
-      keywords: |
-        Ingress
-    pod-privileged-policy:
-      name: Pod Privileged Policy
-      description: Limit the ability to create privileged containers
-      resourceType: Pod
-      keywords: |
-        PSP
-        Pod
-        Container
-        Privileged
-    pod-runtime:
-      name: Pod Runtime
-      description: Control Pod runtimeClass usage
-      resourceType: Pod
-      keywords: |
-        Pod
-        Runtime
-        Container Runtime
-    readonly-root-filesystem-psp:
-      name: Readonly Root Filesystem PSP
-      description: A Kubewarden policy that enforces root filesystem to be readonly
-      resourceType: Pod
-      keywords: |
-        PSP
-        Container
-        filesystem
-        Volume
-    safe-annotations:
-      name: Safe Annotations
-      description: A policy that validates Kubernetes' resource annotations
-      resourceType: Global
-      keywords: |
-        Annotations
-    safe-labels:
-      name: Safe Labels
-      description: A policy that validates Kubernetes' resource labels
-      resourceType: Global
-      keywords: |
-        Labels
-    seccomp-psp:
-      name: Seccomp PSP
-      description: Pod Security Policy that controls usage of Seccomp profile
-      resourceType: Pod
-      keywords: |
-        PSP
-        seccomp
-    selinux-psp:
-      name: SELinux PSP
-      description: Replacement for the Kubernetes Pod Security Policy that controls the usage of SELinux
-      resourceType: Pod
-      keywords: |
-        PSP
-        Container
-        Runtime
-        SELinux
-    sysctl-psp:
-      name: Sysctl PSP
-      description: A Pod Security Policy that controls usage of sysctls in pods
-      resourceType: Pod
-      keywords: |
-        PSP
-        Sysctl
-        Pod
-    trusted-repos:
-      name: Trusted Repos
-      description: Restrict what registries, tags and images can be used
-      resourceType: Pod
-      keywords: |
-        Image
-        Registry
-        Tag
-    user-group-psp:
-      name: User Group PSP
-      description: A Pod Security Policy that controls the container user and groups
-      resourceType: Pod
-      keywords: |
-        PSP
-        Container
-        User
-        Group
-    verify-image-signatures:
-      name: Verify Image Signatures
-      description: Validates Sigstore signatures for containers, init container and ephemeral container that match the name provided in the image settings field.
-      resourceType: Pod
-      keywords: |
-        Pod
-        Signature
-        Sigstore
-        Trusted
-    volumes-psp:
-      name: Volumes PSP
-      description: Pod Security Policy that controls usage of volumes
-      resourceType: Pod
-      keywords: |
-        PSP
-        Volumes
-        Pod
 
 asyncButton:
   artifactHub:

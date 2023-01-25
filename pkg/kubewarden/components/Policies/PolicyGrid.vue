@@ -123,8 +123,6 @@ export default {
   <form
     class="create-resource-container step__policies"
   >
-    <slot name="whitelistBanner"></slot>
-
     <div class="filter">
       <LabeledSelect
         v-model="keywords"
@@ -181,15 +179,21 @@ export default {
           </div>
 
           <div v-if="subtype.signed" class="subtype__signed">
-            <i v-tooltip="t('kubewarden.policyCharts.signedPolicy')" class="icon icon-checkmark" />
+            <span v-tooltip="t('kubewarden.policyCharts.signedPolicy.tooltip')">
+              {{ t('kubewarden.policyCharts.signedPolicy.label') }}
+            </span>
           </div>
 
           <div v-if="subtype.data['kubewarden/mutation'] === 'true'" class="subtype__mutation">
-            <i v-tooltip="t('kubewarden.policyCharts.mutationPolicy')" class="icon icon-edit" />
+            <span v-tooltip="t('kubewarden.policyCharts.mutationPolicy.tooltip')">
+              {{ t('kubewarden.policyCharts.mutationPolicy.label') }}
+            </span>
           </div>
 
           <div v-if="subtype.data['kubewarden/contextAware'] === 'true'" class="subtype__aware">
-            <i v-tooltip="t('kubewarden.policyCharts.contextAware')" class="icon icon-show" />
+            <span>
+              {{ t('kubewarden.policyCharts.contextAware') }}
+            </span>
           </div>
 
           <h4 class="subtype__label">
