@@ -12,7 +12,7 @@ import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 
-import { KUBEWARDEN } from '../../../types';
+import { KUBEWARDEN, KUBEWARDEN_APPS } from '../../../types';
 
 export default {
   name: 'General',
@@ -52,6 +52,14 @@ export default {
 
     if ( this.isCreate && !isEmpty(this.policy.spec) ) {
       set(this.policy.spec, 'mode', 'protect');
+    }
+
+    if ( this.isCreate && !isEmpty(this.policyServers) ) {
+      const defaultPolicyServer = this.policyServers.find((ps) => {
+        return ps.metadata.annotations?.['meta.helm.sh/release-name'] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
+      });
+
+      this.policy.spec.policyServer = defaultPolicyServer?.id;
     }
   },
 
@@ -175,18 +183,6 @@ export default {
       <div class="row mb-20">
         <div class="col span-6">
           <RadioGroup
-            v-model="policy.spec.mutating"
-            name="mutating"
-            :options="[false, true]"
-            :mode="mode"
-            :label="t('kubewarden.policyConfig.mutating.label')"
-            :labels="['No', 'Yes']"
-            :tooltip="t('kubewarden.policyConfig.mutating.tooltip')"
-            required
-          />
-        </div>
-        <div class="col span-6">
-          <RadioGroup
             v-model="policy.spec.mode"
             name="mode"
             :disabled="modeDisabled"
@@ -198,22 +194,20 @@ export default {
           />
           <Banner v-if="showModeBanner" color="warning" :label="t('kubewarden.policyConfig.mode.warning')" />
         </div>
-      </div>
-    </template>
 
-    <template v-if="isGlobal">
-      <div class="row mb-20">
-        <div class="col span-6">
-          <RadioGroup
-            v-model="policy.ignoreRancherNamespaces"
-            name="ignoreRancherNamespaces"
-            :options="[true, false]"
-            :mode="mode"
-            :label="t('kubewarden.policyConfig.ignoreRancherNamespaces.label')"
-            :labels="['Yes', 'No']"
-            :tooltip="t('kubewarden.policyConfig.ignoreRancherNamespaces.tooltip')"
-          />
-        </div>
+        <template v-if="isGlobal">
+          <div class="col span-6">
+            <RadioGroup
+              v-model="policy.ignoreRancherNamespaces"
+              name="ignoreRancherNamespaces"
+              :options="[true, false]"
+              :mode="mode"
+              :label="t('kubewarden.policyConfig.ignoreRancherNamespaces.label')"
+              :labels="['Yes', 'No']"
+              :tooltip="t('kubewarden.policyConfig.ignoreRancherNamespaces.tooltip')"
+            />
+          </div>
+        </template>
       </div>
     </template>
   </div>
