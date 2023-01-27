@@ -16,7 +16,7 @@ kubewarden:
         title: Policy Servers
         description: Kubewarden uses Policy Servers to receive requests to be validated. It does that by executing Kubewarden's policies.
         linkText: Create Policy Server
-        slotTitle: Deployments
+        slotTitle: Policy Server Pods
       admissionPolicy:
         title: Admission Policies
         description: An Admission Policy is a namespace-wide resource. The policy will process only the requests that are targeting the Namespace where the Admission Policy is defined.

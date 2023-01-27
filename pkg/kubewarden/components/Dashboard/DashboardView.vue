@@ -2,7 +2,7 @@
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 
-import { CATALOG, WORKLOAD_TYPES } from '@shell/config/types';
+import { CATALOG, POD, WORKLOAD_TYPES } from '@shell/config/types';
 import { KUBERNETES, CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 import { allHash } from '@shell/utils/promise';
 
@@ -25,7 +25,7 @@ export default {
 
     const hash = await allHash({
       controller:         this.$store.dispatch(`${ inStore }/findMatching`, { type: WORKLOAD_TYPES.DEPLOYMENT, selector: `${ KUBERNETES.MANAGED_NAME }=${ KUBEWARDEN_CHARTS.CONTROLLER }` }),
-      psDeployments:      this.$store.dispatch(`${ inStore }/findMatching`, { type: WORKLOAD_TYPES.DEPLOYMENT, selector: 'kubewarden/policy-server' }),
+      psPods:             this.$store.dispatch(`${ inStore }/findMatching`, { type: POD, selector: 'kubewarden/policy-server' }),
       globalPolicies:     this.$store.dispatch(`${ inStore }/findAll`, { type: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }),
       namespacedPolicies: this.$store.dispatch(`${ inStore }/findAll`, { type: KUBEWARDEN.ADMISSION_POLICY }),
       apps:               this.$store.dispatch(`${ inStore }/findAll`, { type: CATALOG.APP })
@@ -35,8 +35,8 @@ export default {
       this.controller = hash.controller[0];
     }
 
-    if ( !isEmpty(hash.psDeployments) ) {
-      this.psDeployments = hash.psDeployments;
+    if ( !isEmpty(hash.psPods) ) {
+      this.psPods = hash.psPods;
     }
 
     if ( !isEmpty(hash.apps) ) {
@@ -55,7 +55,7 @@ export default {
 
       apps:               null,
       controller:         null,
-      psDeployments:      null,
+      psPods:      null,
     };
   },
 
@@ -68,13 +68,13 @@ export default {
       });
     },
 
-    deployments() {
-      const deps = this.psDeployments || [];
+    policyServers() {
+      const pods = this.psPods || [];
 
-      return deps.reduce((ps, neu) => {
+      return pods.reduce((ps, neu) => {
         return {
           status: {
-            running:       ps.status.running + ( neu.metadata.state.name === 'active' ? 1 : 0 ),
+            running:       ps.status.running + ( neu.metadata.state.name === 'running' ? 1 : 0 ),
             stopped:       ps.status.stopped + ( neu.metadata.state.error ? 1 : 0 ),
             pending:       ps.status.transitioning + ( neu.metadata.state.transitioning ? 1 : 0 )
           },
@@ -184,16 +184,16 @@ export default {
         class="card-container"
       >
         <Card v-if="card.isEnabled" :card="card">
-          <!-- Policy Server deployments -->
+          <!-- Policy Server pods -->
           <span v-if="index === 0">
             <slot>
               <ConsumptionGauge
-                resource-name="Running"
+                resource-name="Active"
                 :color-stops="colorStops"
-                :capacity="deployments.total"
+                :capacity="policyServers.total"
                 :used-as-resource-name="true"
-                :used="deployments.status.running"
-                units="Deployments"
+                :used="policyServers.status.running"
+                units="Pods"
               />
             </slot>
           </span>

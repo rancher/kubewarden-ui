@@ -20,6 +20,11 @@ export default {
       required: true
     },
 
+    disabled: {
+      type:     Boolean,
+      required: true
+    },
+
     mode: {
       type:    String,
       default: _CREATE
@@ -195,6 +200,7 @@ export default {
     <div v-if="isGlobalRule">
       <LabeledSelect
         v-model="value.scope"
+        :disabled="disabled"
         :label="t('kubewarden.policyConfig.scope.label')"
         :tooltip="t('kubewarden.policyConfig.scope.tooltip')"
         :mode="mode"
@@ -206,6 +212,7 @@ export default {
     <div>
       <LabeledSelect
         v-model="apiGroupValues"
+        :disabled="disabled"
         :label="t('kubewarden.policyConfig.apiGroups.label')"
         :tooltip="t('kubewarden.policyConfig.apiGroups.tooltip')"
         :mode="mode"
@@ -219,6 +226,7 @@ export default {
     <div>
       <LabeledSelect
         v-model="value.resources"
+        :disabled="disabled"
         :label="t('kubewarden.policyConfig.resources.label')"
         :mode="mode"
         :multiple="true"
@@ -232,6 +240,7 @@ export default {
     <div>
       <LabeledSelect
         v-model="value.apiVersions"
+        :disabled="disabled"
         :clearable="true"
         :searchable="false"
         :mode="mode"
@@ -247,6 +256,7 @@ export default {
     <div>
       <LabeledSelect
         v-model="value.operations"
+        :disabled="disabled"
         :label="t('kubewarden.policyConfig.operations.label')"
         :mode="mode"
         :multiple="true"
