@@ -2,6 +2,7 @@ import filter from 'lodash/filter';
 import matches from 'lodash/matches';
 
 import SteveModel from '@shell/plugins/steve/steve-class';
+import { STATES, STATES_ENUM } from '@shell/plugins/dashboard-store/resource-class';
 import { CONFIG_MAP, MANAGEMENT, SERVICE } from '@shell/config/types';
 import { proxyUrlFromParts } from '@shell/models/service';
 import { findBy, isArray } from '@shell/utils/array';
@@ -467,6 +468,16 @@ export function colorForStatus(status) {
   }
 
   return 'text-warning'; // 'unscheduled' is the default state
+}
+
+export function colorForPolicyServerState(state) {
+  for ( const key of Object.keys(STATES_ENUM)) {
+    if ( state === STATES_ENUM[key] ) {
+      return STATES[STATES_ENUM[key]].color;
+    }
+  }
+
+  return 'info';
 }
 
 export function stateSort(color, display) {

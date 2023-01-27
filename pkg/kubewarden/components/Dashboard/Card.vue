@@ -27,7 +27,6 @@ export default {
     :class="setLoading"
   >
     <div class="d-header">
-      <i class="icon icon-fw" :class="card.icon" />
       <n-link :to="card.link">
         <h1>
           {{ t(card.title) }}
@@ -66,12 +65,6 @@ export default {
   .d-header {
     display: flex;
     align-items: center;
-
-    i {
-      margin: 5px 10px 0 0 ;
-      width: auto;
-      text-decoration: none;
-    }
 
     h1 {
       margin: 0;

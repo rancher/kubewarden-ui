@@ -1,4 +1,4 @@
-import { STATE, NAME as NAME_HEADER } from '@shell/config/table-headers';
+import { NAME as NAME_HEADER } from '@shell/config/table-headers';
 
 import { createKubewardenRoute } from '../utils/custom-routing';
 import { KUBEWARDEN } from '../types';
@@ -32,6 +32,16 @@ export const ADMISSION_POLICY_OPERATIONS = {
   label:     'Operations',
   value:     'spec.rules',
   formatter: 'PolicyResources'
+};
+
+export const POLICY_SERVER_STATE = {
+  name:      'state',
+  sort:      ['stateSort', 'nameSort'],
+  value:     'metadata.name',
+  getValue:  (row: any) => row.matchingDeployment(),
+  label:     'Status',
+  width:     100,
+  formatter: 'PolicyServerStatus'
 };
 
 export const RELATED_POLICY_SUMMARY = {
@@ -71,7 +81,7 @@ export const RELATED_HEADERS = [
 ];
 
 export const POLICY_SERVER_HEADERS = [
-  STATE,
+  POLICY_SERVER_STATE,
   {
     name:          'name',
     labelKey:      'tableHeaders.name',

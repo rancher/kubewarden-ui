@@ -2,9 +2,7 @@
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 
-import {
-  _CREATE, CHART, REPO, REPO_TYPE, VERSION
-} from '@shell/config/query-params';
+import { _CREATE } from '@shell/config/query-params';
 import { monitoringStatus } from '@shell/utils/monitoring';
 import { dashboardExists } from '@shell/utils/grafana';
 import CreateEditView from '@shell/mixins/create-edit-view';

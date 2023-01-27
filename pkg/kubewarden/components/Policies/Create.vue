@@ -275,10 +275,7 @@ export default ({
       const updatedPolicy = {
         apiVersion: this.value.apiVersion,
         kind:       this.value.kind,
-        metadata:   {
-          name:        policyDetails.name,
-          annotations: { [ARTIFACTHUB_PKG_ANNOTATION]: packageAnnotation }
-        },
+        metadata:   { annotations: { [ARTIFACTHUB_PKG_ANNOTATION]: packageAnnotation } },
         spec:       {
           module:       policyDetails.containers_images[0].image,
           contextAware: JSON.parse(policyDetails?.data?.['kubewarden/contextAware']) || false,
