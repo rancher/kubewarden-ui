@@ -48,6 +48,7 @@ export default {
           :mode="mode"
           :label="t('nameNsDescription.name.label')"
           :placeholder="t('nameNsDescription.name.placeholder')"
+          required
         />
       </div>
     </div>
