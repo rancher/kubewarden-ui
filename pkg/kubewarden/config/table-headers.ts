@@ -38,7 +38,6 @@ export const POLICY_SERVER_STATE = {
   name:      'state',
   sort:      ['stateSort', 'nameSort'],
   value:     'metadata.name',
-  getValue:  (row: any) => row.matchingDeployment(),
   label:     'Status',
   width:     100,
   formatter: 'PolicyServerStatus'
