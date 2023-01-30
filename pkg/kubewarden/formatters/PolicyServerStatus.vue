@@ -1,5 +1,8 @@
 <script>
 import isEmpty from 'lodash/isEmpty';
+import { mapGetters } from 'vuex';
+
+import { WORKLOAD_TYPES } from '@shell/config/types';
 
 import { BadgeState } from '@components/BadgeState';
 import { colorForPolicyServerState } from '../plugins/kubewarden-class';
@@ -9,28 +12,41 @@ export default {
 
   props:      {
     value: {
-      type:     Promise,
+      type:     String,
       required: true
     }
   },
 
   async fetch() {
-    const deployment = await this.value;
-
-    if ( !isEmpty(deployment) ) {
-      this.stateDisplay = deployment.map(d => d.metadata.state.name)[0];
-
-      const color = colorForPolicyServerState(this.stateDisplay);
-
-      this.stateBackground = `bg-${ color }`;
-    }
+    await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: WORKLOAD_TYPES.DEPLOYMENT });
   },
 
-  data() {
-    return {
-      stateDisplay:    '',
-      stateBackground: ''
-    };
+  computed: {
+    ...mapGetters(['currentProduct']),
+
+    allDeployments() {
+      return this.$store.getters[`${ this.currentProduct.inStore }/all`](WORKLOAD_TYPES.DEPLOYMENT);
+    },
+
+    deployment() {
+      if ( !isEmpty(this.allDeployments) ) {
+        return this.allDeployments.find(d => d.spec.template.metadata.labels['kubewarden/policy-server'] === this.value);
+      }
+
+      return null;
+    },
+
+    stateBackground() {
+      return `bg-${ colorForPolicyServerState(this.stateDisplay) }`;
+    },
+
+    stateDisplay() {
+      if ( !isEmpty(this.deployment) ) {
+        return this.deployment.metadata?.state?.name;
+      }
+
+      return 'pending';
+    }
   },
 
   methods: {
