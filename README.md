@@ -2,9 +2,7 @@
 
 This is an extension for [Rancher Manager](https://github.com/rancher/rancher) (`v2.7.0`) which allows you to interact with Kubewarden.
 
-View the [Wiki](https://github.com/kubewarden/ui/wiki) for more in-depth info on how to use the UI. Visit the [Kubewarden docs](https://docs.kubewarden.io) for more insight on how to use Kubewarden.
-
-> ___Note___: The UI is still in development and has not yet been fully released.
+View the [Rancher UI Extension documentation](https://docs.kubewarden.io/operator-manual/ui-extension/install) for more in-depth info on how to use the UI. Visit the [Kubewarden docs](https://docs.kubewarden.io) for more insight on how to use Kubewarden.
 
 ## Install
 
@@ -12,14 +10,12 @@ You will need to point the UI to a running instance of Rancher, here's a [quicks
 
 > This extension requires a Rancher version of `v2.7.0` or later, you can find the latest releases [here](https://github.com/rancher/rancher/releases).
 
-1. Within your Local cluster, navigate to Apps &#8594; Repositories.
-2. Create a new repository with the target of `https://github.com/kubewarden/ui.git` on the `main` branch.
-3. Navigate to the Extensions page from the side-nav and Enable the Extension support.
-4. Once the Extension Operator has been installed you should see Kubewarden as an availble extension, click Install.
+1. Navigate to the Extensions page from the side-nav and Enable the Extension support.
+2. Once the Extension Operator has been installed you should see Kubewarden as an availble extension, click Install.
 
-You will now have the Kubewarden Extension installed on your local cluster.
+You will now have the Kubewarden Extension installed on your cluster.
 
-5. Navigate to the Dashboard page by selecting the Kubewarden resource item and follow the steps to install the `Kubewarden` chart.
+3. Navigate to the Dashboard page by selecting the Kubewarden resource item and follow the steps to install the `Kubewarden` chart.
 
 ---
 
