@@ -107,18 +107,6 @@ export default class KubewardenModel extends SteveModel {
     return null;
   }
 
-  get link() {
-    if ( this.spec?.toURL ) {
-      return this.spec.toURL;
-    } else if ( this.spec?.toService ) {
-      const s = this.spec.toService;
-
-      return proxyUrlFromParts(this.$rootGetters['clusterId'], s.namespace, s.name, s.scheme, s.port, s.path);
-    } else {
-      return null;
-    }
-  }
-
   get whitelistSetting() {
     return this.$rootGetters['management/all'](MANAGEMENT.SETTING).find(s => s.id === 'whitelist-domain');
   }
@@ -201,7 +189,16 @@ export default class KubewardenModel extends SteveModel {
         const grafana = await this.grafanaService();
 
         if ( grafana ) {
-          return `${ grafana.proxyUrl('http', 80) }d/${ type }/${ dashboardName }?orgId=1&kiosk`;
+          const path = `d/${ type }/${ dashboardName }?orgId=1&kiosk`;
+
+          return proxyUrlFromParts(
+            this.$rootGetters['clusterId'],
+            grafana.metadata.namespace,
+            grafana.metadata.name,
+            'http',
+            '80',
+            path
+          );
         }
       } catch (e) {
         console.warn(`Error fetching Grafana proxy: ${ e }`); // eslint-disable-line no-console

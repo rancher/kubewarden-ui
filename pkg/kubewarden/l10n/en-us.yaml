@@ -124,6 +124,7 @@ kubewarden:
   metrics:
     notInstalled: The Grafana dashboard for this Kubewarden resource can not be found. You need to create the ConfigMap for the dashboard.
     reload: Grafana dashboard created - reload required
+    noService: The Metrics service is not currently active or is not installed correctly. Check the status of the Monitoring app.
 
   policyConfig:
     serverSelect:
