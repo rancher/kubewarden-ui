@@ -17,6 +17,7 @@ import CloudCredentialType from '@shell/components/Questions/CloudCredential';
 import ArrayType from './Array';
 import MapType from './QuestionMap';
 import StringType from './String';
+import SequenceType from './SequenceMap';
 
 export const knownTypes = {
   string:          StringType,
@@ -47,6 +48,8 @@ export function componentForQuestion(q) {
     return MapType;
   } else if ( type.startsWith('reference[') ) { // Same, only works with map[string|multiline]
     return ReferenceType;
+  } else if ( type.startsWith('sequence[') ) {
+    return SequenceType;
   }
 
   return 'string';
@@ -283,6 +286,40 @@ export default {
         this.$emit('updated');
       }
     },
+    updateSequence(event) {
+      const {
+        question, variable, index, $event
+      } = event;
+      const out = this.value[question.variable][index];
+
+      set(out, variable, $event);
+
+      if ( this.emit ) {
+        this.$emit('updated');
+      }
+    },
+    addSequence($event) {
+      const out = {};
+
+      for ( const value of Object.values($event.sequence_questions) ) {
+        Object.assign(out, { [value.variable]: value.default });
+      }
+
+      if ( Array.isArray(this.value[$event.variable]) ) {
+        this.value[$event.variable].push(out);
+      }
+
+      if ( this.emit ) {
+        this.$emit('updated');
+      }
+    },
+    removeSequence($event) {
+      this.value?.[$event.question.variable].splice($event.vIndex, 1);
+
+      if ( this.emit ) {
+        this.$emit('updated');
+      }
+    },
     evalExpr(expr, values, question, allQuestions) {
       try {
         const out = Jexl.evalSync(expr, values);
@@ -454,6 +491,9 @@ export default {
             :disabled="disabled"
             :chart-name="chartName"
             @input="update(q.variable, $event)"
+            @seqInput="updateSequence($event)"
+            @addSeq="addSequence($event)"
+            @removeSeq="removeSequence($event)"
           />
         </div>
       </div>
@@ -483,6 +523,9 @@ export default {
             :disabled="disabled"
             :chart-name="chartName"
             @input="update(q.variable, $event)"
+            @seqInput="updateSequence($event)"
+            @addSeq="addSequence($event)"
+            @removeSeq="removeSequence($event)"
           />
         </div>
       </div>
