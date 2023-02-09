@@ -4,6 +4,7 @@ import {
   _CREATE, CHART, REPO, REPO_TYPE, VERSION
 } from '@shell/config/query-params';
 import { monitoringStatus } from '@shell/utils/monitoring';
+import { dashboardExists } from '@shell/utils/grafana';
 import { allHash } from '@shell/utils/promise';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
@@ -72,7 +73,7 @@ export default {
         this.metricsProxy = await this.value.grafanaProxy(this.metricsType);
 
         if ( this.metricsProxy ) {
-          this.metricsService = await this.$store.dispatch(`${ this.currentProduct.inStore }/request`, { url: this.metricsProxy, redirectUnauthorized: false });
+          this.metricsService = await dashboardExists(this.$store, this.currentCluster?.id, this.metricsProxy);
         }
       } catch (e) {
         console.error(`Error fetching Grafana service: ${ e }`); // eslint-disable-line no-console
@@ -236,7 +237,7 @@ export default {
 
       <Tab name="policy-metrics" label="Metrics" :weight="98">
         <MetricsBanner
-          v-if="!monitoringStatus.installed"
+          v-if="!monitoringStatus.installed || !metricsService"
           :metrics-service="metricsService"
           :metrics-type="metricsType"
           :monitoring-route="monitoringRoute"
@@ -251,10 +252,6 @@ export default {
             :summary-url="metricsProxy"
             graph-height="825px"
           />
-        </template>
-
-        <template v-else-if="monitoringStatus.installed && !metricsService">
-          <Banner :label="t('kubewarden.metrics.noService')" color="error" />
         </template>
       </Tab>
 

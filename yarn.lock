@@ -2888,10 +2888,10 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.4.4.tgz#11d5db19bd178936ec89cd84519c4de439574398"
   integrity sha512-1oO6+dN5kdIA3sKPZhRGJTfGVP4SWV6KqlMOwry4J3HfyD68sl/3KmG7DeYUzvN+RbhXDnv/D8vNNB8168tAMg==
 
-"@rancher/shell@0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@rancher/shell/-/shell-0.3.1.tgz#66475992bce23b2143358a003af750607bbbf5a0"
-  integrity sha512-tJD5HHLx+lA1sgnut0iD0pcv+WgWNZXysNW2HpaUTH523FYryXRL7OjrZwKM7BLigTznlrVuGYS7w1vBWi7Zgg==
+"@rancher/shell@0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@rancher/shell/-/shell-0.3.2.tgz#2fa1648ea9e03bf5882429dac917bb428ce4652f"
+  integrity sha512-CDv1FJ+8rt+Wjeq1p+8VP4OJDvt0HIUIdlsmIW4iTHGUrob95o+AvVmhRNFcjfcLCeHU4CIF72ySTiVFwCJ3ug==
   dependencies:
     "@aws-sdk/client-ec2" "3.1.0"
     "@aws-sdk/client-eks" "3.1.0"
@@ -16728,6 +16728,11 @@ vue-template-es2015-compiler@^1.9.0:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
+
+vue-virtual-scroll-list@^2.3.4:
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/vue-virtual-scroll-list/-/vue-virtual-scroll-list-2.3.4.tgz#0d08c2d26299d8609018b8c04f5e3ca608fbe2d6"
+  integrity sha512-a9bmmIhAdnKcp8NG0C9ZQ+pW9nAOrDv5SHqJfbbEpXxVVERCtbIgGeBnkwrGgmoILBoFz/WANIZgA22G44F0Yw==
 
 vue2-transitions@0.3.0:
   version "0.3.0"
