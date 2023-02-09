@@ -9,7 +9,7 @@
     "node": ">=12"
   },
   "dependencies": {
-    "@rancher/shell": "0.3.1",
+    "@rancher/shell": "0.3.2",
     "core-js": "3.25.1",
     "css-loader": "4.3.0"
   },
