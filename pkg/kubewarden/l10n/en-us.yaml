@@ -36,6 +36,7 @@ kubewarden:
       description: This will take you to the app installation page for Kubewarden.
       button: Install Kubewarden
       stepTitle: Kubewarden Install
+      reload: Unable to fetch Kubewarden Helm chart - reload required.
     prerequisites:
       title: Prerequisites
       certManager:
