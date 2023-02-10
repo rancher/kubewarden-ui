@@ -1,12 +1,12 @@
 {
   "name": "ui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": false,
   "engines": {
     "node": ">=12"
   },
   "dependencies": {
-    "@rancher/shell": "0.3.2",
+    "@rancher/shell": "0.3.3",
     "@types/lodash": "4.14.184",
     "core-js": "3.21.1",
     "css-loader": "4.3.0"
@@ -18,7 +18,5 @@
     "build-pkg": "./node_modules/@rancher/shell/scripts/build-pkg.sh",
     "serve-pkgs": "./node_modules/@rancher/shell/scripts/serve-pkgs"
   },
-  "devDependencies": {
-    "vue-virtual-scroll-list": "^2.3.4"
-  }
+  "devDependencies": {}
 }
