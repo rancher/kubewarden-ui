@@ -3,6 +3,7 @@ import { mapGetters } from 'vuex';
 
 import { CATALOG, SERVICE } from '@shell/config/types';
 
+import { Banner } from '@components/Banner';
 import AsyncButton from '@shell/components/AsyncButton';
 import CopyCode from '@shell/components/CopyCode';
 import Loading from '@shell/components/Loading';
@@ -21,12 +22,15 @@ export default {
 
   components: {
     AsyncButton,
+    Banner,
     CopyCode,
     InstallWizard,
     Loading
   },
 
   async fetch() {
+    this.reloadReady = false;
+
     if ( !this.hasSchema ) {
       const promises = [
         this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: SERVICE }),
@@ -59,6 +63,7 @@ export default {
     ];
 
     return {
+      reloadReady:   false,
       install:       false,
       initStepIndex: 0,
       installSteps,
@@ -147,6 +152,10 @@ export default {
       if ( !this.controllerChart && retry === 0 ) {
         await this.refreshCharts(retry + 1);
       }
+
+      if ( !this.controllerChart && retry ) {
+        this.reloadReady = true;
+      }
     },
 
     async chartRoute() {
@@ -161,7 +170,11 @@ export default {
       }
 
       this.controllerChart.goToInstall('kubewarden');
-    }
+    },
+
+    reload() {
+      this.$router.go();
+    },
   }
 };
 </script>
@@ -238,13 +251,31 @@ export default {
           <p class="mb-20">
             {{ t("kubewarden.dashboard.appInstall.description") }}
           </p>
-          <button
-            class="btn role-primary mt-20"
-            :disabled="!controllerChart"
-            @click.prevent="chartRoute"
-          >
-            {{ t("kubewarden.dashboard.appInstall.button") }}
-          </button>
+
+          <div class="chart-route">
+            <Loading v-if="!controllerChart && !reloadReady" mode="relative" class="mt-20" />
+
+            <template v-if="!controllerChart && reloadReady">
+              <Banner color="warning">
+                <span class="mb-20">
+                  {{ t('kubewarden.dashboard.appInstall.reload' ) }}
+                </span>
+                <button class="ml-10 btn btn-sm role-primary" @click="reload()">
+                  {{ t('generic.reload') }}
+                </button>
+              </Banner>
+            </template>
+
+            <template v-if="controllerChart && !reloadReady">
+              <button
+                class="btn role-primary mt-20"
+                :disabled="!controllerChart"
+                @click.prevent="chartRoute"
+              >
+                {{ t("kubewarden.dashboard.appInstall.button") }}
+              </button>
+            </template>
+          </div>
         </template>
       </template>
     </InstallWizard>
@@ -265,6 +296,10 @@ export default {
 
   & .description {
     line-height: 20px;
+  }
+
+  & .chart-route {
+    position: relative;
   }
 }
 </style>
