@@ -2,7 +2,7 @@
   "name": "kubewarden",
   "description": "Kubewarden extension for Rancher Manager",
   "icon": "https://raw.githubusercontent.com/kubewarden/ui/main/pkg/kubewarden/assets/icon-kubewarden.svg",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": false,
   "rancher": true,
   "scripts": {
@@ -11,11 +11,6 @@
   },
   "engines": {
     "node": ">=12"
-  },
-  "dependencies": {
-    "@rancher/shell": "0.3.2",
-    "core-js": "3.25.1",
-    "css-loader": "4.3.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "5.0.8",
