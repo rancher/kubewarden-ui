@@ -35,10 +35,6 @@ export default {
       this.controller = hash.controller[0];
     }
 
-    if ( !isEmpty(hash.psPods) ) {
-      this.psPods = hash.psPods;
-    }
-
     if ( !isEmpty(hash.apps) ) {
       this.apps = hash.apps;
     }
@@ -68,8 +64,12 @@ export default {
       });
     },
 
+    policyServerPods() {
+      return this.$store.getters[`${ this.currentProduct.inStore }/all`]({ type: POD, selector: 'kubewarden/policy-server' });
+    },
+
     policyServers() {
-      const pods = this.psPods || [];
+      const pods = this.policyServerPods || [];
 
       return pods.reduce((ps, neu) => {
         return {
