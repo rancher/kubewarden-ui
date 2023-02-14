@@ -153,7 +153,7 @@ export default {
         await this.refreshCharts(retry + 1);
       }
 
-      if ( !this.controllerChart && retry ) {
+      if ( !this.controllerChart && retry === 1 ) {
         this.reloadReady = true;
       }
     },
@@ -255,7 +255,7 @@ export default {
           <div class="chart-route">
             <Loading v-if="!controllerChart && !reloadReady" mode="relative" class="mt-20" />
 
-            <template v-if="!controllerChart && reloadReady">
+            <template v-else-if="!controllerChart && reloadReady">
               <Banner color="warning">
                 <span class="mb-20">
                   {{ t('kubewarden.dashboard.appInstall.reload' ) }}
@@ -266,7 +266,7 @@ export default {
               </Banner>
             </template>
 
-            <template v-if="controllerChart && !reloadReady">
+            <template v-else>
               <button
                 class="btn role-primary mt-20"
                 :disabled="!controllerChart"

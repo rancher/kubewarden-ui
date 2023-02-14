@@ -23,6 +23,9 @@
       ],
       "@shell/*": [
         "./node_modules/@rancher/shell/*"
+      ],
+      "@components/*": [
+        "./node_modules/@rancher/components/*"
       ]
     },
     "typeRoots": [
