@@ -102,7 +102,7 @@ export default {
         :key="index"
         class="row question"
       >
-        <div class="col span-12">
+        <div class="col span-12 mb-10">
           <component
             :is="componentForQuestion(q)"
             in-store="cluster"
@@ -121,6 +121,8 @@ export default {
       >
         {{ t('generic.remove') }}
       </button>
+
+      <hr class="mb-20">
     </div>
 
     <button
