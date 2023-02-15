@@ -292,7 +292,7 @@ export default {
       } = event;
       const out = this.value[question.variable][index];
 
-      set(out, variable, $event);
+      this.$set(out, [variable], $event);
 
       if ( this.emit ) {
         this.$emit('updated');
@@ -305,7 +305,11 @@ export default {
         Object.assign(out, { [value.variable]: value.default });
       }
 
-      if ( Array.isArray(this.value[$event.variable]) ) {
+      if ( Array.isArray($event.default) ) {
+        if ( !this.value[$event.variable] || !this.value[$event.variable].length ) {
+          this.$set(this.value, [$event.variable], []);
+        }
+
         this.value[$event.variable].push(out);
       }
 
