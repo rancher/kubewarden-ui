@@ -33,6 +33,7 @@ export default {
         :key="question.variable"
         v-model="array"
         :title="question.label"
+        :value-multiline="question.value_multiline"
         :mode="mode"
         :protip="false"
         :disabled="disabled"

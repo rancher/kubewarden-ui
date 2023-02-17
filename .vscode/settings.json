@@ -5,7 +5,7 @@
     ".drone.yml": true,
     ".editorconfig": true,
     ".eslintcache": true,
-    ".eslintignore": true,
+    ".eslintignore": false,
     ".eslintrc.js": true,
     ".nuxt*": true,
     ".nyc_output": true,

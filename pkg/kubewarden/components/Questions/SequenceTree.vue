@@ -1,6 +1,9 @@
 <script>
+import { _VIEW } from '@shell/config/query-params';
 import { get } from '@shell/utils/object';
+import { saferDump } from '@shell/utils/create-yaml';
 
+import YamlEditor from '@shell/components/YamlEditor';
 import BooleanType from '@shell/components/Questions/Boolean';
 import EnumType from '@shell/components/Questions/Enum';
 import IntType from '@shell/components/Questions/Int';
@@ -14,7 +17,6 @@ import CloudCredentialType from '@shell/components/Questions/CloudCredential';
 import ArrayType from './Array';
 import MapType from './QuestionMap';
 import StringType from './String';
-import SequenceType from './SequenceMap';
 
 const knownTypes = {
   string:          StringType,
@@ -45,8 +47,6 @@ function componentForQuestion(q) {
     return MapType;
   } else if ( type.startsWith('reference[') ) { // Same, only works with map[string|multiline]
     return ReferenceType;
-  } else if ( type.startsWith('sequence[') ) {
-    return SequenceType;
   }
 
   return 'string';
@@ -68,13 +68,19 @@ export default {
     }
   },
 
+  components: { ...knownTypes, YamlEditor },
+
   data() {
     const seqQuestions = this.question.sequence_questions;
 
-    return { seqQuestions };
+    return { seqQuestions, sequenceValuesYaml: '' };
   },
 
-  components: { ...knownTypes },
+  computed: {
+    isView() {
+      return this.mode === _VIEW;
+    }
+  },
 
   methods: {
     componentForQuestion,
@@ -86,6 +92,31 @@ export default {
       };
 
       this.$emit('seqInput', out);
+    },
+
+    updateDeep($event, q, vIndex) {
+      const out = {
+        rootQuestion: this.question.variable,
+        deepQuestion: q.variable,
+        valuesYaml:   $event,
+        index:        vIndex
+      };
+
+      this.$emit('seqInputDeep', out);
+    },
+
+    parseSequenceValues(val, question) {
+      if ( val && val.length ) {
+        return saferDump(val);
+      }
+
+      const out = {};
+
+      question.sequence_questions.forEach((q) => {
+        Object.assign(out, { [q.variable]: q.default });
+      });
+
+      return saferDump({ [question.variable]: [out] });
     }
   }
 };
@@ -102,15 +133,30 @@ export default {
         :key="index"
         class="row question"
       >
-        <div class="col span-12 mb-10">
-          <component
-            :is="componentForQuestion(q)"
-            in-store="cluster"
-            :question="q"
-            :value="get(value[vIndex], q.variable)"
-            @input="update(q.variable, vIndex, $event)"
-          />
-        </div>
+        <template v-if="q.type.startsWith('sequence[')">
+          <div class="col span-12 mb-10">
+            <h4>{{ q.label }}</h4>
+            <YamlEditor
+              ref="yamleditor"
+              :value="parseSequenceValues(val[q.variable], q)"
+              class="yaml-editor"
+              :editor-mode="isView ? 'VIEW_CODE' : 'EDIT_CODE'"
+              @onInput="updateDeep($event, q, vIndex)"
+            />
+          </div>
+        </template>
+
+        <template v-else>
+          <div class="col span-12 mb-10">
+            <component
+              :is="componentForQuestion(q)"
+              in-store="cluster"
+              :question="q"
+              :value="get(value[vIndex], q.variable)"
+              @input="update(q.variable, vIndex, $event)"
+            />
+          </div>
+        </template>
       </div>
 
       <button
