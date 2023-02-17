@@ -1,5 +1,6 @@
 <script>
 import Jexl from 'jexl';
+import jsyaml from 'js-yaml';
 import Tab from '@shell/components/Tabbed/Tab';
 import { get, set } from '@shell/utils/object';
 import { sortBy, camelCase } from 'lodash';
@@ -17,7 +18,7 @@ import CloudCredentialType from '@shell/components/Questions/CloudCredential';
 import ArrayType from './Array';
 import MapType from './QuestionMap';
 import StringType from './String';
-import SequenceType from './SequenceMap';
+import SequenceType from './SequenceTree';
 
 export const knownTypes = {
   string:          StringType,
@@ -286,6 +287,7 @@ export default {
         this.$emit('updated');
       }
     },
+
     updateSequence(event) {
       const {
         question, variable, index, $event
@@ -298,6 +300,18 @@ export default {
         this.$emit('updated');
       }
     },
+
+    updateSequenceDeep(event) {
+      const {
+        rootQuestion, deepQuestion, valuesYaml, index
+      } = event;
+      const valuesObj = jsyaml.load(valuesYaml);
+
+      if ( valuesObj ) {
+        this.$set(this.value[rootQuestion][index], [deepQuestion], valuesObj[deepQuestion]);
+      }
+    },
+
     addSequence($event) {
       const out = {};
 
@@ -317,6 +331,7 @@ export default {
         this.$emit('updated');
       }
     },
+
     removeSequence($event) {
       this.value?.[$event.question.variable].splice($event.vIndex, 1);
 
@@ -324,6 +339,7 @@ export default {
         this.$emit('updated');
       }
     },
+
     evalExpr(expr, values, question, allQuestions) {
       try {
         const out = Jexl.evalSync(expr, values);
@@ -346,6 +362,7 @@ export default {
         return true;
       }
     },
+
     evaluate(question, allQuestions) {
       if ( !question.show_if ) {
         return true;
@@ -363,6 +380,7 @@ export default {
 
       return result;
     },
+
     calExpression(showIf, allQuestions) {
       if ( showIf.includes('!=')) {
         return this.isNotEqual(showIf, allQuestions);
@@ -370,6 +388,7 @@ export default {
         return this.isEqual(showIf, allQuestions);
       }
     },
+
     isEqual(showIf, allQuestions) {
       showIf = showIf.trim();
       const variables = this.getVariables(showIf, '=');
@@ -383,6 +402,7 @@ export default {
 
       return false;
     },
+
     isNotEqual(showIf, allQuestions) {
       showIf = showIf.trim();
       const variables = this.getVariables(showIf, '!=');
@@ -396,6 +416,7 @@ export default {
 
       return false;
     },
+
     getVariables(showIf, operator) {
       if ( showIf.includes(operator)) {
         const array = showIf.split(operator);
@@ -412,6 +433,7 @@ export default {
 
       return null;
     },
+
     getAnswer(variable, questions) {
       const found = questions.find(q => q.variable === variable);
 
@@ -422,6 +444,7 @@ export default {
         return variable;
       }
     },
+
     stringifyAnswer(answer) {
       if ( answer === undefined || answer === null ) {
         return '';
@@ -431,6 +454,7 @@ export default {
         return `${ answer }`;
       }
     },
+
     shouldShow(q, values) {
       let expr = q.if;
 
@@ -446,6 +470,7 @@ export default {
 
       return true;
     },
+
     shouldShowSub(q, values) {
       // Sigh, both singular and plural are used in the wild...
       let expr = ( q.subquestions_if === undefined ? q.subquestion_if : q.subquestions_if);
@@ -492,10 +517,12 @@ export default {
             :question="q"
             :target-namespace="targetNamespace"
             :value="get(value, q.variable)"
+            :mode="mode"
             :disabled="disabled"
             :chart-name="chartName"
             @input="update(q.variable, $event)"
             @seqInput="updateSequence($event)"
+            @seqInputDeep="updateSequenceDeep($event)"
             @addSeq="addSequence($event)"
             @removeSeq="removeSequence($event)"
           />
@@ -528,6 +555,7 @@ export default {
             :chart-name="chartName"
             @input="update(q.variable, $event)"
             @seqInput="updateSequence($event)"
+            @seqInputDeep="updateSequenceDeep($event)"
             @addSeq="addSequence($event)"
             @removeSeq="removeSequence($event)"
           />

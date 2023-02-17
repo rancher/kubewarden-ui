@@ -27,7 +27,7 @@ export default {
         :mode="mode"
         :type="inputType"
         :label="displayLabel"
-        :placeholder="question.default"
+        :placeholder="question.placeholder || question.default"
         :required="question.required"
         :value="value"
         :disabled="disabled"
