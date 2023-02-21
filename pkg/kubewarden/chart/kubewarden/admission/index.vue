@@ -2,16 +2,15 @@
 import isEmpty from 'lodash/isEmpty';
 import jsyaml from 'js-yaml';
 
-import { _CREATE, _VIEW } from '@shell/config/query-params';
-import { saferDump } from '@shell/utils/create-yaml';
+import { _CREATE } from '@shell/config/query-params';
 
 import Tab from '@shell/components/Tabbed/Tab';
-import YamlEditor from '@shell/components/YamlEditor';
 
 // Using this custom Questions component until `hide_input` changes are made to @shell version
 import Questions from '../../../components/Questions';
 import General from './General';
 import Rules from './Rules';
+import Settings from './Settings.vue';
 
 export default {
   props: {
@@ -30,28 +29,17 @@ export default {
   },
 
   components: {
-    General, Questions, Rules, Tab, YamlEditor
-  },
-
-  fetch() {
-    if ( this.value ) {
-      this.chartValues = this.value;
-    }
-
-    if ( !isEmpty(this.chartValues?.policy?.spec?.settings) ) {
-      this.settingsYaml = saferDump(this.chartValues.policy.spec.settings);
-    }
-
-    if ( this.isCreate && this.isCustom ) {
-      this.settingsYaml = '# Additional Settings YAML \n';
-    }
+    General, Questions, Rules, Settings, Tab
   },
 
   data() {
-    return {
-      chartValues:  null,
-      settingsYaml: ''
-    };
+    return { chartValues: null };
+  },
+
+  created() {
+    if ( this.value ) {
+      this.chartValues = this.value;
+    }
   },
 
   computed: {
@@ -73,10 +61,6 @@ export default {
 
     isCustom() {
       return this.customPolicy;
-    },
-
-    isView() {
-      return this.mode === _VIEW;
     },
 
     showSettings() {
@@ -121,12 +105,9 @@ export default {
 
     <template v-if="showSettings">
       <Tab name="settings" label="Settings" :weight="97">
-        <YamlEditor
-          ref="yamleditor"
-          v-model="settingsYaml"
-          class="yaml-editor"
-          :editor-mode="isView ? 'VIEW_CODE' : 'EDIT_CODE'"
-          @onInput="settingsChanged($event)"
+        <Settings
+          v-model="chartValues"
+          @updateSettings="settingsChanged($event)"
         />
       </Tab>
     </template>
@@ -145,9 +126,3 @@ export default {
     </template>
   </div>
 </template>
-
-<style lang="scss" scoped>
-::v-deep .CodeMirror-lines {
-    min-height: 40px;
-  }
-</style>
