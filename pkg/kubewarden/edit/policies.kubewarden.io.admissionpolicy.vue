@@ -33,7 +33,7 @@ export default {
   mixins: [CreateEditView],
 
   provide() {
-    return { chartType: this.value.type };
+    return { chartType: this.value.type, realMode: this.realMode };
   },
 
   computed: {
