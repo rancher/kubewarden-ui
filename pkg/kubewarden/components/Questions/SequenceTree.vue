@@ -88,13 +88,13 @@ export default {
 
     update(variable, index, $event) {
       const out = {
-        question: this.question, variable, index, $event
+        question: this.question, variable, index, event: $event
       };
 
       this.$emit('seqInput', out);
     },
 
-    updateDeep($event, q, vIndex) {
+    updateDeep(q, vIndex, $event) {
       const out = {
         rootQuestion: this.question.variable,
         deepQuestion: q.variable,
@@ -103,6 +103,32 @@ export default {
       };
 
       this.$emit('seqInputDeep', out);
+    },
+
+    updateDeepSubquestion(rootValue, seq, sub, vIndex, $event) {
+      /*
+        When a `sequence` contains a set of subquestions, the
+        subquestion.variable string needs to be split to update
+        the correct variable on the rootValue.
+      */
+      const path = sub.variable.split('.');
+      let toUpdate = null;
+
+      for ( let i = 0; i < path.length; i++ ) {
+        if ( rootValue[path[i]] !== seq ) {
+          toUpdate = path[i];
+        }
+      }
+
+      const out = {
+        question:    this.question,
+        variable:    seq.variable,
+        subVariable: toUpdate,
+        index:       vIndex,
+        event:       $event
+      };
+
+      this.$emit('seqInput', out);
     },
 
     parseSequenceValues(val, question) {
@@ -117,6 +143,26 @@ export default {
       });
 
       return saferDump({ [question.variable]: [out] });
+    },
+
+    parseSequenceSubquestion(rootValue, subquestion) {
+      /*
+        The subquestion.variable is a string which contains a dot notation
+        string of the actual variable. Need to separate and create an
+        object on the rootValue from this string.
+      */
+      const path = subquestion.variable.split('.');
+      let currObj = rootValue;
+
+      for ( let i = 0; i < path.length; i++ ) {
+        if ( currObj[path[i]] === undefined ) {
+          currObj[path[i]] = subquestion.default;
+        }
+
+        currObj = currObj[path[i]];
+      }
+
+      return currObj;
     }
   }
 };
@@ -131,30 +177,51 @@ export default {
       <div
         v-for="(q, index) in seqQuestions"
         :key="index"
-        class="row question"
       >
         <template v-if="q.type.startsWith('sequence[')">
-          <div class="col span-12 mb-10">
-            <h4>{{ q.label }}</h4>
-            <YamlEditor
-              ref="yamleditor"
-              :value="parseSequenceValues(val[q.variable], q)"
-              class="yaml-editor"
-              :editor-mode="isView ? 'VIEW_CODE' : 'EDIT_CODE'"
-              @onInput="updateDeep($event, q, vIndex)"
-            />
+          <div class="row question">
+            <div class="col span-12 mb-10">
+              <h4>{{ q.label }}</h4>
+              <YamlEditor
+                ref="yamleditor"
+                :value="parseSequenceValues(val[q.variable], q)"
+                class="yaml-editor"
+                :editor-mode="isView ? 'VIEW_CODE' : 'EDIT_CODE'"
+                @onInput="updateDeep(q, vIndex, $event)"
+              />
+            </div>
+          </div>
+        </template>
+
+        <template v-if="q.type.startsWith('map[') && q.subquestions">
+          <div
+            v-for="(sub, subIndex) in q.subquestions"
+            :key="sub.variable + subIndex"
+            class="row question"
+          >
+            <div class="col span-12 mb-10">
+              <component
+                :is="componentForQuestion(sub)"
+                in-store="cluster"
+                :question="sub"
+                :value="parseSequenceSubquestion(value[vIndex], sub)"
+                @input="updateDeepSubquestion(value[vIndex], q, sub, vIndex, $event)"
+              />
+            </div>
           </div>
         </template>
 
         <template v-else>
-          <div class="col span-12 mb-10">
-            <component
-              :is="componentForQuestion(q)"
-              in-store="cluster"
-              :question="q"
-              :value="get(value[vIndex], q.variable)"
-              @input="update(q.variable, vIndex, $event)"
-            />
+          <div class="row question">
+            <div class="col span-12 mb-10">
+              <component
+                :is="componentForQuestion(q)"
+                in-store="cluster"
+                :question="q"
+                :value="get(value[vIndex], q.variable)"
+                @input="update(q.variable, vIndex, $event)"
+              />
+            </div>
           </div>
         </template>
       </div>

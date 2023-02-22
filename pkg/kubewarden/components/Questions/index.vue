@@ -288,13 +288,18 @@ export default {
       }
     },
 
-    updateSequence(event) {
+    updateSequence(e) {
       const {
-        question, variable, index, $event
-      } = event;
-      const out = this.value[question.variable][index];
+        question, variable, index, subVariable, event
+      } = e;
+      let out = this.value[question.variable][index];
 
-      this.$set(out, [variable], $event);
+      if ( subVariable ) {
+        out = out[variable];
+        this.$set(out, [subVariable], event);
+      } else {
+        this.$set(out, [variable], event);
+      }
 
       if ( this.emit ) {
         this.$emit('updated');
