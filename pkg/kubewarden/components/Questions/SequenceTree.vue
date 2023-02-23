@@ -1,4 +1,6 @@
 <script>
+import isEmpty from 'lodash/isEmpty';
+
 import { _VIEW } from '@shell/config/query-params';
 import { get } from '@shell/utils/object';
 import { saferDump } from '@shell/utils/create-yaml';
@@ -71,9 +73,14 @@ export default {
   components: { ...knownTypes, YamlEditor },
 
   data() {
-    const seqQuestions = this.question.sequence_questions;
+    return { sequenceValuesYaml: '' };
+  },
 
-    return { seqQuestions, sequenceValuesYaml: '' };
+  watch: {
+    question: {
+      deep:    true,
+      handler: 'reset'
+    }
   },
 
   computed: {
@@ -88,7 +95,10 @@ export default {
 
     update(variable, index, $event) {
       const out = {
-        question: this.question, variable, index, event: $event
+        question: this.question,
+        event:    $event,
+        variable,
+        index
       };
 
       this.$emit('seqInput', out);
@@ -105,32 +115,6 @@ export default {
       this.$emit('seqInputDeep', out);
     },
 
-    updateDeepSubquestion(rootValue, seq, sub, vIndex, $event) {
-      /*
-        When a `sequence` contains a set of subquestions, the
-        subquestion.variable string needs to be split to update
-        the correct variable on the rootValue.
-      */
-      const path = sub.variable.split('.');
-      let toUpdate = null;
-
-      for ( let i = 0; i < path.length; i++ ) {
-        if ( rootValue[path[i]] !== seq ) {
-          toUpdate = path[i];
-        }
-      }
-
-      const out = {
-        question:    this.question,
-        variable:    seq.variable,
-        subVariable: toUpdate,
-        index:       vIndex,
-        event:       $event
-      };
-
-      this.$emit('seqInput', out);
-    },
-
     parseSequenceValues(val, question) {
       if ( val && val.length ) {
         return saferDump(val);
@@ -138,31 +122,32 @@ export default {
 
       const out = {};
 
-      question.sequence_questions.forEach((q) => {
+      question.sequence_questions?.forEach((q) => {
         Object.assign(out, { [q.variable]: q.default });
       });
 
       return saferDump({ [question.variable]: [out] });
     },
 
-    parseSequenceSubquestion(rootValue, subquestion) {
-      /*
-        The subquestion.variable is a string which contains a dot notation
-        string of the actual variable. Need to separate and create an
-        object on the rootValue from this string.
-      */
-      const path = subquestion.variable.split('.');
-      let currObj = rootValue;
+    parseSequenceSubquestion(rootValue, question) {
+      const out = {};
+      const obj = rootValue[question.variable];
 
-      for ( let i = 0; i < path.length; i++ ) {
-        if ( currObj[path[i]] === undefined ) {
-          currObj[path[i]] = subquestion.default;
-        }
-
-        currObj = currObj[path[i]];
+      if ( !isEmpty(obj) ) {
+        return saferDump({ [question.variable]: obj });
       }
 
-      return currObj;
+      question.subquestions.forEach((q) => {
+        const key = q.variable.split('.').pop(); // Only works for subquestions 1 level deep.
+
+        Object.assign(out, { [key]: q.default });
+      });
+
+      return saferDump({ [question.variable]: out });
+    },
+
+    reset() {
+      this.$emit('resetSeq', this.question);
     }
   }
 };
@@ -175,38 +160,35 @@ export default {
     </h3>
     <div v-for="(val, vIndex) in value" :key="val + vIndex" class="seq__container mb-20">
       <div
-        v-for="(q, index) in seqQuestions"
+        v-for="(q, index) in question.sequence_questions"
         :key="index"
       >
-        <template v-if="q.type.startsWith('sequence[')">
+        <template v-if="q.type.startsWith('sequence[') || (q.type.startsWith('map[') && q.subquestions)">
           <div class="row question">
             <div class="col span-12 mb-10">
               <h4>{{ q.label }}</h4>
-              <YamlEditor
-                ref="yamleditor"
-                :value="parseSequenceValues(val[q.variable], q)"
-                class="yaml-editor"
-                :editor-mode="isView ? 'VIEW_CODE' : 'EDIT_CODE'"
-                @onInput="updateDeep(q, vIndex, $event)"
-              />
-            </div>
-          </div>
-        </template>
 
-        <template v-if="q.type.startsWith('map[') && q.subquestions">
-          <div
-            v-for="(sub, subIndex) in q.subquestions"
-            :key="sub.variable + subIndex"
-            class="row question"
-          >
-            <div class="col span-12 mb-10">
-              <component
-                :is="componentForQuestion(sub)"
-                in-store="cluster"
-                :question="sub"
-                :value="parseSequenceSubquestion(value[vIndex], sub)"
-                @input="updateDeepSubquestion(value[vIndex], q, sub, vIndex, $event)"
-              />
+              <!-- Sequence questions -->
+              <template v-if="q.type.startsWith('sequence[')">
+                <YamlEditor
+                  ref="yamleditor"
+                  :value="parseSequenceValues(val[q.variable], q)"
+                  class="yaml-editor"
+                  :editor-mode="isView ? 'VIEW_CODE' : 'EDIT_CODE'"
+                  @onInput="updateDeep(q, vIndex, $event)"
+                />
+              </template>
+
+              <!-- Subquestions -->
+              <template v-else-if="q.type.startsWith('map[') && q.subquestions">
+                <YamlEditor
+                  ref="yamleditor"
+                  :value="parseSequenceSubquestion(val, q)"
+                  class="yaml-editor"
+                  :editor-mode="isView ? 'VIEW_CODE' : 'EDIT_CODE'"
+                  @onInput="updateDeep(q, vIndex, $event)"
+                />
+              </template>
             </div>
           </div>
         </template>
