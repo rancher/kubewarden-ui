@@ -290,16 +290,11 @@ export default {
 
     updateSequence(e) {
       const {
-        question, variable, index, subVariable, event
+        question, variable, index, event
       } = e;
-      let out = this.value[question.variable][index];
+      const out = this.value[question.variable][index];
 
-      if ( subVariable ) {
-        out = out[variable];
-        this.$set(out, [subVariable], event);
-      } else {
-        this.$set(out, [variable], event);
-      }
+      this.$set(out, [variable], event);
 
       if ( this.emit ) {
         this.$emit('updated');
@@ -343,6 +338,10 @@ export default {
       if ( this.emit ) {
         this.$emit('updated');
       }
+    },
+
+    resetSequence($event) {
+      this.$set(this.value, [$event.variable], $event.default);
     },
 
     evalExpr(expr, values, question, allQuestions) {
@@ -530,6 +529,7 @@ export default {
             @seqInputDeep="updateSequenceDeep($event)"
             @addSeq="addSequence($event)"
             @removeSeq="removeSequence($event)"
+            @resetSeq="resetSequence($event)"
           />
         </div>
       </div>
@@ -563,6 +563,7 @@ export default {
             @seqInputDeep="updateSequenceDeep($event)"
             @addSeq="addSequence($event)"
             @removeSeq="removeSequence($event)"
+            @resetSeq="resetSequence($event)"
           />
         </div>
       </div>
