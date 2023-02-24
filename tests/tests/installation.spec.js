@@ -7,8 +7,9 @@ test('00 first run', async({ page }) => {
   await page.goto('/');
 
   // login
-  await page.getByRole('textbox').fill('sa');
+  await page.locator('input[type=password]').fill('sa');
   await page.getByTestId('login-submit').click();
+
   // end user agreement
   await page.getByTestId('setup-agreement').locator('.checkbox-custom').check();
   await page.getByTestId('setup-submit').click();
@@ -60,8 +61,7 @@ test('03 install kubewarden', async({ page }) => {
   try {
     await expect(page.getByRole('button', { name: 'Install Kubewarden' })).toBeEnabled()
   } catch (e) {
-    console.log('Reload - https://github.com/kubewarden/ui/issues/201')
-    await page.reload();
+    await page.getByRole('button', { name: 'Reload', exact: true }).click()
     await page.getByRole('button', { name: 'Install Kubewarden' }).click();
   }
   await page.getByRole('button', { name: 'Install Kubewarden' }).click();
@@ -134,11 +134,16 @@ test('10 check overview page', async({ page }) => {
   await expect(page.getByRole('link', { name: 'Create Policy Server' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Create Admission Policy' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Create Cluster Admission Policy' })).toBeVisible()
-  
-  // kubewarden overview
-  await expect(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible({timeout:60_000})
-  await expect(page.getByText('Active 6 of 6 Global Policies / 100%')).toBeVisible()
+
+  await expect(page.getByText('Active 6 of 6 Global Policies / 100%')).toBeVisible({timeout:60_000})
   await expect(page.getByText('Active 0 of 0 Namespaced Policies / 0%')).toBeVisible()
+  try {
+    await expect(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
+  } catch (e) {
+    console.log('Reload - https://github.com/kubewarden/ui/issues/245')
+    await page.reload();
+    await expect(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
+  }
 });
 
 test('11 check policyservers page', async({ page }) => {
