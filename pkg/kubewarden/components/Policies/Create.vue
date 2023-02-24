@@ -244,7 +244,7 @@ export default ({
         try {
           const packages = await Promise.all(promises);
 
-          this.packages = packages.filter(pkg => pkg?.data?.['kubewarden/hide-ui'] !== 'true');
+          this.packages = packages.filter(pkg => pkg?.data?.['kubewarden/hidden-ui'] !== 'true');
         } catch (e) {
           console.warn(`Error fetching packages: ${ e }`); // eslint-disable-line no-console
         }
