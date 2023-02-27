@@ -26,15 +26,24 @@
       ],
       "@components/*": [
         "./node_modules/@rancher/components/*"
+      ],
+      "@kubewarden/*": [
+        "./pkg/kubewarden/*"
       ]
     },
     "typeRoots": [
       "./node_modules",
-      "./node_modules/@rancher/shell/types"
+      "./node_modules/@rancher/shell/types",
+      "./node_modules/@rancher/components/types",
+      "./pkg/kubewarden/types"
     ],
     "types": [
       "@types/node",
       "@nuxt/types",
+      "@jest/types",
+      "@playwright/types",
+      "@rancher/components/types",
+      "kubewarden",
       "cypress",
       "rancher",
       "shell"
@@ -42,6 +51,7 @@
   },
   "exclude": [
     "node_modules",
-    "tests"
+    "tests",
+    "jest.config.js"
   ]
 }
