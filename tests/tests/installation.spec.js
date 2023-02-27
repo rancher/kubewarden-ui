@@ -1,7 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-// you need to wait until cluster is ready before installation
+const DEVEL = 'https://kubewarden.github.io/ui' // use rc-builds REPO
 
 test('00 first run', async({ page }) => {
   await page.goto('/');
@@ -43,10 +43,33 @@ test('01 enable extension support', async({ page }) => {
 });
 
 
+test('02 add devel repository', async({ page }) => {
+  if (!DEVEL) test.skip()
+
+  await page.goto('/dashboard/c/local/apps/catalog.cattle.io.clusterrepo/create')
+  // Add kw extension repository
+  await page.getByPlaceholder('A unique name').fill('kubewarden-charts-devel');
+  await page.getByPlaceholder('e.g. https://charts.rancher.io').fill(DEVEL);
+  await page.getByRole('button', { name: 'Create' }).click();
+
+  // Check repository state is Active
+  await expect(page
+    .locator('tr.main-row')
+    .filter({has: page.getByRole('link', {name: 'kubewarden-charts-devel', exact: true})})
+    .locator('td.col-badge-state-formatter')
+  ).toHaveText('Active')
+})
+
+
 test('02 install kubewarden extension', async({ page }) => {
   await page.goto('/dashboard/c/local/uiplugins#available')
-  // Install kw extension
-  await page.locator('.plugin', {hasText: /Kubewarden/} ).getByRole('button', { name: 'Install' }).click();
+
+  // Select extension by icon that contains repo url, devel or official
+  const repo = DEVEL ? 'kubewarden-charts-devel' : 'rancher-ui-plugins'
+  await page.getByTestId('extension-card-kubewarden')
+    .filter({ has: page.locator(`xpath=//img[contains(@src, "clusterrepos/${repo}")]`) })
+    .getByRole('button', { name: 'Install' }).click();
+
   await page.getByRole('dialog').getByRole('button', { name: 'Install' }).click();
   await expect(page.locator('.plugin', {hasText: 'Kubewarden'} ).getByRole('button', { name: 'Uninstall' })).toBeEnabled({timeout: 30_000});
 });

@@ -74,7 +74,9 @@ async function setupVerifyImageSignatures(page) {
   await page.getByRole('tab', { name: 'Settings' }).click()
   await page.getByRole('button', {name: 'Add', exact: true}).click()
   await page.locator('input:near(:text("Image*"))').first().fill('ghcr.io/kubewarden/*')
-  await page.locator('input:near(:text("Owner*"))').first().fill('kubewarden')
+  // yaml editor
+  await page.getByTestId('yaml-editor-code-mirror').getByText('owner: \'\'').locator('.cm-string').click();
+  await page.keyboard.type('kubewarden')
 }
 
 async function setupEnvironmentVariablePolicy(page) {
