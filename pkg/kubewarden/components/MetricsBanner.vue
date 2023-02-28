@@ -1,5 +1,7 @@
 <script>
+import { mapGetters } from 'vuex';
 import { monitoringStatus } from '@shell/utils/monitoring';
+import { CONFIG_MAP } from '@shell/config/types';
 
 import { Banner } from '@components/Banner';
 import AsyncButton from '@shell/components/AsyncButton';
@@ -24,11 +26,29 @@ export default {
 
   components: { AsyncButton, Banner },
 
+  async fetch() {
+    if ( !this.monitoringChart ) {
+      await this.$store.dispatch('catalog/load');
+    }
+
+    await this.$store.dispatch('cluster/findAll', { type: CONFIG_MAP });
+  },
+
   computed: {
+    ...mapGetters(['currentProduct']),
     ...monitoringStatus(),
 
     monitoringChart() {
       return this.$store.getters['catalog/chart']({ chartName: 'rancher-monitoring' });
+    },
+
+    metricsDashboard() {
+      const out = this.$store.getters['cluster/matching']({
+        type:     CONFIG_MAP,
+        selector: `kubewarden/part-of=cattle-kubewarden-system`
+      });
+
+      return Array.isArray(out) && !out.length ? null : out;
     },
   },
 
@@ -39,7 +59,7 @@ export default {
     },
 
     chartRoute() {
-      this.monitoringChart.goToInstall();
+      this.monitoringChart?.goToInstall();
     }
   }
 };
@@ -58,7 +78,7 @@ export default {
     </Banner>
   </div>
 
-  <div v-else-if="!metricsService">
+  <div v-else-if="!metricsDashboard">
     <Banner color="warning">
       <template v-if="!reloadRequired">
         <p class="mb-20">
@@ -78,6 +98,15 @@ export default {
           {{ t('generic.reload') }}
         </button>
       </template>
+    </Banner>
+  </div>
+
+  <div v-else-if="!metricsService">
+    <Banner color="error">
+      <i class="icon icon-checkmark mr-10" />
+      <span class="mb-20">
+        {{ t('kubewarden.metrics.noService' ) }}
+      </span>
     </Banner>
   </div>
 </template>

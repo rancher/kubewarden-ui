@@ -2,9 +2,11 @@ import filter from 'lodash/filter';
 import matches from 'lodash/matches';
 
 import SteveModel from '@shell/plugins/steve/steve-class';
-import { STATES, STATES_ENUM } from '@shell/plugins/dashboard-store/resource-class';
+import {
+  STATES,
+  STATES_ENUM,
+} from '@shell/plugins/dashboard-store/resource-class';
 import { CONFIG_MAP, MANAGEMENT, SERVICE } from '@shell/config/types';
-import { proxyUrlFromParts } from '@shell/models/service';
 import { findBy, isArray } from '@shell/utils/array';
 import { addParams } from '@shell/utils/url';
 
@@ -14,7 +16,7 @@ import policyDashboard from '../assets/kubewarden-metrics-policy.json';
 
 export const MODE_MAP = {
   monitor: 'bg-info',
-  protect: 'bg-warning'
+  protect: 'bg-warning',
 };
 
 export const OPERATION_MAP = {
@@ -22,7 +24,7 @@ export const OPERATION_MAP = {
   CREATE:  'bg-info',
   UPDATE:  'bg-warning',
   DELETE:  'bg-error',
-  CONNECT: 'bg-success'
+  CONNECT: 'bg-success',
 };
 
 export const RANCHER_NAMESPACES = [
@@ -45,13 +47,13 @@ export const RANCHER_NAMESPACES = [
   'kube-system',
   'rancher-operator-system',
   'security-scan',
-  'tigera-operator'
+  'tigera-operator',
 ];
 
 export const NAMESPACE_SELECTOR = {
   key:      'kubernetes.io/metadata.name',
   operator: 'NotIn',
-  values:   RANCHER_NAMESPACES
+  values:   RANCHER_NAMESPACES,
 };
 
 export const ARTIFACTHUB_ENDPOINT = 'artifacthub.io/api/v1';
@@ -60,7 +62,7 @@ export const ARTIFACTHUB_PKG_ANNOTATION = 'artifacthub/pkg';
 
 export const GRAFANA_DASHBOARD_ANNOTATIONS = {
   'meta.helm.sh/release-name':      'rancher-monitoring',
-  'meta.helm.sh/release-namespace': 'cattle-monitoring-system'
+  'meta.helm.sh/release-namespace': 'cattle-monitoring-system',
 };
 
 export const GRAFANA_DASHBOARD_LABELS = {
@@ -72,7 +74,8 @@ export const GRAFANA_DASHBOARD_LABELS = {
   chart:                          'rancher-monitoring-101.0.0_up19.0.3',
   grafana_dashboard:              '1',
   heritage:                       'Helm',
-  release:                        'rancher-monitoring'
+  release:                        'rancher-monitoring',
+  'kubewarden/part-of':           'cattle-kubewarden-system',
 };
 
 export const VALIDATION_KEYS = [
@@ -85,14 +88,18 @@ export const VALIDATION_KEYS = [
   'operation',
   'policy_id',
   'response_message',
-  'response_code'
+  'response_code',
 ];
 
 export default class KubewardenModel extends SteveModel {
   async allServices() {
     const inStore = this.$rootGetters['currentProduct'].inStore;
 
-    return await this.$dispatch(`${ inStore }/findAll`, { type: SERVICE }, { root: true });
+    return await this.$dispatch(
+      `${ inStore }/findAll`,
+      { type: SERVICE },
+      { root: true }
+    );
   }
 
   get detailPageHeaderBadgeOverride() {
@@ -100,7 +107,7 @@ export default class KubewardenModel extends SteveModel {
   }
 
   get componentForBadge() {
-    if ( this.detailPageHeaderBadgeOverride ) {
+    if (this.detailPageHeaderBadgeOverride) {
       return require(`../formatters/PolicyStatus.vue`).default;
     }
 
@@ -108,7 +115,9 @@ export default class KubewardenModel extends SteveModel {
   }
 
   get whitelistSetting() {
-    return this.$rootGetters['management/all'](MANAGEMENT.SETTING).find(s => s.id === 'whitelist-domain');
+    return this.$rootGetters['management/all'](MANAGEMENT.SETTING).find(
+      s => s.id === 'whitelist-domain'
+    );
   }
 
   /*
@@ -120,13 +129,17 @@ export default class KubewardenModel extends SteveModel {
       const packages = 'packages/search';
       const params = {
         kind:  13, // Kind for Kubewarden policies https://artifacthub.io/packages/search?kind=13
-        limit: 50 // Limit request count
+        limit: 50, // Limit request count
       };
 
       url += `${ ARTIFACTHUB_ENDPOINT }/${ packages }`;
       url = addParams(url, params);
 
-      return await this.$dispatch('management/request', { url, redirectUnauthorized: false }, { root: true });
+      return await this.$dispatch(
+        'management/request',
+        { url, redirectUnauthorized: false },
+        { root: true }
+      );
     };
   }
 
@@ -138,7 +151,11 @@ export default class KubewardenModel extends SteveModel {
       try {
         const url = `/meta/proxy/${ ARTIFACTHUB_ENDPOINT }/packages/kubewarden/${ pkg.repository.name }/${ pkg.name }`;
 
-        return this.$dispatch('management/request', { url, redirectUnauthorized: false }, { root: true });
+        return this.$dispatch(
+          'management/request',
+          { url, redirectUnauthorized: false },
+          { root: true }
+        );
       } catch (e) {
         console.warn(`Error fetching pkg: ${ e }`); // eslint-disable-line no-console
       }
@@ -170,8 +187,12 @@ export default class KubewardenModel extends SteveModel {
       try {
         const services = await this.allServices();
 
-        if ( services ) {
-          const grafana = findBy(services, 'id', 'cattle-monitoring-system/rancher-monitoring-grafana');
+        if (services) {
+          const grafana = findBy(
+            services,
+            'id',
+            'cattle-monitoring-system/rancher-monitoring-grafana'
+          );
 
           return grafana;
         }
@@ -183,22 +204,19 @@ export default class KubewardenModel extends SteveModel {
 
   get grafanaProxy() {
     return async(type) => {
-      const dashboardName = type === METRICS_DASHBOARD.POLICY_SERVER ? 'kubewarden-policy-server' : 'kubewarden-policy';
+      const dashboardName =
+        type === METRICS_DASHBOARD.POLICY_SERVER ? 'kubewarden-policy-server' : 'kubewarden-policy';
 
       try {
         const grafana = await this.grafanaService();
 
-        if ( grafana ) {
-          const path = `d/${ type }/${ dashboardName }?orgId=1&kiosk`;
+        if (grafana) {
+          const base = `/api/v1/namespaces/${ grafana.metadata.namespace }/services/http:${ grafana.metadata.name }:80/proxy`;
+          const path = `/d/${ type }/${ dashboardName }?orgId=1&kiosk`;
 
-          return proxyUrlFromParts(
-            this.$rootGetters['clusterId'],
-            grafana.metadata.namespace,
-            grafana.metadata.name,
-            'http',
-            '80',
-            path
-          );
+          const out = base + path;
+
+          return out;
         }
       } catch (e) {
         console.warn(`Error fetching Grafana proxy: ${ e }`); // eslint-disable-line no-console
@@ -213,11 +231,14 @@ export default class KubewardenModel extends SteveModel {
       try {
         const services = await this.allServices();
 
-        if ( services ) {
+        if (services) {
           return services.find((s) => {
-            const found = s.metadata?.labels?.['app'] === 'jaeger' && s.metadata?.labels?.['app.kubernetes.io/component'] === 'service-query';
+            const found =
+              s.metadata?.labels?.['app'] === 'jaeger' &&
+              s.metadata?.labels?.['app.kubernetes.io/component'] ===
+                'service-query';
 
-            if ( found ) {
+            if (found) {
               return s;
             }
           });
@@ -237,7 +258,7 @@ export default class KubewardenModel extends SteveModel {
       const traceTags = `tags={"allowed"%3A"false"}`;
       const proxyPath = `api/traces?service=kubewarden-policy-server&operation=validation&limit=1000&lookback=${ lookbackTime }`;
 
-      if ( denied ) {
+      if (denied) {
         proxyPath.concat('&', traceTags);
       }
 
@@ -270,7 +291,7 @@ export default class KubewardenModel extends SteveModel {
 
         let out = await Promise.all(promises);
 
-        if ( out.length > 1 ) {
+        if (out.length > 1) {
           out = out.flatMap(o => o.data);
         }
 
@@ -304,10 +325,15 @@ export default class KubewardenModel extends SteveModel {
 
   // Determines if a policy is targeting rancher specific namespaces (which happens by default)
   get namespaceSelector() {
-    const rancherNs = RANCHER_NAMESPACES.find(ns => ns === this.metadata?.namespace);
-    const selector = filter(this.spec?.namespaceSelector?.matchExpressions, matches(NAMESPACE_SELECTOR));
+    const rancherNs = RANCHER_NAMESPACES.find(
+      ns => ns === this.metadata?.namespace
+    );
+    const selector = filter(
+      this.spec?.namespaceSelector?.matchExpressions,
+      matches(NAMESPACE_SELECTOR)
+    );
 
-    if ( rancherNs || !selector ) {
+    if (rancherNs || !selector) {
       return true;
     }
 
@@ -326,19 +352,24 @@ export default class KubewardenModel extends SteveModel {
       - PolicyServer is the default one copied from https://grafana.com/grafana/dashboards/15314-kubewarden/
       - Policies have a condensed version
     */
-    const dashboard = type === METRICS_DASHBOARD.POLICY_SERVER ? policyServerDashboard : policyDashboard;
+    const dashboard =
+      type === METRICS_DASHBOARD.POLICY_SERVER ? policyServerDashboard : policyDashboard;
     const fileKey = `${ type }.json`;
 
-    const configMapTemplate = await this.$dispatch('cluster/create', {
-      type:       CONFIG_MAP,
-      metadata: {
-        annotations: GRAFANA_DASHBOARD_ANNOTATIONS,
-        labels:      GRAFANA_DASHBOARD_LABELS,
-        name:        type,
-        namespace:   'cattle-dashboards'
+    const configMapTemplate = await this.$dispatch(
+      'cluster/create',
+      {
+        type:     CONFIG_MAP,
+        metadata: {
+          annotations: GRAFANA_DASHBOARD_ANNOTATIONS,
+          labels:      GRAFANA_DASHBOARD_LABELS,
+          name:        type,
+          namespace:   'cattle-dashboards',
+        },
+        data: { [fileKey]: JSON.stringify(dashboard) },
       },
-      data: { [fileKey]: JSON.stringify(dashboard) },
-    }, { root: true });
+      { root: true }
+    );
 
     try {
       await configMapTemplate.save();
@@ -358,7 +389,7 @@ export default class KubewardenModel extends SteveModel {
   }
 
   importComponent(name) {
-    if ( !name ) {
+    if (!name) {
       throw new Error('Name required');
     }
 
@@ -369,8 +400,10 @@ export default class KubewardenModel extends SteveModel {
     let traceArray = [];
 
     // If a policy is in monitor mode it will pass multiple trace objects
-    if ( isArray(traces) ) {
-      traceArray = [...new Map(traces.map(trace => [trace['traceID'], trace])).values()];
+    if (isArray(traces)) {
+      traceArray = [
+        ...new Map(traces.map(trace => [trace['traceID'], trace])).values(),
+      ];
     } else {
       Object.assign(traceArray, traces?.data);
     }
@@ -379,7 +412,7 @@ export default class KubewardenModel extends SteveModel {
       const eSpan = trace.spans?.find(s => s.operationName === 'policy_eval'); // policy in Monitor mode evaluation span
       const vSpan = trace.spans?.find(s => s.operationName === 'validation'); // policy in Protect mode validation span
 
-      if ( vSpan ) {
+      if (vSpan) {
         const date = new Date(vSpan.startTime / 1000);
         const duration = vSpan.duration / 1000;
 
@@ -390,23 +423,31 @@ export default class KubewardenModel extends SteveModel {
         let mode = 'protect'; // defaults to Protect mode for "Mode" trace header
 
         // 'policy_eval' logs will only exist when a policy is in monitor mode
-        if ( eSpan.logs.length > 0 ) {
+        if (eSpan.logs.length > 0) {
           mode = 'monitor';
 
           const fields = eSpan.logs.flatMap(log => log.fields);
 
           fields.map((f) => {
-            if ( f.key === 'response' ) {
+            if (f.key === 'response') {
               Object.assign(logs, { [f.key]: f.value });
             }
           });
         }
 
-        const tags = VALIDATION_KEYS.map(vKey => vSpan.tags.find(tag => tag.key === vKey));
+        const tags = VALIDATION_KEYS.map(vKey => vSpan.tags.find(tag => tag.key === vKey)
+        );
 
-        return tags?.reduce((tag, item) => ({
-          ...vSpan, ...tag, [item?.key]: item?.value, mode, logs
-        }), {});
+        return tags?.reduce(
+          (tag, item) => ({
+            ...vSpan,
+            ...tag,
+            [item?.key]: item?.value,
+            mode,
+            logs,
+          }),
+          {}
+        );
       }
 
       return null;
@@ -415,18 +456,22 @@ export default class KubewardenModel extends SteveModel {
     return out;
   }
 
-  toggleUpdateMode( resources = this ) {
-    this.$dispatch('cluster/promptModal', {
-      resources,
-      component: 'UpdateModeDialog'
-    }, { root: true });
+  toggleUpdateMode(resources = this) {
+    this.$dispatch(
+      'cluster/promptModal',
+      {
+        resources,
+        component: 'UpdateModeDialog',
+      },
+      { root: true }
+    );
   }
 
   updateWhitelist(url, remove) {
     const whitelist = this.whitelistSetting;
     const whitelistValue = whitelist?.value.split(',');
 
-    if ( remove && whitelistValue.includes(url) ) {
+    if (remove && whitelistValue.includes(url)) {
       const out = whitelistValue.filter(domain => domain !== url);
 
       whitelist.default = out.join();
@@ -437,7 +482,7 @@ export default class KubewardenModel extends SteveModel {
       } catch (e) {}
     }
 
-    if ( !whitelistValue.includes(url) ) {
+    if (!whitelistValue.includes(url)) {
       whitelistValue.push(url);
 
       whitelist.default = whitelistValue.join();
@@ -453,7 +498,7 @@ export default class KubewardenModel extends SteveModel {
 export function colorForStatus(status) {
   const lowStatus = status.toLowerCase();
 
-  switch ( lowStatus ) {
+  switch (lowStatus) {
   case 'unschedulable':
     return 'text-error';
   case 'pending':
@@ -468,8 +513,8 @@ export function colorForStatus(status) {
 }
 
 export function colorForPolicyServerState(state) {
-  for ( const key of Object.keys(STATES_ENUM)) {
-    if ( state === STATES_ENUM[key] ) {
+  for (const key of Object.keys(STATES_ENUM)) {
+    if (state === STATES_ENUM[key]) {
       return STATES[STATES_ENUM[key]].color;
     }
   }
@@ -495,7 +540,7 @@ export function stateSort(color, display) {
 }
 
 export function colorForTraceStatus(status) {
-  switch ( status ) {
+  switch (status) {
   case 'allowed':
     return 'success';
   case 'denied':
