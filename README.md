@@ -1,3 +1,5 @@
+[![E2E](https://github.com/kubewarden/ui/actions/workflows/playwright.yml/badge.svg)](https://github.com/kubewarden/ui/actions/workflows/playwright.yml)
+
 # Kubewarden UI
 
 This is an extension for [Rancher Manager](https://github.com/rancher/rancher) (`v2.7.0`) which allows you to interact with Kubewarden.
