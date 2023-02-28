@@ -17758,10 +17758,10 @@ ts-loader@^8.0.17:
     micromatch "^4.0.0"
     semver "^7.3.4"
 
-ts-loader@~8.0.0:
-  version "8.0.18"
-  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-8.0.18.tgz#b2385cbe81c34ad9f997915129cdde3ad92a61ea"
-  integrity sha512-hRZzkydPX30XkLaQwJTDcWDoxZHK6IrEMDQpNd7tgcakFruFkeUp/aY+9hBb7BUGb+ZWKI0jiOGMo0MckwzdDQ==
+ts-loader@~8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-8.2.0.tgz#6a3aeaa378aecda543e2ed2c332d3123841d52e0"
+  integrity sha512-ebXBFrNyMSmbWgjnb3WBloUBK+VSx1xckaXsMXxlZRDqce/OPdYBVN5efB0W3V0defq0Gcy4YuzvPGqRgjj85A==
   dependencies:
     chalk "^4.1.0"
     enhanced-resolve "^4.0.0"
