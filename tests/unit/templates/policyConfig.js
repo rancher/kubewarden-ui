@@ -20,7 +20,6 @@ export default {
     name: 'do-not-run-as-root',
   },
   spec: {
-    mode:              'monitor',
     module:            'ghcr.io/kubewarden/policies/user-group-psp:v0.4.2',
     mutating:          true,
     namespaceSelector: {
