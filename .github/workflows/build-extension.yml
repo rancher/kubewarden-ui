@@ -2,12 +2,17 @@ name: Build Kubewarden Extension
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - pkg/kubewarden/package.json
-    
+  pull_request:
+    branches:
+      - main
+
 env:
   ACTIONS_RUNNER_DEBUG: false
+  CI_COMMIT_MESSAGE: CI Build Artifacts
 
 defaults:
   run:
@@ -15,15 +20,11 @@ defaults:
     working-directory: ./
 
 jobs:
-  release:
+  build:
     if: github.repository_owner == 'kubewarden'
+    name: Build extension artifact
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      packages: write
-      contents: write
-    env:
-      CI_COMMIT_MESSAGE: CI Build Artifacts
+    permissions: write-all
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -43,12 +44,12 @@ jobs:
       - name: Setup yq
         uses: chrisdickinson/setup-yq@v1.0.1
         with:
-          yq-version: v4.28.2  
+          yq-version: v4.28.2
 
       - name: Setup Nodejs and npm
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: '16'
 
       - name: Setup yarn
         run: npm install -g yarn
@@ -56,7 +57,7 @@ jobs:
       - name: Setup Nodejs with yarn caching
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: '16'
           cache: yarn
 
       - name: Install dependencies
@@ -69,9 +70,39 @@ jobs:
           chmod +x ./scripts/publish
           ./scripts/publish -s "${{ github.repository }}" -b main
 
+      - name: Upload charts artifact
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v3
+        with:
+          name: charts
+          path: tmp
+
+  release:
+    name: Release Build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: charts
+
       - name: Commit build
         run: |
-          git add ./assets ./charts/kubewarden ./extensions ./index.yaml
+          git add ./{assets,charts,extensions,index.yaml}
           git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
           git push
 
@@ -80,5 +111,5 @@ jobs:
         with:
           charts_dir: ./charts/kubewarden
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
           CR_SKIP_EXISTING: true
