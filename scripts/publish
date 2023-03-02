@@ -320,6 +320,13 @@ popd > /dev/null
 rm -rf ${CHART_TMP}
 rm -rf ${TMP}
 
+mkdir -p tmp/{assets,charts,extensions}/$pkg
+
+cp -r ${PKG_ASSET} tmp/assets/$pkg
+cp -r ${CHARTS}/${pkg}/${PKG_VERSION} tmp/charts/$pkg
+cp -r ${EXT_FOLDER} tmp/extensions/$pkg
+cp index.yaml tmp
+
 # If the user asked to create a commit, commit the changes
 # if [ "${COMMIT}" == "true" ]; then
 #   echo -e "${CYAN}${BOLD}Creating git commit${RESET}"
