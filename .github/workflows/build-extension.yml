@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - pkg/kubewarden/package.json
+  pull_request:
+    branches:
+      - main
 
 env:
   ACTIONS_RUNNER_DEBUG: false
@@ -68,6 +71,7 @@ jobs:
           ./scripts/publish -s "${{ github.repository }}" -b main
 
       - name: Upload charts artifact
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-artifact@v3
         with:
           name: charts
@@ -75,6 +79,7 @@ jobs:
 
   release:
     name: Release Build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     permissions: write-all
