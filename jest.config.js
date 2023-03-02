@@ -24,5 +24,7 @@ module.exports = {
     '<rootDir>/extensions/',
     '<rootDir>/tests/tests/',
   ],
-  preset: '@vue/cli-plugin-unit-jest/presets/typescript-and-babel',
+  coverageDirectory: '<rootDir>/coverage/unit',
+  coverageReporters: ['json', 'text-summary'],
+  preset:            '@vue/cli-plugin-unit-jest/presets/typescript-and-babel',
 };

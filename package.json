@@ -9,8 +9,8 @@
     "dev": "./node_modules/.bin/nuxt dev",
     "nuxt": "./node_modules/.bin/nuxt",
     "serve-pkgs": "./node_modules/@rancher/shell/scripts/serve-pkgs",
-    "test": "jest --watch",
-    "test:ci": "jest --collectCoverage"
+    "test": "export TS_JEST_DISABLE_VER_CHECKER=true && jest --watch",
+    "test:ci": "export TS_JEST_DISABLE_VER_CHECKER=true && jest --collectCoverage"
   },
   "dependencies": {
     "@rancher/components": "0.1.0-alpha.10",
