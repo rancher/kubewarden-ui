@@ -535,26 +535,23 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": false,
-          "text": "",
-          "value": ""
-        },
+        "current": {},
+        "definition": "label_values(kubewarden_policy_evaluations_total{}, policy_name)",
         "description": "Define the policy which you want to see the metrics",
-        "error": null,
         "hide": 0,
-        "label": null,
+        "includeAll": false,
+        "multi": false,
         "name": "policy_name",
-        "options": [
-          {
-            "selected": true,
-            "text": "",
-            "value": ""
-          }
-        ],
-        "query": "",
+        "options": [],
+        "query": {
+          "query": "label_values(kubewarden_policy_evaluations_total{}, policy_name)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
         "skipUrlSync": false,
-        "type": "textbox"
+        "sort": 0,
+        "type": "query"
       }
     ]
   },
