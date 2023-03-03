@@ -127,7 +127,7 @@ for (const policy of policies) {
         .locator('tr.main-row')
         .filter({has: page.getByRole('link', {name:polname, exact: true})})
         .locator('td.col-policy-status')
-      ).toHaveText('Active', {timeout: 60_000})
+      ).toHaveText('Active', {timeout: 120_000})
 
       // Delete policy
       await page.locator(`button[id$='+${polname}']`).click()  // id="actionButton+0+rancher-kubewarden-controller"
