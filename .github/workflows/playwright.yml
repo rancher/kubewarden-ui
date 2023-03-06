@@ -13,6 +13,7 @@ defaults:
 
 jobs:
   playwright:
+    if: github.repository_owner == 'kubewarden' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
