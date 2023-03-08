@@ -22,7 +22,7 @@ describe('component: General', () => {
 
     const selector = wrapper.findComponent(ServiceNameSelect);
 
-    expect(selector.props().options).toStrictEqual(serviceAccounts as Array<String>);
+    expect(selector.props().options).toStrictEqual(serviceAccounts as String[]);
   });
 
   it('displays correct service account when existing', () => {
