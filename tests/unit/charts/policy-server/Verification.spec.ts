@@ -26,12 +26,12 @@ describe('component: Verification', () => {
     const configMaps = ['cm-1', 'cm-2', 'cm-3'];
 
     const wrapper = shallowMount(Verification as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData: { value: { verificationConfig: 'cm-2' }, configMaps },
+      propsData: { value: { verificationConfig: configMaps[1] }, configMaps },
       stubs:     { Banner: { template: '<span />' } }
     });
 
     const selector = wrapper.findComponent(LabeledSelect);
 
-    expect(selector.props().value).toStrictEqual('cm-2' as String);
+    expect(selector.props().value).toStrictEqual(configMaps[1] as String);
   });
 });
