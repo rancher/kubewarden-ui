@@ -6,7 +6,7 @@ import { describe, expect, it } from '@jest/globals';
 import Rules from '@kubewarden/chart/kubewarden/admission/Rules.vue';
 import Rule from '@kubewarden/chart/kubewarden/admission/Rule.vue';
 
-import policyConfig from '../templates/policyConfig';
+import policyConfig from '../../templates/policyConfig';
 
 describe('component: Rules', () => {
   it('rules should render rule components based on policy config', async() => {

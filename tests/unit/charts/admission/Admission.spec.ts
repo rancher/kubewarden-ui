@@ -8,8 +8,8 @@ import Settings from '@kubewarden/chart/kubewarden/admission/Settings.vue';
 import Questions from '@kubewarden/components/Questions/index.vue';
 
 import { DEFAULT_POLICY } from '@kubewarden/plugins/policy-class';
-import policyConfig from '../templates/policyConfig';
-import { question } from '../templates/questions';
+import policyConfig from '../../templates/policyConfig';
+import { question } from '../../templates/questions';
 
 describe('component: Rules', () => {
   it('settings component should be shown when custom policy', () => {

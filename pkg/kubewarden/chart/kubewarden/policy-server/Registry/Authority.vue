@@ -11,7 +11,6 @@ export default {
       type:    String,
       default: _EDIT
     },
-
     value: {
       type:    Object,
       default: () => {}
