@@ -19,7 +19,7 @@ describe('component: Verification', () => {
 
     const selector = wrapper.findComponent(LabeledSelect);
 
-    expect(selector.props().options).toStrictEqual(configMaps as Array<String>);
+    expect(selector.props().options).toStrictEqual(configMaps as String[]);
   });
 
   it('displays correct configmap when existing', () => {

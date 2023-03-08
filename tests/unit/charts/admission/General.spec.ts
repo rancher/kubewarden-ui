@@ -41,7 +41,7 @@ describe('component: General', () => {
     const input = wrapper.findComponent(LabeledSelect);
 
     expect(input.props().value).toStrictEqual('default' as String);
-    expect(input.props().options).toStrictEqual(['default', 'custom-ps'] as Array<String>);
+    expect(input.props().options).toStrictEqual(['default', 'custom-ps'] as String[]);
   });
 
   it('monitor mode should be protect by default', async() => {
