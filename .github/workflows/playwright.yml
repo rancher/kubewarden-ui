@@ -1,43 +1,110 @@
 name: Playwright Tests
+
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
+    inputs:
+      # TODO: head | rc | released | v2.7.1 | v2.7.2-rc7
+      rancher:
+        type: choice
+        default: 'rc'
+        description: Rancher
+        required: true
+        options:
+        - rc
+        - released
+      # TODO: head | released | tag#1.0.4-rc2 | pr#xxx | v#1.0.3
+      kubewarden:
+        type: choice
+        default: 'rc'
+        description: Kubewarden
+        required: true
+        options:
+        - head
+        - rc
+        - released
+      testsuite:
+        type: choice
+        default: 'install'
+        description: Testsuite
+        required: true
+        options:
+        - install (7 min)
+        - install + policies (7+30 min)
+
+      policyfilter:
+        type: string
+        description: Policy Filter
+
+  pull_request:
+    branches: main
+    paths: pkg/kubewarden/**
+
   schedule:
     - cron: "0 2 * * *"
 
-defaults:
-  run:
-    working-directory: tests
+env:
+  K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-github-runner
 
 jobs:
-  playwright:
-    if: github.repository_owner == 'kubewarden' || github.event_name == 'workflow_dispatch'
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
+  e2e:
+    # run schedule workflows only on kubewarden repo, not forks
+    if: github.repository_owner == 'kubewarden' || github.event_name != 'schedule'
+    runs-on: self-hosted
     steps:
     # ==================================================================================================
-    # Install requirements
+    # Check out code and install requirements
     - uses: actions/checkout@v3
     - uses: azure/setup-kubectl@v3
     - uses: actions/setup-node@v3
+    - name: Install dev dependencies
+      if: env.KUBEWARDEN == 'source'
+      run: yarn install --ignore-engines
     - name: Install playwright
+      working-directory: tests
       run: |
         npm install
-        npx playwright install --with-deps chromium
+        npx playwright install chromium # --with-deps
 
     # ==================================================================================================
-    # Create cluster and Install rancher
+    # Create k3d cluster and install rancher
     - name: "Create kubernetes cluster"
       uses: AbsaOSS/k3d-action@v2.4.0
       with:
-        cluster-name: ${{ github.repository_owner }}-ghactions-cluster
-        args: "--agents 1 --image rancher/k3s:v1.24.9-k3s2"
+        cluster-name: ${{ env.K3D_CLUSTER_NAME }}
+        args: "--agents 1 --image rancher/k3s:v1.24.11-k3s1"
+
+    # ==================================================================================================
+    # Set up parameters and ENV
+    - name: Setup global ENV
+      run: |
+        case ${{github.event_name}} in
+          pull_request)
+            RANCHER=rc
+            KUBEWARDEN=source
+            TESTSUITE=install
+            ;;
+          schedule)
+            RANCHER=rc
+            KUBEWARDEN=released
+            TESTSUITE=policies
+            ;;
+          workflow_dispatch)
+            RANCHER="${{ inputs.rancher }}"
+            KUBEWARDEN="${{ inputs.kubewarden }}"
+            TESTSUITE="${{ inputs.testsuite }}"
+            ;;
+          # TODO: add schedule test for RANCHER=devel KUBEWARDEN=source
+        esac
+
+        echo "Event: ${{github.event_name}}"
+        echo RANCHER=$RANCHER | tee -a $GITHUB_ENV
+        echo KUBEWARDEN=$KUBEWARDEN | tee -a $GITHUB_ENV
+        echo TESTSUITE="$TESTSUITE" | tee -a $GITHUB_ENV
+
+
     - name: Install Rancher
       run: |
-        FQDN=$(k3d cluster list ${{ github.repository_owner }}-ghactions-cluster -o json | jq -r '[.[].nodes[] | select(.role == "server").IP.IP] | first').nip.io
-        echo "RANCHER_URL=https://$FQDN" >> $GITHUB_ENV
+        RANCHER_FQDN=$(k3d cluster list ${{ env.K3D_CLUSTER_NAME }} -o json | jq -r '[.[].nodes[] | select(.role == "server").IP.IP] | first').nip.io
 
         # Wait for kube-system
         for i in {1..20}; do
@@ -50,12 +117,15 @@ jobs:
         kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml
         kubectl wait --for=condition=Available deployment --timeout=2m -n cert-manager --all
 
+        [ "${{ env.RANCHER }}" == 'rc' ] && RANCHER_DEVEL=1
         helm repo add --force-update rancher-latest https://releases.rancher.com/server-charts/latest
         helm upgrade --install rancher rancher-latest/rancher --wait \
             --namespace cattle-system --create-namespace \
-            --set hostname=$FQDN \
+            --set hostname=$RANCHER_FQDN \
             --set bootstrapPassword=sa \
-            --devel
+            ${RANCHER_DEVEL:+--devel}
+
+        # Wait for rancher
         for i in {1..20}; do
             output=$(kubectl get pods --no-headers -o wide -n cattle-system | grep -vw Completed || echo 'Wait: cattle-system')$'\n'
             output+=$(kubectl get pods --no-headers -o wide -n cattle-fleet-system | grep -vw Completed || echo 'Wait: cattle-fleet-system')$'\n'
@@ -63,17 +133,47 @@ jobs:
             grep -vE '([0-9]+)/\1 +Running|^$' <<< $output || break
             [ $i -ne 20 ] && sleep 30 || { echo "Godot: pods not running"; exit 1; }
         done
+    
+        echo "RANCHER_FQDN=$RANCHER_FQDN" >> $GITHUB_ENV
 
     # ==================================================================================================
-    # Run playwright tests and upload results
+    # Setup playwright ENV and run tests
+    # https://rancher.github.io/dashboard/testing/e2e-test#setup-for-local-tests
     - name: Install kubewarden
-      run: npx playwright test installation
-    - name: Install policies
-      run: npx playwright test policies -g 'Pod Privileged Policy'
+      working-directory: tests
+      run: |
+        export RANCHER_URL=https://${{env.RANCHER_FQDN}}
+        if [ "${{ env.KUBEWARDEN }}" == 'source' ]; then
+          export API=$RANCHER_URL
+          export RANCHER_URL=https://localhost:8005
+        fi
+        export ORIGIN=${{ env.KUBEWARDEN }}
 
+        echo API=$API
+        echo RANCHER_URL=$RANCHER_URL
+      
+        npx playwright test installation -x
+
+
+    - name: Install policies
+      if: contains(env.TESTSUITE, 'policies') || ${{ inputs.policyfilter }}
+      timeout-minutes: 90
+      working-directory: tests
+      run: |
+        [ -n "${{ inputs.policyfilter }}" ] && FILTER='${{ inputs.policyfilter }}'
+        npx playwright test policies ${FILTER:+-g "$FILTER"}
+
+    # ==================================================================================================
+    # Artifacts & Summary
     - uses: actions/upload-artifact@v3
       if: always()
       with:
         name: playwright-report
-        path: tests/test-results/
+        path: tests/playwright-report/
         retention-days: 30
+
+
+    - name: Clean Up
+      if: always()
+      run: |
+        k3d cluster delete ${{ env.K3D_CLUSTER_NAME }}
