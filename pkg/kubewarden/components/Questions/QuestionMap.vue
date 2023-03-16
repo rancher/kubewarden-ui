@@ -8,13 +8,19 @@ export default {
   props: {
     value: {
       type:    [Array, Object],
-      default: () => []
+      default: () => {}
     }
   },
 
   components: { KeyValue },
 
   mixins: [Question],
+
+  data() {
+    const questionValue = this.value?.[this.question.variable] || this.value;
+
+    return { questionValue };
+  },
 
   methods: {
     update(val) {
@@ -39,7 +45,7 @@ export default {
         <KeyValue
           v-if="showInput"
           :key="question.variable"
-          v-model="value[question.variable]"
+          v-model="questionValue"
           :title="question.label"
           :mode="mode"
           :protip="false"
