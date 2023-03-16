@@ -49,8 +49,8 @@ export default {
       DASHBOARD_HEADERS,
       colorStops,
 
-      apps:               null,
-      controller:         null,
+      apps:        null,
+      controller:  null,
       psPods:      null,
     };
   },
