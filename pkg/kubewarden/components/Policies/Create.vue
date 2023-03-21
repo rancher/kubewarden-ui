@@ -278,8 +278,8 @@ export default ({
         metadata:   { annotations: { [ARTIFACTHUB_PKG_ANNOTATION]: packageAnnotation } },
         spec:       {
           module:       policyDetails.containers_images[0].image,
-          contextAware: JSON.parse(policyDetails?.data?.['kubewarden/contextAware']) || false,
-          mutating:     JSON.parse(policyDetails?.data?.['kubewarden/mutation']) || false,
+          contextAware: policyDetails?.data?.['kubewarden/contextAware'] ? JSON.parse(policyDetails.data['kubewarden/contextAware']) : false,
+          mutating:     policyDetails?.data?.['kubewarden/mutation'] ? JSON.parse(policyDetails.data['kubewarden/mutation']) : false,
           rules:        packageRules?.rules || []
         }
       };

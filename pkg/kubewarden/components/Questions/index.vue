@@ -292,9 +292,15 @@ export default {
       const {
         question, variable, index, event
       } = e;
-      const out = this.value[question.variable][index];
 
-      this.$set(out, [variable], event);
+      const out = this.value[question.variable];
+      const deepProp = this.getProperty(this.value, question.variable);
+
+      if ( deepProp ) {
+        this.$set(deepProp[index], [variable], event);
+      } else {
+        this.$set(out[index], [variable], event);
+      }
 
       if ( this.emit ) {
         this.$emit('updated');
@@ -320,8 +326,32 @@ export default {
       }
 
       if ( Array.isArray($event.default) ) {
-        if ( !this.value[$event.variable] || !this.value[$event.variable].length ) {
+        if ( !this.value[$event.variable] && !$event.variable.includes('.') ) {
           this.$set(this.value, [$event.variable], []);
+        }
+        /*
+          If the sequence is nested within a subquestion, the $event.variable will
+          be a dot notation representation.
+        */
+        if ( $event.variable.includes('.') ) {
+          const deepProp = this.getProperty(this.value, $event.variable);
+          const shouldAssign = $event.type === 'sequence[';
+
+          if ( deepProp ) {
+            return deepProp.push(out);
+          }
+
+          if ( shouldAssign ) {
+            const parts = $event.variable.split('.');
+            const root = this.value[parts[0]];
+            const prop = parts[1];
+
+            if ( root ) {
+              this.$set(root, [prop], []);
+
+              return root[prop].push(out);
+            }
+          }
         }
 
         this.value[$event.variable].push(out);
@@ -333,7 +363,13 @@ export default {
     },
 
     removeSequence($event) {
-      this.value?.[$event.question.variable].splice($event.vIndex, 1);
+      const deepProp = this.getProperty(this.value, $event.question.variable);
+
+      if ( deepProp ) {
+        deepProp.splice($event.vIndex, 1);
+      } else {
+        this.value?.[$event.question.variable].splice($event.vIndex, 1);
+      }
 
       if ( this.emit ) {
         this.$emit('updated');
@@ -419,6 +455,21 @@ export default {
       }
 
       return false;
+    },
+
+    getProperty(root, prop) {
+      const parts = prop.split('.');
+      let value = root;
+
+      for ( const part of parts ) {
+        value = value[part];
+
+        if ( value === undefined ) {
+          return;
+        }
+      }
+
+      return value;
     },
 
     getVariables(showIf, operator) {
