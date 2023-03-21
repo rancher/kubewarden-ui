@@ -17,10 +17,10 @@ export const question = {
   ],
 };
 
-export const deepQuestion = {
+export const deepSequenceQuestion = {
   default:     [],
   description:
-    'Keyless subject prefix. It will verify that the issuer and that the urlPrefix is sanitized to prevent typosquatting.',
+    '',
   label:              'Keyless Subject Prefix',
   type:               'sequence[',
   variable:           'signatures',
@@ -60,3 +60,65 @@ export const deepQuestion = {
     },
   ],
 };
+
+export const deepMapQuestion =
+    {
+      default:      {},
+      description:  '',
+      group:        'Settings',
+      label:        'Run as user',
+      hide_input:   true,
+      type:         'map[',
+      variable:     'run_as_user',
+      subquestions: [
+        {
+          default: 'MustRunAs',
+          group:   'Settings',
+          label:   'Rule',
+          options: [
+            'MustRunAs',
+            'MustRunAsNonRoot',
+            'RunAsAny'
+          ],
+          type:     'enum',
+          variable: 'run_as_user.rule'
+        },
+        {
+          default:  false,
+          group:    'Settings',
+          label:    'Overwrite',
+          show_if:  'run_as_user.rule=MustRunAs',
+          title:    'Overwrite',
+          type:     'boolean',
+          variable: 'run_as_user.overwrite'
+        },
+        {
+          default:            [],
+          description:        '',
+          group:              'Settings',
+          label:              'Ranges',
+          show_if:            'run_as_user.rule=MustRunAs||run_as_user.rule=MustRunAsNonRoot',
+          hide_input:         true,
+          type:               'sequence[',
+          variable:           'run_as_user.ranges',
+          sequence_questions: [
+            {
+              default:  0,
+              group:    'Settings',
+              label:    'min',
+              show_if:  'run_as_user.rule=MustRunAs||run_as_user.rule=MustRunAsNonRoot',
+              type:     'int',
+              variable: 'min'
+            },
+            {
+              default:  0,
+              group:    'Settings',
+              label:    'max',
+              show_if:  'run_as_user.rule=MustRunAs||run_as_user.rule=MustRunAsNonRoot',
+              type:     'int',
+              variable: 'max'
+            }
+          ]
+        }
+      ]
+    };
