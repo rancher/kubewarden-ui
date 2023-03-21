@@ -6,7 +6,7 @@ import { describe, expect, it } from '@jest/globals';
 import Question from '@kubewarden/components/Questions/index.vue';
 import SequenceType from '@kubewarden/components/Questions/SequenceTree.vue';
 
-import { question, deepQuestion } from '../../templates/questions';
+import { question, deepSequenceQuestion } from '../../templates/questions';
 
 function getGroups(flattenedQuestions) {
   const map = {};
@@ -51,13 +51,13 @@ describe('component: SequenceType', () => {
 
   it('renders deep sequence when provided multiple sequence_questions', () => {
     const wrapper = shallowMount(SequenceType as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData:  { question: deepQuestion },
+      propsData:  { question: deepSequenceQuestion },
       stubs:     { 'deep-component': SequenceType }
     });
 
     wrapper.vm.$emit('addSeq', { question: wrapper.props().question });
 
-    const flattenedQuestions = deepQuestion.sequence_questions.flatMap(q => q);
+    const flattenedQuestions = deepSequenceQuestion.sequence_questions.flatMap(q => q);
 
     expect(wrapper.findComponent(SequenceType).exists()).toBe(true);
 
