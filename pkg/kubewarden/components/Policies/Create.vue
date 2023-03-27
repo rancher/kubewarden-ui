@@ -272,14 +272,22 @@ export default ({
       const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.['kubewarden/questions-ui']);
       const packageAnnotation = `${ policyDetails.repository.name }/${ policyDetails.name }/${ policyDetails.version }`;
 
+      const determineAnnotation = (annotation) => {
+        if ( policyDetails?.data?.[annotation] !== undefined ) {
+          return JSON.parse(policyDetails.data[annotation]);
+        }
+
+        return false;
+      };
+
       const updatedPolicy = {
         apiVersion: this.value.apiVersion,
         kind:       this.value.kind,
         metadata:   { annotations: { [ARTIFACTHUB_PKG_ANNOTATION]: packageAnnotation } },
         spec:       {
           module:       policyDetails.containers_images[0].image,
-          contextAware: policyDetails?.data?.['kubewarden/contextAware'] ? JSON.parse(policyDetails.data['kubewarden/contextAware']) : false,
-          mutating:     policyDetails?.data?.['kubewarden/mutation'] ? JSON.parse(policyDetails.data['kubewarden/mutation']) : false,
+          contextAware: determineAnnotation('kubewarden/contextAware'),
+          mutating:     determineAnnotation('kubewarden/mutation'),
           rules:        packageRules?.rules || []
         }
       };
