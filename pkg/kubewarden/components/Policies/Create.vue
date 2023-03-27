@@ -268,9 +268,17 @@ export default ({
       }
 
       const policyDetails = this.packages.find(pkg => pkg.name === this.type?.name);
-      const packageRules = this.value.parsePackageMetadata(policyDetails?.data?.['kubewarden/rules']);
       const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.['kubewarden/questions-ui']);
       const packageAnnotation = `${ policyDetails.repository.name }/${ policyDetails.name }/${ policyDetails.version }`;
+      const packageRules = () => {
+        const out = this.value.parsePackageMetadata(policyDetails?.data?.['kubewarden/rules']);
+
+        if ( out?.rules !== undefined ) {
+          return out.rules;
+        }
+
+        return out || [];
+      };
 
       const determineAnnotation = (annotation) => {
         if ( policyDetails?.data?.[annotation] !== undefined ) {
@@ -288,7 +296,7 @@ export default ({
           module:       policyDetails.containers_images[0].image,
           contextAware: determineAnnotation('kubewarden/contextAware'),
           mutating:     determineAnnotation('kubewarden/mutation'),
-          rules:        packageRules?.rules || []
+          rules:        packageRules()
         }
       };
 

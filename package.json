@@ -1,6 +1,6 @@
 {
   "name": "ui",
-  "version": "1.0.4-rc1",
+  "version": "1.0.4-rc2",
   "private": false,
   "scripts": {
     "build": "./node_modules/.bin/nuxt build",
