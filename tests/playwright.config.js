@@ -32,7 +32,7 @@ const config = {
   /* Opt out of parallel tests on CI. */
   workers:    process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: process.env.CI ? 'github' : 'list',
+  reporter: process.env.CI ? 'html' : 'list',
   reportSlowTests: null,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use:        {
@@ -64,35 +64,20 @@ const config = {
         viewport: { width: 1600, height: 900 },
       },
     },
-
-    //    {
-    //      name: 'firefox',
-    //      use: {
-    //        ...devices['Desktop Firefox'],
-    //      },
-    //    },
-    //
-    //    {
-    //      name: 'webkit',
-    //      use: {
-    //        ...devices['Desktop Safari'],
-    //      },
-    //    },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: {
-    //     channel: 'msedge',
-    //   },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: {
-    //     channel: 'chrome',
-    //   },
-    // },
   ],
+
+  /* Run your local dev server before starting the tests */
+  webServer: process.env.API ? {
+    command: 'yarn dev',
+    port: 8005,
+    ignoreHTTPSErrors: true,
+    cwd: '../',
+    timeout: 300_000,
+    env: {
+      ROUTER_BASE: '/dashboard/',
+      //NODE_OPTIONS: '--openssl-legacy-provider'
+    }
+  } : undefined
 };
 
 module.exports = config;
