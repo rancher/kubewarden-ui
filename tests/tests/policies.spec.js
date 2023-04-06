@@ -9,7 +9,7 @@ const polkeep   = process.env.keep || false
 
 const policies = [
   { name: 'Custom Policy', action: setupCustomPolicy },
-  { name: 'Allow Privilege Escalation PSP', skip: 'https://github.com/kubewarden/allow-privilege-escalation-psp-policy/issues/48' },
+  { name: 'Allow Privilege Escalation PSP' },
   { name: 'Allowed Fs Groups PSP' },
   { name: 'Allowed Proc Mount Types PSP' },
   { name: 'Apparmor PSP' },

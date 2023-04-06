@@ -139,19 +139,20 @@ jobs:
     # ==================================================================================================
     # Setup playwright ENV and run tests
     # https://rancher.github.io/dashboard/testing/e2e-test#setup-for-local-tests
+    - name: Setup Playwright ENV
+      run: |
+        RANCHER_URL=https://${{env.RANCHER_FQDN}}
+        if [ "${{ env.KUBEWARDEN }}" == 'source' ]; then
+          API=$RANCHER_URL
+          RANCHER_URL=https://localhost:8005
+        fi
+        [ -v API ] && echo API=$API | tee -a $GITHUB_ENV
+        echo RANCHER_URL=$RANCHER_URL | tee -a $GITHUB_ENV
+        echo ORIGIN=${{ env.KUBEWARDEN }} | tee -a $GITHUB_ENV
+      
     - name: Install kubewarden
       working-directory: tests
       run: |
-        export RANCHER_URL=https://${{env.RANCHER_FQDN}}
-        if [ "${{ env.KUBEWARDEN }}" == 'source' ]; then
-          export API=$RANCHER_URL
-          export RANCHER_URL=https://localhost:8005
-        fi
-        export ORIGIN=${{ env.KUBEWARDEN }}
-
-        echo API=$API
-        echo RANCHER_URL=$RANCHER_URL
-      
         npx playwright test installation -x
 
 
@@ -160,8 +161,7 @@ jobs:
       timeout-minutes: 90
       working-directory: tests
       run: |
-        [ -n "${{ inputs.policyfilter }}" ] && FILTER='${{ inputs.policyfilter }}'
-        npx playwright test policies ${FILTER:+-g "$FILTER"}
+        npx playwright test policies -g "${{ inputs.policyfilter || '' }}" -x
 
     # ==================================================================================================
     # Artifacts & Summary
