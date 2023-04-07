@@ -4,7 +4,7 @@ const jsyaml = require('js-yaml');
 const merge = require('lodash.merge');
 
 // source (yarn dev) | rc (add devel repo) | released (just install)
-const ORIGIN = process.env.ORIGIN || 'rc' // use source if API is set
+const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
 
 /**
  * @param {import('@playwright/test').Page} page
