@@ -2,6 +2,9 @@
 import { mapGetters } from 'vuex';
 
 import { CATALOG, SERVICE } from '@shell/config/types';
+import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
+import { allHash } from '@shell/utils/promise';
+import ResourceFetch from '@shell/mixins/resource-fetch';
 
 import { Banner } from '@components/Banner';
 import AsyncButton from '@shell/components/AsyncButton';
@@ -9,6 +12,7 @@ import CopyCode from '@shell/components/CopyCode';
 import Loading from '@shell/components/Loading';
 
 import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPO } from '../../types';
+import { getLatestStableVersion } from '../../plugins/kubewarden-class';
 
 import InstallWizard from './InstallWizard';
 
@@ -28,23 +32,25 @@ export default {
     Loading
   },
 
+  mixins: [ResourceFetch],
+
   async fetch() {
     this.reloadReady = false;
 
     if ( !this.hasSchema ) {
-      const promises = [
-        this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: SERVICE }),
-        this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: CATALOG.CLUSTER_REPO })
+      const hash = [
+        this.$fetchType(SERVICE),
+        this.$fetchType(CATALOG.CLUSTER_REPO)
       ];
 
-      await Promise.all(promises);
+      await allHash(hash);
 
       if ( this.certService ) {
         this.initStepIndex = 1;
         this.installSteps[0].ready = true;
       }
 
-      await this.refreshCharts(1);
+      await this.refreshCharts(1, true);
     }
   },
 
@@ -131,29 +137,36 @@ export default {
           spec:     { url: KUBEWARDEN_REPO },
         });
 
-        await repoObj.save();
+        try {
+          await repoObj.save();
+        } catch (e) {
+          this.handleGrowlError(e);
+          btnCb(false);
+
+          return;
+        }
 
         await this.refreshCharts();
-
         btnCb(true);
       } catch (e) {
-        this.$store.dispatch('growl/fromError', e);
+        this.handleGrowlError(e);
         btnCb(false);
       }
     },
 
-    async refreshCharts(retry = 0) {
+    async refreshCharts(retry = 0, init) {
       try {
         await this.$store.dispatch('catalog/load', { force: true, reset: true });
       } catch (e) {
-        this.$store.dispatch('growl/fromError', e);
+        this.handleGrowlError(e);
       }
 
       if ( !this.controllerChart && retry === 0 ) {
+        await this.$fetchType(CATALOG.CLUSTER_REPO);
         await this.refreshCharts(retry + 1);
       }
 
-      if ( !this.controllerChart && retry === 1 ) {
+      if ( !this.controllerChart && retry === 1 && !init ) {
         this.reloadReady = true;
       }
     },
@@ -163,18 +176,44 @@ export default {
         try {
           await this.refreshCharts();
         } catch (e) {
-          this.$store.dispatch('growl/fromError', e);
+          this.handleGrowlError(e);
 
           return;
         }
       }
 
-      this.controllerChart.goToInstall('kubewarden');
+      const {
+        repoType, repoName, chartName, versions
+      } = this.controllerChart;
+      const latestStableVersion = getLatestStableVersion(versions);
+
+      const query = {
+        [REPO_TYPE]: repoType,
+        [REPO]:      repoName,
+        [CHART]:     chartName,
+        [VERSION]:   latestStableVersion.version
+      };
+
+      this.$router.push({
+        name:   'c-cluster-apps-charts-install',
+        params: { cluster: this.currentCluster?.id || '_' },
+        query,
+      });
     },
 
     reload() {
       this.$router.go();
     },
+
+    handleGrowlError(e) {
+      const error = e?.data || e;
+
+      this.$store.dispatch('growl/error', {
+        title:   error._statusText,
+        message: error.message,
+        timeout: 5000,
+      }, { root: true });
+    }
   }
 };
 </script>

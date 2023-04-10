@@ -553,3 +553,23 @@ export function colorForTraceStatus(status) {
 
   return 'success';
 }
+
+export function getLatestStableVersion(versions) {
+  const stableVersions = versions.filter(v => !v.version.includes('rc'));
+
+  return stableVersions?.sort((a, b) => {
+    const versionA = a.version.split('.').map(Number);
+    const versionB = b.version.split('.').map(Number);
+
+    for ( let i = 0; i < Math.max(versionA.length, versionB.length); i++ ) {
+      if ( versionA[i] === undefined || versionA[i] < versionB[i] ) {
+        return 1;
+      }
+      if ( versionB[i] === undefined || versionA[i] > versionB[i] ) {
+        return -1;
+      }
+    }
+
+    return 0;
+  })[0];
+}
