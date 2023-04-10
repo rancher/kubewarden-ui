@@ -3,6 +3,7 @@ import jsyaml from 'js-yaml';
 import merge from 'lodash/merge';
 import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
+
 import ChartMixin from '@shell/mixins/chart';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { _CREATE, CHART, REPO, REPO_TYPE } from '@shell/config/query-params';
@@ -19,6 +20,7 @@ import Wizard from '@shell/components/Wizard';
 import { ARTIFACTHUB_PKG_ANNOTATION, NAMESPACE_SELECTOR } from '../../plugins/kubewarden-class';
 import { DEFAULT_POLICY } from '../../plugins/policy-class';
 import { KUBEWARDEN_PRODUCT_NAME, VALUES_STATE } from '../../types';
+import { removeEmptyAttrs } from '../../utils/object';
 
 import PolicyGrid from './PolicyGrid';
 import Values from './Values';
@@ -63,7 +65,7 @@ export default ({
 
   data() {
     return {
-      errors:            null,
+      errors:            [],
       bannerTitle:       null,
       loadingPackages:   false,
       packages:          null,
@@ -193,8 +195,15 @@ export default ({
 
         btnCb(true);
         this.loadingPackages = false;
-      } catch (err) {
-        this.errors = err;
+      } catch (e) {
+        const error = e?.data || e;
+
+        this.$store.dispatch('growl/error', {
+          title:   error._statusText,
+          message: error.message,
+          timeout: 5000,
+        }, { root: true });
+
         btnCb(false);
         this.loadingPackages = false;
       }
@@ -227,11 +236,20 @@ export default ({
           out = this.chartValues?.policy ? this.chartValues.policy : jsyaml.load(this.yamlValues);
         }
 
+        removeEmptyAttrs(out); // Clean up empty values from questions
         merge(this.value, out);
 
         await this.save(event);
       } catch (e) {
-        this.errors.push(e);
+        const error = e?.data || e;
+
+        this.$store.dispatch('growl/error', {
+          title:   error._statusText,
+          message: error.message,
+          timeout: 5000,
+        }, { root: true });
+
+        console.error('Error creating policy', e); // eslint-disable-line no-console
       }
     },
 
@@ -246,7 +264,15 @@ export default ({
 
           this.packages = packages.filter(pkg => pkg?.data?.['kubewarden/hidden-ui'] !== 'true');
         } catch (e) {
-          console.warn(`Error fetching packages: ${ e }`); // eslint-disable-line no-console
+          const error = e?.data || e;
+
+          this.$store.dispatch('growl/error', {
+            title:   error._statusText,
+            message: error.message,
+            timeout: 5000,
+          }, { root: true });
+
+          console.warn(`Error fetching packages`, e); // eslint-disable-line no-console
         }
       }
     },

@@ -3,6 +3,8 @@ import { _CREATE, _EDIT } from '@shell/config/query-params';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import CruResource from '@shell/components/CruResource';
+import { removeEmptyAttrs } from '../utils/object';
+
 import Config from '../components/Policies/Config';
 import Create from '../components/Policies/Create';
 
@@ -45,8 +47,18 @@ export default {
   methods: {
     async finish(event) {
       try {
+        removeEmptyAttrs(this.value);
+
         await this.save(event);
-      } catch (e) {}
+      } catch (e) {
+        const error = e?.data || e;
+
+        this.$store.dispatch('growl/error', {
+          title:   error._statusText,
+          message: error.message,
+          timeout: 5000,
+        }, { root: true });
+      }
     },
   }
 };
