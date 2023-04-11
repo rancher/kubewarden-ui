@@ -56,9 +56,8 @@ jobs:
     - uses: actions/checkout@v3
     - uses: azure/setup-kubectl@v3
     - uses: actions/setup-node@v3
-    - name: Install dev dependencies
-      if: env.KUBEWARDEN == 'source'
-      run: yarn install --ignore-engines
+      with:
+        node-version: '16'
     - name: Install playwright
       working-directory: tests
       run: |
@@ -149,15 +148,18 @@ jobs:
         [ -v API ] && echo API=$API | tee -a $GITHUB_ENV
         echo RANCHER_URL=$RANCHER_URL | tee -a $GITHUB_ENV
         echo ORIGIN=${{ env.KUBEWARDEN }} | tee -a $GITHUB_ENV
-      
+
+    - name: Install dev dependencies
+      if: env.KUBEWARDEN == 'source'
+      run: yarn install --ignore-engines
+
     - name: Install kubewarden
       working-directory: tests
       run: |
         npx playwright test installation -x
 
-
     - name: Install policies
-      if: contains(env.TESTSUITE, 'policies') || ${{ inputs.policyfilter }}
+      if: ${{ contains(env.TESTSUITE, 'policies') || inputs.policyfilter }}
       timeout-minutes: 90
       working-directory: tests
       run: |
