@@ -59,7 +59,7 @@ export default {
 
         if ( this.keywords ) {
           for ( const selected of this.keywords ) {
-            if ( !subtype.keywords.includes(selected) ) {
+            if ( !subtype.keywords?.includes(selected) ) {
               return false;
             }
           }
@@ -73,7 +73,9 @@ export default {
 
     keywordOptions() {
       const flattened = this.value?.flatMap((subtype) => {
-        return subtype.keywords;
+        if ( subtype.keywords && subtype.keywords.length ) {
+          return subtype.keywords;
+        }
       }).sort();
 
       return [...new Set(flattened)] || [];
@@ -81,17 +83,24 @@ export default {
 
     resourceOptions() {
       const out = [];
+
       const resources = this.value?.flatMap((subtype) => {
-        return subtype.data?.['kubewarden/resources'];
+        const annotation = subtype.data?.['kubewarden/resources'];
+
+        if ( annotation ) {
+          return annotation;
+        }
       });
 
       resources?.flatMap((resource) => {
-        const split = resource.split(',');
+        if ( resource ) {
+          const split = resource.split(',');
 
-        if ( split.length > 1 ) {
-          split.forEach(s => out.push(s));
-        } else {
-          out.push(resource);
+          if ( split.length > 1 ) {
+            split.forEach(s => out.push(s));
+          } else {
+            out.push(resource);
+          }
         }
       }).sort();
 
@@ -107,9 +116,13 @@ export default {
     },
 
     resourceType(type) {
-      const t = type.split(',');
+      if ( type === undefined ) {
+        return null;
+      }
 
-      if ( t.length > 1 ) {
+      const t = type?.split(',');
+
+      if ( t?.length > 1 ) {
         return 'Multiple';
       }
 
@@ -174,7 +187,7 @@ export default {
         @click="$emit('selectType', subtype)"
       >
         <div class="subtype__metadata">
-          <div class="subtype__badge">
+          <div v-if="subtype.data['kubewarden/resources']" class="subtype__badge">
             <label>{{ resourceType(subtype.data['kubewarden/resources']) }}</label>
           </div>
 
@@ -184,13 +197,13 @@ export default {
             </span>
           </div>
 
-          <div v-if="subtype.data['kubewarden/mutation'] === 'true'" class="subtype__mutation">
+          <div v-if="subtype.data['kubewarden/mutation']" class="subtype__mutation">
             <span v-tooltip="t('kubewarden.policyCharts.mutationPolicy.tooltip')">
               {{ t('kubewarden.policyCharts.mutationPolicy.label') }}
             </span>
           </div>
 
-          <div v-if="subtype.data['kubewarden/contextAware'] === 'true'" class="subtype__aware">
+          <div v-if="subtype.data['kubewarden/contextAware']" class="subtype__aware">
             <span>
               {{ t('kubewarden.policyCharts.contextAware') }}
             </span>
