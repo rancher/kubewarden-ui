@@ -170,6 +170,7 @@ kubewarden:
     defaultImage:
       label: Default Image
       tooltip: Use the default `policy-server` container image.
+      versionWarning: The latest stable version for Policy Server could not be determined, falling back to default.
     image:
       label: Image URL
       tooltip: This is the container image the policy server.
