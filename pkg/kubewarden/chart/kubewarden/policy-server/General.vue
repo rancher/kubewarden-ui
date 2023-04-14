@@ -1,9 +1,17 @@
 <script>
+import isEmpty from 'lodash/isEmpty';
+import ResourceFetch from '@shell/mixins/resource-fetch';
+import { CATALOG } from '@shell/config/types';
 import { _CREATE } from '@shell/config/query-params';
 
+import Loading from '@shell/components/Loading';
 import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
+import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
+
+import { KUBEWARDEN_CHARTS } from '../../../types';
+import { getLatestStableVersion } from '../../../plugins/kubewarden-class';
 
 export default {
   props: {
@@ -23,24 +31,64 @@ export default {
     }
   },
 
+  mixins: [ResourceFetch],
+
   components: {
-    LabeledInput, RadioGroup, ServiceNameSelect
+    Banner, LabeledInput, Loading, RadioGroup, ServiceNameSelect
+  },
+
+  async fetch() {
+    if ( this.isCreate ) {
+      await this.$initializeFetchData(CATALOG);
+      await this.$fetchType(CATALOG.CLUSTER_REPO);
+
+      if ( this.defaultsChart ) {
+        const defaultsStable = getLatestStableVersion(this.defaultsChart.versions);
+
+        const chartInfo = await this.$store.dispatch('catalog/getVersionInfo', {
+          repoType:    this.defaultsChart?.repoType,
+          repoName:    this.defaultsChart?.repoName,
+          chartName:   this.defaultsChart?.chartName,
+          versionName: defaultsStable?.version
+        });
+
+        if ( !isEmpty(chartInfo) ) {
+          const registry = chartInfo.values?.common?.cattle?.systemDefaultRegistry;
+          const psImage = chartInfo.values?.policyServer?.image?.repository;
+          const psTag = chartInfo.values?.policyServer?.image?.tag;
+
+          if ( registry && psImage && psTag ) {
+            this.latestStableVersion = `${ registry }/${ psImage }:${ psTag }`;
+            this.$set(this.value.spec, 'image', this.latestStableVersion);
+          }
+        }
+      }
+    }
   },
 
   data() {
-    return { defaultImage: true };
+    return { defaultImage: true, latestStableVersion: null };
   },
 
   computed: {
     isCreate() {
       return this.mode === _CREATE;
+    },
+
+    defaultsChart() {
+      return this.$store.getters['catalog/chart']({ chartName: KUBEWARDEN_CHARTS.DEFAULTS });
+    },
+
+    showVersionBanner() {
+      return (this.isCreate && this.defaultImage && !this.defaultsChart && !this.latestStableVersion);
     }
   }
 };
 </script>
 
 <template>
-  <div>
+  <Loading v-if="$fetchState.pending" />
+  <div v-else>
     <div class="row mt-10">
       <div class="col span-6 mb-20">
         <LabeledInput
@@ -55,6 +103,12 @@ export default {
 
     <div class="row">
       <div class="col span-6">
+        <Banner
+          v-if="showVersionBanner"
+          class="mb-20 mt-0"
+          color="warning"
+          :label="t('kubewarden.policyServerConfig.defaultImage.versionWarning')"
+        />
         <RadioGroup
           v-model="defaultImage"
           name="defaultImage"

@@ -14,6 +14,23 @@ describe('component: General', () => {
 
     const wrapper = shallowMount(General as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData: { value: DEFAULT_POLICY_SERVER, serviceAccounts },
+      computed:  {
+        isCreate:      () => false,
+        defaultsChart: () => null
+      },
+      mocks:     {
+        $fetchState: { pending: false },
+        $store:      {
+          getters: {
+            currentStore:                 () => 'current_store',
+            'current_store/all':          jest.fn(),
+            'i18n/t':                     jest.fn(),
+            'management/byId':            jest.fn(),
+            'resource-fetch/refreshFlag': jest.fn()
+          },
+          dispatch: jest.fn()
+        }
+      },
       stubs:     {
         LabeledInput:      { template: '<span />' },
         RadioGroup:        { template: '<span />' }
@@ -33,7 +50,24 @@ describe('component: General', () => {
 
     const wrapper = shallowMount(General as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData: { value: policyServer, serviceAccounts },
-      stubs:     { Banner: { template: '<span />' } }
+      computed:  {
+        isCreate:      () => false,
+        defaultsChart: () => null
+      },
+      mocks:     {
+        $fetchState: { pending: false },
+        $store:      {
+          getters: {
+            currentStore:                 () => 'current_store',
+            'current_store/all':          jest.fn(),
+            'i18n/t':                     jest.fn(),
+            'management/byId':            jest.fn(),
+            'resource-fetch/refreshFlag': jest.fn()
+          },
+          dispatch: jest.fn()
+        }
+      },
+      stubs: { Banner: { template: '<span />' } }
     });
 
     const selector = wrapper.findComponent(ServiceNameSelect);
