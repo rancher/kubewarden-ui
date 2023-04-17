@@ -3,7 +3,6 @@ name: Playwright Tests
 on:
   workflow_dispatch:
     inputs:
-      # TODO: head | rc | released | v2.7.1 | v2.7.2-rc7
       rancher:
         type: choice
         default: 'rc'
@@ -12,14 +11,13 @@ on:
         options:
         - rc
         - released
-      # TODO: head | released | tag#1.0.4-rc2 | pr#xxx | v#1.0.3
       kubewarden:
         type: choice
         default: 'rc'
         description: Kubewarden
         required: true
         options:
-        - head
+        - source
         - rc
         - released
       testsuite:
@@ -28,8 +26,8 @@ on:
         description: Testsuite
         required: true
         options:
-        - install (7 min)
-        - install + policies (7+30 min)
+        - install (10 min)
+        - install + policies (10+30 min)
 
       policyfilter:
         type: string
@@ -92,7 +90,6 @@ jobs:
             KUBEWARDEN="${{ inputs.kubewarden }}"
             TESTSUITE="${{ inputs.testsuite }}"
             ;;
-          # TODO: add schedule test for RANCHER=devel KUBEWARDEN=source
         esac
 
         echo "Event: ${{github.event_name}}"
@@ -117,11 +114,13 @@ jobs:
         kubectl wait --for=condition=Available deployment --timeout=2m -n cert-manager --all
 
         [ "${{ env.RANCHER }}" == 'rc' ] && RANCHER_DEVEL=1
+        RANCHER_PSP=$(kubectl version -o json | jq -r '.serverVersion.minor <= "24"')
         helm repo add --force-update rancher-latest https://releases.rancher.com/server-charts/latest
         helm upgrade --install rancher rancher-latest/rancher --wait \
             --namespace cattle-system --create-namespace \
             --set hostname=$RANCHER_FQDN \
             --set bootstrapPassword=sa \
+            --set global.cattle.psp.enabled=$RANCHER_PSP \
             ${RANCHER_DEVEL:+--devel}
 
         # Wait for rancher
@@ -138,25 +137,19 @@ jobs:
     # ==================================================================================================
     # Setup playwright ENV and run tests
     # https://rancher.github.io/dashboard/testing/e2e-test#setup-for-local-tests
-    - name: Setup Playwright ENV
-      run: |
-        RANCHER_URL=https://${{env.RANCHER_FQDN}}
-        if [ "${{ env.KUBEWARDEN }}" == 'source' ]; then
-          API=$RANCHER_URL
-          RANCHER_URL=https://localhost:8005
-        fi
-        [ -v API ] && echo API=$API | tee -a $GITHUB_ENV
-        echo RANCHER_URL=$RANCHER_URL | tee -a $GITHUB_ENV
-        echo ORIGIN=${{ env.KUBEWARDEN }} | tee -a $GITHUB_ENV
-
-    - name: Install dev dependencies
+    - name: Build Kubewarden extension
       if: env.KUBEWARDEN == 'source'
-      run: yarn install --ignore-engines
+      run: |
+        yarn install --ignore-engines
+        VERSION=0.0.1 yarn build-pkg kubewarden
 
-    - name: Install kubewarden
+    - name: Install Kubewarden
       working-directory: tests
       run: |
         npx playwright test installation -x
+      env:
+        RANCHER_URL: https://${{env.RANCHER_FQDN}}
+        ORIGIN: ${{ env.KUBEWARDEN }}
 
     - name: Install policies
       if: ${{ contains(env.TESTSUITE, 'policies') || inputs.policyfilter }}
@@ -164,6 +157,8 @@ jobs:
       working-directory: tests
       run: |
         npx playwright test policies -g "${{ inputs.policyfilter || '' }}" -x
+      env:
+        RANCHER_URL: https://${{env.RANCHER_FQDN}}
 
     # ==================================================================================================
     # Artifacts & Summary
@@ -173,7 +168,6 @@ jobs:
         name: playwright-report
         path: tests/playwright-report/
         retention-days: 30
-
 
     - name: Clean Up
       if: always()
