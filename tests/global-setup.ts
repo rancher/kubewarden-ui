@@ -1,10 +1,10 @@
-// global-setup.js
+// global-setup.ts
 const { request } = require('@playwright/test');
 
 module.exports = async() => {
   const requestContext = await request.newContext({
     ignoreHTTPSErrors: true,
-    baseURL:           process.env.RANCHER_URL, // "https://example.com"
+    baseURL: process.env.RANCHER_URL,
   });
 
   await requestContext.post('/v3-public/localProviders/local?action=login', {

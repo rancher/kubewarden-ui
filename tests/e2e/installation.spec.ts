@@ -1,19 +1,16 @@
-// @ts-check
-const { test, expect } = require('@playwright/test');
-const jsyaml = require('js-yaml');
-const merge = require('lodash.merge');
+import { test, expect, type Page } from '@playwright/test';
+import jsyaml from 'js-yaml';
+import merge from 'lodash.merge';
 
 // source (yarn dev) | rc (add github repo) | released (just install)
 const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
 
 /**
- * @param {import('@playwright/test').Page} page
- *
- * Use:
+ * Usage:
  * await editYaml(page, d => d.telemetry.enabled = true )
  * await editYaml(page, '{"policyServer": {"telemetry": { "enabled": false }}}')
  */
-async function editYaml(page, source) {
+async function editYaml(page: Page, source: Function|string) {
   const lines = await page.locator('.CodeMirror-code > div > pre.CodeMirror-line').allTextContents();
 
   let cmYaml = jsyaml.load(lines.join('\n')
@@ -66,12 +63,11 @@ test('00 disable namespace filter', async({ page }) => {
 });
 
 test('00 enable extension developer features', async({ page }) => {
-  if (ORIGIN != 'source') test.skip(true, "Skip: Use developer load only when testing source code")
+  if (ORIGIN != 'source') test.skip(true, "Use developer load only when testing source code")
   await page.goto('/dashboard/prefs')
   await expect(page.getByRole('heading', { name: 'Advanced Features' })).toBeVisible()
   await page.getByRole('checkbox', { name: 'Enable Extension developer features' }).check();
 });
-
 
 // ==================================================================================================
 // Installation
@@ -95,7 +91,7 @@ test('01 enable extension support', async({ page }) => {
   try {
     await expect(page.getByRole('tab', { name: 'Installed' })).toBeVisible({timeout: 60_000});
   } catch (e) {
-    console.log('Reload - Not showing installed extensions tab')
+    test.info().annotations.push({ type: 'Reload', description: 'Not showing installed extensions tab' });
     await page.reload();
     await expect(page.getByRole('tab', { name: 'Installed' })).toBeVisible();
   }
@@ -107,7 +103,7 @@ test('01 enable extension support', async({ page }) => {
     try {
       await expect(page.locator('.plugin', {hasText: 'Kubewarden'} )).toBeVisible();
     } catch (e) {
-      console.log('Reload - Not showing kubewarden extension')
+      test.info().annotations.push({ type: 'Reload', description: 'Not showing kubewarden extension' });
       await page.reload();
       await page.getByRole('tab', { name: 'All', exact:true }).click()
     }
@@ -117,7 +113,7 @@ test('01 enable extension support', async({ page }) => {
 });
 
 test('02 add UI charts repository', async({ page }) => {
-  if (ORIGIN != 'rc') test.skip(true, "Skip: Add UI repository only when testing RCs")
+  if (ORIGIN != 'rc') test.skip(true, "Add UI repository only when testing RCs")
 
   await page.goto('/dashboard/c/local/apps/catalog.cattle.io.clusterrepo/create')
   // Add kw extension repository
@@ -134,7 +130,7 @@ test('02 add UI charts repository', async({ page }) => {
 })
 
 test('02 install kubewarden extension', async({ page }) => {
-  if (ORIGIN == 'source') test.skip(true, "Skip: Don't install extension from repository when testing source code")
+  if (ORIGIN == 'source') test.skip(true, "Don't install extension from repository when testing source code")
   await page.goto('/dashboard/c/local/uiplugins#available')
 
   // Select extension by icon that contains repo url, github or official
@@ -148,7 +144,7 @@ test('02 install kubewarden extension', async({ page }) => {
 });
 
 test('02 developer load extension', async({ page }) => {
-  if (ORIGIN != 'source') test.skip(true, "Skip: Use developer load only when testing source code")
+  if (ORIGIN != 'source') test.skip(true, "Use developer load only when testing source code")
 
   await page.goto('/dashboard/c/local/uiplugins')
   await expect(page.getByRole('heading', { name: 'Extensions', exact:true })).toBeVisible()
@@ -167,9 +163,7 @@ test('02 developer load extension', async({ page }) => {
   await expect(page.locator('.plugin', {hasText: 'Kubewarden'} ).getByRole('button', { name: 'Uninstall' })).toBeEnabled();
 });
 
-
 test('03 install kubewarden', async({ page }) => {
-  // add kubewarden-charts repository
   await page.goto('/dashboard/c/local/kubewarden/dashboard')
   await page.getByRole('button', { name: 'Install Kubewarden' }).click();
   await page.getByRole('button', { name: 'Add Kubewarden Repository' }).click();
@@ -198,12 +192,11 @@ test('03 install kubewarden', async({ page }) => {
   try {
     await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
   } catch (e) {
-    console.log('Reload - kubewarden installation done but not detected')
+    test.info().annotations.push({ type: 'Reload', description: 'Kubewarden installation done but not detected' });
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
   }
 });
-
 
 test('04 install default policyserver', async({ page }) => {
   await page.goto('/dashboard/c/local/kubewarden/dashboard')
@@ -226,7 +219,6 @@ test('04 install default policyserver', async({ page }) => {
   await expect(page.locator('#windowmanager').getByText(/SUCCESS: helm upgrade .* rancher-kubewarden-defaults/)).toBeVisible({timeout:40_000})
   // wait for policy server?
 });
-
 
 test('05 whitelist artifacthub', async({ page }) => {
   await page.goto('/dashboard/c/local/kubewarden/policies.kubewarden.io.clusteradmissionpolicy/create')
@@ -256,7 +248,7 @@ test('10 check overview page', async({ page }) => {
   try {
     await expect(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
   } catch (e) {
-    console.log('Reload - https://github.com/kubewarden/ui/issues/245')
+    test.info().annotations.push({ type: 'Reload', description: 'https://github.com/kubewarden/ui/issues/245' });
     await page.reload();
     await expect(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
   }
