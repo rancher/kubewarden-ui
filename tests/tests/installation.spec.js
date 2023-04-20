@@ -3,7 +3,7 @@ const { test, expect } = require('@playwright/test');
 const jsyaml = require('js-yaml');
 const merge = require('lodash.merge');
 
-// source (yarn dev) | rc (add devel repo) | released (just install)
+// source (yarn dev) | rc (add github repo) | released (just install)
 const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
 
 /**
@@ -43,12 +43,14 @@ test('00 end user agreement', async({ page }) => {
   await page.getByTestId('login-submit').click();
 
   // end user agreement
+  await page.locator('label.checkbox-container')
+     .filter({has: page.getByText('Allow collection of anonymous statistics')})
+     .locator('span.checkbox-custom').uncheck()
   await page.getByTestId('setup-agreement').locator('.checkbox-custom').check();
   await page.getByTestId('setup-submit').click();
   // wait for local cluster to be Active
   await expect(page.getByTestId('sortable-cell-0-0')).toContainText('Active', {timeout: 30_000})
 });
-
 
 test('00 disable namespace filter', async({ page }) => {
   await page.goto('/dashboard/c/local/apps/catalog.cattle.io.app')
@@ -63,67 +65,106 @@ test('00 disable namespace filter', async({ page }) => {
   await expect(page.getByText('Namespace: cattle-system')).toBeVisible()
 });
 
+test('00 enable extension developer features', async({ page }) => {
+  if (ORIGIN != 'source') test.skip(true, "Skip: Use developer load only when testing source code")
+  await page.goto('/dashboard/prefs')
+  await expect(page.getByRole('heading', { name: 'Advanced Features' })).toBeVisible()
+  await page.getByRole('checkbox', { name: 'Enable Extension developer features' }).check();
+});
+
 
 // ==================================================================================================
 // Installation
 
 test('01 enable extension support', async({ page }) => {
-  if (ORIGIN == 'source') test.skip(true, 'Loading extension from yarn dev')
-
   // menu -> configuration -> extensions
   await page.goto('/dashboard/c/local/uiplugins');
+  await expect(page.getByRole('heading', { name: 'Extension support is not enabled' })).toBeVisible()
 
-  // click Enable button
+  // Enable extensions
   await page.getByRole('button', { name: 'Enable' }).click();
+  // don't add released extension repository
+  if (ORIGIN != 'released') {
+    await page.locator('label.checkbox-container')
+      .filter({has: page.getByText('Add the Rancher Extension Repository')})
+      .locator('span.checkbox-custom').uncheck()
+  }
   await page.getByRole('button', { name: 'OK' }).click();
 
-  // wait for extension list
+  // Wait for extensions to be enabled
   try {
-    await expect(page.getByRole('tab', { name: 'Installed' })).toBeVisible({timeout: 30_000});
+    await expect(page.getByRole('tab', { name: 'Installed' })).toBeVisible({timeout: 60_000});
   } catch (e) {
-    console.log('Reload - Not showing list of extensions')
+    console.log('Reload - Not showing installed extensions tab')
     await page.reload();
     await expect(page.getByRole('tab', { name: 'Installed' })).toBeVisible();
   }
 
-  // wait for extensions
-  await page.getByRole('tab', { name: 'Available' }).click()
-  await page.waitForTimeout(5000)
-  await page.reload()
-  await expect(page.locator('.plugin', {hasText: 'Kubewarden'} )).toBeVisible();
+  // Wait for default list of extensions
+  await expect(page.locator('.plugin', {hasText: 'Virtualization Manager'} )).toBeVisible();
+  if (ORIGIN == 'released') {
+    await page.getByRole('tab', { name: 'All', exact:true }).click()
+    try {
+      await expect(page.locator('.plugin', {hasText: 'Kubewarden'} )).toBeVisible();
+    } catch (e) {
+      console.log('Reload - Not showing kubewarden extension')
+      await page.reload();
+      await page.getByRole('tab', { name: 'All', exact:true }).click()
+    }
+    await expect(page.locator('.plugin', {hasText: 'Kubewarden'} )).toBeVisible();
+  }
+
 });
 
-
-test('02 add devel repository', async({ page }) => {
-  if (ORIGIN != 'rc') test.skip(true, 'Add devel repository only for rc tests')
+test('02 add UI charts repository', async({ page }) => {
+  if (ORIGIN != 'rc') test.skip(true, "Skip: Add UI repository only when testing RCs")
 
   await page.goto('/dashboard/c/local/apps/catalog.cattle.io.clusterrepo/create')
   // Add kw extension repository
-  await page.getByPlaceholder('A unique name').fill('kubewarden-charts-devel');
+  await page.getByPlaceholder('A unique name').fill('kubewarden-github-charts');
   await page.getByPlaceholder('e.g. https://charts.rancher.io').fill('https://kubewarden.github.io/ui');
   await page.getByRole('button', { name: 'Create' }).click();
 
   // Check repository state is Active
   await expect(page
     .locator('tr.main-row')
-    .filter({has: page.getByRole('link', {name: 'kubewarden-charts-devel', exact: true})})
+    .filter({has: page.getByRole('link', {name: 'kubewarden-github-charts', exact: true})})
     .locator('td.col-badge-state-formatter')
   ).toHaveText('Active')
 })
 
-
 test('02 install kubewarden extension', async({ page }) => {
-  if (ORIGIN == 'source') test.skip(true, 'Loading extension from yarn dev')
+  if (ORIGIN == 'source') test.skip(true, "Skip: Don't install extension from repository when testing source code")
   await page.goto('/dashboard/c/local/uiplugins#available')
 
-  // Select extension by icon that contains repo url, devel or official
-  const repo = ORIGIN == 'rc' ? 'kubewarden-charts-devel' : 'rancher-ui-plugins'
+  // Select extension by icon that contains repo url, github or official
+  const repo = ORIGIN == 'rc' ? 'kubewarden-github-charts' : 'rancher-ui-plugins'
   await page.getByTestId('extension-card-kubewarden')
     .filter({ has: page.locator(`xpath=//img[contains(@src, "clusterrepos/${repo}")]`) })
     .getByRole('button', { name: 'Install' }).click();
 
   await page.getByRole('dialog').getByRole('button', { name: 'Install' }).click();
-  await expect(page.locator('.plugin', {hasText: 'Kubewarden'} ).getByRole('button', { name: 'Uninstall' })).toBeEnabled({timeout: 30_000});
+  await expect(page.locator('.plugin', {hasText: 'Kubewarden'} ).getByRole('button', { name: 'Uninstall' })).toBeEnabled({timeout: 60_000});
+});
+
+test('02 developer load extension', async({ page }) => {
+  if (ORIGIN != 'source') test.skip(true, "Skip: Use developer load only when testing source code")
+
+  await page.goto('/dashboard/c/local/uiplugins')
+  await expect(page.getByRole('heading', { name: 'Extensions', exact:true })).toBeVisible()
+
+  await page.getByTestId('extensions-page-menu').click();
+  await page.getByText('Developer Load').click();
+  await expect(page.getByRole('heading', { name: 'Developer Load Extension' })).toBeVisible()
+
+  await page.getByRole('textbox').first().fill('http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js');
+  await page.locator('label.checkbox-container')
+     .filter({has: page.getByText('Persist extension by creating custom resource')})
+     .locator('span.checkbox-custom').check()
+
+  await page.getByRole('button', { name: 'Load', exact:true }).click()
+  await page.getByTestId('extension-reload-banner-reload-btn').click()
+  await expect(page.locator('.plugin', {hasText: 'Kubewarden'} ).getByRole('button', { name: 'Uninstall' })).toBeEnabled();
 });
 
 

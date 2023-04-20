@@ -50,7 +50,6 @@ const config = {
 
     screenshot: 'only-on-failure',
     trace:      'on', // retain-on-failure
-    // video: 'retain-on-failure',
   },
 
   globalSetup: require.resolve('./global-setup'),
@@ -66,17 +65,13 @@ const config = {
     },
   ],
 
-  /* Run your local dev server before starting the tests */
-  webServer: process.env.API ? {
-    command: 'yarn dev',
-    port: 8005,
-    ignoreHTTPSErrors: true,
+  // Run local server serving extensions
+  // https://rancher.github.io/dashboard/extensions/extensions-getting-started#loading-into-another-rancher-instance
+  webServer: process.env.ORIGIN == 'source' ? {
+    command: 'yarn serve-pkgs',
+    port: 4500,
+    reuseExistingServer: true,
     cwd: '../',
-    timeout: 300_000,
-    env: {
-      ROUTER_BASE: '/dashboard/',
-      //NODE_OPTIONS: '--openssl-legacy-provider'
-    }
   } : undefined
 };
 

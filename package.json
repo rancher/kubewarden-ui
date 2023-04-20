@@ -23,7 +23,6 @@
     "@babel/preset-env": "^7.20.2",
     "@jest/globals": "^29.4.3",
     "@jest/types": "^29.4.3",
-    "@playwright/test": "^1.31.1",
     "@vue/cli-plugin-unit-jest": "~5.0.0",
     "@vue/server-test-utils": "1",
     "@vue/test-utils": "1",
