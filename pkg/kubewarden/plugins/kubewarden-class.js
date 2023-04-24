@@ -128,10 +128,7 @@ export default class KubewardenModel extends SteveModel {
       let url = '/meta/proxy/';
       const packages = 'packages/search';
       const params = {
-        org:                KUBEWARDEN_PRODUCT_NAME, // Limit to the Kubewarden organization
         kind:               13, // Kind for Kubewarden policies
-        verified_publisher: true, // Require verified publisher
-        official:           true, // Ensure package is official
         limit:              50 // limit to 50, default is 20
       };
 

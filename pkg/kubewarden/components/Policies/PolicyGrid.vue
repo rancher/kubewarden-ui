@@ -5,6 +5,8 @@ import { sortBy } from '@shell/utils/sort';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 
+import { KUBEWARDEN_PRODUCT_NAME } from '../../types';
+
 export default {
   props: {
     mode: {
@@ -32,9 +34,12 @@ export default {
 
   data() {
     return {
-      category:          null,
-      keywords:          [],
-      searchQuery:       null
+      KUBEWARDEN_PRODUCT_NAME,
+
+      category:    null,
+      keywords:    [],
+      provider:    null,
+      searchQuery: null
     };
   },
 
@@ -65,6 +70,14 @@ export default {
           }
         }
 
+        if ( this.provider ) {
+          for ( const p of this.provider ) {
+            if ( !subtype.repository?.organization_name.includes(p) ) {
+              return false;
+            }
+          }
+        }
+
         return true;
       });
 
@@ -79,6 +92,14 @@ export default {
       }).sort();
 
       return [...new Set(flattened)] || [];
+    },
+
+    providerOptions() {
+      const out = this.value?.flatMap((subtype) => {
+        return subtype.repository?.organization_name || null;
+      });
+
+      return [...new Set(out)] || [];
     },
 
     resourceOptions() {
@@ -112,6 +133,7 @@ export default {
     refresh() {
       this.category = null;
       this.keywords = [];
+      this.provider = null;
       this.searchQuery = null;
     },
 
@@ -127,6 +149,10 @@ export default {
       }
 
       return type === '*' ? 'Global' : type;
+    },
+
+    subtypeSignature(subtype) {
+      return subtype.signatures?.[0] || 'unknown';
     }
   }
 };
@@ -138,13 +164,25 @@ export default {
   >
     <div class="filter">
       <LabeledSelect
+        v-if="providerOptions.length"
+        v-model="provider"
+        :clearable="true"
+        :taggable="true"
+        :mode="mode"
+        :multiple="true"
+        class="filter__provider"
+        :label="t('kubewarden.utils.provider')"
+        :options="providerOptions"
+      />
+
+      <LabeledSelect
         v-model="keywords"
         :clearable="true"
         :taggable="true"
         :mode="mode"
         :multiple="true"
         class="filter__keywords"
-        label="Filter by Keyword"
+        :label="t('kubewarden.utils.keyword')"
         :options="keywordOptions"
       />
 
@@ -152,12 +190,12 @@ export default {
         v-model="category"
         :clearable="true"
         :searchable="false"
-        :options="resourceOptions"
         :mode="mode"
         :multiple="true"
         placement="bottom"
         class="filter__category"
-        label="Filter by Resource Type"
+        :label="t('kubewarden.utils.resource')"
+        :options="resourceOptions"
       />
 
       <input
@@ -191,10 +229,21 @@ export default {
             <label>{{ resourceType(subtype.data['kubewarden/resources']) }}</label>
           </div>
 
-          <div v-if="subtype.signed" class="subtype__signed">
-            <span v-tooltip="t('kubewarden.policyCharts.signedPolicy.tooltip')">
-              {{ t('kubewarden.policyCharts.signedPolicy.label') }}
-            </span>
+          <div class="subtype__left">
+            <div v-if="subtype.signed" class="subtype__signed">
+              <span v-tooltip="t('kubewarden.policyCharts.signedPolicy.tooltip', { signatures: subtypeSignature(subtype) })">
+                <i class="icon icon-lock" />
+              </span>
+            </div>
+
+            <div v-if="subtype.repository.organization_name === KUBEWARDEN_PRODUCT_NAME" class="subtype__icon">
+              <img
+                v-tooltip="t('kubewarden.policies.official')"
+                src="../../assets/icon-kubewarden.svg"
+                :alt="t('kubewarden.policies.official')"
+                class="ml-5"
+              >
+            </div>
           </div>
 
           <div v-if="subtype.data['kubewarden/mutation']" class="subtype__mutation">
@@ -209,9 +258,11 @@ export default {
             </span>
           </div>
 
-          <h4 class="subtype__label">
-            {{ subtype.display_name }}
-          </h4>
+          <div class="subtype__label">
+            <h4>
+              {{ subtype.display_name }}
+            </h4>
+          </div>
 
           <div v-if="subtype.description" class="subtype__description mb-20">
             {{ subtype.description }}
@@ -277,6 +328,14 @@ $margin: 10px;
   flex-wrap: wrap;
   margin: 0 -1*$margin;
 
+  .custom {
+    height: 110px;
+  }
+
+  .subtype {
+    height: auto;
+  }
+
   @media only screen and (min-width: map-get($breakpoints, '--viewport-4')) {
     .subtype {
       width: 100%;
@@ -297,6 +356,17 @@ $margin: 10px;
       width: calc(25% - 2 * #{$margin});
     }
   }
+  @media only screen and (min-width: 1600px) {
+    .subtype {
+      &__label {
+        max-width: 100%;
+      }
+
+      h4 {
+        white-space: nowrap;
+      }
+    }
+  }
 
   .disabled {
     opacity: 0.5;
@@ -305,20 +375,33 @@ $margin: 10px;
 }
 
 .subtype {
+  &__label {
+    max-width: 205px;
+
+    h4 {
+      white-space: normal;
+    }
+  }
+
   &__badge {
     background-color: var(--darker);
     padding: 4px 5px;
   }
 
-  &__signed, &__mutation, &__aware {
+  &__left, &__mutation, &__aware {
     position: absolute;
     bottom: 5px;
-    padding: 0px 5px;
-    border: 1px solid var(--border);
   }
 
-  &__signed {
-    left: 10px;
+  &__mutation, &__aware {
+    border: 1px solid var(--border);
+    padding: 0px 5px;
+  }
+
+  &__left {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
   }
 
   &__mutation {
@@ -327,6 +410,10 @@ $margin: 10px;
 
   &__aware {
     right: 30px;
+  }
+
+  &__icon {
+    width: 20px;
   }
 }
 </style>
