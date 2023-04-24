@@ -10,7 +10,7 @@ import { CONFIG_MAP, MANAGEMENT, SERVICE } from '@shell/config/types';
 import { findBy, isArray } from '@shell/utils/array';
 import { addParams } from '@shell/utils/url';
 
-import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME, METRICS_DASHBOARD } from '../types';
+import { KUBEWARDEN, METRICS_DASHBOARD } from '../types';
 import policyServerDashboard from '../assets/kubewarden-metrics-policyserver.json';
 import policyDashboard from '../assets/kubewarden-metrics-policy.json';
 

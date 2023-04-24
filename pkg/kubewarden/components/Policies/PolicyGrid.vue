@@ -48,8 +48,10 @@ export default {
       const subtypes = ( this.value || [] );
 
       const out = subtypes.filter((subtype) => {
-        if ( this.category && !subtype.data?.['kubewarden/resources']?.includes(this.category) ) {
-          return false;
+        if ( this.category ) {
+          if ( !this.hasAnnotation(subtype, 'kubewarden/resources') || !subtype.data?.['kubewarden/resources']?.includes(this.category) ) {
+            return false;
+          }
         }
 
         if ( this.searchQuery ) {
@@ -64,7 +66,7 @@ export default {
 
         if ( this.keywords ) {
           for ( const selected of this.keywords ) {
-            if ( !subtype.keywords?.includes(selected) ) {
+            if ( !subtype.keywords || subtype.keywords?.length === 0 || !subtype.keywords?.includes(selected) ) {
               return false;
             }
           }
@@ -72,7 +74,7 @@ export default {
 
         if ( this.provider ) {
           for ( const p of this.provider ) {
-            if ( !subtype.repository?.organization_name.includes(p) ) {
+            if ( !subtype.provider || !subtype.provider?.includes(p) ) {
               return false;
             }
           }
@@ -89,17 +91,25 @@ export default {
         if ( subtype.keywords && subtype.keywords.length ) {
           return subtype.keywords;
         }
-      }).sort();
+      });
 
-      return [...new Set(flattened)] || [];
+      if ( !flattened || flattened?.length === 0 ) {
+        return;
+      }
+
+      return [...new Set(flattened.filter(Boolean))];
     },
 
     providerOptions() {
       const out = this.value?.flatMap((subtype) => {
-        return subtype.repository?.organization_name || null;
+        return subtype.provider ? subtype.provider : [];
       });
 
-      return [...new Set(out)] || [];
+      if ( !out || out?.length === 0 ) {
+        return [];
+      }
+
+      return [...new Set(out)];
     },
 
     resourceOptions() {
@@ -123,13 +133,23 @@ export default {
             out.push(resource);
           }
         }
-      }).sort();
 
-      return [...new Set(out)] || [];
+        return [];
+      })?.sort();
+
+      if ( !out || out?.length === 0 ) {
+        return;
+      }
+
+      return [...new Set(out.filter(Boolean))];
     },
   },
 
   methods: {
+    hasAnnotation(subtype, annotation) {
+      return subtype.data?.[annotation];
+    },
+
     refresh() {
       this.category = null;
       this.keywords = [];
@@ -225,7 +245,7 @@ export default {
         @click="$emit('selectType', subtype)"
       >
         <div class="subtype__metadata">
-          <div v-if="subtype.data['kubewarden/resources']" class="subtype__badge">
+          <div v-if="hasAnnotation(subtype, 'kubewarden/resources')" class="subtype__badge">
             <label>{{ resourceType(subtype.data['kubewarden/resources']) }}</label>
           </div>
 
@@ -236,7 +256,7 @@ export default {
               </span>
             </div>
 
-            <div v-if="subtype.repository.organization_name === KUBEWARDEN_PRODUCT_NAME" class="subtype__icon">
+            <div v-if="subtype.provider === KUBEWARDEN_PRODUCT_NAME" class="subtype__icon">
               <img
                 v-tooltip="t('kubewarden.policies.official')"
                 src="../../assets/icon-kubewarden.svg"
@@ -246,13 +266,13 @@ export default {
             </div>
           </div>
 
-          <div v-if="subtype.data['kubewarden/mutation']" class="subtype__mutation">
+          <div v-if="hasAnnotation(subtype, 'kubewarden/mutation')" class="subtype__mutation">
             <span v-tooltip="t('kubewarden.policyCharts.mutationPolicy.tooltip')">
               {{ t('kubewarden.policyCharts.mutationPolicy.label') }}
             </span>
           </div>
 
-          <div v-if="subtype.data['kubewarden/contextAware']" class="subtype__aware">
+          <div v-if="hasAnnotation(subtype, 'kubewarden/contextAware')" class="subtype__aware">
             <span>
               {{ t('kubewarden.policyCharts.contextAware') }}
             </span>
