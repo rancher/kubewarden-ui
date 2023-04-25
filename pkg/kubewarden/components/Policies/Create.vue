@@ -428,7 +428,7 @@ export default ({
       <template #policies>
         <PolicyGrid :value="packages" @selectType="selectType($event)">
           <template #customSubtype>
-            <div class="subtype" @click="selectType('custom')">
+            <div class="subtype custom" @click="selectType('custom')">
               <div class="subtype__metadata">
                 <div class="subtype__badge" :style="{ 'background-color': 'var(--darker)' }">
                   <label>{{ t('kubewarden.customPolicy.badge') }}</label>
@@ -497,10 +497,14 @@ $color: var(--body-text) !important;
 }
 
 ::v-deep .controls-row {
-    .controls-steps {
-      display: flex;
-    }
+  .controls-steps {
+    display: flex;
   }
+}
+
+::v-deep .custom {
+  min-height: 110px;
+}
 
 ::v-deep .subtype {
   height: $height;

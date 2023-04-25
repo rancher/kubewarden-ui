@@ -10,7 +10,7 @@ import { CONFIG_MAP, MANAGEMENT, SERVICE } from '@shell/config/types';
 import { findBy, isArray } from '@shell/utils/array';
 import { addParams } from '@shell/utils/url';
 
-import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME, METRICS_DASHBOARD } from '../types';
+import { KUBEWARDEN, METRICS_DASHBOARD } from '../types';
 import policyServerDashboard from '../assets/kubewarden-metrics-policyserver.json';
 import policyDashboard from '../assets/kubewarden-metrics-policy.json';
 
@@ -128,10 +128,7 @@ export default class KubewardenModel extends SteveModel {
       let url = '/meta/proxy/';
       const packages = 'packages/search';
       const params = {
-        org:                KUBEWARDEN_PRODUCT_NAME, // Limit to the Kubewarden organization
         kind:               13, // Kind for Kubewarden policies
-        verified_publisher: true, // Require verified publisher
-        official:           true, // Ensure package is official
         limit:              50 // limit to 50, default is 20
       };
 
