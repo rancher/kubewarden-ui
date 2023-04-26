@@ -12,6 +12,11 @@
   optionalDependencies:
     "fsevents" "2.3.2"
 
+"@types/js-yaml@^4.0.5":
+  "integrity" "sha512-FhpRzf927MNQdRZP0J5DLIdTXhjLYzeUTmLAu69mnVksLH9CJY3IuSeEgbKUki7GQZm0WqDkGzyxju2EZGD2wA=="
+  "resolved" "https://registry.npmjs.org/@types/js-yaml/-/js-yaml-4.0.5.tgz"
+  "version" "4.0.5"
+
 "@types/lodash.merge@^4.6.7":
   "integrity" "sha512-OwxUJ9E50gw3LnAefSHJPHaBLGEKmQBQ7CZe/xflHkyy/wH2zVyEIAKReHvVrrn7zKdF58p16We9kMfh7v0RRQ=="
   "resolved" "https://registry.npmjs.org/@types/lodash.merge/-/lodash.merge-4.6.7.tgz"
