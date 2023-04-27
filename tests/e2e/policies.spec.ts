@@ -1,5 +1,4 @@
-// @ts-check
-const { test, expect } = require('@playwright/test');
+import { test, expect, type Page } from '@playwright/test';
 
 test.describe.configure({ mode: 'parallel' });
 
@@ -39,7 +38,7 @@ const policies = [
   { name: 'Volumes PSP' },
 ]
 
-async function setupCustomPolicy(page) {
+async function setupCustomPolicy(page: Page) {
   await page.locator('input:near(:text("Module*"))').first().fill('ghcr.io/kubewarden/policies/pod-privileged:v0.2.4')
   await page.getByRole('tab', { name: 'Rules' }).click()
   await page.getByText('Resource type*').click()
@@ -50,7 +49,7 @@ async function setupCustomPolicy(page) {
   await page.getByRole('option', { name: 'CREATE', exact: true }).click()
 }
 
-async function setupVolumeMounts(page) {
+async function setupVolumeMounts(page: Page) {
   await page.getByRole('tab', { name: 'Settings' }).click()
   await page.getByText('Reject', {exact: true}).click()
   await page.getByRole('option', {name: 'anyIn'}).click()
@@ -58,18 +57,18 @@ async function setupVolumeMounts(page) {
   await page.getByPlaceholder('e.g. bar').fill('/nomount')
 }
 
-async function setupSelinuxPSP(page) {
+async function setupSelinuxPSP(page: Page) {
   await page.getByRole('tab', { name: 'Settings' }).click()
   await page.getByText('SE Linux Options', {exact: true}).click()
   await page.getByRole('option', {name: 'RunAsAny'}).click()
 }
 
-async function setupDeprecatedAPIVersions(page) {
+async function setupDeprecatedAPIVersions(page: Page) {
   await page.getByRole('tab', { name: 'Settings' }).click()
   await page.locator('input:near(:text("Kubernetes Version*"))').first().fill('v1.24.9+k3s2')
 }
 
-async function setupVerifyImageSignatures(page) {
+async function setupVerifyImageSignatures(page: Page) {
   await page.getByRole('tab', { name: 'Settings' }).click()
   await page.getByRole('button', {name: 'Add', exact: true}).click()
   await page.locator('input:near(:text("Image*"))').first().fill('ghcr.io/kubewarden/*')
@@ -78,7 +77,7 @@ async function setupVerifyImageSignatures(page) {
   await page.keyboard.type('kubewarden')
 }
 
-async function setupEnvironmentVariablePolicy(page) {
+async function setupEnvironmentVariablePolicy(page: Page) {
   await page.getByRole('tab', { name: 'Settings' }).click()
   await page.getByRole('button', {name: 'Add', exact: true}).click()
   // yaml editor
@@ -86,7 +85,7 @@ async function setupEnvironmentVariablePolicy(page) {
   await page.keyboard.type('novar')
 }
 
-async function setupUserGroupPSP(page) {
+async function setupUserGroupPSP(page: Page) {
   await page.getByRole('tab', { name: 'Settings' }).click()
   for (const role of await page.getByRole('combobox').all()) {
     role.click()
@@ -139,4 +138,3 @@ for (const policy of policies) {
     }
   });
 }
-

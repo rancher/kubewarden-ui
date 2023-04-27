@@ -1,15 +1,13 @@
 {
-  "name": "tests",
+  "name": "playwright",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
-  "scripts": {},
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.32.3",
+    "@types/lodash.merge": "^4.6.7",
     "js-yaml": "^4.1.0",
     "lodash.merge": "^4.6.2"
-  }
+  },
+  "scripts": {}
 }
