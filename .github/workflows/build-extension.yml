@@ -107,7 +107,7 @@ jobs:
           git push
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.4.1
+        uses: helm/chart-releaser-action@v1.5.0
         with:
           charts_dir: ./charts/kubewarden
         env:
