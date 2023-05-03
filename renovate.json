@@ -5,6 +5,16 @@
   ],
   "ignoreDeps": [
     "./dashboard",
-    "core-js"
+    "core-js",
+    "@rancher/shell",
+    "ts-jest",
+    "ts-loader",
+    "typescript",
+    "@babel/preset-env",
+    "@vue/test-utils",
+    "@vue/vue2-jest",
+    "babel-jest",
+    "jest",
+    "sass-loader"
   ]
 }
