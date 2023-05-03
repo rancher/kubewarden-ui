@@ -30,7 +30,7 @@
     "babel-jest": "^28.0.0-alpha.1",
     "jest": "^28.0.0-alpha.1",
     "jest-environment-jsdom": "^29.4.3",
-    "sass-loader": "10.4.1",
+    "sass-loader": "13.2.2",
     "ts-jest": "^29.0.5",
     "ts-loader": "~8.4.0",
     "typescript": "4.9.5",
