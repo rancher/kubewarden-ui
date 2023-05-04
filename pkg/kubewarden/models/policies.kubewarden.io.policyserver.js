@@ -11,7 +11,6 @@ export const DEFAULT_POLICY_SERVER = {
   spec:       {
     annotations: {},
     env:         [
-      { name: 'KUBEWARDEN_ENABLE_METRICS', value: '1' },
       { name: 'KUBEWARDEN_LOG_FMT', value: 'otlp' },
       { name: 'KUBEWARDEN_LOG_LEVEL', value: 'info' }
     ],
