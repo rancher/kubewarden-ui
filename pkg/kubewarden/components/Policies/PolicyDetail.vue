@@ -146,7 +146,7 @@ export default {
         <TraceTable :rows="tracesRows">
           <template #traceBanner>
             <Banner v-if="emptyTraces" color="warning">
-              <span v-if="!jaegerService" v-html="t('kubewarden.tracing.noJaeger', {}, true)" />
+              <span v-if="!jaegerService" v-clean-html="t('kubewarden.tracing.noJaeger', {}, true)" />
               <span v-else>{{ t('kubewarden.tracing.noTraces') }}</span>
             </Banner>
           </template>

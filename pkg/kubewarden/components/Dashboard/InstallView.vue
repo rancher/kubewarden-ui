@@ -239,7 +239,7 @@ export default {
           {{ t("kubewarden.dashboard.prerequisites.certManager.description") }}
         </p>
 
-        <p v-html="t('kubewarden.dashboard.prerequisites.certManager.manualStep', null, true)"></p>
+        <p v-clean-html="t('kubewarden.dashboard.prerequisites.certManager.manualStep', null, true)"></p>
         <CopyCode class="m-10 p-10">
           {{ t("kubewarden.dashboard.prerequisites.certManager.applyCommand") }}
         </CopyCode>

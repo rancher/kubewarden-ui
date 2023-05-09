@@ -39,7 +39,6 @@
     ],
     "types": [
       "@types/node",
-      "@nuxt/types",
       "@jest/types",
       "@rancher/components/types",
       "kubewarden",

@@ -87,7 +87,7 @@ export default {
     :closable="true"
     @close="closeDefaultsBanner()"
   >
-    <span v-html="t('kubewarden.policyServer.noDefaultsInstalled.description', {}, true)" />
+    <span v-clean-html="t('kubewarden.policyServer.noDefaultsInstalled.description', {}, true)" />
     <button
       class="btn role-primary ml-10"
       @click.prevent="chartRoute"

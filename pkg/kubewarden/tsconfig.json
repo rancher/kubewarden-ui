@@ -16,13 +16,13 @@
     "typeRoots": [
       "../../node_modules",
       "../../node_modules/@rancher/shell/types",
-      "./core"
+      "./core",
+      "./types"
     ],
     "types": [
       "node",
       "webpack-env",
       "@types/lodash",
-      "@nuxt/types",
       "rancher",
       "shell",
       "core"
@@ -48,8 +48,14 @@
       ],
       "@components/*": [
         "./node_modules/@rancher/components/*"
+      ],
+      "@/*": [
+        "../../*"
+      ],
+      "@kubewarden/*": [
+        "./*"
       ]
-    }
+    },
   },
   "include": [
     "**/*.ts",

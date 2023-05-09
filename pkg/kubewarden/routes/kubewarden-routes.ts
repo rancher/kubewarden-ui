@@ -9,28 +9,33 @@ import ViewKubewardenNsResource from '../pages/c/_cluster/kubewarden/_resource/_
 const routes = [
   {
     name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }`,
-    path:       `/c/:cluster/:product/dashboard`,
+    path:       `/c/:cluster/${ KUBEWARDEN_PRODUCT_NAME }`,
     component:  Dashboard,
+    meta:       { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME }
   },
   {
-    name:       `c-cluster-product-resource`,
-    path:       `/c/:cluster/:product/:resource`,
-    component:  KubewardenResourcedList
+    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource`,
+    path:       `/c/:cluster/${ KUBEWARDEN_PRODUCT_NAME }/:resource`,
+    component:  KubewardenResourcedList,
+    meta:       { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME }
   },
   {
-    name:       `c-cluster-product-resource-create`,
-    path:       `/c/:cluster/:product/:resource/create`,
+    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource-create`,
+    path:       `/c/:cluster/${ KUBEWARDEN_PRODUCT_NAME }/:resource/create`,
     component:  CreateKubewardenResource,
+    meta:       { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME }
   },
   {
-    name:       `c-cluster-product-resource-id`,
-    path:       `/c/:cluster/:product/:resource/:id`,
+    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource-id`,
+    path:       `/c/:cluster/${ KUBEWARDEN_PRODUCT_NAME }/:resource/:id`,
     component:  ViewKubewardenResource,
+    meta:       { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME }
   },
   {
-    name:       `c-cluster-product-resource-namespace-id`,
-    path:       `/c/:cluster/:product/:resource/:namespace/:id`,
+    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource-namespace-id`,
+    path:       `/c/:cluster/${ KUBEWARDEN_PRODUCT_NAME }/:resource/:namespace/:id`,
     component:  ViewKubewardenNsResource,
+    meta:       { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME }
   }
 ];
 

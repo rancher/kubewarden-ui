@@ -34,7 +34,7 @@ export default {
       </n-link>
     </div>
 
-    <p v-html="t(card.description)" />
+    <p v-clean-html="t(card.description)" />
 
     <n-link class="btn role-secondary" :to="card.cta">
       {{ t(card.linkText) }}

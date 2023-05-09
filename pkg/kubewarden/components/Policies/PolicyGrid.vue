@@ -251,14 +251,14 @@ export default {
 
           <div class="subtype__left">
             <div v-if="subtype.signed" class="subtype__signed">
-              <span v-tooltip="t('kubewarden.policyCharts.signedPolicy.tooltip', { signatures: subtypeSignature(subtype) })">
+              <span v-clean-tooltip="t('kubewarden.policyCharts.signedPolicy.tooltip', { signatures: subtypeSignature(subtype) })">
                 <i class="icon icon-lock" />
               </span>
             </div>
 
             <div v-if="subtype.provider === KUBEWARDEN_PRODUCT_NAME" class="subtype__icon">
               <img
-                v-tooltip="t('kubewarden.policies.official')"
+                v-clean-tooltip="t('kubewarden.policies.official')"
                 src="../../assets/icon-kubewarden.svg"
                 :alt="t('kubewarden.policies.official')"
                 class="ml-5"
@@ -267,7 +267,7 @@ export default {
           </div>
 
           <div v-if="hasAnnotation(subtype, 'kubewarden/mutation')" class="subtype__mutation">
-            <span v-tooltip="t('kubewarden.policyCharts.mutationPolicy.tooltip')">
+            <span v-clean-tooltip="t('kubewarden.policyCharts.mutationPolicy.tooltip')">
               {{ t('kubewarden.policyCharts.mutationPolicy.label') }}
             </span>
           </div>

@@ -68,7 +68,7 @@ export default {
 <template>
   <div v-if="!monitoringStatus.installed">
     <Banner color="warning">
-      <span v-html="t('kubewarden.monitoring.notInstalled', {}, true)" />
+      <span v-clean-html="t('kubewarden.monitoring.notInstalled', {}, true)" />
       <button
         class="btn role-primary ml-10"
         @click.prevent="chartRoute"
