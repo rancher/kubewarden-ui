@@ -164,7 +164,7 @@ test('02 developer load extension', async({ page }) => {
 });
 
 test('03 install kubewarden', async({ page }) => {
-  await page.goto('/dashboard/c/local/kubewarden/dashboard')
+  await page.goto('/dashboard/c/local/kubewarden')
   await page.getByRole('button', { name: 'Install Kubewarden' }).click();
   await page.getByRole('button', { name: 'Add Kubewarden Repository' }).click();
 
@@ -199,7 +199,7 @@ test('03 install kubewarden', async({ page }) => {
 });
 
 test('04 install default policyserver', async({ page }) => {
-  await page.goto('/dashboard/c/local/kubewarden/dashboard')
+  await page.goto('/dashboard/c/local/kubewarden')
 
   await page.getByRole('link', { name: 'PolicyServers' }).click()
   await expect(page.getByRole('heading', { name: 'PolicyServers' })).toBeVisible()
@@ -236,7 +236,7 @@ test('05 whitelist artifacthub', async({ page }) => {
 // Basic checks
 
 test('10 check overview page', async({ page }) => {
-  await page.goto('/dashboard/c/local/kubewarden/dashboard')
+  await page.goto('/dashboard/c/local/kubewarden')
   await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
 
   await expect(page.getByRole('link', { name: 'Create Policy Server' })).toBeVisible()

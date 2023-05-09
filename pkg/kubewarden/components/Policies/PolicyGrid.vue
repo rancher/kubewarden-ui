@@ -94,7 +94,7 @@ export default {
       });
 
       if ( !flattened || flattened?.length === 0 ) {
-        return;
+        return [];
       }
 
       return [...new Set(flattened.filter(Boolean))];
@@ -138,7 +138,7 @@ export default {
       })?.sort();
 
       if ( !out || out?.length === 0 ) {
-        return;
+        return [];
       }
 
       return [...new Set(out.filter(Boolean))];
@@ -317,6 +317,7 @@ $margin: 10px;
 
   & > * {
     margin: $margin;
+    max-width: 33%;
   }
   & > *:first-child {
     margin-left: 0;

@@ -9,6 +9,7 @@ import { Banner } from '@components/Banner';
 
 import { KUBEWARDEN_CHARTS } from '../types';
 import { getLatestStableVersion } from '../plugins/kubewarden-class';
+import { handleGrowlError } from '../utils/handle-growl';
 
 export default {
   components: { Banner },
@@ -37,7 +38,7 @@ export default {
       try {
         await this.$store.dispatch('catalog/load', { force: true, reset: true });
       } catch (e) {
-        this.handleGrowlError(e);
+        handleGrowlError({ error: e, store: this.$store });
       }
 
       if ( !this.defaultsChart && retry === 0 ) {
@@ -51,7 +52,7 @@ export default {
         try {
           await this.refreshCharts();
         } catch (e) {
-          this.handleGrowlError(e);
+          handleGrowlError({ error: e, store: this.$store });
 
           return;
         }
@@ -74,16 +75,6 @@ export default {
         params: { cluster: this.currentCluster?.id || '_' },
         query,
       });
-    },
-
-    handleGrowlError(e) {
-      const error = e?.data || e;
-
-      this.$store.dispatch('growl/error', {
-        title:   error._statusText,
-        message: error.message,
-        timeout: 5000,
-      }, { root: true });
     }
   }
 };
