@@ -13,6 +13,7 @@ import Loading from '@shell/components/Loading';
 
 import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPO } from '../../types';
 import { getLatestStableVersion } from '../../plugins/kubewarden-class';
+import { handleGrowlError } from '../../utils/handle-growl';
 
 import InstallWizard from './InstallWizard';
 
@@ -124,7 +125,7 @@ export default {
         this.installSteps[0].ready = true;
         this.$refs.wizard.next();
       } catch (e) {
-        this.$store.dispatch('growl/fromError', e);
+        handleGrowlError({ error: e, store: this.$store });
         btnCb(false);
       }
     },
@@ -140,7 +141,7 @@ export default {
         try {
           await repoObj.save();
         } catch (e) {
-          this.handleGrowlError(e);
+          handleGrowlError({ error: e, store: this.$store });
           btnCb(false);
 
           return;
@@ -149,7 +150,7 @@ export default {
         await this.refreshCharts();
         btnCb(true);
       } catch (e) {
-        this.handleGrowlError(e);
+        handleGrowlError({ error: e, store: this.$store });
         btnCb(false);
       }
     },
@@ -158,7 +159,7 @@ export default {
       try {
         await this.$store.dispatch('catalog/load', { force: true, reset: true });
       } catch (e) {
-        this.handleGrowlError(e);
+        handleGrowlError({ error: e, store: this.$store });
       }
 
       if ( !this.controllerChart && retry === 0 ) {
@@ -176,7 +177,7 @@ export default {
         try {
           await this.refreshCharts();
         } catch (e) {
-          this.handleGrowlError(e);
+          handleGrowlError({ error: e, store: this.$store });
 
           return;
         }
@@ -203,16 +204,6 @@ export default {
 
     reload() {
       this.$router.go();
-    },
-
-    handleGrowlError(e) {
-      const error = e?.data || e;
-
-      this.$store.dispatch('growl/error', {
-        title:   error._statusText,
-        message: error.message,
-        timeout: 5000,
-      }, { root: true });
     }
   }
 };

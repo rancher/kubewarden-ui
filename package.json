@@ -1,20 +1,20 @@
 {
   "name": "ui",
-  "version": "1.0.5-rc2",
+  "version": "1.0.5-rc3",
   "private": false,
   "scripts": {
-    "build": "./node_modules/.bin/nuxt build",
     "test:unit": "vue-cli-service test:unit",
     "build-pkg": "./node_modules/@rancher/shell/scripts/build-pkg.sh",
-    "dev": "./node_modules/.bin/nuxt dev",
-    "nuxt": "./node_modules/.bin/nuxt",
     "serve-pkgs": "./node_modules/@rancher/shell/scripts/serve-pkgs",
+    "dev": "NODE_ENV=dev ./node_modules/.bin/vue-cli-service serve",
+    "build": "./node_modules/.bin/vue-cli-service build",
+    "clean": "./node_modules/@rancher/shell/scripts/clean",
     "test": "export TS_JEST_DISABLE_VER_CHECKER=true && jest --watch",
     "test:ci": "export TS_JEST_DISABLE_VER_CHECKER=true && jest --collectCoverage"
   },
   "dependencies": {
     "@rancher/components": "0.1.1",
-    "@rancher/shell": "0.3.4",
+    "@rancher/shell": "0.3.8",
     "@types/lodash": "4.14.194",
     "core-js": "3.21.1",
     "css-loader": "4.3.0"
@@ -34,7 +34,7 @@
     "ts-jest": "^29.0.5",
     "ts-loader": "~8.2.0",
     "typescript": "4.1.6",
-    "vue-template-compiler": "2.6.14"
+    "vue-template-compiler": "2.7.14"
   },
   "engines": {
     "node": ">=12"

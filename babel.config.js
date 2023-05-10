@@ -7,8 +7,9 @@ module.exports = {
           {
             root:  ['.'],
             alias: {
-              '@': '.',
-              '~': '.',
+              '@':           '.',
+              '~':           '.',
+              '@kubewarden': './pkg/kubewarden',
             },
           },
         ],

@@ -21,6 +21,7 @@ import { ARTIFACTHUB_PKG_ANNOTATION, NAMESPACE_SELECTOR } from '../../plugins/ku
 import { DEFAULT_POLICY } from '../../plugins/policy-class';
 import { KUBEWARDEN_PRODUCT_NAME, VALUES_STATE } from '../../types';
 import { removeEmptyAttrs } from '../../utils/object';
+import { handleGrowlError } from '../../utils/handle-growl';
 
 import PolicyGrid from './PolicyGrid';
 import Values from './Values';
@@ -196,13 +197,7 @@ export default ({
         btnCb(true);
         this.loadingPackages = false;
       } catch (e) {
-        const error = e?.data || e;
-
-        this.$store.dispatch('growl/error', {
-          title:   error._statusText,
-          message: error.message,
-          timeout: 5000,
-        }, { root: true });
+        handleGrowlError({ error: e, store: this.$store });
 
         btnCb(false);
         this.loadingPackages = false;
@@ -241,13 +236,7 @@ export default ({
 
         await this.save(event);
       } catch (e) {
-        const error = e?.data || e;
-
-        this.$store.dispatch('growl/error', {
-          title:   error._statusText,
-          message: error.message,
-          timeout: 5000,
-        }, { root: true });
+        handleGrowlError({ error: e, store: this.$store });
 
         console.error('Error creating policy', e); // eslint-disable-line no-console
       }
@@ -264,13 +253,7 @@ export default ({
 
           this.packages = packages.filter(pkg => pkg?.data?.['kubewarden/hidden-ui'] !== 'true');
         } catch (e) {
-          const error = e?.data || e;
-
-          this.$store.dispatch('growl/error', {
-            title:   error._statusText,
-            message: error.message,
-            timeout: 5000,
-          }, { root: true });
+          handleGrowlError({ error: e, store: this.$store });
 
           console.warn(`Error fetching packages`, e); // eslint-disable-line no-console
         }
