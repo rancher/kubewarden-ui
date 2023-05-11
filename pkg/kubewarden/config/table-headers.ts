@@ -1,7 +1,7 @@
 import { NAME as NAME_HEADER } from '@shell/config/table-headers';
 
 import { createKubewardenRoute } from '../utils/custom-routing';
-import { KUBEWARDEN } from '../types';
+import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME } from '../types';
 
 export const ADMISSION_POLICY_STATE = {
   name:      'policyStatus',
@@ -146,8 +146,8 @@ export const DASHBOARD_HEADERS = [
     isEnabled:   true,
     isLoaded:    true,
     icon:        'icon-question-mark',
-    cta:         createKubewardenRoute({ name: 'c-cluster-product-resource-create', params: { resource: KUBEWARDEN.POLICY_SERVER } }),
-    link:        createKubewardenRoute({ name: 'c-cluster-product-resource', params: { resource: KUBEWARDEN.POLICY_SERVER } }),
+    cta:         createKubewardenRoute({ name: `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource-create`, params: { resource: KUBEWARDEN.POLICY_SERVER, product: KUBEWARDEN_PRODUCT_NAME } }),
+    link:        createKubewardenRoute({ name: `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource`, params: { resource: KUBEWARDEN.POLICY_SERVER, product: KUBEWARDEN_PRODUCT_NAME } }),
     linkText:    'kubewarden.dashboard.headers.policyServer.linkText',
     description: 'kubewarden.dashboard.headers.policyServer.description',
     slotTitle:   'kubewarden.dashboard.headers.policyServer.slotTitle',
@@ -157,8 +157,8 @@ export const DASHBOARD_HEADERS = [
     isEnabled:   true,
     isLoaded:    true,
     icon:        'icon-question-mark',
-    cta:         createKubewardenRoute({ name: 'c-cluster-product-resource-create', params: { resource: KUBEWARDEN.ADMISSION_POLICY } }),
-    link:        createKubewardenRoute({ name: 'c-cluster-product-resource', params: { resource: KUBEWARDEN.ADMISSION_POLICY } }),
+    cta:         createKubewardenRoute({ name: `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource-create`, params: { resource: KUBEWARDEN.ADMISSION_POLICY, product: KUBEWARDEN_PRODUCT_NAME } }),
+    link:        createKubewardenRoute({ name: `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource`, params: { resource: KUBEWARDEN.ADMISSION_POLICY, product: KUBEWARDEN_PRODUCT_NAME } }),
     linkText:    'kubewarden.dashboard.headers.admissionPolicy.linkText',
     description: 'kubewarden.dashboard.headers.admissionPolicy.description',
     slotTitle:   'kubewarden.dashboard.headers.admissionPolicy.slotTitle',
@@ -168,8 +168,8 @@ export const DASHBOARD_HEADERS = [
     isEnabled:   true,
     isLoaded:    true,
     icon:        'icon-question-mark',
-    cta:         createKubewardenRoute({ name: 'c-cluster-product-resource-create', params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY } }),
-    link:        createKubewardenRoute({ name: 'c-cluster-product-resource', params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY } }),
+    cta:         createKubewardenRoute({ name: `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource-create`, params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY, product: KUBEWARDEN_PRODUCT_NAME } }),
+    link:        createKubewardenRoute({ name: `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource`, params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY, product: KUBEWARDEN_PRODUCT_NAME } }),
     linkText:    'kubewarden.dashboard.headers.clusterAdmissionPolicy.linkText',
     description: 'kubewarden.dashboard.headers.clusterAdmissionPolicy.description',
     slotTitle:   'kubewarden.dashboard.headers.clusterAdmissionPolicy.slotTitle',

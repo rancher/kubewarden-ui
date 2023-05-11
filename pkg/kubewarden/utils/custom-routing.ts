@@ -11,7 +11,7 @@ interface KubewardenRouteConfig {
 }
 
 export const rootKubewardenRoute = (): KubewardenRouteConfig => ({
-  name:   `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }`,
+  name:   `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster`,
   params: { product: KUBEWARDEN_PRODUCT_NAME },
   meta:   { pkg: KUBEWARDEN_PRODUCT_NAME, product: KUBEWARDEN_PRODUCT_NAME }
 });
@@ -20,7 +20,7 @@ export const createKubewardenRoute = (config?: KubewardenRouteConfig) => {
   const { name, params = {}, meta = {} } = config || {};
 
   return {
-    name:   name || `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource`,
+    name:   name || `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource`,
     params: { ...rootKubewardenRoute().params, ...params },
     meta:   { ...rootKubewardenRoute().meta, ...meta }
   };

@@ -1,5 +1,5 @@
-import { rootKubewardenRoute } from '../utils/custom-routing';
-import { KUBEWARDEN, KUBEWARDEN_DASHBOARD } from '../types';
+import { rootKubewardenRoute, createKubewardenRoute } from '../utils/custom-routing';
+import { KUBEWARDEN, KUBEWARDEN_DASHBOARD, KUBEWARDEN_PRODUCT_NAME } from '../types';
 import { POLICY_SERVER_HEADERS, POLICY_HEADERS } from './table-headers';
 
 export function init($plugin: any, store: any) {
@@ -9,6 +9,7 @@ export function init($plugin: any, store: any) {
     weightType,
     virtualType,
     headers,
+    configureType,
   } = $plugin.DSL(store, $plugin.name);
 
   const {
@@ -34,6 +35,12 @@ export function init($plugin: any, store: any) {
     route:       rootKubewardenRoute(),
     overview:    true
   });
+
+  configureType(POLICY_SERVER, { customRoute: createKubewardenRoute({ name: `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource`, params: { resource: KUBEWARDEN.POLICY_SERVER, product: KUBEWARDEN_PRODUCT_NAME } }) });
+
+  configureType(ADMISSION_POLICY, { customRoute: createKubewardenRoute({ name: `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource`, params: { resource: KUBEWARDEN.ADMISSION_POLICY, product: KUBEWARDEN_PRODUCT_NAME } }) });
+
+  configureType(CLUSTER_ADMISSION_POLICY, { customRoute: createKubewardenRoute({ name: `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource`, params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY, product: KUBEWARDEN_PRODUCT_NAME } }) });
 
   basicType([
     KUBEWARDEN_DASHBOARD,

@@ -1,5 +1,4 @@
-import { KUBEWARDEN_PRODUCT_NAME, KUBEWARDEN_DASHBOARD } from '../types';
-import { createKubewardenRoute } from '../utils/custom-routing';
+import { KUBEWARDEN_PRODUCT_NAME } from '../types';
 
 import Dashboard from '../pages/c/_cluster/kubewarden/index.vue';
 import KubewardenResourcedList from '../pages/c/_cluster/kubewarden/_resource/index.vue';
@@ -9,33 +8,38 @@ import ViewKubewardenNsResource from '../pages/c/_cluster/kubewarden/_resource/_
 
 const routes = [
   {
-    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }`,
-    path:       `/c/:cluster/:product`,
+    name:       `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster`,
+    path:       `/${ KUBEWARDEN_PRODUCT_NAME }/c/:cluster`,
     component:  Dashboard,
+    params:     { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME },
     meta:       { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME }
   },
   {
-    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource`,
-    path:       `/c/:cluster/:product/:resource`,
+    name:       `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource`,
+    path:       `/${ KUBEWARDEN_PRODUCT_NAME }/c/:cluster/:resource`,
     component:  KubewardenResourcedList,
+    params:     { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME },
     meta:       { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME }
   },
   {
-    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource-create`,
-    path:       `/c/:cluster/:product/:resource/create`,
+    name:       `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource-create`,
+    path:       `/${ KUBEWARDEN_PRODUCT_NAME }/c/:cluster/:resource/create`,
     component:  CreateKubewardenResource,
+    params:     { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME },
     meta:       { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME }
   },
   {
-    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource-id`,
-    path:       `/c/:cluster/:product/:resource/:id`,
+    name:       `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource-id`,
+    path:       `/${ KUBEWARDEN_PRODUCT_NAME }/c/:cluster/:resource/:id`,
     component:  ViewKubewardenResource,
+    params:     { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME },
     meta:       { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME }
   },
   {
-    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource-namespace-id`,
-    path:       `/c/:cluster/:product/:resource/:namespace/:id`,
+    name:       `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource-namespace-id`,
+    path:       `/${ KUBEWARDEN_PRODUCT_NAME }/c/:cluster/:resource/:namespace/:id`,
     component:  ViewKubewardenNsResource,
+    params:     { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME },
     meta:       { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME }
   }
 ];

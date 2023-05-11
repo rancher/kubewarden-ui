@@ -206,7 +206,7 @@ export default ({
 
     done() {
       this.$router.replace({
-        name:   'c-cluster-product-resource',
+        name:   `${ KUBEWARDEN_PRODUCT_NAME }-c-cluster-resource`,
         params: {
           cluster:  this.$route.params.cluster,
           product:  KUBEWARDEN_PRODUCT_NAME,
