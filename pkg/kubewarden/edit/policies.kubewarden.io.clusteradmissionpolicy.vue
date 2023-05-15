@@ -4,6 +4,7 @@ import CreateEditView from '@shell/mixins/create-edit-view';
 
 import CruResource from '@shell/components/CruResource';
 import { removeEmptyAttrs } from '../utils/object';
+import { handleGrowlError } from '../utils/handle-growl';
 
 import Config from '../components/Policies/Config';
 import Create from '../components/Policies/Create';
@@ -51,13 +52,7 @@ export default {
 
         await this.save(event);
       } catch (e) {
-        const error = e?.data || e;
-
-        this.$store.dispatch('growl/error', {
-          title:   error._statusText,
-          message: error.message,
-          timeout: 5000,
-        }, { root: true });
+        handleGrowlError({ error: e, store: this.$store });
       }
     },
   }

@@ -144,7 +144,7 @@ export default {
       </div>
     </div>
 
-    <slot name="stepContainer mt-20" :activeStep="activeStep">
+    <slot name="stepContainer mt-20" :active-step="activeStep">
       <template v-for="step in steps">
         <div
           v-if="step.name === activeStep.name || step.hidden"
