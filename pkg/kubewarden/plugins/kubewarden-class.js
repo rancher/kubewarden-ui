@@ -323,6 +323,28 @@ export default class KubewardenModel extends SteveModel {
     return out;
   }
 
+  get openTelemetryService() {
+    return async() => {
+      try {
+        const services = await this.allServices();
+
+        if (services) {
+          return services.find((s) => {
+            const found = s.metadata?.labels?.['app.kubernetes.io/name'] === 'opentelemetry-operator';
+
+            if ( found ) {
+              return s;
+            }
+          });
+        }
+      } catch (e) {
+        console.warn(`Error fetching opentelemetry service: ${ e }`); // eslint-disable-line no-console
+      }
+
+      return null;
+    };
+  }
+
   // Determines if a policy is targeting rancher specific namespaces (which happens by default)
   get namespaceSelector() {
     const rancherNs = RANCHER_NAMESPACES.find(
@@ -346,11 +368,15 @@ export default class KubewardenModel extends SteveModel {
     return out;
   }
 
+  /**
+   * Creates a ConfigMap for the Grafana dashboard depending on the type supplied
+   * @param {*} type - Type of resource ( PolicyServer || (Cluster)AdmissionPolicy )
+   */
   async addGrafanaDashboard(type) {
-    /*
-      There are 2 dashboards for Kubewarden:
-      - PolicyServer is the default one copied from https://grafana.com/grafana/dashboards/15314-kubewarden/
-      - Policies have a condensed version
+    /**
+     * There are 2 dashboards for Kubewarden:
+     * PolicyServer is the default one copied from https://grafana.com/grafana/dashboards/15314-kubewarden/
+     * Policies have a condensed version
     */
     const dashboard =
       type === METRICS_DASHBOARD.POLICY_SERVER ? policyServerDashboard : policyDashboard;

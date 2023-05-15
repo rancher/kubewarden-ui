@@ -37,6 +37,9 @@ kubewarden:
       button: Install Kubewarden
       stepTitle: Kubewarden Install
       reload: Unable to fetch Kubewarden Helm chart - reload required.
+      versionError:
+        title: Chart Version not found.
+        message: Unable to determine the latest stable version of the kubewarden-controller chart. Please make sure the Helm repository is configured correctly.
     prerequisites:
       title: Prerequisites
       certManager:
@@ -50,6 +53,14 @@ kubewarden:
       repository:
         title: Repository
         description: You will need the Kubewarden helm repository (https://charts.kubewarden.io) to install the `kubewarden` chart.
+      airGapped:
+        warning: "An air-gapped installation has been detected, this will require intervention to enable access to Kubewarden images and policies. It is necessary to make them available from an OCI registry that is accessible to the cluster."
+        docs: |
+          Follow the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/operator-manual/airgap/requirements">Documentation</a> to setup an OCI registry for further installation.
+        certManager:
+          manualStep: Follow the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/operator-manual/airgap/install#save-container-images-in-your-workstation">Documentation</a> to install Cert-Manager from a private registry.
+        repository:
+          description: Follow the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/operator-manual/airgap/install#helm-charts">Documentation</a> to populate your OCI registry with the required Helm charts.
   tabs:
     general:
       label: General
@@ -114,14 +125,20 @@ kubewarden:
     noRules: There are no rules configured for this policy.
     namespaceWarning: This policy is targeting Rancher specific namespaces which will cause catastrophic failures with your Rancher deployment.
     official: Official Kubewarden Policy
+    airgap:
+      banner: "An air-gapped installation is detected, you will be unable to use the policies listed within the ArtifactHub catalog. You are still able to deploy a custom policy by referencing a WebAssembly module that is accessible to this cluster."
   utils:
     keyword: Filter by Keyword
     provider: Filter by Provider
     resource: Filter by Resource Type
     resetFilter: Reset Filter
   tracing:
+    installOpenTelemetry: |
+      Click the button below  or run the <code>kubectl</code> command to install the latest version of OpenTelemetry.
+    noOpenTelemetry: |
+      An OpenTelemetry service can not be found, please follow the steps <a href="https://docs.kubewarden.io/operator-manual/telemetry/opentelemetry/quickstart#install-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">listed here</a> to setup the OpenTelemetry Operator.
     noJaeger: |
-      No Jaeger service is installed, please follow the steps <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart" target="_blank" rel="noopener noreferrer nofollow">listed here</a> to setup tracing for your policies.
+      A Jaeger service can not be found, please follow the steps <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart" target="_blank" rel="noopener noreferrer nofollow">listed here</a> to setup tracing for your policies.
     noRelatedTraces: No tracing data exists for the related policies.
     noTraces: No tracing data exists for this policy. 
   monitoring:

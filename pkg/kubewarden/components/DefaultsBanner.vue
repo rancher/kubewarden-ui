@@ -18,7 +18,6 @@ export default {
 
   computed: {
     ...mapGetters(['currentCluster']),
-    ...mapGetters({ allRepos: 'catalog/repos' }),
 
     defaultsChart() {
       return this.$store.getters['catalog/chart']({ chartName: KUBEWARDEN_CHARTS.DEFAULTS });
@@ -27,7 +26,7 @@ export default {
 
   methods: {
     async closeDefaultsBanner(retry = 0) {
-      const res = await this.$store.dispatch('kubewarden/updateHideDefaultsBanner', true);
+      const res = await this.$store.dispatch('kubewarden/updateHideBannerDefaults', true);
 
       if ( retry === 0 && res?.type === 'error' && res?.status === 500 ) {
         await this.closeDefaultsBanner(retry + 1);
@@ -63,18 +62,27 @@ export default {
       } = this.defaultsChart;
       const latestStableVersion = getLatestStableVersion(versions);
 
-      const query = {
-        [REPO_TYPE]: repoType,
-        [REPO]:      repoName,
-        [CHART]:     chartName,
-        [VERSION]:   latestStableVersion.version
-      };
+      if ( latestStableVersion ) {
+        const query = {
+          [REPO_TYPE]: repoType,
+          [REPO]:      repoName,
+          [CHART]:     chartName,
+          [VERSION]:   latestStableVersion.version
+        };
 
-      this.$router.push({
-        name:   'c-cluster-apps-charts-install',
-        params: { cluster: this.currentCluster?.id || '_' },
-        query,
-      });
+        this.$router.push({
+          name:   'c-cluster-apps-charts-install',
+          params: { cluster: this.currentCluster?.id || '_' },
+          query,
+        });
+      } else {
+        const error = {
+          _statusText: this.t('kubewarden.dashboard.appInstall.versionError.title'),
+          message:     this.t('kubewarden.dashboard.appInstall.versionError.message')
+        };
+
+        handleGrowlError({ error, store: this.$store });
+      }
     }
   }
 };

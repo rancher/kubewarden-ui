@@ -78,8 +78,12 @@ export default {
   },
 
   watch: {
-    certService() {
+    async certService() {
       this.installSteps[0].ready = true;
+
+      if ( this.isAirgap ) {
+        await this.refreshCharts();
+      }
 
       this.$refs.wizard?.goToStep(2);
     }
@@ -87,7 +91,11 @@ export default {
 
   computed: {
     ...mapGetters(['currentCluster', 'currentProduct']),
-    ...mapGetters({ allRepos: 'catalog/repos' }),
+    ...mapGetters({ allRepos: 'catalog/repos', t: 'i18n/t' }),
+
+    isAirgap() {
+      return this.$store.getters['kubewarden/airGapped'];
+    },
 
     certService() {
       return this.$store.getters[`${ this.currentProduct.inStore }/all`](SERVICE).find(s => s.metadata?.labels?.['app'] === 'cert-manager');
@@ -98,7 +106,11 @@ export default {
     },
 
     kubewardenRepo() {
-      return this.allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
+      if ( !this.isAirgap ) {
+        return this.allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
+      }
+
+      return this.controllerChart;
     },
 
     shellEnabled() {
@@ -188,18 +200,27 @@ export default {
       } = this.controllerChart;
       const latestStableVersion = getLatestStableVersion(versions);
 
-      const query = {
-        [REPO_TYPE]: repoType,
-        [REPO]:      repoName,
-        [CHART]:     chartName,
-        [VERSION]:   latestStableVersion.version
-      };
+      if ( latestStableVersion ) {
+        const query = {
+          [REPO_TYPE]: repoType,
+          [REPO]:      repoName,
+          [CHART]:     chartName,
+          [VERSION]:   latestStableVersion.version
+        };
 
-      this.$router.push({
-        name:   'c-cluster-apps-charts-install',
-        params: { cluster: this.currentCluster?.id || '_' },
-        query,
-      });
+        this.$router.push({
+          name:   'c-cluster-apps-charts-install',
+          params: { cluster: this.currentCluster?.id || '_' },
+          query,
+        });
+      } else {
+        const error = {
+          _statusText: this.t('kubewarden.dashboard.appInstall.versionError.title'),
+          message:     this.t('kubewarden.dashboard.appInstall.versionError.message')
+        };
+
+        handleGrowlError({ error, store: this.$store });
+      }
     },
 
     reload() {
@@ -230,85 +251,166 @@ export default {
       </button>
     </div>
 
-    <InstallWizard v-else ref="wizard" :init-step-index="initStepIndex" :steps="installSteps">
-      <template #certmanager>
-        <h2 class="mt-20 mb-10">
-          {{ t("kubewarden.dashboard.prerequisites.certManager.title") }}
-        </h2>
-        <p class="mb-20">
-          {{ t("kubewarden.dashboard.prerequisites.certManager.description") }}
-        </p>
-
-        <p v-clean-html="t('kubewarden.dashboard.prerequisites.certManager.manualStep', null, true)"></p>
-        <CopyCode class="m-10 p-10">
-          {{ t("kubewarden.dashboard.prerequisites.certManager.applyCommand") }}
-        </CopyCode>
-        <button
-          :disabled="!shellEnabled"
-          type="button"
-          class="btn role-secondary"
-          @shortkey="currentCluster.openShell()"
-          @click="currentCluster.openShell()"
+    <template v-else>
+      <!-- Air-Gapped -->
+      <template v-if="isAirgap">
+        <Banner
+          class="mb-20 mt-20"
+          color="warning"
         >
-          <i class="icon icon-terminal icon-lg" />{{ t("kubewarden.dashboard.prerequisites.certManager.openShell") }}
-        </button>
+          <span>{{ t('kubewarden.dashboard.prerequisites.airGapped.warning') }}</span>
+          <span v-html="t('kubewarden.dashboard.prerequisites.airGapped.docs', {}, true)"></span>
+        </Banner>
+        <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps">
+          <template #certmanager>
+            <h2 class="mt-20 mb-10">
+              {{ t("kubewarden.dashboard.prerequisites.certManager.title") }}
+            </h2>
+            <p class="mb-20">
+              {{ t("kubewarden.dashboard.prerequisites.certManager.description") }}
+            </p>
 
-        <slot>
-          <Banner
-            class="mb-20 mt-20"
-            color="info"
-            :label="t('kubewarden.dashboard.prerequisites.certManager.stepProgress')"
-          />
-        </slot>
-      </template>
+            <p v-html="t('kubewarden.dashboard.prerequisites.airGapped.certManager.manualStep', null, true)"></p>
 
-      <template #install>
-        <template v-if="!kubewardenRepo">
-          <h2 class="mt-20 mb-10">
-            {{ t("kubewarden.dashboard.prerequisites.repository.title") }}
-          </h2>
-          <p class="mb-20">
-            {{ t("kubewarden.dashboard.prerequisites.repository.description") }}
-          </p>
+            <slot>
+              <Banner
+                class="mb-20 mt-20"
+                color="info"
+                :label="t('kubewarden.dashboard.prerequisites.certManager.stepProgress')"
+              />
+            </slot>
+          </template>
 
-          <AsyncButton mode="kubewardenRepository" @click="addRepository" />
-        </template>
-
-        <template v-else>
-          <h2 class="mt-20 mb-10">
-            {{ t("kubewarden.dashboard.appInstall.title") }}
-          </h2>
-          <p class="mb-20">
-            {{ t("kubewarden.dashboard.appInstall.description") }}
-          </p>
-
-          <div class="chart-route">
-            <Loading v-if="!controllerChart && !reloadReady" mode="relative" class="mt-20" />
-
-            <template v-else-if="!controllerChart && reloadReady">
-              <Banner color="warning">
-                <span class="mb-20">
-                  {{ t('kubewarden.dashboard.appInstall.reload' ) }}
-                </span>
-                <button class="ml-10 btn btn-sm role-primary" @click="reload()">
-                  {{ t('generic.reload') }}
-                </button>
-              </Banner>
+          <template #install>
+            <template v-if="!controllerChart">
+              <h2 class="mt-20 mb-10">
+                {{ t("kubewarden.dashboard.prerequisites.repository.title") }}
+              </h2>
+              <p class="mb-20">
+                <span v-html="t('kubewarden.dashboard.prerequisites.airGapped.repository.description', {}, true)"></span>
+              </p>
             </template>
 
             <template v-else>
-              <button
-                class="btn role-primary mt-20"
-                :disabled="!controllerChart"
-                @click.prevent="chartRoute"
-              >
-                {{ t("kubewarden.dashboard.appInstall.button") }}
-              </button>
+              <h2 class="mt-20 mb-10">
+                {{ t("kubewarden.dashboard.appInstall.title") }}
+              </h2>
+              <p class="mb-20">
+                {{ t("kubewarden.dashboard.appInstall.description") }}
+              </p>
+
+              <div class="chart-route">
+                <Loading v-if="!controllerChart && !reloadReady" mode="relative" class="mt-20" />
+
+                <template v-else-if="!controllerChart && reloadReady">
+                  <Banner color="warning">
+                    <span class="mb-20">
+                      {{ t('kubewarden.dashboard.appInstall.reload' ) }}
+                    </span>
+                    <button class="ml-10 btn btn-sm role-primary" @click="reload()">
+                      {{ t('generic.reload') }}
+                    </button>
+                  </Banner>
+                </template>
+
+                <template v-else>
+                  <button
+                    class="btn role-primary mt-20"
+                    :disabled="!controllerChart"
+                    @click.prevent="chartRoute"
+                  >
+                    {{ t("kubewarden.dashboard.appInstall.button") }}
+                  </button>
+                </template>
+              </div>
             </template>
-          </div>
-        </template>
+          </template>
+        </InstallWizard>
       </template>
-    </InstallWizard>
+
+      <!-- Non Air-Gapped -->
+      <template v-else>
+        <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps">
+          <template #certmanager>
+            <h2 class="mt-20 mb-10">
+              {{ t("kubewarden.dashboard.prerequisites.certManager.title") }}
+            </h2>
+            <p class="mb-20">
+              {{ t("kubewarden.dashboard.prerequisites.certManager.description") }}
+            </p>
+
+            <p v-clean-html="t('kubewarden.dashboard.prerequisites.certManager.manualStep', null, true)"></p>
+            <CopyCode class="m-10 p-10">
+              {{ t("kubewarden.dashboard.prerequisites.certManager.applyCommand") }}
+            </CopyCode>
+            <button
+              :disabled="!shellEnabled"
+              type="button"
+              class="btn role-secondary"
+              @shortkey="currentCluster.openShell()"
+              @click="currentCluster.openShell()"
+            >
+              <i class="icon icon-terminal icon-lg" />{{ t("kubewarden.dashboard.prerequisites.certManager.openShell") }}
+            </button>
+
+            <slot>
+              <Banner
+                class="mb-20 mt-20"
+                color="info"
+                :label="t('kubewarden.dashboard.prerequisites.certManager.stepProgress')"
+              />
+            </slot>
+          </template>
+
+          <template #install>
+            <template v-if="!kubewardenRepo">
+              <h2 class="mt-20 mb-10">
+                {{ t("kubewarden.dashboard.prerequisites.repository.title") }}
+              </h2>
+              <p class="mb-20">
+                {{ t("kubewarden.dashboard.prerequisites.repository.description") }}
+              </p>
+
+              <AsyncButton mode="kubewardenRepository" @click="addRepository" />
+            </template>
+
+            <template v-else>
+              <h2 class="mt-20 mb-10">
+                {{ t("kubewarden.dashboard.appInstall.title") }}
+              </h2>
+              <p class="mb-20">
+                {{ t("kubewarden.dashboard.appInstall.description") }}
+              </p>
+
+              <div class="chart-route">
+                <Loading v-if="!controllerChart && !reloadReady" mode="relative" class="mt-20" />
+
+                <template v-else-if="!controllerChart && reloadReady">
+                  <Banner color="warning">
+                    <span class="mb-20">
+                      {{ t('kubewarden.dashboard.appInstall.reload' ) }}
+                    </span>
+                    <button class="ml-10 btn btn-sm role-primary" @click="reload()">
+                      {{ t('generic.reload') }}
+                    </button>
+                  </Banner>
+                </template>
+
+                <template v-else>
+                  <button
+                    class="btn role-primary mt-20"
+                    :disabled="!controllerChart"
+                    @click.prevent="chartRoute"
+                  >
+                    {{ t("kubewarden.dashboard.appInstall.button") }}
+                  </button>
+                </template>
+              </div>
+            </template>
+          </template>
+        </InstallWizard>
+      </template>
+    </template>
   </div>
 </template>
 

@@ -6,10 +6,22 @@ import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
 
-const kubewardenFactory = (): CoreStoreSpecifics => {
+export interface StateConfig {
+  airGapped: Boolean,
+  hideBannerDefaults: Boolean,
+  hideBannerArtifactHub: Boolean,
+  hideBannerAirgapPolicy: Boolean
+}
+
+const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
   return {
-    state() {
-      return { hideDefaultsBanner: false };
+    state: (): StateConfig => {
+      return {
+        airGapped:              config.airGapped,
+        hideBannerDefaults:     config.hideBannerDefaults,
+        hideBannerArtifactHub:  config.hideBannerArtifactHub,
+        hideBannerAirgapPolicy: config.hideBannerAirgapPolicy
+      };
     },
 
     getters:   { ...getters },
@@ -21,6 +33,11 @@ const kubewardenFactory = (): CoreStoreSpecifics => {
 const config: CoreStoreConfig = { namespace: KUBEWARDEN_PRODUCT_NAME };
 
 export default {
-  specifics: kubewardenFactory(),
+  specifics: kubewardenFactory({
+    airGapped:              false,
+    hideBannerDefaults:     false,
+    hideBannerArtifactHub:  false,
+    hideBannerAirgapPolicy: false
+  }),
   config
 };

@@ -5,7 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
 
 import CreateEditView from '@shell/mixins/create-edit-view';
-import { _CREATE, CHART, REPO, REPO_TYPE } from '@shell/config/query-params';
+import { _CREATE } from '@shell/config/query-params';
 import { saferDump } from '@shell/utils/create-yaml';
 import { set } from '@shell/utils/object';
 
@@ -108,6 +108,10 @@ export default ({
   },
 
   computed: {
+    isAirgap() {
+      return this.$store.getters['kubewarden/airGapped'];
+    },
+
     isCreate() {
       return this.realMode === _CREATE;
     },
@@ -135,23 +139,33 @@ export default ({
 
     /** Determines if the required rules/settings are set, if not the resource can not be created */
     hasRequired() {
-      const { rules, settings } = this.chartValues?.policy?.spec;
+      if ( !isEmpty(this.chartValues?.policy) ) {
+        const { rules, settings } = this.chartValues?.policy?.spec;
 
-      const requiredRules = ['apiVersions', 'operations', 'resources'];
-      const acceptedRules = this.acceptedValues(rules, requiredRules);
+        const requiredRules = ['apiVersions', 'operations', 'resources'];
+        const acceptedRules = this.acceptedValues(rules, requiredRules);
 
-      const requiredQuestions = this.chartValues?.questions?.questions?.map((q) => {
-        if ( q.required ) {
-          return q.variable;
+        const requiredQuestions = this.chartValues?.questions?.questions?.map((q) => {
+          if ( q.required ) {
+            return q.variable;
+          }
+        }).filter(Boolean);
+        const acceptedQuestions = this.acceptedValues(settings, requiredQuestions);
+
+        if ( !isEmpty(acceptedRules) && (isEmpty(requiredQuestions) || !isEmpty(acceptedQuestions)) ) {
+          return true;
         }
-      }).filter(Boolean);
-      const acceptedQuestions = this.acceptedValues(settings, requiredQuestions);
-
-      if ( !isEmpty(acceptedRules) && (isEmpty(requiredQuestions) || !isEmpty(acceptedQuestions)) ) {
-        return true;
       }
 
       return false;
+    },
+
+    hideArtifactHubBanner() {
+      return this.$store.getters['kubewarden/hideBannerArtifactHub'] || !!this.hasArtifactHub || !!this.isAirgap;
+    },
+
+    hideAirgapBanner() {
+      return !this.isAirgap || this.$store.getters['kubewarden/hideBannerAirgapPolicy'];
     },
 
     packageValues() {
@@ -209,6 +223,14 @@ export default ({
       }
 
       return null;
+    },
+
+    async closeBanner(banner, retry = 0) {
+      const res = await this.$store.dispatch(`kubewarden/${ banner }`, true);
+
+      if ( retry === 0 && res?.type === 'error' && res?.status === 500 ) {
+        await this.close(retry + 1);
+      }
     },
 
     async addArtifactHub(btnCb) {
@@ -393,14 +415,6 @@ export default ({
         this.$set(this, 'hasCustomPolicy', false);
       }
 
-      this.$router.push({
-        query: {
-          [REPO]:      KUBEWARDEN_PRODUCT_NAME,
-          [REPO_TYPE]: 'cluster',
-          [CHART]:     isCustom ? 'custom' : type?.name
-        }
-      });
-
       this.policyQuestions();
       this.stepPolicies.ready = true;
       this.$refs.wizard.next();
@@ -415,16 +429,27 @@ export default ({
 <template>
   <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-else>
-    <template v-if="!hasArtifactHub">
+    <template v-if="!hideArtifactHubBanner">
       <Banner
         class="type-banner mb-20 mt-0"
         color="warning"
+        :closable="true"
+        @close="closeBanner('updateHideBannerArtifactHub')"
       >
         <div>
           <p v-clean-html="t('kubewarden.policies.noArtifactHub', {}, true)" class="mb-10" />
           <AsyncButton mode="artifactHub" @click="addArtifactHub" />
         </div>
       </Banner>
+    </template>
+    <template v-if="!hideAirgapBanner">
+      <Banner
+        class="type-banner mb-20 mt-0"
+        color="warning"
+        :closable="true"
+        :label="t('kubewarden.policies.airgap.banner')"
+        @close="closeBanner('updateHideBannerAirgapPolicy')"
+      />
     </template>
     <Loading v-if="loadingPackages" />
     <Wizard

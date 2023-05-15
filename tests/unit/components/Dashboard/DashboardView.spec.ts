@@ -12,7 +12,8 @@ describe('component: General', () => {
     const wrapper = shallowMount(DashboardView as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       computed:  {
         defaultsApp:        () => null,
-        hideDefaultsBanner: () => false,
+        defaultsChart:      () => null,
+        hideBannerDefaults: () => false,
         policyServerPods:   () => [],
         globalPolicies:     () => [],
         namespacedPolicies: () => [],
@@ -26,7 +27,8 @@ describe('component: General', () => {
             currentProduct:                  () => 'current_product',
             'current_product/all':           jest.fn(),
             'i18n/t':                        jest.fn(),
-            'kubewarden/hideDefaultsBanner': jest.fn()
+            'kubewarden/hideBannerDefaults': jest.fn(),
+            'catalog/chart':                 jest.fn()
           },
         }
       },
@@ -79,7 +81,8 @@ describe('component: General', () => {
             currentProduct:                  () => 'current_product',
             'current_product/all':           jest.fn(),
             'i18n/t':                        jest.fn(),
-            'kubewarden/hideDefaultsBanner': jest.fn()
+            'kubewarden/hideBannerDefaults': jest.fn(),
+            'catalog/chart':                 jest.fn()
           },
         }
       },
@@ -133,7 +136,8 @@ describe('component: General', () => {
             currentProduct:                  () => 'current_product',
             'current_product/all':           jest.fn(),
             'i18n/t':                        jest.fn(),
-            'kubewarden/hideDefaultsBanner': jest.fn()
+            'kubewarden/hideBannerDefaults': jest.fn(),
+            'catalog/chart':                 jest.fn()
           },
         }
       },

@@ -21,5 +21,8 @@
     "pkg/**/node_modules": true,
     "yarn-error.log": true,
     "CODEOWNERS": true
-  }
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
 }

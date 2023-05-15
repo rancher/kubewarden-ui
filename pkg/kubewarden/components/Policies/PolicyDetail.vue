@@ -52,7 +52,7 @@ export default {
         this.metricsProxy = await this.value.grafanaProxy(this.metricsType);
 
         if ( this.metricsProxy ) {
-          this.metricsService = await dashboardExists(this.$store, this.currentCluster?.id, this.metricsProxy);
+          this.metricsService = await dashboardExists('v2', this.$store, this.currentCluster?.id, this.metricsProxy);
         }
       } catch (e) {
         console.error(`Error fetching Grafana service: ${ e }`); // eslint-disable-line no-console
