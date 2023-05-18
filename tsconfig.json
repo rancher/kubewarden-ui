@@ -41,7 +41,6 @@
       "@types/node",
       "@nuxt/types",
       "@jest/types",
-      "@playwright/types",
       "@rancher/components/types",
       "kubewarden",
       "cypress",
