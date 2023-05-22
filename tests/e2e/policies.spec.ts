@@ -26,7 +26,7 @@ const policies = [
   { name: 'Ingress Policy' },
   { name: 'Pod Privileged Policy' },
   { name: 'Pod Runtime' },
-  { name: 'PSA Label Enforcer', skip: 'Will be implemented after POM rewrite is merged' },
+  { name: 'PSA Label Enforcer', action: setupPSALabelEnforcer },
   { name: 'Readonly Root Filesystem PSP' },
   { name: 'Safe Annotations'},
   { name: 'Safe Labels' },
@@ -39,6 +39,11 @@ const policies = [
   { name: 'volumeMounts', action: setupVolumeMounts },
   { name: 'Volumes PSP' },
 ]
+
+async function setupPSALabelEnforcer(ui: RancherUI) {
+  await ui.page.getByRole('tab', { name: 'Settings' }).click()
+  await ui.select('Enforce', 'baseline')
+}
 
 async function setupCustomPolicy(ui: RancherUI) {
   await ui.input('Module*').fill('ghcr.io/kubewarden/policies/pod-privileged:v0.2.5')
