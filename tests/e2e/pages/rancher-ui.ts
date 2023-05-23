@@ -1,7 +1,7 @@
-import { expect, Page, Locator } from '@playwright/test';
-
+import type { Page } from '@playwright/test';
 import jsyaml from 'js-yaml';
 import merge from 'lodash.merge';
+import { TableRow } from '../components/table-row';
 
 /**
  * aria-label is not always filled - we have to use filters to find elements reliably
@@ -39,23 +39,10 @@ export class RancherUI {
     }
 
     // ==================================================================================================
-    // Table Row Handlers - TODO: move to table / row object
+    // Table Handler
 
     getRow(name: string) {
-        return this.page.locator('tr.main-row')
-            .filter({has: this.page.getByRole('link', {name: name, exact: true})})
-    }
-
-    async rowAction(row: Locator, action: string) {
-        // Alternative: locator(`button[id$='+${name}']`) - id="actionButton+0+rancher-kubewarden-controller"
-        await row.locator('button.actions').click()
-        await this.page.getByRole('listitem').getByText(action, {exact: true}).click()
-    }
-
-    async deleteRow(row: Locator) {
-        await this.rowAction(row, 'Delete')
-        await this.page.getByTestId('prompt-remove-confirm-button').click()
-        await expect(row).not.toBeVisible();
+        return new TableRow(this.page, name)
     }
 
     // ==================================================================================================

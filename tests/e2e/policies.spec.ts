@@ -119,11 +119,11 @@ for (const policy of policies) {
 
     // Check new policy
     const polRow = ui.getRow(polname)
-    await expect(polRow).toBeVisible()
+    await expect(polRow.body).toBeVisible()
     if (!polkeep) {
       // Waiting for policy takes 1m, check only if we delete it
-      await expect(polRow.locator('td.col-policy-status')).toHaveText('Active', {timeout: 220_000})
-      await ui.deleteRow(polRow)
+      await expect(polRow.column('Status')).toHaveText('Active', {timeout: 220_000})
+      await polRow.delete()
     }
   });
 }

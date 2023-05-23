@@ -32,9 +32,9 @@ test('Policy Servers Landing Page', async({ page, ui }) => {
 
   // Default policy server
   const psRow = ui.getRow('default')
-  await expect(psRow).toBeVisible()
-  await expect(psPage.getState(psRow)).toHaveText('Active')
-  await expect(psPage.getPolicies(psRow)).toHaveText('6')
+  await expect(psRow.body).toBeVisible()
+  await expect(psRow.column('Status')).toHaveText('Active')
+  await expect(psRow.column('Policies')).toHaveText('6')
 
   // Check there is only default policy server
   await expect(page.locator('td.col-policy-server-status')).toHaveCount(1);

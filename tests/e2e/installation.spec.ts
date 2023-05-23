@@ -8,7 +8,7 @@ import { PolicyServersPage } from './pages/policyservers.page';
 const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
 
 
-test('00 Initial rancher setup', async({ page }) => {
+test('00 Initial rancher setup', async({ page, ui }) => {
   const rancher = new RancherCommonPage(page)
   await page.goto('/');
 
@@ -16,6 +16,8 @@ test('00 Initial rancher setup', async({ page }) => {
   if (! await rancher.isLoggedIn()) {
     await rancher.handleFirstLogin('sa')
   }
+  // wait for local cluster to be Active
+  await expect(ui.getRow('local').column('State')).toHaveText('Active', {timeout: 60_000})
   // disable namespace filter
   await rancher.setNamespaceFilter('All Namespaces')
   // enable extension developer features
