@@ -229,7 +229,7 @@ test('05 whitelist artifacthub', async({ page }) => {
   await page.getByRole('button', { name: 'Add ArtifactHub To Whitelist' }).click();
   
   await expect(page.getByRole('heading', { name: 'Pod Privileged Policy' })).toBeVisible()
-  await expect(page.locator(".subtype")).toHaveCount(29) // we have 28 + 1 custom
+  await expect(page.locator(".subtype")).toHaveCount(30) // we have 29 + 1 custom
 });
 
 // ==================================================================================================
