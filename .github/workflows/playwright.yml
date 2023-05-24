@@ -41,6 +41,7 @@ on:
     - cron: "0 2 * * *"
 
 env:
+  K3S_VERSION: v1.25.9-k3s1
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-github-runner
 
 jobs:
@@ -61,14 +62,6 @@ jobs:
       run: |
         yarn
         yarn playwright install chromium # --with-deps
-
-    # ==================================================================================================
-    # Create k3d cluster and install rancher
-    - name: "Create kubernetes cluster"
-      uses: AbsaOSS/k3d-action@v2.4.0
-      with:
-        cluster-name: ${{ env.K3D_CLUSTER_NAME }}
-        args: "--agents 1 --image rancher/k3s:v1.24.11-k3s1"
 
     # ==================================================================================================
     # Set up parameters and ENV
@@ -97,6 +90,13 @@ jobs:
         echo KUBEWARDEN=$KUBEWARDEN | tee -a $GITHUB_ENV
         echo TESTSUITE="$TESTSUITE" | tee -a $GITHUB_ENV
 
+    # ==================================================================================================
+    # Create k3d cluster and install rancher
+    - name: "Create kubernetes cluster"
+      uses: AbsaOSS/k3d-action@v2.4.0
+      with:
+        cluster-name: ${{ env.K3D_CLUSTER_NAME }}
+        args: "--agents 1 --image rancher/k3s:${{ env.K3S_VERSION }}"
 
     - name: Install Rancher
       run: |
@@ -131,7 +131,7 @@ jobs:
             grep -vE '([0-9]+)/\1 +Running|^$' <<< $output || break
             [ $i -ne 20 ] && sleep 30 || { echo "Godot: pods not running"; exit 1; }
         done
-    
+
         echo "RANCHER_FQDN=$RANCHER_FQDN" >> $GITHUB_ENV
 
     # ==================================================================================================
@@ -146,7 +146,7 @@ jobs:
     - name: Install Kubewarden
       working-directory: tests
       run: |
-        yarn playwright test installation -x
+        yarn playwright test installation overview -x
       env:
         RANCHER_URL: https://${{env.RANCHER_FQDN}}
         ORIGIN: ${{ env.KUBEWARDEN }}
@@ -160,6 +160,7 @@ jobs:
         yarn playwright test policies -g "${{ inputs.policyfilter || '' }}" -x
       env:
         RANCHER_URL: https://${{env.RANCHER_FQDN}}
+        ORIGIN: ${{ env.KUBEWARDEN }}
         PLAYWRIGHT_HTML_REPORT: policies-report
 
     # ==================================================================================================

@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from './rancher-test';
+import type { RancherUI } from './pages/rancher-ui';
 
 test.describe.configure({ mode: 'parallel' });
 
@@ -24,7 +25,7 @@ const policies = [
   { name: 'Hostpaths PSP' },
   { name: 'Ingress Policy' },
   { name: 'Pod Privileged Policy' },
-  { name: 'Pod Runtime', skip: 'https://github.com/kubewarden/pod-runtime-class-policy/issues/14' },
+  { name: 'Pod Runtime' },
   { name: 'PSA Label Enforcer', skip: 'Will be implemented after POM rewrite is merged' },
   { name: 'Readonly Root Filesystem PSP' },
   { name: 'Safe Annotations'},
@@ -39,65 +40,60 @@ const policies = [
   { name: 'Volumes PSP' },
 ]
 
-async function setupCustomPolicy(page: Page) {
-  await page.locator('input:near(:text("Module*"))').first().fill('ghcr.io/kubewarden/policies/pod-privileged:v0.2.4')
-  await page.getByRole('tab', { name: 'Rules' }).click()
-  await page.getByText('Resource type*').click()
-  await page.getByRole('option', { name: 'pods', exact: true }).click()
-  await page.getByText('API Versions*').click()
-  await page.getByRole('option', { name: 'v1', exact: true }).click()
-  await page.getByText('Operation type*').click()
-  await page.getByRole('option', { name: 'CREATE', exact: true }).click()
+async function setupCustomPolicy(ui: RancherUI) {
+  await ui.input('Module*').fill('ghcr.io/kubewarden/policies/pod-privileged:v0.2.5')
+
+  await ui.page.getByRole('tab', { name: 'Rules' }).click()
+  await ui.select('Resource type*', 'pods')
+  await ui.select('API Versions*', 'v1')
+  await ui.select('Operation type*', 'CREATE')
 }
 
-async function setupVolumeMounts(page: Page) {
-  await page.getByRole('tab', { name: 'Settings' }).click()
-  await page.getByText('Reject', {exact: true}).click()
-  await page.getByRole('option', {name: 'anyIn'}).click()
-  await page.getByRole('button', { name: 'Add'}).click()
-  await page.getByPlaceholder('e.g. bar').fill('/nomount')
+async function setupVolumeMounts(ui: RancherUI) {
+  await ui.page.getByRole('tab', { name: 'Settings' }).click()
+
+  await ui.select('Reject', 'anyIn')
+  await ui.page.getByRole('button', { name: 'Add'}).click()
+  await ui.page.getByPlaceholder('e.g. bar').fill('/nomount')
 }
 
-async function setupSelinuxPSP(page: Page) {
-  await page.getByRole('tab', { name: 'Settings' }).click()
-  await page.getByText('SE Linux Options', {exact: true}).click()
-  await page.getByRole('option', {name: 'RunAsAny'}).click()
+async function setupSelinuxPSP(ui: RancherUI) {
+  await ui.page.getByRole('tab', { name: 'Settings' }).click()
+  await ui.select('SE Linux Options', 'RunAsAny')
 }
 
-async function setupDeprecatedAPIVersions(page: Page) {
-  await page.getByRole('tab', { name: 'Settings' }).click()
-  await page.locator('input:near(:text("Kubernetes Version*"))').first().fill('v1.24.9+k3s2')
+async function setupDeprecatedAPIVersions(ui: RancherUI) {
+  await ui.page.getByRole('tab', { name: 'Settings' }).click()
+  await ui.input('Kubernetes Version*').fill('v1.24.9+k3s2')
 }
 
-async function setupVerifyImageSignatures(page: Page) {
-  await page.getByRole('tab', { name: 'Settings' }).click()
-  await page.getByRole('button', {name: 'Add', exact: true}).click()
-  await page.locator('input:near(:text("Image*"))').first().fill('ghcr.io/kubewarden/*')
-  // yaml editor
-  await page.getByTestId('yaml-editor-code-mirror').getByText('owner: \'\'').locator('.cm-string').click();
-  await page.keyboard.type('kubewarden')
+async function setupVerifyImageSignatures(ui: RancherUI) {
+  await ui.page.getByRole('tab', { name: 'Settings' }).click()
+  await ui.select('Signature Type', 'GithubAction')
+  await ui.page.getByRole('button', {name: 'Add', exact: true}).click()
+  await ui.input('Image*').fill('ghcr.io/kubewarden/*')
+  await ui.editYaml(ui.page, d => d.githubActions.owner = "kubewarden")
 }
 
-async function setupEnvironmentVariablePolicy(page: Page) {
-  await page.getByRole('tab', { name: 'Settings' }).click()
-  await page.getByRole('button', {name: 'Add', exact: true}).click()
-  // yaml editor
-  await page.getByTestId('yaml-editor-code-mirror').getByText('name: \'\'').locator('.cm-string').click();
-  await page.keyboard.type('novar')
+async function setupEnvironmentVariablePolicy(ui: RancherUI) {
+  await ui.page.getByRole('tab', { name: 'Settings' }).click()
+  await ui.page.getByRole('button', {name: 'Add', exact: true}).click()
+  await ui.select('Reject Operator', 'anyIn')
+  await ui.editYaml(ui.page, d => d.environmentVariables[0].name = "novar")
 }
 
-async function setupUserGroupPSP(page: Page) {
-  await page.getByRole('tab', { name: 'Settings' }).click()
-  for (const role of await page.getByRole('combobox').all()) {
+async function setupUserGroupPSP(ui: RancherUI) {
+  await ui.page.getByRole('tab', { name: 'Settings' }).click()
+
+  for (const role of await ui.page.getByRole('combobox').all()) {
     role.click()
-    await page.getByRole('option', { name: 'RunAsAny', exact: true }).click()
+    await ui.page.getByRole('option', { name: 'RunAsAny', exact: true }).click()
   }
 }
 
-
 // Generate installation test for every policy.
 for (const policy of policies) {
-  test(`install: ${policy.name}`, async ({ page }) => {
+  test(`install: ${policy.name}`, async ({ page, ui }) => {
     const polname = 'test-' + policy.name.replace(/\s+/g, '-').toLowerCase()
 
     // Skip broken tests
@@ -109,33 +105,25 @@ for (const policy of policies) {
     // Select policy
     await page.getByRole('heading', { name: policy.name, exact: true }).click()
     await page.getByRole('tab', { name: 'Values' }).click(); // skip readme
-    // Fill name, mode, policy server
-    await page.getByPlaceholder('A unique name').fill(polname)
+    // Fill general values
+    await ui.input('Name*').fill(polname)
+    await ui.select('Policy Server', polserver)
     await page.getByRole('radio', {name: polmode}).check()
-    await page.getByText('Policy Server', {exact: true}).click()
-    await page.getByRole('option', {name: polserver}).click()
-
     // Extra policy settings
-    if (policy.action) await policy.action(page)
+    if (policy.action) await policy.action(ui)
 
-    // Create policy
+    // Create policy - redirects to policies list
     await page.getByRole('button', { name: 'Finish' }).click()
     await expect(page).toHaveURL(/.*clusteradmissionpolicy$/)
     await expect(page.getByRole('link', {name: polname, exact: true})).toBeVisible()
 
+    // Check new policy
+    const polRow = ui.getRow(polname)
+    await expect(polRow).toBeVisible()
     if (!polkeep) {
-      // Check policy state is Active
-      await expect(page
-        .locator('tr.main-row')
-        .filter({has: page.getByRole('link', {name:polname, exact: true})})
-        .locator('td.col-policy-status')
-      ).toHaveText('Active', {timeout: 220_000})
-
-      // Delete policy
-      await page.locator(`button[id$='+${polname}']`).click()  // id="actionButton+0+rancher-kubewarden-controller"
-      await page.getByRole('listitem').getByText('Delete').click()
-      await page.getByTestId('prompt-remove-confirm-button').click()
-      await expect(page.getByRole('link', {name: polname, exact: true})).not.toBeVisible()
+      // Waiting for policy takes 1m, check only if we delete it
+      await expect(polRow.locator('td.col-policy-status')).toHaveText('Active', {timeout: 220_000})
+      await ui.deleteRow(polRow)
     }
   });
 }

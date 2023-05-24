@@ -15,8 +15,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 1 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /* Opt out of parallel tests */
+  workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI ? 'html' : 'list',
 
@@ -37,7 +37,7 @@ export default defineConfig({
     /* Timeout for navigation actions like page.goto() */
     navigationTimeout: 60_000,
     /* Slows down Playwright operations by the specified amount of milliseconds. */
-    launchOptions: { slowMo: 100 },
+    // launchOptions: { slowMo: 100 },
 
     ignoreHTTPSErrors: true,
     storageState: 'storageState.json',
@@ -49,7 +49,10 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+         ...devices['Desktop Chrome'],
+         viewport: { width: 1600, height: 900 },
+        },
     },
 
     // {
