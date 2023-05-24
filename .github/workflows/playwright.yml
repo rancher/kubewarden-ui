@@ -90,6 +90,9 @@ jobs:
         echo KUBEWARDEN=$KUBEWARDEN | tee -a $GITHUB_ENV
         echo TESTSUITE="$TESTSUITE" | tee -a $GITHUB_ENV
 
+        # Rancher v2.7.5-rc2 is broken, use released one
+        echo RANCHER=released | tee -a $GITHUB_ENV
+
     # ==================================================================================================
     # Create k3d cluster and install rancher
     - name: "Create kubernetes cluster"
