@@ -25,6 +25,7 @@ const policies = [
   { name: 'Ingress Policy' },
   { name: 'Pod Privileged Policy' },
   { name: 'Pod Runtime', skip: 'https://github.com/kubewarden/pod-runtime-class-policy/issues/14' },
+  { name: 'PSA Label Enforcer', skip: 'Will be implemented after POM rewrite is merged' },
   { name: 'Readonly Root Filesystem PSP' },
   { name: 'Safe Annotations'},
   { name: 'Safe Labels' },
@@ -119,7 +120,7 @@ for (const policy of policies) {
 
     // Create policy
     await page.getByRole('button', { name: 'Finish' }).click()
-    await expect(page).toHaveURL(/.*clusteradmissionpolicy$/);   
+    await expect(page).toHaveURL(/.*clusteradmissionpolicy$/)
     await expect(page.getByRole('link', {name: polname, exact: true})).toBeVisible()
 
     if (!polkeep) {
