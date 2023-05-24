@@ -1,6 +1,13 @@
 import { expect, Page } from '@playwright/test';
 import { BasePage } from './basepage';
 
+export interface Chart {
+  title: string,
+  name: string,
+  namespace?: string,
+  project?: string,
+}
+
 export class RancherCommonPage extends BasePage {
 
   constructor(page: Page) {
@@ -87,45 +94,41 @@ export class RancherCommonPage extends BasePage {
     await expect(repoRow.locator('td.col-badge-state-formatter')).toHaveText('Active')
   }
 
-  async installApp(name: string, options?: {namespace?: string, project?: string, validate: string}) {
+  async installApp(chart: Chart) {
     // Select chart
     await this.page.goto('dashboard/c/local/apps/charts')
     await expect(this.page.getByRole('heading', { name: 'Charts', exact: true })).toBeVisible()
-    await this.page.locator('.grid > .item').getByRole('heading', { name: name, exact: true }).click()
+    await this.page.locator('.grid > .item').getByRole('heading', { name: chart.title, exact: true }).click()
     await this.page.getByRole('button', { name: 'Install' }).click()
 
     // Select namespace or project
-    if (options?.namespace) {
+    if (chart.namespace) {
         await expect(this.page.getByRole('heading', { name: 'Install: Step 1' })).toBeVisible()
         await this.ui.select('Namespace *', 'Create a New Namespace')
-        await this.ui.input('Namespace').fill(options.namespace)
+        await this.ui.input('Namespace').fill(chart.namespace)
     }
-    if (options?.project) {
-        await this.ui.select('Install into Project', options.project)
+    if (chart.project) {
+        await this.ui.select('Install into Project', chart.project)
     }
 
     // Installation & Wait
     await this.page.getByRole('button', { name: 'Next' }).click() // readme
     await this.page.getByRole('button', { name: 'Install' }).click()
-    if (options?.validate) {
-      await expect(this.ui.helmPassRegex(options.validate)).toBeVisible({timeout:300_000})
-    }
+    await expect(this.ui.helmPassRegex(chart.name)).toBeVisible({timeout:300_000})
   }
 
   // Without parameters only for upgrade/reload
-  async updateApp(name: string, options?: {validate: string}) {
+  async updateApp(chart: Chart) {
     await this.page.goto('dashboard/c/local/apps/catalog.cattle.io.app')
     await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
 
-    const row = this.ui.getRow(name)
+    const row = this.ui.getRow(chart.name)
     await this.ui.rowAction(row, 'Edit/Upgrade')
-    await expect(this.page.getByRole('heading', { name: name })).toBeVisible()
+    await expect(this.page.getByRole('heading', { name: chart.name })).toBeVisible()
+
     await this.page.getByRole('button', { name: 'Next' }).click() // version
     await this.page.getByRole('button', { name: 'Update' }).click()
-
-    if (options?.validate) {
-      await expect(this.ui.helmPassRegex(options.validate)).toBeVisible({timeout:300_000})
-    }
+    await expect(this.ui.helmPassRegex(chart.name)).toBeVisible({timeout:300_000})
   }
 
 }
