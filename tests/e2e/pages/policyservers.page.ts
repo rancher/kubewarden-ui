@@ -9,14 +9,6 @@ export class PolicyServersPage extends BasePage {
     this.noDefaultPsBanner = page.locator('.banner').getByText('The default PolicyServer and policies are not installed')
   }
 
-  public getState(row: Locator) {
-    return row.locator('td.col-policy-server-status')
-  }
-
-  public getPolicies(row: Locator) {
-    return row.locator('td.col-policy-summary-graph')
-  }
-
   async create(name: string) {
     await this.page.getByRole('button', { name: 'Create' }).click();
     await this.page.getByPlaceholder('A unique name').fill(name);
@@ -24,12 +16,11 @@ export class PolicyServersPage extends BasePage {
 
     // Wait for Active state
     const row = this.ui.getRow(name)
-    await expect(this.getState(row)).toHaveText('Active')
+    await expect(row.column('Status')).toHaveText('Active')
   }
 
   async delete(name: string) {
-    const row = this.ui.getRow(name)
-    this.ui.deleteRow(row)
+    await this.ui.getRow(name).delete()
   }
 
   async installDefaultDialog(recommended: {enable: boolean, mode?: 'monitor' | 'protect'}) {

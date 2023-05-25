@@ -26,7 +26,7 @@ const policies = [
   { name: 'Ingress Policy' },
   { name: 'Pod Privileged Policy' },
   { name: 'Pod Runtime' },
-  { name: 'PSA Label Enforcer', skip: 'Will be implemented after POM rewrite is merged' },
+  { name: 'PSA Label Enforcer', action: setupPSALabelEnforcer },
   { name: 'Readonly Root Filesystem PSP' },
   { name: 'Safe Annotations'},
   { name: 'Safe Labels' },
@@ -39,6 +39,11 @@ const policies = [
   { name: 'volumeMounts', action: setupVolumeMounts },
   { name: 'Volumes PSP' },
 ]
+
+async function setupPSALabelEnforcer(ui: RancherUI) {
+  await ui.page.getByRole('tab', { name: 'Settings' }).click()
+  await ui.select('Enforce', 'baseline')
+}
 
 async function setupCustomPolicy(ui: RancherUI) {
   await ui.input('Module*').fill('ghcr.io/kubewarden/policies/pod-privileged:v0.2.5')
@@ -119,11 +124,11 @@ for (const policy of policies) {
 
     // Check new policy
     const polRow = ui.getRow(polname)
-    await expect(polRow).toBeVisible()
+    await expect(polRow.body).toBeVisible()
     if (!polkeep) {
       // Waiting for policy takes 1m, check only if we delete it
-      await expect(polRow.locator('td.col-policy-status')).toHaveText('Active', {timeout: 220_000})
-      await ui.deleteRow(polRow)
+      await expect(polRow.column('Status')).toHaveText('Active', {timeout: 220_000})
+      await polRow.delete()
     }
   });
 }

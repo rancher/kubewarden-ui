@@ -91,7 +91,7 @@ export class RancherCommonPage extends BasePage {
 
     // Check repository state is Active
     const repoRow = this.ui.getRow(name)
-    await expect(repoRow.locator('td.col-badge-state-formatter')).toHaveText('Active')
+    await expect(repoRow.column('State')).toHaveText('Active')
   }
 
   async installApp(chart: Chart) {
@@ -122,8 +122,7 @@ export class RancherCommonPage extends BasePage {
     await this.page.goto('dashboard/c/local/apps/catalog.cattle.io.app')
     await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
 
-    const row = this.ui.getRow(chart.name)
-    await this.ui.rowAction(row, 'Edit/Upgrade')
+    await this.ui.getRow(chart.name).action('Edit/Upgrade')
     await expect(this.page.getByRole('heading', { name: chart.name })).toBeVisible()
 
     await this.page.getByRole('button', { name: 'Next' }).click() // version
