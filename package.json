@@ -13,7 +13,7 @@
     "test:ci": "export TS_JEST_DISABLE_VER_CHECKER=true && jest --collectCoverage"
   },
   "dependencies": {
-    "@rancher/components": "0.1.1",
+    "@rancher/components": "0.1.3",
     "@rancher/shell": "0.3.4",
     "@types/lodash": "4.14.194",
     "core-js": "3.21.1",
