@@ -6,7 +6,7 @@
     ".editorconfig": true,
     ".eslintcache": true,
     ".eslintignore": false,
-    ".eslintrc.js": true,
+    ".eslintrc.js": false,
     ".nuxt*": true,
     ".nyc_output": true,
     ".vscode": false,

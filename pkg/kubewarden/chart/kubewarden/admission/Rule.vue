@@ -44,6 +44,10 @@ export default {
     this.schemas = this.$store.getters[`${ this.currentProduct.inStore }/all`](SCHEMA);
 
     if ( this.isCreate && isEmpty(this.value?.apiGroups) ) {
+      if ( !Array.isArray(this.value.apiGroups) ) {
+        this.$set(this.value, 'apiGroups', []);
+      }
+
       this.value.apiGroups.push('*');
     }
   },

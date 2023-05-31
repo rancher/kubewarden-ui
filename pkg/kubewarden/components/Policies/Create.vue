@@ -120,42 +120,34 @@ export default ({
       return this.type === 'custom';
     },
 
+    /** Allow create if either editing in yaml view or module and required rules/settings have been met */
     canFinish() {
       if ( this.yamlOption === VALUES_STATE.YAML ) {
         return true;
       }
 
-      return !!this.chartValues?.policy?.spec?.module && this.hasRequiredRules;
+      return !!this.chartValues?.policy?.spec?.module && this.hasRequired;
     },
 
     hasArtifactHub() {
       return this.value.artifactHubWhitelist;
     },
 
-    /*
-      Determines if the required rules are set, if not the resource can not be created
-    */
-    hasRequiredRules() {
-      const { rules } = this.chartValues?.policy?.spec;
-      const requiredProps = ['apiGroups', 'apiVersions', 'operations', 'resources'];
+    /** Determines if the required rules/settings are set, if not the resource can not be created */
+    hasRequired() {
+      const { rules, settings } = this.chartValues?.policy?.spec;
 
-      const acceptedRule = rules?.find((rule) => {
-        const match = [];
+      const requiredRules = ['apiVersions', 'operations', 'resources'];
+      const acceptedRules = this.acceptedValues(rules, requiredRules);
 
-        for ( const prop of requiredProps.values() ) {
-          if ( !isEmpty(rule[prop]) ) {
-            match.push(prop);
-          }
+      const requiredQuestions = this.chartValues?.questions?.questions?.map((q) => {
+        if ( q.required ) {
+          return q.variable;
         }
+      }).filter(Boolean);
+      const acceptedQuestions = this.acceptedValues(settings, requiredQuestions);
 
-        if ( isEqual(match, requiredProps) ) {
-          return rule;
-        }
-
-        return null;
-      });
-
-      if ( !isEmpty(acceptedRule) ) {
+      if ( !isEmpty(acceptedRules) && (isEmpty(requiredQuestions) || !isEmpty(acceptedQuestions)) ) {
         return true;
       }
 
@@ -186,6 +178,39 @@ export default ({
   },
 
   methods: {
+    /** Determine values which need to be required from supplied property and keys */
+    acceptedValues(requiredProp, requiredKeys) {
+      if ( isEmpty(requiredKeys) ) {
+        return null;
+      }
+
+      let accepted;
+
+      if ( Array.isArray(requiredProp) ) {
+        accepted = requiredProp.find(prop => this.checkProperties(prop, requiredKeys));
+      } else {
+        accepted = this.checkProperties(requiredProp, requiredKeys);
+      }
+
+      return accepted;
+    },
+
+    /** Check supplied property for required keys */
+    checkProperties(requiredProp, requiredKeys) {
+      const match = [];
+
+      for ( const key of requiredKeys?.values() ) {
+        if ( !isEmpty(requiredProp[key]) ) {
+          match.push(key);
+        }
+      }
+      if ( requiredKeys && isEqual(match, requiredKeys) ) {
+        return requiredProp;
+      }
+
+      return null;
+    },
+
     async addArtifactHub(btnCb) {
       try {
         this.loadingPackages = true;
@@ -241,6 +266,7 @@ export default ({
       }
     },
 
+    /** Fetch packages from ArtifactHub repository */
     async getPackages() {
       this.repository = await this.value.artifactHubRepo();
 
@@ -265,6 +291,7 @@ export default ({
       } catch (e) {}
     },
 
+    /** Extract policy questions from ArtifactHub package if available */
     policyQuestions() {
       const defaultPolicy = structuredClone(DEFAULT_POLICY);
 
@@ -278,6 +305,7 @@ export default ({
       const policyDetails = this.packages.find(pkg => pkg.name === this.type?.name);
       const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.['kubewarden/questions-ui']);
       const packageAnnotation = `${ policyDetails.repository.name }/${ policyDetails.name }/${ policyDetails.version }`;
+      /** Return rules from package if exists */
       const packageRules = () => {
         const out = this.value.parsePackageMetadata(policyDetails?.data?.['kubewarden/rules']);
 
@@ -288,6 +316,7 @@ export default ({
         return out || [];
       };
 
+      /** Return value of annotation if it exists */
       const determineAnnotation = (annotation) => {
         if ( policyDetails?.data?.[annotation] !== undefined ) {
           return JSON.parse(policyDetails.data[annotation]);
