@@ -33,6 +33,7 @@ module.exports = {
     'vue/no-v-html':                  'off',
     'vue/multi-word-component-names': 'off',
     'wrap-iife':                      'off',
+    'eol-last':                       'off',
 
     'array-bracket-spacing':             'warn',
     'arrow-parens':                      'warn',
