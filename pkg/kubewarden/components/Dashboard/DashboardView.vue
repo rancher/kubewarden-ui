@@ -38,6 +38,10 @@ export default {
     if ( !isEmpty(hash.apps) ) {
       this.apps = hash.apps;
     }
+
+    if ( !isEmpty(hash.psPods) ) {
+      this.psPods = hash.psPods;
+    }
   },
 
   data() {
@@ -65,20 +69,33 @@ export default {
     },
 
     policyServerPods() {
-      return this.$store.getters[`${ this.currentProduct.inStore }/all`]({ type: POD, selector: 'kubewarden/policy-server' });
+      return this.psPods;
     },
 
+    /** Counts the current policy server pods - returns the status and total count */
     policyServers() {
       const pods = this.policyServerPods || [];
 
       return pods.reduce((ps, neu) => {
+        const neuContainerStatues = neu?.status?.containerStatuses;
+        let terminated = false;
+
+        // If the container state is terminated, remove it from the available counts
+        if ( !isEmpty(neuContainerStatues) ) {
+          const filtered = neuContainerStatues.filter(status => status.state['terminated']);
+
+          if ( !isEmpty(filtered) ) {
+            terminated = true;
+          }
+        }
+
         return {
           status: {
-            running:       ps.status.running + ( neu.metadata.state.name === 'running' ? 1 : 0 ),
-            stopped:       ps.status.stopped + ( neu.metadata.state.error ? 1 : 0 ),
-            pending:       ps.status.transitioning + ( neu.metadata.state.transitioning ? 1 : 0 )
+            running:       ps?.status.running + ( neu.metadata.state.name === 'running' && !terminated ? 1 : 0 ),
+            stopped:       ps?.status.stopped + ( neu.metadata.state.error ? 1 : 0 ),
+            pending:       ps?.status.transitioning + ( neu.metadata.state.transitioning ? 1 : 0 )
           },
-          total: ps.total + 1
+          total: terminated ? ps?.total || 0 : ps?.total + 1
         };
       }, {
         status: {
