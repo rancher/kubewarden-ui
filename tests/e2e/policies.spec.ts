@@ -24,6 +24,7 @@ const policies = [
   { name: 'Host Namespaces PSP', action: undefined },
   { name: 'Hostpaths PSP', action: undefined },
   { name: 'Ingress Policy', action: undefined },
+  { name: 'Namespace Label Propagator', action: setupNamespaceLabelPropagator, skip: 'https://github.com/kubewarden/namespace-label-propagator-policy/issues/6' },
   { name: 'Pod Privileged Policy' },
   { name: 'Pod Runtime', action: undefined },
   { name: 'PSA Label Enforcer', action: setupPSALabelEnforcer },
@@ -39,6 +40,11 @@ const policies = [
   { name: 'volumeMounts', action: setupVolumeMounts },
   { name: 'Volumes PSP', action: undefined },
 ]
+
+async function setupNamespaceLabelPropagator(ui: RancherUI) {
+  await ui.page.getByRole('tab', { name: 'Settings' }).click()
+  // Fill settings after initial issue is fixed
+}
 
 async function setupPSALabelEnforcer(ui: RancherUI) {
   await ui.page.getByRole('tab', { name: 'Settings' }).click()

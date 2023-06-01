@@ -109,5 +109,5 @@ test('05 Whitelist artifacthub', async({ page }) => {
 
   await kwPage.whitelistArtifacthub()
   await expect(page.getByRole('heading', { name: 'Pod Privileged Policy' })).toBeVisible()
-  await expect(page.locator(".subtype")).toHaveCount(30) // we have 29 + 1 custom
+  await expect(page.locator(".subtype")).toHaveCount(31) // we have 30 + 1 custom
 });
