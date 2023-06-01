@@ -6,16 +6,17 @@ import { get, set } from '@shell/utils/object';
 import { sortBy, camelCase } from 'lodash';
 import { _EDIT } from '@shell/config/query-params';
 import BooleanType from '@shell/components/Questions/Boolean';
-import EnumType from '@shell/components/Questions/Enum';
+// import EnumType from '@shell/components/Questions/Enum';
 import IntType from '@shell/components/Questions/Int';
 import FloatType from '@shell/components/Questions/Float';
 import ReferenceType from '@shell/components/Questions/Reference';
 import CloudCredentialType from '@shell/components/Questions/CloudCredential';
 
 /*
-  Replacing these components until we are able to hide inputs with `hide_input` property in questions
+  Replacing these components for added functionality
 */
 import ArrayType from './Array';
+import EnumType from './Enum';
 import MapType from './QuestionMap';
 import StringType from './String';
 import SequenceType from './SequenceTree';
@@ -380,6 +381,47 @@ export default {
       this.$set(this.value, [$event.variable], $event.default);
     },
 
+    /** Remove properties from this.value that only appear when an Enum condition is met */
+    enumUpdate($event, question) {
+      const values = this.value;
+
+      let match;
+
+      // Find the matching question related to the Enum
+      for ( const q of this.allQuestions ) {
+        if ( question.variable.includes(q.variable) ) {
+          match = q;
+        }
+      }
+
+      // Remove the properties from this.value
+      if ( match && match.type.startsWith('map[') ) {
+        const subProperties = match.subquestions.map(sub => sub.variable);
+
+        this.removeProperties(values, subProperties);
+      }
+    },
+
+    /** Delete the properties from an object by supplying the question variable dot notation strings */
+    removeProperties(values, propertyNames) {
+      propertyNames.forEach((propertyName) => {
+        const keys = propertyName.split('.');
+        let obj = values;
+
+        for ( let i = 0; i < keys.length - 1; i++ ) {
+          if ( keys[i] in obj ) {
+            obj = obj[keys[i]];
+          } else {
+            return; // Property does not exist, no need to continue
+          }
+        }
+
+        delete obj[keys[keys.length - 1]];
+      });
+
+      return values;
+    },
+
     evalExpr(expr, values, question, allQuestions) {
       try {
         const out = Jexl.evalSync(expr, values);
@@ -581,6 +623,7 @@ export default {
             @addSeq="addSequence($event)"
             @removeSeq="removeSequence($event)"
             @resetSeq="resetSequence($event)"
+            @enumUpdate="enumUpdate($event)"
           />
         </div>
       </div>
@@ -615,6 +658,7 @@ export default {
             @addSeq="addSequence($event)"
             @removeSeq="removeSequence($event)"
             @resetSeq="resetSequence($event)"
+            @enumUpdate="enumUpdate($event, q)"
           />
         </div>
       </div>

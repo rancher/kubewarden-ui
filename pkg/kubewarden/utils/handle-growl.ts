@@ -7,7 +7,7 @@ interface GrowlConfig {
     _statusText: String,
     message: String
   },
-  store: any
+  store?: any
 }
 
 export function handleGrowlError(config: GrowlConfig): void {
