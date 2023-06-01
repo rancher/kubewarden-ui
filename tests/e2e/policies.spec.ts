@@ -9,35 +9,35 @@ const polkeep   = process.env.keep || false
 
 const policies = [
   { name: 'Custom Policy', action: setupCustomPolicy },
-  { name: 'Allow Privilege Escalation PSP' },
-  { name: 'Allowed Fs Groups PSP' },
-  { name: 'Allowed Proc Mount Types PSP' },
-  { name: 'Apparmor PSP' },
-  { name: 'Capabilities PSP' },
+  { name: 'Allow Privilege Escalation PSP', action: undefined },
+  { name: 'Allowed Fs Groups PSP', action: undefined },
+  { name: 'Allowed Proc Mount Types PSP', action: undefined },
+  { name: 'Apparmor PSP', action: undefined },
+  { name: 'Capabilities PSP', action: undefined },
   { name: 'Deprecated API Versions', action: setupDeprecatedAPIVersions },
   { name: 'Disallow Service Loadbalancer' },
   { name: 'Disallow Service Nodeport' },
   { name: 'Echo' },
   { name: 'Environment Variable Secrets Scanner' },
   { name: 'Environment Variable Policy', action: setupEnvironmentVariablePolicy },
-  { name: 'Flexvolume Drivers Psp' },
-  { name: 'Host Namespaces PSP' },
-  { name: 'Hostpaths PSP' },
-  { name: 'Ingress Policy' },
+  { name: 'Flexvolume Drivers Psp', action: undefined },
+  { name: 'Host Namespaces PSP', action: undefined },
+  { name: 'Hostpaths PSP', action: undefined },
+  { name: 'Ingress Policy', action: undefined },
   { name: 'Pod Privileged Policy' },
-  { name: 'Pod Runtime' },
+  { name: 'Pod Runtime', action: undefined },
   { name: 'PSA Label Enforcer', action: setupPSALabelEnforcer },
   { name: 'Readonly Root Filesystem PSP' },
-  { name: 'Safe Annotations'},
-  { name: 'Safe Labels' },
-  { name: 'Seccomp PSP' },
+  { name: 'Safe Annotations', action: undefined },
+  { name: 'Safe Labels', action: undefined },
+  { name: 'Seccomp PSP', action: undefined },
   { name: 'Selinux PSP', action: setupSelinuxPSP },
-  { name: 'Sysctl PSP' },
+  { name: 'Sysctl PSP', action: undefined },
   { name: 'Trusted Repos', skip: 'https://github.com/kubewarden/ui/issues/308' },
   { name: 'User Group PSP', action: setupUserGroupPSP },
   { name: 'Verify Image Signatures', action: setupVerifyImageSignatures },
   { name: 'volumeMounts', action: setupVolumeMounts },
-  { name: 'Volumes PSP' },
+  { name: 'Volumes PSP', action: undefined },
 ]
 
 async function setupPSALabelEnforcer(ui: RancherUI) {
@@ -107,15 +107,23 @@ for (const policy of policies) {
     await page.goto('/dashboard/c/local/kubewarden/policies.kubewarden.io.clusteradmissionpolicy/create')
     await expect(page.getByRole('heading', { name: 'Finish: Step 1' })).toBeVisible()
 
-    // Select policy
+    // Select policy, skip readme
     await page.getByRole('heading', { name: policy.name, exact: true }).click()
-    await page.getByRole('tab', { name: 'Values' }).click(); // skip readme
+    await page.getByRole('tab', { name: 'Values' }).click()
+
     // Fill general values
     await ui.input('Name*').fill(polname)
     await ui.select('Policy Server', polserver)
     await page.getByRole('radio', {name: polmode}).check()
-    // Extra policy settings
-    if (policy.action) await policy.action(ui)
+
+    if (policy.action) {
+      // Fill extra policy settings
+      await policy.action(ui)
+      // Give generated fields time to get registered
+      await ui.page.waitForTimeout(200)
+      // Show yaml with edited settings
+      await page.getByRole('button', { name: 'Edit YAML' }).click()
+    }
 
     // Create policy - redirects to policies list
     await page.getByRole('button', { name: 'Finish' }).click()
