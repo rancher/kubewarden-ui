@@ -508,6 +508,12 @@ $color: var(--body-text) !important;
 }
 
 ::v-deep .controls-row {
+  position: sticky;
+  bottom: 0;
+  background: var(--body-bg);
+  margin-top: 24px;
+  z-index: 100;
+
   .controls-steps {
     display: flex;
   }

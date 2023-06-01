@@ -474,23 +474,37 @@ export default class KubewardenModel extends SteveModel {
     if (remove && whitelistValue.includes(url)) {
       const out = whitelistValue.filter(domain => domain !== url);
 
-      whitelist.default = out.join();
       whitelist.value = out.join();
 
       try {
         return whitelist.save();
-      } catch (e) {}
+      } catch (e) {
+        const error = e?.data || e;
+
+        this.$dispatch('growl/error', {
+          title:   error._statusText,
+          message: error.message,
+          timeout: 5000,
+        }, { root: true });
+      }
     }
 
     if (!whitelistValue.includes(url)) {
       whitelistValue.push(url);
 
-      whitelist.default = whitelistValue.join();
       whitelist.value = whitelistValue.join();
 
       try {
         return whitelist.save();
-      } catch (e) {}
+      } catch (e) {
+        const error = e?.data || e;
+
+        this.$dispatch('growl/error', {
+          title:   error._statusText,
+          message: error.message,
+          timeout: 5000,
+        }, { root: true });
+      }
     }
   }
 }
