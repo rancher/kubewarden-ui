@@ -233,6 +233,12 @@ export default {
       let weight = this.shownQuestions.length;
 
       for ( const q of this.shownQuestions ) {
+        if ( q.type?.startsWith('map[') && q.group === undefined ) {
+          const subWithGroup = q.subquestions.find(sub => sub.group);
+
+          q.group = subWithGroup.group;
+        }
+
         const group = q.group || defaultGroup;
 
         const normalized = group.trim().toLowerCase();
