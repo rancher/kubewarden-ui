@@ -10,7 +10,8 @@ import Tab from '@shell/components/Tabbed/Tab';
 import Questions from '../../../components/Questions';
 import General from './General';
 import Rules from './Rules';
-import Settings from './Settings.vue';
+import Settings from './Settings';
+import ContextAware from './ContextAware';
 
 export default {
   props: {
@@ -29,7 +30,7 @@ export default {
   },
 
   components: {
-    General, Questions, Rules, Settings, Tab
+    General, Questions, Rules, Settings, ContextAware, Tab
   },
 
   data() {
@@ -43,16 +44,16 @@ export default {
   },
 
   computed: {
+    hasContextAware() {
+      return !isEmpty(this.value?.policy?.spec?.contextAwareResources);
+    },
+
     hasSettings() {
       return !isEmpty(this.value?.policy?.spec?.settings);
     },
 
     hasQuestions() {
-      if ( !isEmpty(this.chartValues?.questions?.questions) ) {
-        return true;
-      }
-
-      return false;
+      return !isEmpty(this.chartValues?.questions?.questions);
     },
 
     isCreate() {
@@ -61,6 +62,10 @@ export default {
 
     isCustom() {
       return this.customPolicy;
+    },
+
+    showContextAware() {
+      return this.hasContextAware || this.isCustom;
     },
 
     showSettings() {
@@ -96,15 +101,21 @@ export default {
 
 <template>
   <div>
-    <Tab name="general" label="General" :weight="99">
+    <Tab name="general" :label="t('kubewarden.policyConfig.tabs.general')" :weight="99">
       <General v-model="chartValues" :mode="mode" :target-namespace="targetNamespace" />
     </Tab>
-    <Tab name="rules" label="Rules" :weight="98">
+    <Tab name="rules" :label="t('kubewarden.policyConfig.tabs.rules')" :weight="98">
       <Rules v-model="chartValues" :mode="mode" />
     </Tab>
 
+    <template v-if="showContextAware">
+      <Tab name="contextAware" :label="t('kubewarden.policyConfig.tabs.contextAware')" :weight="97">
+        <ContextAware v-model="chartValues" :mode="mode" />
+      </Tab>
+    </template>
+
     <template v-if="showSettings">
-      <Tab name="settings" label="Settings" :weight="97">
+      <Tab name="settings" :label="t('kubewarden.policyConfig.tabs.settings')" :weight="96">
         <Settings
           v-model="chartValues"
           @updateSettings="settingsChanged($event)"
@@ -114,7 +125,7 @@ export default {
 
     <!-- Values as questions -->
     <template v-if="hasQuestions">
-      <Tab name="Settings" label="Settings" :weight="97">
+      <Tab name="Settings" label="Settings" :weight="96">
         <Questions
           v-model="chartValues.policy.spec.settings"
           :mode="mode"

@@ -132,6 +132,11 @@ kubewarden:
     noService: The Metrics service is not currently active or is not installed correctly. Check the status of the Monitoring app.
 
   policyConfig:
+    tabs:
+      general: General
+      rules: Rules
+      settings: Settings
+      contextAware: Context Aware Resources
     serverSelect:
       label: Policy Server
       tooltip: The PolicyServer that will receive the requests to be validated.
@@ -170,6 +175,20 @@ kubewarden:
     scope:
       label: Scope
       tooltip: Specifies the scope of this rule. Valid values are "Cluster", "Namespaced", and "". "Cluster" means that only cluster-scoped resources will match this rule. Namespace API objects are cluster-scoped. "Namespaced" means that only namespaced resources will match this rule. "" means that there are no scope restrictions. Subresources match the scope of their parent resource. Default is "*".
+    contextAware:
+      label: Context Aware Resources
+      description: A list of Kubernetes resources the policy is allowed to access at evaluation time. Access to these resources is done using the ServiceAccount of the PolicyServer the policy is assigned to.
+      warning: >-
+        Kubewarden administrators need to thoroughly examine the types of resources that a policy will access in order to prevent any misuse or abuse of the system. In some cases, it may be necessary to increase the permissions of the ServiceAccount associated with the PolicyServer to enable the policy to retrieve the required information. Although policies are restricted to read-only access to Kubernetes resources, there is a risk that a malicious attacker could exploit a Kubewarden policy to extract sensitive data from the cluster.
+      resource:
+        add: Add Resource
+        remove: Remove Resource
+        apiVersion:
+          label: API Version
+          tooltip: This is the apiVersion of the resource (v1 for core group, groupName/groupVersions for other).
+        kind:
+          label: Kind
+          tooltip: Singular PascalCase name of the resource
   policyServerConfig:
     defaultImage:
       label: Default Image
@@ -204,8 +223,10 @@ kubewarden:
       tooltip: This policy has been signed with { signatures }.
     mutationPolicy:
       label: Mutation
-      tooltip: Mutation Policy
-    contextAware: Context Aware
+      tooltip: A mutating policy will rebuild the requests with definied values that are conformant with the policy definition.
+    contextAware: 
+      label: Context Aware
+      tooltip: Can determine whether an AdmissionRequest has to be accepted or rejected based on other resources already deployed in the cluster.
 
 asyncButton:
   artifactHub:

@@ -21,7 +21,6 @@ export const DEFAULT_POLICY = {
       resources:   [],
       operations:  []
     }],
-    contextAware: false,
     mutating:     false,
     settings:     {}
   }
@@ -73,9 +72,9 @@ export default class PolicyModel extends KubewardenModel {
     return stateBackground();
   }
 
-  /*
-    If a the policy is from ArtifactHub we need to fetch the questions that correspond to the
-    version of the policy. This is saved as an annotation on the policy.
+  /**
+   * If a the policy is from ArtifactHub we need to fetch the questions that correspond to the
+   * version of the policy. This is saved as an annotation on the policy.
   */
   get artifactHubPackageVersion() {
     return () => {
@@ -97,6 +96,7 @@ export default class PolicyModel extends KubewardenModel {
     };
   }
 
+  /** Parse provided yaml into workable json - returns js object */
   parsePackageMetadata(data) {
     if ( data ) {
       const parsed = JSON.parse(JSON.stringify(data));

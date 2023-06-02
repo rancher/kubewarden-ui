@@ -296,6 +296,10 @@ export default ({
       const defaultPolicy = structuredClone(DEFAULT_POLICY);
 
       if ( this.type === 'custom' ) {
+        // Add contextAwareResources to custom policy spec
+        const updatedCustomPolicy = { spec: { contextAwareResources: [] } };
+
+        merge(defaultPolicy, updatedCustomPolicy);
         set(this.chartValues, 'policy', defaultPolicy);
         this.yamlValues = saferDump(defaultPolicy);
 
@@ -305,15 +309,15 @@ export default ({
       const policyDetails = this.packages.find(pkg => pkg.name === this.type?.name);
       const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.['kubewarden/questions-ui']);
       const packageAnnotation = `${ policyDetails.repository.name }/${ policyDetails.name }/${ policyDetails.version }`;
-      /** Return rules from package if exists */
-      const packageRules = () => {
-        const out = this.value.parsePackageMetadata(policyDetails?.data?.['kubewarden/rules']);
+      /** Return spec from package if annotation exists */
+      const parseAnnotation = (annotation, obj) => {
+        const spec = this.value.parsePackageMetadata(policyDetails?.data?.[annotation]);
 
-        if ( out?.rules !== undefined ) {
-          return out.rules;
+        if ( spec?.[obj] !== undefined ) {
+          return spec[obj];
         }
 
-        return out || [];
+        return spec || [];
       };
 
       /** Return value of annotation if it exists */
@@ -330,10 +334,10 @@ export default ({
         kind:       this.value.kind,
         metadata:   { annotations: { [ARTIFACTHUB_PKG_ANNOTATION]: packageAnnotation } },
         spec:       {
-          module:       policyDetails.containers_images[0].image,
-          contextAware: determineAnnotation('kubewarden/contextAware'),
-          mutating:     determineAnnotation('kubewarden/mutation'),
-          rules:        packageRules()
+          module:                policyDetails.containers_images[0].image,
+          contextAwareResources: parseAnnotation('kubewarden/contextAwareResources', 'contextAwareResources'),
+          rules:                 parseAnnotation('kubewarden/rules', 'rules'),
+          mutating:              determineAnnotation('kubewarden/mutation')
         }
       };
 
@@ -508,12 +512,6 @@ $color: var(--body-text) !important;
 }
 
 ::v-deep .controls-row {
-  position: sticky;
-  bottom: 0;
-  background: var(--body-bg);
-  margin-top: 24px;
-  z-index: 100;
-
   .controls-steps {
     display: flex;
   }
