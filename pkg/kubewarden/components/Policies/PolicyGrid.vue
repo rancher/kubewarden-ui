@@ -272,9 +272,9 @@ export default {
             </span>
           </div>
 
-          <div v-if="hasAnnotation(subtype, 'kubewarden/contextAware')" class="subtype__aware">
-            <span>
-              {{ t('kubewarden.policyCharts.contextAware') }}
+          <div v-if="hasAnnotation(subtype, 'kubewarden/contextAwareResources')" class="subtype__aware">
+            <span v-tooltip="t('kubewarden.policyCharts.contextAware.tooltip')">
+              {{ t('kubewarden.policyCharts.contextAware.label') }}
             </span>
           </div>
 
@@ -430,7 +430,7 @@ $margin: 10px;
   }
 
   &__aware {
-    right: 30px;
+    right: 80px;
   }
 
   &__icon {

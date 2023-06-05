@@ -8,7 +8,7 @@ import { SCHEMA } from '@shell/config/types';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 
-import { KUBEWARDEN } from '../../../types';
+import { KUBEWARDEN } from '../../../../types';
 
 export default {
   name: 'Rule',

@@ -15,7 +15,8 @@
     "preserveSymlinks": true,
     "typeRoots": [
       "../../node_modules",
-      "../../node_modules/@rancher/shell/types"
+      "../../node_modules/@rancher/shell/types",
+      "./core"
     ],
     "types": [
       "node",
@@ -23,7 +24,8 @@
       "@types/lodash",
       "@nuxt/types",
       "rancher",
-      "shell"
+      "shell",
+      "core"
     ],
     "lib": [
       "esnext",

@@ -3,8 +3,8 @@ import { DefaultProps } from 'vue/types/options';
 import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from '@jest/globals';
 
-import Rules from '@kubewarden/chart/kubewarden/admission/Rules.vue';
-import Rule from '@kubewarden/chart/kubewarden/admission/Rule.vue';
+import Rules from '@kubewarden/chart/kubewarden/admission/Rules';
+import Rule from '@kubewarden/chart/kubewarden/admission/Rules/Rule.vue';
 
 import policyConfig from '../../templates/policyConfig';
 
