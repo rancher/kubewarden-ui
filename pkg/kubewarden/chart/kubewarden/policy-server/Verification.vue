@@ -32,7 +32,7 @@ export default {
       <Banner
         class="type-banner mb-20 mt-0"
         color="info"
-        v-html="t('kubewarden.policyServerConfig.verification.description', {}, true)"
+        v-clean-html="t('kubewarden.policyServerConfig.verification.description', {}, true)"
       />
     </div>
     <div class="row">

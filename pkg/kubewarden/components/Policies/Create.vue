@@ -420,7 +420,7 @@ export default ({
         color="warning"
       >
         <div>
-          <p class="mb-10" v-html="t('kubewarden.policies.noArtifactHub', {}, true)" />
+          <p v-clean-html="t('kubewarden.policies.noArtifactHub', {}, true)" class="mb-10" />
           <AsyncButton mode="artifactHub" @click="addArtifactHub" />
         </div>
       </Banner>
@@ -512,6 +512,9 @@ $color: var(--body-text) !important;
 }
 
 ::v-deep .controls-row {
+  position: relative;
+  width: auto;
+
   .controls-steps {
     display: flex;
   }
@@ -582,5 +585,10 @@ $color: var(--body-text) !important;
     text-overflow: ellipsis;
     color: var(--input-label);
   }
+}
+
+.wizard {
+  position: relative;
+  height: 100%;
 }
 </style>
