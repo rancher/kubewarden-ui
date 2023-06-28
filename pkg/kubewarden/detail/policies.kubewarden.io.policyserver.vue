@@ -7,6 +7,7 @@ import { monitoringStatus } from '@shell/utils/monitoring';
 import { dashboardExists } from '@shell/utils/grafana';
 import { allHash } from '@shell/utils/promise';
 import CreateEditView from '@shell/mixins/create-edit-view';
+import { mapPref, GROUP_RESOURCES } from '@shell/store/prefs';
 
 import { Banner } from '@components/Banner';
 import CountGauge from '@shell/components/CountGauge';
@@ -127,9 +128,16 @@ export default {
   computed: {
     ...mapGetters(['currentCluster', 'currentProduct']),
     ...monitoringStatus(),
+    _group: mapPref(GROUP_RESOURCES),
 
     emptyTraces() {
       return isEmpty(this.filteredValidations);
+    },
+
+    groupPreference() {
+      const out = this._group === 'namespace' ? 'kind' : null;
+
+      return out;
     },
 
     relatedPoliciesTotal() {
@@ -220,7 +228,7 @@ export default {
             :rows="relatedPolicies || []"
             :headers="RELATED_HEADERS"
             :groupable="true"
-            group-by="kind"
+            :group-by="groupPreference"
             :table-actions="true"
           >
             <template #col:operation="{ row }">

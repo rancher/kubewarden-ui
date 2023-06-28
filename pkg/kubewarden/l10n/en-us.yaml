@@ -97,6 +97,8 @@ kubewarden:
     policyGauge:
       byStatus: Policies by Status
       traces: Policy Validations
+    groups:
+      kind: Policy Type
   admissionPolicy:
     title: Admission Policies
     description: AdmissionPolicy is a namespace-wide resource. These policies will process only the requests that are targeting the Namespace where the AdmissionPolicy is defined.
