@@ -90,9 +90,6 @@ jobs:
         echo KUBEWARDEN=$KUBEWARDEN | tee -a $GITHUB_ENV
         echo TESTSUITE="$TESTSUITE" | tee -a $GITHUB_ENV
 
-        # Rancher v2.7.5-rc2 is broken, use released one
-        echo RANCHER=released | tee -a $GITHUB_ENV
-
     # ==================================================================================================
     # Create k3d cluster and install rancher
     - name: "Create kubernetes cluster"
@@ -130,7 +127,6 @@ jobs:
         for i in {1..20}; do
             output=$(kubectl get pods --no-headers -o wide -n cattle-system | grep -vw Completed || echo 'Wait: cattle-system')$'\n'
             output+=$(kubectl get pods --no-headers -o wide -n cattle-fleet-system | grep -vw Completed || echo 'Wait: cattle-fleet-system')$'\n'
-            output+=$(kubectl get pods --no-headers -o wide -n cattle-fleet-local-system | grep -vw Completed || echo 'Wait: cattle-fleet-local-system')
             grep -vE '([0-9]+)/\1 +Running|^$' <<< $output || break
             [ $i -ne 20 ] && sleep 30 || { echo "Godot: pods not running"; exit 1; }
         done
