@@ -11,7 +11,7 @@
   "dependencies": {
     "@rancher/shell": "^0.2.5",
     "core-js": "3.25.1",
-    "css-loader": "4.3.0"
+    "css-loader": "6.8.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "5.0.8",
