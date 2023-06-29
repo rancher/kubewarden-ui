@@ -242,17 +242,18 @@ export default ({
     async finish(event) {
       try {
         let out;
-        const { ignoreRancherNamespaces } = this.chartValues.policy;
-
-        if ( ignoreRancherNamespaces ) {
-          set(this.chartValues.policy.spec, 'namespaceSelector', { matchExpressions: [NAMESPACE_SELECTOR] });
-          delete this.chartValues.policy.ignoreRancherNamespaces;
-        }
 
         if ( this.yamlOption === VALUES_STATE.YAML ) {
           out = jsyaml.load(this.yamlValues);
         } else {
           out = this.chartValues?.policy ? this.chartValues.policy : jsyaml.load(this.yamlValues);
+        }
+
+        const { ignoreRancherNamespaces } = out;
+
+        if ( ignoreRancherNamespaces ) {
+          set(out.spec, 'namespaceSelector', { matchExpressions: [NAMESPACE_SELECTOR] });
+          delete out.ignoreRancherNamespaces;
         }
 
         removeEmptyAttrs(out); // Clean up empty values from questions
