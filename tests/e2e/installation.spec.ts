@@ -3,6 +3,7 @@ import { RancherCommonPage } from './pages/rancher-common.page';
 import { RancherExtensionsPage } from './pages/rancher-extensions.page';
 import { KubewardenPage } from './pages/kubewarden.page';
 import { PolicyServersPage } from './pages/policyservers.page';
+import { policyTitles } from './pages/basepolicypage';
 
 // source (yarn dev) | rc (add github repo) | released (just install)
 const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc');
@@ -111,7 +112,7 @@ test('05 Whitelist artifacthub', async({ page }) => {
   await expect(page.getByRole('heading', { name: 'Custom Policy' })).toBeVisible();
   await expect(page.locator('.subtype')).toHaveCount(1);
 
-  await kwPage.whitelistArtifacthub();
-  await expect(page.getByRole('heading', { name: 'Pod Privileged Policy' })).toBeVisible();
-  await expect(page.locator('.subtype')).toHaveCount(31); // we have 30 + 1 custom
+  await kwPage.whitelistArtifacthub()
+  await expect(page.getByRole('heading', { name: 'Pod Privileged Policy' })).toBeVisible()
+  await expect(page.locator(".subtype")).toHaveCount(policyTitles.length)
 });

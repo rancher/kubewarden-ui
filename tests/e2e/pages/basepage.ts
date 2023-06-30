@@ -10,7 +10,7 @@ export abstract class BasePage {
 
     async goto() {
         if(this.url === undefined) {
-            throw new Error("url is undefined");
+            throw new Error("URL is undefined");
         } else {
             await this.page.goto(this.url);
         }

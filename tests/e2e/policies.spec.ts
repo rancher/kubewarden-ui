@@ -1,44 +1,46 @@
-import { test, expect } from './rancher-test';
+import { test } from './rancher-test';
 import type { RancherUI } from './pages/rancher-ui';
+import { Policy, generateName } from './pages/basepolicypage';
+import { ClusterAdmissionPoliciesPage } from './pages/clusteradmissionpolicies.page';
 
 test.describe.configure({ mode: 'parallel' });
 
-const polmode   = process.env.mode || 'monitor'
+const polmode   = 'Monitor'
 const polserver = process.env.server || 'default'
 const polkeep   = process.env.keep || false
 
-const policies = [
-  { name: 'Custom Policy', action: setupCustomPolicy },
-  { name: 'Allow Privilege Escalation PSP', action: undefined },
-  { name: 'Allowed Fs Groups PSP', action: undefined },
-  { name: 'Allowed Proc Mount Types PSP', action: undefined },
-  { name: 'Apparmor PSP', action: undefined },
-  { name: 'Capabilities PSP', action: undefined },
-  { name: 'Deprecated API Versions', action: setupDeprecatedAPIVersions },
-  { name: 'Disallow Service Loadbalancer' },
-  { name: 'Disallow Service Nodeport' },
-  { name: 'Echo' },
-  { name: 'Environment Variable Secrets Scanner' },
-  { name: 'Environment Variable Policy', action: setupEnvironmentVariablePolicy },
-  { name: 'Flexvolume Drivers Psp', action: undefined },
-  { name: 'Host Namespaces PSP', action: undefined },
-  { name: 'Hostpaths PSP', action: undefined },
-  { name: 'Ingress Policy', action: undefined },
-  { name: 'Namespace label propagator', action: setupNamespaceLabelPropagator },
-  { name: 'Pod Privileged Policy' },
-  { name: 'Pod Runtime', action: undefined },
-  { name: 'PSA Label Enforcer', action: setupPSALabelEnforcer },
-  { name: 'Readonly Root Filesystem PSP' },
-  { name: 'Safe Annotations', action: undefined },
-  { name: 'Safe Labels', action: undefined },
-  { name: 'Seccomp PSP', action: undefined },
-  { name: 'Selinux PSP', action: setupSelinuxPSP },
-  { name: 'Sysctl PSP', action: undefined },
-  { name: 'Trusted Repos', skip: 'https://github.com/kubewarden/ui/issues/308' },
-  { name: 'User Group PSP', action: setupUserGroupPSP },
-  { name: 'Verify Image Signatures', action: setupVerifyImageSignatures },
-  { name: 'volumeMounts', action: setupVolumeMounts },
-  { name: 'Volumes PSP', action: undefined },
+const policyList: {title: Policy["title"], action?: Policy["settings"], skip?: string }[] = [
+  { title: 'Custom Policy', action: setupCustomPolicy },
+  { title: 'Allow Privilege Escalation PSP', action: undefined },
+  { title: 'Allowed Fs Groups PSP', action: undefined },
+  { title: 'Allowed Proc Mount Types PSP', action: undefined },
+  { title: 'Apparmor PSP', action: undefined },
+  { title: 'Capabilities PSP', action: undefined },
+  { title: 'Deprecated API Versions', action: setupDeprecatedAPIVersions },
+  { title: 'Disallow Service Loadbalancer' },
+  { title: 'Disallow Service Nodeport' },
+  { title: 'Echo' },
+  { title: 'Environment Variable Secrets Scanner' },
+  { title: 'Environment Variable Policy', action: setupEnvironmentVariablePolicy },
+  { title: 'Flexvolume Drivers Psp', action: undefined },
+  { title: 'Host Namespaces PSP', action: undefined },
+  { title: 'Hostpaths PSP', action: undefined },
+  { title: 'Ingress Policy', action: undefined },
+  { title: 'Namespace label propagator', action: setupNamespaceLabelPropagator },
+  { title: 'Pod Privileged Policy' },
+  { title: 'Pod Runtime', action: undefined },
+  { title: 'PSA Label Enforcer', action: setupPSALabelEnforcer },
+  { title: 'Readonly Root Filesystem PSP' },
+  { title: 'Safe Annotations', action: undefined },
+  { title: 'Safe Labels', action: undefined },
+  { title: 'Seccomp PSP', action: undefined },
+  { title: 'Selinux PSP', action: setupSelinuxPSP },
+  { title: 'Sysctl PSP', action: undefined },
+  { title: 'Trusted Repos', skip: 'https://github.com/kubewarden/ui/issues/308' },
+  { title: 'User Group PSP', action: setupUserGroupPSP },
+  { title: 'Verify Image Signatures', action: setupVerifyImageSignatures },
+  { title: 'volumeMounts', action: setupVolumeMounts },
+  { title: 'Volumes PSP', action: undefined },
 ]
 
 async function setupNamespaceLabelPropagator(ui: RancherUI) {
@@ -105,47 +107,25 @@ async function setupUserGroupPSP(ui: RancherUI) {
   }
 }
 
-// Generate installation test for every policy.
-for (const policy of policies) {
-  test(`install: ${policy.name}`, async ({ page, ui }) => {
-    const polname = 'test-' + policy.name.replace(/\s+/g, '-').toLowerCase()
-
+// Generate installation test for every policy
+for (const policy of policyList) {
+  test(`install: ${policy.title}`, async ({ page, ui }) => {
     // Skip broken tests
     if (policy.skip) test.fixme(true, policy.skip)
 
-    await page.goto('/dashboard/c/local/kubewarden/policies.kubewarden.io.clusteradmissionpolicy/create')
-    await expect(page.getByRole('heading', { name: 'Finish: Step 1' })).toBeVisible()
-
-    // Select policy, skip readme
-    await page.getByRole('heading', { name: policy.name, exact: true }).click()
-    await page.getByRole('tab', { name: 'Values' }).click()
-
-    // Fill general values
-    await ui.input('Name*').fill(polname)
-    await ui.select('Policy Server', polserver)
-    await page.getByRole('radio', {name: polmode}).check()
-
-    if (policy.action) {
-      // Fill extra policy settings
-      await policy.action(ui)
-      // Give generated fields time to get registered
-      await ui.page.waitForTimeout(200)
-      // Show yaml with edited settings
-      await page.getByRole('button', { name: 'Edit YAML' }).click()
+    const p: Policy = {
+      title: policy.title,
+      name: generateName(policy.title),
+      server: polserver,
+      mode: polmode,
+      settings: policy.action
     }
 
-    // Create policy - redirects to policies list
-    await page.getByRole('button', { name: 'Finish' }).click()
-    await expect(page).toHaveURL(/.*clusteradmissionpolicy$/)
-    await expect(page.getByRole('link', {name: polname, exact: true})).toBeVisible()
-
-    // Check new policy
-    const polRow = ui.getRow(polname)
-    await expect(polRow.body).toBeVisible()
+    const capPage = new ClusterAdmissionPoliciesPage(page)
+    await capPage.goto()
+    await capPage.create(p, {wait: !polkeep} )
     if (!polkeep) {
-      // Waiting for policy takes 1m, check only if we delete it
-      await expect(polRow.column('Status')).toHaveText('Active', {timeout: 220_000})
-      await polRow.delete()
+      await ui.getRow(p.name).delete()
     }
   });
 }
