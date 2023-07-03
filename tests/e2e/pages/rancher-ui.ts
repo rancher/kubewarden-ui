@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import jsyaml from 'js-yaml';
 import merge from 'lodash.merge';
 import { TableRow } from '../components/table-row';
@@ -8,7 +8,11 @@ import { TableRow } from '../components/table-row';
  */
 export class RancherUI {
 
-    constructor(public readonly page: Page) {}
+    readonly createBtn: Locator
+
+    constructor(public readonly page: Page) {
+        this.createBtn = page.getByRole('link', {name: 'Create', exact: true} )
+    }
 
     // ==================================================================================================
     // https://vuetifyjs.com/en/components/checkboxes/#checkboxes
@@ -41,8 +45,8 @@ export class RancherUI {
     // ==================================================================================================
     // Table Handler
 
-    getRow(name: string) {
-        return new TableRow(this.page, name)
+    getRow(name: string, options?: {group?: string}) {
+        return new TableRow(this.page, name, {group: options?.group})
     }
 
     // ==================================================================================================

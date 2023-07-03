@@ -32,7 +32,7 @@ test('Policy Servers Landing Page', async({ page, ui }) => {
 
   // Default policy server
   const psRow = ui.getRow('default')
-  await expect(psRow.body).toBeVisible()
+  await expect(psRow.row).toBeVisible()
   await expect(psRow.column('Status')).toHaveText('Active')
   await expect(psRow.column('Policies')).toHaveText('6')
 
