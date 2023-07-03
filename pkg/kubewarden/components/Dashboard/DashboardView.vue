@@ -113,8 +113,8 @@ export default {
       return this.getPolicyGauges(this.globalPolicies);
     },
 
-    hideDefaultsBanner() {
-      return this.$store.getters['kubewarden/hideDefaultsBanner'] || !!this.defaultsApp;
+    hideBannerDefaults() {
+      return this.$store.getters['kubewarden/hideBannerDefaults'] || !!this.defaultsApp;
     },
 
     namespacedPolicies() {
@@ -192,7 +192,7 @@ export default {
       </div>
     </div>
 
-    <DefaultsBanner v-if="!hideDefaultsBanner" />
+    <DefaultsBanner v-if="!hideBannerDefaults" />
 
     <div class="get-started">
       <div

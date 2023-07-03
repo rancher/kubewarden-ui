@@ -9,7 +9,6 @@ import { allHash } from '@shell/utils/promise';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { mapPref, GROUP_RESOURCES } from '@shell/store/prefs';
 
-import { Banner } from '@components/Banner';
 import CountGauge from '@shell/components/CountGauge';
 import DashboardMetrics from '@shell/components/DashboardMetrics';
 import Loading from '@shell/components/Loading';
@@ -20,15 +19,17 @@ import Tab from '@shell/components/Tabbed/Tab';
 import { isEmpty } from 'lodash';
 import { METRICS_DASHBOARD } from '../types';
 import { RELATED_HEADERS } from '../config/table-headers';
+import { handleGrowlError } from '../utils/handle-growl';
 
 import MetricsBanner from '../components/MetricsBanner';
+import TraceBanner from '../components/TraceBanner';
 import TraceTable from '../components/TraceTable';
 
 export default {
   name: 'PolicyServer',
 
   components: {
-    Banner, CountGauge, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, ResourceTable, Tab, TraceTable
+    CountGauge, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, ResourceTable, Tab, TraceBanner, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -47,22 +48,22 @@ export default {
 
   async fetch() {
     const hash = await allHash({
-      relatedPolicies:   this.value.allRelatedPolicies(),
-      policyGauges:      this.value.policyGauges(),
-      jaegerService:     this.value.jaegerService()
+      relatedPolicies:      this.value.allRelatedPolicies(),
+      policyGauges:         this.value.policyGauges(),
+      jaegerService:        this.value.jaegerService(),
+      openTelemetryService: this.value.openTelemetryService()
     });
 
-    if ( !isEmpty(hash.relatedPolicies) ) {
-      this.relatedPolicies = hash.relatedPolicies;
-    }
+    const assignIfNotEmpty = (prop, value) => {
+      if ( !isEmpty(value) ) {
+        this[prop] = value;
+      }
+    };
 
-    if ( !isEmpty(hash.policyGauges) ) {
-      this.policyGauges = hash.policyGauges;
-    }
-
-    if ( !isEmpty(hash.jaegerService) ) {
-      this.jaegerService = hash.jaegerService;
-    }
+    assignIfNotEmpty('relatedPolicies', hash.relatedPolicies);
+    assignIfNotEmpty('policyGauges', hash.policyGauges);
+    assignIfNotEmpty('jaegerService', hash.jaegerService);
+    assignIfNotEmpty('openTelemetryService', hash.openTelemetryService);
 
     if ( !isEmpty(this.relatedPolicies) && this.jaegerService ) {
       this.filteredValidations = await this.value.filteredValidations({ service: this.jaegerService });
@@ -74,7 +75,7 @@ export default {
         this.metricsProxy = await this.value.grafanaProxy(this.metricsType);
 
         if ( this.metricsProxy ) {
-          this.metricsService = await dashboardExists(this.$store, this.currentCluster?.id, this.metricsProxy);
+          this.metricsService = await dashboardExists('v2', this.$store, this.currentCluster?.id, this.metricsProxy);
         }
       } catch (e) {
         console.error(`Error fetching Grafana service: ${ e }`); // eslint-disable-line no-console
@@ -112,14 +113,15 @@ export default {
   data() {
     return {
       RELATED_HEADERS,
-      jaegerService:       null,
-      filteredValidations: null,
-      metricsProxy:        null,
-      metricsService:      null,
-      monitoringRoute:     null,
-      policyGauges:        null,
-      relatedPolicies:     null,
-      reloadRequired:      false,
+      jaegerService:        null,
+      openTelemetryService: null,
+      filteredValidations:  null,
+      metricsProxy:         null,
+      metricsService:       null,
+      monitoringRoute:      null,
+      policyGauges:         null,
+      relatedPolicies:      null,
+      reloadRequired:       false,
 
       metricsType: METRICS_DASHBOARD.POLICY_SERVER
     };
@@ -164,8 +166,9 @@ export default {
         btnCb(true);
 
         this.reloadRequired = true;
-      } catch (err) {
-        this.errors = err;
+      } catch (e) {
+        handleGrowlError({ error: e, store: this.$store });
+
         btnCb(false);
       }
     },
@@ -265,14 +268,9 @@ export default {
 
       <Tab name="policy-tracing" label="Tracing" :weight="97">
         <template>
-          <TraceTable
-            :rows="filteredValidations"
-          >
+          <TraceTable :rows="filteredValidations">
             <template #traceBanner>
-              <Banner v-if="emptyTraces" color="warning">
-                <span v-if="!jaegerService" v-clean-html="t('kubewarden.tracing.noJaeger', {}, true)" />
-                <span v-else>{{ t('kubewarden.tracing.noRelatedTraces') }}</span>
-              </Banner>
+              <TraceBanner v-if="emptyTraces" :jaeger-service="jaegerService" :open-telemetry-service="openTelemetryService" />
             </template>
           </TraceTable>
         </template>

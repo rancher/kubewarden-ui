@@ -7,7 +7,7 @@ import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations
 import Loading from '@shell/components/Loading';
 import ResourceTable from '@shell/components/ResourceTable';
 
-import { KUBEWARDEN_APPS } from '../types';
+import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS } from '../types';
 
 import DefaultsBanner from '../components/DefaultsBanner';
 
@@ -31,28 +31,26 @@ export default {
     await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: this.resource });
     await this.$store.dispatch('catalog/load');
 
-    /*
-      Determine if the default PolicyServer is installed from the `kubewarden-defaults` chart
-      When installed the App name will be `rancher-kubewarden-defaults`
-    */
-    if ( !this.hideDefaultsBanner ) {
-      const apps = await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: CATALOG.APP });
-
-      this.hasDefaults = apps.find((a) => {
-        return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
-      });
+    if ( !this.hideBannerDefaults ) {
+      this.apps = await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: CATALOG.APP });
     }
   },
 
   data() {
-    return { hasDefaults: null };
+    return { apps: null };
   },
 
   computed: {
     ...mapGetters(['currentProduct']),
 
-    hideDefaultsBanner() {
-      return this.$store.getters['kubewarden/hideDefaultsBanner'];
+    defaultsApp() {
+      return this.apps?.find((a) => {
+        return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
+      });
+    },
+
+    hideBannerDefaults() {
+      return this.$store.getters['kubewarden/hideBannerDefaults'] || !!this.defaultsApp;
     },
 
     rows() {
@@ -65,7 +63,7 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else>
-    <DefaultsBanner v-if="!hideDefaultsBanner && !hasDefaults" />
+    <DefaultsBanner v-if="!hideBannerDefaults" />
     <ResourceTable
       :schema="schema"
       :rows="rows"
