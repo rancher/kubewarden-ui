@@ -1,4 +1,4 @@
-name: Build Kubewarden Extension
+name: Build and Release Extension
 
 on:
   push:
@@ -67,8 +67,7 @@ jobs:
         shell: bash
         id: build_script
         run: |
-          chmod +x ./scripts/publish
-          ./scripts/publish -s "${{ github.repository }}" -b main
+          yarn publish-pkgs -s "${{ github.repository }}" -b gh-pages
 
       - name: Upload charts artifact
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -87,8 +86,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-          ref: main
+          ref: gh-pages
 
       - name: Configure Git
         run: |
@@ -109,7 +107,7 @@ jobs:
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
         with:
-          charts_dir: ./charts/kubewarden
+          charts_dir: ./charts/*
         env:
           CR_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
           CR_SKIP_EXISTING: true
