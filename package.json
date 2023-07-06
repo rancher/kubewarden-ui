@@ -3,14 +3,15 @@
   "version": "1.0.6",
   "private": false,
   "scripts": {
-    "test:unit": "vue-cli-service test:unit",
     "build-pkg": "./node_modules/@rancher/shell/scripts/build-pkg.sh",
     "serve-pkgs": "./node_modules/@rancher/shell/scripts/serve-pkgs",
+    "publish-pkgs": "./node_modules/@rancher/shell/scripts/extension/publish",
     "dev": "NODE_ENV=dev ./node_modules/.bin/vue-cli-service serve",
     "build": "./node_modules/.bin/vue-cli-service build",
     "clean": "./node_modules/@rancher/shell/scripts/clean",
     "test": "export TS_JEST_DISABLE_VER_CHECKER=true && jest --watch",
-    "test:ci": "export TS_JEST_DISABLE_VER_CHECKER=true && jest --collectCoverage"
+    "test:ci": "export TS_JEST_DISABLE_VER_CHECKER=true && jest --collectCoverage",
+    "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
     "@rancher/components": "0.1.3",

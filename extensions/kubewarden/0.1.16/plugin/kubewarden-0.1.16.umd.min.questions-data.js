@@ -1,2 +1,0 @@
-(("undefined"!==typeof self?self:this)["webpackJsonpkubewarden_0_1_16"]=("undefined"!==typeof self?self:this)["webpackJsonpkubewarden_0_1_16"]||[]).push([[28],{6402:function(e,n){const s=[{categories:[],namespace:"kubewarden",questions:[]}];e.exports=s.length<=1?s[0]:s}}]);
-//# sourceMappingURL=kubewarden-0.1.16.umd.min.questions-data.js.map
