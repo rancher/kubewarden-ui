@@ -37,6 +37,10 @@ on:
     branches: main
     paths: pkg/kubewarden/**
 
+  push:
+    tags:
+      - '*'
+
   schedule:
     - cron: "0 2 * * *"
 
@@ -83,6 +87,10 @@ jobs:
             KUBEWARDEN="${{ inputs.kubewarden }}"
             TESTSUITE="${{ inputs.testsuite }}"
             ;;
+          push)
+            RANCHER=released
+            KUBEWARDEN=rc
+            TESTSUITE=policies
         esac
 
         echo "Event: ${{github.event_name}}"
