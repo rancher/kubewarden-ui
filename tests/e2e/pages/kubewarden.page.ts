@@ -18,7 +18,7 @@ export class KubewardenPage extends BasePage {
     const failRepoBtn = this.page.getByRole('button', { name: 'Reload', exact: true });
 
     // Welcome screen
-    await this.page.goto('dashboard/c/local/kubewarden');
+    await this.goto();
     await expect(welcomeStep).toBeVisible();
     await installBtn.click();
 

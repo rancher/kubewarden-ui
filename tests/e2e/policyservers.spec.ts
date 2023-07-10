@@ -8,7 +8,8 @@ const expect3m = expect.configure({timeout: 3*60_000})
 
 test('Policy Servers ', async({ page, ui }) => {
   const serverName = 'test-policyserver'
-  const policy: Policy = {title: 'Pod Privileged Policy', name: 'test-policy-podpriv', server: serverName}
+  const policyName = 'test-policy-podpriv'
+  const policy: Policy = {title: 'Pod Privileged Policy', name: policyName, server: serverName}
 
   const psPage = new PolicyServersPage(page)
   const apPage = new AdmissionPoliciesPage(page)
@@ -35,8 +36,8 @@ test('Policy Servers ', async({ page, ui }) => {
 
   // Check Policy Server details page
   await psRow.open()
-  const apRow = ui.getRow(policy.name, {group: 'AdmissionPolicy'})
-  const capRow = ui.getRow(policy.name, {group: 'ClusterAdmissionPolicy'})
+  const apRow = ui.getRow(policyName, {group: 'AdmissionPolicy'})
+  const capRow = ui.getRow(policyName, {group: 'ClusterAdmissionPolicy'})
   await expect3m(apRow.column('Status')).toHaveText('Active')
   await expect3m(capRow.column('Status')).toHaveText('Active')
 
