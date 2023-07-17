@@ -69,13 +69,13 @@ export class BasePolicyPage extends BasePage {
 
   async setValues(p: Policy) {
     // Fill general values
-    if (p.name) await this.setName(p.name)
-    if (p.server) await this.setServer(p.server)
+    if (p.name != null) await this.setName(p.name)
+    if (p.server != null) await this.setServer(p.server)
     if (p.mode) await this.setMode(p.mode)
-    if (p.module) await this.setModule(p.module)
+    if (p.module != null) await this.setModule(p.module)
 
     // Fill Admission | ClusterAdmission specific fields
-    if ('namespace' in p && p.namespace)
+    if ('namespace' in p && p.namespace != null)
       await this.setNamespace(p.namespace)
     if ('ignoreRancherNS' in p && p.ignoreRancherNS)
       await this.setIgnoreRancherNS(p.ignoreRancherNS)

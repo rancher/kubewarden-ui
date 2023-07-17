@@ -61,6 +61,14 @@ export class RancherCommonPage extends BasePage {
     await nsDropdown.locator('i.icon-chevron-up').click()
   }
 
+  async setHelmCharts(option: 'Show Releases Only'|'Include Prerelease Versions') {
+    await this.page.goto('/dashboard/prefs')
+    const btn = this.page.getByRole('button', {name: option, exact: true})
+    await btn.click()
+    await expect(btn).toHaveClass(/bg-primary/)
+    await this.page.waitForTimeout(100)
+  }
+
   /**
    * Change user preferences
    * @param checked Switch developer features on | off
