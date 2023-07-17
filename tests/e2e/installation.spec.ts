@@ -49,7 +49,6 @@ test('02 Install extension', async({ page }) => {
   // Add UI charts repository
   if (ORIGIN == 'rc') {
     const rancher = new RancherCommonPage(page);
-
     await rancher.addRepository('kubewarden-extension-rc', 'https://kubewarden.github.io/ui');
   }
 
