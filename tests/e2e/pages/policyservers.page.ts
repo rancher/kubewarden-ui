@@ -20,6 +20,7 @@ export class PolicyServersPage extends BasePage {
     if (options?.wait) {
       await expect(psRow.status).toHaveText('Active', {timeout: 60_000})
     }
+    return psRow
   }
 
   async delete(name: string) {

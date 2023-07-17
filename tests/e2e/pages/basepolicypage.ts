@@ -1,6 +1,8 @@
 import { expect } from '@playwright/test';
 import { BasePage } from './basepage';
 import { RancherUI } from './rancher-ui';
+import type { Locator, Page } from '@playwright/test';
+import { TableRow } from '../components/table-row';
 
 export const policyTitles = ['Custom Policy', 'Allow Privilege Escalation PSP', 'Allowed Fs Groups PSP', 'Allowed Proc Mount Types PSP', 'Apparmor PSP', 'Capabilities PSP',
   'Deprecated API Versions', 'Disallow Service Loadbalancer', 'Disallow Service Nodeport', 'Echo', 'Environment Variable Secrets Scanner', 'Environment Variable Policy', 'Flexvolume Drivers Psp',
@@ -9,7 +11,7 @@ export const policyTitles = ['Custom Policy', 'Allow Privilege Escalation PSP', 
 
 export interface Policy {
   title: typeof policyTitles[number]
-  name: string
+  name?: string
   mode?: 'Monitor'|'Protect'
   server?: string
   module?: string
@@ -24,7 +26,7 @@ export function generateName(title: string) {
 
 export class BasePolicyPage extends BasePage {
 
-  async selectTab(name: 'General'|'Rules'|'Settings') {
+  async selectTab(name: 'General'|'Rules'|'Settings'|'Context Aware Resources') {
     await this.page.getByRole('tab', { name: name, exact: true }).click()
     await expect(this.page.locator('.tab-header').getByRole('heading', {name: name})).toBeVisible()
   }
@@ -55,22 +57,25 @@ export class BasePolicyPage extends BasePage {
     await this.page.getByRole('heading', {name:'Ignore Rancher'}).locator('xpath=../..').getByRole('radio', {name: option}).check()
   }
 
-  async create(p: Policy, options?: { wait: boolean}) {
+  async open(p: Policy) {
+    // Start from policies list
     await this.ui.createBtn.click()
     await expect(this.page.getByRole('heading', { name: 'Finish: Step 1' })).toBeVisible()
 
     // Select policy, skip readme
     await this.page.getByRole('heading', { name: p.title, exact: true }).click()
     await this.page.getByRole('tab', { name: 'Values' }).click()
+  }
 
+  async setValues(p: Policy) {
     // Fill general values
-    await this.setName(p.name)
-    if (p.server) await this.setServer(p.server)
+    if (p.name != null) await this.setName(p.name)
+    if (p.server != null) await this.setServer(p.server)
     if (p.mode) await this.setMode(p.mode)
-    if (p.module) await this.setModule(p.module)
+    if (p.module != null) await this.setModule(p.module)
 
     // Fill Admission | ClusterAdmission specific fields
-    if ('namespace' in p && p.namespace)
+    if ('namespace' in p && p.namespace != null)
       await this.setNamespace(p.namespace)
     if ('ignoreRancherNS' in p && p.ignoreRancherNS)
       await this.setIgnoreRancherNS(p.ignoreRancherNS)
@@ -83,6 +88,19 @@ export class BasePolicyPage extends BasePage {
       // Show yaml with edited settings
       await this.page.getByRole('button', { name: 'Edit YAML' }).click()
     }
+  }
+
+  async updateToProtect(row: TableRow) {
+    await row.action('Update Mode')
+    await this.ui.checkbox('Update to Protect Mode').check()
+    await this.page.getByRole('button', {name: 'Save', exact: true}).click()
+    await expect(row.column('Mode')).toHaveText('Protect')
+  }
+
+  async create(p: Policy, options?: { wait: boolean}) {
+    p.name ??= generateName(p.title)
+    await this.open(p)
+    await this.setValues(p)
 
     // Create policy - redirects to policies list
     await this.page.getByRole('button', { name: 'Finish' }).click()
@@ -93,6 +111,7 @@ export class BasePolicyPage extends BasePage {
     if (options?.wait) {
       await expect(polRow.column('Status')).toHaveText('Active', {timeout: 200_000})
     }
+    return polRow
   }
 
 }
