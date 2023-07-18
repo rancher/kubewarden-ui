@@ -1,7 +1,7 @@
 {
   "name": "kubewarden",
   "description": "Kubewarden extension for Rancher Manager",
-  "icon": "https://raw.githubusercontent.com/kubewarden/ui/main/pkg/kubewarden/assets/icon-kubewarden.svg",
+  "icon": "https://raw.githubusercontent.com/kubewarden/kubewarden-ui/main/pkg/kubewarden/assets/icon-kubewarden.svg",
   "version": "0.1.10",
   "private": false,
   "rancher": true,
