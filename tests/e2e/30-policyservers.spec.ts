@@ -6,7 +6,7 @@ import { Policy } from './pages/basepolicypage';
 
 const expect3m = expect.configure({timeout: 3*60_000})
 
-test('Policy Servers ', async({ page, ui }) => {
+test('Policy Servers', async({ page, ui }) => {
   const serverName = 'test-policyserver'
   const policyName = 'test-policy-podpriv'
   const policy: Policy = {title: 'Pod Privileged Policy', name: policyName, server: serverName}
