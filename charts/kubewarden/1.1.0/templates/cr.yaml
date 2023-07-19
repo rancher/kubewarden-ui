@@ -8,5 +8,5 @@ spec:
   plugin:
     name: {{ include "extension-server.fullname" . }}
     version: {{ (semver (default .Chart.AppVersion .Values.plugin.versionOverride)).Original }}
-    endpoint: https://raw.githubusercontent.com/kubewarden/ui/gh-pages/extensions/kubewarden/1.1.0
+    endpoint: https://raw.githubusercontent.com/kubewarden/kubewarden-ui/gh-pages/extensions/kubewarden/1.1.0
     noCache: {{ .Values.plugin.noCache }}
