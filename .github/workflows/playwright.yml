@@ -46,7 +46,7 @@ on:
 
 env:
   K3S_VERSION: v1.25.9-k3s1
-  K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-github-runner
+  K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
 
 jobs:
   e2e:
