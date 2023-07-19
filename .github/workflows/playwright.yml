@@ -154,7 +154,7 @@ jobs:
     - name: Install Kubewarden
       working-directory: tests
       run: |
-        yarn playwright test installation overview policyservers -x
+        yarn playwright test "/[0-9]0-" -x
       env:
         RANCHER_URL: https://${{env.RANCHER_FQDN}}
         ORIGIN: ${{ env.KUBEWARDEN }}
@@ -165,7 +165,7 @@ jobs:
       timeout-minutes: 90
       working-directory: tests
       run: |
-        yarn playwright test policies -g "${{ inputs.policyfilter || '' }}" -x
+        yarn playwright test /policies -g "${{ inputs.policyfilter || '' }}" -x
       env:
         RANCHER_URL: https://${{env.RANCHER_FQDN}}
         ORIGIN: ${{ env.KUBEWARDEN }}
