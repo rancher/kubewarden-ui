@@ -14,8 +14,12 @@ export const DEFAULT_POLICY = {
       resources:   [],
       operations:  []
     }],
-    mutating:     false,
-    settings:     {}
+    mutating:          false,
+    namespaceSelector: {
+      matchExpressions: [],
+      matchLabels:      {}
+    },
+    settings: {}
   }
 };
 
@@ -59,7 +63,7 @@ export const RANCHER_NAMESPACES = [
   'tigera-operator',
 ];
 
-export const NAMESPACE_SELECTOR = {
+export const RANCHER_NS_MATCH_EXPRESSION = {
   key:      'kubernetes.io/metadata.name',
   operator: 'NotIn',
   values:   RANCHER_NAMESPACES,

@@ -14,7 +14,7 @@ import {
   KUBEWARDEN,
   METRICS_DASHBOARD,
   RANCHER_NAMESPACES,
-  NAMESPACE_SELECTOR,
+  RANCHER_NS_MATCH_EXPRESSION,
   ARTIFACTHUB_ENDPOINT,
   GRAFANA_DASHBOARD_ANNOTATIONS,
   GRAFANA_DASHBOARD_LABELS,
@@ -284,7 +284,7 @@ export default class KubewardenModel extends SteveModel {
     );
     const selector = filter(
       this.spec?.namespaceSelector?.matchExpressions,
-      matches(NAMESPACE_SELECTOR)
+      matches(RANCHER_NS_MATCH_EXPRESSION)
     );
 
     if (rancherNs || !selector) {

@@ -20,7 +20,6 @@ import {
   KUBEWARDEN_PRODUCT_NAME,
   VALUES_STATE,
   ARTIFACTHUB_PKG_ANNOTATION,
-  NAMESPACE_SELECTOR,
   DEFAULT_POLICY
 } from '../../types';
 import { removeEmptyAttrs } from '../../utils/object';
@@ -273,13 +272,6 @@ export default ({
           out = jsyaml.load(this.yamlValues);
         } else {
           out = this.chartValues?.policy ? this.chartValues.policy : jsyaml.load(this.yamlValues);
-        }
-
-        const { ignoreRancherNamespaces } = out;
-
-        if ( ignoreRancherNamespaces ) {
-          set(out.spec, 'namespaceSelector', { matchExpressions: [NAMESPACE_SELECTOR] });
-          delete out.ignoreRancherNamespaces;
         }
 
         removeEmptyAttrs(out); // Clean up empty values from questions

@@ -176,6 +176,15 @@ kubewarden:
     ignoreRancherNamespaces:
       label: Ignore Rancher Namespaces
       tooltip: Certain policies will break core services of Rancher, this will add a default list of namespaces to ignore.
+    namespaceSelector:
+      label: Namespace Selector
+      tooltip: NamespaceSelector decides whether to run the webhook on an object based on whether the namespace for that object matches the selector. If the object itself is a namespace, the matching is performed on object.metadata.labels. If the object is another cluster scoped resource, it never skips the webhook.
+      matchExpressions:
+        label: Match Expressions
+        tooltip: matchExpressions is a list of label selector requirements. 
+      matchLabels:
+        label: Match Labels
+        tooltip: matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value".
     rules:
       add: Add Rule Set
       remove: Remove Rule Set

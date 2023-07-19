@@ -279,7 +279,7 @@ export default {
           </div>
 
           <div v-if="hasAnnotation(subtype, 'kubewarden/contextAwareResources')" class="subtype__aware">
-            <span v-tooltip="t('kubewarden.policyCharts.contextAware.tooltip')">
+            <span v-clean-tooltip="t('kubewarden.policyCharts.contextAware.tooltip')">
               {{ t('kubewarden.policyCharts.contextAware.label') }}
             </span>
           </div>

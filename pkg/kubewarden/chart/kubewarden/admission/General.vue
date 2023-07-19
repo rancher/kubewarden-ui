@@ -6,6 +6,7 @@ import { _CREATE } from '@shell/config/query-params';
 import { set } from '@shell/utils/object';
 import { POD } from '@shell/config/types';
 
+import KeyValue from '@shell/components/form/KeyValue';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import Loading from '@shell/components/Loading';
 import MatchExpressions from '@shell/components/form/MatchExpressions';
@@ -14,7 +15,7 @@ import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 
-import { KUBEWARDEN, KUBEWARDEN_APPS } from '../../../types';
+import { KUBEWARDEN, KUBEWARDEN_APPS, RANCHER_NS_MATCH_EXPRESSION } from '../../../types';
 
 export default {
   name: 'General',
@@ -37,6 +38,7 @@ export default {
   },
 
   components: {
+    KeyValue,
     LabeledSelect,
     Loading,
     MatchExpressions,
@@ -50,7 +52,7 @@ export default {
     await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: KUBEWARDEN.POLICY_SERVER });
 
     if ( this.isGlobal ) {
-      set(this.policy, 'ignoreRancherNamespaces', this.hasNamespaceSelector);
+      set(this, 'ignoreRancherNamespaces', this.hasNamespaceSelector);
     }
 
     if ( this.isCreate && !isEmpty(this.policy.spec) ) {
@@ -78,9 +80,12 @@ export default {
     return {
       POD,
       policy,
-      initialPolicyMode: null
+      initialPolicyMode:       null,
+      ignoreRancherNamespaces: false
     };
   },
+
+  watch: { ignoreRancherNamespaces: 'updateNamespaceSelector' },
 
   created() {
     if ( this.policyMode ) {
@@ -93,7 +98,7 @@ export default {
 
     hasNamespaceSelector() {
       if ( !this.isCreate ) {
-        return this.value?.policy?.namespaceSelector;
+        return !isEmpty(this.value?.policy?.namespaceSelector);
       }
 
       return true;
@@ -142,6 +147,26 @@ export default {
       }
 
       return false;
+    }
+  },
+
+  methods: {
+    updateNamespaceSelector(neu, old) {
+      const selector = this.policy?.spec?.namespaceSelector;
+      const parsedNamespaces = JSON.stringify(RANCHER_NS_MATCH_EXPRESSION);
+
+      if ( selector ) {
+        const expressions = selector.matchExpressions || [];
+        const exists = expressions.some(exp => JSON.stringify(exp) === parsedNamespaces);
+
+        if ( neu ) {
+          if ( !exists ) {
+            this.$set(selector, 'matchExpressions', [...expressions, RANCHER_NS_MATCH_EXPRESSION]);
+          }
+        } else if ( exists ) {
+          this.$set(selector, 'matchExpressions', expressions.filter(exp => JSON.stringify(exp) !== parsedNamespaces));
+        }
+      }
     }
   }
 };
@@ -212,7 +237,7 @@ export default {
           <div class="col span-6">
             <RadioGroup
               v-model="policy.ignoreRancherNamespaces"
-              data-testid="kw-policy-general-ignore-ns-input"
+              data-testid="kw-policy-config-ignore-ns-input"
               name="ignoreRancherNamespaces"
               :options="[true, false]"
               :mode="mode"
@@ -223,16 +248,33 @@ export default {
           </div>
         </template>
       </div>
-      <div class="row mb-20">
-        <div class="col span-12">
-          <MatchExpressions
-            v-model="policy.spec.matchExpressions"
-            :mode="mode"
-            :type="POD"
-            :matching-selector-display="true"
-          />
+
+      <template v-if="isGlobal">
+        <h3>{{ t('kubewarden.policyConfig.namespaceSelector.label') }}</h3>
+        <div class="row mb-20">
+          <div class="col span-12">
+            <h4>
+              {{ t('kubewarden.policyConfig.namespaceSelector.matchExpressions.label') }}
+            </h4>
+            <span v-clean-tooltip="t('kubewarden.policyConfig.namespaceSelector.matchExpressions.tooltip')"></span>
+            <MatchExpressions
+              v-model="policy.spec.namespaceSelector.matchExpressions"
+              :mode="mode"
+              :show-remove="false"
+              :type="POD"
+            />
+          </div>
         </div>
-      </div>
+        <h4>{{ t('kubewarden.policyConfig.namespaceSelector.matchLabels.label') }}</h4>
+        <div class="row mb-20">
+          <div class="col span-12">
+            <KeyValue
+              v-model="policy.spec.namespaceSelector.matchLabels"
+              :mode="mode"
+            />
+          </div>
+        </div>
+      </template>
     </template>
   </div>
 </template>

@@ -1,7 +1,7 @@
 <script>
 import isEmpty from 'lodash/isEmpty';
 
-import { _CREATE, _VIEW } from '@shell/config/query-params';
+import { _CREATE, _EDIT, _VIEW } from '@shell/config/query-params';
 import { SCHEMA } from '@shell/config/types';
 import { createYaml, saferDump } from '@shell/utils/create-yaml';
 import { set } from '@shell/utils/object';
@@ -117,6 +117,10 @@ export default {
 
     isCreate() {
       return this.mode === _CREATE;
+    },
+
+    isEdit() {
+      return this.mode === _EDIT;
     }
   },
 
@@ -155,7 +159,7 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-else>
-    <div v-if="isCreate" class="step__values__controls">
+    <div v-if="isCreate || isEdit" class="step__values__controls">
       <ButtonGroup
         v-model="yamlOption"
         data-testid="kw-policy-config-yaml-option"
@@ -183,7 +187,7 @@ export default {
             </template>
           </Tabbed>
         </template>
-        <template v-else-if="isCreate && !showForm">
+        <template v-else-if="(isCreate || isEdit) && !showForm">
           <YamlEditor
             ref="yaml"
             v-model="currentYamlValues"
