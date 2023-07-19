@@ -4,9 +4,11 @@ import isEmpty from 'lodash/isEmpty';
 
 import { _CREATE } from '@shell/config/query-params';
 import { set } from '@shell/utils/object';
+import { POD } from '@shell/config/types';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import Loading from '@shell/components/Loading';
+import MatchExpressions from '@shell/components/form/MatchExpressions';
 import NameNsDescription from '@shell/components/form/NameNsDescription';
 import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
@@ -37,6 +39,7 @@ export default {
   components: {
     LabeledSelect,
     Loading,
+    MatchExpressions,
     NameNsDescription,
     Banner,
     LabeledInput,
@@ -73,6 +76,7 @@ export default {
     }
 
     return {
+      POD,
       policy,
       initialPolicyMode: null
     };
@@ -218,6 +222,16 @@ export default {
             />
           </div>
         </template>
+      </div>
+      <div class="row mb-20">
+        <div class="col span-12">
+          <MatchExpressions
+            v-model="policy.spec.matchExpressions"
+            :mode="mode"
+            :type="POD"
+            :matching-selector-display="true"
+          />
+        </div>
       </div>
     </template>
   </div>

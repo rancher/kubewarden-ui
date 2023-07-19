@@ -16,9 +16,13 @@ import Loading from '@shell/components/Loading';
 import ChartReadme from '@shell/components/ChartReadme';
 import Wizard from '@shell/components/Wizard';
 
-import { ARTIFACTHUB_PKG_ANNOTATION, NAMESPACE_SELECTOR } from '../../plugins/kubewarden-class';
-import { DEFAULT_POLICY } from '../../plugins/policy-class';
-import { KUBEWARDEN_PRODUCT_NAME, VALUES_STATE } from '../../types';
+import {
+  KUBEWARDEN_PRODUCT_NAME,
+  VALUES_STATE,
+  ARTIFACTHUB_PKG_ANNOTATION,
+  NAMESPACE_SELECTOR,
+  DEFAULT_POLICY
+} from '../../types';
 import { removeEmptyAttrs } from '../../utils/object';
 import { handleGrowlError } from '../../utils/handle-growl';
 

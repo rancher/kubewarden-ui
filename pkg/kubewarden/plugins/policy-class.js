@@ -3,28 +3,8 @@ import jsyaml from 'js-yaml';
 import { colorForState, stateBackground, stateDisplay } from '@shell/plugins/dashboard-store/resource-class';
 import { get } from '@shell/utils/object';
 
-import KubewardenModel, { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION, colorForStatus } from './kubewarden-class';
-
-export const DEFAULT_POLICY = {
-  apiVersion: '',
-  kind:       '',
-  metadata:   {
-    name:      '',
-    namespace: ''
-  },
-  spec:       {
-    policyServer: '',
-    module:       '',
-    rules:        [{
-      apiGroups:   [],
-      apiVersions: [],
-      resources:   [],
-      operations:  []
-    }],
-    mutating:     false,
-    settings:     {}
-  }
-};
+import { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION } from '../types';
+import KubewardenModel, { colorForStatus } from './kubewarden-class';
 
 export default class PolicyModel extends KubewardenModel {
   get _availableActions() {

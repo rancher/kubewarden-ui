@@ -5,8 +5,7 @@ import { removeAt } from '@shell/utils/array';
 
 import Loading from '@shell/components/Loading';
 
-import { KUBEWARDEN_APPS } from '../../../../types';
-import { ARTIFACTHUB_PKG_ANNOTATION } from '../../../../plugins/kubewarden-class';
+import { KUBEWARDEN_APPS, ARTIFACTHUB_PKG_ANNOTATION } from '../../../../types';
 import Rule from './Rule';
 
 export default {

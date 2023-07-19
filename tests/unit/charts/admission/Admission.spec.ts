@@ -7,7 +7,7 @@ import Admission from '@kubewarden/chart/kubewarden/admission/index.vue';
 import Settings from '@kubewarden/chart/kubewarden/admission/Settings.vue';
 import Questions from '@kubewarden/components/Questions/index.vue';
 
-import { DEFAULT_POLICY } from '@kubewarden/plugins/policy-class';
+import { DEFAULT_POLICY } from '@kubewarden/types';
 import policyConfig from '../../templates/policyConfig';
 import { question } from '../../templates/questions';
 
