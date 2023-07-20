@@ -184,7 +184,7 @@ kubewarden:
         tooltip: matchExpressions is a list of label selector requirements. 
       matchLabels:
         label: Match Labels
-        tooltip: matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value".
+        tooltip: "matchLabels is a map of key, value pairs. A single key, value in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'."
     rules:
       add: Add Rule Set
       remove: Remove Rule Set

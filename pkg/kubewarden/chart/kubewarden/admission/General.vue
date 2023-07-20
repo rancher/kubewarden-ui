@@ -250,11 +250,21 @@ export default {
       </div>
 
       <template v-if="isGlobal">
-        <h3>{{ t('kubewarden.policyConfig.namespaceSelector.label') }}</h3>
+        <h3>
+          <t k="kubewarden.policyConfig.namespaceSelector.label" />
+          <i
+            v-clean-tooltip="t('kubewarden.policyConfig.namespaceSelector.tooltip')"
+            class="icon icon-info icon-lg"
+          />
+        </h3>
         <div class="row mb-20">
           <div class="col span-12">
             <h4>
-              {{ t('kubewarden.policyConfig.namespaceSelector.matchExpressions.label') }}
+              <t k="kubewarden.policyConfig.namespaceSelector.matchExpressions.label" />
+              <i
+                v-clean-tooltip="t('kubewarden.policyConfig.namespaceSelector.matchExpressions.tooltip')"
+                class="icon icon-info icon-lg"
+              />
             </h4>
             <span v-clean-tooltip="t('kubewarden.policyConfig.namespaceSelector.matchExpressions.tooltip')"></span>
             <MatchExpressions
@@ -265,7 +275,13 @@ export default {
             />
           </div>
         </div>
-        <h4>{{ t('kubewarden.policyConfig.namespaceSelector.matchLabels.label') }}</h4>
+        <h4>
+          <t k="kubewarden.policyConfig.namespaceSelector.matchLabels.label" />
+          <i
+            v-clean-tooltip="t('kubewarden.policyConfig.namespaceSelector.matchLabels.tooltip')"
+            class="icon icon-info icon-lg"
+          />
+        </h4>
         <div class="row mb-20">
           <div class="col span-12">
             <KeyValue
