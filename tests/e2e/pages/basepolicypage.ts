@@ -110,6 +110,8 @@ export class BasePolicyPage extends BasePage {
     await expect(polRow.row).toBeVisible()
     if (options?.wait) {
       await expect(polRow.column('Status')).toHaveText('Active', {timeout: 200_000})
+      // Prevent occasional wrong resource version error on follow-up tests
+      await this.page.waitForTimeout(2_000)
     }
     return polRow
   }

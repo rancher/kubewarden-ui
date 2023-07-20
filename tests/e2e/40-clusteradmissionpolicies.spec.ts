@@ -11,7 +11,6 @@ test('ClusterAdmissionPolicies ', async({ page, ui }) => {
   const capPage = new ClusterAdmissionPoliciesPage(page)
 
   const finishBtn = page.getByRole('button', { name: 'Finish', exact: true })
-
   let row: TableRow
 
   // ====================================================================================
@@ -54,7 +53,7 @@ test('ClusterAdmissionPolicies ', async({ page, ui }) => {
 
   // Create policy with custom PS
   await capPage.goto()
-  row = await capPage.create({title: p.title, name: 'test-policy-custom-ps', server: customPS}, {wait: true})
+  row = await capPage.create({title: p.title, name: 'test-policy-custom-ps', server: customPS})
   await expect(row.column('Policy Server')).toHaveText(customPS)
   // Delete custom PS, check policy is deleted too
   await psPage.goto()
