@@ -67,6 +67,7 @@ export default {
     <ResourceTable
       :schema="schema"
       :rows="rows"
+      data-testid="kw-ps-resource-table"
     />
   </div>
 </template>

@@ -90,6 +90,7 @@ export default {
 
 <template>
   <Banner
+    data-testid="kw-defaults-banner"
     class="mb-20 mt-0"
     color="info"
     :closable="true"
@@ -97,6 +98,7 @@ export default {
   >
     <span v-clean-html="t('kubewarden.policyServer.noDefaultsInstalled.description', {}, true)" />
     <button
+      data-testid="kw-defaults-banner-button"
       class="btn role-primary ml-10"
       @click.prevent="chartRoute"
     >

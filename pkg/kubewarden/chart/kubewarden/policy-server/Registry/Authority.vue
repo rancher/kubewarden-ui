@@ -64,6 +64,7 @@ export default {
       <LabeledInput
         ref="authorityName"
         v-model="value.registryName"
+        data-testid="ps-config-authority-name-input"
         type="multiline"
         :label="t('kubewarden.policyServerConfig.sourceAuthorities.endpoint')"
         class="mb-20 mt-20"
@@ -79,6 +80,7 @@ export default {
             <LabeledInput
               ref="authorityCert"
               v-model="value.certs[cIndex]"
+              :data-testid="`ps-config-authority-cert-input-${ cIndex }`"
               type="multiline"
               :label="t('kubewarden.policyServerConfig.sourceAuthorities.certificate.label')"
               class="p-10 col span-6"
@@ -90,6 +92,7 @@ export default {
 
             <div class="remove">
               <button
+                :data-testid="`ps-config-authority-cert-remove-button-${ cIndex }`"
                 type="button"
                 :disabled="isView"
                 class="btn role-link remove"
@@ -102,6 +105,7 @@ export default {
         </template>
 
         <button
+          data-testid="ps-config-authority-cert-add-button"
           type="button"
           class="btn role-tertiary add"
           :disabled="isView"
@@ -111,6 +115,7 @@ export default {
         </button>
 
         <FileSelector
+          data-testid="ps-config-authority-select-file"
           class="btn role-link"
           :label="t('kubewarden.policyServerConfig.sourceAuthorities.certificate.file')"
           :disabled="isView"

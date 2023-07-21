@@ -41,6 +41,7 @@ export default {
     <YamlEditor
       ref="yamleditor"
       v-model="settingsYaml"
+      data-testid="kw-policy-config-settings-yaml-editor"
       class="yaml-editor"
       initial-yaml-values="# Additional Settings YAML \n"
       :editor-mode="isView ? 'VIEW_CODE' : 'EDIT_CODE'"

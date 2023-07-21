@@ -431,6 +431,7 @@ export default ({
   <div v-else>
     <template v-if="!hideArtifactHubBanner">
       <Banner
+        data-testid="kw-policy-create-ah-banner"
         class="type-banner mb-20 mt-0"
         color="warning"
         :closable="true"
@@ -444,6 +445,7 @@ export default ({
     </template>
     <template v-if="!hideAirgapBanner">
       <Banner
+        data-testid="kw-policy-create-ag-banner"
         class="type-banner mb-20 mt-0"
         color="warning"
         :closable="true"
@@ -456,6 +458,7 @@ export default ({
       v-if="value && !loadingPackages"
       ref="wizard"
       v-model="value"
+      data-testid="kw-policy-create-wizard"
       :errors="errors"
       :steps="steps"
       :edit-first-step="true"
@@ -467,9 +470,9 @@ export default ({
       @finish="finish"
     >
       <template #policies>
-        <PolicyGrid :value="packages" @selectType="selectType($event)">
+        <PolicyGrid data-testid="kw-policy-create-grid" :value="packages" @selectType="selectType($event)">
           <template #customSubtype>
-            <div class="subtype custom" @click="selectType('custom')">
+            <div data-testid="kw-grid-subtype-card-custom" class="subtype custom" @click="selectType('custom')">
               <div class="subtype__metadata">
                 <div class="subtype__badge" :style="{ 'background-color': 'var(--darker)' }">
                   <label>{{ t('kubewarden.customPolicy.badge') }}</label>
@@ -489,7 +492,7 @@ export default ({
       </template>
 
       <template #readme>
-        <ChartReadme v-if="packageValues" :version-info="packageValues" class="mb-20" />
+        <ChartReadme v-if="packageValues" data-testid="kw-policy-create-readme" :version-info="packageValues" class="mb-20" />
       </template>
 
       <template #values>
@@ -506,6 +509,7 @@ export default ({
 
       <template #finish>
         <AsyncButton
+          data-testid="kw-policy-create-finish-button"
           :disabled="!canFinish"
           mode="finish"
           @click="finish"

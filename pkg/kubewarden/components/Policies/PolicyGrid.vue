@@ -186,6 +186,7 @@ export default {
       <LabeledSelect
         v-if="providerOptions.length"
         v-model="provider"
+        data-testid="kw-grid-filter-provider"
         :clearable="true"
         :taggable="true"
         :mode="mode"
@@ -197,6 +198,7 @@ export default {
 
       <LabeledSelect
         v-model="keywords"
+        data-testid="kw-grid-filter-keywords"
         :clearable="true"
         :taggable="true"
         :mode="mode"
@@ -208,6 +210,7 @@ export default {
 
       <LabeledSelect
         v-model="category"
+        data-testid="kw-grid-filter-category"
         :clearable="true"
         :searchable="false"
         :mode="mode"
@@ -221,12 +224,14 @@ export default {
       <input
         ref="searchQuery"
         v-model="searchQuery"
+        data-testid="kw-grid-filter-search"
         type="search"
         class="input-sm filter__search"
         :placeholder="t('catalog.charts.search')"
       >
       <button
         ref="btn"
+        data-testid="kw-grid-filter-refresh"
         class="btn, btn-sm, role-primary"
         type="button"
         @click="refresh"
@@ -241,6 +246,7 @@ export default {
       <div
         v-for="subtype in filteredSubtypes"
         :key="subtype.package_id"
+        :data-testid="`kw-grid-subtype-card-${ subtype.package_id }`"
         class="subtype"
         @click="$emit('selectType', subtype)"
       >

@@ -84,11 +84,14 @@ export default {
 <template>
   <div class="row">
     <div class="col span-12">
-      <h3>{{ t('kubewarden.policyServerConfig.sourceAuthorities.title') }}</h3>
+      <h3 data-testid="ps-config-source-authorities-title">
+        {{ t('kubewarden.policyServerConfig.sourceAuthorities.title') }}
+      </h3>
       <template v-for="(row, index) in rows">
         <Authority ref="authority" :key="index" v-model="rows[index]" :mode="mode" @update="updateAuthority($event, index)">
           <template #remove>
             <button
+              :data-testid="`ps-config-authority-remove-button-${ index }`"
               type="button"
               :disabled="isView"
               class="btn role-link remove btn-sm"
@@ -101,6 +104,7 @@ export default {
       </template>
 
       <button
+        data-testid="ps-config-source-authorities-add-button"
         type="button"
         class="btn role-tertiary add"
         :disabled="isView"

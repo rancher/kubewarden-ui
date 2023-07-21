@@ -76,19 +76,20 @@ export default {
       <Rule
         ref="lastRule"
         v-model="rules[index]"
+        :data-testid="`kw-policy-rules-rule-${ index }`"
         :disabled="disabledRules"
         :mode="mode"
         :api-groups="apiGroups"
       >
         <template v-if="!isView && !disabledRules" #removeRule>
-          <button type="button" class="btn role-link p-0" @click="removeRule(index)">
+          <button :data-testid="`kw-policy-rules-rule-remove-${ index }`" type="button" class="btn role-link p-0" @click="removeRule(index)">
             {{ t('kubewarden.policyConfig.rules.remove') }}
           </button>
         </template>
       </Rule>
     </div>
 
-    <button v-if="!isView && !disabledRules" type="button" class="btn role-tertiary add" @click="addRule">
+    <button v-if="!isView && !disabledRules" data-testid="kw-policy-rules-rule-add" type="button" class="btn role-tertiary add" @click="addRule">
       {{ t('kubewarden.policyConfig.rules.add') }}
     </button>
   </div>

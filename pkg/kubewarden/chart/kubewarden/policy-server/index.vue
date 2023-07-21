@@ -109,16 +109,16 @@ export default {
   <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-else>
     <Tab name="general" label-key="kubewarden.tabs.general.label" :weight="99">
-      <General v-model="chartValues" :mode="mode" :service-accounts="serviceAccounts" />
+      <General v-model="chartValues" data-testid="ps-config-general-tab" :mode="mode" :service-accounts="serviceAccounts" />
     </Tab>
     <Tab name="labels" label-key="generic.labelsAndAnnotations" :weight="98">
-      <Labels v-model="resourceClone" :mode="mode" />
+      <Labels v-model="resourceClone" data-testid="ps-config-labels-tab" :mode="mode" />
     </Tab>
     <Tab name="verification" label-key="kubewarden.tabs.verification.label" :weight="97">
-      <Verification :value="chartValues.spec" :mode="mode" :config-maps="configMaps" />
+      <Verification data-testid="ps-config-verification-tab" :value="chartValues.spec" :mode="mode" :config-maps="configMaps" />
     </Tab>
     <Tab name="registry" label-key="kubewarden.tabs.registry.label" :weight="96" @active="refresh">
-      <Registry ref="registry" :value="chartValues.spec" :mode="mode" />
+      <Registry ref="registry" data-testid="ps-config-registry-tab" :value="chartValues.spec" :mode="mode" />
     </Tab>
   </div>
 </template>

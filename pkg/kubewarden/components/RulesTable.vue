@@ -30,6 +30,7 @@ export default {
   <div>
     <SortableTable
       v-if="rows.length > 0"
+      data-testid="kw-policy-rules-sortable-table"
       :rows="rows"
       :headers="RULE_HEADERS"
       :table-actions="false"

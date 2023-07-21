@@ -94,6 +94,7 @@ export default {
   <div v-else>
     <p>{{ t('kubewarden.policyConfig.contextAware.description') }}</p>
     <Banner
+      data-testid="kw-policy-config-context-banner"
       class="mb-20"
       color="warning"
       :label="t('kubewarden.policyConfig.contextAware.warning')"
@@ -103,19 +104,26 @@ export default {
       <Resource
         ref="lastResource"
         v-model="contextAwareResources[index]"
+        :data-testid="`kw-policy-config-context-resource-${ index }`"
         :disabled="disabledcontextAwareResources"
         :mode="mode"
         :api-group-versions="apiGroupVersions"
       >
         <template v-if="!isView && !disabledcontextAwareResources" #removeResource>
-          <button type="button" class="btn role-link p-0" @click="removeResource(index)">
+          <button :data-testid="`kw-policy-config-context-remove-${ index }`" type="button" class="btn role-link p-0" @click="removeResource(index)">
             {{ t('kubewarden.policyConfig.contextAware.resource.remove') }}
           </button>
         </template>
       </Resource>
     </div>
 
-    <button v-if="!isView && !disabledcontextAwareResources" type="button" class="btn role-tertiary add" @click="addResource">
+    <button
+      v-if="!isView && !disabledcontextAwareResources"
+      data-testid="kw-policy-config-context-add"
+      type="button"
+      class="btn role-tertiary add"
+      @click="addResource"
+    >
       {{ t('kubewarden.policyConfig.contextAware.resource.add') }}
     </button>
   </div>
