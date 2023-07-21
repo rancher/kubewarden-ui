@@ -107,9 +107,9 @@ export class BasePolicyPage extends BasePage {
     await expect(this.page).toHaveURL(/.*admissionpolicy$/)
     // Check new policy
     const polRow = this.ui.getRow(p.name)
-    await expect(polRow.row).toBeVisible()
+    await polRow.toBeVisible()
     if (options?.wait) {
-      await expect(polRow.column('Status')).toHaveText('Active', {timeout: 200_000})
+      await polRow.toBeActive()
       // Prevent occasional wrong resource version error on follow-up tests
       await this.page.waitForTimeout(2_000)
     }
