@@ -40,11 +40,12 @@ export default {
   <Loading v-if="$fetchState.pending" />
   <div v-else>
     <Banner
+      data-testid="kw-cap-list-banner"
       class="type-banner mb-20 mt-0"
       color="info"
       :label="t('kubewarden.clusterAdmissionPolicy.description')"
     />
 
-    <PolicyList :resource="resource" :rows="rows" :schema="schema" />
+    <PolicyList data-testid="kw-cap-policy-list" :resource="resource" :rows="rows" :schema="schema" />
   </div>
 </template>

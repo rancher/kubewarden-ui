@@ -52,9 +52,10 @@ export default {
   <div class="mt-10 mb-20">
     <div class="row">
       <Banner
+        v-clean-html="t('kubewarden.policyServerConfig.registry.description', {}, true)"
+        data-testid="ps-config-registry-banner"
         class="type-banner mb-20 mt-0"
         color="info"
-        v-clean-html="t('kubewarden.policyServerConfig.registry.description', {}, true)"
       />
     </div>
 
@@ -66,6 +67,7 @@ export default {
         <div class="col span-6">
           <ArrayList
             v-model="insecureSources"
+            data-testid="ps-config-insecure-sources-input"
             :mode="mode"
             :add-allowed="true"
             :add-label="t('kubewarden.policyServerConfig.insecureSources.addLabel')"

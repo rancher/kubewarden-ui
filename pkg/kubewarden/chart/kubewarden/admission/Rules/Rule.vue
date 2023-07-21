@@ -204,6 +204,7 @@ export default {
     <div v-if="isGlobalRule">
       <LabeledSelect
         v-model="value.scope"
+        data-testid="kw-policy-rules-rule-scope-select"
         :disabled="disabled"
         :label="t('kubewarden.policyConfig.scope.label')"
         :tooltip="t('kubewarden.policyConfig.scope.tooltip')"
@@ -216,6 +217,7 @@ export default {
     <div>
       <LabeledSelect
         v-model="apiGroupValues"
+        data-testid="kw-policy-rules-rule-apigroup-select"
         :disabled="disabled"
         :label="t('kubewarden.policyConfig.apiGroups.label')"
         :tooltip="t('kubewarden.policyConfig.apiGroups.tooltip')"
@@ -230,6 +232,7 @@ export default {
     <div>
       <LabeledSelect
         v-model="value.resources"
+        data-testid="kw-policy-rules-rule-resources-select"
         :disabled="disabled"
         :label="t('kubewarden.policyConfig.resources.label')"
         :mode="mode"
@@ -244,6 +247,7 @@ export default {
     <div>
       <LabeledSelect
         v-model="value.apiVersions"
+        data-testid="kw-policy-rules-rule-apiversions-select"
         :disabled="disabled"
         :clearable="true"
         :searchable="false"
@@ -260,6 +264,7 @@ export default {
     <div>
       <LabeledSelect
         v-model="value.operations"
+        data-testid="kw-policy-rules-rule-operations-select"
         :disabled="disabled"
         :label="t('kubewarden.policyConfig.operations.label')"
         :mode="mode"

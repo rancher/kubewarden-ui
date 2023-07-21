@@ -30,15 +30,17 @@ export default {
   <div>
     <div class="row">
       <Banner
+        v-clean-html="t('kubewarden.policyServerConfig.verification.description', {}, true)"
+        data-testid="ps-config-verification-banner"
         class="type-banner mb-20 mt-0"
         color="info"
-        v-clean-html="t('kubewarden.policyServerConfig.verification.description', {}, true)"
       />
     </div>
     <div class="row">
       <div class="col span-6">
         <LabeledSelect
           v-model="value.verificationConfig"
+          data-testid="ps-config-verification-select"
           :mode="mode"
           :label="t('kubewarden.policyServerConfig.verification.label')"
           :options="configMaps"

@@ -93,6 +93,7 @@ export default {
       <div class="col span-6 mb-20">
         <LabeledInput
           v-model="value.metadata.name"
+          data-testid="ps-config-name-input"
           :mode="mode"
           :label="t('nameNsDescription.name.label')"
           :placeholder="t('nameNsDescription.name.placeholder')"
@@ -111,6 +112,7 @@ export default {
         />
         <RadioGroup
           v-model="defaultImage"
+          data-testid="ps-config-default-image-button"
           name="defaultImage"
           :options="[true, false]"
           :mode="mode"
@@ -122,6 +124,7 @@ export default {
         <template v-if="!defaultImage">
           <LabeledInput
             v-model="value.spec.image"
+            data-testid="ps-config-image-input"
             :mode="mode"
             :label="t('kubewarden.policyServerConfig.image.label')"
             :tooltip="t('kubewarden.policyServerConfig.image.tooltip')"
@@ -134,6 +137,7 @@ export default {
       <div class="col span-12">
         <ServiceNameSelect
           v-model="value.spec.serviceAccountName"
+          data-testid="ps-config-service-account-input"
           :mode="mode"
           :select-label="t('workload.serviceAccountName.label')"
           :select-placeholder="t('workload.serviceAccountName.label')"
@@ -154,6 +158,7 @@ export default {
         </h3>
         <LabeledInput
           v-model.number="value.spec.replicas"
+          data-testid="ps-config-replicas-input"
           type="number"
           min="0"
           required

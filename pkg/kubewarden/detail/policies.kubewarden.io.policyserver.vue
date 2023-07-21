@@ -187,7 +187,7 @@ export default {
       <div class="row">
         <template>
           <div class="col span-6">
-            <h3>
+            <h3 data-testid="kw-ps-detail-status-title">
               {{ t('kubewarden.policyServer.policyGauge.byStatus') }}
             </h3>
             <div class="gauges mb-20">
@@ -233,10 +233,12 @@ export default {
             :groupable="true"
             :group-by="groupPreference"
             :table-actions="true"
+            data-testid="kw-ps-detail-related-policies-list"
           >
             <template #col:operation="{ row }">
               <td>
                 <BadgeState
+                  :data-testid="`kw-ps-detail-${ row.id }-state`"
                   :label="row.operation"
                   :color="color(row.operation)"
                 />
@@ -259,6 +261,7 @@ export default {
         <template v-if="metricsService" #default="props">
           <DashboardMetrics
             v-if="props.active"
+            data-testid="kw-ps-metrics-dashboard"
             :detail-url="metricsProxy"
             :summary-url="metricsProxy"
             graph-height="825px"

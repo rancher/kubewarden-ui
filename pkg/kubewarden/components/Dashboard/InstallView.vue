@@ -240,13 +240,13 @@ export default {
           height="64"
         />
       </div>
-      <h1 class="mb-20">
+      <h1 class="mb-20" data-testid="kw-install-title">
         {{ t("kubewarden.title") }}
       </h1>
       <div class="description">
         {{ t("kubewarden.dashboard.description") }}
       </div>
-      <button v-if="!hasSchema" class="btn role-primary mt-20" @click="install = true">
+      <button v-if="!hasSchema" class="btn role-primary mt-20" data-testid="kw-initial-install-button" @click="install = true">
         {{ t("kubewarden.dashboard.appInstall.button") }}
       </button>
     </div>
@@ -258,12 +258,12 @@ export default {
           class="mb-20 mt-20"
           color="warning"
         >
-          <span>{{ t('kubewarden.dashboard.prerequisites.airGapped.warning') }}</span>
+          <span data-testid="kw-install-ag-warning">{{ t('kubewarden.dashboard.prerequisites.airGapped.warning') }}</span>
           <span v-html="t('kubewarden.dashboard.prerequisites.airGapped.docs', {}, true)"></span>
         </Banner>
         <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps">
           <template #certmanager>
-            <h2 class="mt-20 mb-10">
+            <h2 class="mt-20 mb-10" data-testid="kw-ag-cm-title">
               {{ t("kubewarden.dashboard.prerequisites.certManager.title") }}
             </h2>
             <p class="mb-20">
@@ -283,7 +283,7 @@ export default {
 
           <template #install>
             <template v-if="!controllerChart">
-              <h2 class="mt-20 mb-10">
+              <h2 class="mt-20 mb-10" data-testid="kw-ag-repo-title">
                 {{ t("kubewarden.dashboard.prerequisites.repository.title") }}
               </h2>
               <p class="mb-20">
@@ -292,7 +292,7 @@ export default {
             </template>
 
             <template v-else>
-              <h2 class="mt-20 mb-10">
+              <h2 class="mt-20 mb-10" data-testid="kw-ag-app-install-title">
                 {{ t("kubewarden.dashboard.appInstall.title") }}
               </h2>
               <p class="mb-20">
@@ -317,6 +317,7 @@ export default {
                   <button
                     class="btn role-primary mt-20"
                     :disabled="!controllerChart"
+                    data-testid="kw-ag-app-install-button"
                     @click.prevent="chartRoute"
                   >
                     {{ t("kubewarden.dashboard.appInstall.button") }}
@@ -332,7 +333,7 @@ export default {
       <template v-else>
         <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps">
           <template #certmanager>
-            <h2 class="mt-20 mb-10">
+            <h2 class="mt-20 mb-10" data-testid="kw-cm-title">
               {{ t("kubewarden.dashboard.prerequisites.certManager.title") }}
             </h2>
             <p class="mb-20">
@@ -340,10 +341,11 @@ export default {
             </p>
 
             <p v-clean-html="t('kubewarden.dashboard.prerequisites.certManager.manualStep', null, true)"></p>
-            <CopyCode class="m-10 p-10">
+            <CopyCode class="m-10 p-10" data-testid="kw-cm-copy-code">
               {{ t("kubewarden.dashboard.prerequisites.certManager.applyCommand") }}
             </CopyCode>
             <button
+              data-testid="kw-cm-open-shell"
               :disabled="!shellEnabled"
               type="button"
               class="btn role-secondary"
@@ -364,18 +366,18 @@ export default {
 
           <template #install>
             <template v-if="!kubewardenRepo">
-              <h2 class="mt-20 mb-10">
+              <h2 class="mt-20 mb-10" data-testid="kw-repo-title">
                 {{ t("kubewarden.dashboard.prerequisites.repository.title") }}
               </h2>
               <p class="mb-20">
                 {{ t("kubewarden.dashboard.prerequisites.repository.description") }}
               </p>
 
-              <AsyncButton mode="kubewardenRepository" @click="addRepository" />
+              <AsyncButton mode="kubewardenRepository" data-testid="kw-repo-add-button" @click="addRepository" />
             </template>
 
             <template v-else>
-              <h2 class="mt-20 mb-10">
+              <h2 class="mt-20 mb-10" data-testid="kw-app-install-title">
                 {{ t("kubewarden.dashboard.appInstall.title") }}
               </h2>
               <p class="mb-20">
@@ -398,6 +400,7 @@ export default {
 
                 <template v-else>
                   <button
+                    data-testid="kw-app-install-button"
                     class="btn role-primary mt-20"
                     :disabled="!controllerChart"
                     @click.prevent="chartRoute"

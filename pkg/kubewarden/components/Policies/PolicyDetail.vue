@@ -137,13 +137,13 @@ export default {
     <div class="mb-20">
       <h3>{{ t('namespace.resources') }}</h3>
     </div>
-    <ResourceTabs v-model="value" :mode="mode" :need-related="hasRelationships">
+    <ResourceTabs v-model="value" data-testid="kw-policy-detail-tabs" :mode="mode" :need-related="hasRelationships">
       <Tab v-if="hasRules" name="policy-rules" label="Rules" :weight="99">
-        <RulesTable :rows="rulesRows" />
+        <RulesTable data-testid="kw-polity-detail-rules-table" :rows="rulesRows" />
       </Tab>
 
       <Tab name="policy-tracing" label="Tracing" :weight="98">
-        <TraceTable :rows="tracesRows">
+        <TraceTable data-testid="kw-policy-detail-trace-table" :rows="tracesRows">
           <template #traceBanner>
             <Banner v-if="emptyTraces" color="warning">
               <span v-if="!jaegerService" v-clean-html="t('kubewarden.tracing.noJaeger', {}, true)" />

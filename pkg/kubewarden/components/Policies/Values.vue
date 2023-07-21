@@ -158,6 +158,7 @@ export default {
     <div v-if="isCreate" class="step__values__controls">
       <ButtonGroup
         v-model="yamlOption"
+        data-testid="kw-policy-config-yaml-option"
         :options="YAML_OPTIONS"
         inactive-class="bg-disabled btn-sm"
         active-class="bg-primary btn-sm"
@@ -186,6 +187,7 @@ export default {
           <YamlEditor
             ref="yaml"
             v-model="currentYamlValues"
+            data-testid="kw-policy-config-yaml-editor"
             class="step__values__content"
             :scrolling="true"
             :initial-yaml-values="originalYamlValues"
@@ -197,6 +199,7 @@ export default {
 
         <ResourceCancelModal
           ref="cancelModal"
+          data-testid="kw-policy-config-yaml-cancel"
           :is-cancel-modal="false"
           :is-form="true"
           @cancel-cancel="preYamlOption = yamlOption"

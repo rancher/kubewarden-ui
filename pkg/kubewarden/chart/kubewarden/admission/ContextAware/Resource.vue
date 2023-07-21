@@ -115,6 +115,7 @@ export default {
     <div class="col span-4">
       <LabeledSelect
         v-model="value.apiVersion"
+        data-testid="kw-policy-context-resource-apiversion-select"
         :disabled="disabled"
         :clearable="false"
         :searchable="true"
@@ -130,6 +131,7 @@ export default {
     <div class="col span-4">
       <LabeledSelect
         v-model="value.kind"
+        data-testid="kw-policy-context-resource-kind-select"
         :disabled="disabled"
         :clearable="false"
         :searchable="true"

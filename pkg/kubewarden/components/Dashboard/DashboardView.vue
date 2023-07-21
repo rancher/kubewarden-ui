@@ -162,7 +162,9 @@ export default {
   <div v-else class="dashboard">
     <div class="head">
       <div class="head-title">
-        <h1>{{ t('kubewarden.dashboard.intro') }}</h1>
+        <h1 data-testid="kw-dashboard-title">
+          {{ t('kubewarden.dashboard.intro') }}
+        </h1>
         <span v-if="version">{{ version }}</span>
       </div>
 
@@ -205,6 +207,7 @@ export default {
           <span v-if="index === 0">
             <slot>
               <ConsumptionGauge
+                data-testid="kw-dashboard-ps-gauge"
                 resource-name="Active"
                 :color-stops="colorStops"
                 :capacity="policyServers.total"
@@ -219,6 +222,7 @@ export default {
           <span v-if="index === 1">
             <slot>
               <ConsumptionGauge
+                data-testid="kw-dashboard-ap-gauge"
                 resource-name="Active"
                 :color-stops="colorStops"
                 :capacity="namespacedGuages.total"
@@ -238,6 +242,7 @@ export default {
           <span v-if="index === 2">
             <slot>
               <ConsumptionGauge
+                data-testid="kw-dashboard-cap-gauge"
                 resource-name="Active"
                 :color-stops="colorStops"
                 :capacity="globalGuages.total"

@@ -149,6 +149,7 @@ export default {
     <div class="row">
       <div class="col span-12">
         <NameNsDescription
+          data-testid="kw-policy-general-name-input"
           :mode="mode"
           :value="policy"
           :description-hidden="true"
@@ -163,6 +164,7 @@ export default {
         <div class="col span-6">
           <LabeledSelect
             v-model="policy.spec.policyServer"
+            data-testid="kw-policy-general-ps-input"
             :value="value"
             :mode="mode"
             :options="policyServerOptions"
@@ -173,6 +175,7 @@ export default {
         <div class="col span-6">
           <LabeledInput
             v-model="policy.spec.module"
+            data-testid="kw-policy-general-module-input"
             :mode="mode"
             :label="t('kubewarden.policyConfig.module.label')"
             :tooltip="t('kubewarden.policyConfig.module.tooltip')"
@@ -184,6 +187,7 @@ export default {
         <div class="col span-6">
           <RadioGroup
             v-model="policy.spec.mode"
+            data-testid="kw-policy-general-mode-input"
             name="mode"
             :disabled="modeDisabled"
             :options="['monitor', 'protect']"
@@ -192,13 +196,19 @@ export default {
             :labels="['Monitor', 'Protect']"
             :tooltip="t('kubewarden.policyConfig.mode.tooltip')"
           />
-          <Banner v-if="showModeBanner" color="warning" :label="t('kubewarden.policyConfig.mode.warning')" />
+          <Banner
+            v-if="showModeBanner"
+            data-testid="kw-policy-general-mode-banner"
+            color="warning"
+            :label="t('kubewarden.policyConfig.mode.warning')"
+          />
         </div>
 
         <template v-if="isGlobal">
           <div class="col span-6">
             <RadioGroup
               v-model="policy.ignoreRancherNamespaces"
+              data-testid="kw-policy-general-ignore-ns-input"
               name="ignoreRancherNamespaces"
               :options="[true, false]"
               :mode="mode"

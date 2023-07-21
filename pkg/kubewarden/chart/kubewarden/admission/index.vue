@@ -102,15 +102,15 @@ export default {
 <template>
   <div>
     <Tab name="general" :label="t('kubewarden.policyConfig.tabs.general')" :weight="99">
-      <General v-model="chartValues" :mode="mode" :target-namespace="targetNamespace" />
+      <General v-model="chartValues" data-testid="kw-policy-config-general-tab" :mode="mode" :target-namespace="targetNamespace" />
     </Tab>
     <Tab name="rules" :label="t('kubewarden.policyConfig.tabs.rules')" :weight="98">
-      <Rules v-model="chartValues" :mode="mode" />
+      <Rules v-model="chartValues" data-testid="kw-policy-config-rules-tab" :mode="mode" />
     </Tab>
 
     <template v-if="showContextAware">
       <Tab name="contextAware" :label="t('kubewarden.policyConfig.tabs.contextAware')" :weight="97">
-        <ContextAware v-model="chartValues" :mode="mode" />
+        <ContextAware v-model="chartValues" data-testid="kw-policy-config-context-tab" :mode="mode" />
       </Tab>
     </template>
 
@@ -118,6 +118,7 @@ export default {
       <Tab name="settings" :label="t('kubewarden.policyConfig.tabs.settings')" :weight="96">
         <Settings
           v-model="chartValues"
+          data-testid="kw-policy-config-settings-tab"
           @updateSettings="settingsChanged($event)"
         />
       </Tab>
@@ -128,6 +129,7 @@ export default {
       <Tab name="Settings" label="Settings" :weight="96">
         <Questions
           v-model="chartValues.policy.spec.settings"
+          data-testid="kw-policy-config-questions-tab"
           :mode="mode"
           :source="chartValues"
           tabbed="never"

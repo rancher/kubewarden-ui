@@ -67,9 +67,10 @@ export default {
 
 <template>
   <div v-if="!monitoringStatus.installed">
-    <Banner color="warning">
+    <Banner color="warning" data-testid="kw-metrics-not-installed-banner">
       <span v-clean-html="t('kubewarden.monitoring.notInstalled', {}, true)" />
       <button
+        data-testid="kw-metrics-banner-install-button"
         class="btn role-primary ml-10"
         @click.prevent="chartRoute"
       >
@@ -85,6 +86,7 @@ export default {
           {{ t('kubewarden.metrics.notInstalled' ) }}
         </p>
         <AsyncButton
+          data-testid="kw-metrics-banner-add-dashboard-button"
           mode="grafanaDashboard"
           @click="$emit('add', $event)"
         />
@@ -104,7 +106,7 @@ export default {
   <div v-else-if="!metricsService">
     <Banner color="error">
       <i class="icon icon-checkmark mr-10" />
-      <span class="mb-20">
+      <span class="mb-20" data-testid="kw-metrics-banner-no-service">
         {{ t('kubewarden.metrics.noService' ) }}
       </span>
     </Banner>
