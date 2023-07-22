@@ -25,7 +25,7 @@
     "@babel/preset-env": "^7.20.2",
     "@jest/globals": "^29.4.3",
     "@jest/types": "^29.4.3",
-    "@types/node": "18.11.9",
+    "@types/node": "18.17.0",
     "@vue/cli-plugin-unit-jest": "~5.0.0",
     "@vue/server-test-utils": "1",
     "@vue/test-utils": "1",
