@@ -9,7 +9,6 @@ test('ClusterAdmissionPolicies ', async({ page, ui }) => {
   const p: Policy = {title: 'Pod Privileged Policy'}
 
   const capPage = new ClusterAdmissionPoliciesPage(page)
-
   const finishBtn = page.getByRole('button', { name: 'Finish', exact: true })
   let row: TableRow
 

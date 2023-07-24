@@ -22,8 +22,16 @@ export class TableRow {
 
     this.page = page
     this.row = tbody.locator('tr.main-row').filter({has: page.getByRole('link', {name: name, exact: true})})
-    this.name = this.column('Name').getByRole('link')
+    this.name = this.column('Name')
     this.status = this.column('Status')
+  }
+
+  async toBeVisible() {
+    await this.row.waitFor()
+  }
+
+  async toBeActive(timeout = 200_000) {
+    await expect(this.status).toHaveText('Active', {timeout: timeout})
   }
 
   column(name: string) {
@@ -44,7 +52,7 @@ export class TableRow {
   }
 
   async open() {
-    await this.name.click()
+    await this.name.getByRole('link').click()
   }
 
 }

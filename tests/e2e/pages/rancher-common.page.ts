@@ -98,8 +98,7 @@ export class RancherCommonPage extends BasePage {
     await this.page.getByRole('button', { name: 'Create' }).click();
 
     // Check repository state is Active
-    const repoRow = this.ui.getRow(name)
-    await expect(repoRow.column('State')).toHaveText('Active')
+    await this.ui.getRow(name).toBeActive()
   }
 
   async installApp(chart: Chart) {

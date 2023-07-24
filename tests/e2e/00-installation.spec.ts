@@ -1,7 +1,7 @@
 import { test, expect } from './rancher-test';
 import { RancherCommonPage } from './pages/rancher-common.page';
 import { RancherExtensionsPage } from './pages/rancher-extensions.page';
-import { KubewardenPage } from './pages/kubewarden.page';
+import { OverviewPage } from './pages/overview.page';
 import { PolicyServersPage } from './pages/policyservers.page';
 import { policyTitles } from './pages/basepolicypage';
 
@@ -18,7 +18,7 @@ test('00 Initial rancher setup', async({ page, ui }) => {
     await rancher.handleFirstLogin('sa');
   }
   // wait for local cluster to be Active
-  await expect(ui.getRow('local').column('State')).toHaveText('Active', { timeout: 60_000 });
+  await ui.getRow('local').toBeActive()
   // disable namespace filter
   await rancher.setNamespaceFilter('All Namespaces');
   // enable extension developer features
@@ -64,7 +64,7 @@ test('02 Install extension', async({ page }) => {
 });
 
 test('03 Install kubewarden', async({ page }) => {
-  const kwPage = new KubewardenPage(page);
+  const kwPage = new OverviewPage(page);
 
   await kwPage.installKubewarden();
 
@@ -83,7 +83,7 @@ test('04 Install default policyserver', async({ page, ui }) => {
   const psPage = new PolicyServersPage(page);
 
   // Check banner is also visible on overview page
-  const kwPage = new KubewardenPage(page);
+  const kwPage = new OverviewPage(page);
 
   await kwPage.goto();
   await expect(psPage.noDefaultPsBanner).toBeVisible();
@@ -105,7 +105,7 @@ test('04 Install default policyserver', async({ page, ui }) => {
 });
 
 test('05 Whitelist artifacthub', async({ page }) => {
-  const kwPage = new KubewardenPage(page);
+  const kwPage = new OverviewPage(page);
 
   await page.goto('/dashboard/c/local/kubewarden/policies.kubewarden.io.clusteradmissionpolicy/create');
   await expect(page.getByRole('heading', { name: 'Custom Policy' })).toBeVisible();

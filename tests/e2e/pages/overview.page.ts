@@ -1,9 +1,21 @@
-import { expect, Page } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 import { BasePage } from './basepage';
 
-export class KubewardenPage extends BasePage {
+export class OverviewPage extends BasePage {
+  readonly createPsBtn: Locator;
+  readonly createApBtn: Locator;
+  readonly createCapBtn: Locator;
+
   constructor(page: Page) {
     super(page, 'dashboard/c/local/kubewarden');
+    this.createPsBtn = page.getByRole('link', {name: 'Create Policy Server', exact: true})
+    this.createApBtn = page.getByRole('link', {name: 'Create Admission Policy', exact: true})
+    this.createCapBtn = page.getByRole('link', {name: 'Create Cluster Admission Policy', exact: true})
+  }
+
+  getPane(name: 'Policy Servers'|'Admission Policies'|'Cluster Admission Policies' ) {
+    return this.page.locator('div.card-container').filter({
+      has:this.page.getByRole('heading', {name: name, exact: true})})
   }
 
   async installKubewarden() {
