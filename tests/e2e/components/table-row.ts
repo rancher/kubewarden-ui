@@ -27,7 +27,7 @@ export class TableRow {
   }
 
   async toBeVisible() {
-    await this.row.waitFor()
+    await expect(this.row).toBeVisible()
   }
 
   async toBeActive(timeout = 200_000) {

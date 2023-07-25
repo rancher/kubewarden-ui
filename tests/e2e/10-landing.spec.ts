@@ -4,7 +4,7 @@ import { PolicyServersPage } from './pages/policyservers.page';
 import { AdmissionPoliciesPage } from './pages/admissionpolicies.page';
 import { ClusterAdmissionPoliciesPage } from './pages/clusteradmissionpolicies.page';
 
-test('Kubewarden Landing page', async({ page }) => {
+test('Kubewarden Landing page', async({ page, ui }) => {
   const kwPage = new OverviewPage(page);
   await kwPage.goto();
   await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
@@ -15,13 +15,10 @@ test('Kubewarden Landing page', async({ page }) => {
 
   await expect(page.getByText('Active 6 of 6 Global Policies / 100%')).toBeVisible({timeout:60_000})
   await expect(page.getByText('Active 0 of 0 Namespaced Policies / 0%')).toBeVisible()
-  try {
-    await expect(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
-  } catch (e) {
-    console.log('Reload: https://github.com/kubewarden/ui/issues/245')
-    await page.reload();
-    await expect(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
-  }
+
+  await ui.withReload(async () => {
+    expect(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
+  }, 'https://github.com/kubewarden/ui/issues/245')
 });
 
 test('Policy Servers Landing Page', async({ page, ui }) => {

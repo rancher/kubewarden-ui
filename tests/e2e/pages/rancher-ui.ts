@@ -85,4 +85,14 @@ export class RancherUI {
         await page.keyboard.insertText(jsyaml.dump(cmYaml))
     }
 
+    async withReload(code: () => Promise<void>, message?: string): Promise<void> {
+        try {
+            await code();
+        } catch (e) {
+            if (message) console.log(`Reload: ${message}`)
+            await this.page.reload();
+            await code();
+        }
+    }
+
 }
