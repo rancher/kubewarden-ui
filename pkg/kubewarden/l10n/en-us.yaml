@@ -154,6 +154,7 @@ kubewarden:
     tabs:
       general: General
       rules: Rules
+      namespaceSelector: Namespace Selector
       settings: Settings
       contextAware: Context Aware Resources
     serverSelect:
@@ -178,7 +179,8 @@ kubewarden:
       tooltip: Certain policies will break core services of Rancher, this will add a default list of namespaces to ignore.
     namespaceSelector:
       label: Namespace Selector
-      tooltip: NamespaceSelector decides whether to run the webhook on an object based on whether the namespace for that object matches the selector. If the object itself is a namespace, the matching is performed on object.metadata.labels. If the object is another cluster scoped resource, it never skips the webhook.
+      description: NamespaceSelector decides whether to evaluate the policy on a request, based on whether the namespace for that request matches the selector. If the object of the request is a namespace, the matching is performed on object.metadata.labels. If the object is another cluster scoped resource, it never skips the policy evaluation.
+      addSelector: Add Selectors
       matchExpressions:
         label: Match Expressions
         tooltip: matchExpressions is a list of label selector requirements. 
