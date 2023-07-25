@@ -25,23 +25,17 @@ test('00 Initial rancher setup', async({ page, ui }) => {
   await rancher.setExtensionDeveloperFeatures(true);
 });
 
-test('01 Enable extension support', async({ page }) => {
+test('01 Enable extension support', async({ page, ui }) => {
   const extensions = new RancherExtensionsPage(page);
 
   await extensions.enable(ORIGIN == 'released');
 
   // Wait for default list of extensions
   if (ORIGIN == 'released') {
-    await extensions.selectTab('All');
-    try {
-      // Extension list is usually empty without page refresh
-      await expect(page.locator('.plugin', { hasText: 'Kubewarden' } )).toBeVisible();
-    } catch (e) {
-      console.log('Reload: Not showing kubewarden extension');
-      await page.reload();
-      await extensions.selectTab('All');
-      await expect(page.locator('.plugin', { hasText: 'Kubewarden' } )).toBeVisible();
-    }
+    await ui.withReload(async () => {
+      await extensions.selectTab('All')
+      await expect(page.locator('.plugin', { hasText: 'Kubewarden' } )).toBeVisible()
+    }, 'Not showing kubewarden extension')
   }
 });
 
@@ -63,20 +57,16 @@ test('02 Install extension', async({ page }) => {
   }
 });
 
-test('03 Install kubewarden', async({ page }) => {
+test('03 Install kubewarden', async({ page, ui }) => {
   const kwPage = new OverviewPage(page);
 
   await kwPage.installKubewarden();
 
   // Check UI is active
   await page.getByRole('navigation').getByRole('link', { name: 'Kubewarden' }).click();
-  try {
-    await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible();
-  } catch (e) {
-    console.log('Reload: Kubewarden installation done but not detected');
-    await page.reload();
-    await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible();
-  }
+  await ui.withReload(async () => {
+    await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
+  }, 'Kubewarden installation not detected')
 });
 
 test('04 Install default policyserver', async({ page, ui }) => {

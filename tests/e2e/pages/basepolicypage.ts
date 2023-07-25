@@ -1,7 +1,6 @@
 import { expect } from '@playwright/test';
 import { BasePage } from './basepage';
 import { RancherUI } from './rancher-ui';
-import type { Locator, Page } from '@playwright/test';
 import { TableRow } from '../components/table-row';
 
 export const policyTitles = ['Custom Policy', 'Allow Privilege Escalation PSP', 'Allowed Fs Groups PSP', 'Allowed Proc Mount Types PSP', 'Apparmor PSP', 'Capabilities PSP',
@@ -58,13 +57,16 @@ export class BasePolicyPage extends BasePage {
   }
 
   async open(p: Policy) {
-    // Start from policies list
+    // Open list of policies
     await this.ui.createBtn.click()
     await expect(this.page.getByRole('heading', { name: 'Finish: Step 1' })).toBeVisible()
-
-    // Select policy, skip readme
-    await this.page.getByRole('heading', { name: p.title, exact: true }).click()
+    // Open requested policy
+    await this.ui.withReload(async () => {
+      await this.page.getByRole('heading', { name: p.title, exact: true }).click()
+    }, 'Could not get policy list from artifacthub')
+    // Go to values tab, skip optional readme
     await this.page.getByRole('tab', { name: 'Values' }).click()
+    await expect(this.page.getByRole('heading', { name: 'General' })).toBeVisible()
   }
 
   async setValues(p: Policy) {

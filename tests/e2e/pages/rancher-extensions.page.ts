@@ -58,14 +58,9 @@ export class RancherExtensionsPage extends BasePage {
       await this.ui.select('Version', options.version)
     }
     await dialog.getByRole('button', { name: 'Install' }).click();
-
-    try {
-      await expect(plugin.getByRole('button', { name: 'Uninstall' })).toBeEnabled({timeout: 60_000});
-    } catch (e) {
-      console.log('Reload: Extension stuck in "Installing..."');
-      await this.page.reload();
-      await expect(plugin.getByRole('button', { name: 'Uninstall' })).toBeEnabled();
-    }
+    await this.ui.withReload(async () => {
+      await expect(plugin.getByRole('button', { name: 'Uninstall' })).toBeEnabled({timeout: 60_000})
+    }, 'Extension stuck in "Installing..."')
   }
 
   /**
