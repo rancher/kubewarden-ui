@@ -10,7 +10,7 @@ on:
 
 jobs:
   unit-test:
-    if: github.repository_owner == 'kubewarden'
+    if: github.repository_owner == 'rancher'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

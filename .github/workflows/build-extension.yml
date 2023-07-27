@@ -21,7 +21,7 @@ defaults:
 
 jobs:
   build:
-    if: github.repository_owner == 'kubewarden'
+    if: github.repository_owner == 'rancher'
     name: Build extension artifact
     runs-on: ubuntu-latest
     permissions: write-all

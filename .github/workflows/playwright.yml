@@ -50,8 +50,8 @@ env:
 
 jobs:
   e2e:
-    # run schedule workflows only on kubewarden repo, not forks
-    if: github.repository_owner == 'kubewarden' || github.event_name != 'schedule'
+    # run schedule workflows only on original repo, not forks
+    if: github.repository_owner == 'rancher' || github.event_name != 'schedule'
     runs-on: self-hosted
     steps:
     # ==================================================================================================
