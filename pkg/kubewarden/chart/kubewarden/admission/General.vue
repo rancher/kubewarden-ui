@@ -46,10 +46,6 @@ export default {
   async fetch() {
     await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: KUBEWARDEN.POLICY_SERVER });
 
-    if ( this.isGlobal ) {
-      set(this.policy, 'ignoreRancherNamespaces', this.hasNamespaceSelector);
-    }
-
     if ( this.isCreate && !isEmpty(this.policy.spec) ) {
       set(this.policy.spec, 'mode', 'protect');
     }
@@ -74,7 +70,7 @@ export default {
 
     return {
       policy,
-      initialPolicyMode: null
+      initialPolicyMode: null,
     };
   },
 
@@ -86,14 +82,6 @@ export default {
 
   computed: {
     ...mapGetters(['currentProduct']),
-
-    hasNamespaceSelector() {
-      if ( !this.isCreate ) {
-        return this.value?.policy?.namespaceSelector;
-      }
-
-      return true;
-    },
 
     isCreate() {
       return this.mode === _CREATE;
@@ -203,21 +191,6 @@ export default {
             :label="t('kubewarden.policyConfig.mode.warning')"
           />
         </div>
-
-        <template v-if="isGlobal">
-          <div class="col span-6">
-            <RadioGroup
-              v-model="policy.ignoreRancherNamespaces"
-              data-testid="kw-policy-general-ignore-ns-input"
-              name="ignoreRancherNamespaces"
-              :options="[true, false]"
-              :mode="mode"
-              :label="t('kubewarden.policyConfig.ignoreRancherNamespaces.label')"
-              :labels="['Yes', 'No']"
-              :tooltip="t('kubewarden.policyConfig.ignoreRancherNamespaces.tooltip')"
-            />
-          </div>
-        </template>
       </div>
     </template>
   </div>

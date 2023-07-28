@@ -10,86 +10,18 @@ import { CONFIG_MAP, MANAGEMENT, SERVICE } from '@shell/config/types';
 import { findBy, isArray } from '@shell/utils/array';
 import { addParams } from '@shell/utils/url';
 
-import { KUBEWARDEN, METRICS_DASHBOARD } from '../types';
+import {
+  KUBEWARDEN,
+  METRICS_DASHBOARD,
+  RANCHER_NAMESPACES,
+  RANCHER_NS_MATCH_EXPRESSION,
+  ARTIFACTHUB_ENDPOINT,
+  GRAFANA_DASHBOARD_ANNOTATIONS,
+  GRAFANA_DASHBOARD_LABELS,
+  VALIDATION_KEYS
+} from '../types';
 import policyServerDashboard from '../assets/kubewarden-metrics-policyserver.json';
 import policyDashboard from '../assets/kubewarden-metrics-policy.json';
-
-export const MODE_MAP = {
-  monitor: 'bg-info',
-  protect: 'bg-warning',
-};
-
-export const OPERATION_MAP = {
-  '*':     'bg-darker',
-  CREATE:  'bg-info',
-  UPDATE:  'bg-warning',
-  DELETE:  'bg-error',
-  CONNECT: 'bg-success',
-};
-
-export const RANCHER_NAMESPACES = [
-  'calico-system',
-  'cattle-alerting',
-  'cattle-fleet-local-system',
-  'cattle-fleet-system',
-  'cattle-global-data',
-  'cattle-global-nt',
-  'cattle-impersonation-system',
-  'cattle-istio',
-  'cattle-logging',
-  'cattle-pipeline',
-  'cattle-prometheus',
-  'cattle-system',
-  'cert-manager',
-  'ingress-nginx',
-  'kube-node-lease',
-  'kube-public',
-  'kube-system',
-  'rancher-operator-system',
-  'security-scan',
-  'tigera-operator',
-];
-
-export const NAMESPACE_SELECTOR = {
-  key:      'kubernetes.io/metadata.name',
-  operator: 'NotIn',
-  values:   RANCHER_NAMESPACES,
-};
-
-export const ARTIFACTHUB_ENDPOINT = 'artifacthub.io/api/v1';
-
-export const ARTIFACTHUB_PKG_ANNOTATION = 'artifacthub/pkg';
-
-export const GRAFANA_DASHBOARD_ANNOTATIONS = {
-  'meta.helm.sh/release-name':      'rancher-monitoring',
-  'meta.helm.sh/release-namespace': 'cattle-monitoring-system',
-};
-
-export const GRAFANA_DASHBOARD_LABELS = {
-  app:                            'rancher-monitoring-grafana',
-  'app.kubernetes.io/instance':   'rancher-monitoring',
-  'app.kubernetes.io/managed-by': 'Helm',
-  'app.kubernetes.io/part-of':    'rancher-monitoring',
-  'app.kubernetes.io/version':    '101.0.0_up19.0.3',
-  chart:                          'rancher-monitoring-101.0.0_up19.0.3',
-  grafana_dashboard:              '1',
-  heritage:                       'Helm',
-  release:                        'rancher-monitoring',
-  'kubewarden/part-of':           'cattle-kubewarden-system',
-};
-
-export const VALIDATION_KEYS = [
-  'allowed',
-  'host',
-  'kind',
-  'mutated',
-  'name',
-  'namespace',
-  'operation',
-  'policy_id',
-  'response_message',
-  'response_code',
-];
 
 export default class KubewardenModel extends SteveModel {
   async allServices() {
@@ -352,7 +284,7 @@ export default class KubewardenModel extends SteveModel {
     );
     const selector = filter(
       this.spec?.namespaceSelector?.matchExpressions,
-      matches(NAMESPACE_SELECTOR)
+      matches(RANCHER_NS_MATCH_EXPRESSION)
     );
 
     if (rancherNs || !selector) {

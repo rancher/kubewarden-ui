@@ -3,6 +3,8 @@ import { DefaultProps } from 'vue/types/options';
 import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from '@jest/globals';
 
+import { KUBEWARDEN } from '@kubewarden/types';
+
 import Rules from '@kubewarden/chart/kubewarden/admission/Rules';
 import Rule from '@kubewarden/chart/kubewarden/admission/Rules/Rule.vue';
 
@@ -15,6 +17,7 @@ describe('component: Rules', () => {
         return { rules: policyConfig.spec.rules };
       },
       propsData: { value: { policy: policyConfig } },
+      provide:   { chartType: KUBEWARDEN.ADMISSION_POLICY },
       computed:  {
         currentProduct: () => {
           return { inStore: 'cluster' };

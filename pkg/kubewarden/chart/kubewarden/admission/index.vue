@@ -6,10 +6,14 @@ import { _CREATE } from '@shell/config/query-params';
 
 import Tab from '@shell/components/Tabbed/Tab';
 
+import { KUBEWARDEN } from '../../../types';
+
 // Using this custom Questions component until `hide_input` changes are made to @shell version
 import Questions from '../../../components/Questions';
+
 import General from './General';
 import Rules from './Rules';
+import NamespaceSelector from './NamespaceSelector';
 import Settings from './Settings';
 import ContextAware from './ContextAware';
 
@@ -30,8 +34,10 @@ export default {
   },
 
   components: {
-    General, Questions, Rules, Settings, ContextAware, Tab
+    General, Questions, Rules, NamespaceSelector, Settings, ContextAware, Tab
   },
+
+  inject: ['chartType'],
 
   data() {
     return { chartValues: null };
@@ -62,6 +68,10 @@ export default {
 
     isCustom() {
       return this.customPolicy;
+    },
+
+    isGlobal() {
+      return this.chartType === KUBEWARDEN.CLUSTER_ADMISSION_POLICY;
     },
 
     showContextAware() {
@@ -108,6 +118,12 @@ export default {
       <Rules v-model="chartValues" data-testid="kw-policy-config-rules-tab" :mode="mode" />
     </Tab>
 
+    <template v-if="isGlobal">
+      <Tab name="namespaceSelector" :label="t('kubewarden.policyConfig.tabs.namespaceSelector')" :weight="97">
+        <NamespaceSelector v-model="chartValues.policy.spec.namespaceSelector" data-testid="kw-policy-config-ns-selector-tab" :mode="mode" />
+      </Tab>
+    </template>
+
     <template v-if="showContextAware">
       <Tab name="contextAware" :label="t('kubewarden.policyConfig.tabs.contextAware')" :weight="97">
         <ContextAware v-model="chartValues" data-testid="kw-policy-config-context-tab" :mode="mode" />
@@ -115,7 +131,7 @@ export default {
     </template>
 
     <template v-if="showSettings">
-      <Tab name="settings" :label="t('kubewarden.policyConfig.tabs.settings')" :weight="96">
+      <Tab name="settings" :label="t('kubewarden.policyConfig.tabs.settings')" :weight="95">
         <Settings
           v-model="chartValues"
           data-testid="kw-policy-config-settings-tab"
@@ -126,7 +142,7 @@ export default {
 
     <!-- Values as questions -->
     <template v-if="hasQuestions">
-      <Tab name="Settings" label="Settings" :weight="96">
+      <Tab name="Settings" label="Settings" :weight="95">
         <Questions
           v-model="chartValues.policy.spec.settings"
           data-testid="kw-policy-config-questions-tab"

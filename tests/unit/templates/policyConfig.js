@@ -54,6 +54,7 @@ export default {
           ],
         },
       ],
+      matchLabels: {}
     },
     policyServer: 'default',
     rules:        [

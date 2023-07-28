@@ -65,6 +65,7 @@ export default {
     v-else
     :resource="value"
     :mode="realMode"
+    :can-yaml="false"
     @finish="finish"
   >
     <Config :value="value" :mode="realMode" />

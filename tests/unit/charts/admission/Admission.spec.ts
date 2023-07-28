@@ -7,7 +7,7 @@ import Admission from '@kubewarden/chart/kubewarden/admission/index.vue';
 import Settings from '@kubewarden/chart/kubewarden/admission/Settings.vue';
 import Questions from '@kubewarden/components/Questions/index.vue';
 
-import { DEFAULT_POLICY } from '@kubewarden/plugins/policy-class';
+import { DEFAULT_POLICY, KUBEWARDEN } from '@kubewarden/types';
 import policyConfig from '../../templates/policyConfig';
 import { question } from '../../templates/questions';
 
@@ -17,7 +17,8 @@ describe('component: Rules', () => {
       propsData: {
         customPolicy: true,
         value:        { policy: DEFAULT_POLICY }
-      }
+      },
+      provide: { chartType: KUBEWARDEN.ADMISSION_POLICY },
     });
 
     const settings = wrapper.findComponent(Settings);
@@ -30,7 +31,9 @@ describe('component: Rules', () => {
       propsData: {
         customPolicy: false,
         value:        { policy: policyConfig, questions: {} }
-      }
+      },
+      provide: { chartType: KUBEWARDEN.ADMISSION_POLICY },
+
     });
 
     const settings = wrapper.findComponent(Settings);
@@ -43,7 +46,8 @@ describe('component: Rules', () => {
       propsData: {
         customPolicy: false,
         value:        { policy: policyConfig, questions: { questions: question } }
-      }
+      },
+      provide: { chartType: KUBEWARDEN.ADMISSION_POLICY },
     });
 
     const q = wrapper.findComponent(Questions);

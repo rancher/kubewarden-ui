@@ -5,6 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import { KUBEWARDEN } from '@kubewarden/types';
 import General from '@kubewarden/chart/kubewarden/admission/General.vue';
+
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import { RadioGroup } from '@components/Form/Radio';
 

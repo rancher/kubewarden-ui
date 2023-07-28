@@ -7,7 +7,7 @@ import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations
 import Loading from '@shell/components/Loading';
 import ResourceTable from '@shell/components/ResourceTable';
 
-import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS } from '../types';
+import { KUBEWARDEN_APPS } from '../types';
 
 import DefaultsBanner from '../components/DefaultsBanner';
 

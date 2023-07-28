@@ -154,6 +154,7 @@ kubewarden:
     tabs:
       general: General
       rules: Rules
+      namespaceSelector: Namespace Selector
       settings: Settings
       contextAware: Context Aware Resources
     serverSelect:
@@ -176,6 +177,16 @@ kubewarden:
     ignoreRancherNamespaces:
       label: Ignore Rancher Namespaces
       tooltip: Certain policies will break core services of Rancher, this will add a default list of namespaces to ignore.
+    namespaceSelector:
+      label: Namespace Selector
+      description: NamespaceSelector decides whether to evaluate the policy on a request, based on whether the namespace for that request matches the selector. If the object of the request is a namespace, the matching is performed on object.metadata.labels. If the object is another cluster scoped resource, it never skips the policy evaluation.
+      addSelector: Add Selectors
+      matchExpressions:
+        label: Match Expressions
+        tooltip: matchExpressions is a list of label selector requirements. 
+      matchLabels:
+        label: Match Labels
+        tooltip: "matchLabels is a map of key, value pairs. A single key, value in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'."
     rules:
       add: Add Rule Set
       remove: Remove Rule Set
