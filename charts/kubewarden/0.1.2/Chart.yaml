@@ -13,4 +13,4 @@ description: Kubewarden extension for Rancher Manager
 name: kubewarden
 type: application
 version: 0.1.2
-icon: https://raw.githubusercontent.com/kubewarden/kubewarden-ui/main/pkg/kubewarden/assets/icon-kubewarden.svg
+icon: https://raw.githubusercontent.com/rancher/kubewarden-ui/main/pkg/kubewarden/assets/icon-kubewarden.svg
