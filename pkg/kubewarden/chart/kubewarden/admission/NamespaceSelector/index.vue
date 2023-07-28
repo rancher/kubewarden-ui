@@ -9,7 +9,6 @@ import KeyValue from '@shell/components/form/KeyValue';
 import MatchExpressions from '@shell/components/form/MatchExpressions';
 import InfoBox from '@shell/components/InfoBox';
 import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
-import { RadioGroup } from '@components/Form/Radio';
 
 import { RANCHER_NS_MATCH_EXPRESSION } from '../../../../types';
 
@@ -26,7 +25,7 @@ export default {
   },
 
   components: {
-    KeyValue, MatchExpressions, InfoBox, Checkbox, RadioGroup
+    KeyValue, MatchExpressions, InfoBox, Checkbox
   },
 
   data() {
@@ -85,22 +84,18 @@ export default {
       {{ t('kubewarden.policyConfig.namespaceSelector.description') }}
     </p>
     <div class="col span-6 mb-20">
-      <RadioGroup
+      <Checkbox
         v-model="ignoreRancherNamespaces"
-        name="ignoreRancherNamespaces"
-        :options="[true, false]"
         :mode="mode"
         :label="t('kubewarden.policyConfig.ignoreRancherNamespaces.label')"
-        :labels="['Yes', 'No']"
         :tooltip="t('kubewarden.policyConfig.ignoreRancherNamespaces.tooltip')"
       />
     </div>
 
-    <div class="divider mb-20"></div>
-
     <div class="col span-6 mb-20">
       <Checkbox
         v-model="addSelector"
+        :mode="mode"
         :label="t('kubewarden.policyConfig.namespaceSelector.addSelector')"
       />
     </div>
@@ -145,10 +140,3 @@ export default {
     </template>
   </div>
 </template>
-
-<style lang="scss" scoped>
-.divider {
-  flex-basis: 100%;
-  border-top: 1px solid var(--border);
-}
-</style>
