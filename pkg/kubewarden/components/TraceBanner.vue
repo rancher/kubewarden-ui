@@ -4,8 +4,8 @@ import { Banner } from '@components/Banner';
 export default {
   props: {
     openTelemetryService: {
-      type:    Object,
-      default: null
+      type:    Array,
+      default: () => []
     },
     jaegerService: {
       type:    Object,
@@ -20,7 +20,7 @@ export default {
 <template>
   <div>
     <Banner color="warning">
-      <span v-if="!openTelemetryService" v-clean-html="t('kubewarden.tracing.noOpenTelemetry', {}, true)" data-testid="kw-trace-banner-no-telemetry" />
+      <span v-if="!openTelemetryService.length " v-clean-html="t('kubewarden.tracing.noOpenTelemetry', {}, true)" data-testid="kw-trace-banner-no-telemetry" />
       <span v-else-if="!jaegerService" v-clean-html="t('kubewarden.tracing.noJaeger', {}, true)" data-testid="kw-trace-banner-no-jaeger" />
       <span v-else data-testid="kw-trace-banner-no-traces">{{ t('kubewarden.tracing.noRelatedTraces') }}</span>
     </Banner>

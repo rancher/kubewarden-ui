@@ -1,18 +1,14 @@
 <script>
 export default {
-  name: 'InstallMenu',
-
   props: {
-    getStartedLink: {
-      type:    Object,
-      default: null,
-    },
-
     initStepIndex: {
       type:    Number,
       default: 0
     },
-
+    showTitle: {
+      type:    Boolean,
+      default: true
+    },
     steps: {
       type:    Array,
       default: null,
@@ -35,17 +31,17 @@ export default {
 
   methods: {
     goToStep(number, fromNav) {
-      if (number < 1) {
+      if ( number < 1 ) {
         return;
       }
 
-      if (number === 1 && fromNav) {
+      if ( number === 1 && fromNav ) {
         return;
       }
 
       const selected = this.steps[number - 1];
 
-      if (!selected || (!this.isAvailable(selected) && number !== 1)) {
+      if ( !selected || (!this.isAvailable(selected) && number !== 1) ) {
         return;
       }
 
@@ -55,18 +51,18 @@ export default {
     },
 
     isAvailable(step) {
-      if (!step) {
+      if ( !step ) {
         return false;
       }
 
       const idx = this.steps.findIndex(s => s.name === step.name);
 
-      if (idx === 0) {
+      if ( idx === 0 ) {
         return false;
       }
 
-      for (let i = 0; i < idx; i++) {
-        if (this.steps[i].ready === false) {
+      for ( let i = 0; i < idx; i++ ) {
+        if ( this.steps[i].ready === false ) {
           return false;
         }
       }
@@ -85,15 +81,20 @@ export default {
   <div>
     <div class="header mt-20 mb-20">
       <div class="title">
-        <div class="product-image">
-          <img src="../../assets/icon-kubewarden.svg" class="logo" />
-        </div>
-        <div class="subtitle mr-20">
-          <h2>
-            {{ t('kubewarden.title') }}
-          </h2>
-          <span class="subtext">{{ t('kubewarden.dashboard.install') }}</span>
-        </div>
+        <template v-if="showTitle">
+          <div>
+            <div class="product-image">
+              <img src="../assets/icon-kubewarden.svg" class="logo" />
+            </div>
+            <div class="subtitle mr-20">
+              <h2>
+                {{ t('kubewarden.title') }}
+              </h2>
+              <span class="subtext">{{ t('kubewarden.dashboard.install') }}</span>
+            </div>
+          </div>
+        </template>
+
         <div class="subtitle">
           <h2>{{ t('wizard.step', {number: activeStepIndex + 1}) }}</h2>
           <slot name="bannerSubtext">

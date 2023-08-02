@@ -103,13 +103,17 @@ export default {
     </div>
 
     <div class="row">
-      <div class="col span-6">
+      <div v-if="showVersionBanner" class="col span-12">
         <Banner
-          v-if="showVersionBanner"
           class="mb-20 mt-0"
           color="warning"
           :label="t('kubewarden.policyServerConfig.defaultImage.versionWarning')"
         />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col span-6">
         <RadioGroup
           v-model="defaultImage"
           data-testid="ps-config-default-image-button"

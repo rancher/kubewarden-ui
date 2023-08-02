@@ -24,7 +24,10 @@ export default {
     const inStore = this.currentProduct.inStore;
 
     const hash = await allHash({
-      controller:         this.$store.dispatch(`${ inStore }/findMatching`, { type: WORKLOAD_TYPES.DEPLOYMENT, selector: `${ KUBERNETES.MANAGED_NAME }=${ KUBEWARDEN_CHARTS.CONTROLLER }` }),
+      controller:         this.$store.dispatch(`${ inStore }/findMatching`, {
+        type:     WORKLOAD_TYPES.DEPLOYMENT,
+        selector: `${ KUBERNETES.MANAGED_NAME }=${ KUBEWARDEN_CHARTS.CONTROLLER }`
+      }),
       psPods:             this.$store.dispatch(`${ inStore }/findMatching`, { type: POD, selector: 'kubewarden/policy-server' }),
       globalPolicies:     this.$store.dispatch(`${ inStore }/findAll`, { type: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }),
       namespacedPolicies: this.$store.dispatch(`${ inStore }/findAll`, { type: KUBEWARDEN.ADMISSION_POLICY }),

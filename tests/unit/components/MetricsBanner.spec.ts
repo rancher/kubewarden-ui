@@ -24,7 +24,6 @@ describe('component: MetricsBanner', () => {
           getters: {
             currentProduct:         () => 'current_product',
             monitoringChart:        () => null,
-            metricsDashboard:       () => null,
             'current_product/all':  jest.fn(),
             'i18n/t':               jest.fn()
           },
@@ -53,7 +52,6 @@ describe('component: MetricsBanner', () => {
           getters: {
             currentProduct:         () => 'current_product',
             monitoringChart:        () => null,
-            metricsDashboard:       () => null,
             'current_product/all':  jest.fn(),
             'cluster/matching':     jest.fn(),
             'i18n/t':               jest.fn()
@@ -82,7 +80,6 @@ describe('component: MetricsBanner', () => {
           getters: {
             currentProduct:         () => 'current_product',
             monitoringChart:        () => null,
-            metricsDashboard:       () => null,
             'current_product/all':  jest.fn(),
             'cluster/matching':     jest.fn(),
             'i18n/t':               jest.fn()
@@ -105,8 +102,7 @@ describe('component: MetricsBanner', () => {
       computed:  {
         monitoringStatus: () => {
           return { installed: true };
-        },
-        metricsDashboard: () => true
+        }
       },
       mocks:     {
         $fetchState: { pending: false },
@@ -114,9 +110,7 @@ describe('component: MetricsBanner', () => {
           getters: {
             currentProduct:         () => 'current_product',
             monitoringChart:        () => null,
-            metricsDashboard:       () => null,
             'current_product/all':  jest.fn(),
-            'cluster/matching':     jest.fn(),
             'i18n/t':               jest.fn()
           },
         }
@@ -126,36 +120,6 @@ describe('component: MetricsBanner', () => {
     const banner = wrapper.findComponent(Banner);
 
     expect(banner.exists()).toBe(true);
-    expect(banner.html().includes('%kubewarden.metrics.noService%')).toBe(true);
-  });
-
-  it('warning banner displays when metrics is installed and service is falsy', () => {
-    const wrapper = shallowMount(MetricsBanner as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData: { metricsType: METRICS_DASHBOARD.POLICY_SERVER },
-      computed:  {
-        monitoringStatus: () => {
-          return { installed: true };
-        },
-        metricsDashboard: () => true
-      },
-      mocks:     {
-        $fetchState: { pending: false },
-        $store:      {
-          getters: {
-            currentProduct:         () => 'current_product',
-            monitoringChart:        () => null,
-            metricsDashboard:       () => null,
-            'current_product/all':  jest.fn(),
-            'cluster/matching':     jest.fn(),
-            'i18n/t':               jest.fn()
-          },
-        }
-      },
-    });
-
-    const banner = wrapper.findComponent(Banner);
-
-    expect(banner.exists()).toBe(true);
-    expect(banner.html().includes('%kubewarden.metrics.noService%')).toBe(true);
+    expect(banner.html().includes('%kubewarden.metrics.notInstalled%')).toBe(true);
   });
 });
