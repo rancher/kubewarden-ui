@@ -46,7 +46,7 @@ export class RancherUI {
     // Table Handler
 
     getRow(name: string, options?: {group?: string}) {
-        return new TableRow(this.page, name, {group: options?.group})
+        return new TableRow(this, name, {group: options?.group})
     }
 
     // ==================================================================================================
@@ -85,6 +85,10 @@ export class RancherUI {
         await page.keyboard.insertText(jsyaml.dump(cmYaml))
     }
 
+
+    /**
+     * Call ui.withReload(async()=> { <code> }, 'Reason')
+     */
     async withReload(code: () => Promise<void>, message?: string): Promise<void> {
         try {
             await code();

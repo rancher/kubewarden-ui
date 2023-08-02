@@ -1,8 +1,9 @@
-import { expect, Page, Locator } from '@playwright/test';
+import { expect, Locator } from '@playwright/test';
+import { RancherUI } from '../pages/rancher-ui';
 
 export class TableRow {
 
-  private readonly page: Page
+  private readonly ui: RancherUI
   readonly row: Locator
   readonly name: Locator
   readonly status: Locator
@@ -14,20 +15,22 @@ export class TableRow {
    * @param group When there are multiple tbodies filter by group-tab
    *
    */
-  constructor(page: Page, name: string, options?: {group?: string}) {
-    let tbody = page.locator('table.sortable-table > tbody')
+  constructor(ui: RancherUI, name: string, options?: {group?: string}) {
+    let tbody = ui.page.locator('table.sortable-table > tbody')
     if (options?.group) {
-      tbody = tbody.filter({has: page.getByRole('cell', {name: options.group, exact: true})})
+      tbody = tbody.filter({has: ui.page.getByRole('cell', {name: options.group, exact: true})})
     }
 
-    this.page = page
-    this.row = tbody.locator('tr.main-row').filter({has: page.getByRole('link', {name: name, exact: true})})
+    this.ui = ui
+    this.row = tbody.locator('tr.main-row').filter({has: ui.page.getByRole('link', {name: name, exact: true})})
     this.name = this.column('Name')
     this.status = this.column('Status')
   }
 
   async toBeVisible() {
-    await expect(this.row).toBeVisible()
+    await this.ui.withReload(async()=> {
+      await expect(this.row).toBeVisible()
+    }, 'Rancher showing duplicit rows')
   }
 
   async toBeActive(timeout = 200_000) {
@@ -40,14 +43,13 @@ export class TableRow {
   }
 
   async action(name: string) {
-    // Alternative: locator(`button[id$='+${name}']`) - id="actionButton+0+rancher-kubewarden-controller"
     await this.row.locator('button.actions').click()
-    await this.page.getByRole('listitem').getByText(name, {exact: true}).click()
+    await this.ui.page.getByRole('listitem').getByText(name, {exact: true}).click()
   }
 
   async delete() {
     await this.action('Delete')
-    await this.page.getByTestId('prompt-remove-confirm-button').click()
+    await this.ui.page.getByTestId('prompt-remove-confirm-button').click()
     await expect(this.row).not.toBeVisible();
   }
 
