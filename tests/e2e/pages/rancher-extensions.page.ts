@@ -13,13 +13,14 @@ export class RancherExtensionsPage extends BasePage {
     await this.tabs.getByRole('tab', { name: name, exact:true }).click()
   }
 
-  async enable(addRancherRepo: boolean) {
+  async enable(rancherRepo=true, partnersRepo=true) {
     await this.page.goto('dashboard/c/local/uiplugins');
     await expect(this.page.getByRole('heading', { name: 'Extension support is not enabled' })).toBeVisible()
 
     // Enable extensions
     await this.page.getByRole('button', { name: 'Enable' }).click();
-    await this.ui.checkbox('Add the Rancher Extension Repository').setChecked(addRancherRepo)
+    await this.ui.checkbox('Rancher Extensions Repository').setChecked(rancherRepo)
+    await this.ui.checkbox('Partners Extensions Repository').setChecked(partnersRepo)
     await this.page.getByRole('button', { name: 'OK' }).click();
 
     // Wait for extensions to be enabled
