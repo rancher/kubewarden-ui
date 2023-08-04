@@ -1,4 +1,6 @@
 <script>
+import isEmpty from 'lodash/isEmpty';
+
 import { _CREATE, CATEGORY, SEARCH_QUERY } from '@shell/config/query-params';
 import { ensureRegex } from '@shell/utils/string';
 import { sortBy } from '@shell/utils/sort';
@@ -38,9 +40,21 @@ export default {
 
       category:     null,
       keywords:     [],
-      organization:    null,
+      organization: [],
       searchQuery:  null
     };
+  },
+
+  beforeMount() {
+    if ( !isEmpty(this.value) ) {
+      const officialExists = this.value.find(subtype => this.isOfficial(subtype));
+
+      this.$nextTick(() => {
+        if ( officialExists && officialExists.repository?.organization_display_name ) {
+          this.organization.push(officialExists.repository.organization_display_name);
+        }
+      });
+    }
   },
 
   computed: {
@@ -175,7 +189,7 @@ export default {
       return type === '*' ? 'Global' : type;
     },
 
-    showOfficialBadge(subtype) {
+    isOfficial(subtype) {
       return subtype?.repository?.organization_name?.toLowerCase() === KUBEWARDEN_PRODUCT_NAME;
     },
 
@@ -270,7 +284,7 @@ export default {
               </span>
             </div>
 
-            <div v-if="showOfficialBadge(subtype)" class="subtype__icon">
+            <div v-if="isOfficial(subtype)" class="subtype__icon">
               <img
                 v-clean-tooltip="t('kubewarden.policies.official')"
                 src="../../assets/icon-kubewarden.svg"
