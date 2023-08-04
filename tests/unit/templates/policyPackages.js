@@ -7,14 +7,14 @@ export default [
     data:         { 'kubewarden/resources': 'Deployment,Replicaset,Statefulset,Daemonset,Replicationcontroller,Job,Cronjob,Pod' },
     signed:       true,
     signatures:   ['cosign'],
-    provider:     'kubewarden'
+    repository:   { organization_display_name: 'Kubewarden Developers' }
   },
   {
     name:         'signed-test-policy',
     display_name: 'Signed Test Policy',
     description:  'A signed test policy with no signatures',
     signed:       true,
-    provider:     'evil'
+    repository:   { user_alias: 'evil' }
   },
   {
     name:         'test-policy',
@@ -27,6 +27,6 @@ export default [
     description:  'A test policy with less info',
     data:         { 'kubewarden/resources': 'Daemonset' },
     keywords:     ['PSP'],
-    provider:     'evil'
+    repository:   { user_alias: 'evil' }
   }
 ];

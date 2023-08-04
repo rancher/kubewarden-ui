@@ -129,7 +129,7 @@ kubewarden:
       banner: "An air-gapped installation is detected, you will be unable to use the policies listed within the ArtifactHub catalog. You are still able to deploy a custom policy by referencing a WebAssembly module that is accessible to this cluster."
   utils:
     keyword: Filter by Keyword
-    provider: Filter by Provider
+    organization: Filter by Organization
     resource: Filter by Resource Type
     resetFilter: Reset Filter
   tracing:
