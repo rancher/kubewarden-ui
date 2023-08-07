@@ -36,7 +36,7 @@ describe('component: General', () => {
     expect(wrapper.html()).toContain('Allow Privilege Escalation PSP');
   });
 
-  it('should render correct provider options in LabeledSelect', () => {
+  it('should render correct organization options in LabeledSelect', () => {
     const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData:  { targetNamespace: 'default', value: policyPackages },
       directives: { tooltip: jest.fn() },
@@ -45,10 +45,10 @@ describe('component: General', () => {
 
     const selects = wrapper.findAllComponents(LabeledSelect);
 
-    expect(selects.at(0).props().options).toStrictEqual(['kubewarden', 'evil'] as String[]);
+    expect(selects.at(0).props().options).toStrictEqual(['Kubewarden Developers', 'evil'] as String[]);
   });
 
-  it('filters shown cards by provider when selected', async() => {
+  it('filters shown cards by organization when selected', async() => {
     const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData:  { targetNamespace: 'default', value: policyPackages },
       directives: { tooltip: jest.fn() },
@@ -59,7 +59,7 @@ describe('component: General', () => {
     expect(wrapper.html()).toContain('Signed Test Policy');
     expect(wrapper.html()).toContain('Test Policy 2');
 
-    await wrapper.setData({ provider: ['evil'] });
+    await wrapper.setData({ organization: ['evil'] });
 
     expect(wrapper.html()).not.toContain('Allow Privilege Escalation PSP');
     expect(wrapper.html()).toContain('Test Policy 2');

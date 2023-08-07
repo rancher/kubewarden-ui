@@ -1,4 +1,6 @@
 <script>
+import isEmpty from 'lodash/isEmpty';
+
 import { _CREATE, CATEGORY, SEARCH_QUERY } from '@shell/config/query-params';
 import { ensureRegex } from '@shell/utils/string';
 import { sortBy } from '@shell/utils/sort';
@@ -36,11 +38,23 @@ export default {
     return {
       KUBEWARDEN_PRODUCT_NAME,
 
-      category:    null,
-      keywords:    [],
-      provider:    null,
-      searchQuery: null
+      category:     null,
+      keywords:     [],
+      organization: [],
+      searchQuery:  null
     };
+  },
+
+  beforeMount() {
+    if ( !isEmpty(this.value) ) {
+      const officialExists = this.value.find(subtype => this.isOfficial(subtype));
+
+      this.$nextTick(() => {
+        if ( officialExists && officialExists.repository?.organization_display_name ) {
+          this.organization.push(officialExists.repository.organization_display_name);
+        }
+      });
+    }
   },
 
   computed: {
@@ -72,9 +86,11 @@ export default {
           }
         }
 
-        if ( this.provider ) {
-          for ( const p of this.provider ) {
-            if ( !subtype.provider || !subtype.provider?.includes(p) ) {
+        if ( this.organization ) {
+          for ( const org of this.organization ) {
+            const name = subtype.repository?.organization_display_name || subtype.repository?.user_alias;
+
+            if ( !name || name !== org ) {
               return false;
             }
           }
@@ -100,9 +116,11 @@ export default {
       return [...new Set(flattened.filter(Boolean))];
     },
 
-    providerOptions() {
+    organizationOptions() {
       const out = this.value?.flatMap((subtype) => {
-        return subtype.provider ? subtype.provider : [];
+        const name = subtype.repository?.organization_display_name || subtype.repository?.user_alias;
+
+        return name || [];
       });
 
       if ( !out || out?.length === 0 ) {
@@ -142,7 +160,7 @@ export default {
       }
 
       return [...new Set(out.filter(Boolean))];
-    },
+    }
   },
 
   methods: {
@@ -153,7 +171,7 @@ export default {
     refresh() {
       this.category = null;
       this.keywords = [];
-      this.provider = null;
+      this.organization = null;
       this.searchQuery = null;
     },
 
@@ -171,6 +189,10 @@ export default {
       return type === '*' ? 'Global' : type;
     },
 
+    isOfficial(subtype) {
+      return subtype?.repository?.organization_name?.toLowerCase() === KUBEWARDEN_PRODUCT_NAME;
+    },
+
     subtypeSignature(subtype) {
       return subtype.signatures?.[0] || 'unknown';
     }
@@ -184,16 +206,16 @@ export default {
   >
     <div class="filter">
       <LabeledSelect
-        v-if="providerOptions.length"
-        v-model="provider"
-        data-testid="kw-grid-filter-provider"
+        v-if="organizationOptions.length"
+        v-model="organization"
+        data-testid="kw-grid-filter-organization"
         :clearable="true"
         :taggable="true"
         :mode="mode"
         :multiple="true"
-        class="filter__provider"
-        :label="t('kubewarden.utils.provider')"
-        :options="providerOptions"
+        class="filter__organization"
+        :label="t('kubewarden.utils.organization')"
+        :options="organizationOptions"
       />
 
       <LabeledSelect
@@ -262,7 +284,7 @@ export default {
               </span>
             </div>
 
-            <div v-if="subtype.provider === KUBEWARDEN_PRODUCT_NAME" class="subtype__icon">
+            <div v-if="isOfficial(subtype)" class="subtype__icon">
               <img
                 v-clean-tooltip="t('kubewarden.policies.official')"
                 src="../../assets/icon-kubewarden.svg"
