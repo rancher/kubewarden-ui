@@ -258,6 +258,7 @@ kubewarden:
       label: Context Aware
       tooltip: Can determine whether an AdmissionRequest has to be accepted or rejected based on other resources already deployed in the cluster.
   policyReporter:
+    title: Policy Reporter
     link: Policy Reporter UI
     service:
       banner:

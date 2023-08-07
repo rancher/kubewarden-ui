@@ -261,52 +261,6 @@ export default class KubewardenModel extends SteveModel {
     return out;
   }
 
-  get policyReporterService() {
-    return async() => {
-      try {
-        const services = await this.$dispatch('cluster/findMatching', {
-          type:     SERVICE,
-          selector: 'app.kubernetes.io/part-of=policy-reporter'
-        }, { root: true });
-
-        if ( !isEmpty(services) ) {
-          return services.find(s => s.metadata?.labels?.['app.kubernetes.io/name'] === 'ui');
-        }
-      } catch (e) {
-        const error = e.data || e;
-
-        this.$dispatch('growl/error', {
-          title:   error._statusText,
-          message: error.message,
-          timeout: 3000,
-        }, { root: true });
-      }
-    };
-  }
-
-  get policyReporterProxy() {
-    return async() => {
-      try {
-        const service = await this.policyReporterService();
-
-        if ( service ) {
-          const base = `/api/v1/namespaces/${ service.metadata?.namespace }/services/`;
-          const proxy = `http:${ service.metadata?.name }:${ service.spec?.ports?.[0].port }/proxy`;
-
-          return base + proxy;
-        }
-      } catch (e) {
-        const error = e.data || e;
-
-        this.$dispatch('growl/error', {
-          title:   error._statusText,
-          message: error.message,
-          timeout: 3000,
-        }, { root: true });
-      }
-    };
-  }
-
   get openTelemetryService() {
     return async() => {
       try {

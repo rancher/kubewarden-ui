@@ -1,25 +1,20 @@
 <script>
 import isEmpty from 'lodash/isEmpty';
 
+import { SERVICE } from '@shell/config/types';
 import { Banner } from '@components/Banner';
 
+import { handleGrowlError } from '../../utils/handle-growl';
 import InstallView from './InstallView';
 
 export default {
-  props: {
-    value: {
-      type:     Object,
-      required: true
-    }
-  },
-
   components: { Banner, InstallView },
 
   async fetch() {
-    this.reporterService = await this.value.policyReporterService();
+    this.reporterService = await this.policyReporterService();
 
     if ( !isEmpty(this.reporterService) ) {
-      this.reporterUrl = await this.value.policyReporterProxy();
+      this.reporterUrl = this.policyReporterProxy();
     }
   },
 
@@ -28,6 +23,38 @@ export default {
       reporterService: null,
       reporterUrl:     null
     };
+  },
+
+  methods: {
+    async policyReporterService() {
+      try {
+        const services = await this.$store.dispatch('cluster/findMatching', {
+          type:     SERVICE,
+          selector: 'app.kubernetes.io/part-of=policy-reporter'
+        });
+
+        if ( !isEmpty(services) ) {
+          return services.find(s => s.metadata?.labels?.['app.kubernetes.io/name'] === 'ui');
+        }
+      } catch (e) {
+        handleGrowlError({ error: e, store: this.$store });
+      }
+    },
+
+    policyReporterProxy() {
+      try {
+        const service = this.reporterService;
+
+        if ( service ) {
+          const base = `/api/v1/namespaces/${ service.metadata?.namespace }/services/`;
+          const proxy = `http:${ service.metadata?.name }:${ service.spec?.ports?.[0].port }/proxy`;
+
+          return base + proxy;
+        }
+      } catch (e) {
+        handleGrowlError({ error: e, store: this.$store });
+      }
+    }
   }
 };
 </script>

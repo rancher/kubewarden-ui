@@ -24,13 +24,12 @@ import { handleGrowlError } from '../utils/handle-growl';
 import MetricsBanner from '../components/MetricsBanner';
 import TraceBanner from '../components/TraceBanner';
 import TraceTable from '../components/TraceTable';
-import PolicyReporter from '../components/PolicyReporter';
 
 export default {
   name: 'PolicyServer',
 
   components: {
-    CountGauge, DashboardMetrics, Loading, MetricsBanner, PolicyReporter, ResourceTabs, ResourceTable, Tab, TraceBanner, TraceTable
+    CountGauge, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, ResourceTable, Tab, TraceBanner, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -249,11 +248,7 @@ export default {
         </template>
       </Tab>
 
-      <Tab name="policy-reporter" label="Policy Reporter" :weight="98">
-        <PolicyReporter :value="value" />
-      </Tab>
-
-      <Tab name="policy-metrics" label="Metrics" :weight="97">
+      <Tab name="policy-metrics" label="Metrics" :weight="98">
         <MetricsBanner
           v-if="!monitoringStatus.installed || !metricsService"
           :metrics-service="metricsService"
@@ -274,7 +269,7 @@ export default {
         </template>
       </Tab>
 
-      <Tab name="policy-tracing" label="Tracing" :weight="96">
+      <Tab name="policy-tracing" label="Tracing" :weight="97">
         <template>
           <TraceTable :rows="filteredValidations">
             <template #traceBanner>

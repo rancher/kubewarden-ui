@@ -1,5 +1,5 @@
 import { rootKubewardenRoute } from '../utils/custom-routing';
-import { KUBEWARDEN, KUBEWARDEN_DASHBOARD } from '../types';
+import { KUBEWARDEN, KUBEWARDEN_DASHBOARD, POLICY_REPORTER_PRODUCT, KUBEWARDEN_PRODUCT_NAME } from '../types';
 import { POLICY_SERVER_HEADERS, POLICY_HEADERS } from './table-headers';
 
 export function init($plugin: any, store: any) {
@@ -35,8 +35,21 @@ export function init($plugin: any, store: any) {
     overview:    true
   });
 
+  virtualType({
+    label:      store.getters['i18n/t']('kubewarden.policyReporter.title'),
+    icon:       'notifier',
+    name:       POLICY_REPORTER_PRODUCT,
+    namespaced: false,
+    weight:     95,
+    route:      {
+      name:   `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-${ POLICY_REPORTER_PRODUCT }`,
+      params: { product: KUBEWARDEN_PRODUCT_NAME }
+    }
+  });
+
   basicType([
     KUBEWARDEN_DASHBOARD,
+    POLICY_REPORTER_PRODUCT,
     POLICY_SERVER,
     ADMISSION_POLICY,
     CLUSTER_ADMISSION_POLICY
