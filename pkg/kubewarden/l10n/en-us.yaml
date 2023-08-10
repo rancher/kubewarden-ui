@@ -52,7 +52,7 @@ kubewarden:
         stepProgress: The active step will progress once Cert-Manager is installed.
       repository:
         title: Repository
-        description: You will need the Kubewarden helm repository (https://charts.kubewarden.io) to install the `kubewarden` chart.
+        description: You will need the Kubewarden Helm repository (https://charts.kubewarden.io) to install the `kubewarden` chart.
       airGapped:
         warning: "An air-gapped installation has been detected, this will require intervention to enable access to Kubewarden images and policies. It is necessary to make them available from an OCI registry that is accessible to the cluster."
         docs: |
@@ -257,6 +257,23 @@ kubewarden:
     contextAware: 
       label: Context Aware
       tooltip: Can determine whether an AdmissionRequest has to be accepted or rejected based on other resources already deployed in the cluster.
+  policyReporter:
+    title: Policy Reporter
+    link: Policy Reporter UI
+    service:
+      banner:
+        unavailable: The Policy Reporter service is unavailable, follow the instructions to install the Policy Reporter chart.
+    url:
+      banner:
+        unavailable: The Policy Reporter UI proxy URL is unavailble, please ensure that the UI is properly configured.
+    install:
+      airGapped:
+        warning: "An air-gapped installation has been detected, this will require intervention to install the Policy Reporter UI. It is necessary to make the charts available from an OCI registry that is accessible to the cluster."
+      repo:
+        title: Policy Reporter Repository
+        description: You will need to add the Policy Reporter Helm (https://kyverno.github.io/policy-reporter) to install the `policy-reporter` chart.
+      chart:
+        title: Install Policy Reporter Chart
 
 asyncButton:
   artifactHub:
@@ -275,3 +292,11 @@ asyncButton:
     action: Add Grafana Dashboard
     success: Added
     wating: Adding&hellip;
+  policyReporterRepo:
+    action: Add Policy Reporter Repository
+    success: Added
+    waiting: Adding&hellip;
+  policyReporterChart:
+    action: Install Policy Reporter Chart
+    success: Installed
+    waiting: Installing&hellip;

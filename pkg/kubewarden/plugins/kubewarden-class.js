@@ -1,5 +1,6 @@
 import filter from 'lodash/filter';
 import matches from 'lodash/matches';
+import isEmpty from 'lodash/isEmpty';
 
 import SteveModel from '@shell/plugins/steve/steve-class';
 import {
@@ -7,7 +8,7 @@ import {
   STATES_ENUM,
 } from '@shell/plugins/dashboard-store/resource-class';
 import { CONFIG_MAP, MANAGEMENT, SERVICE } from '@shell/config/types';
-import { findBy, isArray } from '@shell/utils/array';
+import { isArray } from '@shell/utils/array';
 import { addParams } from '@shell/utils/url';
 
 import {
@@ -26,6 +27,11 @@ import policyDashboard from '../assets/kubewarden-metrics-policy.json';
 export default class KubewardenModel extends SteveModel {
   async allServices() {
     const inStore = this.$rootGetters['currentProduct'].inStore;
+    const services = this.$rootGetters[`${ inStore }/all`](SERVICE);
+
+    if ( !isEmpty(services) ) {
+      return services;
+    }
 
     return await this.$dispatch(
       `${ inStore }/findAll`,
@@ -103,9 +109,10 @@ export default class KubewardenModel extends SteveModel {
   get certManagerService() {
     return async() => {
       try {
-        const all = await this.allServices();
-
-        return all.find(s => s.metadata?.labels?.['app'] === 'cert-manager');
+        return await this.$dispatch('cluster/findMatch', {
+          type:     SERVICE,
+          selector: 'app.kubernetes.io/instance=cert-manager'
+        }, { root: true });
       } catch (e) {
         console.warn(`Error fetching cert-manager service: ${ e }`); // eslint-disable-line no-console
       }
@@ -117,17 +124,10 @@ export default class KubewardenModel extends SteveModel {
   get grafanaService() {
     return async() => {
       try {
-        const services = await this.allServices();
-
-        if (services) {
-          const grafana = findBy(
-            services,
-            'id',
-            'cattle-monitoring-system/rancher-monitoring-grafana'
-          );
-
-          return grafana;
-        }
+        return await this.$dispatch('cluster/find', {
+          type: SERVICE,
+          id:   'cattle-monitoring-system/rancher-monitoring-grafana'
+        }, { root: true });
       } catch (e) {
         console.warn(`Error getting Grafana service: ${ e }`); // eslint-disable-line no-console
       }
@@ -136,19 +136,16 @@ export default class KubewardenModel extends SteveModel {
 
   get grafanaProxy() {
     return async(type) => {
-      const dashboardName =
-        type === METRICS_DASHBOARD.POLICY_SERVER ? 'kubewarden-policy-server' : 'kubewarden-policy';
+      const dashboardName = type === METRICS_DASHBOARD.POLICY_SERVER ? 'kubewarden-policy-server' : 'kubewarden-policy';
 
       try {
         const grafana = await this.grafanaService();
 
-        if (grafana) {
+        if ( !isEmpty(grafana) ) {
           const base = `/api/v1/namespaces/${ grafana.metadata.namespace }/services/http:${ grafana.metadata.name }:80/proxy`;
           const path = `/d/${ type }/${ dashboardName }?orgId=1&kiosk`;
 
-          const out = base + path;
-
-          return out;
+          return base + path;
         }
       } catch (e) {
         console.warn(`Error fetching Grafana proxy: ${ e }`); // eslint-disable-line no-console
@@ -158,23 +155,32 @@ export default class KubewardenModel extends SteveModel {
     };
   }
 
-  get jaegerService() {
+  get grafanaDashboard() {
     return async() => {
       try {
-        const services = await this.allServices();
+        return await this.$dispatch('cluster/findMatching', {
+          type:     CONFIG_MAP,
+          selector: `kubewarden/part-of=cattle-kubewarden-system`
+        }, { root: true });
+      } catch (e) {
+        console.warn(`Error fetching grafana dashboard configMap: ${ e }`); // eslint-disable-line no-console
+      }
+    };
+  }
 
-        if (services) {
-          return services.find((s) => {
-            const found =
-              s.metadata?.labels?.['app'] === 'jaeger' &&
-              s.metadata?.labels?.['app.kubernetes.io/component'] ===
-                'service-query';
+  get jaegerQueryService() {
+    return async() => {
+      try {
+        const services = await this.$dispatch('cluster/findMatching', {
+          type:     SERVICE,
+          selector: 'app.kubernetes.io/part-of=jaeger'
+        }, { root: true });
 
-            if (found) {
-              return s;
-            }
-          });
+        if ( !isEmpty(services) ) {
+          return services.find(s => s.metadata?.labels?.['app.kubernetes.io/component'] === 'service-query');
         }
+
+        return null;
       } catch (e) {
         console.warn(`Error fetching services: ${ e }`); // eslint-disable-line no-console
       }
@@ -258,17 +264,10 @@ export default class KubewardenModel extends SteveModel {
   get openTelemetryService() {
     return async() => {
       try {
-        const services = await this.allServices();
-
-        if (services) {
-          return services.find((s) => {
-            const found = s.metadata?.labels?.['app.kubernetes.io/name'] === 'opentelemetry-operator';
-
-            if ( found ) {
-              return s;
-            }
-          });
-        }
+        return await this.$dispatch('cluster/findMatching', {
+          type:     SERVICE,
+          selector: 'app.kubernetes.io/name=opentelemetry-operator'
+        }, { root: true });
       } catch (e) {
         console.warn(`Error fetching opentelemetry service: ${ e }`); // eslint-disable-line no-console
       }
@@ -332,7 +331,13 @@ export default class KubewardenModel extends SteveModel {
     try {
       await configMapTemplate.save();
     } catch (e) {
-      console.warn(`Error creating dashboard configmap: ${ e }`); // eslint-disable-line no-console
+      const error = e.data || e;
+
+      this.$dispatch('growl/error', {
+        title:   error._statusText,
+        message: error.message,
+        timeout: 3000,
+      }, { root: true });
     }
   }
 

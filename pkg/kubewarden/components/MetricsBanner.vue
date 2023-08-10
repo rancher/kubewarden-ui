@@ -1,7 +1,6 @@
 <script>
 import { mapGetters } from 'vuex';
 import { monitoringStatus } from '@shell/utils/monitoring';
-import { CONFIG_MAP } from '@shell/config/types';
 
 import { Banner } from '@components/Banner';
 import AsyncButton from '@shell/components/AsyncButton';
@@ -31,7 +30,11 @@ export default {
       await this.$store.dispatch('catalog/load');
     }
 
-    await this.$store.dispatch('cluster/findAll', { type: CONFIG_MAP });
+    this.grafanaDashboard = await this.value.grafanaDashboard();
+  },
+
+  data() {
+    return { grafanaDashboard: null };
   },
 
   computed: {
@@ -40,16 +43,7 @@ export default {
 
     monitoringChart() {
       return this.$store.getters['catalog/chart']({ chartName: 'rancher-monitoring' });
-    },
-
-    metricsDashboard() {
-      const out = this.$store.getters['cluster/matching']({
-        type:     CONFIG_MAP,
-        selector: `kubewarden/part-of=cattle-kubewarden-system`
-      });
-
-      return Array.isArray(out) && !out.length ? null : out;
-    },
+    }
   },
 
   methods: {
@@ -79,7 +73,7 @@ export default {
     </Banner>
   </div>
 
-  <div v-else-if="!metricsDashboard">
+  <div v-else-if="!grafanaDashboard">
     <Banner color="warning">
       <template v-if="!reloadRequired">
         <p class="mb-20">

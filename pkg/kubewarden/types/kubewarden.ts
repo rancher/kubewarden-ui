@@ -19,5 +19,7 @@ export const KUBEWARDEN_APPS = {
 export const KUBEWARDEN = {
   ADMISSION_POLICY:         'policies.kubewarden.io.admissionpolicy',
   CLUSTER_ADMISSION_POLICY: 'policies.kubewarden.io.clusteradmissionpolicy',
-  POLICY_SERVER:            'policies.kubewarden.io.policyserver'
+  POLICY_SERVER:            'policies.kubewarden.io.policyserver',
+  POLICY_REPORT:            'wgpolicyk8s.io.policyreport',
+  CLUSTER_POLICY_REPORT:    'wgpolicyk8s.io.clusterpolicyreport'
 };

@@ -59,7 +59,7 @@ export default {
       }
     }
 
-    this.jaegerService = await this.value.jaegerService();
+    this.jaegerService = await this.value.jaegerQueryService();
 
     if ( this.jaegerService ) {
       this.filteredValidations = await this.value.jaegerSpecificValidations({ service: this.jaegerService });

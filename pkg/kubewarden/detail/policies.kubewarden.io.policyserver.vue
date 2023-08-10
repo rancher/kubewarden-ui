@@ -50,7 +50,7 @@ export default {
     const hash = await allHash({
       relatedPolicies:      this.value.allRelatedPolicies(),
       policyGauges:         this.value.policyGauges(),
-      jaegerService:        this.value.jaegerService(),
+      jaegerService:        this.value.jaegerQueryService(),
       openTelemetryService: this.value.openTelemetryService()
     });
 

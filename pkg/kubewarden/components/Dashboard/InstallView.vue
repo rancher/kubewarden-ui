@@ -15,7 +15,7 @@ import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPO } from '../../types';
 import { getLatestStableVersion } from '../../plugins/kubewarden-class';
 import { handleGrowlError } from '../../utils/handle-growl';
 
-import InstallWizard from './InstallWizard';
+import InstallWizard from '../InstallWizard';
 
 export default {
   props: {

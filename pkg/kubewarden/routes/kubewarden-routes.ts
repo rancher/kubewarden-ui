@@ -1,6 +1,7 @@
-import { KUBEWARDEN_PRODUCT_NAME } from '../types';
+import { KUBEWARDEN_PRODUCT_NAME, POLICY_REPORTER_PRODUCT } from '../types';
 
 import Dashboard from '../pages/c/_cluster/kubewarden/index.vue';
+import PolicyReport from '../pages/c/_cluster/kubewarden/_resource/policy-reporter.vue';
 import KubewardenResourcedList from '../pages/c/_cluster/kubewarden/_resource/index.vue';
 import CreateKubewardenResource from '../pages/c/_cluster/kubewarden/_resource/create.vue';
 import ViewKubewardenResource from '../pages/c/_cluster/kubewarden/_resource/_id.vue';
@@ -11,6 +12,12 @@ const routes = [
     name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }`,
     path:       `/c/:cluster/${ KUBEWARDEN_PRODUCT_NAME }`,
     component:  Dashboard,
+    meta:       { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME }
+  },
+  {
+    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-${ POLICY_REPORTER_PRODUCT }`,
+    path:       `/c/:cluster/${ KUBEWARDEN_PRODUCT_NAME }/${ POLICY_REPORTER_PRODUCT }`,
+    component:  PolicyReport,
     meta:       { product: KUBEWARDEN_PRODUCT_NAME, pkg: KUBEWARDEN_PRODUCT_NAME }
   },
   {
