@@ -18,7 +18,7 @@ test('00 Initial rancher setup', async({ page, ui }) => {
     await rancher.handleFirstLogin('sa');
   }
   // wait for local cluster to be Active
-  await ui.getRow('local').toBeActive()
+  await ui.getRow('local').toBeActive();
   // disable namespace filter
   await rancher.setNamespaceFilter('All Namespaces');
   // enable extension developer features
@@ -28,21 +28,22 @@ test('00 Initial rancher setup', async({ page, ui }) => {
 test('01 Enable extension support', async({ page, ui }) => {
   const extensions = new RancherExtensionsPage(page);
 
-  await extensions.enable(ORIGIN == 'released');
+  await extensions.enable(ORIGIN === 'released');
 
   // Wait for default list of extensions
-  if (ORIGIN == 'released') {
-    await ui.withReload(async () => {
-      await extensions.selectTab('All')
-      await expect(page.locator('.plugin', { hasText: 'Kubewarden' } )).toBeVisible()
-    }, 'Not showing kubewarden extension')
+  if (ORIGIN === 'released') {
+    await ui.withReload(async() => {
+      await extensions.selectTab('All');
+      await expect(page.locator('.plugin', { hasText: 'Kubewarden' } )).toBeVisible();
+    }, 'Not showing kubewarden extension');
   }
 });
 
 test('02 Install extension', async({ page }) => {
   // Add UI charts repository
-  if (ORIGIN == 'rc') {
+  if (ORIGIN === 'rc') {
     const rancher = new RancherCommonPage(page);
+
     await rancher.addRepository('kubewarden-extension-rc', 'https://rancher.github.io/kubewarden-ui/');
   }
 
@@ -50,7 +51,7 @@ test('02 Install extension', async({ page }) => {
   const extensions = new RancherExtensionsPage(page);
 
   await extensions.goto();
-  if (ORIGIN == 'source') {
+  if (ORIGIN === 'source') {
     await extensions.developerLoad('http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js');
   } else {
     await extensions.install('kubewarden');
@@ -64,9 +65,9 @@ test('03 Install kubewarden', async({ page, ui }) => {
 
   // Check UI is active
   await page.getByRole('navigation').getByRole('link', { name: 'Kubewarden' }).click();
-  await ui.withReload(async () => {
-    await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
-  }, 'Kubewarden installation not detected')
+  await ui.withReload(async() => {
+    await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible();
+  }, 'Kubewarden installation not detected');
 });
 
 test('04 Install default policyserver', async({ page, ui }) => {
@@ -101,7 +102,7 @@ test('05 Whitelist artifacthub', async({ page }) => {
   await expect(page.getByRole('heading', { name: 'Custom Policy' })).toBeVisible();
   await expect(page.locator('.subtype')).toHaveCount(1);
 
-  await kwPage.whitelistArtifacthub()
-  await expect(page.getByRole('heading', { name: 'Pod Privileged Policy' })).toBeVisible()
-  await expect(page.locator(".subtype")).toHaveCount(policyTitles.length)
+  await kwPage.whitelistArtifacthub();
+  await expect(page.getByRole('heading', { name: 'Pod Privileged Policy' })).toBeVisible();
+  await expect(page.locator('.subtype')).toHaveCount(policyTitles.length, { timeout: 5_000 });
 });
