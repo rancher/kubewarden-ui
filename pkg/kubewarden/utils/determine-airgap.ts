@@ -1,7 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
 import { MANAGEMENT } from '@shell/config/types';
 
-import { handleGrowlError } from './handle-growl';
+import { handleGrowl } from './handle-growl';
 
 interface AirgapConfig {
   store: any
@@ -42,11 +42,13 @@ export async function isAirgap(context: AirgapConfig): Promise<Boolean> {
   } catch (e) {
     if ( !store.getters['kubewarden/airGapped'] ) {
       const error = {
-        _statusText: 'Error',
+        _statusText: 'Warning',
         message:     'Unable to determine management.cattle.io.settings/whitelist-domain value. Some Kubewarden UI features may be unavailable.'
       };
 
-      handleGrowlError({ error, store });
+      handleGrowl({
+        error, store, type: 'warning'
+      });
       store.dispatch('kubewarden/updateAirGapped', true);
     }
 

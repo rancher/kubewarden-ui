@@ -23,7 +23,7 @@ import {
   DEFAULT_POLICY
 } from '../../types';
 import { removeEmptyAttrs } from '../../utils/object';
-import { handleGrowlError } from '../../utils/handle-growl';
+import { handleGrowl } from '../../utils/handle-growl';
 
 import PolicyGrid from './PolicyGrid';
 import Values from './Values';
@@ -246,7 +246,7 @@ export default ({
         btnCb(true);
         this.loadingPackages = false;
       } catch (e) {
-        handleGrowlError({ error: e, store: this.$store });
+        handleGrowl({ error: e, store: this.$store });
 
         btnCb(false);
         this.loadingPackages = false;
@@ -279,7 +279,7 @@ export default ({
 
         await this.save(event);
       } catch (e) {
-        handleGrowlError({ error: e, store: this.$store });
+        handleGrowl({ error: e, store: this.$store });
 
         console.error('Error creating policy', e); // eslint-disable-line no-console
       }
@@ -297,7 +297,7 @@ export default ({
 
           this.packages = packages.filter(pkg => pkg?.data?.['kubewarden/hidden-ui'] !== 'true');
         } catch (e) {
-          handleGrowlError({ error: e, store: this.$store });
+          handleGrowl({ error: e, store: this.$store });
 
           console.warn(`Error fetching packages`, e); // eslint-disable-line no-console
         }

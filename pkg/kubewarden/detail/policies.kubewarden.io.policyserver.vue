@@ -19,7 +19,7 @@ import Tab from '@shell/components/Tabbed/Tab';
 import { isEmpty } from 'lodash';
 import { METRICS_DASHBOARD } from '../types';
 import { RELATED_HEADERS } from '../config/table-headers';
-import { handleGrowlError } from '../utils/handle-growl';
+import { handleGrowl } from '../utils/handle-growl';
 
 import MetricsBanner from '../components/MetricsBanner';
 import TraceBanner from '../components/TraceBanner';
@@ -167,7 +167,7 @@ export default {
 
         this.reloadRequired = true;
       } catch (e) {
-        handleGrowlError({ error: e, store: this.$store });
+        handleGrowl({ error: e, store: this.$store });
 
         btnCb(false);
       }
