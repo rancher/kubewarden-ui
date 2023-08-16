@@ -63,4 +63,4 @@ jobs:
 
       - name: Build and push UI image
         run: |
-          yarn publish-pkgs -cp -r ${{ env.REGISTRY }} -o ${{ github.repository_owner }} -i "kubewarden-"
+          yarn publish-pkgs -cp -r ${{ env.REGISTRY }} -o ${{ github.repository_owner }}
