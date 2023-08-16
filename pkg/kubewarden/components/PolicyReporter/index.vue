@@ -4,7 +4,10 @@ import isEmpty from 'lodash/isEmpty';
 import { SERVICE } from '@shell/config/types';
 import { Banner } from '@components/Banner';
 
-import { handleGrowlError } from '../../utils/handle-growl';
+import { handleGrowl } from '../../utils/handle-growl';
+import { rootKubewardenRoute } from '../../utils/custom-routing';
+import { KUBEWARDEN } from '../../types';
+
 import InstallView from './InstallView';
 
 export default {
@@ -20,9 +23,16 @@ export default {
 
   data() {
     return {
+      rootKubewardenRoute,
       reporterService: null,
       reporterUrl:     null
     };
+  },
+
+  computed: {
+    hasPolicyServerSchema() {
+      return this.$store.getters['cluster/schemaFor'](KUBEWARDEN.POLICY_SERVER);
+    }
   },
 
   methods: {
@@ -37,7 +47,7 @@ export default {
           return services.find(s => s.metadata?.labels?.['app.kubernetes.io/name'] === 'ui');
         }
       } catch (e) {
-        handleGrowlError({ error: e, store: this.$store });
+        handleGrowl({ error: e, store: this.$store });
       }
     },
 
@@ -52,7 +62,7 @@ export default {
           return base + proxy;
         }
       } catch (e) {
-        handleGrowlError({ error: e, store: this.$store });
+        handleGrowl({ error: e, store: this.$store });
       }
     }
   }
@@ -61,16 +71,36 @@ export default {
 
 <template>
   <div>
-    <template v-if="!reporterService">
+    <template v-if="!hasPolicyServerSchema">
+      <div>
+        <h1 class="mb-20">
+          {{ t('kubewarden.policyReporter.title') }}
+        </h1>
+        <Banner
+          :label="t('kubewarden.policyReporter.noSchema.banner')"
+          color="error"
+          class="mt-20 mb-20"
+        />
+        <div class="install-route">
+          <n-link :to="rootKubewardenRoute()">
+            <button class="btn role-primary mt-20" data-testid="kw-pr-noschema-install-button">
+              {{ t('kubewarden.policyReporter.noSchema.link') }}
+            </button>
+          </n-link>
+        </div>
+      </div>
+    </template>
+    <template v-else-if="!reporterService">
       <div>
         <Banner
           :label="t('kubewarden.policyReporter.service.banner.unavailable')"
+          data-testid="kw-pr-service-unavailable-banner"
           color="warning"
         />
       </div>
       <InstallView />
     </template>
-    <template v-if="reporterUrl">
+    <template v-else-if="reporterUrl">
       <div>
         <div class="reporter__header mb-20">
           <div
@@ -98,6 +128,12 @@ export default {
 </template>
 
 <style lang='scss' scoped>
+.install-route {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .reporter {
   &__header {
     display: flex;

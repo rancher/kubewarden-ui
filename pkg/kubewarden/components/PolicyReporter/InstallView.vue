@@ -10,7 +10,7 @@ import AsyncButton from '@shell/components/AsyncButton';
 
 import { POLICY_REPORTER_CHART, POLICY_REPORTER_REPO } from '../../types';
 import { getLatestStableVersion } from '../../plugins/kubewarden-class';
-import { handleGrowlError } from '../../utils/handle-growl';
+import { handleGrowl } from '../../utils/handle-growl';
 
 import InstallWizard from '../InstallWizard';
 
@@ -99,7 +99,7 @@ export default {
         try {
           await repoObj.save();
         } catch (e) {
-          handleGrowlError({ error: e, store: this.$store });
+          handleGrowl({ error: e, store: this.$store });
           btnCb(false);
 
           return;
@@ -108,7 +108,7 @@ export default {
         await this.refreshCharts();
         btnCb(true);
       } catch (e) {
-        handleGrowlError({ error: e, store: this.$store });
+        handleGrowl({ error: e, store: this.$store });
         btnCb(false);
       }
     },
@@ -118,7 +118,7 @@ export default {
         try {
           await this.refreshCharts();
         } catch (e) {
-          handleGrowlError({ error: e, store: this.$store });
+          handleGrowl({ error: e, store: this.$store });
 
           return;
         }
@@ -148,7 +148,7 @@ export default {
           message:     this.t('kubewarden.dashboard.appInstall.versionError.message')
         };
 
-        handleGrowlError({ error, store: this.$store });
+        handleGrowl({ error, store: this.$store });
       }
     },
 
@@ -156,7 +156,7 @@ export default {
       try {
         await this.$store.dispatch('catalog/load', { force: true, reset: true });
       } catch (e) {
-        handleGrowlError({ error: e, store: this.$store });
+        handleGrowl({ error: e, store: this.$store });
       }
 
       if ( !this.reporterChart && retry === 0 ) {

@@ -7,13 +7,14 @@ interface GrowlConfig {
     _statusText: String,
     message: String
   },
-  store?: any
+  store?: any,
+  type?: String
 }
 
-export function handleGrowlError(config: GrowlConfig): void {
+export function handleGrowl(config: GrowlConfig): void {
   const error = config.error?.data || config.error;
 
-  config.store.dispatch('growl/error', {
+  config.store.dispatch(`growl/${ config.type || 'error' }`, {
     title:   error._statusText,
     message: error.message,
     timeout: 5000,

@@ -260,6 +260,9 @@ kubewarden:
   policyReporter:
     title: Policy Reporter
     link: Policy Reporter UI
+    noSchema:
+      banner: Kubewarden has not been installed, this will need to be accomplished before installing the Policy Reporter
+      link: Install Kubewarden
     service:
       banner:
         unavailable: The Policy Reporter service is unavailable, follow the instructions to install the Policy Reporter chart.
