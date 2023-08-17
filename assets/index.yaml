@@ -19,7 +19,7 @@ entries:
     name: kubewarden
     type: application
     urls:
-    - kubewarden/kubewarden-1.2.0.tgz
+    - https://github.com/rancher/kubewarden-ui/releases/download/kubewarden-1.2.0/kubewarden-1.2.0.tgz
     version: 1.2.0
   - annotations:
       catalog.cattle.io/certified: rancher
