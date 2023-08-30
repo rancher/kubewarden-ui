@@ -114,7 +114,7 @@ export default {
     },
 
     async installChart() {
-      if ( !this.controllerChart ) {
+      if ( !this.reporterChart ) {
         try {
           await this.refreshCharts();
         } catch (e) {
