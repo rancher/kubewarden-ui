@@ -24,7 +24,7 @@ export class TableRow {
     this.ui = ui
     this.row = tbody.locator('tr.main-row').filter({has: ui.page.getByRole('link', {name: name, exact: true})})
     this.name = this.column('Name')
-    this.status = this.column('Status')
+    this.status = this.column('Status', 'State')
   }
 
   async toBeVisible() {
@@ -37,9 +37,11 @@ export class TableRow {
     await expect(this.status).toHaveText('Active', {timeout: timeout})
   }
 
-  column(name: string) {
+  column(...names: string[]) {
+    // Generate selector from column names
+    const selector = names.map(str => `normalize-space(.)="${str}"`).join(" or ")
     // https://stackoverflow.com/questions/14745478/how-to-select-table-column-by-column-header-name-with-xpath
-    return this.row.locator(`xpath=/td[count(ancestor::table[1]/thead/tr/th[normalize-space(.)="${name}"]/preceding-sibling::th)+1]`)
+    return this.row.locator(`xpath=/td[count(ancestor::table[1]/thead/tr/th[${selector}]/preceding-sibling::th)+1]`)
   }
 
   async action(name: string) {
