@@ -38,7 +38,7 @@ export class TableRow {
   }
 
   column(...names: string[]) {
-    // Generate selector from column names
+    // Transform: names > normalize-space(.)="names[0]" [or ...]
     const selector = names.map(str => `normalize-space(.)="${str}"`).join(" or ")
     // https://stackoverflow.com/questions/14745478/how-to-select-table-column-by-column-header-name-with-xpath
     return this.row.locator(`xpath=/td[count(ancestor::table[1]/thead/tr/th[${selector}]/preceding-sibling::th)+1]`)
