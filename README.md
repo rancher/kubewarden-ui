@@ -21,7 +21,7 @@ The official [Rancher documentation](https://ranchermanager.docs.rancher.com/int
 2. Once the Extension Operator has been installed click on the Action Menu in the top right of the screen and select "Manage Repositories".
 3. Create a new Helm repository with the "Target" as a https URL pointing to the published domain for the UI Github Repository:
 ```console
-https://kubewarden.github.io/ui
+https://rancher.github.io/kubewarden-ui/
 ```
 4. Navigate back to the extensions screen and a card for Kubewarden should appear with available options for versions to install.
 
