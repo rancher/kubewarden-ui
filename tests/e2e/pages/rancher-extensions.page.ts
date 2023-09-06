@@ -19,11 +19,17 @@ export class RancherExtensionsPage extends BasePage {
 
     // Enable extensions
     await this.page.getByRole('button', { name: 'Enable' }).click();
-    await this.ui.checkbox('Rancher Extensions Repository').setChecked(rancherRepo)
-    await this.ui.checkbox('Partners Extensions Repository').setChecked(partnersRepo)
-    await this.page.getByRole('button', { name: 'OK' }).click();
+    await expect(this.page.getByRole('heading', { name: 'Enable Extension Support?' })).toBeVisible()
 
-    // Wait for extensions to be enabled
+    // Add repositories
+    await this.ui.checkbox('Rancher Extension').setChecked(rancherRepo)
+    // New option in rancher 2.7.7
+    if (await this.ui.checkbox('Partners Extension').isVisible()) {
+      await this.ui.checkbox('Partners Extension').setChecked(partnersRepo)
+    }
+
+    // Confirm and wait for extensions to be enabled
+    await this.page.getByRole('button', { name: 'OK' }).click();
     await expect(this.tabs).toBeVisible({timeout: 60_000})
   }
 

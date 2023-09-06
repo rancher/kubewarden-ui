@@ -104,5 +104,7 @@ test('05 Whitelist artifacthub', async({ page }) => {
 
   await kwPage.whitelistArtifacthub();
   await expect(page.getByRole('heading', { name: 'Pod Privileged Policy' })).toBeVisible();
+
+  test.fail(ORIGIN === 'released', 'Expect failure until 1.2.0 is released - https://github.com/rancher/kubewarden-ui/issues/451')
   await expect(page.locator('.subtype')).toHaveCount(policyTitles.length, { timeout: 5_000 });
 });
