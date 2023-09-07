@@ -10,6 +10,7 @@ import { Banner } from '@components/Banner';
 import AsyncButton from '@shell/components/AsyncButton';
 import CopyCode from '@shell/components/CopyCode';
 import Loading from '@shell/components/Loading';
+import Markdown from '@shell/components/Markdown';
 
 import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPO } from '../../types';
 import { getLatestStableVersion } from '../../plugins/kubewarden-class';
@@ -30,7 +31,8 @@ export default {
     Banner,
     CopyCode,
     InstallWizard,
-    Loading
+    Loading,
+    Markdown
   },
 
   mixins: [ResourceFetch],
@@ -70,11 +72,22 @@ export default {
     ];
 
     return {
+      installSteps,
       reloadReady:   false,
       install:       false,
       initStepIndex: 0,
-      installSteps,
+      docs:          { airgap: '' }
     };
+  },
+
+  async mounted() {
+    if ( this.isAirgap ) {
+      const docs = (await import(/* webpackChunkName: "airgap-docs" */ '../../assets/airgap-installation.md'));
+
+      if ( docs ) {
+        this.docs.airgap = docs.body;
+      }
+    }
   },
 
   watch: {
@@ -259,74 +272,8 @@ export default {
           color="warning"
         >
           <span data-testid="kw-install-ag-warning">{{ t('kubewarden.dashboard.prerequisites.airGapped.warning') }}</span>
-          <span v-html="t('kubewarden.dashboard.prerequisites.airGapped.docs', {}, true)"></span>
         </Banner>
-        <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps">
-          <template #certmanager>
-            <h2 class="mt-20 mb-10" data-testid="kw-ag-cm-title">
-              {{ t("kubewarden.dashboard.prerequisites.certManager.title") }}
-            </h2>
-            <p class="mb-20">
-              {{ t("kubewarden.dashboard.prerequisites.certManager.description") }}
-            </p>
-
-            <p v-html="t('kubewarden.dashboard.prerequisites.airGapped.certManager.manualStep', null, true)"></p>
-
-            <slot>
-              <Banner
-                class="mb-20 mt-20"
-                color="info"
-                :label="t('kubewarden.dashboard.prerequisites.certManager.stepProgress')"
-              />
-            </slot>
-          </template>
-
-          <template #install>
-            <template v-if="!controllerChart">
-              <h2 class="mt-20 mb-10" data-testid="kw-ag-repo-title">
-                {{ t("kubewarden.dashboard.prerequisites.repository.title") }}
-              </h2>
-              <p class="mb-20">
-                <span v-html="t('kubewarden.dashboard.prerequisites.airGapped.repository.description', {}, true)"></span>
-              </p>
-            </template>
-
-            <template v-else>
-              <h2 class="mt-20 mb-10" data-testid="kw-ag-app-install-title">
-                {{ t("kubewarden.dashboard.appInstall.title") }}
-              </h2>
-              <p class="mb-20">
-                {{ t("kubewarden.dashboard.appInstall.description") }}
-              </p>
-
-              <div class="chart-route">
-                <Loading v-if="!controllerChart && !reloadReady" mode="relative" class="mt-20" />
-
-                <template v-else-if="!controllerChart && reloadReady">
-                  <Banner color="warning">
-                    <span class="mb-20">
-                      {{ t('kubewarden.dashboard.appInstall.reload' ) }}
-                    </span>
-                    <button class="ml-10 btn btn-sm role-primary" @click="reload()">
-                      {{ t('generic.reload') }}
-                    </button>
-                  </Banner>
-                </template>
-
-                <template v-else>
-                  <button
-                    class="btn role-primary mt-20"
-                    :disabled="!controllerChart"
-                    data-testid="kw-ag-app-install-button"
-                    @click.prevent="chartRoute"
-                  >
-                    {{ t("kubewarden.dashboard.appInstall.button") }}
-                  </button>
-                </template>
-              </div>
-            </template>
-          </template>
-        </InstallWizard>
+        <Markdown v-model="docs.airgap" />
       </template>
 
       <!-- Non Air-Gapped -->
@@ -435,6 +382,10 @@ export default {
 
   & .chart-route {
     position: relative;
+  }
+
+  & .airgap-align {
+    justify-content: start;
   }
 }
 </style>
