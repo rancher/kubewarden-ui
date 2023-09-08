@@ -7,6 +7,7 @@ import ResourceFetch from '@shell/mixins/resource-fetch';
 
 import Loading from '@shell/components/Loading';
 import AsyncButton from '@shell/components/AsyncButton';
+import { Banner } from '@components/Banner';
 
 import { POLICY_REPORTER_CHART, POLICY_REPORTER_REPO } from '../../types';
 import { getLatestStableVersion } from '../../plugins/kubewarden-class';
@@ -16,7 +17,7 @@ import InstallWizard from '../InstallWizard';
 
 export default {
   components: {
-    InstallWizard, Loading, AsyncButton
+    InstallWizard, Loading, AsyncButton, Banner
   },
 
   mixins: [ResourceFetch],
@@ -114,7 +115,7 @@ export default {
     },
 
     async installChart() {
-      if ( !this.controllerChart ) {
+      if ( !this.reporterChart ) {
         try {
           await this.refreshCharts();
         } catch (e) {
@@ -182,14 +183,12 @@ export default {
   <div v-else>
     <!-- Air-Gapped -->
     <template v-if="isAirgap">
-      <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps" :show-title="false">
-        <Banner
-          class="mb-20 mt-20"
-          color="warning"
-        >
-          <span data-testid="kw-pr-install-ag-warning">{{ t('kubewarden.policyReporter.install.airGapped.warning') }}</span>
-        </Banner>
-      </InstallWizard>
+      <Banner
+        class="mb-20 mt-20"
+        color="warning"
+      >
+        <span data-testid="kw-pr-install-ag-warning">{{ t('kubewarden.policyReporter.install.airGapped.warning') }}</span>
+      </Banner>
     </template>
 
     <!-- Non Air-Gapped -->
@@ -223,10 +222,15 @@ export default {
           </template>
 
           <template v-else>
-            <div>
+            <div class="step-container">
               <h3 class="mt-20 mb-10" data-testid="kw-pr-install-repo-title">
                 {{ t("kubewarden.policyReporter.install.chart.title") }}
               </h3>
+              <Banner color="warning">
+                <span class="mb-20">
+                  {{ t("kubewarden.policyReporter.install.chart.warning") }}
+                </span>
+              </Banner>
               <AsyncButton mode="policyReporterChart" data-testid="kw-pr-install-chart-button" @click="installChart" />
             </div>
           </template>
@@ -241,5 +245,6 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 </style>

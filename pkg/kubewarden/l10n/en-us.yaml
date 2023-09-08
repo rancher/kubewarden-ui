@@ -56,11 +56,7 @@ kubewarden:
       airGapped:
         warning: "An air-gapped installation has been detected, this will require intervention to enable access to Kubewarden images and policies. It is necessary to make them available from an OCI registry that is accessible to the cluster."
         docs: |
-          Follow the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/operator-manual/airgap/requirements">Documentation</a> to setup an OCI registry for further installation.
-        certManager:
-          manualStep: Follow the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/operator-manual/airgap/install#save-container-images-in-your-workstation">Documentation</a> to install Cert-Manager from a private registry.
-        repository:
-          description: Follow the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/operator-manual/airgap/install#helm-charts">Documentation</a> to populate your OCI registry with the required Helm charts.
+          Follow the documentation to setup an OCI registry for further installation.
   tabs:
     general:
       label: General
@@ -263,9 +259,18 @@ kubewarden:
     noSchema:
       banner: Kubewarden has not been installed, this will need to be accomplished before installing the Policy Reporter
       link: Install Kubewarden
+    incompatible:
+      banner: "Your cluster does not support policy reports, upgrade your Kubewarden to version `1.7.0` or greater to add the required crds."
+      current: Current Kubewarden Controller version
+      noCrds:
+        banner: "The CRDs for `wgpolicyk8s.io.clusterpolicyreport` or `wgpolicyk8s.io.policyreport` can not be found. These must be installed to support policy reports."
     service:
-      banner:
-        unavailable: The Policy Reporter service is unavailable, follow the instructions to install the Policy Reporter chart.
+      main:
+        banner:
+          unavailable: The Policy Reporter service is unavailable, follow the instructions to install the Policy Reporter chart.
+      ui:
+        banner:
+          unavailable: The Policy Reporter UI service is unavailable, ensure the property `ui.enabled` is set to `true` within the Policy Reporter chart.
     url:
       banner:
         unavailable: The Policy Reporter UI proxy URL is unavailble, please ensure that the UI is properly configured.
@@ -277,6 +282,7 @@ kubewarden:
         description: You will need to add the Policy Reporter Helm (https://kyverno.github.io/policy-reporter) to install the `policy-reporter` chart.
       chart:
         title: Install Policy Reporter Chart
+        warning: "When installing the chart ensure the property `ui.enabled` is set to `true`."
 
 asyncButton:
   artifactHub:
