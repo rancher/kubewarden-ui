@@ -3181,10 +3181,10 @@
   dependencies:
     lodash.debounce "4.0.8"
 
-"@rancher/shell@0.3.15":
-  version "0.3.15"
-  resolved "https://registry.yarnpkg.com/@rancher/shell/-/shell-0.3.15.tgz#986fc15e2880cb01bc2113e0bd88e10cdb321435"
-  integrity sha512-Oave/czgyfcBJXXD4rbpvDVZ9IymhwryimXNHaQ9M1CIz35wXG2sTH97XOPn7uYsfle0e8MyucAiiKG71s3UNg==
+"@rancher/shell@0.3.23":
+  version "0.3.23"
+  resolved "https://registry.yarnpkg.com/@rancher/shell/-/shell-0.3.23.tgz#9f334f2e9034e27d7edf6f8a12af597790e31d14"
+  integrity sha512-nnfrpEBR/JMCS2MGRhgAygr9hIOsO1cVB+1jvbo/q8VVLZQTlNmVNcl2YyOuCvo+tE6J/svD4rQmPwyIeJ6EQA==
   dependencies:
     "@aws-sdk/client-ec2" "3.1.0"
     "@aws-sdk/client-eks" "3.1.0"
@@ -3227,7 +3227,7 @@
     d3-selection "1.4.1"
     dagre-d3 "0.6.4"
     dayjs "1.8.29"
-    diff2html "2.11.2"
+    diff2html "3.4.24"
     dompurify "2.4.5"
     eslint "7.32.0"
     eslint-config-standard "16.0.3"
@@ -3264,7 +3264,7 @@
     nyc "15.1.0"
     papaparse "5.3.0"
     portal-vue "2.1.7"
-    rancher-icons rancher/icons#v2.0.14
+    rancher-icons rancher/icons#v2.0.16
     require-extension-hooks "0.3.3"
     require-extension-hooks-babel "1.0.0"
     require-extension-hooks-vue "3.0.0"
@@ -7816,15 +7816,20 @@ diff-sequences@^29.4.3:
   resolved "https://registry.yarnpkg.com/diff-sequences/-/diff-sequences-29.4.3.tgz#9314bc1fabe09267ffeca9cbafc457d8499a13f2"
   integrity sha512-ofrBgwpPhCD85kMKtE9RYFFq6OC1A89oW2vvgWZNCwxrUpRUILopY7lsYyMDSjc8g6U6aiO0Qubg6r4Wgt5ZnA==
 
-diff2html@2.11.2:
-  version "2.11.2"
-  resolved "https://registry.yarnpkg.com/diff2html/-/diff2html-2.11.2.tgz#f3f27c6b81a75b5a8a3cfb7ae2fda2127290c809"
-  integrity sha512-FKDFFXW0cHyt+joiYeyWxbcLWZsQYeYRRrHKWZEvu+XMFMM1ChxTkGhET53zAU0tvVjyRRxRjUcrn5ImSqD0ZQ==
+diff2html@3.4.24:
+  version "3.4.24"
+  resolved "https://registry.yarnpkg.com/diff2html/-/diff2html-3.4.24.tgz#42811f1830fa12b9ad73baebcf63431b20c2445d"
+  integrity sha512-eVzxAj8r52nm5QLVCVlVD/J0VR4X9vVLkgkdI7w7b5cw81pyYxgqed9WetjBwjYXzprdkOcmILKK3qzWg/ld3A==
   dependencies:
-    diff "^4.0.1"
-    hogan.js "^3.0.2"
-    merge "^1.2.1"
-    whatwg-fetch "^3.0.0"
+    diff "5.1.0"
+    hogan.js "3.0.2"
+  optionalDependencies:
+    highlight.js "11.6.0"
+
+diff@5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-5.1.0.tgz#bc52d298c5ea8df9194800224445ed43ffc87e40"
+  integrity sha512-D+mk+qE8VC/PAUrlAU34N+VfXev0ghe5ywmpqrawphmVZc1bEfn56uo9qpyGp1p4xpzOHkSW4ztBd6L7Xx4ACw==
 
 diff@^4.0.1, diff@^4.0.2:
   version "4.0.2"
@@ -9996,6 +10001,11 @@ hex-color-regex@^1.1.0:
   resolved "https://registry.yarnpkg.com/hex-color-regex/-/hex-color-regex-1.1.0.tgz#4c06fccb4602fe2602b3c93df82d7e7dbf1a8a8e"
   integrity sha512-l9sfDFsuqtOqKDsQdqrMRk0U85RZc0RtOR9yPI7mRVOa4FsR/BVnZ0shmQRM96Ji99kYZP/7hn1cedc1+ApsTQ==
 
+highlight.js@11.6.0:
+  version "11.6.0"
+  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-11.6.0.tgz#a50e9da05763f1bb0c1322c8f4f755242cff3f5a"
+  integrity sha512-ig1eqDzJaB0pqEvlPVIpSSyMaO92bH1N2rJpLMN/nX396wTpDA4Eq0uK+7I/2XG17pFaaKE0kjV/XPeGt7Evjw==
+
 highlight.js@^10.7.1:
   version "10.7.3"
   resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-10.7.3.tgz#697272e3991356e40c3cac566a74eef681756531"
@@ -10010,7 +10020,7 @@ hmac-drbg@^1.0.1:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.1"
 
-hogan.js@^3.0.2:
+hogan.js@3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/hogan.js/-/hogan.js-3.0.2.tgz#4cd9e1abd4294146e7679e41d7898732b02c7bfd"
   integrity sha512-RqGs4wavGYJWE07t35JQccByczmNUXQT0E12ZYV1VKYu5UiAU9lsos/yBAcf840+zrUQQxgVduCR5/B8nNtibg==
@@ -12892,11 +12902,6 @@ merge2@^1.2.3, merge2@^1.3.0, merge2@^1.4.1:
   resolved "https://registry.yarnpkg.com/merge2/-/merge2-1.4.1.tgz#4368892f885e907455a6fd7dc55c0c9d404990ae"
   integrity sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==
 
-merge@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/merge/-/merge-1.2.1.tgz#38bebf80c3220a8a487b6fcfb3941bb11720c145"
-  integrity sha512-VjFo4P5Whtj4vsLzsYBu5ayHhoHJ0UqNm7ibvShmbmoz7tGi0vXaoJbGdB+GmDMLUdg8DpQXEIeVDAe8MaABvQ==
-
 methods@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/methods/-/methods-1.1.2.tgz#5529a4d67654134edcc5266656835b0f851afcee"
@@ -15218,9 +15223,9 @@ queue-microtask@^1.2.2:
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
 
-rancher-icons@rancher/icons#v2.0.14:
-  version "2.0.14"
-  resolved "https://codeload.github.com/rancher/icons/tar.gz/9d31e6c3dfe99493207e6bbfa957551da476735f"
+rancher-icons@rancher/icons#v2.0.16:
+  version "2.0.16"
+  resolved "https://codeload.github.com/rancher/icons/tar.gz/fc788547982a7800030fe37ad0b40747bec24b1f"
 
 randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5, randombytes@^2.1.0:
   version "2.1.0"
@@ -18258,11 +18263,6 @@ whatwg-encoding@^2.0.0:
   integrity sha512-p41ogyeMUrw3jWclHWTQg1k05DSVXPLcVxRTYsXUk+ZooOCZLcoYgPZ/HL/D/N+uQPOtcp1me1WhBEaX02mhWg==
   dependencies:
     iconv-lite "0.6.3"
-
-whatwg-fetch@^3.0.0:
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/whatwg-fetch/-/whatwg-fetch-3.6.2.tgz#dced24f37f2624ed0281725d51d0e2e3fe677f8c"
-  integrity sha512-bJlen0FcuU/0EMLrdbJ7zOnW6ITZLrZMIarMUVmdKtsGvZna8vxKYaexICWPfZ8qwf9fzNq+UEIZrnSaApt6RA==
 
 whatwg-mimetype@^2.2.0, whatwg-mimetype@^2.3.0:
   version "2.3.0"
