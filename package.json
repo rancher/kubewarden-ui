@@ -1,10 +1,11 @@
 {
   "name": "ui",
-  "version": "1.2.1-rc1",
+  "version": "1.2.1-rc2",
   "private": false,
   "scripts": {
     "build-pkg": "./node_modules/@rancher/shell/scripts/build-pkg.sh",
     "serve-pkgs": "./node_modules/@rancher/shell/scripts/serve-pkgs",
+    "parse-tag-name": "./node_modules/@rancher/shell/scripts/extension/parse-tag-name",
     "publish-pkgs": "./node_modules/@rancher/shell/scripts/extension/publish",
     "dev": "NODE_ENV=dev ./node_modules/.bin/vue-cli-service serve",
     "build": "./node_modules/.bin/vue-cli-service build",
@@ -15,7 +16,7 @@
   },
   "dependencies": {
     "@rancher/components": "0.1.3",
-    "@rancher/shell": "0.3.15",
+    "@rancher/shell": "0.3.23",
     "@types/lodash": "4.14.196",
     "core-js": "3.21.1",
     "css-loader": "4.3.0",

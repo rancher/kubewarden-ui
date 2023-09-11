@@ -45,6 +45,9 @@
       "@shell/components/*": [
         "../../node_modules/@rancher/shell/components/*"
       ],
+      "@shell/initialize/*": [
+        "../../node_modules/@rancher/shell/initialize/*"
+      ],
       "@components/*": [
         "./node_modules/@rancher/components/*"
       ],

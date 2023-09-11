@@ -35,7 +35,7 @@ export default {
 
     async refreshCharts(retry = 0) {
       try {
-        await this.$store.dispatch('catalog/load', { force: true, reset: true });
+        await this.$store.dispatch('catalog/refresh');
       } catch (e) {
         handleGrowl({ error: e, store: this.$store });
       }
