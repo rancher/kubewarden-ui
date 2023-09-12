@@ -16,6 +16,13 @@ import { handleGrowl } from '../../utils/handle-growl';
 import InstallWizard from '../InstallWizard';
 
 export default {
+  props: {
+    controllerNs: {
+      type:    String,
+      default: ''
+    }
+  },
+
   components: {
     InstallWizard, Loading, AsyncButton, Banner
   },
@@ -224,11 +231,11 @@ export default {
           <template v-else>
             <div class="step-container">
               <h3 class="mt-20 mb-10" data-testid="kw-pr-install-repo-title">
-                {{ t("kubewarden.policyReporter.install.chart.title") }}
+                {{ t('kubewarden.policyReporter.install.chart.title') }}
               </h3>
               <Banner color="warning">
                 <span class="mb-20">
-                  {{ t("kubewarden.policyReporter.install.chart.warning") }}
+                  {{ t('kubewarden.policyReporter.install.chart.warning', { ns: controllerNs }) }}
                 </span>
               </Banner>
               <AsyncButton mode="policyReporterChart" data-testid="kw-pr-install-chart-button" @click="installChart" />

@@ -59,7 +59,7 @@ describe('component: General', () => {
     expect(wrapper.html()).toContain('Signed Test Policy');
     expect(wrapper.html()).toContain('Test Policy 2');
 
-    await wrapper.setData({ organization: ['evil'] });
+    await wrapper.setData({ organizations: ['evil'] });
 
     expect(wrapper.html()).not.toContain('Allow Privilege Escalation PSP');
     expect(wrapper.html()).toContain('Test Policy 2');
