@@ -8,6 +8,7 @@ on:
 env:
   ACTIONS_RUNNER_DEBUG: false
   CI_COMMIT_MESSAGE: CI Build Artifacts
+  TARGET_BRANCH: gh-pages
 
 defaults:
   run:
@@ -66,16 +67,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           chmod +x ./node_modules/@rancher/shell/scripts/extension/parse-tag-name
-          yarn parse-tag-name ${{ inputs.tagged_release }} ${{ github.run_id }} "charts"
+          yarn parse-tag-name ${{ github.ref_name }} ${{ github.run_id }} "charts"
 
       - name: Run build script
         shell: bash
         id: build_script
         run: |
-          publish="yarn publish-pkgs -s ${{ github.repository }} -b ${{ inputs.target_branch }}"
+          publish="yarn publish-pkgs -s ${{ github.repository }} -b ${{ env.TARGET_BRANCH }}"
 
-          if [[ -n "${{ inputs.tagged_release }}" ]]; then
-            publish="$publish -t ${{ inputs.tagged_release }}"
+          if [[ -n "${{ github.ref_name }}" ]]; then
+            publish="$publish -t ${{ github.ref_name }}"
           fi
           
           $publish
@@ -101,7 +102,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: "${{ inputs.target_branch }}"
+          ref: "${{ env.TARGET_BRANCH }}"
 
       - name: Configure Git
         run: |
