@@ -38,10 +38,10 @@ export default {
     return {
       KUBEWARDEN_PRODUCT_NAME,
 
-      category:     null,
-      keywords:     [],
-      organization: [],
-      searchQuery:  null
+      category:      null,
+      keywords:      [],
+      organizations: [],
+      searchQuery:   null
     };
   },
 
@@ -51,7 +51,7 @@ export default {
 
       this.$nextTick(() => {
         if ( officialExists && officialExists.repository?.organization_display_name ) {
-          this.organization.push(officialExists.repository.organization_display_name);
+          this.organizations.push(officialExists.repository.organization_display_name);
         }
       });
     }
@@ -86,8 +86,8 @@ export default {
           }
         }
 
-        if ( this.organization ) {
-          for ( const org of this.organization ) {
+        if ( this.organizations ) {
+          for ( const org of this.organizations ) {
             const name = subtype.repository?.organization_display_name || subtype.repository?.user_alias;
 
             if ( !name || name !== org ) {
@@ -171,7 +171,7 @@ export default {
     refresh() {
       this.category = null;
       this.keywords = [];
-      this.organization = null;
+      this.organizations = [];
       this.searchQuery = null;
     },
 
@@ -207,7 +207,7 @@ export default {
     <div class="filter">
       <LabeledSelect
         v-if="organizationOptions.length"
-        v-model="organization"
+        v-model="organizations"
         data-testid="kw-grid-filter-organization"
         :clearable="true"
         :taggable="true"

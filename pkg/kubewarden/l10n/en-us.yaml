@@ -282,7 +282,7 @@ kubewarden:
         description: You will need to add the Policy Reporter Helm (https://kyverno.github.io/policy-reporter) to install the `policy-reporter` chart.
       chart:
         title: Install Policy Reporter Chart
-        warning: "When installing the chart ensure the property `ui.enabled` is set to `true`."
+        warning: "When installing the chart ensure the selected namespace is `{ ns }` and the property `ui.enabled` is set to `true`."
 
 asyncButton:
   artifactHub:

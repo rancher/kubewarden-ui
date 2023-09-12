@@ -61,6 +61,14 @@ export default {
       return this.hasClusterPolicyReportSchema && this.hasPolicyReportSchema;
     },
 
+    controllerNamespace() {
+      if ( !isEmpty(this.controller) ) {
+        return this.controller[0].metadata?.namespace;
+      }
+
+      return null;
+    },
+
     controllerVersion() {
       if ( !isEmpty(this.controller) ) {
         return this.controller[0].metadata?.labels?.['app.kubernetes.io/version'];
@@ -162,7 +170,7 @@ export default {
             data-testid="kw-pr-main-service-unavailable-banner"
             color="warning"
           />
-          <InstallView />
+          <InstallView :controller-ns="controllerNamespace" />
         </template>
         <template v-else-if="!reporterUIService">
           <Banner
