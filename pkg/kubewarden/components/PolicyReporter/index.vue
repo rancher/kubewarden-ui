@@ -12,12 +12,8 @@ import { handleGrowl } from '../../utils/handle-growl';
 import { rootKubewardenRoute } from '../../utils/custom-routing';
 import { KUBEWARDEN, KUBEWARDEN_CHARTS } from '../../types';
 
-import InstallView from './InstallView';
-
 export default {
-  components: {
-    Banner, InstallView, Loading
-  },
+  components: { Banner, Loading },
 
   async fetch() {
     if ( this.hasPolicyServerSchema ) {
@@ -133,10 +129,11 @@ export default {
           :label="t('kubewarden.policyReporter.noSchema.banner')"
           color="error"
           class="mt-20 mb-20"
+          data-testid="kw-pr-noschema-banner"
         />
         <div class="install-route">
           <n-link :to="rootKubewardenRoute()">
-            <button class="btn role-primary mt-20" data-testid="kw-pr-noschema-install-button">
+            <button class="btn role-primary mt-20">
               {{ t('kubewarden.policyReporter.noSchema.link') }}
             </button>
           </n-link>
@@ -150,7 +147,7 @@ export default {
         data-testid="kw-pr-incompatibile-banner"
       >
         <p>{{ t('kubewarden.policyReporter.incompatible.banner') }}</p>
-        <p v-if="controllerVersion" class="mt-10">
+        <p v-if="controllerVersion" class="mt-10" data-testid="kw-pr-controller-version-badge">
           {{ t('kubewarden.policyReporter.incompatible.current') }}: <span class="version-badge">{{ controllerVersion }}</span>
         </p>
       </Banner>
@@ -170,7 +167,6 @@ export default {
             data-testid="kw-pr-main-service-unavailable-banner"
             color="warning"
           />
-          <InstallView :controller-ns="controllerNamespace" />
         </template>
         <template v-else-if="!reporterUIService">
           <Banner
