@@ -7,7 +7,7 @@ import DashboardView from '@kubewarden/components/Dashboard/DashboardView.vue';
 import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 
-describe('component: General', () => {
+describe('component: DashboardView', () => {
   it('renders defaults banner when default app is not found', () => {
     const wrapper = shallowMount(DashboardView as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       computed:  {

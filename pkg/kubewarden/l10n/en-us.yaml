@@ -54,7 +54,7 @@ kubewarden:
         title: Repository
         description: You will need the Kubewarden Helm repository (https://charts.kubewarden.io) to install the `kubewarden` chart.
       airGapped:
-        warning: "An air-gapped installation has been detected, this will require intervention to enable access to Kubewarden images and policies. It is necessary to make them available from an OCI registry that is accessible to the cluster."
+        warning: 'An air-gapped installation has been detected, this will require intervention to enable access to Kubewarden images and policies. It is necessary to make them available from an OCI registry that is accessible to the cluster.'
         docs: |
           Follow the documentation to setup an OCI registry for further installation.
   tabs:
@@ -122,7 +122,7 @@ kubewarden:
     namespaceWarning: This policy is targeting Rancher specific namespaces which will cause catastrophic failures with your Rancher deployment.
     official: Official Kubewarden Policy
     airgap:
-      banner: "An air-gapped installation is detected, you will be unable to use the policies listed within the ArtifactHub catalog. You are still able to deploy a custom policy by referencing a WebAssembly module that is accessible to this cluster."
+      banner: 'An air-gapped installation is detected, you will be unable to use the policies listed within the ArtifactHub catalog. You are still able to deploy a custom policy by referencing a WebAssembly module that is accessible to this cluster.'
   utils:
     keyword: Filter by Keyword
     organization: Filter by Organization
@@ -136,7 +136,7 @@ kubewarden:
     noJaeger: |
       A Jaeger service can not be found, please follow the steps <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart" target="_blank" rel="noopener noreferrer nofollow">listed here</a> to setup tracing for your policies.
     noRelatedTraces: No tracing data exists for the related policies.
-    noTraces: No tracing data exists for this policy. 
+    noTraces: No tracing data exists for this policy.
   monitoring:
     notInstalled: |
       The Monitoring app is not installed, this will will need to be installed and configured to enable metrics. Follow <a href="https://docs.kubewarden.io/operator-manual/telemetry/metrics/quickstart#install-prometheus" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to add the Kubewarden ServiceMonitor for Prometheus.
@@ -179,7 +179,7 @@ kubewarden:
       addSelector: Add Selectors
       matchExpressions:
         label: Match Expressions
-        tooltip: matchExpressions is a list of label selector requirements. 
+        tooltip: matchExpressions is a list of label selector requirements.
       matchLabels:
         label: Match Labels
         tooltip: "matchLabels is a map of key, value pairs. A single key, value in the matchLabels map is equivalent to an element of matchExpressions, whose key field is 'key', the operator is 'In', and the values array contains only 'value'."
@@ -235,8 +235,8 @@ kubewarden:
       add: Add Source Authority
       endpoint: Registry URI Endpoint
       placeholder: registry-pre.example.com:5500
-      certificate: 
-        label: Certificate 
+      certificate:
+        label: Certificate
         add: Add PEM Certificate
         remove: Remove Certificate
         file: Read Certificate from File
@@ -250,7 +250,7 @@ kubewarden:
     mutationPolicy:
       label: Mutation
       tooltip: A mutating policy will rebuild the requests with definied values that are conformant with the policy definition.
-    contextAware: 
+    contextAware:
       label: Context Aware
       tooltip: Can determine whether an AdmissionRequest has to be accepted or rejected based on other resources already deployed in the cluster.
   policyReporter:
@@ -260,29 +260,20 @@ kubewarden:
       banner: Kubewarden has not been installed, this will need to be accomplished before installing the Policy Reporter
       link: Install Kubewarden
     incompatible:
-      banner: "Your cluster does not support policy reports, upgrade your Kubewarden to version `1.7.0` or greater to add the required crds."
+      banner: 'Your cluster does not support policy reports, upgrade your Kubewarden to version `1.7.0` or greater to add the required crds.'
       current: Current Kubewarden Controller version
       noCrds:
-        banner: "The CRDs for `wgpolicyk8s.io.clusterpolicyreport` or `wgpolicyk8s.io.policyreport` can not be found. These must be installed to support policy reports."
+        banner: 'The CRDs for `wgpolicyk8s.io.clusterpolicyreport` or `wgpolicyk8s.io.policyreport` can not be found. These must be installed to support policy reports.'
     service:
       main:
         banner:
-          unavailable: The Policy Reporter service is unavailable, follow the instructions to install the Policy Reporter chart.
+          unavailable: 'The Policy Reporter service is unavailable, ensure the properties `auditScanner.enable` and `auditScanner.policyReporter` are set to `true` within the Kubewarden Controller chart.'
       ui:
         banner:
-          unavailable: The Policy Reporter UI service is unavailable, ensure the property `ui.enabled` is set to `true` within the Policy Reporter chart.
+          unavailable: 'The Policy Reporter UI service is unavailable, ensure the property `policy-reporter.ui.enabled` is set to `true` within the Kubewarden Controller chart.'
     url:
       banner:
         unavailable: The Policy Reporter UI proxy URL is unavailble, please ensure that the UI is properly configured.
-    install:
-      airGapped:
-        warning: "An air-gapped installation has been detected, this will require intervention to install the Policy Reporter UI. It is necessary to make the charts available from an OCI registry that is accessible to the cluster."
-      repo:
-        title: Policy Reporter Repository
-        description: You will need to add the Policy Reporter Helm (https://kyverno.github.io/policy-reporter) to install the `policy-reporter` chart.
-      chart:
-        title: Install Policy Reporter Chart
-        warning: "When installing the chart ensure the selected namespace is `{ ns }` and the property `ui.enabled` is set to `true`."
 
 asyncButton:
   artifactHub:

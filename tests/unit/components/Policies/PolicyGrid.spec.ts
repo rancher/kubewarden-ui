@@ -8,7 +8,7 @@ import LabeledSelect from '@shell/components/form/LabeledSelect';
 
 import policyPackages from '../../templates/policyPackages.js';
 
-describe('component: General', () => {
+describe('component: PolicyGrid', () => {
   it('should render custom card when provided empty packages', () => {
     const packages: Array<any> = [];
     const customSubtype = `<div>Custom Policy</div>`;

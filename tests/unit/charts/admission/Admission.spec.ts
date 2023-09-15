@@ -11,7 +11,7 @@ import { DEFAULT_POLICY, KUBEWARDEN } from '@kubewarden/types';
 import policyConfig from '../../templates/policyConfig';
 import { question } from '../../templates/questions';
 
-describe('component: Rules', () => {
+describe('component: Admission', () => {
   it('settings component should be shown when custom policy', () => {
     const wrapper = shallowMount(Admission as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData: {
