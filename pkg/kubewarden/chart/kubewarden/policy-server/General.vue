@@ -41,6 +41,7 @@ export default {
     if ( this.isCreate ) {
       await this.$initializeFetchData(CATALOG);
       await this.$fetchType(CATALOG.CLUSTER_REPO);
+      await this.$store.dispatch('catalog/load');
 
       if ( this.defaultsChart ) {
         const defaultsStable = getLatestStableVersion(this.defaultsChart.versions);
@@ -57,8 +58,8 @@ export default {
           const psImage = chartInfo.values?.policyServer?.image?.repository;
           const psTag = chartInfo.values?.policyServer?.image?.tag;
 
-          if ( registry && psImage && psTag ) {
-            this.latestStableVersion = `${ registry }/${ psImage }:${ psTag }`;
+          if ( psImage && psTag ) {
+            this.latestStableVersion = `${ registry || 'ghcr.io' }/${ psImage }:${ psTag }`;
             this.$set(this.value.spec, 'image', this.latestStableVersion);
           }
         }
