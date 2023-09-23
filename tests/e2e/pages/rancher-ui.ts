@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 import jsyaml from 'js-yaml';
 import merge from 'lodash.merge';
 import { TableRow } from '../components/table-row';
@@ -32,6 +33,41 @@ export class RancherUI {
         return this.page.locator('label.checkbox-container')
             .filter({hasText: label})
             .locator('span.checkbox-custom')
+    }
+
+    // Radio group
+    radio(label: string, name: string) {
+        // Exact name with optional "i" tooltip
+        const groupLabel = new RegExp(`^${label} .?$`)
+        return this.page.locator('.radio-group')
+            .filter({has: this.page.getByRole('heading', {name: groupLabel})})
+            .locator('xpath=./following-sibling::div')
+            .getByRole('radio', {name: name})
+    }
+
+    /**
+     * Execute commands in kubectl shell
+     * @param commands execute, have to finish with 0 exit code
+     */
+    async shell(...commands: string[]) {
+        const win = this.page.locator('#windowmanager')
+        const prompt = win.locator('.xterm-rows>div:has(span)').filter({hasText: ">"}).last()
+
+        // Open terminal
+        await this.page.locator('#btn-kubectl').click()
+        await expect(win.locator('.status').getByText('Connected', {exact: true})).toBeVisible({timeout: 30_000})
+        // Run command
+        // await win.locator('.xterm-cursor').click()
+        for (const cmd of commands) {
+            await this.page.keyboard.type(cmd + ' || echo ERREXIT-$?')
+            await this.page.keyboard.press('Enter')
+            // Wait - command finished when prompt (>) has blinking cursor
+            await expect(prompt.locator('span.xterm-cursor')).toBeVisible({timeout: 60_000})
+            // Verify that it passed
+            await expect(win.getByText(/ERREXIT-[0-9]+/), {message: 'Shell command finished with an error'}).not.toBeVisible({timeout: 1})
+        }
+        // Close terminal
+        await win.locator('.tab').filter({hasText: 'Kubectl: local'}).locator('i.closer').click()
     }
 
     // Labeled Select
