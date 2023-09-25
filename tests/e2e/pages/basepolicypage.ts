@@ -25,7 +25,7 @@ export function generateName(title: string) {
 
 export class BasePolicyPage extends BasePage {
 
-  async selectTab(name: 'General'|'Rules'|'Settings'|'Context Aware Resources') {
+  async selectTab(name: 'General'|'Rules'|'Settings'|'Namespace Selector'|'Context Aware Resources') {
     await this.page.getByRole('tab', { name: name, exact: true }).click()
     await expect(this.page.locator('.tab-header').getByRole('heading', {name: name})).toBeVisible()
   }
@@ -47,13 +47,19 @@ export class BasePolicyPage extends BasePage {
   }
 
   async setMode(mode: 'Monitor' | 'Protect') {
-    await this.page.getByRole('heading', {name:'Mode'}).locator('xpath=../..').getByRole('radio', {name: mode}).check()
+    await this.ui.radio('Mode', mode).check()
   }
 
-  async setIgnoreRancherNS(option: 'Yes' | 'No' | boolean) {
-    if (typeof option == 'boolean')
-      option = option ? 'Yes' : 'No'
-    await this.page.getByRole('heading', {name:'Ignore Rancher'}).locator('xpath=../..').getByRole('radio', {name: option}).check()
+  async setIgnoreRancherNS(checked: boolean) {
+    await this.ui.checkbox('Ignore Rancher Namespaces').setChecked(checked)
+  }
+
+  async editYaml() {
+      // Give generated fields time to get registered
+      await this.page.waitForTimeout(200)
+      // Show yaml with edited settings
+      await this.page.getByRole('button', { name: 'Edit YAML' }).click()
+      await expect(this.page.getByTestId('kw-policy-config-yaml-editor')).toBeVisible()
   }
 
   async open(p: Policy) {
@@ -85,10 +91,7 @@ export class BasePolicyPage extends BasePage {
     // Extra policy settings
     if (p.settings) {
       await p.settings(this.ui)
-      // Give generated fields time to get registered
-      await this.ui.page.waitForTimeout(200)
-      // Show yaml with edited settings
-      await this.page.getByRole('button', { name: 'Edit YAML' }).click()
+      await this.editYaml()
     }
   }
 

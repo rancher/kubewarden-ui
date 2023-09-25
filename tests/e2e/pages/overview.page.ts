@@ -57,8 +57,13 @@ export class OverviewPage extends BasePage {
     await expect(this.page).toHaveURL(/.*\/apps\/charts\/install.*chart=kubewarden-controller/);
 
     // ==================================================================================================
-    // Rancher Application Install
+    // Rancher Application Metadata
     await this.page.getByRole('button', { name: 'Next' }).click();
+    // Rancher Application Values
+    const schedule = this.ui.input('Schedule')
+    await expect(schedule).toHaveValue('*/60 * * * *')
+    await schedule.fill('*/1 * * * *')
+    await this.ui.checkbox('Enable Policy Reporter').check()
 
     // Enable telemetry
     // await page.getByRole('button', { name: 'Edit YAML' }).click()
