@@ -57,7 +57,6 @@ export class RancherUI {
         await this.page.locator('#btn-kubectl').click()
         await expect(win.locator('.status').getByText('Connected', {exact: true})).toBeVisible({timeout: 30_000})
         // Run command
-        // await win.locator('.xterm-cursor').click()
         for (const cmd of commands) {
             await this.page.keyboard.type(cmd + ' || echo ERREXIT-$?')
             await this.page.keyboard.press('Enter')
