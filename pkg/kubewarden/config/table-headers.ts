@@ -248,3 +248,36 @@ export const RULE_HEADERS = [
     sort:  'resources'
   },
 ];
+
+export const POLICY_REPORTER_HEADERS = [
+  {
+    name:     'kind',
+    labelKey: 'tableHeaders.subType',
+    value:    'kind'
+  },
+  {
+    name:     'name',
+    labelKey: 'tableHeaders.name',
+    value:    'name'
+  },
+  {
+    name:     'policy',
+    labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.policy.label',
+    value:    'policy'
+  },
+  {
+    name:     'rule',
+    labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.rule.label',
+    value:    'rule'
+  },
+  {
+    name:     'severity',
+    labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.severity.label',
+    value:    'severity'
+  },
+  {
+    name:     'status',
+    labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.status.label',
+    value:    'status'
+  },
+];

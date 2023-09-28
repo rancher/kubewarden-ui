@@ -274,6 +274,25 @@ kubewarden:
     url:
       banner:
         unavailable: The Policy Reporter UI proxy URL is unavailble, please ensure that the UI is properly configured.
+    headers:
+      label: Policy Reports
+      description: When using the Kubewarden Audit Scanner, the results of the policy scans are stored using the PolicyReport Custom Resource.
+      policyReportsTab:
+        policy:
+          label: Policy
+        rule:
+          label: Rule
+        severity:
+          label: Severity
+        status:
+          label: Status
+        message:
+          title: Message
+        properties:
+          policy-uid: policy-uid
+          version: policy-resource-version
+          mutating: mutating
+          validating: validating
 
 asyncButton:
   artifactHub:

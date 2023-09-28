@@ -30,7 +30,7 @@ export default {
       await this.$store.dispatch('catalog/load');
     }
 
-    this.grafanaDashboard = await this.value.grafanaDashboard();
+    this.grafanaDashboard = await this.value?.grafanaDashboard();
   },
 
   data() {
