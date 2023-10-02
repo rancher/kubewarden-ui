@@ -1,7 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
 import { randomStr } from '@shell/utils/string';
 import {
-  KUBEWARDEN, Resource, Severity, Result, PolicyReport, PolicyReportResult
+  KUBEWARDEN, Resource, Severity, Result, PolicyReport, PolicyReportResult, PolicyReportSummary
 } from '../types';
 import { createKubewardenRoute } from '../utils/custom-routing';
 
@@ -31,10 +31,80 @@ export async function getPolicyReports(store: any): Promise<PolicyReport[] | voi
 /**
  * Dispatches findAll for PolicyReports (`wgpolicyk8s.io.policyreport`)
  * @param store
- * @returns `wgpolicyk8s.io.policyreport[] | void`
+ * @returns `PolicyReport[] | void`
  */
 export async function fetchPolicyReports(store: any): Promise<Array<PolicyReport>> {
   return await store.dispatch('cluster/findAll', { type: KUBEWARDEN.POLICY_REPORT }, { root: true });
+}
+
+/**
+ * Filters PolicyReports to return a summary of the results per namespace
+ * @param store
+ * @param resource
+ * @returns `PolicyReportSummary | null | void`
+ */
+export function getFilteredSummary(store: any, resource: any): PolicyReportSummary | null | void {
+  const schema = store.getters['cluster/schemaFor'](resource.type);
+
+  if ( schema ) {
+    const reports = store.getters['kubewarden/policyReports'];
+
+    if ( !isEmpty(reports) ) {
+      const hasNamespace = resource?.metadata?.namespace;
+
+      if ( hasNamespace ) {
+        let filtered: PolicyReportResult[] | undefined;
+
+        // Find the report that is scoped to the resource namespace
+        if ( Array.isArray(reports) ) {
+          reports.forEach((report: any) => {
+            if ( report.scope?.name === resource.metadata.namespace ) {
+              const filteredResult = report.results?.filter((result: PolicyReportResult) => {
+                const filteredResource = result?.resources?.find((r: Resource) => {
+                  const { kind, name, namespace } = r;
+
+                  if ( kind === resource.kind && name === resource.metadata.name && namespace === resource.metadata.namespace ) {
+                    return r;
+                  }
+                });
+
+                if ( !isEmpty(filteredResource) ) {
+                  // Assign uid for SortableTable sub-row
+                  Object.assign(result, { uid: randomStr() });
+
+                  return result;
+                }
+              });
+
+              if ( !isEmpty(filteredResult) ) {
+                filtered = filteredResult;
+              }
+            }
+          });
+        }
+
+        if ( !isEmpty(filtered) ) {
+          const out: PolicyReportSummary = {
+            pass:  0,
+            fail:  0,
+            warn:  0,
+            error: 0,
+            skip:  0
+          };
+
+          filtered?.forEach((r: PolicyReportResult) => {
+            const resultVal = r.result;
+
+            if ( resultVal ) {
+              (out as any)[resultVal]++;
+            }
+          });
+
+          return out;
+        }
+      }
+    }
+  }
 }
 
 /**

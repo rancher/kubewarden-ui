@@ -33,45 +33,42 @@ export enum Result {
 }
 /* eslint-enable no-unused-vars */
 
+export type PolicyReportSummary = {
+  pass?: number;
+  fail?: number;
+  warn?: number;
+  error?: number;
+  skip?: number;
+}
+
+export type PolicyReportResult = {
+  message: string;
+  policy: string;
+  rule: string;
+  priority?: string;
+  status?: string;
+  source?: string;
+  severity?: string;
+  category?: string;
+  properties?: {[key: string]: string};
+  scored: boolean;
+  result?: string;
+  resources?: Resource[];
+  uid?: string;
+}
+
 export type PolicyReport = {
   apiVersion: string;
   id: string;
   kind: string;
   links?: Links;
   metadata: Metadata;
-  results?: Array<{
-    category?: string;
-    message?: string;
-    policy?: string;
-    result?: string;
-    resources?: Resource[];
-  }>
+  results?: Array<PolicyReportResult>
   scope?: {
     name?: string;
     uid?: string;
   }
-  summary?: {
-    pass?: number;
-    fail?: number;
-    warn?: number;
-    error?: number;
-    skip?: number;
-  }
+  summary?: PolicyReportSummary
   type: string;
   uid: string;
-}
-
-export type PolicyReportResult = {
-    message: string;
-    policy: string;
-    rule: string;
-    priority?: string;
-    status?: string;
-    source?: string;
-    severity?: string;
-    category?: string;
-    properties?: {[key: string]: string};
-    scored: boolean;
-    resources?: Resource[];
-    uid?: string;
 }

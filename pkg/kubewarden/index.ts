@@ -2,7 +2,9 @@ import { importTypes } from '@rancher/auto-import';
 import {
   IPlugin, TableColumnLocation, TabLocation, PanelLocation, OnNavToPackage
 } from '@shell/core/types';
-import { NAMESPACE } from '@shell/config/types';
+import {
+  NAMESPACE, POD, WORKLOAD_TYPES, INGRESS, SERVICE
+} from '@shell/config/types';
 
 import kubewardenRoutes from './routes/kubewarden-routes';
 import kubewardenStore from './store/kubewarden';
@@ -59,26 +61,24 @@ export default function($plugin: IPlugin, args: any) {
   /** Tabs */
   $plugin.addTab(
     TabLocation.RESOURCE_DETAIL,
-    { resource: [NAMESPACE] },
+    {
+      resource: [
+        NAMESPACE,
+        POD,
+        WORKLOAD_TYPES.CRON_JOB,
+        WORKLOAD_TYPES.DAEMON_SET,
+        WORKLOAD_TYPES.DEPLOYMENT,
+        WORKLOAD_TYPES.JOB,
+        WORKLOAD_TYPES.STATEFUL_SET,
+        INGRESS,
+        SERVICE
+      ]
+    },
     {
       name:       'policy-report-tab',
       labelKey:   'kubewarden.policyReporter.headers.label',
       weight:     -5,
       showHeader: true,
-      tooltip:    'this is a tooltip message',
-      component:  () => import('./components/PolicyReporter/ResourceTab.vue')
-    }
-  );
-
-  $plugin.addTab(
-    TabLocation.RESOURCE_DETAIL,
-    { resource: ['pod'] },
-    {
-      name:       'policy-report-tab',
-      labelKey:   'kubewarden.policyReporter.headers.label',
-      weight:     -5,
-      showHeader: true,
-      tooltip:    'this is a tooltip message',
       component:  () => import('./components/PolicyReporter/ResourceTab.vue')
     }
   );

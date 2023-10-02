@@ -2,8 +2,9 @@
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 import { sortBy } from '@shell/utils/sort';
+import { NAMESPACE } from '@shell/config/query-params';
 
-import { colorForResult } from '../modules/policyReporter';
+import { colorForResult, getFilteredSummary } from '../modules/policyReporter';
 
 export default {
   props: {
@@ -14,7 +15,13 @@ export default {
   },
 
   data() {
-    return { expanded: false };
+    return { expanded: false, filteredReports: null };
+  },
+
+  created() {
+    if ( !this.isNamespaceResource ) {
+      this.filteredReports = getFilteredSummary(this.$store, this.value);
+    }
   },
 
   computed: {
@@ -34,6 +41,10 @@ export default {
       }
 
       return false;
+    },
+
+    isNamespaceResource() {
+      return this.value?.type === NAMESPACE;
     },
 
     summaryParts() {
@@ -74,21 +85,23 @@ export default {
     },
 
     summary() {
-      const connectedReport = this.reports?.find(r => r.namespace === this.value?.id);
+      if ( this.isNamespaceResource ) {
+        const connectedReport = this.reports?.find(r => r.metadata?.namespace === this.value?.id);
 
-      if ( connectedReport ) {
-        return connectedReport.summary;
+        if ( connectedReport ) {
+          return connectedReport.summary;
+        }
       }
 
-      return null;
+      return this.filteredReports;
     }
   },
 
   methods: {
     policySummarySort(color, display) {
       const SORT_ORDER = {
-        pass:    1,
-        fail:    2,
+        fail:    1,
+        pass:    2,
         error:   3,
         warning: 4,
         skip:    5,
