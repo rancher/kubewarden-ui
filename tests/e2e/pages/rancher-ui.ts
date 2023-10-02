@@ -45,30 +45,6 @@ export class RancherUI {
             .getByRole('radio', {name: name})
     }
 
-    /**
-     * Execute commands in kubectl shell
-     * @param commands execute, have to finish with 0 exit code
-     */
-    async shell(...commands: string[]) {
-        const win = this.page.locator('#windowmanager')
-        const prompt = win.locator('.xterm-rows>div:has(span)').filter({hasText: ">"}).last()
-
-        // Open terminal
-        await this.page.locator('#btn-kubectl').click()
-        await expect(win.locator('.status').getByText('Connected', {exact: true})).toBeVisible({timeout: 30_000})
-        // Run command
-        for (const cmd of commands) {
-            await this.page.keyboard.type(cmd + ' || echo ERREXIT-$?')
-            await this.page.keyboard.press('Enter')
-            // Wait - command finished when prompt (>) has blinking cursor
-            await expect(prompt.locator('span.xterm-cursor')).toBeVisible({timeout: 60_000})
-            // Verify that it passed
-            await expect(win.getByText(/ERREXIT-[0-9]+/), {message: 'Shell command finished with an error'}).not.toBeVisible({timeout: 1})
-        }
-        // Close terminal
-        await win.locator('.tab').filter({hasText: 'Kubectl: local'}).locator('i.closer').click()
-    }
-
     // Labeled Select
     async select(label: string, option: string) {
         await this.page.locator('div.labeled-select')
@@ -101,8 +77,11 @@ export class RancherUI {
      * await editYaml(page, '{"policyServer": {"telemetry": { "enabled": false }}}')
      */
     async editYaml(page: Page, source: Function|string) {
+        const cmEditor = page.locator('div.CodeMirror-lines[role="presentation"]')
+
         // Load yaml from code editor
-        const lines = await page.locator('.CodeMirror-code > div > pre.CodeMirror-line').allTextContents();
+        await expect(cmEditor).toBeVisible()
+        const lines = await cmEditor.locator('pre.CodeMirror-line').allTextContents()
         let cmYaml = jsyaml.load(lines.join('\n')
             .replace(/\u00a0/g, " ")  // replace &nbsp; with space
             .replace(/\u200b/g, "")   // remove ZERO WIDTH SPACE last line
@@ -120,6 +99,31 @@ export class RancherUI {
         await page.keyboard.insertText(jsyaml.dump(cmYaml))
     }
 
+    /**
+     * Execute commands in kubectl shell, can process single-line commands
+     * @param commands execute, have to finish with 0 exit code
+     */
+    async shell(...commands: string[]) {
+        const win = this.page.locator('#windowmanager')
+        const prompt = win.locator('.xterm-rows>div:has(span)').filter({hasText: ">"}).last()
+        const input = win.getByLabel('Terminal input', {exact: true})
+
+        // Open terminal
+        await this.page.locator('#btn-kubectl').click()
+        await expect(win.locator('.status').getByText('Connected', {exact: true})).toBeVisible({timeout: 30_000})
+        // Run command
+        for (const cmd of commands) {
+            // Fill removes newlines, multiline commands require input.pressSequentially
+            await input.fill(cmd + ' || echo ERREXIT-$?')
+            await input.press('Enter')
+            // Wait - command finished when prompt is empty
+            await expect(prompt.getByText(/^>\s+$/)).toBeVisible({timeout: 60_000})
+            // Verify command exit status
+            await expect(win.getByText(/ERREXIT-[0-9]+/), {message: 'Shell command finished with an error'}).not.toBeVisible({timeout: 1})
+        }
+        // Close terminal
+        await win.locator('.tab').filter({hasText: 'Kubectl: local'}).locator('i.closer').click()
+    }
 
     /**
      * Call ui.withReload(async()=> { <code> }, 'Reason')
