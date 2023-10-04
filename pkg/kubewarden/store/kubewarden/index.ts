@@ -1,6 +1,6 @@
 import { CoreStoreSpecifics, CoreStoreConfig } from '@shell/core/types';
 
-import { KUBEWARDEN_PRODUCT_NAME } from '../../types';
+import { KUBEWARDEN_PRODUCT_NAME, PolicyReport } from '../../types';
 
 import getters from './getters';
 import mutations from './mutations';
@@ -10,7 +10,8 @@ export interface StateConfig {
   airGapped: Boolean,
   hideBannerDefaults: Boolean,
   hideBannerArtifactHub: Boolean,
-  hideBannerAirgapPolicy: Boolean
+  hideBannerAirgapPolicy: Boolean,
+  policyReports: PolicyReport[]
 }
 
 const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
@@ -20,7 +21,8 @@ const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
         airGapped:              config.airGapped,
         hideBannerDefaults:     config.hideBannerDefaults,
         hideBannerArtifactHub:  config.hideBannerArtifactHub,
-        hideBannerAirgapPolicy: config.hideBannerAirgapPolicy
+        hideBannerAirgapPolicy: config.hideBannerAirgapPolicy,
+        policyReports:          config.policyReports
       };
     },
 
@@ -37,7 +39,8 @@ export default {
     airGapped:              false,
     hideBannerDefaults:     false,
     hideBannerArtifactHub:  false,
-    hideBannerAirgapPolicy: false
+    hideBannerAirgapPolicy: false,
+    policyReports:          []
   }),
   config
 };

@@ -1,15 +1,25 @@
 import { importTypes } from '@rancher/auto-import';
-import { IPlugin } from '@shell/core/types';
+import {
+  IPlugin, TableColumnLocation, TabLocation, PanelLocation, OnNavToPackage
+} from '@shell/core/types';
+import {
+  NAMESPACE, POD, WORKLOAD_TYPES, INGRESS, SERVICE
+} from '@shell/config/types';
 
 import kubewardenRoutes from './routes/kubewarden-routes';
 import kubewardenStore from './store/kubewarden';
+import { getPolicyReports } from './modules/policyReporter';
 
 // fix missing directives on dashboard v2.7.2
 import '@shell/plugins/clean-tooltip-directive';
 import '@shell/plugins/clean-html-directive';
 
+const onEnter: OnNavToPackage = async(store) => {
+  await getPolicyReports(store);
+};
+
 // Init the package
-export default function($plugin: IPlugin) {
+export default function($plugin: IPlugin, args: any) {
   // Auto-import model, detail, edit from the folders
   importTypes($plugin);
 
@@ -24,4 +34,52 @@ export default function($plugin: IPlugin) {
 
   // Routes
   $plugin.addRoutes(kubewardenRoutes);
+
+  // Add hooks to Vue navigation world
+  $plugin.addNavHooks(onEnter);
+
+  /** Panels */
+  $plugin.addPanel(
+    PanelLocation.RESOURCE_LIST,
+    { path: [{ urlPath: 'explorer/projectsnamespaces', endsWith: true }] },
+    { component: () => import('./components/PolicyReporter/ReporterPanel.vue') }
+  );
+
+  /** Columns */
+  $plugin.addTableColumn(
+    TableColumnLocation.RESOURCE,
+    { path: [{ urlPath: 'explorer/projectsnamespaces', endsWith: true }] },
+    {
+      name:      'policy-reports',
+      labelKey:  'kubewarden.policyReporter.headers.label',
+      getValue:  (row: any) => row,
+      weight:    3,
+      formatter: 'PolicyReportSummary'
+    }
+  );
+
+  /** Tabs */
+  $plugin.addTab(
+    TabLocation.RESOURCE_DETAIL,
+    {
+      resource: [
+        NAMESPACE,
+        POD,
+        WORKLOAD_TYPES.CRON_JOB,
+        WORKLOAD_TYPES.DAEMON_SET,
+        WORKLOAD_TYPES.DEPLOYMENT,
+        WORKLOAD_TYPES.JOB,
+        WORKLOAD_TYPES.STATEFUL_SET,
+        INGRESS,
+        SERVICE
+      ]
+    },
+    {
+      name:       'policy-report-tab',
+      labelKey:   'kubewarden.policyReporter.headers.label',
+      weight:     -5,
+      showHeader: true,
+      component:  () => import('./components/PolicyReporter/ResourceTab.vue')
+    }
+  );
 }

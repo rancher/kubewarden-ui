@@ -191,6 +191,18 @@ export default {
             :label="t('kubewarden.policyConfig.mode.warning')"
           />
         </div>
+        <div class="col span-6">
+          <RadioGroup
+            v-model="policy.spec.backgroundAudit"
+            data-testid="kw-policy-general-background-audit-input"
+            name="mode"
+            :options="[true, false]"
+            :mode="mode"
+            :label="t('kubewarden.policyConfig.backgroundAudit.label')"
+            :labels="['On', 'Off']"
+            :tooltip="t('kubewarden.policyConfig.backgroundAudit.tooltip')"
+          />
+        </div>
       </div>
     </template>
   </div>
