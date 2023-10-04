@@ -29,8 +29,8 @@ test('PolicyReports', async({ page, ui }) => {
       await den.getByRole('textbox').fill('unsafelbl')
 
       // Customize because audit for "*" rules is skipped
-      await capPage.editYaml()
-      await ui.editYaml(ui.page, d => {
+      await ui.openYamlEditor()
+      await ui.editYaml(d => {
         d.spec.rules[0].apiGroups[0] = ""
         d.spec.rules[0].apiVersions[0] = "v1"
         d.spec.rules[0].resources[0] = "namespaces"

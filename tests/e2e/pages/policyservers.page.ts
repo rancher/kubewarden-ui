@@ -1,5 +1,7 @@
-import { Locator, Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { BasePage } from './basepage';
+import { RancherAppsPage } from './rancher-apps.page';
 
 export class PolicyServersPage extends BasePage {
   readonly noDefaultPsBanner: Locator;
@@ -33,12 +35,24 @@ export class PolicyServersPage extends BasePage {
     await this.ui.getRow(name).delete()
   }
 
-  async installDefaultDialog(recommended: {enable: boolean, mode?: 'monitor' | 'protect'}) {
-    await this.ui.checkbox('Enable recommended policies').check()
+  async installDefault(options?: {recommended?: boolean, mode?: 'monitor' | 'protect'}) {
+    const apps = new RancherAppsPage(this.page)
+    // Skip metadata
+    await expect(apps.step1).toBeVisible()
+    await apps.nextBtn.click()
+    await expect(apps.step2).toBeVisible()
 
-    if (recommended.enable && recommended.mode) {
-      await this.ui.select('Execution mode', recommended.mode)
+    // Handle questions
+    if (options?.recommended) {
+      await this.ui.checkbox('Enable recommended policies').setChecked(options.recommended)
     }
-  };
+    if (options?.mode) {
+      await this.ui.select('Execution mode', options.mode)
+    }
+
+    // Install
+    await apps.installBtn.click();
+    await apps.waitHelmSuccess('rancher-kubewarden-defaults')
+  }
 
 }

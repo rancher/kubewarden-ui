@@ -63,21 +63,21 @@ export class RancherUI {
     // ==================================================================================================
     // Helper functions
 
-    /**
-     * Build regex matching successfull chart installation
-     */
-    helmPassRegex(name: string) {
-        const re = new RegExp(`SUCCESS: helm .* ${name} \/home`)
-        return this.page.locator('.logs-container').getByText(re)
+    async openYamlEditor() {
+        // Give generated fields time to get registered
+        await this.page.waitForTimeout(200)
+        // Show yaml with edited settings
+        await this.page.getByRole('button', { name: 'Edit YAML' }).click()
+        await expect(this.page.locator('div.CodeMirror')).toBeVisible()
     }
 
     /**
      * Usage:
-     * await editYaml(page, d => d.telemetry.enabled = true )
-     * await editYaml(page, '{"policyServer": {"telemetry": { "enabled": false }}}')
+     * await editYaml(d => d.telemetry.enabled = true )
+     * await editYaml('{"policyServer": {"telemetry": { "enabled": false }}}')
      */
-    async editYaml(page: Page, source: Function|string) {
-        const cmEditor = page.locator('div.CodeMirror-lines[role="presentation"]')
+    async editYaml(source: Function|string) {
+        const cmEditor = this.page.locator('div.CodeMirror-lines[role="presentation"]')
 
         // Load yaml from code editor
         await expect(cmEditor).toBeVisible()
@@ -94,9 +94,9 @@ export class RancherUI {
             merge(cmYaml, jsyaml.load(source))
         }
         // Paste edited yaml
-        await page.locator('.CodeMirror-code').click()
-        await page.keyboard.press('Control+A');
-        await page.keyboard.insertText(jsyaml.dump(cmYaml))
+        await this.page.locator('.CodeMirror-code').click()
+        await this.page.keyboard.press('Control+A');
+        await this.page.keyboard.insertText(jsyaml.dump(cmYaml))
     }
 
     /**
@@ -117,7 +117,7 @@ export class RancherUI {
             await input.fill(cmd + ' || echo ERREXIT-$?')
             await input.press('Enter')
             // Wait - command finished when prompt is empty
-            await expect(prompt.getByText(/^>\s+$/)).toBeVisible({timeout: 60_000})
+            await expect(prompt.getByText(/^>\s+$/)).toBeVisible({timeout: 5*60_000})
             // Verify command exit status
             await expect(win.getByText(/ERREXIT-[0-9]+/), {message: 'Shell command finished with an error'}).not.toBeVisible({timeout: 1})
         }

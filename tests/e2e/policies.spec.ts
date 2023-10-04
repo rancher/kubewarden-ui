@@ -88,14 +88,14 @@ async function setupVerifyImageSignatures(ui: RancherUI) {
   await ui.select('Signature Type', 'GithubAction')
   await ui.page.getByRole('button', {name: 'Add', exact: true}).click()
   await ui.input('Image*').fill('ghcr.io/kubewarden/*')
-  await ui.editYaml(ui.page, d => d.githubActions.owner = "kubewarden")
+  await ui.editYaml(d => d.githubActions.owner = "kubewarden")
 }
 
 async function setupEnvironmentVariablePolicy(ui: RancherUI) {
   await ui.page.getByRole('tab', { name: 'Settings' }).click()
   await ui.page.getByRole('button', {name: 'Add', exact: true}).click()
   await ui.select('Reject Operator', 'anyIn')
-  await ui.editYaml(ui.page, d => d.environmentVariables[0].name = "novar")
+  await ui.editYaml(d => d.environmentVariables[0].name = "novar")
 }
 
 async function setupUserGroupPSP(ui: RancherUI) {
