@@ -11,7 +11,11 @@ import SortableTable from '@shell/components/SortableTable';
 
 import { KUBEWARDEN } from '../../types';
 import { POLICY_REPORTER_HEADERS } from '../../config/table-headers';
-import { getFilteredReports, getLinkForPolicy, colorForResult, colorForSeverity } from '../../modules/policyReporter';
+import {
+  getFilteredReports, getLinkForPolicy, getLinkForResource, colorForResult, colorForSeverity
+} from '../../modules/policyReporter';
+import { splitGroupKind } from '../../modules/core';
+import * as coreTypes from '../../core/core-resources';
 
 export default {
   props: {
@@ -82,6 +86,26 @@ export default {
   },
 
   methods: {
+    canGetResourceLink(row) {
+      const resource = row?.resources[0];
+
+      if ( resource ) {
+        const isCore = Object.values(coreTypes).find(type => resource.kind === type.attributes.kind);
+
+        if ( isCore ) {
+          return this.$store.getters['cluster/schemaFor'](resource.kind?.toLowerCase());
+        }
+
+        const groupType = splitGroupKind(resource);
+
+        if ( groupType ) {
+          return this.$store.getters['cluster/schemaFor'](groupType);
+        }
+      }
+
+      return null;
+    },
+
     getResourceValue(row, val, needsResource = false) {
       if ( this.isNamespaceResource && needsResource && !isEmpty(row.resources) ) {
         return row.resources[0][val] || '-';
@@ -96,6 +120,10 @@ export default {
 
     getPolicyLink(row) {
       return getLinkForPolicy(this.$store, row);
+    },
+
+    getResourceLink(row) {
+      return getLinkForResource(row);
     },
 
     severityColor(row) {
@@ -134,7 +162,9 @@ export default {
       :sub-expand-column="true"
       :sub-rows="true"
       :paging="true"
-      :rows-per-page="40"
+      :rows-per-page="25"
+      :extra-search-fields="['result']"
+      default-sort-by="status"
     >
       <!-- Namespace Resource columns -->
       <template v-if="isNamespaceResource" #col:kind="{row}">
@@ -142,25 +172,27 @@ export default {
       </template>
       <template v-if="isNamespaceResource" #col:name="{row}">
         <td>
-          <span>{{ getResourceValue(row, 'name', true) }}</span>
+          <template v-if="canGetResourceLink(row)">
+            <n-link :to="getResourceLink(row)">
+              <span>{{ getResourceValue(row, 'name', true) }}</span>
+            </n-link>
+          </template>
+          <template v-else>
+            <span>{{ getResourceValue(row, 'name', true) }}</span>
+          </template>
         </td>
       </template>
 
       <template #col:policy="{row}">
-        <td v-if="row.policy" :class="{ 'text-bold': isNamespaceResource}">
+        <td v-if="row.policy && row.rule" :class="{ 'text-bold': isNamespaceResource}">
           <template v-if="canGetKubewardenLinks">
             <n-link :to="getPolicyLink(row)">
-              <span>{{ row.policy }}</span>
+              <span>{{ row.rule }}</span>
             </n-link>
           </template>
           <template v-else>
-            <span>{{ row.policy }}</span>
+            <span>{{ row.rule }}</span>
           </template>
-        </td>
-      </template>
-      <template #col:rule="{row}">
-        <td class="text-bold">
-          {{ row.rule }}
         </td>
       </template>
       <template #col:severity="{row}">

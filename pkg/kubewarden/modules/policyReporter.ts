@@ -3,7 +3,9 @@ import { randomStr } from '@shell/utils/string';
 import {
   KUBEWARDEN, Resource, Severity, Result, PolicyReport, PolicyReportResult, PolicyReportSummary
 } from '../types';
+import * as coreTypes from '../core/core-resources';
 import { createKubewardenRoute } from '../utils/custom-routing';
+import { splitGroupKind } from './core';
 
 /**
  * Attempts to fetch PolicyReports by dispatching a findAll against `wgpolicyk8s.io.policyreport`
@@ -230,6 +232,47 @@ export function getLinkForPolicy(store: any, report: PolicyReportResult): Object
         name:   'c-cluster-product-resource-id',
         params: { resource: policyType, id: policyParts[1] }
       });
+    }
+  }
+}
+
+/**
+ * Finds the resource link from a policy report for a Namespace's tab component. Since the `type` is
+ * not passed in from the report, it needs to be determined by the `kind` of the resource. For core
+ * resources this works as is, but for non-core resources (e.g. `apps.deployments`), this is extrapolated
+ * by the `apiVersion` combined with the `kind`.
+ * @param report: `PolicyReportResult
+ * @returns `Route | void`
+ */
+export function getLinkForResource(report: PolicyReportResult): Object | void {
+  if ( !isEmpty(report.resources?.[0]) ) {
+    const resource = report.resources?.[0];
+
+    if ( resource ) {
+      const isCore = Object.values(coreTypes).find(type => resource.kind === type.attributes.kind);
+      let resourceType;
+
+      if ( isCore ) {
+        resourceType = resource.kind.toLowerCase();
+      } else {
+        resourceType = splitGroupKind(resource);
+      }
+
+      if ( resourceType ) {
+        if ( resource.namespace ) {
+          return {
+            name:   'c-cluster-product-resource-namespace-id',
+            params: {
+              resource: resourceType, id: resource.name, namespace: resource.namespace
+            }
+          };
+        }
+
+        return {
+          name:   'c-cluster-product-resource-id',
+          params: { resource: resourceType, id: resource.name }
+        };
+      }
     }
   }
 }

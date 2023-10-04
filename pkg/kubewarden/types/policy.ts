@@ -6,9 +6,10 @@ export const DEFAULT_POLICY = {
     namespace: ''
   },
   spec:       {
-    policyServer: '',
-    module:       '',
-    rules:        [{
+    backgroundAudit: true,
+    policyServer:    '',
+    module:          '',
+    rules:           [{
       apiGroups:   [],
       apiVersions: [],
       resources:   [],

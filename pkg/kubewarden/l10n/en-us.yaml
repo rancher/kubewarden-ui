@@ -170,6 +170,9 @@ kubewarden:
         checkbox: Update to Protect Mode
         title: Update Policy Mode
         body: The monitor mode is a way to view the behavior of a policy without letting it make the final decision on requests that are validated by the policy.
+    backgroundAudit:
+      label: Background Audit
+      tooltip: 'Indicates whether a policy should be used or skipped when performing audit checks. If false, the policy cannot produce meaningful evaluation results during audit checks and will be skipped. The default is "true".'
     ignoreRancherNamespaces:
       label: Ignore Rancher Namespaces
       tooltip: Certain policies will break core services of Rancher, this will add a default list of namespaces to ignore.
