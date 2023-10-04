@@ -1,11 +1,11 @@
 import { test, expect } from './rancher-test';
-import { OverviewPage } from './pages/overview.page';
+import { KubewardenPage } from './pages/kubewarden.page';
 import { PolicyServersPage } from './pages/policyservers.page';
 import { AdmissionPoliciesPage } from './pages/admissionpolicies.page';
 import { ClusterAdmissionPoliciesPage } from './pages/clusteradmissionpolicies.page';
 
 test('Kubewarden Landing page', async({ page, ui }) => {
-  const kwPage = new OverviewPage(page);
+  const kwPage = new KubewardenPage(page);
   await kwPage.goto();
   await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
 

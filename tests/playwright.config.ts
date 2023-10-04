@@ -22,7 +22,9 @@ export default defineConfig({
 
   // ===== Rancher specific config =====
   /* Maximum time one test can run for. */
-  timeout: 7 * 60_0000,
+  timeout: 7 * 60_000,
+  /* Expect timeout - increase from 5s to 10s because rancher is slow when loading pages */
+  expect: { timeout: 10_000 },
   /* Whether to report slow test files. */
   reportSlowTests: null,
   /* Path to the global setup file. */
@@ -37,7 +39,7 @@ export default defineConfig({
     /* Timeout for navigation actions like page.goto() */
     navigationTimeout: 60_000,
     /* Slows down Playwright operations by the specified amount of milliseconds. */
-    // launchOptions: { slowMo: 100 },
+    // launchOptions: { slowMo: 200 },
 
     ignoreHTTPSErrors: true,
     storageState: 'storageState.json',

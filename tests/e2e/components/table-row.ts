@@ -1,6 +1,18 @@
 import { expect, Locator } from '@playwright/test';
 import { RancherUI } from '../pages/rancher-ui';
 
+/**
+ * Builds xpath expression to get column index by it's name
+ * @param name Name of the table column
+ * @returns xpath expression to get index of the column
+ */
+function xpath_colIndex(...names: string[]):string {
+  // Transform: names > normalize-space(.)="names[0]" [or ...]
+  const selector = names.map(str => `normalize-space(.)="${str}"`).join(" or ")
+  // Find thead > th with requested name and count how many th was before it
+  return `count(ancestor::table[1]/thead/tr/th[${selector}]/preceding-sibling::th)+1`
+}
+
 export class TableRow {
 
   private readonly ui: RancherUI
@@ -10,8 +22,8 @@ export class TableRow {
 
   /**
    *
-   * @param page required by actions menu since it's not child of the table
-   * @param name of the row, has to be a link to the resource
+   * @param page is required by row actions menu since it's not child of the table
+   * @param name of the row, it is searched under "Name" column by default
    * @param group When there are multiple tbodies filter by group-tab
    *
    */
@@ -22,7 +34,7 @@ export class TableRow {
     }
 
     this.ui = ui
-    this.row = tbody.locator('tr.main-row').filter({has: ui.page.getByRole('link', {name: name, exact: true})})
+    this.row = tbody.locator(`xpath=tr[td[${xpath_colIndex("Name")}][normalize-space(.)="${name}"]]`)
     this.name = this.column('Name')
     this.status = this.column('Status', 'State')
   }
@@ -37,11 +49,12 @@ export class TableRow {
     await expect(this.status).toHaveText('Active', {timeout: timeout})
   }
 
+  /**
+   * @param names header of the column, you can provide alternative names (State|Status)
+   * @returns table cell (td) that is under requested column. Returns first cell if no match was found
+   */
   column(...names: string[]) {
-    // Transform: names > normalize-space(.)="names[0]" [or ...]
-    const selector = names.map(str => `normalize-space(.)="${str}"`).join(" or ")
-    // https://stackoverflow.com/questions/14745478/how-to-select-table-column-by-column-header-name-with-xpath
-    return this.row.locator(`xpath=/td[count(ancestor::table[1]/thead/tr/th[${selector}]/preceding-sibling::th)+1]`)
+      return this.row.locator(`xpath=td[${xpath_colIndex(...names)}]`)
   }
 
   async action(name: string) {

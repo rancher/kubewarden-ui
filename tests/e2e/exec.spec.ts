@@ -1,10 +1,10 @@
 import { test } from './rancher-test'
-import { type Chart, RancherCommonPage } from './pages/rancher-common.page';
+import { type Chart, RancherAppsPage } from './pages/rancher-apps.page';
 
 const charts: Chart[] = [
-  {title: 'Jaeger Operator', namespace: 'jaeger', name: "jaeger-operator"},
-  {title: 'Monitoring', project: '(None)', name: "rancher-monitoring"},
-  {title: 'Kubewarden', project: 'Default', name: "rancher-kubewarden-controller"},
+  {title: 'Jaeger Operator', namespace: 'jaeger', check: "jaeger-operator"},
+  {title: 'Monitoring', project: '(None)', check: "rancher-monitoring"},
+  {title: 'Kubewarden', project: 'Default', check: "rancher-kubewarden-controller"},
 ]
 
 // Install chart from apps menu
@@ -12,15 +12,15 @@ const charts: Chart[] = [
 test('appInstall', async({ page}) => {
   const chart = charts.find(o => o.title === process.env.app) || charts[0]
 
-  const rancher = new RancherCommonPage(page)
-  await rancher.installApp(chart)
+  const apps = new RancherAppsPage(page)
+  await apps.installChart(chart)
 });
 
 // Upgrade without any changes will reload app yaml (patched by kubectl)
 // app='Jaeger Operator' pw test exec -g 'appUpdate' --headed
 test('appUpdate', async({ page }) => {
-    const chart = charts.find(o => o.title === process.env.app) || charts[0]
+    const app = process.env.app || 'jaeger-operator'
 
-    const rancher = new RancherCommonPage(page)
-    await rancher.updateApp(chart)
+    const apps = new RancherAppsPage(page)
+    await apps.updateApp(app)
 });
