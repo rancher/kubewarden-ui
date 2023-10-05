@@ -5,6 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import { CATALOG, POD, WORKLOAD_TYPES } from '@shell/config/types';
 import { KUBERNETES, CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 import { allHash } from '@shell/utils/promise';
+import ResourceManager from '@shell/mixins/resource-manager';
 
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 import Loading from '@shell/components/Loading';
@@ -20,31 +21,26 @@ export default {
     Card, ConsumptionGauge, DefaultsBanner, Loading
   },
 
+  mixins: [ResourceManager],
+
   async fetch() {
     const inStore = this.currentProduct.inStore;
+    const hash = {};
+    const types = [
+      KUBEWARDEN.ADMISSION_POLICY,
+      KUBEWARDEN.CLUSTER_ADMISSION_POLICY
+    ];
 
-    const hash = await allHash({
-      controller:         this.$store.dispatch(`${ inStore }/findMatching`, {
-        type:     WORKLOAD_TYPES.DEPLOYMENT,
-        selector: `${ KUBERNETES.MANAGED_NAME }=${ KUBEWARDEN_CHARTS.CONTROLLER }`
-      }),
-      psPods:             this.$store.dispatch(`${ inStore }/findMatching`, { type: POD, selector: 'kubewarden/policy-server' }),
-      globalPolicies:     this.$store.dispatch(`${ inStore }/findAll`, { type: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }),
-      namespacedPolicies: this.$store.dispatch(`${ inStore }/findAll`, { type: KUBEWARDEN.ADMISSION_POLICY }),
-      apps:               this.$store.dispatch(`${ inStore }/findAll`, { type: CATALOG.APP })
-    });
-
-    if ( !isEmpty(hash.controller) ) {
-      this.controller = hash.controller[0];
+    for ( const type of types ) {
+      if ( this.$store.getters[`${ inStore }/canList`](type) ) {
+        hash[type] = this.$store.dispatch(`${ inStore }/findAll`, { type });
+      }
     }
 
-    if ( !isEmpty(hash.apps) ) {
-      this.apps = hash.apps;
-    }
+    await allHash(hash);
 
-    if ( !isEmpty(hash.psPods) ) {
-      this.psPods = hash.psPods;
-    }
+    this.secondaryResourceData = this.secondaryResourceDataConfig();
+    this.resourceManagerFetchSecondaryResources(this.secondaryResourceData);
   },
 
   data() {
@@ -56,28 +52,29 @@ export default {
       DASHBOARD_HEADERS,
       colorStops,
 
-      apps:        null,
-      controller:  null,
-      psPods:      null,
+      apps:                  null,
+      controller:            null,
+      psPods:                [],
+      secondaryResourceData: this.secondaryResourceDataConfig(),
     };
   },
 
   computed: {
-    ...mapGetters(['currentCluster', 'currentProduct']),
+    ...mapGetters(['currentProduct']),
 
     defaultsApp() {
-      return this.apps?.find((a) => {
-        return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
-      });
-    },
+      if ( this.apps ) {
+        return this.apps?.find((a) => {
+          return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
+        });
+      }
 
-    policyServerPods() {
-      return this.psPods;
+      return true;
     },
 
     /** Counts the current policy server pods - returns the status and total count */
     policyServers() {
-      const pods = this.policyServerPods || [];
+      const pods = this.psPods || [];
 
       return pods.reduce((ps, neu) => {
         const neuContainerStatues = neu?.status?.containerStatuses;
@@ -134,6 +131,37 @@ export default {
   },
 
   methods: {
+    secondaryResourceDataConfig() {
+      return {
+        namespace: this.controller?.metadata?.namespace,
+        data:      {
+          [WORKLOAD_TYPES.DEPLOYMENT]: {
+            applyTo: [
+              { var: 'namespacedDeployments' },
+              {
+                var:         'controller',
+                parsingFunc: (data) => {
+                  return data.find(deploy => deploy?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === KUBEWARDEN_CHARTS.CONTROLLER);
+                }
+              }
+            ]
+          },
+          [POD]: {
+            applyTo: [
+              { var: 'namespacedPods' },
+              {
+                var:         'psPods',
+                parsingFunc: (data) => {
+                  return data.filter(pod => pod?.metadata?.labels['kubewarden/policy-server']);
+                }
+              }
+            ]
+          },
+          [CATALOG.APP]: { applyTo: [{ var: 'apps' }] }
+        }
+      };
+    },
+
     getPolicyGauges(type) {
       return type.reduce((policy, neu) => {
         return {
