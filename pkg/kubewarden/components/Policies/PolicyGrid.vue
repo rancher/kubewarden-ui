@@ -165,7 +165,11 @@ export default {
 
   methods: {
     hasAnnotation(subtype, annotation) {
-      return subtype.data?.[annotation];
+      if ( subtype.data?.[annotation] && subtype.data?.[annotation] !== 'false' ) {
+        return true;
+      }
+
+      return false;
     },
 
     refresh() {
@@ -323,6 +327,10 @@ export default {
 
 <style lang="scss" scoped>
 $margin: 10px;
+
+::v-deep .vs__selected {
+  height: auto !important;
+}
 
 .step {
   &__policies {

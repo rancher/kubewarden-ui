@@ -13,7 +13,7 @@ import { Banner } from '@components/Banner';
 
 import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
-import ChartReadme from '@shell/components/ChartReadme';
+import Markdown from '@shell/components/Markdown';
 import Wizard from '@shell/components/Wizard';
 
 import {
@@ -35,7 +35,7 @@ export default ({
     AsyncButton,
     Banner,
     Loading,
-    ChartReadme,
+    Markdown,
     Wizard,
     PolicyGrid,
     Values
@@ -488,7 +488,7 @@ export default ({
       </template>
 
       <template #readme>
-        <ChartReadme v-if="packageValues" data-testid="kw-policy-create-readme" :version-info="packageValues" class="mb-20" />
+        <Markdown v-if="packageValues.readme" data-testid="kw-policy-create-readme" :value="packageValues.readme" class="mb-20" />
       </template>
 
       <template #values>
