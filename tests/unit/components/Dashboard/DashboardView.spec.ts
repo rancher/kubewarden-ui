@@ -66,9 +66,11 @@ describe('component: DashboardView', () => {
     ];
 
     const wrapper = shallowMount(DashboardView as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
+      data() {
+        return { psPods: pods };
+      },
       computed:  {
         defaultsApp:        () => null,
-        policyServerPods:   () => pods,
         globalPolicies:     () => [],
         namespacedPolicies: () => [],
         version:            () => '1.25'

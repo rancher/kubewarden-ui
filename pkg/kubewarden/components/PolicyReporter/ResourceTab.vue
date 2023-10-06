@@ -35,7 +35,7 @@ export default {
     const fetchedReports = await getFilteredReports(this.$store, this.resource);
 
     if ( this.isNamespaceResource ) {
-      this.reports = fetchedReports.results || [];
+      this.reports = fetchedReports?.results || [];
     } else {
       this.reports = fetchedReports || [];
     }

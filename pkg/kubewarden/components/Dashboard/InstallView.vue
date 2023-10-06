@@ -41,10 +41,16 @@ export default {
     this.reloadReady = false;
 
     if ( !this.hasSchema ) {
-      const hash = [
-        this.$fetchType(SERVICE),
-        this.$fetchType(CATALOG.CLUSTER_REPO)
-      ];
+      const inStore = this.currentProduct.inStore;
+      const hash = [];
+
+      if ( this.$store.getters[`${ inStore }/canList`](SERVICE) ) {
+        hash.push(this.$fetchType(SERVICE));
+      }
+
+      if ( this.$store.getters[`${ inStore }/canList`](CATALOG.CLUSTER_REPO) ) {
+        hash.push(this.$fetchType(CATALOG.CLUSTER_REPO));
+      }
 
       await allHash(hash);
 
