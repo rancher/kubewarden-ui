@@ -54,14 +54,6 @@ export class BasePolicyPage extends BasePage {
     await this.ui.checkbox('Ignore Rancher Namespaces').setChecked(checked)
   }
 
-  async editYaml() {
-      // Give generated fields time to get registered
-      await this.page.waitForTimeout(200)
-      // Show yaml with edited settings
-      await this.page.getByRole('button', { name: 'Edit YAML' }).click()
-      await expect(this.page.getByTestId('kw-policy-config-yaml-editor')).toBeVisible()
-  }
-
   async open(p: Policy) {
     // Open list of policies
     await this.ui.createBtn.click()
@@ -91,7 +83,7 @@ export class BasePolicyPage extends BasePage {
     // Extra policy settings
     if (p.settings) {
       await p.settings(this.ui)
-      await this.editYaml()
+      await this.ui.openYamlEditor()
     }
   }
 
