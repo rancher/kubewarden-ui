@@ -1,6 +1,5 @@
 import { test, expect } from './rancher-test';
 import { Chart, RancherAppsPage } from './pages/rancher-apps.page';
-import { PolicyServersPage } from './pages/policyservers.page';
 
 /**
  * Expect timeout has to be increased after telemetry installation on local cluster
@@ -37,15 +36,13 @@ test('Enable tracing in Kubewarden', async ({ page, ui }) => {
     done`)
 });
 
-test('Check traces are visible', async ({ page, ui }) => {
+test('Check traces are visible', async ({ page, ui, nav }) => {
   const tracingTab = page.getByRole('tablist').locator('li#policy-tracing')
   const policiesTab = page.getByRole('tablist').locator('li#related-policies')
   const logline = ui.getRow('tracing-privpod').row.first()
 
-  const psPage = new PolicyServersPage(page)
-  await psPage.goto()
-
   // Create trace log line
+  await nav.explorer('Kubewarden', 'PolicyServers')
   await ui.shell('k run tracing-privpod --image=nginx:alpine --privileged')
   console.warn('Workaround: Opentelemetry not installed warning before I generate traces')
   await page.reload()
