@@ -15,19 +15,20 @@ test('Install opentelemetry & jaeger', async ({ page }) => {
   await apps.installChart(otelChart)
 
   // Install Jaeger
-  await apps.installChart(jaegerChart, d => {
+  await apps.installChart(jaegerChart, {yamlPatch: d => {
     d.jaeger.create = "true"
     d.rbac.clusterRole = "true"
-  })
+  }})
 });
 
 test('Enable tracing in Kubewarden', async ({ page, ui }) => {
   const apps = new RancherAppsPage(page)
-  await apps.updateApp('rancher-kubewarden-controller', d => {
-    d.telemetry.enabled = true
-    d.telemetry.tracing.jaeger.endpoint = "jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:14250"
-    d.telemetry.tracing.jaeger.tls = {}
-    d.telemetry.tracing.jaeger.tls.insecure = true
+  await apps.updateApp('rancher-kubewarden-controller', {questions: async () => {
+      await page.getByRole('tab', {name: 'Telemetry', exact: true}).click()
+      await ui.checkbox('Enable Tracing').check()
+      await ui.input('Jaeger endpoint configuration').fill('jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317')
+      await ui.checkbox('Jaeger endpoint insecure TLS configuration').check()
+    }
   })
 
   // Wait until kubewarden controller and policyserver are restarted, it takes around 1m
@@ -43,7 +44,10 @@ test('Check traces are visible', async ({ page, ui, nav }) => {
 
   // Create trace log line
   await nav.explorer('Kubewarden', 'PolicyServers')
-  await ui.shell('k run tracing-privpod --image=nginx:alpine --privileged')
+  await ui.shell(
+    'k run tracing-privpod --image=nginx:alpine --privileged',
+    'k delete pod tracing-privpod'
+  )
   console.warn('Workaround: Opentelemetry not installed warning before I generate traces')
   await page.reload()
 
@@ -57,7 +61,4 @@ test('Check traces are visible', async ({ page, ui, nav }) => {
   await ui.getRow('no-privileged-pod').open()
   await tracingTab.click()
   await expect(logline).toBeVisible()
-
-  // Cleanup
-  await ui.shell('k delete pod tracing-privpod')
 })

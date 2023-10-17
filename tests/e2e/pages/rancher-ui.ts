@@ -55,9 +55,8 @@ export class RancherUI {
 
     // ==================================================================================================
     // Table Handler
-
-    getRow(name: string, options?: {group?: string}) {
-        return new TableRow(this, name, {group: options?.group})
+    getRow(arg: string | { [key: string]: string }, options?: {group?: string}) {
+        return new TableRow(this, arg, options)
     }
 
     // ==================================================================================================
