@@ -1,5 +1,6 @@
 export * from './types/core';
 export * from './types/kubewarden';
+export * from './types/jaeger';
 export * from './types/policy';
 export * from './types/grafana';
 export * from './types/policy-reporter';

@@ -1,33 +1,91 @@
 <script>
-import { isEmpty } from '@shell/utils/object';
+import isEmpty from 'lodash/isEmpty';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+import { CATALOG, SERVICE } from '@shell/config/types';
+import { KUBERNETES } from '@shell/config/labels-annotations';
+import ResourceManager from '@shell/mixins/resource-manager';
 
 import { BadgeState } from '@components/BadgeState';
+import { Banner } from '@components/Banner';
+import Loading from '@shell/components/Loading';
 import SortableTable from '@shell/components/SortableTable';
 
 import { TRACE_HEADERS } from '../config/table-headers';
-import { KUBEWARDEN, MODE_MAP, OPERATION_MAP } from '../types';
+import { KUBEWARDEN, KUBEWARDEN_APPS, MODE_MAP, OPERATION_MAP } from '../types';
+import { jaegerTraces } from '../modules/jaegerTracing';
+import { formatDuration } from '../utils/duration-format';
+
+import TraceChecklist from './TraceChecklist';
+
+dayjs.extend(relativeTime);
 
 export default {
   props: {
-    rows: {
-      type:     Array,
-      default:  () => []
+    resource: {
+      type:     String,
+      required: true
+    },
+    relatedPolicies: {
+      type:    Array,
+      default: () => []
+    },
+    policy: {
+      type:    Object,
+      default: () => {}
     }
   },
 
-  components: { BadgeState, SortableTable },
+  components: {
+    BadgeState, Banner, Loading, SortableTable, TraceChecklist
+  },
+
+  mixins: [ResourceManager],
+
+  async fetch() {
+    if ( this.$store.getters['cluster/canList'](SERVICE) ) {
+      this.allServices = await this.$store.dispatch('cluster/findAll', { type: SERVICE });
+    }
+    this.secondaryResourceData = this.secondaryResourceDataConfig();
+    await this.resourceManagerFetchSecondaryResources(this.secondaryResourceData);
+
+    if ( this.jaegerQuerySvc ) {
+      const options = {
+        store:           this.$store,
+        queryService:    this.jaegerQuerySvc,
+        resource:        this.resource,
+        relatedPolicies: null,
+        policy:          null
+      };
+
+      if ( this.resource === KUBEWARDEN.POLICY_SERVER ) {
+        options.relatedPolicies = this.relatedPolicies;
+      } else {
+        options.policy = this.policy;
+      }
+
+      this.specificValidations = await jaegerTraces(options);
+    }
+  },
 
   data() {
     return {
       MODE_MAP,
       TRACE_HEADERS,
-      OPERATION_MAP
+      OPERATION_MAP,
+
+      apps:                  null,
+      controllerChart:       null,
+      allServices:           null,
+      specificValidations:   null,
+      secondaryResourceData: this.secondaryResourceDataConfig()
     };
   },
 
   computed: {
     groupField() {
-      if ( !!this.isPolicyServer ) {
+      if ( this.isPolicyServer ) {
         return 'policy_id';
       }
 
@@ -35,21 +93,129 @@ export default {
     },
 
     isPolicyServer() {
-      return this.$route.params.resource === KUBEWARDEN.POLICY_SERVER;
+      return this.resource === KUBEWARDEN.POLICY_SERVER;
+    },
+
+    emptyPolicies() {
+      if ( this.resource === KUBEWARDEN.POLICY_SERVER ) {
+        return isEmpty(this.relatedPolicies);
+      }
+
+      return isEmpty(this.policy);
+    },
+
+    emptyTraces() {
+      return isEmpty(this.specificValidations);
+    },
+
+    emptyTracesLabel() {
+      if ( this.resource === KUBEWARDEN.POLICY_SERVER ) {
+        return 'kubewarden.tracing.noRelatedTraces';
+      }
+
+      return 'kubewarden.tracing.noTraces';
     },
 
     rowsPerPage() {
-      if ( !!this.isPolicyServer ) {
+      if ( this.isPolicyServer ) {
         return 40;
       }
 
       return 20;
+    },
+
+    tracingConfiguration() {
+      if ( this.controllerChart ) {
+        return this.controllerChart?.spec?.values?.telemetry?.tracing;
+      }
+
+      return null;
+    },
+
+    tracingEnabled() {
+      if ( this.tracingConfiguration ) {
+        return this.tracingConfiguration.enabled;
+      }
+
+      return null;
+    },
+
+    jaegerServices() {
+      if ( this.allServices ) {
+        return this.allServices.filter(svc => svc?.metadata?.labels?.['app.kubernetes.io/part-of'] === 'jaeger');
+      }
+
+      return null;
+    },
+
+    jaegerQuerySvc() {
+      if ( !isEmpty(this.jaegerServices) ) {
+        return this.jaegerServices.find((svc) => {
+          const ports = svc?.spec?.ports;
+
+          if ( ports.length ) {
+            return ports.find(p => p.port === 16685 || p.port === 16686);
+          }
+        });
+      }
+
+      return null;
+    },
+
+    openTelemetryServices() {
+      if ( this.allServices ) {
+        return this.allServices.filter(svc => svc?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === 'opentelemetry-operator');
+      }
+
+      return null;
+    },
+
+    openTelSvc() {
+      if ( !isEmpty(this.openTelemetryServices) ) {
+        return this.openTelemetryServices.find((svc) => {
+          const ports = svc?.spec?.ports;
+
+          if ( ports.length ) {
+            return ports.find(p => p.port === 8080);
+          }
+        });
+      }
+
+      return null;
+    },
+
+    showChecklist() {
+      return (!this.openTelSvc || !this.jaegerQuerySvc || !this.tracingConfiguration?.enabled);
+    },
+
+    showTable() {
+      return (!this.emptyPolicies && !this.showChecklist && !this.emptyTraces);
+    },
+
+    filteredValidations() {
+      if ( this.specificValidations ) {
+        return this.specificValidations.flatMap(v => v.traces);
+      }
+
+      return [];
     }
   },
 
   methods: {
-    capitalizeMessage(m) {
-      return m?.charAt(0).toUpperCase() + m?.slice(1);
+    secondaryResourceDataConfig() {
+      return {
+        data:      {
+          [CATALOG.APP]: {
+            applyTo: [
+              { var: 'apps' },
+              {
+                var:         'controllerChart',
+                parsingFunc: data => data.find(app => app?.metadata?.name === KUBEWARDEN_APPS.RANCHER_CONTROLLER)
+              }
+            ]
+          }
+        }
+      };
     },
 
     modeColor(mode) {
@@ -60,28 +226,41 @@ export default {
       return this.OPERATION_MAP[op];
     },
 
-    showLogs(logs) {
-      if ( isEmpty(logs) ) {
-        return false;
-      }
+    formatTime(time) {
+      return dayjs(time / 1000);
+    },
 
-      return true;
+    duration(duration) {
+      return formatDuration(duration);
     }
   }
 };
 </script>
 
 <template>
-  <div>
-    <slot name="traceBanner"></slot>
+  <Loading v-if="$fetchState.pending" />
+  <div v-else>
+    <TraceChecklist
+      v-if="showChecklist"
+      :controller-chart="controllerChart"
+      :tracing-configuration="tracingConfiguration"
+      :jaeger-query-svc="jaegerQuerySvc"
+      :open-tel-svc="openTelSvc"
+    />
+
+    <Banner
+      v-else-if="!showChecklist && emptyPolicies"
+      color="error"
+      :label="t('kubewarden.tracing.noRelatedPolicies')"
+    />
 
     <SortableTable
-      v-if="rows"
-      :rows="rows"
+      v-else-if="showTable"
+      :rows="filteredValidations"
       :headers="TRACE_HEADERS"
       :table-actions="false"
       :row-actions="false"
-      key-field="traceID"
+      key-field="id"
       default-sort-by="startTime"
       :sub-expandable="true"
       :sub-expand-column="true"
@@ -92,68 +271,74 @@ export default {
       <template #col:mode="{row}">
         <td>
           <BadgeState
-            :label="capitalizeMessage(row.mode)"
+            :label="row.mode"
             :color="modeColor(row.mode)"
+            class="text-capitalize"
           />
         </td>
       </template>
 
-      <template #col:operation="{row}">
+      <template #col:name="{row}">
+        <td class="text-bold">
+          {{ row.name }}
+        </td>
+      </template>
+
+      <template #col:namespace="{row}">
         <td>
-          {{ row.operation }}
+          {{ row.namespace ? row.namespace : '-' }}
+        </td>
+      </template>
+
+      <template #col:startTime="{row}">
+        <td>
+          {{ formatTime(row.startTime) }}
+        </td>
+      </template>
+
+      <template #col:duration="{row}">
+        <td>
+          {{ duration(row.duration) }}
         </td>
       </template>
 
       <template #sub-row="{row, fullColspan}">
         <td :colspan="fullColspan" class="sub-row">
           <div class="details">
-            <template v-if="showLogs(row.logs)">
-              <section class="col">
-                <div class="title">
-                  Response
-                </div>
-                <span v-if="row.logs.response" class="text-info">
-                  {{ capitalizeMessage(row.logs.response) }}
-                </span>
-                <span v-else>
-                  N/A
-                </span>
-              </section>
-            </template>
-
-            <template v-else>
-              <section class="col">
-                <div class="title">
-                  Response Message
-                </div>
-                <span v-if="row.response_message" class="text-warning">
-                  {{ capitalizeMessage(row.response_message) }}
-                </span>
-                <span v-else>
-                  N/A
-                </span>
-              </section>
-              <section class="col">
-                <div class="title">
-                  Response Code
-                </div>
-                <span class="text-info">
-                  {{ row.response_code ? row.response_code : 'N/A' }}
-                </span>
-              </section>
-              <section class="col">
-                <div class="title">
-                  Mutated
-                </div>
-                <span class="text-info">
-                  {{ row.mutated }}
-                </span>
-              </section>
-            </template>
+            <section class="col">
+              <div class="title">
+                Response Message
+              </div>
+              <span class="text-info text-capitalize">
+                {{ row.responseMessage ? row.responseMessage : '-' }}
+              </span>
+            </section>
+            <section class="col">
+              <div class="title">
+                Response Code
+              </div>
+              <span class="text-info">
+                {{ row.responseCode ? row.responseCode : '-' }}
+              </span>
+            </section>
+            <section class="col">
+              <div class="title">
+                Mutated
+              </div>
+              <span class="text-info">
+                {{ row.mutated }}
+              </span>
+            </section>
           </div>
         </td>
       </template>
     </SortableTable>
+
+    <Banner
+      v-else
+      color="warning"
+      :label="t(emptyTracesLabel)"
+    />
   </div>
 </template>
 

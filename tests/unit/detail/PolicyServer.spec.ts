@@ -7,6 +7,8 @@ import PolicyServer from '@kubewarden/detail/policies.kubewarden.io.policyserver
 import MetricsBanner from '@kubewarden/components/MetricsBanner';
 import CountGauge from '@shell/components/CountGauge';
 
+import TraceTestData from '../templates/policyTraces';
+
 const policyGauges = {
   Active: {
     count: 42,
@@ -91,21 +93,14 @@ describe('component: PolicyServer', () => {
     const wrapper = shallowMount(PolicyServer as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData: { value: {} },
       data() {
-        const filteredValidations:Number[] = [];
-
-        for ( const key of Object.keys(traceCounts) ) {
-          for ( let i = 0; i < traceCounts[key].count; i++ ) {
-            filteredValidations.push(i);
-          }
-        }
-
-        return { policyGauges, filteredValidations };
+        return { policyGauges };
       },
       computed:  {
         monitoringStatus: () => {
           return { installed: false };
         },
         relatedPoliciesTotal: () => relatedPolicies(),
+        policyTraces:         () => TraceTestData,
         tracesGauges:         () => traceCounts,
         emptyTraces:          () => false
       },
@@ -134,13 +129,11 @@ describe('component: PolicyServer', () => {
     const mutatedGauge = gauges.at(3).props();
 
     expect(deniedGauge.name).toStrictEqual('Denied' as String);
-    expect(deniedGauge.total).toStrictEqual(wrapper.vm.$data.filteredValidations.length as Number);
-    expect(deniedGauge.useful).toStrictEqual(traceCounts['Denied'].count as Number);
+    expect(deniedGauge.useful).toStrictEqual(42 as Number);
     expect(deniedGauge.primaryColorVar.replace('--sizzle-', '')).toStrictEqual(traceCounts['Denied'].color as String);
 
     expect(mutatedGauge.name).toStrictEqual('Mutated' as String);
-    expect(mutatedGauge.total).toStrictEqual(wrapper.vm.$data.filteredValidations.length as Number);
-    expect(mutatedGauge.useful).toStrictEqual(traceCounts['Mutated'].count as Number);
+    expect(mutatedGauge.useful).toStrictEqual(13 as Number);
     expect(mutatedGauge.primaryColorVar.replace('--sizzle-', '')).toStrictEqual(traceCounts['Mutated'].color as String);
   });
 

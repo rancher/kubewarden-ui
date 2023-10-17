@@ -16,6 +16,8 @@ export const KUBEWARDEN_APPS = {
   RANCHER_DEFAULTS:   'rancher-kubewarden-defaults'
 };
 
+export const KUBEWARDEN_LABELS = { POLICY_SERVER: 'kubewarden/policy-server' };
+
 export const KUBEWARDEN = {
   ADMISSION_POLICY:         'policies.kubewarden.io.admissionpolicy',
   CLUSTER_ADMISSION_POLICY: 'policies.kubewarden.io.clusteradmissionpolicy',

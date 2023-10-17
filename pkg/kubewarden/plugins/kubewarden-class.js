@@ -1,6 +1,7 @@
 import filter from 'lodash/filter';
 import matches from 'lodash/matches';
 import isEmpty from 'lodash/isEmpty';
+import semver from 'semver';
 
 import SteveModel from '@shell/plugins/steve/steve-class';
 import {
@@ -264,6 +265,8 @@ export default class KubewardenModel extends SteveModel {
   get openTelemetryService() {
     return async() => {
       try {
+        await this.allServices();
+
         return await this.$dispatch('cluster/findMatching', {
           type:     SERVICE,
           selector: 'app.kubernetes.io/name=opentelemetry-operator'
@@ -532,7 +535,12 @@ export function colorForTraceStatus(status) {
 }
 
 export function getLatestStableVersion(versions) {
+  const allVersions = versions.map(v => v.version);
   const stableVersions = versions.filter(v => !v.version.includes('rc'));
+
+  if ( isEmpty(stableVersions) && !isEmpty(allVersions) ) {
+    return semver.rsort(allVersions)[0];
+  }
 
   return stableVersions?.sort((a, b) => {
     const versionA = a.version.split('.').map(Number);
