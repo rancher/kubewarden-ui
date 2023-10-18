@@ -61,7 +61,7 @@ export class RancherAppsPage extends BasePage {
         await expect(passedMsg).toBeVisible({ timeout: timeout })
     }
 
-    async installChart(chart: Chart, yamlPatch?: Function | string, options?:{timeout?: number}) {
+    async installChart(chart: Chart, options?:{questions?: () => Promise<void>, yamlPatch?: Function | string, timeout?: number}) {
         // Select chart by title
         await this.page.goto('dashboard/c/local/apps/charts')
         await expect(this.page.getByRole('heading', { name: 'Charts', exact: true })).toBeVisible()
@@ -91,9 +91,10 @@ export class RancherAppsPage extends BasePage {
         await this.nextBtn.click()
 
         // Chart questions
-        if (yamlPatch) {
+        if (options?.questions) await options.questions()
+        if (options?.yamlPatch) {
             await this.ui.openYamlEditor()
-            await this.ui.editYaml(yamlPatch)
+            await this.ui.editYaml(options.yamlPatch)
             await this.page.getByRole('button', { name: 'Compare Changes', exact: true }).click()
         }
 
@@ -103,7 +104,7 @@ export class RancherAppsPage extends BasePage {
     }
 
     // Without parameters only for upgrade/reload
-    async updateApp(name: string, yamlPatch?: Function | string, options?:{timeout?: number}) {
+    async updateApp(name: string, options?:{questions?: () => Promise<void>, yamlPatch?: Function | string, timeout?: number}) {
         await this.page.goto('dashboard/c/local/apps/catalog.cattle.io.app')
         await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
 
@@ -112,9 +113,10 @@ export class RancherAppsPage extends BasePage {
         await this.nextBtn.click()
 
         // Chart questions
-        if (yamlPatch) {
+        if (options?.questions) await options.questions()
+        if (options?.yamlPatch) {
             await this.ui.openYamlEditor()
-            await this.ui.editYaml(yamlPatch)
+            await this.ui.editYaml(options.yamlPatch)
             await this.page.getByRole('button', { name: 'Compare Changes', exact: true }).click()
         }
 
