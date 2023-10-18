@@ -7,7 +7,6 @@ import { monitoringStatus } from '@shell/utils/monitoring';
 import { dashboardExists } from '@shell/utils/grafana';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
-import { Banner } from '@components/Banner';
 import DashboardMetrics from '@shell/components/DashboardMetrics';
 import Loading from '@shell/components/Loading';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
@@ -23,7 +22,7 @@ export default {
   name: 'PolicyDetail',
 
   components: {
-    Banner, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, RulesTable, Tab, TraceTable
+    DashboardMetrics, Loading, MetricsBanner, ResourceTabs, RulesTable, Tab, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -58,21 +57,13 @@ export default {
         console.error(`Error fetching Grafana service: ${ e }`); // eslint-disable-line no-console
       }
     }
-
-    this.jaegerService = await this.value.jaegerQueryService();
-
-    if ( this.jaegerService ) {
-      this.filteredValidations = await this.value.jaegerSpecificValidations({ service: this.jaegerService });
-    }
   },
 
   data() {
     return {
-      jaegerService:       null,
-      metricsProxy:        null,
-      metricsService:      null,
-      reloadRequired:      false,
-      filteredValidations: null,
+      metricsProxy:         null,
+      metricsService:       null,
+      reloadRequired:       false,
 
       metricsType: METRICS_DASHBOARD.POLICY
     };
@@ -86,14 +77,6 @@ export default {
       return { policy_name: `clusterwide-${ this.value?.id }` };
     },
 
-    emptyTraces() {
-      if ( isEmpty(this.filteredValidations) ) {
-        return true;
-      }
-
-      return false;
-    },
-
     hasRelationships() {
       return !!this.value.metadata?.relationships;
     },
@@ -104,14 +87,6 @@ export default {
 
     rulesRows() {
       return this.value.spec?.rules;
-    },
-
-    tracesRows() {
-      if ( this.filteredValidations ) {
-        return this.value.traceTableRows(this.filteredValidations);
-      }
-
-      return [];
     }
   },
 
@@ -143,14 +118,7 @@ export default {
       </Tab>
 
       <Tab name="policy-tracing" label="Tracing" :weight="98">
-        <TraceTable data-testid="kw-policy-detail-trace-table" :rows="tracesRows">
-          <template #traceBanner>
-            <Banner v-if="emptyTraces" color="warning">
-              <span v-if="!jaegerService" v-clean-html="t('kubewarden.tracing.noJaeger', {}, true)" />
-              <span v-else>{{ t('kubewarden.tracing.noTraces') }}</span>
-            </Banner>
-          </template>
-        </TraceTable>
+        <TraceTable :resource="resource" :policy="value" data-testid="kw-policy-detail-trace-table" />
       </Tab>
 
       <Tab name="policy-metrics" label="Metrics" :weight="97">

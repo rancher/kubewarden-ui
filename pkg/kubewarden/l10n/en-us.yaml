@@ -129,14 +129,24 @@ kubewarden:
     resource: Filter by Resource Type
     resetFilter: Reset Filter
   tracing:
+    description: Tracing allows to collect fine grained details about policy evaluations. It can be a useful tool for debugging issues inside of your Kubewarden deployment and policies.
+    prerequisites:
+      label: Prerequisites
+      description: There are a few resources which need to be installed for tracing to work correctly with the Kubewarden Controller.
+      warning: The deployments of these resources can take a few minutes to become active.
     installOpenTelemetry: |
       Click the button below  or run the <code>kubectl</code> command to install the latest version of OpenTelemetry.
-    noOpenTelemetry: |
-      An OpenTelemetry service can not be found, please follow the steps <a href="https://docs.kubewarden.io/operator-manual/telemetry/opentelemetry/quickstart#install-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">listed here</a> to setup the OpenTelemetry Operator.
-    noJaeger: |
-      A Jaeger service can not be found, please follow the steps <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart" target="_blank" rel="noopener noreferrer nofollow">listed here</a> to setup tracing for your policies.
+    openTelemetry: |
+      The <a href="https://github.com/open-telemetry/opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Operator</a> must be installed, follow the <a href="https://docs.kubewarden.io/operator-manual/telemetry/opentelemetry/quickstart#install-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to setup the OpenTelemetry Operator.
+    jaeger: |
+      The <a href="https://github.com/jaegertracing/jaeger-operator" target="_blank" rel="noopener noreferrer nofollow">Jaeger Operator and Instance</a> must be installed, follow the <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to setup tracing for your policies.
+    noRelatedPolicies: No related policies found.
     noRelatedTraces: No tracing data exists for the related policies.
     noTraces: No tracing data exists for this policy.
+    config: 
+      label: |
+        Tracing must be <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart#install-kubewarden" target="_blank" rel="noopener noreferrer nofollow">enabled and configured</a> with a Jaeger endpoint in the Kubewarden Controller chart.
+      link: Update Chart
   monitoring:
     notInstalled: |
       The Monitoring app is not installed, this will will need to be installed and configured to enable metrics. Follow <a href="https://docs.kubewarden.io/operator-manual/telemetry/metrics/quickstart#install-prometheus" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to add the Kubewarden ServiceMonitor for Prometheus.

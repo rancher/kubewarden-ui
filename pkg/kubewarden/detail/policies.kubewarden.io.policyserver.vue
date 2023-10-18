@@ -22,14 +22,13 @@ import { RELATED_HEADERS } from '../config/table-headers';
 import { handleGrowl } from '../utils/handle-growl';
 
 import MetricsBanner from '../components/MetricsBanner';
-import TraceBanner from '../components/TraceBanner';
 import TraceTable from '../components/TraceTable';
 
 export default {
   name: 'PolicyServer',
 
   components: {
-    CountGauge, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, ResourceTable, Tab, TraceBanner, TraceTable
+    CountGauge, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, ResourceTable, Tab, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -38,6 +37,11 @@ export default {
     mode: {
       type:    String,
       default: _CREATE,
+    },
+
+    resource: {
+      type:    String,
+      default: null
     },
 
     value: {
@@ -49,9 +53,7 @@ export default {
   async fetch() {
     const hash = await allHash({
       relatedPolicies:      this.value.allRelatedPolicies(),
-      policyGauges:         this.value.policyGauges(),
-      jaegerService:        this.value.jaegerQueryService(),
-      openTelemetryService: this.value.openTelemetryService()
+      policyGauges:         this.value.policyGauges()
     });
 
     const assignIfNotEmpty = (prop, value) => {
@@ -62,12 +64,6 @@ export default {
 
     assignIfNotEmpty('relatedPolicies', hash.relatedPolicies);
     assignIfNotEmpty('policyGauges', hash.policyGauges);
-    assignIfNotEmpty('jaegerService', hash.jaegerService);
-    assignIfNotEmpty('openTelemetryService', hash.openTelemetryService);
-
-    if ( !isEmpty(this.relatedPolicies) && this.jaegerService ) {
-      this.filteredValidations = await this.value.filteredValidations({ service: this.jaegerService });
-    }
 
     // If monitoring is installed look for the dashboard for PolicyServers
     if ( this.monitoringStatus.installed ) {
@@ -113,9 +109,6 @@ export default {
   data() {
     return {
       RELATED_HEADERS,
-      jaegerService:        null,
-      openTelemetryService: null,
-      filteredValidations:  null,
       metricsProxy:         null,
       metricsService:       null,
       monitoringRoute:      null,
@@ -129,11 +122,24 @@ export default {
 
   computed: {
     ...mapGetters(['currentCluster', 'currentProduct']),
+    ...mapGetters({ policyTraces: 'kubewarden/policyTraces' }),
     ...monitoringStatus(),
     _group: mapPref(GROUP_RESOURCES),
 
+    filteredTraces() {
+      if ( !isEmpty(this.policyTraces) ) {
+        return this.policyTraces.filter((policyTraceObj) => {
+          if ( this.currentCluster?.id === policyTraceObj.cluster ) {
+            return policyTraceObj;
+          }
+        });
+      }
+
+      return null;
+    },
+
     emptyTraces() {
-      return isEmpty(this.filteredValidations);
+      return isEmpty(this.filteredTraces);
     },
 
     groupPreference() {
@@ -152,10 +158,18 @@ export default {
 
     tracesGauges() {
       if ( !this.emptyTraces ) {
-        return this.value.tracesGauges(this.filteredValidations);
+        return this.value.tracesGauges(this.filteredTraces);
       }
 
       return null;
+    },
+
+    traceGaugeTotals() {
+      if ( !this.emptyTraces ) {
+        return this.filteredTraces?.flatMap(policyTraceObj => policyTraceObj.traces).length;
+      }
+
+      return 0;
     }
   },
 
@@ -212,8 +226,8 @@ export default {
               <CountGauge
                 v-for="(group, key) in tracesGauges"
                 :key="key"
-                :total="filteredValidations.length"
                 :useful="group.count || 0"
+                :total="traceGaugeTotals"
                 :graphical="false"
                 :primary-color-var="`--sizzle-${group.color}`"
                 :name="key"
@@ -270,13 +284,7 @@ export default {
       </Tab>
 
       <Tab name="policy-tracing" label="Tracing" :weight="97">
-        <template>
-          <TraceTable :rows="filteredValidations">
-            <template #traceBanner>
-              <TraceBanner v-if="emptyTraces" :jaeger-service="jaegerService" :open-telemetry-service="openTelemetryService" />
-            </template>
-          </TraceTable>
-        </template>
+        <TraceTable :resource="resource" :related-policies="relatedPolicies" />
       </Tab>
     </ResourceTabs>
   </div>

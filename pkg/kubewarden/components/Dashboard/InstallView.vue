@@ -43,14 +43,13 @@ export default {
     if ( !this.hasSchema ) {
       const inStore = this.currentProduct.inStore;
       const hash = [];
+      const listTypes = [SERVICE, CATALOG.CLUSTER_REPO];
 
-      if ( this.$store.getters[`${ inStore }/canList`](SERVICE) ) {
-        hash.push(this.$fetchType(SERVICE));
-      }
-
-      if ( this.$store.getters[`${ inStore }/canList`](CATALOG.CLUSTER_REPO) ) {
-        hash.push(this.$fetchType(CATALOG.CLUSTER_REPO));
-      }
+      listTypes.forEach((type) => {
+        if ( this.$store.getters[`${ inStore }/canList`](type) ) {
+          hash.push(this.$fetchType(type));
+        }
+      });
 
       await allHash(hash);
 
@@ -318,7 +317,7 @@ export default {
           </template>
 
           <template #install>
-            <template v-if="!kubewardenRepo">
+            <template v-if="!kubewardenRepo && !controllerChart">
               <h2 class="mt-20 mb-10" data-testid="kw-repo-title">
                 {{ t("kubewarden.dashboard.prerequisites.repository.title") }}
               </h2>

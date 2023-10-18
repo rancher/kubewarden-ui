@@ -3,7 +3,7 @@ import { mapGetters } from 'vuex';
 
 import { CATALOG } from '@shell/config/types';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
-import ResourceFetch from '@shell/mixins/resource-fetch';
+import ResourceManager from '@shell/mixins/resource-manager';
 
 import { Banner } from '@components/Banner';
 
@@ -14,7 +14,19 @@ import { handleGrowl } from '../utils/handle-growl';
 export default {
   components: { Banner },
 
-  mixins: [ResourceFetch],
+  mixins: [ResourceManager],
+
+  async fetch() {
+    this.secondaryResourceData = this.secondaryResourceDataConfig();
+    await this.resourceManagerFetchSecondaryResources(this.secondaryResourceData);
+  },
+
+  data() {
+    return {
+      apps:                  null,
+      secondaryResourceData: this.secondaryResourceDataConfig()
+    };
+  },
 
   computed: {
     ...mapGetters(['currentCluster']),
@@ -25,6 +37,10 @@ export default {
   },
 
   methods: {
+    secondaryResourceDataConfig() {
+      return { data: { [CATALOG.APP]: { applyTo: [{ var: 'apps' }] } } };
+    },
+
     async closeDefaultsBanner(retry = 0) {
       const res = await this.$store.dispatch('kubewarden/updateHideBannerDefaults', true);
 
@@ -98,6 +114,7 @@ export default {
   >
     <span v-clean-html="t('kubewarden.policyServer.noDefaultsInstalled.description', {}, true)" />
     <button
+      v-if="defaultsChart"
       data-testid="kw-defaults-banner-button"
       class="btn role-primary ml-10"
       @click.prevent="chartRoute"

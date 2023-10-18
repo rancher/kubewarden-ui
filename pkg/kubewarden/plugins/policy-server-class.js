@@ -71,35 +71,37 @@ export default class PolicyServerModel extends KubewardenModel {
   }
 
   get tracesGauges() {
-    return (traces) => {
+    return (policyTraces) => {
       const out = {};
 
-      if ( isEmpty(traces) ) {
+      if ( isEmpty(policyTraces) ) {
         return out;
       }
 
-      traces?.map((trace) => {
-        const { allowed, mode, mutated } = trace;
+      policyTraces?.flatMap((policyObj) => {
+        policyObj?.traces?.map((trace) => {
+          const { allowed, mode, mutated } = trace;
 
-        if ( mode === 'monitor' ) {
-          return;
-        }
+          if ( mode === 'monitor' ) {
+            return;
+          }
 
-        if ( out['Denied'] && !allowed ) {
-          out['Denied'].count++;
-        } else if ( !allowed ) {
-          out['Denied'] = {
-            color: colorForTraceStatus('denied'),
-            count: 1
-          };
-        } else if ( out['Mutated'] && mutated ) {
-          out['Mutated'].count++;
-        } else if ( mutated && allowed ) {
-          out['Mutated'] = {
-            color: colorForTraceStatus('mutated'),
-            count: 1
-          };
-        }
+          if ( out['Denied'] && !allowed ) {
+            out['Denied'].count++;
+          } else if ( !allowed ) {
+            out['Denied'] = {
+              color: colorForTraceStatus('denied'),
+              count: 1
+            };
+          } else if ( out['Mutated'] && mutated ) {
+            out['Mutated'].count++;
+          } else if ( mutated && allowed ) {
+            out['Mutated'] = {
+              color: colorForTraceStatus('mutated'),
+              count: 1
+            };
+          }
+        });
       });
 
       return out;
