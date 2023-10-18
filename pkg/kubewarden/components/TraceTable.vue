@@ -1,4 +1,5 @@
 <script>
+import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -84,6 +85,8 @@ export default {
   },
 
   computed: {
+    ...mapGetters(['currentCluster']),
+
     groupField() {
       if ( this.isPolicyServer ) {
         return 'policy_id';
@@ -194,7 +197,11 @@ export default {
 
     filteredValidations() {
       if ( this.specificValidations ) {
-        return this.specificValidations.flatMap(v => v.traces);
+        return this.specificValidations.flatMap((v) => {
+          if ( this.currentCluster?.id === v.cluster ) {
+            return v.traces;
+          }
+        });
       }
 
       return [];

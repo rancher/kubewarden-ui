@@ -24,6 +24,7 @@ export interface PolicyTrace {
 
 export interface PolicyTraceConfig {
   policyName: string,
+  cluster: string,
   traces: PolicyTrace[]
 }
 

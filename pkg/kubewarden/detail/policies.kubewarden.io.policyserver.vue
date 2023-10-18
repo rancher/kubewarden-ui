@@ -126,8 +126,20 @@ export default {
     ...monitoringStatus(),
     _group: mapPref(GROUP_RESOURCES),
 
+    filteredTraces() {
+      if ( !isEmpty(this.policyTraces) ) {
+        return this.policyTraces.filter((policyTraceObj) => {
+          if ( this.currentCluster?.id === policyTraceObj.cluster ) {
+            return policyTraceObj;
+          }
+        });
+      }
+
+      return null;
+    },
+
     emptyTraces() {
-      return isEmpty(this.policyTraces);
+      return isEmpty(this.filteredTraces);
     },
 
     groupPreference() {
@@ -146,7 +158,7 @@ export default {
 
     tracesGauges() {
       if ( !this.emptyTraces ) {
-        return this.value.tracesGauges(this.policyTraces);
+        return this.value.tracesGauges(this.filteredTraces);
       }
 
       return null;
@@ -154,7 +166,7 @@ export default {
 
     traceGaugeTotals() {
       if ( !this.emptyTraces ) {
-        return this.policyTraces?.flatMap(policyObj => policyObj.traces).length;
+        return this.filteredTraces?.flatMap(policyTraceObj => policyTraceObj.traces).length;
       }
 
       return 0;

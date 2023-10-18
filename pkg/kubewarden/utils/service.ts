@@ -1,5 +1,5 @@
 export function proxyUrlFromBase(base: any, scheme: any, name: any, port: any, path?: any) {
-  const schemaNamePort = (scheme ? `${ escape(scheme) }:` : '') + escape(name) + (port ? `:${ escape(port) }` : '');
+  const schemaNamePort = (scheme ? `${ encodeURIComponent(scheme) }:` : '') + encodeURIComponent(name) + (port ? `:${ encodeURIComponent(port) }` : '');
 
   const cleanPath = `/${ (path || '').replace(/^\/+/g, '') }`;
   const cleanBase = base.replace(/\/+$/g, '');

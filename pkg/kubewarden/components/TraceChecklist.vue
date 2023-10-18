@@ -33,6 +33,10 @@ export default {
   computed: {
     ...mapGetters(['currentCluster']),
 
+    disableChartInstall() {
+      return !this.openTelSvc || !this.jaegerQuerySvc;
+    },
+
     tracingEnabled() {
       if ( this.tracingConfiguration ) {
         return this.tracingConfiguration.enabled;
@@ -96,6 +100,7 @@ export default {
           <button
             data-testid="kw-tracing-checklist-step-config-button"
             class="btn role-primary ml-10"
+            :disabled="disableChartInstall"
             @click.prevent="chartRoute"
           >
             {{ t("kubewarden.tracing.config.link") }}

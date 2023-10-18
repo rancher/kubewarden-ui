@@ -52,8 +52,8 @@ export default {
    * @param policy
    * @param updatedTrace
    */
-  updatePolicyTraces(state: StateConfig, val: { policyName: string, updatedTrace: PolicyTrace }) {
-    const { policyName, updatedTrace } = val;
+  updatePolicyTraces(state: StateConfig, val: { policyName: string, cluster: string, updatedTrace: PolicyTrace }) {
+    const { policyName, cluster, updatedTrace } = val;
     const existingPolicyObj = state.policyTraces.find((traceObj: PolicyTraceConfig) => traceObj.policyName === policyName);
     let existingTrace = existingPolicyObj?.traces.find((trace: PolicyTrace) => trace.id === updatedTrace.id);
 
@@ -62,6 +62,7 @@ export default {
     } else if ( !existingPolicyObj ) {
       state.policyTraces.push({
         policyName,
+        cluster,
         traces: [updatedTrace]
       });
     } else {

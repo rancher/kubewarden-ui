@@ -84,6 +84,7 @@ export function proxyUrl(service: any, port: number) {
 }
 
 function scaffoldPolicyTrace(store: any, traces: any, resource: any, relatedPolicies: any, policy: any): any {
+  const currentCluster = store.getters['currentCluster'];
   const out = [];
 
   function filterTraces(p: any) {
@@ -116,7 +117,11 @@ function scaffoldPolicyTrace(store: any, traces: any, resource: any, relatedPoli
 
       if ( !isEmpty(out) ) {
         acc.push(out);
-        store.dispatch('kubewarden/updatePolicyTraces', { policyName: p.metadata.name, updatedTrace: out });
+        store.dispatch('kubewarden/updatePolicyTraces', {
+          policyName:   p.metadata.name,
+          cluster:      currentCluster?.id,
+          updatedTrace: out
+        });
       }
 
       return acc;
@@ -128,7 +133,11 @@ function scaffoldPolicyTrace(store: any, traces: any, resource: any, relatedPoli
       const relatedTraces = filterTraces(relatedPolicy);
 
       if ( !isEmpty(relatedTraces) ) {
-        out.push({ policyName: relatedPolicy.metadata.name, traces: relatedTraces });
+        out.push({
+          policyName: relatedPolicy.metadata.name,
+          cluster:    currentCluster?.id,
+          traces:     relatedTraces
+        });
       }
     }
   } else {
