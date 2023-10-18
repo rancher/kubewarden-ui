@@ -108,7 +108,7 @@ export default {
     },
 
     emptyTraces() {
-      return isEmpty(this.specificValidations);
+      return isEmpty(this.filteredValidations);
     },
 
     emptyTracesLabel() {
@@ -196,10 +196,12 @@ export default {
     },
 
     filteredValidations() {
-      if ( this.specificValidations ) {
+      if ( !isEmpty(this.specificValidations) ) {
         return this.specificValidations.flatMap((v) => {
           if ( this.currentCluster?.id === v.cluster ) {
             return v.traces;
+          } else {
+            return [];
           }
         });
       }

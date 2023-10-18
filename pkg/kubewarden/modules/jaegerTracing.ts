@@ -1,11 +1,19 @@
 import isEmpty from 'lodash/isEmpty';
 
-import { KUBEWARDEN, JaegerConfig, PolicyTrace, Tag } from '../types';
-import { proxyUrlFromBase } from '../utils/service';
+import {
+  KUBEWARDEN, JaegerConfig, PolicyTrace, PolicyTraceConfig, Tag
+} from '../types';
+import { proxyUrl } from '../utils/service';
 
 /** TODO: Update the `any` types throughout this file */
 
-export async function jaegerTraces(config: JaegerConfig): Promise<any> {
+/**
+ * Fetches trace reports from Jaeger for each related policy or singular policy.
+ * @param config `JaegerConfig` | Contains the `store`, `jaegerQueryService`, `resource` (policy-server or policy type),
+ * `relatedPolicies?` needed for policy server, `policy?` for individual policies, `time?` for trace timeframe.
+ * @returns `PolicyTraceConfig | null` | A scaffold object which contains the policy name, cluster id, and traces for the policy.
+ */
+export async function jaegerTraces(config: JaegerConfig): Promise<PolicyTraceConfig | null> {
   const {
     store, queryService, resource, relatedPolicies, policy, time
   } = config;
@@ -76,13 +84,6 @@ function jaegerTraceRequest(store: any, proxyUrl: any, policy: any, time?: any) 
   return store.dispatch('cluster/request', { url: JAEGER_PATH });
 }
 
-export function proxyUrl(service: any, port: number) {
-  const view = service?.links['view'];
-  const idx = view.lastIndexOf(`/`);
-
-  return proxyUrlFromBase(view.slice(0, idx), 'http', service?.metadata.name, port);
-}
-
 function scaffoldPolicyTrace(store: any, traces: any, resource: any, relatedPolicies: any, policy: any): any {
   const currentCluster = store.getters['currentCluster'];
   const out = [];
@@ -144,7 +145,11 @@ function scaffoldPolicyTrace(store: any, traces: any, resource: any, relatedPoli
     const relatedTraces = filterTraces(policy);
 
     if ( !isEmpty(relatedTraces) ) {
-      out.push({ policyName: policy.metadata.name, traces: relatedTraces });
+      out.push({
+        policyName: policy.metadata.name,
+        cluster:    currentCluster?.id,
+        traces:     relatedTraces
+      });
     }
   }
 
