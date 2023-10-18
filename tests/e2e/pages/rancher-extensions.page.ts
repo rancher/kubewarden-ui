@@ -90,7 +90,6 @@ export class RancherExtensionsPage extends BasePage {
 
     // Check successful load message
     await expect(this.page.locator('div.growl-message').getByText(`Loaded extension ${moduleName}`, {exact: true})).toBeVisible()
-    await this.page.getByTestId('extension-reload-banner-reload-btn').click()
   }
 
 }

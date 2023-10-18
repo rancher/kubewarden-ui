@@ -1,6 +1,35 @@
 import { expect, Locator } from '@playwright/test';
 import { RancherUI } from '../pages/rancher-ui';
 
+/**
+ * Compare text of current element with parameter(s)
+ * @param args
+ * @returns XPath predicate: normalize-space(.)="args[0]" [or ...]
+ */
+function text_is(...args: string[]):string {
+  return args.map(str => `normalize-space(.)="${str}"`).join(" or ")
+}
+
+/**
+ * Get table column index by it's name
+ * @param name Name of the table column
+ * @returns XPath predicate: count(ancestor::table[1]/thead/tr/th[normalize-space(.)="Name"]/preceding-sibling::th)+1
+ */
+function column_index(...names: string[]):string {
+  // Find thead > th with requested name and count how many th were before it
+  return `count(ancestor::table[1]/thead/tr/th[${text_is(...names)}]/preceding-sibling::th)+1`
+}
+
+/**
+ * Get table column by name and find cell with specified text
+ * @param column find table column with this name
+ * @param text find table cell with this text in selected column
+ * @returns XPath predicate: td[count(ancestor::table[1]/thead/tr/th[normalize-space(.)="Name"]/preceding-sibling::th)+1][normalize-space(.)="podname"]
+ */
+function xpath_column_selector(column: string, text: string) {
+  return `xpath=td[${column_index(column)}][${text_is(text)}]`
+}
+
 export class TableRow {
 
   private readonly ui: RancherUI
@@ -10,21 +39,43 @@ export class TableRow {
 
   /**
    *
-   * @param page required by actions menu since it's not child of the table
-   * @param name of the row, has to be a link to the resource
-   * @param group When there are multiple tbodies filter by group-tab
-   *
+   * @param ui Page is required by row actions menu since it's not child of the table
+   * @param arg:string name of the row, looks for value under "Name" column
+   * @param arg:object row value under selected column(s) {column1: "value", "column 2": "value2"}
+   * @param options.group When there are multiple tbodies filter by group-tab (Project, Namespace, ..)
    */
-  constructor(ui: RancherUI, name: string, options?: {group?: string}) {
-    let tbody = ui.page.locator('table.sortable-table > tbody')
+  constructor(ui: RancherUI, arg: string | { [key: string]: string }, options?: {group?: string}) {
+    let table = ui.page.locator('table.sortable-table > tbody')
+
+    // Filter by project / namespace
     if (options?.group) {
-      tbody = tbody.filter({has: ui.page.getByRole('cell', {name: options.group, exact: true})})
+      const groupRegex = new RegExp(`^((Project|Namespace): )?${options.group}`)
+      table = table.filter({has: ui.page.getByRole('cell', {name: groupRegex})})
     }
+    let rows = table.locator('tr.main-row')
+
+    // Filter by argument
+    if (typeof arg === 'string') {
+      rows = rows.filter({has: ui.page.locator(xpath_column_selector('Name', arg)) })
+    } else if (typeof arg === 'object') {
+      for (const colName in arg) {
+        const colValue = arg[colName]
+        rows = rows.filter({has: ui.page.locator(xpath_column_selector(colName, colValue)) })
+      }
+    }
+    this.row = rows
 
     this.ui = ui
-    this.row = tbody.locator('tr.main-row').filter({has: ui.page.getByRole('link', {name: name, exact: true})})
     this.name = this.column('Name')
     this.status = this.column('Status', 'State')
+  }
+
+  /**
+   * @param names header(s) of the column, you can provide alternative names (State|Status)
+   * @returns table cell (td) that is under requested column. Returns first cell if no match was found
+   */
+  column(...names: string[]) {
+    return this.row.locator(`xpath=td[${column_index(...names)}]`)
   }
 
   async toBeVisible() {
@@ -35,13 +86,6 @@ export class TableRow {
 
   async toBeActive(timeout = 200_000) {
     await expect(this.status).toHaveText('Active', {timeout: timeout})
-  }
-
-  column(...names: string[]) {
-    // Transform: names > normalize-space(.)="names[0]" [or ...]
-    const selector = names.map(str => `normalize-space(.)="${str}"`).join(" or ")
-    // https://stackoverflow.com/questions/14745478/how-to-select-table-column-by-column-header-name-with-xpath
-    return this.row.locator(`xpath=/td[count(ancestor::table[1]/thead/tr/th[${selector}]/preceding-sibling::th)+1]`)
   }
 
   async action(name: string) {

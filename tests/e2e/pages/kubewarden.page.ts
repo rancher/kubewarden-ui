@@ -1,7 +1,8 @@
 import { expect, Locator, Page } from '@playwright/test';
 import { BasePage } from './basepage';
+import { RancherAppsPage } from './rancher-apps.page';
 
-export class OverviewPage extends BasePage {
+export class KubewardenPage extends BasePage {
   readonly createPsBtn: Locator;
   readonly createApBtn: Locator;
   readonly createCapBtn: Locator;
@@ -58,21 +59,21 @@ export class OverviewPage extends BasePage {
 
     // ==================================================================================================
     // Rancher Application Metadata
-    await this.page.getByRole('button', { name: 'Next' }).click();
+    const apps = new RancherAppsPage(this.page)
+    await expect(apps.step1).toBeVisible()
+    await apps.nextBtn.click()
+    await expect(apps.step2).toBeVisible()
+
     // Rancher Application Values
     const schedule = this.ui.input('Schedule')
     await expect(schedule).toHaveValue('*/60 * * * *')
     await schedule.fill('*/1 * * * *')
     await this.ui.checkbox('Enable Policy Reporter').check()
 
-    // Enable telemetry
-    // await page.getByRole('button', { name: 'Edit YAML' }).click()
-    // await editYaml(page, d => d.telemetry.enabled = true )
-    // await page.getByRole('button', { name: 'Compare Changes' }).click()
-
-    await this.page.getByRole('button', { name: 'Install' }).click();
-    await expect(this.ui.helmPassRegex('rancher-kubewarden-crds')).toBeVisible({ timeout: 30_000 });
-    await expect(this.ui.helmPassRegex('rancher-kubewarden-controller')).toBeVisible({ timeout: 60_000 });
+    // Start installation
+    await apps.installBtn.click()
+    await apps.waitHelmSuccess('rancher-kubewarden-crds')
+    await apps.waitHelmSuccess('rancher-kubewarden-controller')
   }
 
   async whitelistArtifacthub() {

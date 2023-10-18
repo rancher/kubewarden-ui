@@ -1,12 +1,7 @@
 import { test, expect } from './rancher-test';
-import { OverviewPage } from './pages/overview.page';
-import { PolicyServersPage } from './pages/policyservers.page';
-import { AdmissionPoliciesPage } from './pages/admissionpolicies.page';
-import { ClusterAdmissionPoliciesPage } from './pages/clusteradmissionpolicies.page';
 
-test('Kubewarden Landing page', async({ page, ui }) => {
-  const kwPage = new OverviewPage(page);
-  await kwPage.goto();
+test('Kubewarden Landing page', async({ page, ui, nav }) => {
+  await nav.explorer('Kubewarden')
   await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
 
   await expect(page.getByRole('link', { name: 'Create Policy Server' })).toBeVisible()
@@ -21,10 +16,8 @@ test('Kubewarden Landing page', async({ page, ui }) => {
   }, 'https://github.com/kubewarden/ui/issues/245')
 });
 
-test('Policy Servers Landing Page', async({ page, ui }) => {
-  const psPage = new PolicyServersPage(page);
-  await psPage.goto();
-
+test('Policy Servers Landing Page', async({ page, ui, nav }) => {
+  await nav.explorer('Kubewarden', 'PolicyServers')
   await expect(page.getByRole('heading', { name: 'PolicyServers' })).toBeVisible()
 
   // Default policy server
@@ -37,9 +30,8 @@ test('Policy Servers Landing Page', async({ page, ui }) => {
   await expect(page.locator('td.col-policy-server-status')).toHaveCount(1);
 });
 
-test('Cluster Admission Policies Landing page', async({ page }) => {
-  const capPage = new ClusterAdmissionPoliciesPage(page);
-  await capPage.goto();
+test('Cluster Admission Policies Landing page', async({ page, nav }) => {
+  await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
 
   await expect(page.getByRole('heading', { name: 'ClusterAdmissionPolicies' })).toBeVisible()
   await expect(page.locator('.col-policy-status')).toHaveCount(6);
@@ -47,9 +39,8 @@ test('Cluster Admission Policies Landing page', async({ page }) => {
   await expect(page.locator('.col-link-detail').first()).not.toBeEmpty();
 });
 
-test('Admission Policies Landing page', async({ page }) => {
-  const apPage = new AdmissionPoliciesPage(page);
-  await apPage.goto();
+test('Admission Policies Landing page', async({ page, nav }) => {
+  await nav.explorer('Kubewarden', 'AdmissionPolicies')
 
   await expect(page.getByRole('heading', { name: 'AdmissionPolicies' })).toBeVisible()
   await expect(page.getByText('There are no rows to show.')).toBeVisible()
