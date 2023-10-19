@@ -1,6 +1,7 @@
 export default [
   {
     policyName: 'disallow-np',
+    cluster:    'current_cluster',
     traces:     [
       {
         id:              '8bb0ad38f130c28f544491ea03a10b40',
@@ -32,6 +33,7 @@ export default [
   },
   {
     policyName: 'do-not-run-as-root',
+    cluster:    'current_cluster',
     traces:     [
       {
         id:        '0de3e0c42e65bee1589d712288c50ffc',
@@ -73,6 +75,7 @@ export default [
   },
   {
     policyName: 'do-not-share-host-paths',
+    cluster:    'current_cluster',
     traces:     [
       {
         id:        '6737aab871b84c88e0d72fe9ccd1c0ad',
@@ -90,6 +93,7 @@ export default [
   },
   {
     policyName: 'drop-capabilities',
+    cluster:    'current_cluster',
     traces:     [
       {
         id:        '6b45b47c049c232930506009ea6e3208',
@@ -107,6 +111,7 @@ export default [
   },
   {
     policyName: 'no-host-namespace-sharing',
+    cluster:    'current_cluster',
     traces:     [
       {
         id:        '1032644de83d5e3d19e292f870084dec',
@@ -124,6 +129,7 @@ export default [
   },
   {
     policyName: 'no-privilege-escalation',
+    cluster:    'current_cluster',
     traces:     [
       {
         id:        'd300801925447ca66a605e242c78902e',
@@ -165,6 +171,7 @@ export default [
   },
   {
     policyName: 'no-privileged-pod',
+    cluster:    'current_cluster',
     traces:     [
       {
         id:        '3c9375e05d413606bac9e21d17f1326b',

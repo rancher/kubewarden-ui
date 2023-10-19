@@ -39,10 +39,23 @@ export default {
 
   computed: {
     ...mapGetters(['currentProduct']),
+    ...mapGetters({ charts: 'catalog/charts' }),
     ...monitoringStatus(),
 
     monitoringChart() {
-      return this.$store.getters['catalog/chart']({ chartName: 'rancher-monitoring' });
+      if ( this.rancherRepo ) {
+        return this.$store.getters['catalog/chart']({
+          repoName:  this.kubewardenRepo.repoName,
+          repoType:  this.kubewardenRepo.repoType,
+          chartName: 'rancher-monitoring'
+        });
+      }
+
+      return null;
+    },
+
+    rancherRepo() {
+      return this.charts?.find(chart => chart.chartName === 'rancher-monitoring');
     }
   },
 
