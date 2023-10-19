@@ -5,7 +5,7 @@ export function removeEmptyAttrs(obj: any) {
   Object.keys(obj).forEach((key: any) => {
     const value = obj[key];
 
-    if ( !value || value === '' || (Array.isArray(value) && !value.length) || (isObject(value) && isEmpty(value)) ) {
+    if ( value === undefined || value === null || value === '' || (Array.isArray(value) && !value.length) || (isObject(value) && isEmpty(value)) ) {
       delete obj[key];
     } else if ( isObject(value) ) {
       removeEmptyAttrs(value);
