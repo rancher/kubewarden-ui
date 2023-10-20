@@ -1,6 +1,6 @@
 import { test, expect } from './rancher-test';
 
-test('Kubewarden Landing page', async({ page, ui, nav }) => {
+test('Kubewarden Landing page', async({ page, nav }) => {
   await nav.explorer('Kubewarden')
   await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
 
@@ -8,12 +8,10 @@ test('Kubewarden Landing page', async({ page, ui, nav }) => {
   await expect(page.getByRole('link', { name: 'Create Admission Policy' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Create Cluster Admission Policy' })).toBeVisible()
 
-  await expect(page.getByText('Active 6 of 6 Global Policies / 100%')).toBeVisible({timeout:60_000})
-  await expect(page.getByText('Active 0 of 0 Namespaced Policies / 0%')).toBeVisible()
-
-  await ui.withReload(async () => {
-    expect(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
-  }, 'https://github.com/rancher/kubewarden-ui/issues/514')
+  const expect1m = expect.configure({timeout: 60_000})
+  await expect1m(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
+  await expect1m(page.getByText('Active 0 of 0 Namespaced Policies / 0%')).toBeVisible()
+  await expect1m(page.getByText('Active 6 of 6 Global Policies / 100%')).toBeVisible()
 });
 
 test('Policy Servers Landing Page', async({ page, ui, nav }) => {
