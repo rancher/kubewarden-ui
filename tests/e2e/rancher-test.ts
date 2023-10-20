@@ -11,8 +11,8 @@ export const test = base.extend<TestOptions>({
   ui: async ({ page }, use) => {
     use(new RancherUI(page));
   },
-  nav: async ({ page }, use) => {
-    use(new Navigation(page));
+  nav: async ({ ui }, use) => {
+    use(new Navigation(ui));
   },
 });
 

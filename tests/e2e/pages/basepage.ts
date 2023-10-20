@@ -8,7 +8,7 @@ export abstract class BasePage {
 
     constructor(public readonly page: Page, readonly url?: string) {
         this.ui = new RancherUI(page)
-        this.nav = new Navigation(page)
+        this.nav = new Navigation(this.ui)
     }
 
     async goto() {

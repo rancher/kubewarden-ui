@@ -1,4 +1,5 @@
 import { expect, Page } from '@playwright/test';
+import { RancherUI } from '../pages/rancher-ui';
 
 type ExpGroup = 'Cluster' | 'Workloads' | 'Kubewarden' | 'Apps'
 type ExpItemMap = {
@@ -8,9 +9,23 @@ type ExpItemMap = {
     Kubewarden: 'PolicyServers' | 'ClusterAdmissionPolicies' | 'AdmissionPolicies' | 'Policy Reporter'
 };
 
+const kwTabId: Record<string, string> = {
+    'Policies': 'related-policies',
+    'Rules': 'policy-rules',
+    'Metrics': 'policy-metrics',
+    'Tracing': 'policy-tracing',
+    'Conditions': 'conditions',
+    'Recent Events': 'events',
+    'Related Resources': 'related',
+}
+
 export class Navigation {
 
-    constructor(private readonly page: Page) { }
+    readonly page: Page
+
+    constructor(private readonly ui: RancherUI) {
+        this.page = ui.page
+    }
 
     // User menu
     async userNav(to: 'Preferences' | 'Account & API Keys' | 'Log Out') {
@@ -47,6 +62,29 @@ export class Navigation {
         } else {
             await groupBlock.locator(groupHeader).click()
         }
+    }
+
+    // === Kubewarden specific navigation ===
+
+    // Policy Servers
+    async pserver(name: string, tab?: 'Policies'|'Metrics'|'Tracing'|'Conditions'|'Recent Events'|'Related Resources') {
+        await this.explorer('Kubewarden', 'PolicyServers')
+        await this.ui.getRow(name).open()
+        if (tab) await this.page.getByRole('tablist').locator(`li#${kwTabId[tab]}`).click()
+    }
+
+    // Cluster Admission Policies
+    async capolicy(name: string, tab?: 'Rules'|'Tracing'|'Metrics'|'Conditions'|'Recent Events'|'Related Resources') {
+        await this.explorer('Kubewarden', 'ClusterAdmissionPolicies')
+        await this.ui.getRow(name).open()
+        if (tab) await this.page.getByRole('tablist').locator(`li#${kwTabId[tab]}`).click()
+    }
+
+    // Admission Policies
+    async apolicy(name: string, tab?: 'Rules'|'Tracing'|'Metrics'|'Conditions'|'Recent Events') {
+        await this.explorer('Kubewarden', 'AdmissionPolicies')
+        await this.ui.getRow(name).open()
+        if (tab) await this.page.getByRole('tablist').locator(`li#${kwTabId[tab]}`).click()
     }
 
 }
