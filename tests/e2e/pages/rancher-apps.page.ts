@@ -82,7 +82,7 @@ export class RancherAppsPage extends BasePage {
             await this.ui.input('Name').fill(chart.name)
         }
         if (chart.namespace) {
-            await this.ui.select('Namespace *', 'Create a New Namespace')
+            await this.ui.select('Namespace *', /^Create a [nN]ew Namespace$/)
             await this.ui.input('Namespace').fill(chart.namespace)
         }
         if (chart.project) {

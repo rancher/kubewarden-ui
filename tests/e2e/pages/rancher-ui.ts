@@ -46,7 +46,7 @@ export class RancherUI {
     }
 
     // Labeled Select
-    async select(label: string, option: string) {
+    async select(label: string, option: string|RegExp) {
         await this.page.locator('div.labeled-select')
             .filter({hasText: label})
             .getByRole('combobox', { name: 'Search for option' }).click()

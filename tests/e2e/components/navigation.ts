@@ -53,10 +53,12 @@ export class Navigation {
             await this.cluster('local')
 
         if (childName) {
-            // Open group if closed
+            const expandBtn = groupBlock.locator('i.icon-chevron-down,i.icon-chevron-right')
+
+            // Can't detect with expandBtn.isVisible, conflict in: icon-down = closed (2.7) = open (2.8)
             await expect(groupBlock).toBeVisible()
-            if (await groupBlock.locator('i.icon-chevron-down').isVisible()) {
-                await groupBlock.locator('i.icon-chevron-down').click()
+            if (!await groupBlock.getByRole('list').isVisible()) {
+                await expandBtn.click()
             }
             await groupBlock.getByText(childName, {exact: true}).click()
         } else {
