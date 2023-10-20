@@ -3,7 +3,6 @@ import { mapGetters } from 'vuex';
 
 import { CATALOG } from '@shell/config/types';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
-import ResourceManager from '@shell/mixins/resource-manager';
 
 import { Banner } from '@components/Banner';
 
@@ -14,18 +13,10 @@ import { handleGrowl } from '../utils/handle-growl';
 export default {
   components: { Banner },
 
-  mixins: [ResourceManager],
-
   async fetch() {
-    this.secondaryResourceData = this.secondaryResourceDataConfig();
-    await this.resourceManagerFetchSecondaryResources(this.secondaryResourceData);
-  },
-
-  data() {
-    return {
-      apps:                  null,
-      secondaryResourceData: this.secondaryResourceDataConfig()
-    };
+    if ( this.$store.getters[`cluster/canList`](CATALOG.CLUSTER_REPO) ) {
+      await this.$store.dispatch('catalog/refresh');
+    }
   },
 
   computed: {
@@ -50,10 +41,6 @@ export default {
   },
 
   methods: {
-    secondaryResourceDataConfig() {
-      return { data: { [CATALOG.APP]: { applyTo: [{ var: 'apps' }] } } };
-    },
-
     async closeDefaultsBanner(retry = 0) {
       const res = await this.$store.dispatch('kubewarden/updateHideBannerDefaults', true);
 
