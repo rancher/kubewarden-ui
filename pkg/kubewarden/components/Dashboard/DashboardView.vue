@@ -69,7 +69,7 @@ export default {
         });
       }
 
-      return true;
+      return false;
     },
 
     /** Counts the current policy server pods - returns the status and total count */

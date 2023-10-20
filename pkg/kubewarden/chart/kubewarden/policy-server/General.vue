@@ -1,5 +1,7 @@
 <script>
+import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
+
 import ResourceFetch from '@shell/mixins/resource-fetch';
 import { CATALOG } from '@shell/config/types';
 import { _CREATE } from '@shell/config/query-params';
@@ -72,12 +74,26 @@ export default {
   },
 
   computed: {
+    ...mapGetters({ charts: 'catalog/charts' }),
+
     isCreate() {
       return this.mode === _CREATE;
     },
 
     defaultsChart() {
-      return this.$store.getters['catalog/chart']({ chartName: KUBEWARDEN_CHARTS.DEFAULTS });
+      if ( this.kubewardenRepo ) {
+        return this.$store.getters['catalog/chart']({
+          repoName:  this.kubewardenRepo.repoName,
+          repoType:  this.kubewardenRepo.repoType,
+          chartName: KUBEWARDEN_CHARTS.DEFAULTS
+        });
+      }
+
+      return null;
+    },
+
+    kubewardenRepo() {
+      return this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.DEFAULTS);
     },
 
     showVersionBanner() {

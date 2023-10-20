@@ -109,7 +109,7 @@ export default {
 
   computed: {
     ...mapGetters(['currentCluster', 'currentProduct']),
-    ...mapGetters({ allRepos: 'catalog/repos', t: 'i18n/t' }),
+    ...mapGetters({ charts: 'catalog/charts', t: 'i18n/t' }),
 
     isAirgap() {
       return this.$store.getters['kubewarden/airGapped'];
@@ -120,15 +120,19 @@ export default {
     },
 
     controllerChart() {
-      return this.$store.getters['catalog/chart']({ chartName: KUBEWARDEN_CHARTS.CONTROLLER });
+      if ( this.kubewardenRepo ) {
+        return this.$store.getters['catalog/chart']({
+          repoName:  this.kubewardenRepo.repoName,
+          repoType:  this.kubewardenRepo.repoType,
+          chartName: KUBEWARDEN_CHARTS.CONTROLLER
+        });
+      }
+
+      return null;
     },
 
     kubewardenRepo() {
-      if ( !this.isAirgap ) {
-        return this.allRepos?.find(r => r.spec.url === KUBEWARDEN_REPO);
-      }
-
-      return this.controllerChart;
+      return this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
     },
 
     shellEnabled() {
