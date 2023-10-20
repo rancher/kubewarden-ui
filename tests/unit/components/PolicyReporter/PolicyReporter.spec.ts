@@ -12,6 +12,7 @@ const defaultMocks = {
     getters: {
       'cluster/schemaFor': jest.fn(),
       'i18n/t':            jest.fn(),
+      'management/byId':   () => 'local'
     }
   }
 };
@@ -23,7 +24,11 @@ const defaultComputed = {
   reporterCrds:                 () => null,
   controllerNamespace:          () => null,
   controllerVersion:            () => null,
-  canShowReporter:              () => null
+  canShowReporter:              () => null,
+  allDeployments:               () => null,
+  controllerDeployments:        () => null,
+  reporterDeployment:           () => null,
+  reporterDeploymentState:      () => 'active'
 };
 
 const mockCanShowReporter = (version: String): Boolean => {

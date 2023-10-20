@@ -287,6 +287,9 @@ kubewarden:
     url:
       banner:
         unavailable: The Policy Reporter UI proxy URL is unavailble, please ensure that the UI is properly configured.
+    deployment:
+      banner:
+        unavailable: "The Policy Reporter UI Deployment is currently in a `{ state }` state, please wait."
     headers:
       label: Compliance
       description: When using the Kubewarden Audit Scanner, the results of the policy scans are stored using the PolicyReport Custom Resource.
