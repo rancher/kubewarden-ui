@@ -11,7 +11,7 @@ import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 import Loading from '@shell/components/Loading';
 
 import { DASHBOARD_HEADERS } from '../../config/table-headers';
-import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS } from '../../types';
+import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_LABELS } from '../../types';
 
 import DefaultsBanner from '../DefaultsBanner';
 import Card from './Card';
@@ -28,7 +28,9 @@ export default {
     const hash = {};
     const types = [
       KUBEWARDEN.ADMISSION_POLICY,
-      KUBEWARDEN.CLUSTER_ADMISSION_POLICY
+      KUBEWARDEN.CLUSTER_ADMISSION_POLICY,
+      POD,
+      CATALOG.APP
     ];
 
     for ( const type of types ) {
@@ -52,8 +54,8 @@ export default {
       DASHBOARD_HEADERS,
       colorStops,
 
-      apps:                  null,
       controller:            null,
+      deployments:           null,
       psPods:                [],
       secondaryResourceData: this.secondaryResourceDataConfig(),
     };
@@ -62,9 +64,17 @@ export default {
   computed: {
     ...mapGetters(['currentProduct']),
 
+    allApps() {
+      return this.$store.getters['cluster/all'](CATALOG.APP);
+    },
+
+    allPods() {
+      return this.$store.getters['cluster/all'](POD);
+    },
+
     defaultsApp() {
-      if ( this.apps ) {
-        return this.apps?.find((a) => {
+      if ( this.allApps ) {
+        return this.allApps?.find((a) => {
           return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
         });
       }
@@ -72,37 +82,56 @@ export default {
       return false;
     },
 
+    policyServerPods() {
+      if ( this.$store.getters['cluster/canList'](POD) ) {
+        const pods = this.allPods?.filter(pod => pod?.metadata?.labels?.[KUBEWARDEN_LABELS.POLICY_SERVER]);
+
+        return Object.values(pods).flat();
+      }
+
+      return null;
+    },
+
     /** Counts the current policy server pods - returns the status and total count */
-    policyServers() {
-      const pods = this.psPods || [];
+    policyServerCounts() {
+      const pods = this.policyServerPods || [];
 
-      return pods.reduce((ps, neu) => {
-        const neuContainerStatues = neu?.status?.containerStatuses;
-        let terminated = false;
+      if ( !isEmpty(pods) ) {
+        return pods?.reduce((ps, neu) => {
+          const neuContainerStatues = neu?.status?.containerStatuses;
+          let terminated = false;
 
-        // If the container state is terminated, remove it from the available counts
-        if ( !isEmpty(neuContainerStatues) ) {
-          const filtered = neuContainerStatues.filter(status => status.state['terminated']);
+          // If the container state is terminated, remove it from the available counts
+          if ( !isEmpty(neuContainerStatues) ) {
+            const filtered = neuContainerStatues.filter(status => status?.state['terminated']);
 
-          if ( !isEmpty(filtered) ) {
-            terminated = true;
+            if ( !isEmpty(filtered) ) {
+              terminated = true;
+            }
           }
-        }
 
-        return {
+          return {
+            status: {
+              running:       ps?.status?.running + ( neu?.metadata?.state?.name === 'running' && !terminated ? 1 : 0 ),
+              stopped:       ps?.status?.stopped + ( neu?.metadata?.state?.error ? 1 : 0 ),
+              pending:       ps?.status?.transitioning + ( neu?.metadata?.state?.transitioning ? 1 : 0 )
+            },
+            total: terminated ? ps?.total || 0 : ps?.total + 1
+          };
+        }, {
           status: {
-            running:       ps?.status.running + ( neu.metadata.state.name === 'running' && !terminated ? 1 : 0 ),
-            stopped:       ps?.status.stopped + ( neu.metadata.state.error ? 1 : 0 ),
-            pending:       ps?.status.transitioning + ( neu.metadata.state.transitioning ? 1 : 0 )
+            running: 0, stopped: 0, pending: 0
           },
-          total: terminated ? ps?.total || 0 : ps?.total + 1
-        };
-      }, {
+          total: 0
+        });
+      }
+
+      return {
         status: {
           running: 0, stopped: 0, pending: 0
         },
         total: 0
-      });
+      };
     },
 
     globalPolicies() {
@@ -137,7 +166,6 @@ export default {
         data:      {
           [WORKLOAD_TYPES.DEPLOYMENT]: {
             applyTo: [
-              { var: 'namespacedDeployments' },
               {
                 var:         'controller',
                 parsingFunc: (data) => {
@@ -145,36 +173,24 @@ export default {
                 }
               }
             ]
-          },
-          [POD]: {
-            applyTo: [
-              { var: 'namespacedPods' },
-              {
-                var:         'psPods',
-                parsingFunc: (data) => {
-                  return data.filter(pod => pod?.metadata?.labels['kubewarden/policy-server']);
-                }
-              }
-            ]
-          },
-          [CATALOG.APP]: { applyTo: [{ var: 'apps' }] }
+          }
         }
       };
     },
 
     getPolicyGauges(type) {
-      return type.reduce((policy, neu) => {
+      return type?.reduce((policy, neu) => {
         return {
           status: {
-            running: policy.status.running + ( neu.status.policyStatus === 'active' ? 1 : 0 ),
-            stopped: policy.status.stopped + ( neu.status.error ? 1 : 0 ),
-            pending: policy.status.pending + ( neu.status.policyStatus === 'pending' ? 1 : 0 ),
+            running: policy?.status?.running + ( neu?.status?.policyStatus === 'active' ? 1 : 0 ),
+            stopped: policy?.status?.stopped + ( neu?.status?.error ? 1 : 0 ),
+            pending: policy?.status?.pending + ( neu?.status?.policyStatus === 'pending' ? 1 : 0 ),
           },
           mode: {
-            protect: policy.mode.protect + ( neu.spec.mode === 'protect' ? 1 : 0 ),
-            monitor: policy.mode.monitor + ( neu.spec.mode === 'monitor' ? 1 : 0 )
+            protect: policy?.mode?.protect + ( neu?.spec?.mode === 'protect' ? 1 : 0 ),
+            monitor: policy?.mode?.monitor + ( neu?.spec?.mode === 'monitor' ? 1 : 0 )
           },
-          total: policy.total + 1
+          total: policy?.total + 1
         };
       }, {
         status: {
@@ -241,9 +257,9 @@ export default {
                 data-testid="kw-dashboard-ps-gauge"
                 resource-name="Active"
                 :color-stops="colorStops"
-                :capacity="policyServers.total"
+                :capacity="policyServerCounts.total"
                 :used-as-resource-name="true"
-                :used="policyServers.status.running"
+                :used="policyServerCounts.status.running"
                 units="Pods"
               />
             </slot>

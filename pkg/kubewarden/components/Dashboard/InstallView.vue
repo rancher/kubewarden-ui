@@ -58,7 +58,9 @@ export default {
         this.installSteps[0].ready = true;
       }
 
-      await this.refreshCharts(1, true);
+      if ( !this.kubewardenRepo || !this.controllerChart ) {
+        await this.$store.dispatch('catalog/refresh');
+      }
     }
   },
 
@@ -109,7 +111,9 @@ export default {
 
   computed: {
     ...mapGetters(['currentCluster', 'currentProduct']),
-    ...mapGetters({ charts: 'catalog/charts', t: 'i18n/t' }),
+    ...mapGetters({
+      charts: 'catalog/charts', repos: 'catalog/repos', t: 'i18n/t'
+    }),
 
     isAirgap() {
       return this.$store.getters['kubewarden/airGapped'];
@@ -122,8 +126,8 @@ export default {
     controllerChart() {
       if ( this.kubewardenRepo ) {
         return this.$store.getters['catalog/chart']({
-          repoName:  this.kubewardenRepo.repoName,
-          repoType:  this.kubewardenRepo.repoType,
+          repoName:  this.kubewardenRepo.id,
+          repoType:  'cluster',
           chartName: KUBEWARDEN_CHARTS.CONTROLLER
         });
       }
@@ -132,7 +136,9 @@ export default {
     },
 
     kubewardenRepo() {
-      return this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
+      const chart = this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
+
+      return this.repos?.find(repo => repo.id === chart?.repoName);
     },
 
     shellEnabled() {
@@ -321,7 +327,7 @@ export default {
           </template>
 
           <template #install>
-            <template v-if="!kubewardenRepo && !controllerChart">
+            <template v-if="!kubewardenRepo">
               <h2 class="mt-20 mb-10" data-testid="kw-repo-title">
                 {{ t("kubewarden.dashboard.prerequisites.repository.title") }}
               </h2>

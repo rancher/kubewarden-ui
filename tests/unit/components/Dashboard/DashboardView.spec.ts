@@ -7,14 +7,17 @@ import DashboardView from '@kubewarden/components/Dashboard/DashboardView.vue';
 import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 
+import DEFAULTS_APP from '../../templates/defaultsApp';
+import PS_POD from '../../templates/policyServerPod';
+
 describe('component: DashboardView', () => {
   it('renders defaults banner when default app is not found', () => {
     const wrapper = shallowMount(DashboardView as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       computed:  {
-        defaultsApp:        () => null,
+        defaultsApp:        () => DEFAULTS_APP,
         defaultsChart:      () => null,
         hideBannerDefaults: () => false,
-        policyServerPods:   () => [],
+        policyServerPods:   () => [PS_POD],
         globalPolicies:     () => [],
         namespacedPolicies: () => [],
         version:            () => '1.25'
@@ -28,7 +31,8 @@ describe('component: DashboardView', () => {
             'current_product/all':           jest.fn(),
             'i18n/t':                        jest.fn(),
             'kubewarden/hideBannerDefaults': jest.fn(),
-            'catalog/chart':                 jest.fn()
+            'catalog/chart':                 jest.fn(),
+            'cluster/canList':               () => true
           },
         }
       },
@@ -70,7 +74,8 @@ describe('component: DashboardView', () => {
         return { psPods: pods };
       },
       computed:  {
-        defaultsApp:        () => null,
+        defaultsApp:        () => DEFAULTS_APP,
+        policyServerPods:   () => [PS_POD],
         globalPolicies:     () => [],
         namespacedPolicies: () => [],
         version:            () => '1.25'
@@ -84,7 +89,8 @@ describe('component: DashboardView', () => {
             'current_product/all':           jest.fn(),
             'i18n/t':                        jest.fn(),
             'kubewarden/hideBannerDefaults': jest.fn(),
-            'catalog/chart':                 jest.fn()
+            'catalog/chart':                 jest.fn(),
+            'cluster/canList':               () => true
           },
         }
       },
@@ -93,7 +99,7 @@ describe('component: DashboardView', () => {
 
     const gauges = wrapper.findAllComponents(ConsumptionGauge);
 
-    expect(gauges.at(0).props().capacity).toStrictEqual(pods.length as Number);
+    expect(gauges.at(0).props().capacity).toStrictEqual([PS_POD].length as Number);
     expect(gauges.at(0).props().used).toStrictEqual(1 as Number);
   });
 
@@ -124,8 +130,8 @@ describe('component: DashboardView', () => {
 
     const wrapper = shallowMount(DashboardView as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       computed:  {
-        defaultsApp:        () => null,
-        policyServerPods:   () => [],
+        defaultsApp:        () => DEFAULTS_APP,
+        policyServerPods:   () => [PS_POD],
         globalPolicies:     () => [],
         namespacedPolicies: () => policies,
         version:            () => '1.25'
@@ -139,7 +145,8 @@ describe('component: DashboardView', () => {
             'current_product/all':           jest.fn(),
             'i18n/t':                        jest.fn(),
             'kubewarden/hideBannerDefaults': jest.fn(),
-            'catalog/chart':                 jest.fn()
+            'catalog/chart':                 jest.fn(),
+            'cluster/canList':               () => true
           },
         }
       },
