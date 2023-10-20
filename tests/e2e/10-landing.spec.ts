@@ -13,7 +13,7 @@ test('Kubewarden Landing page', async({ page, ui, nav }) => {
 
   await ui.withReload(async () => {
     expect(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
-  }, 'https://github.com/kubewarden/ui/issues/245')
+  }, 'https://github.com/rancher/kubewarden-ui/issues/514')
 });
 
 test('Policy Servers Landing Page', async({ page, ui, nav }) => {
