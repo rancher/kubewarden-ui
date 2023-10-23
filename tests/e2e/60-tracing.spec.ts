@@ -16,9 +16,10 @@ test('Set up tracing', async ({ page, ui, nav }) => {
   const jaeger = tracing.getByTestId('kw-tracing-checklist-step-jaeger')
   const enableBtn = tracing.getByTestId('kw-tracing-checklist-step-config-button')
 
+  await nav.pserver('default', 'Tracing')
+
   await test.step('Install OpenTelemetry', async () => {
     // Otel is disabled
-    await nav.pserver('default', 'Tracing')
     await expect(otel.locator('i.icon-dot-open')).toBeVisible()
     await expect(enableBtn).toHaveAttribute('disabled', 'disabled')
     // Install OpenTelemetry
@@ -31,7 +32,6 @@ test('Set up tracing', async ({ page, ui, nav }) => {
 
   await test.step('Install Jaeger', async () => {
     // Jaeger is disabled
-    await nav.pserver('default', 'Tracing')
     await expect(jaeger.locator('i.icon-dot-open')).toBeVisible()
     await expect(enableBtn).toHaveAttribute('disabled', 'disabled')
     // Install Jaeger
@@ -46,11 +46,8 @@ test('Set up tracing', async ({ page, ui, nav }) => {
 
   await test.step('Enable tracing in Kubewarden', async () => {
     const apps = new RancherAppsPage(page)
-    // Tracing is disabled
-    await nav.pserver('default', 'Tracing')
     await enableBtn.click()
 
-    // Enable tracing
     await apps.nextBtn.click()
     await page.getByRole('tab', {name: 'Telemetry', exact: true}).click()
     await ui.checkbox('Enable Tracing').check()
