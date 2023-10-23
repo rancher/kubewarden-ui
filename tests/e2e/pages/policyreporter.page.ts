@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 import type { Locator, FrameLocator } from '@playwright/test';
 import { BasePage } from './basepage';
 
@@ -19,11 +19,23 @@ export class PolicyReporterPage extends BasePage {
   }
 
   async selectTab(name: 'Dashboard'|'Policy Reports'|'ClusterPolicy Reports'|'Logs') {
-    // Open menu
-    if (!await this.frame.locator('nav').isVisible()) {
-      await this.frame.locator('header').locator('i.mdi-menu').click()
+    const menu = this.frame.locator('header').locator('i.mdi-menu')
+    const overlay = this.frame.locator('div.v-overlay--active')
+    const tabItem = this.frame.locator('nav').getByRole('link', {name: name, exact: true})
+
+    // Wait until iframe is loaded
+    await expect(this.frame.locator('header')).toBeVisible()
+
+    // If screen is too small then menu is open with overlay
+    if (await overlay.isVisible() && name == 'Dashboard') {
+      await overlay.click()
+    } else {
+      // Open menu if not visible & select tab
+      if (!await tabItem.isVisible()) await menu.click()
+      await tabItem.click()
     }
-    await this.frame.locator('nav').getByRole('link', {name: name, exact: true}).click()
+    // Menu animation can match previous closing nemu
+    await this.page.waitForTimeout(500)
   }
 
 }

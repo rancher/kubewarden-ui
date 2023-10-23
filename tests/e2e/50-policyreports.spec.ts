@@ -56,6 +56,7 @@ test('New resources should be reported', async({ page, ui, nav }) => {
 
   // Check that audit reported unsafe label and privileged pod
   await nav.explorer('Kubewarden', 'Policy Reporter')
+  await reporter.selectTab('Dashboard')
   await expect_2m(reporter.failCpBanner).toHaveText('1')
   await expect_2m(reporter.failNsBanner).toContainText(testNs)
   await reporter.selectTab('Policy Reports')
@@ -96,9 +97,7 @@ test('Cleanup & check results are gone', async({ page, ui, nav }) => {
   await ui.getRow(policyLabels).delete()
 
   await nav.explorer('Kubewarden', 'Policy Reporter')
+  await reporter.selectTab('Dashboard')
   await expect_2m(reporter.failCpBanner).toHaveText('0')
-  await reporter.selectTab('Policy Reports')
-  await expect(reporter.failNsTable.getByText(testPod)).not.toBeVisible()
-  await reporter.selectTab('ClusterPolicy Reports')
-  await expect(reporter.failCpTable.getByText(testNs)).not.toBeVisible()
+  await expect_2m(reporter.failNsBanner).not.toContainText(testNs)
 });
