@@ -19,6 +19,10 @@ export class PolicyReporterPage extends BasePage {
   }
 
   async selectTab(name: 'Dashboard'|'Policy Reports'|'ClusterPolicy Reports'|'Logs') {
+    // Open menu
+    if (!await this.frame.locator('nav').isVisible()) {
+      await this.frame.locator('header').locator('i.mdi-menu').click()
+    }
     await this.frame.locator('nav').getByRole('link', {name: name, exact: true}).click()
   }
 
