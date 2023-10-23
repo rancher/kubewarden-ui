@@ -1,33 +1,31 @@
 <script>
+import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 import semver from 'semver';
 
 import { SERVICE, WORKLOAD_TYPES } from '@shell/config/types';
 import { KUBERNETES } from '@shell/config/labels-annotations';
+import ResourceFetch from '@shell/mixins/resource-fetch';
+import ResourceManager from '@shell/mixins/resource-manager';
 
 import Loading from '@shell/components/Loading';
 import { Banner } from '@components/Banner';
 
 import { handleGrowl } from '../../utils/handle-growl';
 import { rootKubewardenRoute } from '../../utils/custom-routing';
-import { KUBEWARDEN, KUBEWARDEN_CHARTS } from '../../types';
+import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS } from '../../types';
 
 export default {
   components: { Banner, Loading },
 
+  mixins: [ResourceFetch, ResourceManager],
+
   async fetch() {
-    if ( this.hasPolicyServerSchema ) {
-      this.controller = await this.$store.dispatch(`cluster/findMatching`, {
-        type:     WORKLOAD_TYPES.DEPLOYMENT,
-        selector: `${ KUBERNETES.MANAGED_NAME }=${ KUBEWARDEN_CHARTS.CONTROLLER }`
-      });
-    }
+    await this.$fetchType(WORKLOAD_TYPES.DEPLOYMENT);
+    await this.$fetchType(SERVICE);
 
-    await this.policyReporterService();
-
-    if ( !isEmpty(this.reporterUIService) ) {
-      this.reporterUrl = this.policyReporterProxy();
-    }
+    this.secondaryResourceData = this.secondaryResourceDataConfig();
+    await this.resourceManagerFetchSecondaryResources(this.secondaryResourceData);
   },
 
   data() {
@@ -36,11 +34,28 @@ export default {
       controller:               null,
       reporterReportingService: null,
       reporterUIService:        null,
-      reporterUrl:              null
+      reporterUrl:              null,
+      secondaryResourceData:    this.secondaryResourceDataConfig(),
     };
   },
 
+  watch: {
+    reporterUIService() {
+      this.reporterUrl = this.policyReporterProxy();
+    }
+  },
+
   computed: {
+    ...mapGetters(['currentCluster']),
+
+    allDeployments() {
+      return this.$store.getters['cluster/all'](WORKLOAD_TYPES.DEPLOYMENT);
+    },
+
+    controllerDeployments() {
+      return this.allDeployments?.filter(deploy => deploy?.metadata?.labels?.[KUBERNETES.INSTANCE] === KUBEWARDEN_APPS.RANCHER_CONTROLLER);
+    },
+
     hasPolicyServerSchema() {
       return this.$store.getters['cluster/schemaFor'](KUBEWARDEN.POLICY_SERVER);
     },
@@ -57,9 +72,17 @@ export default {
       return this.hasClusterPolicyReportSchema && this.hasPolicyReportSchema;
     },
 
+    reporterDeployment() {
+      return this.controllerDeployments?.find(deploy => deploy?.metadata?.labels?.['app.kubernetes.io/component'] === 'ui');
+    },
+
+    reporterDeploymentState() {
+      return this.reporterDeployment?.metadata?.state?.name;
+    },
+
     controllerNamespace() {
       if ( !isEmpty(this.controller) ) {
-        return this.controller[0].metadata?.namespace;
+        return this.controller?.metadata?.namespace;
       }
 
       return null;
@@ -67,7 +90,7 @@ export default {
 
     controllerVersion() {
       if ( !isEmpty(this.controller) ) {
-        return this.controller[0].metadata?.labels?.['app.kubernetes.io/version'];
+        return this.controller?.metadata?.labels?.['app.kubernetes.io/version'];
       }
 
       return null;
@@ -83,20 +106,38 @@ export default {
   },
 
   methods: {
-    async policyReporterService() {
-      try {
-        const services = await this.$store.dispatch('cluster/findMatching', {
-          type:     SERVICE,
-          selector: 'app.kubernetes.io/part-of=policy-reporter'
-        });
-
-        if ( !isEmpty(services) ) {
-          this.reporterReportingService = services.find(s => s.metadata?.labels?.['app.kubernetes.io/component'] === 'reporting');
-          this.reporterUIService = services.find(s => s.metadata?.labels?.['app.kubernetes.io/name'] === 'ui');
+    secondaryResourceDataConfig() {
+      return {
+        namespace: this.controller?.metadata?.namespace,
+        data:      {
+          [WORKLOAD_TYPES.DEPLOYMENT]: {
+            applyTo: [
+              {
+                var:         'controller',
+                parsingFunc: (data) => {
+                  return data.find(deploy => deploy?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === KUBEWARDEN_CHARTS.CONTROLLER);
+                }
+              }
+            ]
+          },
+          [SERVICE]: {
+            applyTo: [{ var: 'services' },
+              {
+                var:         'reporterReportingService',
+                parsingFunc: (data) => {
+                  return data.find(service => service?.metadata?.labels?.['app.kubernetes.io/component'] === 'reporting');
+                }
+              },
+              {
+                var:         'reporterUIService',
+                parsingFunc: (data) => {
+                  return data.find(service => service?.metadata?.labels?.['app.kubernetes.io/name'] === 'ui');
+                }
+              }
+            ]
+          }
         }
-      } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
-      }
+      };
     },
 
     policyReporterProxy() {
@@ -104,7 +145,7 @@ export default {
         const service = this.reporterUIService;
 
         if ( service ) {
-          const base = `/api/v1/namespaces/${ service.metadata?.namespace }/services/`;
+          const base = `/k8s/clusters/${ this.currentCluster.id }/api/v1/namespaces/${ service.metadata?.namespace }/services/`;
           const proxy = `http:${ service.metadata?.name }:${ service.spec?.ports?.[0].port }/proxy`;
 
           return base + proxy;
@@ -191,14 +232,22 @@ export default {
                 </a>
               </div>
             </div>
-            <div class="reporter__container">
-              <iframe
-                ref="frame"
-                :src="reporterUrl"
-                frameborder="0"
-                data-testid="kw-pr-iframe"
+            <template v-if="reporterDeploymentState && reporterDeploymentState !== 'active'">
+              <Banner
+                :label="t('kubewarden.policyReporter.deployment.banner.unavailable', { state: reporterDeploymentState })"
+                color="warning"
               />
-            </div>
+            </template>
+            <template v-else>
+              <div class="reporter__container">
+                <iframe
+                  ref="frame"
+                  :src="reporterUrl"
+                  frameborder="0"
+                  data-testid="kw-pr-iframe"
+                />
+              </div>
+            </template>
           </div>
         </template>
       </template>
