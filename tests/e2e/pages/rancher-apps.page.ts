@@ -54,11 +54,19 @@ export class RancherAppsPage extends BasePage {
      * SUCCESS: helm upgrade ... rancher-kubewarden-defaults /home/shell/helm/kubewarden-defaults-1.7.3.tgz
      * SUCCESS: helm [install|upgrade] [--generate-name=true|name]  /home/shell/helm/opentelemetry-operator-0.38.0.tgz
      */
-    async waitHelmSuccess(text: string, timeout=60_000) {
+    async waitHelmSuccess(text: string, options?:{timeout?: number, keepLog?: boolean}) {
+        const timeout = options?.timeout || 60_000
+        const keepLog = options?.keepLog || false
+
         // Can't match ^..$ because output is sometimes mixed up
         const regex = new RegExp(`SUCCESS: helm.*${text}`)
         const passedMsg = this.page.locator('div.logs-container').locator('span.msg').getByText(regex)
         await expect(passedMsg).toBeVisible({ timeout: timeout })
+        // Close the window
+        if (keepLog === false) {
+            const win = this.page.locator('#windowmanager')
+            await win.locator('div.tab.active').locator('i.closer').click()
+        }
     }
 
     async installChart(chart: Chart, options?:{questions?: () => Promise<void>, yamlPatch?: Function | string, timeout?: number}) {
@@ -100,7 +108,7 @@ export class RancherAppsPage extends BasePage {
 
         // Installation & Wait
         await this.installBtn.click()
-        await this.waitHelmSuccess(chart.check, options?.timeout)
+        await this.waitHelmSuccess(chart.check, {timeout: options?.timeout}  )
     }
 
     // Without parameters only for upgrade/reload
@@ -121,7 +129,7 @@ export class RancherAppsPage extends BasePage {
         }
 
         await this.updateBtn.click()
-        await this.waitHelmSuccess(name, options?.timeout)
+        await this.waitHelmSuccess(name, {timeout: options?.timeout})
     }
 
 }

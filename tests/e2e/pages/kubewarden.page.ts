@@ -72,7 +72,7 @@ export class KubewardenPage extends BasePage {
 
     // Start installation
     await apps.installBtn.click()
-    await apps.waitHelmSuccess('rancher-kubewarden-crds')
+    await apps.waitHelmSuccess('rancher-kubewarden-crds', {keepLog: true})
     await apps.waitHelmSuccess('rancher-kubewarden-controller')
   }
 
