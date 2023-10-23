@@ -8,10 +8,15 @@ export class KubewardenPage extends BasePage {
   readonly createCapBtn: Locator;
 
   constructor(page: Page) {
-    super(page, 'dashboard/c/local/kubewarden');
+    super(page);
     this.createPsBtn = page.getByRole('link', {name: 'Create Policy Server', exact: true})
     this.createApBtn = page.getByRole('link', {name: 'Create Admission Policy', exact: true})
     this.createCapBtn = page.getByRole('link', {name: 'Create Cluster Admission Policy', exact: true})
+  }
+
+  async goto(): Promise<void> {
+    // await this.nav.explorer('Kubewarden')
+    await this.page.goto('dashboard/c/local/kubewarden')
   }
 
   getPane(name: 'Policy Servers'|'Admission Policies'|'Cluster Admission Policies' ) {

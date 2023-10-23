@@ -1,10 +1,10 @@
-import type { Page } from '@playwright/test';
 import { BasePolicyPage } from './basepolicypage';
 
 export class AdmissionPoliciesPage extends BasePolicyPage {
 
-  constructor(page: Page) {
-    super(page, '/dashboard/c/local/kubewarden/policies.kubewarden.io.admissionpolicy');
+  async goto(): Promise<void> {
+    // await this.nav.explorer('Kubewarden', 'AdmissionPolicies')
+    await this.page.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.admissionpolicy')
   }
 
 }

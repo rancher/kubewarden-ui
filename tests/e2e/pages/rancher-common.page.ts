@@ -1,10 +1,10 @@
-import { expect, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { BasePage } from './basepage';
 
 export class RancherCommonPage extends BasePage {
 
-  constructor(page: Page) {
-    super(page)
+  goto(): Promise<void> {
+    throw new Error('Method not implemented.');
   }
 
   async isLoggedIn() {
@@ -33,7 +33,7 @@ export class RancherCommonPage extends BasePage {
    * @param filter Use #id or exact name of the filter
    */
   async setNamespaceFilter(filter: string) {
-    await this.page.goto('dashboard/c/local/explorer')
+    await this.nav.cluster('local')
     await expect(this.page.getByRole('heading', { name: 'Cluster Dashboard' })).toBeVisible()
 
     const nsMenu     = this.page.getByTestId('namespaces-menu')
@@ -55,7 +55,7 @@ export class RancherCommonPage extends BasePage {
   }
 
   async setHelmCharts(option: 'Show Releases Only'|'Include Prerelease Versions') {
-    await this.page.goto('/dashboard/prefs')
+    await this.nav.userNav('Preferences')
     const btn = this.page.getByRole('button', {name: option, exact: true})
     await btn.click()
     await expect(btn).toHaveClass(/bg-primary/)
@@ -67,7 +67,7 @@ export class RancherCommonPage extends BasePage {
    * @param checked Switch developer features on | off
    */
   async setExtensionDeveloperFeatures(enabled: boolean) {
-    await this.page.goto('/dashboard/prefs')
+    await this.nav.userNav('Preferences')
     await expect(this.page.getByRole('heading', { name: 'Advanced Features' })).toBeVisible()
     await this.ui.checkbox('Enable Extension developer features').setChecked(enabled)
   }

@@ -10,12 +10,17 @@ export class PolicyReporterPage extends BasePage {
   readonly failCpTable: Locator;
 
   constructor(page: Page) {
-    super(page, 'dashboard/c/local/kubewarden/policy-reporter')
+    super(page)
     this.frame = page.frameLocator('[data-testid="kw-pr-iframe"]')
     this.failCpBanner = this.frame.getByText('Failing Cluster Policies', {exact:true}).locator('xpath=./following-sibling::div')
     this.failNsBanner = this.frame.getByText('Failing Policy Results per Namespace', {exact:true}).locator('xpath=./following-sibling::div')
     this.failCpTable = this.frame.getByText('Failing ClusterPolicy Results', {exact: true}).locator('xpath=./following-sibling::div//table')
     this.failNsTable = this.frame.getByText('Failing Policy Results', {exact: true}).locator('xpath=./following-sibling::div//table')
+  }
+
+  async goto(): Promise<void> {
+    // await this.nav.explorer('Kubewarden', 'Policy Reporter')
+    await this.page.goto('dashboard/c/local/kubewarden/policy-reporter')
   }
 
   async selectTab(name: 'Dashboard'|'Policy Reports'|'ClusterPolicy Reports'|'Logs') {

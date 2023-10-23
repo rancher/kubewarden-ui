@@ -8,9 +8,14 @@ export class PolicyServersPage extends BasePage {
   readonly saveBtn: Locator
 
   constructor(page: Page) {
-    super(page, 'dashboard/c/local/kubewarden/policies.kubewarden.io.policyserver')
+    super(page)
     this.noDefaultPsBanner = page.locator('.banner').getByText('The default PolicyServer and policies are not installed')
     this.saveBtn = page.getByRole('button', { name: 'Save', exact: true })
+  }
+
+  async goto(): Promise<void> {
+    // await this.nav.explorer('Kubewarden', 'PolicyServers')
+    await this.page.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.policyserver')
   }
 
   async setName(name: string) {

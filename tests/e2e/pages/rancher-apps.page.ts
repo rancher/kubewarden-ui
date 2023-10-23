@@ -19,12 +19,17 @@ export class RancherAppsPage extends BasePage {
     readonly updateBtn: Locator
 
     constructor(page: Page) {
-        super(page, "dashboard/c/local/apps/charts")
+        super(page)
         this.step1 = page.getByRole('heading', { name: 'Install: Step 1' })
         this.step2 = page.getByRole('heading', { name: 'Install: Step 2' })
         this.nextBtn = page.getByRole('button', { name: 'Next' })
         this.installBtn = page.getByRole('button', { name: 'Install' })
         this.updateBtn = page.getByRole('button', { name: 'Update' })
+    }
+
+    async goto(): Promise<void> {
+        // await this.nav.explorer('Apps', 'Charts')
+        await this.page.goto('dashboard/c/local/apps/charts')
     }
 
     /**
@@ -33,7 +38,8 @@ export class RancherAppsPage extends BasePage {
      * @param url Git or http(s) url of the repository
      */
     async addRepository(name: string, url: string) {
-        await this.page.goto('dashboard/c/local/apps/catalog.cattle.io.clusterrepo/create')
+        await this.nav.explorer('Apps', 'Repositories')
+        await this.ui.button('Create').click()
 
         await this.ui.input('Name *').fill(name)
         if (url.endsWith('.git')) {
@@ -43,7 +49,7 @@ export class RancherAppsPage extends BasePage {
             await this.page.getByRole('radio', { name: 'http(s) URL' }).check()
             await this.ui.input('Index URL *').fill(url)
         }
-        await this.page.getByRole('button', { name: 'Create' }).click();
+        await this.ui.button('Create').click()
 
         // Check repository state is Active
         await this.ui.getRow(name).toBeActive()
@@ -71,7 +77,7 @@ export class RancherAppsPage extends BasePage {
 
     async installChart(chart: Chart, options?:{questions?: () => Promise<void>, yamlPatch?: Function | string, timeout?: number}) {
         // Select chart by title
-        await this.page.goto('dashboard/c/local/apps/charts')
+        await this.nav.explorer('Apps', 'Charts')
         await expect(this.page.getByRole('heading', { name: 'Charts', exact: true })).toBeVisible()
         await this.page.locator('.grid > .item').getByRole('heading', { name: chart.title, exact: true }).click()
 
@@ -113,7 +119,7 @@ export class RancherAppsPage extends BasePage {
 
     // Without parameters only for upgrade/reload
     async updateApp(name: string, options?:{questions?: () => Promise<void>, yamlPatch?: Function | string, timeout?: number}) {
-        await this.page.goto('dashboard/c/local/apps/catalog.cattle.io.app')
+        await this.nav.explorer('Apps', 'Installed Apps')
         await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
 
         await this.ui.getRow(name).action('Edit/Upgrade')

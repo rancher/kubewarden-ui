@@ -57,12 +57,12 @@ test('02 Install extension', async({ page }) => {
   }
 });
 
-test('03 Install kubewarden', async({ page, ui }) => {
+test('03 Install kubewarden', async({ page, ui, nav }) => {
   const kwPage = new KubewardenPage(page);
   await kwPage.installKubewarden();
 
   // Check UI is active
-  await page.getByRole('navigation').getByRole('link', { name: 'Kubewarden' }).click();
+  await nav.explorer('Kubewarden')
   await ui.withReload(async() => {
     await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible();
   }, 'Kubewarden installation not detected');
@@ -86,10 +86,11 @@ test('04 Install default policyserver', async({ page, ui }) => {
   await psPage.installDefault({recommended: true, mode: 'monitor'})
 });
 
-test('05 Whitelist artifacthub', async({ page }) => {
+test('05 Whitelist artifacthub', async({ page, ui, nav }) => {
   const kwPage = new KubewardenPage(page);
+  await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
+  await ui.button('Create').click()
 
-  await page.goto('/dashboard/c/local/kubewarden/policies.kubewarden.io.clusteradmissionpolicy/create');
   await expect(page.getByRole('heading', { name: 'Custom Policy' })).toBeVisible();
   await expect(page.locator('.subtype')).toHaveCount(1);
 

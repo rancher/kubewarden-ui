@@ -5,8 +5,13 @@ export class RancherExtensionsPage extends BasePage {
   readonly tabs: Locator
 
   constructor(page: Page) {
-    super(page, 'dashboard/c/local/uiplugins')
+    super(page)
     this.tabs = page.getByTestId('extension-tabs')
+  }
+
+  async goto(): Promise<void> {
+    // await this.nav.mainNav('Extensions')
+    await this.page.goto('dashboard/c/local/uiplugins')
   }
 
   async selectTab(name: 'Installed'|'Available'|'Updates'|'All') {
@@ -14,7 +19,7 @@ export class RancherExtensionsPage extends BasePage {
   }
 
   async enable(rancherRepo=true, partnersRepo=true) {
-    await this.page.goto('dashboard/c/local/uiplugins');
+    await this.nav.mainNav('Extensions')
     await expect(this.page.getByRole('heading', { name: 'Extension support is not enabled' })).toBeVisible()
 
     // Enable extensions

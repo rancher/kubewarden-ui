@@ -23,7 +23,7 @@ export function generateName(title: string) {
   return 'test-' + title.replace(/\s+/g, '-').toLowerCase()
 }
 
-export class BasePolicyPage extends BasePage {
+export abstract class BasePolicyPage extends BasePage {
 
   async selectTab(name: 'General'|'Rules'|'Settings'|'Namespace Selector'|'Context Aware Resources') {
     await this.page.getByRole('tab', { name: name, exact: true }).click()
