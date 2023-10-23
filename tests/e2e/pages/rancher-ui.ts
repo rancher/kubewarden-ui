@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import jsyaml from 'js-yaml';
 import merge from 'lodash.merge';
@@ -9,18 +9,14 @@ import { TableRow } from '../components/table-row';
  */
 export class RancherUI {
 
-    readonly createBtn: Locator
-
-    constructor(public readonly page: Page) {
-        this.createBtn = page.getByRole('link', {name: 'Create', exact: true} )
-    }
+    constructor(public readonly page: Page) { }
 
     // ==================================================================================================
-    // https://vuetifyjs.com/en/components/checkboxes/#checkboxes
 
-    // button shortcut
+    // Button
     button(name: string) {
-        return this.page.getByRole('button', {name: name, exact: true})
+        return this.page.getByRole('button', {name: name, exact: true}).or(
+            this.page.locator(`a.btn:text-is("${name}")`))
     }
 
     // Labeled Input

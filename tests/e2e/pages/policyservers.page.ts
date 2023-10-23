@@ -18,7 +18,7 @@ export class PolicyServersPage extends BasePage {
   }
 
   async create(name: string, options?: {wait: boolean}) {
-    await this.ui.createBtn.click()
+    await this.ui.button('Create').click()
     await this.setName(name)
     await this.saveBtn.click()
 

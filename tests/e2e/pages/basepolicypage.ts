@@ -56,7 +56,7 @@ export class BasePolicyPage extends BasePage {
 
   async open(p: Policy) {
     // Open list of policies
-    await this.ui.createBtn.click()
+    await this.ui.button('Create').click()
     await expect(this.page.getByRole('heading', { name: 'Finish: Step 1' })).toBeVisible()
     // Open requested policy
     await this.ui.withReload(async () => {

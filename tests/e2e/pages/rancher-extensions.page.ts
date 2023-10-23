@@ -86,7 +86,7 @@ export class RancherExtensionsPage extends BasePage {
     await this.ui.input('Extension URL').fill(url);
     const moduleName = await this.ui.input('Extension module name').inputValue()
     await this.ui.checkbox('Persist extension').check()
-    await this.page.getByRole('button', { name: 'Load', exact:true }).click()
+    await this.ui.button('Load').click()
 
     // Check successful load message
     await expect(this.page.locator('div.growl-message').getByText(`Loaded extension ${moduleName}`, {exact: true})).toBeVisible()

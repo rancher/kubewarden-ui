@@ -1,12 +1,14 @@
+import { KubewardenPage } from './pages/kubewarden.page';
 import { test, expect } from './rancher-test';
 
-test('Kubewarden Landing page', async({ page, nav }) => {
-  await nav.explorer('Kubewarden')
-  await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
+test('Kubewarden Landing page', async({ page }) => {
+  const kw = new KubewardenPage(page)
+  await kw.goto()
 
-  await expect(page.getByRole('link', { name: 'Create Policy Server' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Create Admission Policy' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Create Cluster Admission Policy' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
+  await expect(kw.createPsBtn).toBeVisible()
+  await expect(kw.createApBtn).toBeVisible()
+  await expect(kw.createCapBtn).toBeVisible()
 
   const expect1m = expect.configure({timeout: 60_000})
   await expect1m(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
