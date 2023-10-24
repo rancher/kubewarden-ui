@@ -52,6 +52,7 @@ export class RancherAppsPage extends BasePage {
         await this.ui.button('Create').click()
 
         // Check repository state is Active
+        await this.ui.getRow(name).action('Refresh')
         await this.ui.getRow(name).toBeActive()
     }
 
