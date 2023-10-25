@@ -45,7 +45,7 @@ export class TableRow {
    * @param options.group When there are multiple tbodies filter by group-tab (Project, Namespace, ..)
    */
   constructor(ui: RancherUI, arg: string | { [key: string]: string }, options?: {group?: string}) {
-    let table = ui.page.locator('table.sortable-table > tbody')
+    let table = ui.page.locator('table.sortable-table > tbody:visible')
 
     // Filter by project / namespace
     if (options?.group) {
