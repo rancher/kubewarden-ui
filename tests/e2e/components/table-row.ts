@@ -78,9 +78,9 @@ export class TableRow {
     return this.row.locator(`xpath=td[${column_index(...names)}]`)
   }
 
-  async toBeVisible() {
+  async toBeVisible(options?: {timeout?: number}) {
     await this.ui.withReload(async()=> {
-      await expect(this.row).toBeVisible()
+      await expect(this.row).toBeVisible({timeout: options?.timeout})
     }, 'Rancher showing duplicit rows')
   }
 

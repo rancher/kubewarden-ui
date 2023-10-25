@@ -55,6 +55,7 @@ test('New resources should be reported', async({ page, ui, nav }) => {
   await capPage.create(p, {wait: true})
 
   // Check that audit reported unsafe label and privileged pod
+  await reporter.runJob()
   await nav.explorer('Kubewarden', 'Policy Reporter')
   await reporter.selectTab('Dashboard')
   await expect_2m(reporter.failCpBanner).toHaveText('1')

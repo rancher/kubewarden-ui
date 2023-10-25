@@ -43,4 +43,10 @@ export class PolicyReporterPage extends BasePage {
     await this.page.waitForTimeout(500)
   }
 
+  async runJob() {
+    await this.nav.explorer('Workloads', 'CronJobs')
+    await this.ui.getRow('audit-scanner').action('Run Now')
+    await this.ui.getRow({State: 'Completed'}).toBeVisible({timeout: 30_000})
+  }
+
 }
