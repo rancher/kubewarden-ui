@@ -15,6 +15,7 @@ import Markdown from '@shell/components/Markdown';
 import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPO } from '../../types';
 import { getLatestStableVersion } from '../../plugins/kubewarden-class';
 import { handleGrowl } from '../../utils/handle-growl';
+import { refreshCharts } from '../../utils/chart';
 
 import InstallWizard from '../InstallWizard';
 
@@ -59,7 +60,7 @@ export default {
       }
 
       if ( !this.kubewardenRepo || !this.controllerChart ) {
-        await this.$store.dispatch('catalog/refresh');
+        await refreshCharts({ store: this.$store, init: true });
       }
     }
   },
@@ -102,10 +103,16 @@ export default {
       this.installSteps[0].ready = true;
 
       if ( this.isAirgap ) {
-        await this.refreshCharts();
+        await refreshCharts({ store: this.$store });
       }
 
       this.$refs.wizard?.goToStep(2);
+    },
+
+    async kubewardenRepo() {
+      if ( !this.controllerChart ) {
+        await refreshCharts({ store: this.$store });
+      }
     }
   },
 
@@ -187,7 +194,7 @@ export default {
           return;
         }
 
-        await this.refreshCharts();
+        await refreshCharts({ store: this.$store });
         btnCb(true);
       } catch (e) {
         handleGrowl({ error: e, store: this.$store });
@@ -195,27 +202,10 @@ export default {
       }
     },
 
-    async refreshCharts(retry = 0, init) {
-      try {
-        await this.$store.dispatch('catalog/refresh');
-      } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
-      }
-
-      if ( !this.controllerChart && retry === 0 ) {
-        await this.$fetchType(CATALOG.CLUSTER_REPO);
-        await this.refreshCharts(retry + 1);
-      }
-
-      if ( !this.controllerChart && retry === 1 && !init ) {
-        this.reloadReady = true;
-      }
-    },
-
     async chartRoute() {
       if ( !this.controllerChart ) {
         try {
-          await this.refreshCharts();
+          await refreshCharts({ store: this.$store });
         } catch (e) {
           handleGrowl({ error: e, store: this.$store });
 
