@@ -51,9 +51,13 @@ export class RancherAppsPage extends BasePage {
         }
         await this.ui.button('Create').click()
 
-        // Check repository state is Active
-        await this.ui.getRow(name).action('Refresh')
-        await this.ui.getRow(name).toBeActive()
+        // Transition: Active > [In Progress] > [Active|InProgress]
+        const repo = this.ui.getRow(name)
+        // Wait out first Active state
+        await this.page.waitForTimeout(1000)
+        // Refresh for occasional freeze In Progress
+        await repo.action('Refresh')
+        await repo.toBeActive()
     }
 
     /**

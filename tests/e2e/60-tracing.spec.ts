@@ -31,6 +31,9 @@ test('Set up tracing', async ({ page, ui, nav }) => {
   })
 
   await test.step('Install Jaeger', async () => {
+    // Workaround for missing action log
+    await page.reload()
+
     // Jaeger is disabled
     await expect(jaeger.locator('i.icon-dot-open')).toBeVisible()
     await expect(enableBtn).toHaveAttribute('disabled', 'disabled')
@@ -45,6 +48,9 @@ test('Set up tracing', async ({ page, ui, nav }) => {
   })
 
   await test.step('Enable tracing in Kubewarden', async () => {
+    // Workaround for missing action log
+    await page.reload()
+
     const apps = new RancherAppsPage(page)
     await enableBtn.click()
 
