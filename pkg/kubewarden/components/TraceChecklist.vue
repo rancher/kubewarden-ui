@@ -10,7 +10,7 @@ import { Banner } from '@components/Banner';
 
 export default {
   props: {
-    controllerChart: {
+    controllerApp: {
       type:    Object,
       default: null
     },
@@ -48,8 +48,8 @@ export default {
 
   methods: {
     chartRoute() {
-      if ( this.controllerChart ) {
-        const metadata = this.controllerChart.spec?.chart?.metadata;
+      if ( this.controllerApp ) {
+        const metadata = this.controllerApp.spec?.chart?.metadata;
 
         const query = {
           [NAMESPACE]: metadata?.annotations?.[CATALOG.NAMESPACE],

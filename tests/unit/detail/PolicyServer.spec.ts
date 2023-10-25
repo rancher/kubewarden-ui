@@ -4,7 +4,6 @@ import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from '@jest/globals';
 
 import PolicyServer from '@kubewarden/detail/policies.kubewarden.io.policyserver.vue';
-import MetricsBanner from '@kubewarden/components/MetricsBanner';
 import CountGauge from '@shell/components/CountGauge';
 
 import TraceTestData from '../templates/policyTraces';
@@ -58,7 +57,6 @@ describe('component: PolicyServer', () => {
       stubs: {
         ResourceTabs:  { template: '<span />' },
         Tab:           { template: '<span />' },
-        MetricsBanner: { template: '<span />' },
         TraceTable:    { template: '<span />' },
         Banner:        { template: '<span />' }
       }
@@ -120,7 +118,6 @@ describe('component: PolicyServer', () => {
       stubs: {
         ResourceTabs:  { template: '<span />' },
         Tab:           { template: '<span />' },
-        MetricsBanner: { template: '<span />' },
         TraceTable:    { template: '<span />' },
         Banner:        { template: '<span />' }
       }
@@ -137,38 +134,5 @@ describe('component: PolicyServer', () => {
     expect(mutatedGauge.name).toStrictEqual('Mutated' as String);
     expect(mutatedGauge.useful).toStrictEqual(13 as Number);
     expect(mutatedGauge.primaryColorVar.replace('--sizzle-', '')).toStrictEqual(traceCounts['Mutated'].color as String);
-  });
-
-  it('metrics banner displays when uninstalled', () => {
-    const wrapper = shallowMount(PolicyServer as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData: { value: {} },
-      computed:  {
-        monitoringStatus: () => {
-          return { installed: true };
-        },
-      },
-      mocks:     {
-        $fetchState: { pending: false },
-        $store:      {
-          getters: {
-            currentCluster:                  () => 'current_cluster',
-            currentProduct:                  () => 'current_product',
-            'current_product/all':           jest.fn(),
-            'i18n/t':                        jest.fn(),
-            'kubewarden/policyTraces':       () => TraceTestData
-          },
-        }
-      },
-      stubs: {
-        CountGauge:  { template: '<span />' },
-        TraceTable:  { template: '<span />' },
-        Banner:      { template: '<span />' }
-      }
-    });
-
-    const banner = wrapper.findComponent(MetricsBanner);
-
-    expect(banner.exists()).toBe(true);
-    expect(banner.props().metricsService).toBeFalsy();
   });
 });

@@ -108,17 +108,6 @@ export default class PolicyServerModel extends KubewardenModel {
     };
   }
 
-  get filteredValidations() {
-    return async({ service }) => {
-      const vals = await this.jaegerValidations({ jaegerService: service });
-
-      const traces = this.traceTableRows(vals);
-      const serviceName = `${ this.spec?.serviceAccountName }-${ this.metadata?.name }`;
-
-      return traces.filter(trace => trace.host.includes(serviceName));
-    };
-  }
-
   get matchingDeployment() {
     return async() => {
       try {
@@ -147,25 +136,6 @@ export default class PolicyServerModel extends KubewardenModel {
         console.warn('Error matching policy-server to pod', e); // eslint-disable-line no-console
       }
     };
-  }
-
-  jaegerPolicyNameByPolicy(policy) {
-    let out = null;
-
-    switch (policy.type) {
-    case KUBEWARDEN.CLUSTER_ADMISSION_POLICY:
-      out = `clusterwide-${ policy.metadata?.name }`;
-      break;
-
-    case KUBEWARDEN.ADMISSION_POLICY:
-      out = `namespaced-${ policy.metadata?.namespace }-${ policy.metadata?.name }`;
-      break;
-
-    default:
-      break;
-    }
-
-    return out;
   }
 
   async openLogs() {

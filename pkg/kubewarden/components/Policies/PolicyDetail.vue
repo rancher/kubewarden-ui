@@ -4,17 +4,12 @@ import isEmpty from 'lodash/isEmpty';
 
 import { _CREATE } from '@shell/config/query-params';
 import { monitoringStatus } from '@shell/utils/monitoring';
-import { dashboardExists } from '@shell/utils/grafana';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
-import DashboardMetrics from '@shell/components/DashboardMetrics';
-import Loading from '@shell/components/Loading';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
 import Tab from '@shell/components/Tabbed/Tab';
 
-import { METRICS_DASHBOARD } from '../../types';
-
-import MetricsBanner from '../MetricsBanner';
+import MetricsTab from '../MetricsTab';
 import RulesTable from '../RulesTable';
 import TraceTable from '../TraceTable';
 
@@ -22,7 +17,7 @@ export default {
   name: 'PolicyDetail',
 
   components: {
-    DashboardMetrics, Loading, MetricsBanner, ResourceTabs, RulesTable, Tab, TraceTable
+    MetricsTab, ResourceTabs, RulesTable, Tab, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -44,31 +39,6 @@ export default {
     },
   },
 
-  async fetch() {
-    // If monitoring is installed look for the dashboard for policies
-    if ( this.monitoringStatus.installed ) {
-      try {
-        this.metricsProxy = await this.value.grafanaProxy(this.metricsType);
-
-        if ( this.metricsProxy ) {
-          this.metricsService = await dashboardExists('v2', this.$store, this.currentCluster?.id, this.metricsProxy);
-        }
-      } catch (e) {
-        console.error(`Error fetching Grafana service: ${ e }`); // eslint-disable-line no-console
-      }
-    }
-  },
-
-  data() {
-    return {
-      metricsProxy:         null,
-      metricsService:       null,
-      reloadRequired:       false,
-
-      metricsType: METRICS_DASHBOARD.POLICY
-    };
-  },
-
   computed: {
     ...mapGetters(['currentCluster']),
     ...monitoringStatus(),
@@ -88,27 +58,12 @@ export default {
     rulesRows() {
       return this.value.spec?.rules;
     }
-  },
-
-  methods: {
-    async addDashboard(btnCb) {
-      try {
-        await this.value.addGrafanaDashboard(this.metricsType);
-        btnCb(true);
-
-        this.reloadRequired = true;
-      } catch (err) {
-        this.errors = err;
-        btnCb(false);
-      }
-    }
   }
 };
 </script>
 
 <template>
-  <Loading v-if="$fetchState.pending" />
-  <div v-else>
+  <div>
     <div class="mb-20">
       <h3>{{ t('namespace.resources') }}</h3>
     </div>
@@ -121,24 +76,8 @@ export default {
         <TraceTable :resource="resource" :policy="value" data-testid="kw-policy-detail-trace-table" />
       </Tab>
 
-      <Tab name="policy-metrics" label="Metrics" :weight="97">
-        <MetricsBanner
-          v-if="!monitoringStatus.installed || !metricsService"
-          :metrics-service="metricsService"
-          :metrics-type="metricsType"
-          :reload-required="reloadRequired"
-          @add="addDashboard"
-        />
-
-        <template v-if="metricsService" #default="props">
-          <DashboardMetrics
-            v-if="props.active"
-            :detail-url="metricsProxy"
-            :summary-url="metricsProxy"
-            :vars="dashboardVars"
-            graph-height="825px"
-          />
-        </template>
+      <Tab #default="props" name="policy-metrics" label="Metrics" :weight="97">
+        <MetricsTab :resource="resource" :active="props.active" />
       </Tab>
     </ResourceTabs>
   </div>
