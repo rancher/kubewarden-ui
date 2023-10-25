@@ -9,9 +9,9 @@ export class KubewardenPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.createPsBtn = page.getByRole('link', {name: 'Create Policy Server', exact: true})
-    this.createApBtn = page.getByRole('link', {name: 'Create Admission Policy', exact: true})
-    this.createCapBtn = page.getByRole('link', {name: 'Create Cluster Admission Policy', exact: true})
+    this.createPsBtn = this.ui.button('Create Policy Server')
+    this.createApBtn = this.ui.button('Create Admission Policy')
+    this.createCapBtn = this.ui.button('Create Cluster Admission Policy')
   }
 
   async goto(): Promise<void> {

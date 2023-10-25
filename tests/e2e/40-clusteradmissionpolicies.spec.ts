@@ -26,7 +26,6 @@ test('ClusterAdmissionPolicies ', async({ page, ui }) => {
   })
 
   await test.step('Try monitor & protect mode', async () => {
-    await capPage.goto()
     // Create in protect
     row = await capPage.create({title: p.title, name: 'test-policy-mode-protect', mode: 'Protect'}, {wait: true})
     await expect(row.column('Mode')).toHaveText('Protect')
@@ -45,21 +44,17 @@ test('ClusterAdmissionPolicies ', async({ page, ui }) => {
 
     // Create custom policy server
     const psPage = new PolicyServersPage(page)
-    await psPage.goto()
-    await psPage.create(customPS, {wait: true})
+    await psPage.create({name: customPS})
 
     // Create policy with custom PS
-    await capPage.goto()
     row = await capPage.create({title: p.title, name: 'test-policy-custom-ps', server: customPS})
     await expect(row.column('Policy Server')).toHaveText(customPS)
     // Delete custom PS, check policy is deleted too
-    await psPage.goto()
     await psPage.delete(customPS)
     await capPage.goto()
     await expect(row.row).not.toBeVisible()
 
     // Create policy with default PS
-    await capPage.goto()
     row = await capPage.create({title: p.title, name: 'test-policy-default-ps'})
     await expect(row.column('Policy Server')).toHaveText('default')
     // Check details page
@@ -69,12 +64,10 @@ test('ClusterAdmissionPolicies ', async({ page, ui }) => {
     // Check config page
     await page.locator('div.actions-container').getByRole('button', {name: 'Config', exact: true}).click()
     await expect(ui.input('Name*')).toHaveValue('test-policy-default-ps')
-    await capPage.goto()
-    await row.delete()
+    await capPage.delete(row)
   })
 
   await test.step('Try Rules can\'t be edited', async () => {
-    await capPage.goto()
     await capPage.open({title:'Pod Privileged Policy'})
     await capPage.selectTab('Rules')
     await expect(page.locator('section#rules').locator('input').first()).toBeDisabled()

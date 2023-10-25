@@ -2,15 +2,21 @@ import type { Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { BasePage } from './basepage';
 import { RancherAppsPage } from './rancher-apps.page';
+import { TableRow } from '../components/table-row';
+
+export interface PolicyServer {
+  name: string
+  replicas?: number
+  image?: string
+  settings?(): Promise<void>
+}
 
 export class PolicyServersPage extends BasePage {
   readonly noDefaultPsBanner: Locator;
-  readonly saveBtn: Locator
 
   constructor(page: Page) {
     super(page)
     this.noDefaultPsBanner = page.locator('.banner').getByText('The default PolicyServer and policies are not installed')
-    this.saveBtn = page.getByRole('button', { name: 'Save', exact: true })
   }
 
   async goto(): Promise<void> {
@@ -22,13 +28,34 @@ export class PolicyServersPage extends BasePage {
     await this.ui.input('Name*').fill(name)
   }
 
-  async create(name: string, options?: {wait: boolean}) {
-    await this.ui.button('Create').click()
-    await this.setName(name)
-    await this.saveBtn.click()
+  async setReplicas(replicas: number) {
+    await this.ui.input('Replicas*').fill(replicas.toString())
+  }
 
-    // Check row is created and wait for Active state
-    const psRow = this.ui.getRow(name)
+  async setImage(image: string) {
+    await this.ui.radio('Default Image', 'No').check()
+    await this.ui.input('Image URL').fill(image)
+  }
+
+  async setValues(ps: PolicyServer) {
+    await this.setName(ps.name)
+    if (ps.replicas != null) await this.setReplicas(ps.replicas)
+    if (ps.image != null) await this.setImage(ps.image)
+    if (ps.settings) {
+      await ps.settings()
+      await this.ui.openYamlEditor()
+    }
+  }
+
+  async create(ps: PolicyServer, options?: {wait?: boolean, navigate?: boolean}) {
+    if (options?.navigate != false) {
+      await this.goto()
+      await this.ui.button('Create').click()
+    }
+    await this.setValues(ps)
+    await this.ui.button('Save').click()
+    // Get row and wait for Active state
+    const psRow = this.ui.getRow(ps.name)
     await psRow.toBeVisible()
     if (options?.wait) {
       await psRow.toBeActive(60_000)
@@ -36,8 +63,10 @@ export class PolicyServersPage extends BasePage {
     return psRow
   }
 
-  async delete(name: string) {
-    await this.ui.getRow(name).delete()
+  async delete(ps: string|TableRow) {
+    await this.goto()
+    if (typeof ps == 'string') ps = this.ui.getRow(ps)
+    await ps.delete()
   }
 
   async installDefault(options?: {recommended?: boolean, mode?: 'monitor' | 'protect'}) {

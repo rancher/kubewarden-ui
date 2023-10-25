@@ -54,9 +54,11 @@ export abstract class BasePolicyPage extends BasePage {
     await this.ui.checkbox('Ignore Rancher Namespaces').setChecked(checked)
   }
 
-  async open(p: Policy) {
-    // Open list of policies
-    await this.ui.button('Create').click()
+  async open(p: Policy, options?: { navigate?: boolean}) {
+    if (options?.navigate != false) {
+      await this.goto()
+      await this.ui.button('Create').click()
+    }
     await expect(this.page.getByRole('heading', { name: 'Finish: Step 1' })).toBeVisible()
     // Open requested policy
     await this.ui.withReload(async () => {
@@ -94,9 +96,9 @@ export abstract class BasePolicyPage extends BasePage {
     await expect(row.column('Mode')).toHaveText('Protect')
   }
 
-  async create(p: Policy, options?: { wait: boolean}) {
+  async create(p: Policy, options?: { wait?: boolean, navigate?: boolean}) {
     p.name ??= generateName(p.title)
-    await this.open(p)
+    await this.open(p, options)
     await this.setValues(p)
 
     // Create policy - redirects to policies list
@@ -111,6 +113,12 @@ export abstract class BasePolicyPage extends BasePage {
       await this.page.waitForTimeout(2_000)
     }
     return polRow
+  }
+
+  async delete(policy: string|TableRow) {
+    await this.goto()
+    if (typeof policy == 'string') policy = this.ui.getRow(policy)
+    await policy.delete()
   }
 
 }

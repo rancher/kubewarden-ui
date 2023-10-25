@@ -16,12 +16,9 @@ test('Policy Servers', async({ page, ui }) => {
   const capPage = new ClusterAdmissionPoliciesPage(page)
 
   // Create policy server
-  await psPage.goto()
-  await psPage.create(serverName, {wait: true})
+  await psPage.create({name: serverName})
   // Create 1 Admission, 1 ClusterAdmission policy
-  await apPage.goto()
   await apPage.create(policy)
-  await capPage.goto()
   await capPage.create(policy)
 
   // Check Policy Server overview page
@@ -42,8 +39,7 @@ test('Policy Servers', async({ page, ui }) => {
   await expect3m(capRow.column('Status')).toHaveText('Active')
 
   // Delete and check policies are also deleted
-  await psPage.goto()
-  await psRow.delete()
+  await psPage.delete(psRow)
   await apPage.goto()
   await expect(page.locator('table.sortable-table')).toBeVisible()
   await expect(apRow.row).not.toBeVisible()

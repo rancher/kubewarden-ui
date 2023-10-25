@@ -123,10 +123,9 @@ for (const policy of policyList) {
     }
 
     const capPage = new ClusterAdmissionPoliciesPage(page)
-    await capPage.goto()
-    await capPage.create(p, {wait: !polkeep} )
+    const pRow = await capPage.create(p, {wait: !polkeep} )
     if (!polkeep) {
-      await ui.getRow(p.name).delete()
+      await pRow.delete()
     }
   });
 }
