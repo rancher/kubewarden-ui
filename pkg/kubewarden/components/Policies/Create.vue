@@ -488,7 +488,7 @@ export default ({
       </template>
 
       <template #readme>
-        <Markdown v-if="packageValues.readme" data-testid="kw-policy-create-readme" :value="packageValues.readme" class="mb-20" />
+        <Markdown v-if="packageValues && packageValues.readme" data-testid="kw-policy-create-readme" :value="packageValues.readme" class="mb-20" />
       </template>
 
       <template #values>
