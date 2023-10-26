@@ -1,0 +1,251 @@
+<script>
+import { mapGetters } from 'vuex';
+import isEmpty from 'lodash/isEmpty';
+
+import { CATALOG, CONFIG_MAP, MONITORING, SERVICE } from '@shell/config/types';
+import { KUBERNETES } from '@shell/config/labels-annotations';
+import { dashboardExists } from '@shell/utils/grafana';
+import { monitoringStatus } from '@shell/utils/monitoring';
+import { allHash } from '@shell/utils/promise';
+import ResourceFetch from '@shell/mixins/resource-fetch';
+
+import DashboardMetrics from '@shell/components/DashboardMetrics';
+import Loading from '@shell/components/Loading';
+import { Banner } from '@components/Banner';
+
+import { KUBEWARDEN, KUBEWARDEN_CHARTS, KubewardenDashboardLabels, KubewardenDashboards } from '../types';
+import { handleGrowl } from '../utils/handle-growl';
+import { refreshCharts } from '../utils/chart';
+import { grafanaProxy } from '../modules/grafana';
+import { monitoringIsConfigured } from '../modules/metricsConfig';
+
+import MetricsChecklist from './MetricsChecklist';
+
+export default {
+  props: {
+    active: {
+      type:    Boolean,
+      default: null
+    },
+    resource: {
+      type:    String,
+      default: null
+    }
+  },
+
+  components: {
+    Banner, DashboardMetrics, Loading, MetricsChecklist
+  },
+
+  mixins: [ResourceFetch],
+
+  async fetch() {
+    const types = [CATALOG.APP, CATALOG.CLUSTER_REPO, CONFIG_MAP, KUBEWARDEN.POLICY_SERVER, MONITORING.SERVICEMONITOR, SERVICE];
+    const hash = [];
+
+    for ( const type of types ) {
+      if ( this.$store.getters['cluster/canList'](type) ) {
+        hash.push(this.$fetchType(type));
+      }
+    }
+
+    await allHash(hash);
+
+    // If monitoring is installed look for the dashboard based on the METRICS_TYPE
+    if ( this.monitoringStatus.installed ) {
+      if ( !this.monitoringChart ) {
+        await refreshCharts({ store: this.$store, init: true });
+      }
+
+      try {
+        this.metricsProxy = await grafanaProxy({ store: this.$store, type: this.METRICS_TYPE });
+
+        if ( this.metricsProxy ) {
+          this.metricsService = await dashboardExists('v2', this.$store, this.currentCluster?.id, this.metricsProxy);
+        }
+      } catch (e) {
+        const error = {
+          _statusText: 'Error',
+          message:     `Error fetching Grafana Service: ${ e }`
+        };
+
+        handleGrowl({ error, store: this.$store });
+      }
+    }
+  },
+
+  data() {
+    const METRICS_TYPE = this.resource === KUBEWARDEN.POLICY_SERVER ? KubewardenDashboards.POLICY_SERVER : KubewardenDashboards.POLICY;
+
+    return {
+      METRICS_TYPE,
+
+      [CATALOG.APP]:               null,
+      [CATALOG.CLUSTER_REPO]:      null,
+      [CONFIG_MAP]:                null,
+      [MONITORING.SERVICEMONITOR]: null,
+      [SERVICE]:                   null,
+      metricsProxy:                null,
+      metricsService:              null
+    };
+  },
+
+  watch: {
+    async grafanaService() {
+      if ( !this.metricsProxy ) {
+        this.metricsProxy = await grafanaProxy({ store: this.$store, type: this.METRICS_TYPE });
+
+        if ( this.metricsProxy ) {
+          this.metricsService = await dashboardExists('v2', this.$store, this.currentCluster?.id, this.metricsProxy);
+        }
+      }
+    }
+  },
+
+  computed: {
+    ...mapGetters(['currentCluster', 'productId']),
+    ...mapGetters({ charts: 'catalog/charts' }),
+    ...monitoringStatus(),
+
+    allApps() {
+      return this.$store.getters['cluster/all'](CATALOG.APP);
+    },
+
+    allRepos() {
+      return this.$store.getters['cluster/all'](CATALOG.CLUSTER_REPO);
+    },
+
+    allConfigMaps() {
+      return this.$store.getters['cluster/all'](CONFIG_MAP);
+    },
+
+    allPolicyServers() {
+      return this.$store.getters['cluster/all'](KUBEWARDEN.POLICY_SERVER);
+    },
+
+    allServiceMonitors() {
+      return this.$store.getters['cluster/all'](MONITORING.SERVICEMONITOR);
+    },
+
+    allServices() {
+      return this.$store.getters['cluster/all'](SERVICE);
+    },
+
+    controllerApp() {
+      return this.allApps?.find(app => app?.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER);
+    },
+
+    controllerChart() {
+      return this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
+    },
+
+    grafanaService() {
+      const monitoringServices = this.allServices?.filter(svc => svc?.metadata?.labels?.['app.kubernetes.io/instance'] === 'rancher-monitoring');
+
+      return monitoringServices?.find(svc => svc?.metadata?.labels?.['app.kubernetes.io/name'] === 'grafana');
+    },
+
+    kubewardenGrafanaDashboards() {
+      return this.allConfigMaps.filter(configMap => configMap?.metadata?.labels?.[KubewardenDashboardLabels.DASHBOARD]);
+    },
+
+    monitoringApp() {
+      return this.allApps?.find(app => app?.spec?.chart?.metadata?.name === 'rancher-monitoring');
+    },
+
+    monitoringChart() {
+      return this.charts?.find(chart => chart.chartName === 'rancher-monitoring');
+    },
+
+    monitoringServiceMonitorsSpec() {
+      if ( this.monitoringApp ) {
+        return this.monitoringApp.spec?.values?.prometheus?.additionalServiceMonitors;
+      }
+
+      return null;
+    },
+
+    monitoringIsConfigured() {
+      return monitoringIsConfigured({
+        serviceMonitorSpec: this.monitoringServiceMonitorsSpec,
+        controllerApp:      this.controllerApp,
+        policyServerSvcs:   this.policyServerSvcs
+      });
+    },
+
+    openTelemetryServices() {
+      if ( this.allServices ) {
+        return this.allServices.filter(svc => svc?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === 'opentelemetry-operator');
+      }
+
+      return null;
+    },
+
+    openTelSvc() {
+      if ( !isEmpty(this.openTelemetryServices) ) {
+        return this.openTelemetryServices.find((svc) => {
+          const ports = svc?.spec?.ports;
+
+          if ( ports.length ) {
+            return ports.find(p => p.port === 8080);
+          }
+        });
+      }
+
+      return null;
+    },
+
+    policyServerSvcs() {
+      if ( !isEmpty(this.allPolicyServers) ) {
+        const policyServerNames = this.allPolicyServers.map(ps => ps?.metadata?.name);
+        const out = [];
+
+        for ( const ps of policyServerNames ) {
+          out.push(this.allServices?.find(svc => svc?.metadata?.labels?.app === `kubewarden-policy-server-${ ps }`));
+        }
+
+        return out;
+      }
+
+      return null;
+    },
+
+    showChecklist() {
+      const monitoringEnabled = this.controllerApp?.spec?.values?.telemetry?.metrics?.enabled;
+      const grafanaDashboardsInstalled = !isEmpty(this.kubewardenGrafanaDashboards);
+
+      return !this.openTelSvc || !this.monitoringApp || !monitoringEnabled || !this.monitoringIsConfigured || !grafanaDashboardsInstalled;
+    }
+  }
+};
+</script>
+
+<template>
+  <Loading v-if="$fetchState.pending" />
+  <div v-else>
+    <MetricsChecklist
+      v-if="showChecklist"
+      :controller-app="controllerApp"
+      :controller-chart="controllerChart"
+      :kubewarden-dashboards="kubewardenGrafanaDashboards"
+      :monitoring-app="monitoringApp"
+      :monitoring-chart="monitoringChart"
+      :open-tel-svc="openTelSvc"
+    />
+
+    <template v-if="!showChecklist">
+      <Banner
+        v-if="monitoringApp && !metricsProxy"
+        color="error"
+        :label="t('kubewarden.monitoring.warning.noProxy')"
+      />
+      <DashboardMetrics
+        v-if="metricsProxy && active"
+        data-testid="kw-ps-metrics-dashboard"
+        :detail-url="metricsProxy"
+        :summary-url="metricsProxy"
+        graph-height="825px"
+      />
+    </template>
+  </div>
+</template>

@@ -1,4 +1,4 @@
-interface GrowlConfig {
+export interface GrowlConfig {
   error: {
     data?: {
       _statusText: String,

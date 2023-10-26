@@ -1,34 +1,27 @@
 <script>
 import { mapGetters } from 'vuex';
-import {
-  _CREATE, CHART, REPO, REPO_TYPE, VERSION
-} from '@shell/config/query-params';
-import { monitoringStatus } from '@shell/utils/monitoring';
-import { dashboardExists } from '@shell/utils/grafana';
+import { _CREATE } from '@shell/config/query-params';
 import { allHash } from '@shell/utils/promise';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { mapPref, GROUP_RESOURCES } from '@shell/store/prefs';
 
 import CountGauge from '@shell/components/CountGauge';
-import DashboardMetrics from '@shell/components/DashboardMetrics';
 import Loading from '@shell/components/Loading';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
 import ResourceTable from '@shell/components/ResourceTable';
 import Tab from '@shell/components/Tabbed/Tab';
 
 import { isEmpty } from 'lodash';
-import { METRICS_DASHBOARD } from '../types';
 import { RELATED_HEADERS } from '../config/table-headers';
-import { handleGrowl } from '../utils/handle-growl';
 
-import MetricsBanner from '../components/MetricsBanner';
+import MetricsTab from '../components/MetricsTab';
 import TraceTable from '../components/TraceTable';
 
 export default {
   name: 'PolicyServer',
 
   components: {
-    CountGauge, DashboardMetrics, Loading, MetricsBanner, ResourceTabs, ResourceTable, Tab, TraceTable
+    CountGauge, Loading, MetricsTab, ResourceTabs, ResourceTable, Tab, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -64,66 +57,20 @@ export default {
 
     assignIfNotEmpty('relatedPolicies', hash.relatedPolicies);
     assignIfNotEmpty('policyGauges', hash.policyGauges);
-
-    // If monitoring is installed look for the dashboard for PolicyServers
-    if ( this.monitoringStatus.installed ) {
-      try {
-        this.metricsProxy = await this.value.grafanaProxy(this.metricsType);
-
-        if ( this.metricsProxy ) {
-          this.metricsService = await dashboardExists('v2', this.$store, this.currentCluster?.id, this.metricsProxy);
-        }
-      } catch (e) {
-        console.error(`Error fetching Grafana service: ${ e }`); // eslint-disable-line no-console
-      }
-    } else {
-      // If not we need to direct the user to install monitoring
-      await this.$store.dispatch('catalog/load');
-
-      // Check to see that the chart we need are available
-      const charts = this.$store.getters['catalog/rawCharts'];
-      const chartValues = Object.values(charts);
-
-      const monitoringChart = chartValues.find(
-        chart => chart.chartName === 'rancher-monitoring'
-      );
-
-      if ( monitoringChart ) {
-        this.monitoringRoute = {
-          name:   'c-cluster-apps-charts-install',
-          params: {
-            cluster:  this.$route.params.cluster,
-            product:  this.$store.getters['productId'],
-          },
-          query: {
-            [REPO_TYPE]: 'cluster',
-            [REPO]:      'rancher-charts',
-            [CHART]:     'rancher-monitoring',
-            [VERSION]:   monitoringChart.versions[0]?.version,
-          }
-        };
-      }
-    }
   },
 
   data() {
     return {
       RELATED_HEADERS,
-      metricsProxy:         null,
-      metricsService:       null,
-      monitoringRoute:      null,
       policyGauges:         null,
       relatedPolicies:      null,
       reloadRequired:       false,
-
-      metricsType: METRICS_DASHBOARD.POLICY_SERVER
     };
   },
 
   computed: {
     ...mapGetters(['currentCluster', 'currentProduct']),
     ...mapGetters({ policyTraces: 'kubewarden/policyTraces' }),
-    ...monitoringStatus(),
     _group: mapPref(GROUP_RESOURCES),
 
     filteredTraces() {
@@ -174,19 +121,6 @@ export default {
   },
 
   methods: {
-    async addDashboard(btnCb) {
-      try {
-        await this.value.addGrafanaDashboard(this.metricsType);
-        btnCb(true);
-
-        this.reloadRequired = true;
-      } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
-
-        btnCb(false);
-      }
-    },
-
     hasNamespaceSelector(row) {
       return row.namespaceSelector;
     }
@@ -262,29 +196,12 @@ export default {
         </template>
       </Tab>
 
-      <Tab name="policy-metrics" label="Metrics" :weight="98">
-        <MetricsBanner
-          v-if="!monitoringStatus.installed || !metricsService"
-          :metrics-service="metricsService"
-          :metrics-type="metricsType"
-          :monitoring-route="monitoringRoute"
-          :reload-required="reloadRequired"
-          @add="addDashboard"
-        />
-
-        <template v-if="metricsService" #default="props">
-          <DashboardMetrics
-            v-if="props.active"
-            data-testid="kw-ps-metrics-dashboard"
-            :detail-url="metricsProxy"
-            :summary-url="metricsProxy"
-            graph-height="825px"
-          />
-        </template>
+      <Tab name="policy-tracing" label="Tracing" :weight="98">
+        <TraceTable :resource="resource" :related-policies="relatedPolicies" />
       </Tab>
 
-      <Tab name="policy-tracing" label="Tracing" :weight="97">
-        <TraceTable :resource="resource" :related-policies="relatedPolicies" />
+      <Tab #default="props" name="policy-metrics" label="Metrics" :weight="97">
+        <MetricsTab :resource="resource" :active="props.active" />
       </Tab>
     </ResourceTabs>
   </div>

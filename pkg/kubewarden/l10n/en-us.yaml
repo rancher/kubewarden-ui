@@ -151,6 +151,29 @@ kubewarden:
     notInstalled: |
       The Monitoring app is not installed, this will will need to be installed and configured to enable metrics. Follow <a href="https://docs.kubewarden.io/operator-manual/telemetry/metrics/quickstart#install-prometheus" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to add the Kubewarden ServiceMonitor for Prometheus.
     install: Install Monitoring
+    prerequisites:
+      label: Prerequisites
+      description: There are a few resources which need to be installed and configured correctly for monitoring to be available.
+      warning: The deployments of these resources can take a few minutes to become active.
+      monitoringApp:
+        label: The Rancher Monitoring app must be installed with the Kubewarden Service Monitors added to the Prometheus spec. Follow the <a href="https://docs.kubewarden.io/operator-manual/ui-extension/metrics#install" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to configure Prometheus.
+        install: Install App
+        edit: Edit Config
+        chartError: The Rancher Monitoring chart cannot be found, ensure the repository exists and try reloading the page.
+      configMap:
+        label: Grafana Dashboards (ConfigMaps) for the Policy Servers and for Kubewarden Policies must be created.
+        button: Add Dashboards
+        tooltip:
+          appNotInstalled: The Rancher Monitoring app is not yet installed.
+          appNotConfigured: The Rancher Monitoring app is not configured correctly, please edit the configuration to add the appropriate Service Monitors.
+      controllerConfig:
+        label: The Kubewarden Controller must be configured to enable metrics. Follow <a href="https://docs.kubewarden.io/operator-manual/ui-extension/metrics#2-enable-telemetry-for-your-rancher-kubewarden-controller-resource" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to properly configure the kubewarden-controller chart.
+        button: Edit Config
+        tooltip: The prerequisite steps have not been completed.
+        chartError: The Kubewarden Controller chart cannot be found, ensure the repository exists and try reloading the page.
+    warning:
+      noProxy: The Grafana proxy URL can not be found or is configured incorrectly.
+
   metrics:
     notInstalled: The Grafana dashboard for this Kubewarden resource can not be found. You need to create the ConfigMap for the dashboard.
     reload: Grafana dashboard created - reload required
@@ -324,7 +347,7 @@ asyncButton:
     success: Added
     waiting: Adding&hellip;
   grafanaDashboard:
-    action: Add Grafana Dashboard
+    action: Add Grafana Dashboards
     success: Added
     wating: Adding&hellip;
   policyReporterRepo:

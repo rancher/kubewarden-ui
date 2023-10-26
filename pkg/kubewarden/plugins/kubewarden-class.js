@@ -8,22 +8,17 @@ import {
   STATES,
   STATES_ENUM,
 } from '@shell/plugins/dashboard-store/resource-class';
-import { CONFIG_MAP, MANAGEMENT, SERVICE } from '@shell/config/types';
+import { MANAGEMENT, SERVICE } from '@shell/config/types';
 import { isArray } from '@shell/utils/array';
 import { addParams } from '@shell/utils/url';
 
 import {
   KUBEWARDEN,
-  METRICS_DASHBOARD,
   RANCHER_NAMESPACES,
   RANCHER_NS_MATCH_EXPRESSION,
   ARTIFACTHUB_ENDPOINT,
-  GRAFANA_DASHBOARD_ANNOTATIONS,
-  GRAFANA_DASHBOARD_LABELS,
   VALIDATION_KEYS
 } from '../types';
-import policyServerDashboard from '../assets/kubewarden-metrics-policyserver.json';
-import policyDashboard from '../assets/kubewarden-metrics-policy.json';
 
 export default class KubewardenModel extends SteveModel {
   async allServices() {
@@ -122,163 +117,6 @@ export default class KubewardenModel extends SteveModel {
     };
   }
 
-  get grafanaService() {
-    return async() => {
-      try {
-        return await this.$dispatch('cluster/find', {
-          type: SERVICE,
-          id:   'cattle-monitoring-system/rancher-monitoring-grafana'
-        }, { root: true });
-      } catch (e) {
-        console.warn(`Error getting Grafana service: ${ e }`); // eslint-disable-line no-console
-      }
-    };
-  }
-
-  get grafanaProxy() {
-    return async(type) => {
-      const dashboardName = type === METRICS_DASHBOARD.POLICY_SERVER ? 'kubewarden-policy-server' : 'kubewarden-policy';
-
-      try {
-        const grafana = await this.grafanaService();
-
-        if ( !isEmpty(grafana) ) {
-          const base = `/api/v1/namespaces/${ grafana.metadata.namespace }/services/http:${ grafana.metadata.name }:80/proxy`;
-          const path = `/d/${ type }/${ dashboardName }?orgId=1&kiosk`;
-
-          return base + path;
-        }
-      } catch (e) {
-        console.warn(`Error fetching Grafana proxy: ${ e }`); // eslint-disable-line no-console
-      }
-
-      return null;
-    };
-  }
-
-  get grafanaDashboard() {
-    return async() => {
-      try {
-        return await this.$dispatch('cluster/findMatching', {
-          type:     CONFIG_MAP,
-          selector: `kubewarden/part-of=cattle-kubewarden-system`
-        }, { root: true });
-      } catch (e) {
-        console.warn(`Error fetching grafana dashboard configMap: ${ e }`); // eslint-disable-line no-console
-      }
-    };
-  }
-
-  get jaegerQueryService() {
-    return async() => {
-      try {
-        const services = await this.$dispatch('cluster/findMatching', {
-          type:     SERVICE,
-          selector: 'app.kubernetes.io/part-of=jaeger'
-        }, { root: true });
-
-        if ( !isEmpty(services) ) {
-          return services.find(s => s.metadata?.labels?.['app.kubernetes.io/component'] === 'service-query');
-        }
-
-        return null;
-      } catch (e) {
-        console.warn(`Error fetching services: ${ e }`); // eslint-disable-line no-console
-      }
-
-      return null;
-    };
-  }
-
-  get jaegerValidations() {
-    return async({ jaegerService, denied, time }) => {
-      const lookbackTime = time || '2d';
-
-      const traceTags = `tags={"allowed"%3A"false"}`;
-      const proxyPath = `api/traces?service=kubewarden-policy-server&operation=validation&limit=1000&lookback=${ lookbackTime }`;
-
-      if (denied) {
-        proxyPath.concat('&', traceTags);
-      }
-
-      const url = `${ jaegerService?.proxyUrl('http', 16686) + proxyPath }`;
-
-      return await this.$dispatch('request', { url });
-    };
-  }
-
-  get jaegerSpecificValidations() {
-    return async({ time, service }) => {
-      try {
-        const traceTypes = ['monitor', 'protect'];
-
-        const promises = traceTypes.map((t) => {
-          let proxyPath = null;
-
-          const name = this.jaegerPolicyName;
-          const lookbackTime = time || '2d';
-
-          const options = `lookback=${ lookbackTime }&tags={"policy_id"%3A"${ name }"}`;
-          const operation = t === 'monitor' ? 'policy_eval' : 'validation';
-
-          proxyPath = `api/traces?service=kubewarden-policy-server&operation=${ operation }&${ options }`;
-
-          const JAEGER_PATH = `${ service?.proxyUrl('http', 16686) + proxyPath }`;
-
-          return this.$dispatch('request', { url: JAEGER_PATH });
-        });
-
-        let out = await Promise.all(promises);
-
-        if (out.length > 1) {
-          out = out.flatMap(o => o.data);
-        }
-
-        return out;
-      } catch (e) {
-        console.warn(`Error fetching Jaeger traces: ${ e }`); // eslint-disable-line no-console
-      }
-
-      return null;
-    };
-  }
-
-  get jaegerPolicyName() {
-    let out = null;
-
-    switch (this.kind) {
-    case 'ClusterAdmissionPolicy':
-      out = `clusterwide-${ this.metadata?.name }`;
-      break;
-
-    case 'AdmissionPolicy':
-      out = `namespaced-${ this.metadata?.namespace }-${ this.metadata?.name }`;
-      break;
-
-    default:
-      break;
-    }
-
-    return out;
-  }
-
-  get openTelemetryService() {
-    return async() => {
-      try {
-        await this.allServices();
-
-        return await this.$dispatch('cluster/findMatching', {
-          type:     SERVICE,
-          selector: 'app.kubernetes.io/name=opentelemetry-operator'
-        }, { root: true });
-      } catch (e) {
-        console.warn(`Error fetching opentelemetry service: ${ e }`); // eslint-disable-line no-console
-      }
-
-      return null;
-    };
-  }
-
   // Determines if a policy is targeting rancher specific namespaces (which happens by default)
   get namespaceSelector() {
     const rancherNs = RANCHER_NAMESPACES.find(
@@ -300,48 +138,6 @@ export default class KubewardenModel extends SteveModel {
     const out = Object.values(KUBEWARDEN.SPOOFED);
 
     return out;
-  }
-
-  /**
-   * Creates a ConfigMap for the Grafana dashboard depending on the type supplied
-   * @param {*} type - Type of resource ( PolicyServer || (Cluster)AdmissionPolicy )
-   */
-  async addGrafanaDashboard(type) {
-    /**
-     * There are 2 dashboards for Kubewarden:
-     * PolicyServer is the default one copied from https://grafana.com/grafana/dashboards/15314-kubewarden/
-     * Policies have a condensed version
-    */
-    const dashboard =
-      type === METRICS_DASHBOARD.POLICY_SERVER ? policyServerDashboard : policyDashboard;
-    const fileKey = `${ type }.json`;
-
-    const configMapTemplate = await this.$dispatch(
-      'cluster/create',
-      {
-        type:     CONFIG_MAP,
-        metadata: {
-          annotations: GRAFANA_DASHBOARD_ANNOTATIONS,
-          labels:      GRAFANA_DASHBOARD_LABELS,
-          name:        type,
-          namespace:   'cattle-dashboards',
-        },
-        data: { [fileKey]: JSON.stringify(dashboard) },
-      },
-      { root: true }
-    );
-
-    try {
-      await configMapTemplate.save();
-    } catch (e) {
-      const error = e.data || e;
-
-      this.$dispatch('growl/error', {
-        title:   error._statusText,
-        message: error.message,
-        timeout: 3000,
-      }, { root: true });
-    }
   }
 
   haveComponent(name) {
