@@ -22,8 +22,7 @@ test('Stats reflect resource changes', async({ page, nav }) => {
   const capPage = new ClusterAdmissionPoliciesPage(page)
 
   const ps = {name: 'kw-policyserver'}
-  const policyName = 'kw-policy-privpod'
-  const policy: Policy = {title: 'Pod Privileged Policy', name: policyName, server: ps.name }
+  const policy: Policy = {title: 'Pod Privileged Policy', name: 'kw-policy-privpod', server: ps.name }
 
   await nav.explorer('Kubewarden')
   const psStats = await kwPage.getStats('Policy Servers').textContent() || 'Empty'

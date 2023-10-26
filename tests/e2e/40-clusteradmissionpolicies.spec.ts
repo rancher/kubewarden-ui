@@ -1,18 +1,17 @@
 import { test, expect } from './rancher-test';
-import { PolicyServersPage } from './pages/policyservers.page';
+import { PolicyServer, PolicyServersPage } from './pages/policyservers.page';
 import { ClusterAdmissionPoliciesPage } from './pages/clusteradmissionpolicies.page';
 import { Policy } from './pages/basepolicypage';
 import { TableRow } from './components/table-row';
 
 test('ClusterAdmissionPolicies ', async({ page, ui }) => {
   let row: TableRow
-  const pName = 'test-policy-podpriv'
-  const p: Policy = {title: 'Pod Privileged Policy'}
-
   const capPage = new ClusterAdmissionPoliciesPage(page)
-  const finishBtn = page.getByRole('button', { name: 'Finish', exact: true })
+  const finishBtn = ui.button('Finish')
 
   await test.step('Creation without required fields', async () => {
+    const p: Policy = {title: 'Pod Privileged Policy', name: 'test-policy-podpriv'}
+
     await capPage.goto()
     await capPage.open(p)
     // Try to create without name
@@ -21,18 +20,19 @@ test('ClusterAdmissionPolicies ', async({ page, ui }) => {
     await expect(page.locator('div.error').getByText('Required value: name')).toBeVisible()
     await finishBtn.waitFor({timeout: 10_000}) // button name changes back Error -> Finish
     // Try without module
-    await capPage.setValues({title: p.title, name: pName, module: ''})
+    await capPage.setValues(p)
+    await capPage.setModule('')
     await expect(finishBtn).not.toBeEnabled()
   })
 
   await test.step('Try monitor & protect mode', async () => {
     // Create in protect
-    row = await capPage.create({title: p.title, name: 'test-policy-mode-protect', mode: 'Protect'}, {wait: true})
+    row = await capPage.create({title: 'Pod Privileged Policy', name: 'test-policy-mode-protect', mode: 'Protect'}, {wait: true})
     await expect(row.column('Mode')).toHaveText('Protect')
     await row.delete()
 
     // Create in monitor, change to protect, can't change back
-    row = await capPage.create({title: p.title, name: 'test-policy-mode-monitor', mode: 'Monitor'}, {wait: true})
+    row = await capPage.create({title: 'Pod Privileged Policy', name: 'test-policy-mode-monitor', mode: 'Monitor'}, {wait: true})
     await expect(row.column('Mode')).toHaveText('Monitor')
     await capPage.updateToProtect(row)
     await expect(row.column('Mode')).toHaveText('Protect')
@@ -40,22 +40,22 @@ test('ClusterAdmissionPolicies ', async({ page, ui }) => {
   })
 
   await test.step('Try default & custom policy server', async () => {
-    let customPS = 'test-cap-custom-ps'
+    let ps: PolicyServer = {name: 'test-cap-custom-ps' }
 
     // Create custom policy server
     const psPage = new PolicyServersPage(page)
-    await psPage.create({name: customPS})
+    await psPage.create(ps)
 
     // Create policy with custom PS
-    row = await capPage.create({title: p.title, name: 'test-policy-custom-ps', server: customPS})
-    await expect(row.column('Policy Server')).toHaveText(customPS)
+    row = await capPage.create({title: 'Pod Privileged Policy', name: 'test-policy-custom-ps', server: ps.name})
+    await expect(row.column('Policy Server')).toHaveText(ps.name)
     // Delete custom PS, check policy is deleted too
-    await psPage.delete(customPS)
+    await psPage.delete(ps.name)
     await capPage.goto()
     await expect(row.row).not.toBeVisible()
 
     // Create policy with default PS
-    row = await capPage.create({title: p.title, name: 'test-policy-default-ps'})
+    row = await capPage.create({title: 'Pod Privileged Policy', name: 'test-policy-default-ps'})
     await expect(row.column('Policy Server')).toHaveText('default')
     // Check details page
     await row.open()
@@ -68,7 +68,7 @@ test('ClusterAdmissionPolicies ', async({ page, ui }) => {
   })
 
   await test.step('Try Rules can\'t be edited', async () => {
-    await capPage.open({title:'Pod Privileged Policy'})
+    await capPage.open({title:'Pod Privileged Policy', name: ''})
     await capPage.selectTab('Rules')
     await expect(page.locator('section#rules').locator('input').first()).toBeDisabled()
   })

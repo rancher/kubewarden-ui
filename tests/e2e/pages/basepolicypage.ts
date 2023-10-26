@@ -10,7 +10,7 @@ export const policyTitles = ['Custom Policy', 'Allow Privilege Escalation PSP', 
 
 export interface Policy {
   title: typeof policyTitles[number]
-  name?: string
+  name: string
   mode?: 'Monitor'|'Protect'
   server?: string
   module?: string
@@ -19,8 +19,12 @@ export interface Policy {
   settings?(ui: RancherUI): Promise<void>
 }
 
-export function generateName(title: string) {
-  return 'test-' + title.replace(/\s+/g, '-').toLowerCase()
+/**
+ * Return policy with generated default name
+ */
+export const generatePolicy = (policy: Omit<Policy, 'name'>): Policy => {
+  const defaultName = 'generated-' + policy.title.replace(/\s+/g, '-').toLowerCase()
+  return { name: defaultName, ...policy }
 }
 
 export abstract class BasePolicyPage extends BasePage {
@@ -97,12 +101,11 @@ export abstract class BasePolicyPage extends BasePage {
   }
 
   async create(p: Policy, options?: { wait?: boolean, navigate?: boolean}) {
-    p.name ??= generateName(p.title)
     await this.open(p, options)
     await this.setValues(p)
 
     // Create policy - redirects to policies list
-    await this.page.getByRole('button', { name: 'Finish' }).click()
+    await this.ui.button('Finish').click()
     await expect(this.page).toHaveURL(/.*admissionpolicy$/)
     // Check new policy
     const polRow = this.ui.getRow(p.name)

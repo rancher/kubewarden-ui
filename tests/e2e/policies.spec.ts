@@ -1,6 +1,6 @@
 import { test } from './rancher-test';
 import type { RancherUI } from './pages/rancher-ui';
-import { Policy, generateName } from './pages/basepolicypage';
+import { Policy, generatePolicy } from './pages/basepolicypage';
 import { ClusterAdmissionPoliciesPage } from './pages/clusteradmissionpolicies.page';
 
 test.describe.configure({ mode: 'parallel' });
@@ -110,17 +110,16 @@ async function setupUserGroupPSP(ui: RancherUI) {
 
 // Generate installation test for every policy
 for (const policy of policyList) {
-  test(`install: ${policy.title}`, async ({ page, ui }) => {
+  test(`install: ${policy.title}`, async ({ page }) => {
     // Skip broken tests
     if (policy.skip) test.fixme(true, policy.skip)
 
-    const p: Policy = {
+    const p: Policy = generatePolicy({
       title: policy.title,
-      name: generateName(policy.title),
       server: polserver,
       mode: polmode,
       settings: policy.action
-    }
+    })
 
     const capPage = new ClusterAdmissionPoliciesPage(page)
     const pRow = await capPage.create(p, {wait: !polkeep} )
