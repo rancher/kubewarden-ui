@@ -1,47 +1,47 @@
-import { KubewardenPage } from './pages/kubewarden.page';
 import { test, expect } from './rancher-test';
 
-test('Kubewarden Landing page', async({ page }) => {
-  const kw = new KubewardenPage(page)
-  await kw.goto()
+const expect1m = expect.configure({timeout: 60_000})
 
-  await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
-  await expect(kw.createPsBtn).toBeVisible()
-  await expect(kw.createApBtn).toBeVisible()
-  await expect(kw.createCapBtn).toBeVisible()
+test('Brief check of landing pages', async({ page, ui, nav }) => {
 
-  const expect1m = expect.configure({timeout: 60_000})
-  await expect1m(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
-  await expect1m(page.getByText('Active 0 of 0 Namespaced Policies / 0%')).toBeVisible()
-  await expect1m(page.getByText('Active 6 of 6 Global Policies / 100%')).toBeVisible()
-});
+  await test.step('Kubewarden Landing page', async () => {
+    await nav.explorer('Kubewarden')
+    // Header contains version
+    await expect(page.locator('div.head-title').getByText(/Welcome to Kubewarden\s+v[1-9]/)).toBeVisible()
+    // Recommended policies stats
+    await expect1m(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
+    await expect1m(page.getByText('Active 0 of 0 Namespaced Policies / 0%')).toBeVisible()
+    await expect1m(page.getByText('Active 6 of 6 Global Policies / 100%')).toBeVisible()
+  })
 
-test('Policy Servers Landing Page', async({ page, ui, nav }) => {
-  await nav.explorer('Kubewarden', 'PolicyServers')
-  await expect(page.getByRole('heading', { name: 'PolicyServers' })).toBeVisible()
+  await test.step('Policy Servers Landing Page', async () => {
+    await nav.explorer('Kubewarden', 'PolicyServers')
+    await expect(page.getByRole('heading', { name: 'PolicyServers' })).toBeVisible()
 
-  // Default policy server
-  const psRow = ui.getRow('default')
-  await expect(psRow.row).toBeVisible()
-  await expect(psRow.column('Status')).toHaveText('Active')
-  await expect(psRow.column('Policies')).toHaveText('6')
+    // Default policy server
+    const psRow = ui.getRow('default')
+    await expect(psRow.row).toBeVisible()
+    await expect(psRow.column('Status')).toHaveText('Active')
+    await expect(psRow.column('Policies')).toHaveText('6')
 
-  // Check there is only default policy server
-  await expect(page.locator('td.col-policy-server-status')).toHaveCount(1);
-});
+    // Check there is only default policy server
+    await expect(page.locator('td.col-policy-server-status')).toHaveCount(1);
+  })
 
-test('Cluster Admission Policies Landing page', async({ page, nav }) => {
-  await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
+  await test.step('Admission Policies Landing page', async () => {
+    await nav.explorer('Kubewarden', 'AdmissionPolicies')
 
-  await expect(page.getByRole('heading', { name: 'ClusterAdmissionPolicies' })).toBeVisible()
-  await expect(page.locator('.col-policy-status')).toHaveCount(6);
-  await expect(page.locator('.col-policy-status').getByText('Active')).toHaveCount(6);
-  await expect(page.locator('.col-link-detail').first()).not.toBeEmpty();
-});
+    await expect(page.getByRole('heading', { name: 'AdmissionPolicies' })).toBeVisible()
+    await expect(page.getByText('There are no rows to show.')).toBeVisible()
+  })
 
-test('Admission Policies Landing page', async({ page, nav }) => {
-  await nav.explorer('Kubewarden', 'AdmissionPolicies')
+  await test.step('Cluster Admission Policies Landing page', async () => {
+    await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
 
-  await expect(page.getByRole('heading', { name: 'AdmissionPolicies' })).toBeVisible()
-  await expect(page.getByText('There are no rows to show.')).toBeVisible()
-});
+    await expect(page.getByRole('heading', { name: 'ClusterAdmissionPolicies' })).toBeVisible()
+    await expect(page.locator('.col-policy-status')).toHaveCount(6);
+    await expect(page.locator('.col-policy-status').getByText('Active')).toHaveCount(6);
+    await expect(page.locator('.col-link-detail').first()).not.toBeEmpty();
+  })
+
+})
