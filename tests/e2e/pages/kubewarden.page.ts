@@ -2,6 +2,8 @@ import { expect, Locator, Page } from '@playwright/test';
 import { BasePage } from './basepage';
 import { RancherAppsPage } from './rancher-apps.page';
 
+type Pane = 'Policy Servers' | 'Admission Policies' | 'Cluster Admission Policies'
+
 export class KubewardenPage extends BasePage {
   readonly createPsBtn: Locator;
   readonly createApBtn: Locator;
@@ -19,9 +21,13 @@ export class KubewardenPage extends BasePage {
     await this.page.goto('dashboard/c/local/kubewarden')
   }
 
-  getPane(name: 'Policy Servers'|'Admission Policies'|'Cluster Admission Policies' ) {
+  getPane(name: Pane ) {
     return this.page.locator('div.card-container').filter({
       has:this.page.getByRole('heading', {name: name, exact: true})})
+  }
+
+  getStats(pane: Pane) {
+    return this.getPane(pane).locator('span.numbers-stats')
   }
 
   async installKubewarden() {
