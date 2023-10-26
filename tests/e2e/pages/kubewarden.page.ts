@@ -55,11 +55,17 @@ export class KubewardenPage extends BasePage {
     try {
       await expect(installBtn).toBeVisible();
     } catch (e) {
-      await expect(failRepo).toBeVisible();
-      await failRepoBtn.click();
+      // 2 possible fails
+      await expect(failRepo.or(addRepoBtn)).toBeVisible();
+      console.warn('Workaround: Failed to add repository')
+      if (await failRepo.isVisible()) {
+        await failRepoBtn.click();
+      } else {
+        await this.page.reload()
+      }
       await expect(welcomeStep).toBeVisible();
       await installBtn.click();
-    }
+  }
 
     // Cert-Manager
 
