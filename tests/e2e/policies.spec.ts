@@ -2,12 +2,13 @@ import { test } from './rancher-test';
 import type { RancherUI } from './pages/rancher-ui';
 import { Policy, generatePolicy } from './pages/basepolicypage';
 import { ClusterAdmissionPoliciesPage } from './pages/clusteradmissionpolicies.page';
+import { PolicyServersPage } from './pages/policyservers.page';
 
 test.describe.configure({ mode: 'parallel' });
 
-const polmode   = 'Monitor'
-const polserver = process.env.server || 'default'
-const polkeep   = process.env.keep || false
+const polmode = 'Monitor'
+const pserver = {name: process.env.server || 'policies-private-ps'}
+const polkeep = !!process.env.keep || false
 
 const policyList: {title: Policy["title"], action?: Policy["settings"], skip?: string }[] = [
   { title: 'Custom Policy', action: setupCustomPolicy },
@@ -37,19 +38,24 @@ const policyList: {title: Policy["title"], action?: Policy["settings"], skip?: s
   { title: 'Seccomp PSP', action: undefined },
   { title: 'Selinux PSP', action: setupSelinuxPSP },
   { title: 'Sysctl PSP', action: undefined },
-  { title: 'Trusted Repos', skip: 'https://github.com/kubewarden/ui/issues/308' },
+  { title: 'Trusted Repos', action: trustedRepos },
   { title: 'User Group PSP', action: setupUserGroupPSP },
   { title: 'Verify Image Signatures', action: setupVerifyImageSignatures },
   { title: 'volumeMounts', action: setupVolumeMounts },
   { title: 'Volumes PSP', action: undefined },
 ]
 
+async function trustedRepos(ui: RancherUI) {
+  await ui.page.getByRole('tab', { name: 'Settings' }).click()
+  await ui.button('Add').first().click()
+  await ui.page.getByRole('textbox').last().fill('registry.my-corp.com')
+}
+
 async function setupNamespaceLabelPropagator(ui: RancherUI) {
   await ui.page.getByRole('tab', { name: 'Settings' }).click()
 
-  const s = ui.page.locator('#Settings')
-  await s.getByRole('button', { name: 'Add'}).click()
-  await s.getByRole('textbox').last().fill('cost-center')
+  await ui.button('Add').click()
+  await ui.page.getByRole('textbox').last().fill('cost-center')
 }
 
 async function setupPSALabelEnforcer(ui: RancherUI) {
@@ -70,7 +76,7 @@ async function setupVolumeMounts(ui: RancherUI) {
   await ui.page.getByRole('tab', { name: 'Settings' }).click()
 
   await ui.select('Reject', 'anyIn')
-  await ui.page.getByRole('button', { name: 'Add'}).click()
+  await ui.button('Add').click()
   await ui.page.getByPlaceholder('e.g. bar').fill('/nomount')
 }
 
@@ -87,14 +93,14 @@ async function setupDeprecatedAPIVersions(ui: RancherUI) {
 async function setupVerifyImageSignatures(ui: RancherUI) {
   await ui.page.getByRole('tab', { name: 'Settings' }).click()
   await ui.select('Signature Type', 'GithubAction')
-  await ui.page.getByRole('button', {name: 'Add', exact: true}).click()
+  await ui.button('Add').click()
   await ui.input('Image*').fill('ghcr.io/kubewarden/*')
   await ui.editYaml(d => d.githubActions.owner = "kubewarden")
 }
 
 async function setupEnvironmentVariablePolicy(ui: RancherUI) {
   await ui.page.getByRole('tab', { name: 'Settings' }).click()
-  await ui.page.getByRole('button', {name: 'Add', exact: true}).click()
+  await ui.button('Add').click()
   await ui.select('Reject Operator', 'anyIn')
   await ui.editYaml(d => d.environmentVariables[0].name = "novar")
 }
@@ -108,6 +114,26 @@ async function setupUserGroupPSP(ui: RancherUI) {
   }
 }
 
+// Set up policy server
+test.beforeAll(async ({browser}) => {
+  if (pserver.name == 'default') return
+
+  const page = await browser.newPage()
+  const psPage = new PolicyServersPage(page)
+  await psPage.create(pserver)
+  await page.close()
+})
+
+// Delete policy server
+test.afterAll(async ({browser}) => {
+  if (pserver.name == 'default') return
+
+  const page = await browser.newPage()
+  const psPage = new PolicyServersPage(page)
+  await psPage.delete(pserver.name)
+  await page.close()
+})
+
 // Generate installation test for every policy
 for (const policy of policyList) {
   test(`install: ${policy.title}`, async ({ page }) => {
@@ -116,7 +142,7 @@ for (const policy of policyList) {
 
     const p: Policy = generatePolicy({
       title: policy.title,
-      server: polserver,
+      server: pserver.name,
       mode: polmode,
       settings: policy.action
     })

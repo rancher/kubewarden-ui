@@ -58,7 +58,7 @@ export class PolicyServersPage extends BasePage {
     const psRow = this.ui.getRow(ps.name)
     await psRow.toBeVisible()
     if (options?.wait) {
-      await psRow.toBeActive(60_000)
+      await psRow.toBeActive(20_000)
     }
     return psRow
   }
