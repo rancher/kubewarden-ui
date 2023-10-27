@@ -35,13 +35,11 @@ export default {
   data() {
     return {
       errors:      [],
-      chartValues: null
+      chartValues: this.value
     };
   },
 
   created() {
-    this.chartValues = this.value;
-
     if ( this.isCreate ) {
       merge(this.chartValues, structuredClone(DEFAULT_POLICY_SERVER));
     }

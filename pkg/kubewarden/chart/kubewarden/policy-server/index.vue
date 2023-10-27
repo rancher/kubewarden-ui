@@ -70,6 +70,18 @@ export default {
         // eslint-disable-next-line no-console
         console.warn(`Error refreshing authority refs: ${ e }`);
       }
+    },
+
+    updateGeneral(prop, val) {
+      if ( prop === 'name' ) {
+        this.$set(this.chartValues.metadata, prop, val);
+      } else {
+        this.$set(this.chartValues.spec, prop, val);
+      }
+    },
+
+    updateSpec(prop, val) {
+      this.$set(this.chartValues.spec, prop, val);
     }
   }
 };
@@ -80,16 +92,34 @@ export default {
   <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-else>
     <Tab name="general" label-key="kubewarden.tabs.general.label" :weight="99">
-      <General v-model="chartValues" data-testid="ps-config-general-tab" :mode="mode" :service-accounts="serviceAccounts" />
+      <General
+        v-model="chartValues"
+        data-testid="ps-config-general-tab"
+        :mode="mode"
+        :service-accounts="serviceAccounts"
+        @update-general="updateGeneral"
+      />
     </Tab>
     <Tab name="labels" label-key="generic.labelsAndAnnotations" :weight="98">
       <Labels v-model="chartValues" data-testid="ps-config-labels-tab" :mode="mode" />
     </Tab>
     <Tab name="verification" label-key="kubewarden.tabs.verification.label" :weight="97">
-      <Verification data-testid="ps-config-verification-tab" :value="chartValues.spec" :mode="mode" :config-maps="configMaps" />
+      <Verification
+        data-testid="ps-config-verification-tab"
+        :value="chartValues.spec"
+        :mode="mode"
+        :config-maps="configMaps"
+        @update-vconfig="updateSpec"
+      />
     </Tab>
     <Tab name="registry" label-key="kubewarden.tabs.registry.label" :weight="96" @active="refresh">
-      <Registry ref="registry" data-testid="ps-config-registry-tab" :value="chartValues.spec" :mode="mode" />
+      <Registry
+        ref="registry"
+        data-testid="ps-config-registry-tab"
+        :value="chartValues.spec"
+        :mode="mode"
+        @update-registry="updateSpec"
+      />
     </Tab>
   </div>
 </template>

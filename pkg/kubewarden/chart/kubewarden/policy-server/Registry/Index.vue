@@ -29,20 +29,30 @@ export default {
   },
 
   fetch() {
-    this.insecureSources = this.value?.insecureSources || [];
-    this.sourceAuthorities = this.value?.sourceAuthorities || {};
+    this.insecureSources = this.chartValues?.insecureSources || [];
+    this.sourceAuthorities = this.chartValues?.sourceAuthorities || {};
   },
 
   data() {
     return {
+      chartValues:       this.value,
       insecureSources:   null,
       sourceAuthorities: null
     };
   },
 
+  watch: {
+    insecureSources(neu) {
+      this.$emit('update-registry', 'insecureSources', neu);
+    },
+    sourceAuthorities(neu) {
+      this.$emit('update-registry', 'sourceAuthorities', neu);
+    }
+  },
+
   methods: {
     update(prop) {
-      this.$set(this.value, [prop], this[prop]);
+      this.$set(this.chartValues, [prop], this[prop]);
     }
   }
 };
@@ -87,7 +97,6 @@ export default {
             ref="sourceAuthorities"
             v-model="sourceAuthorities"
             :mode="mode"
-            @update="update('sourceAuthorities')"
           />
         </div>
       </div>

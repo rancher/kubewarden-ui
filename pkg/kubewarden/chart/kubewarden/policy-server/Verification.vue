@@ -2,7 +2,6 @@
 import isEmpty from 'lodash/isEmpty';
 
 import { _CREATE } from '@shell/config/query-params';
-import { randomStr } from '@shell/utils/string';
 
 import { Banner } from '@components/Banner';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
@@ -31,6 +30,12 @@ export default {
     return { vConfig: this.value.verificationConfig };
   },
 
+  watch: {
+    vConfig(neu) {
+      this.$emit('update-vconfig', 'verificationConfig', neu);
+    }
+  },
+
   computed: {
     options() {
       if ( !isEmpty(this.configMaps) ) {
@@ -56,7 +61,7 @@ export default {
     <div class="row">
       <div class="col span-6">
         <LabeledSelect
-          v-model="value.verificationConfig"
+          v-model="vConfig"
           data-testid="ps-config-verification-select"
           :mode="mode"
           :label="t('kubewarden.policyServerConfig.verification.label')"

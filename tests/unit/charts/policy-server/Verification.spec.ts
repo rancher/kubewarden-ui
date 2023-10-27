@@ -8,10 +8,18 @@ import LabeledSelect from '@shell/components/form/LabeledSelect';
 
 import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver.js';
 
+interface ConfigMap {
+  id: string
+}
+
+const configMaps: ConfigMap[] = [
+  { id: 'cm-1' },
+  { id: 'cm-2' },
+  { id: 'cm-3' },
+];
+
 describe('component: Verification', () => {
   it('displays configmap options', () => {
-    const configMaps = ['cm-1', 'cm-2', 'cm-3'];
-
     const wrapper = shallowMount(Verification as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData: { value: DEFAULT_POLICY_SERVER, configMaps },
       stubs:     { Banner: { template: '<span />' } }
@@ -19,7 +27,7 @@ describe('component: Verification', () => {
 
     const selector = wrapper.findComponent(LabeledSelect);
 
-    expect(selector.props().options).toStrictEqual(configMaps as String[]);
+    expect(selector.props().options).toStrictEqual(['cm-1', 'cm-2', 'cm-3'] as String[]);
   });
 
   it('displays correct configmap when existing', () => {

@@ -22,9 +22,13 @@ export default {
     LabeledInput,
   },
 
+  data() {
+    return { chartValues: this.value };
+  },
+
   watch: {
-    'value.registryName': 'update',
-    'value.certs':        {
+    'chartValues.registryName': 'update',
+    'chartValues.certs':        {
       deep:    true,
       handler: 'update'
     }
@@ -38,17 +42,17 @@ export default {
 
   methods: {
     addCertificate() {
-      this.value.certs.push('');
+      this.chartValues.certs.push('');
     },
 
     handleSelectFile(event) {
       createOnSelected('crt');
 
-      this.value.certs.push(event);
+      this.chartValues.certs.push(event);
     },
 
     removeCert(cIndex) {
-      removeAt(this.value.certs, cIndex);
+      removeAt(this.chartValues.certs, cIndex);
     },
 
     update() {
@@ -63,7 +67,7 @@ export default {
     <div>
       <LabeledInput
         ref="authorityName"
-        v-model="value.registryName"
+        v-model="chartValues.registryName"
         data-testid="ps-config-authority-name-input"
         type="multiline"
         :label="t('kubewarden.policyServerConfig.sourceAuthorities.endpoint')"
@@ -75,11 +79,11 @@ export default {
       />
 
       <template>
-        <template v-for="(cert, cIndex) in value.certs">
+        <template v-for="(cert, cIndex) in chartValues.certs">
           <div :key="cIndex" class="sources__container__cert">
             <LabeledInput
               ref="authorityCert"
-              v-model="value.certs[cIndex]"
+              v-model="chartValues.certs[cIndex]"
               :data-testid="`ps-config-authority-cert-input-${ cIndex }`"
               type="multiline"
               :label="t('kubewarden.policyServerConfig.sourceAuthorities.certificate.label')"

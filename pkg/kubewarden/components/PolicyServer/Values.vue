@@ -63,7 +63,8 @@ export default {
       showValuesComponent: false,
       valuesComponent:     null,
       preYamlOption:       VALUES_STATE.FORM,
-      yamlOption:          VALUES_STATE.FORM
+      yamlOption:          VALUES_STATE.FORM,
+      values:              this.chartValues
     };
   },
 
@@ -159,7 +160,7 @@ export default {
         >
           <component
             :is="valuesComponent"
-            v-model="chartValues"
+            v-model="values"
             :resource="value"
             :mode="mode"
           />
