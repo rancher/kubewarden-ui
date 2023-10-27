@@ -1,16 +1,17 @@
 <script>
+import merge from 'lodash/merge';
+
 import { _CREATE, _EDIT } from '@shell/config/query-params';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import CruResource from '@shell/components/CruResource';
 
+import { DEFAULT_POLICY_SERVER } from '../models/policies.kubewarden.io.policyserver';
+
 import Values from '../components/PolicyServer/Values';
-import Create from '../components/PolicyServer/Create';
 
 export default {
-  components: {
-    CruResource, Values, Create
-  },
+  components: { CruResource, Values },
 
   mixins: [CreateEditView],
 
@@ -32,7 +33,16 @@ export default {
   },
 
   data() {
-    return { errors: [] };
+    return {
+      errors:      [],
+      chartValues: this.value
+    };
+  },
+
+  created() {
+    if ( this.isCreate ) {
+      merge(this.chartValues, structuredClone(DEFAULT_POLICY_SERVER));
+    }
   },
 
   computed: {
@@ -54,14 +64,15 @@ export default {
 </script>
 
 <template>
-  <Create v-if="isCreate" :value="value" :mode="mode" />
   <CruResource
-    v-else
     :resource="value"
     :mode="realMode"
+    :can-yaml="false"
+    :done-route="doneRoute"
     :errors="errors"
     @finish="finish"
+    @error="e => errors = e"
   >
-    <Values :value="value" :mode="mode" />
+    <Values :value="value" :chart-values="chartValues" :mode="mode" />
   </CruResource>
 </template>

@@ -1,4 +1,6 @@
 <script>
+import isEmpty from 'lodash/isEmpty';
+
 import { _CREATE } from '@shell/config/query-params';
 
 import { Banner } from '@components/Banner';
@@ -22,7 +24,27 @@ export default {
     }
   },
 
-  components: { Banner, LabeledSelect }
+  components: { Banner, LabeledSelect },
+
+  data() {
+    return { vConfig: this.value.verificationConfig };
+  },
+
+  watch: {
+    vConfig(neu) {
+      this.$emit('update-vconfig', 'verificationConfig', neu);
+    }
+  },
+
+  computed: {
+    options() {
+      if ( !isEmpty(this.configMaps) ) {
+        return this.configMaps.map(config => config.id);
+      }
+
+      return [];
+    }
+  }
 };
 </script>
 
@@ -39,14 +61,11 @@ export default {
     <div class="row">
       <div class="col span-6">
         <LabeledSelect
-          v-model="value.verificationConfig"
+          v-model="vConfig"
           data-testid="ps-config-verification-select"
           :mode="mode"
           :label="t('kubewarden.policyServerConfig.verification.label')"
-          :options="configMaps"
-          option-key="id"
-          option-label="id"
-          :reduce="opt => opt.metadata.name"
+          :options="options"
         />
       </div>
     </div>

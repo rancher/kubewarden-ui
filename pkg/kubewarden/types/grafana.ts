@@ -6,7 +6,6 @@ export enum KubewardenDashboardLabels {
   GRAFANA_DASHBOARD = 'grafana_dashboard',
 }
 
-/* eslint-disable no-unused-vars */
 export enum KubewardenDashboards {
   POLICY_SERVER = 'kubewarden-dashboard-policyserver',
   POLICY = 'kubewarden-dashboard-policy'
@@ -16,6 +15,7 @@ export enum HelmAnnotations {
   NAME = 'meta.helm.sh/release-name',
   NAMESPACE = 'meta.helm.sh/release-namespace'
 }
+/* eslint-enable no-unused-vars */
 
 export interface GrafanaDashboardLabels {
   [KubewardenDashboardLabels.DASHBOARD]: string,

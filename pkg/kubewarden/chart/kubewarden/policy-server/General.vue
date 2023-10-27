@@ -13,6 +13,7 @@ import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 
 import { KUBEWARDEN_CHARTS } from '../../../types';
+import { DEFAULT_POLICY_SERVER } from '../../../models/policies.kubewarden.io.policyserver';
 import { getLatestStableVersion } from '../../../plugins/kubewarden-class';
 
 export default {
@@ -33,44 +34,85 @@ export default {
     }
   },
 
-  mixins: [ResourceFetch],
-
   components: {
     Banner, LabeledInput, Loading, RadioGroup, ServiceNameSelect
   },
 
+  mixins: [ResourceFetch],
+
   async fetch() {
-    if ( this.isCreate ) {
-      await this.$initializeFetchData(CATALOG);
-      await this.$fetchType(CATALOG.CLUSTER_REPO);
-      await this.$store.dispatch('catalog/load');
+    await this.$initializeFetchData(CATALOG);
+    await this.$fetchType(CATALOG.CLUSTER_REPO);
+    await this.$store.dispatch('catalog/load');
 
-      if ( this.defaultsChart ) {
-        const defaultsStable = getLatestStableVersion(this.defaultsChart.versions);
+    if ( this.defaultsChart ) {
+      const defaultsStable = getLatestStableVersion(this.defaultsChart.versions);
 
-        const chartInfo = await this.$store.dispatch('catalog/getVersionInfo', {
-          repoType:    this.defaultsChart?.repoType,
-          repoName:    this.defaultsChart?.repoName,
-          chartName:   this.defaultsChart?.chartName,
-          versionName: defaultsStable?.version
-        });
+      const chartInfo = await this.$store.dispatch('catalog/getVersionInfo', {
+        repoType:    this.defaultsChart?.repoType,
+        repoName:    this.defaultsChart?.repoName,
+        chartName:   this.defaultsChart?.chartName,
+        versionName: defaultsStable?.version
+      });
 
-        if ( !isEmpty(chartInfo) ) {
-          const registry = chartInfo.values?.common?.cattle?.systemDefaultRegistry;
-          const psImage = chartInfo.values?.policyServer?.image?.repository;
-          const psTag = chartInfo.values?.policyServer?.image?.tag;
+      if ( !isEmpty(chartInfo) ) {
+        const registry = chartInfo.values?.common?.cattle?.systemDefaultRegistry;
+        const psImage = chartInfo.values?.policyServer?.image?.repository;
+        const psTag = chartInfo.values?.policyServer?.image?.tag;
 
-          if ( psImage && psTag ) {
-            this.latestStableVersion = `${ registry || 'ghcr.io' }/${ psImage }:${ psTag }`;
-            this.$set(this.value.spec, 'image', this.latestStableVersion);
-          }
+        if ( psImage && psTag ) {
+          this.latestStableVersion = `${ registry || 'ghcr.io' }/${ psImage }:${ psTag }`;
         }
       }
+    }
+
+    if ( this.latestStableVersion ) {
+      if ( !this.image || this.image === DEFAULT_POLICY_SERVER.spec.image ) {
+        // If the image doesn't exist or it's the default 'latest' image, set to the latestStableVersion
+        this.image = this.latestStableVersion;
+      } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image && this.image !== this.latestStableVersion ) {
+        // If the image exists, and is not the default 'latest' image, and not the latestStableVersion,
+        // set the defaultImage radio to false
+        this.defaultImage = false;
+      }
+    } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image ) {
+      this.defaultImage = false;
     }
   },
 
   data() {
-    return { defaultImage: true, latestStableVersion: null };
+    return {
+      defaultImage:        true,
+      latestStableVersion: null,
+      name:                this.value.metadata.name,
+      image:               this.value.spec.image,
+      serviceAccountName:  this.value.spec.serviceAccountName,
+      replicas:            this.value.spec.replicas
+    };
+  },
+
+  watch: {
+    name(neu) {
+      this.$emit('update-general', 'name', neu);
+    },
+    image(neu) {
+      this.$emit('update-general', 'image', neu);
+    },
+    serviceAccountName(neu) {
+      this.$emit('update-general', 'serviceAccountName', neu);
+    },
+    replicas(neu) {
+      this.$emit('update-general', 'replicas', neu);
+    },
+    defaultImage(neu, old) {
+      if ( neu ) {
+        if ( this.latestStableVersion ) {
+          this.image = this.latestStableVersion;
+        } else {
+          this.image = structuredClone(DEFAULT_POLICY_SERVER.spec.image);
+        }
+      }
+    }
   },
 
   computed: {
@@ -109,7 +151,7 @@ export default {
     <div class="row mt-10">
       <div class="col span-6 mb-20">
         <LabeledInput
-          v-model="value.metadata.name"
+          v-model="name"
           data-testid="ps-config-name-input"
           :mode="mode"
           :label="t('nameNsDescription.name.label')"
@@ -144,7 +186,7 @@ export default {
         />
         <template v-if="!defaultImage">
           <LabeledInput
-            v-model="value.spec.image"
+            v-model="image"
             data-testid="ps-config-image-input"
             :mode="mode"
             :label="t('kubewarden.policyServerConfig.image.label')"
@@ -157,7 +199,7 @@ export default {
     <div class="row">
       <div class="col span-12">
         <ServiceNameSelect
-          v-model="value.spec.serviceAccountName"
+          v-model="serviceAccountName"
           data-testid="ps-config-service-account-input"
           :mode="mode"
           :select-label="t('workload.serviceAccountName.label')"
@@ -178,7 +220,7 @@ export default {
           {{ t('kubewarden.policyServerConfig.replicas') }}
         </h3>
         <LabeledInput
-          v-model.number="value.spec.replicas"
+          v-model.number="replicas"
           data-testid="ps-config-replicas-input"
           type="number"
           min="0"

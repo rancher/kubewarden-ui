@@ -10,9 +10,10 @@ const defaultMocks = {
   $fetchState: { pending: false },
   $store:      {
     getters: {
-      'cluster/schemaFor': jest.fn(),
-      'i18n/t':            jest.fn(),
-      'management/byId':   () => 'local'
+      'cluster/schemaFor':          jest.fn(),
+      'i18n/t':                     jest.fn(),
+      'management/byId':            () => 'local',
+      'resource-fetch/refreshFlag': jest.fn()
     }
   }
 };
