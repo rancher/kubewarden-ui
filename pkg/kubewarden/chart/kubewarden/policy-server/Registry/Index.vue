@@ -18,7 +18,7 @@ export default {
     // chartValues.spec
     value: {
       type:     Object,
-      required: true
+      default: null
     }
   },
 

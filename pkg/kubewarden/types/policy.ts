@@ -83,10 +83,12 @@ export const OPERATION_MAP = {
   CONNECT: 'bg-success',
 };
 
-export const VALUES_STATE = {
-  FORM: 'FORM',
-  YAML: 'YAML',
-};
+/* eslint-disable no-unused-vars */
+export enum VALUES_STATE {
+  FORM = 'FORM',
+  YAML = 'YAML',
+}
+/* eslint-enable no-unused-vars */
 
 export const YAML_OPTIONS = [
   {

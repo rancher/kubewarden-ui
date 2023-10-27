@@ -1,9 +1,8 @@
 <script>
-import merge from 'lodash/merge';
 import { _CREATE } from '@shell/config/query-params';
-import { CAPI, CONFIG_MAP, SERVICE_ACCOUNT } from '@shell/config/types';
+import { CONFIG_MAP, SERVICE_ACCOUNT } from '@shell/config/types';
 import { allHash } from '@shell/utils/promise';
-import { clone } from '@shell/utils/object';
+import ResourceFetch from '@shell/mixins/resource-fetch';
 
 import Loading from '@shell/components/Loading';
 import Tab from '@shell/components/Tabbed/Tab';
@@ -20,11 +19,6 @@ export default {
       default: _CREATE
     },
 
-    resource: {
-      type:    Object,
-      default: () => {}
-    },
-
     value: {
       type:     Object,
       default:  () => {}
@@ -35,47 +29,28 @@ export default {
     General, Labels, Loading, Tab, Registry, Verification
   },
 
+  mixins: [ResourceFetch],
+
   async fetch() {
-    const requests = { rancherClusters: this.$store.dispatch('management/findAll', { type: CAPI.RANCHER_CLUSTER }) };
-    const needed = {
-      configMaps:      CONFIG_MAP,
-      serviceAccounts: SERVICE_ACCOUNT,
-    };
+    const hash = [
+      this.$fetchType(CONFIG_MAP),
+      this.$fetchType(SERVICE_ACCOUNT)
+    ];
 
-    // Only fetch types if the user can see them
-    Object.keys(needed).forEach((key) => {
-      const type = needed[key];
-
-      if ( this.$store.getters['cluster/schemaFor'](type) ) {
-        requests[key] = this.$store.dispatch('cluster/findAll', { type });
-      }
-    });
-
-    const hash = await allHash(requests);
-
-    this.configMaps = hash.configMaps || [];
-    this.serviceAccounts = hash.serviceAccounts || [];
-
-    /*
-      Cloning the resource here to update the labels and annotations because the structuredClone
-      of the DEFAULT_POLICY will not contain the model functions: `setLabels`, `setAnnotations`.
-    */
-    this.resourceClone = clone(this.resource);
+    await allHash(hash);
   },
 
   data() {
-    return {
-      chartValues:     this.value.questions,
-      resourceClone:   null,
-      configMaps:      [],
-      serviceAccounts: []
-    };
+    return { chartValues: this.value };
   },
 
-  watch: {
-    'resourceClone.metadata': {
-      deep:    true,
-      handler: 'update'
+  computed: {
+    configMaps() {
+      return this.$store.getters['cluster/all'](CONFIG_MAP);
+    },
+
+    serviceAccounts() {
+      return this.$store.getters['cluster/all'](SERVICE_ACCOUNT);
     }
   },
 
@@ -95,10 +70,6 @@ export default {
         // eslint-disable-next-line no-console
         console.warn(`Error refreshing authority refs: ${ e }`);
       }
-    },
-
-    update(e) {
-      merge(this.chartValues.metadata, e);
     }
   }
 };
@@ -112,7 +83,7 @@ export default {
       <General v-model="chartValues" data-testid="ps-config-general-tab" :mode="mode" :service-accounts="serviceAccounts" />
     </Tab>
     <Tab name="labels" label-key="generic.labelsAndAnnotations" :weight="98">
-      <Labels v-model="resourceClone" data-testid="ps-config-labels-tab" :mode="mode" />
+      <Labels v-model="chartValues" data-testid="ps-config-labels-tab" :mode="mode" />
     </Tab>
     <Tab name="verification" label-key="kubewarden.tabs.verification.label" :weight="97">
       <Verification data-testid="ps-config-verification-tab" :value="chartValues.spec" :mode="mode" :config-maps="configMaps" />
