@@ -53,7 +53,7 @@ export class PolicyServersPage extends BasePage {
       await this.ui.button('Create').click()
     }
     await this.setValues(ps)
-    await this.ui.button('Save').click()
+    await this.ui.button('Create').click()
     // Get row and wait for Active state
     const psRow = this.ui.getRow(ps.name)
     await psRow.toBeVisible()
