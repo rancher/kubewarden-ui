@@ -36,7 +36,7 @@ test('New resources should be reported', async({ page, ui, nav }) => {
       await den.getByRole('textbox').fill('unsafelbl')
 
       // Customize because audit for "*" rules is skipped
-      await ui.openYamlEditor()
+      await ui.openView('Edit YAML')
       await ui.editYaml(d => {
         d.spec.rules[0].apiGroups[0] = ""
         d.spec.rules[0].apiVersions[0] = "v1"

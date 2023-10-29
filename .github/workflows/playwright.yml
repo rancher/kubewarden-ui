@@ -10,7 +10,7 @@ on:
         options:
         - 'released'
         - '= 2.7.8'
-        - '> 2.7.9-0 < 2.8.0-0'
+        - '= 2.7.9'
         - '> 2.8.0-0 < 2.8.1-0'
       kubewarden:
         description: Kubewarden version

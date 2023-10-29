@@ -89,7 +89,7 @@ export abstract class BasePolicyPage extends BasePage {
     // Extra policy settings
     if (p.settings) {
       await p.settings(this.ui)
-      await this.ui.openYamlEditor()
+      await this.ui.openView('Edit YAML')
     }
   }
 

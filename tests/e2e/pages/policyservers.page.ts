@@ -43,7 +43,7 @@ export class PolicyServersPage extends BasePage {
     if (ps.image != null) await this.setImage(ps.image)
     if (ps.settings) {
       await ps.settings()
-      await this.ui.openYamlEditor()
+      await this.ui.openView('Edit YAML')
     }
   }
 

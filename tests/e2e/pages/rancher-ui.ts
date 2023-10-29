@@ -58,12 +58,11 @@ export class RancherUI {
     // ==================================================================================================
     // Helper functions
 
-    async openYamlEditor() {
+    async openView(view: 'Edit Options' | 'Edit YAML' | 'Compare Changes') {
         // Give generated fields time to get registered
         await this.page.waitForTimeout(200)
         // Show yaml with edited settings
-        await this.page.getByRole('button', { name: 'Edit YAML' }).click()
-        await expect(this.page.locator('div.CodeMirror')).toBeVisible()
+        await this.button(view).click()
     }
 
     /**

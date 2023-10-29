@@ -112,9 +112,9 @@ export class RancherAppsPage extends BasePage {
         // Chart questions
         if (options?.questions) await options.questions()
         if (options?.yamlPatch) {
-            await this.ui.openYamlEditor()
+            await this.ui.openView('Edit YAML')
             await this.ui.editYaml(options.yamlPatch)
-            await this.page.getByRole('button', { name: 'Compare Changes', exact: true }).click()
+            await this.ui.openView('Compare Changes')
         }
 
         // Installation & Wait
@@ -134,9 +134,9 @@ export class RancherAppsPage extends BasePage {
         // Chart questions
         if (options?.questions) await options.questions()
         if (options?.yamlPatch) {
-            await this.ui.openYamlEditor()
+            await this.ui.openView('Edit YAML')
             await this.ui.editYaml(options.yamlPatch)
-            await this.page.getByRole('button', { name: 'Compare Changes', exact: true }).click()
+            await this.ui.openView('Compare Changes')
         }
 
         await this.updateBtn.click()
