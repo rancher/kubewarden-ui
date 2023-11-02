@@ -53,14 +53,15 @@ test('Set up tracing', async ({ page, ui, nav, shell }) => {
 
     const apps = new RancherAppsPage(page)
     await enableBtn.click()
-
-    await apps.nextBtn.click()
-    await page.getByRole('tab', {name: 'Telemetry', exact: true}).click()
-    await ui.checkbox('Enable Tracing').check()
-    await ui.input('Jaeger endpoint configuration').fill('jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317')
-    await ui.checkbox('Jaeger endpoint insecure TLS configuration').check()
-    await apps.updateBtn.click()
-    await apps.waitHelmSuccess('rancher-kubewarden-controller')
+    await apps.updateApp('rancher-kubewarden-controller', {
+      navigate: false,
+      questions: async () => {
+        await page.getByRole('tab', {name: 'Telemetry', exact: true}).click()
+        await ui.checkbox('Enable Tracing').check()
+        await ui.input('Jaeger endpoint configuration').fill('jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317')
+        await ui.checkbox('Jaeger endpoint insecure TLS configuration').check()
+      }
+    })
 
     // Wait until kubewarden controller and policyserver are restarted, it takes around 1m
     await shell.retry('k logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container | grep -F "Everything is ready."')

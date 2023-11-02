@@ -80,20 +80,22 @@ export class RancherAppsPage extends BasePage {
         }
     }
 
-    async installChart(chart: Chart, options?:{questions?: () => Promise<void>, yamlPatch?: Function | string, timeout?: number}) {
+    async installChart(chart: Chart, options?:{questions?: () => Promise<void>, yamlPatch?: Function | string, timeout?: number, navigate?: boolean}) {
         // Select chart by title
-        await this.nav.explorer('Apps', 'Charts')
-        await expect(this.page.getByRole('heading', { name: 'Charts', exact: true })).toBeVisible()
-        await this.page.locator('.grid > .item').getByRole('heading', { name: chart.title, exact: true }).click()
+        if (options?.navigate != false) {
+            await this.nav.explorer('Apps', 'Charts')
+            await expect(this.page.getByRole('heading', { name: 'Charts', exact: true })).toBeVisible()
+            await this.page.locator('.grid > .item').getByRole('heading', { name: chart.title, exact: true }).click()
 
-        if (chart.version) {
-            const versionPane = this.page.getByRole('heading', { name: 'Chart Versions', exact: true }).locator('..')
-            await versionPane.getByText('Show More', { exact: true }).click()
-            // Active version is bold text, not active are links
-            await versionPane.getByText(chart.version, { exact: true }).click()
-            await expect(versionPane.locator(`b:text-is("${chart.version}")`)).toBeVisible()
+            if (chart.version) {
+                const versionPane = this.page.getByRole('heading', { name: 'Chart Versions', exact: true }).locator('..')
+                await versionPane.getByText('Show More', { exact: true }).click()
+                // Active version is bold text, not active are links
+                await versionPane.getByText(chart.version, { exact: true }).click()
+                await expect(versionPane.locator(`b:text-is("${chart.version}")`)).toBeVisible()
+            }
+            await this.installBtn.click()
         }
-        await this.installBtn.click()
 
         // Chart metadata
         await expect(this.step1).toBeVisible()
@@ -123,12 +125,15 @@ export class RancherAppsPage extends BasePage {
     }
 
     // Without parameters only for upgrade/reload
-    async updateApp(name: string, options?:{questions?: () => Promise<void>, yamlPatch?: Function | string, timeout?: number}) {
-        await this.nav.explorer('Apps', 'Installed Apps')
-        await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
+    async updateApp(name: string, options?:{questions?: () => Promise<void>, yamlPatch?: Function | string, timeout?: number, navigate?: boolean}) {
+        if (options?.navigate != false) {
+            await this.nav.explorer('Apps', 'Installed Apps')
+            await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
 
-        await this.ui.getRow(name).action('Edit/Upgrade')
-        await expect(this.page.getByRole('heading', { name: name })).toBeVisible()
+            await this.ui.getRow(name).action('Edit/Upgrade')
+            await expect(this.page.getByRole('heading', { name: name })).toBeVisible()
+        }
+        // Skip Step1
         await this.nextBtn.click()
 
         // Chart questions
