@@ -26,6 +26,7 @@ const policyList: {title: Policy["title"], action?: Policy["settings"], skip?: s
   { title: 'Host Namespaces PSP', action: undefined },
   { title: 'Hostpaths PSP', action: undefined },
   { title: 'Ingress Policy', action: undefined },
+  { title: 'Unique Ingress host' },
   { title: 'Namespace label propagator', action: setupNamespaceLabelPropagator },
   { title: 'Pod Privileged Policy' },
   { title: 'Pod Runtime', action: undefined },
