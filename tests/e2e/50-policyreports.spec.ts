@@ -21,7 +21,7 @@ const expect_2m = expect.configure({timeout:2*60_000})
  *  - check errors are reported
  *  - delete policy and resources and check error are gone
  */
-test('New resources should be reported', async({ page, ui, nav }) => {
+test('New resources should be reported', async({ page, ui, nav, shell }) => {
   const capPage = new ClusterAdmissionPoliciesPage(page)
   const reporter = new PolicyReporterPage(page)
 
@@ -47,7 +47,7 @@ test('New resources should be reported', async({ page, ui, nav }) => {
 
   // Create policy and resources that break rules
   await capPage.goto()
-  await ui.shell(
+  await shell.runBatch(
     `k create ns ${testNs}`,
     `k label ns ${testNs} unsafelbl=secret`,
     `k run ${testPod} -n ${testNs} --image=nginx:alpine --privileged`,
@@ -90,11 +90,11 @@ test('Check reports on resources details page', async({ page, ui, nav }) => {
   await expect(ui.getRow({Name: testPod, Policy: policyPrivpod}).column('Status')).toHaveText('fail')
 })
 
-test('Cleanup & check results are gone', async({ page, ui, nav }) => {
+test('Cleanup & check results are gone', async({ page, ui, nav, shell }) => {
   const reporter = new PolicyReporterPage(page)
 
   await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
-  await ui.shell(`k delete ns ${testNs}`)
+  await shell.run(`k delete ns ${testNs}`)
   await ui.getRow(policyLabels).delete()
 
   await nav.explorer('Kubewarden', 'Policy Reporter')

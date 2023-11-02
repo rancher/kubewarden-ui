@@ -8,7 +8,7 @@ const jaegerChart: Chart = { title: 'Jaeger Operator', namespace: 'jaeger', chec
  * Expect timeout has to be increased after telemetry installation on local cluster
  *
  */
-test('Set up tracing', async ({ page, ui, nav }) => {
+test('Set up tracing', async ({ page, ui, nav, shell }) => {
   const apps = new RancherAppsPage(page)
 
   const tracing = page.locator('section#policy-tracing')
@@ -63,18 +63,18 @@ test('Set up tracing', async ({ page, ui, nav }) => {
     await apps.waitHelmSuccess('rancher-kubewarden-controller')
 
     // Wait until kubewarden controller and policyserver are restarted, it takes around 1m
-    await ui.shell(`for i in $(seq 60); do echo "Retry #$i"; k logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container | grep -F 'Everything is ready.' && break || sleep 5; done`)
+    await shell.retry('k logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container | grep -F "Everything is ready."')
   })
 });
 
-test('Check traces are visible', async ({ page, ui, nav }) => {
+test('Check traces are visible', async ({ page, ui, nav, shell }) => {
   const tracingTab = page.getByRole('tablist').locator('li#policy-tracing')
   const policiesTab = page.getByRole('tablist').locator('li#related-policies')
   const logline = ui.getRow('tracing-privpod').row.first()
 
   // Create trace log line
   await nav.cluster('local')
-  await ui.shell(
+  await shell.runBatch(
     'k run tracing-privpod --image=nginx:alpine --privileged',
     'k delete pod tracing-privpod'
   )

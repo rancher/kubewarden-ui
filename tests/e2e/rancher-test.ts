@@ -1,10 +1,12 @@
 import { test as base } from '@playwright/test';
 import { RancherUI } from './pages/rancher-ui';
 import { Navigation } from './components/navigation';
+import { Shell } from './components/kubectl-shell';
 
 export type TestOptions = {
   ui: RancherUI
   nav: Navigation
+  shell: Shell
 };
 
 export const test = base.extend<TestOptions>({
@@ -13,6 +15,9 @@ export const test = base.extend<TestOptions>({
   },
   nav: async ({ ui }, use) => {
     use(new Navigation(ui));
+  },
+  shell: async ({ page }, use) => {
+    use(new Shell(page));
   },
 });
 
