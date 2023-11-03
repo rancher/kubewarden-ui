@@ -1,8 +1,6 @@
 import { test, expect } from './rancher-test';
 import { PolicyServersPage } from './pages/policyservers.page';
-import { AdmissionPoliciesPage } from './pages/admissionpolicies.page';
-import { ClusterAdmissionPoliciesPage } from './pages/clusteradmissionpolicies.page';
-import { Policy } from './pages/basepolicypage';
+import { Policy, AdmissionPoliciesPage, ClusterAdmissionPoliciesPage } from './pages/policies.page';
 import { PolicyServer } from './pages/policyservers.page';
 
 const expect3m = expect.configure({timeout: 3*60_000})

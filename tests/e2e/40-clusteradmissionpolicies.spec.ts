@@ -1,7 +1,6 @@
 import { test, expect } from './rancher-test';
 import { PolicyServer, PolicyServersPage } from './pages/policyservers.page';
-import { ClusterAdmissionPoliciesPage } from './pages/clusteradmissionpolicies.page';
-import { Policy } from './pages/basepolicypage';
+import { Policy, ClusterAdmissionPoliciesPage } from './pages/policies.page';
 import { TableRow } from './components/table-row';
 
 test('ClusterAdmissionPolicies ', async({ page, ui }) => {

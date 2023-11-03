@@ -1,7 +1,6 @@
 import { test } from './rancher-test';
 import type { RancherUI } from './pages/rancher-ui';
-import { Policy, generatePolicy } from './pages/basepolicypage';
-import { ClusterAdmissionPoliciesPage } from './pages/clusteradmissionpolicies.page';
+import { Policy, generatePolicy, ClusterAdmissionPoliciesPage } from './pages/policies.page';
 import { PolicyServersPage } from './pages/policyservers.page';
 
 test.describe.configure({ mode: 'parallel' });

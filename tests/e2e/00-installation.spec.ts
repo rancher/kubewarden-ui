@@ -3,7 +3,7 @@ import { RancherCommonPage } from './pages/rancher-common.page';
 import { RancherExtensionsPage } from './pages/rancher-extensions.page';
 import { KubewardenPage } from './pages/kubewarden.page';
 import { PolicyServersPage } from './pages/policyservers.page';
-import { policyTitles } from './pages/basepolicypage';
+import { policyTitles } from './pages/policies.page';
 import { RancherAppsPage } from './pages/rancher-apps.page';
 
 // source (yarn dev) | rc (add github repo) | released (just install)

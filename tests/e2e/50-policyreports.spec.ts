@@ -1,6 +1,5 @@
 import { test, expect } from './rancher-test';
-import { Policy } from './pages/basepolicypage';
-import { ClusterAdmissionPoliciesPage } from './pages/clusteradmissionpolicies.page';
+import { Policy, ClusterAdmissionPoliciesPage } from './pages/policies.page';
 import { PolicyReporterPage } from './pages/policyreporter.page';
 
 const testNs = 'audit-unsafe-ns'
