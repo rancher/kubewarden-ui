@@ -12,6 +12,7 @@ export interface Policy {
   title: typeof policyTitles[number]
   name: string
   mode?: 'Monitor'|'Protect'
+  audit?: 'On'|'Off'
   server?: string
   module?: string
   namespace?: string        // AdmissionPolicy specific
@@ -54,6 +55,10 @@ export abstract class BasePolicyPage extends BasePage {
     await this.ui.radio('Mode', mode).check()
   }
 
+  async setBackgroundAudit(state: 'On' | 'Off') {
+    await this.ui.radio('Background Audit', state).check()
+  }
+
   async setIgnoreRancherNS(checked: boolean) {
     await this.ui.checkbox('Ignore Rancher Namespaces').setChecked(checked)
   }
@@ -78,6 +83,7 @@ export abstract class BasePolicyPage extends BasePage {
     if (p.name != null) await this.setName(p.name)
     if (p.server != null) await this.setServer(p.server)
     if (p.mode) await this.setMode(p.mode)
+    if (p.audit) await this.setBackgroundAudit(p.audit)
     if (p.module != null) await this.setModule(p.module)
 
     // Fill Admission | ClusterAdmission specific fields
