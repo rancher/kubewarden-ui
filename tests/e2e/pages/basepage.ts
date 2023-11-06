@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { RancherUI } from './rancher-ui'
+import { RancherUI } from '../components/rancher-ui'
 import { Navigation } from '../components/navigation'
 
 export abstract class BasePage {

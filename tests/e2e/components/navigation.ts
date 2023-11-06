@@ -1,5 +1,5 @@
 import { expect, Page } from '@playwright/test';
-import { RancherUI } from '../pages/rancher-ui';
+import { RancherUI } from './rancher-ui';
 
 type ExpGroup = 'Cluster' | 'Workloads' | 'Kubewarden' | 'Apps'
 type ExpItemMap = {

@@ -1,5 +1,5 @@
 import { test as base } from '@playwright/test';
-import { RancherUI } from './pages/rancher-ui';
+import { RancherUI } from './components/rancher-ui';
 import { Navigation } from './components/navigation';
 import { Shell } from './components/kubectl-shell';
 

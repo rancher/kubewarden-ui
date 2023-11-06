@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { BasePage } from './basepage';
-import { RancherUI } from './rancher-ui';
+import { RancherUI } from '../components/rancher-ui';
 import { TableRow } from '../components/table-row';
 
 export const policyTitles = ['Custom Policy', 'Allow Privilege Escalation PSP', 'Allowed Fs Groups PSP', 'Allowed Proc Mount Types PSP', 'Apparmor PSP', 'Capabilities PSP',

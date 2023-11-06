@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import jsyaml from 'js-yaml';
 import merge from 'lodash.merge';
-import { TableRow } from '../components/table-row';
+import { TableRow } from './table-row';
 
 /**
  * aria-label is not always filled - we have to use filters to find elements reliably

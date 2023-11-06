@@ -1,5 +1,5 @@
 import { expect, Locator } from '@playwright/test';
-import { RancherUI } from '../pages/rancher-ui';
+import { RancherUI } from './rancher-ui';
 
 /**
  * Compare text of current element with parameter(s)

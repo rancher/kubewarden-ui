@@ -1,5 +1,5 @@
 import { test } from './rancher-test';
-import type { RancherUI } from './pages/rancher-ui';
+import type { RancherUI } from './components/rancher-ui';
 import { Policy, generatePolicy, ClusterAdmissionPoliciesPage } from './pages/policies.page';
 import { PolicyServersPage } from './pages/policyservers.page';
 
