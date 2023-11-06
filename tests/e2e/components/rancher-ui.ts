@@ -31,6 +31,11 @@ export class RancherUI {
             .locator('span.checkbox-custom')
     }
 
+    // Tab
+    tab(name: string) {
+        return this.page.getByRole('tab', { name: name, exact: true })
+    }
+
     // Radio group
     radioGroup(label: string) {
         // Exact name with optional "i" tooltip
