@@ -32,20 +32,28 @@ export class RancherUI {
     }
 
     // Radio group
-    radio(label: string, name: string) {
+    radioGroup(label: string) {
         // Exact name with optional "i" tooltip
         const groupLabel = new RegExp(`^${label} .?$`)
         return this.page.locator('.radio-group')
             .filter({has: this.page.getByRole('heading', {name: groupLabel})})
             .locator('xpath=./following-sibling::div')
-            .getByRole('radio', {name: name})
     }
 
-    // Labeled Select
+    // Radio input (span)
+    radio(label: string, name: string) {
+        return this.radioGroup(label).getByRole('radio', {name: name})
+    }
+
+    // Labeled Select combobox
+    combobox(label: string) {
+        return this.page.locator('div.labeled-select').filter({hasText: label})
+            .getByRole('combobox', { name: 'Search for option' })
+    }
+
+    // Select option from labeled select
     async select(label: string, option: string|RegExp) {
-        await this.page.locator('div.labeled-select')
-            .filter({hasText: label})
-            .getByRole('combobox', { name: 'Search for option' }).click()
+        await this.combobox(label).click()
         await this.page.getByRole('option', { name: option, exact: true }).click()
     }
 
