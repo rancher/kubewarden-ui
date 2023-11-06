@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { BasePage } from './basepage';
 import { RancherAppsPage } from './rancher-apps.page';
 import { TableRow } from '../components/table-row';
@@ -47,20 +47,22 @@ export class PolicyServersPage extends BasePage {
     }
   }
 
-  async create(ps: PolicyServer, options?: {wait?: boolean, navigate?: boolean}) {
-    if (options?.navigate != false) {
-      await this.goto()
+  async create(ps: PolicyServer, options?: {wait?: boolean, navigate?: boolean}): Promise<TableRow> {
+    return await test.step(`Create policy: ${ps.name}`, async () => {
+      if (options?.navigate != false) {
+        await this.goto()
+        await this.ui.button('Create').click()
+      }
+      await this.setValues(ps)
       await this.ui.button('Create').click()
-    }
-    await this.setValues(ps)
-    await this.ui.button('Create').click()
-    // Get row and wait for Active state
-    const psRow = this.ui.getRow(ps.name)
-    await psRow.toBeVisible()
-    if (options?.wait) {
-      await psRow.toBeActive(20_000)
-    }
-    return psRow
+      // Get row and wait for Active state
+      const psRow = this.ui.getRow(ps.name)
+      await psRow.toBeVisible()
+      if (options?.wait) {
+        await psRow.toBeActive(20_000)
+      }
+      return psRow
+    })
   }
 
   async delete(ps: string|TableRow) {

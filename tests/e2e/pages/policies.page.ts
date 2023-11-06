@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { BasePage } from './basepage';
 import { RancherUI } from '../components/rancher-ui';
 import { TableRow } from '../components/table-row';
@@ -64,18 +64,20 @@ export abstract class BasePolicyPage extends BasePage {
   }
 
   async open(p: Policy, options?: { navigate?: boolean}) {
-    if (options?.navigate != false) {
-      await this.goto()
-      await this.ui.button('Create').click()
-    }
-    await expect(this.page.getByRole('heading', { name: 'Finish: Step 1' })).toBeVisible()
-    // Open requested policy
-    await this.ui.withReload(async () => {
-      await this.page.getByRole('heading', { name: p.title, exact: true }).click()
-    }, 'Could not get policy list from artifacthub')
-    // Go to values tab, skip optional readme
-    await this.page.getByRole('tab', { name: 'Values' }).click()
-    await expect(this.page.getByRole('heading', { name: 'General' })).toBeVisible()
+    await test.step(`Open policy: ${p.name}`, async () => {
+      if (options?.navigate != false) {
+        await this.goto()
+        await this.ui.button('Create').click()
+      }
+      await expect(this.page.getByRole('heading', { name: 'Finish: Step 1' })).toBeVisible()
+      // Open requested policy
+      await this.ui.withReload(async () => {
+        await this.page.getByRole('heading', { name: p.title, exact: true }).click()
+      }, 'Could not get policy list from artifacthub')
+      // Go to values tab, skip optional readme
+      await this.page.getByRole('tab', { name: 'Values' }).click()
+      await expect(this.page.getByRole('heading', { name: 'General' })).toBeVisible()
+    })
   }
 
   async setValues(p: Policy) {
@@ -106,22 +108,24 @@ export abstract class BasePolicyPage extends BasePage {
     await expect(row.column('Mode')).toHaveText('Protect')
   }
 
-  async create(p: Policy, options?: { wait?: boolean, navigate?: boolean}) {
-    await this.open(p, options)
-    await this.setValues(p)
+  async create(p: Policy, options?: { wait?: boolean, navigate?: boolean}): Promise<TableRow> {
+    return await test.step(`Create policy: ${p.name}`, async () => {
+      await this.open(p, options)
+      await this.setValues(p)
 
-    // Create policy - redirects to policies list
-    await this.ui.button('Finish').click()
-    await expect(this.page).toHaveURL(/.*admissionpolicy$/)
-    // Check new policy
-    const polRow = this.ui.getRow(p.name)
-    await polRow.toBeVisible()
-    if (options?.wait) {
-      await polRow.toBeActive()
-      // Prevent occasional wrong resource version error on follow-up tests
-      await this.page.waitForTimeout(2_000)
-    }
-    return polRow
+      // Create policy - redirects to policies list
+      await this.ui.button('Finish').click()
+      await expect(this.page).toHaveURL(/.*admissionpolicy$/)
+      // Check new policy
+      const polRow = this.ui.getRow(p.name)
+      await polRow.toBeVisible()
+      if (options?.wait) {
+        await polRow.toBeActive()
+        // Prevent occasional wrong resource version error on follow-up tests
+        await this.page.waitForTimeout(2_000)
+      }
+      return polRow
+    })
   }
 
   async delete(policy: string|TableRow) {
