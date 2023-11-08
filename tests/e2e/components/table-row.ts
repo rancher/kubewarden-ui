@@ -1,4 +1,4 @@
-import { expect, Locator } from '@playwright/test';
+import { expect, test, Locator } from '@playwright/test';
 import { RancherUI } from './rancher-ui';
 
 /**
@@ -36,6 +36,7 @@ export class TableRow {
   readonly row: Locator
   readonly name: Locator
   readonly status: Locator
+  readonly strval: string
 
   /**
    *
@@ -56,8 +57,10 @@ export class TableRow {
 
     // Filter by argument
     if (typeof arg === 'string') {
+      this.strval = arg
       rows = rows.filter({has: ui.page.locator(xpath_column_selector('Name', arg)) })
     } else if (typeof arg === 'object') {
+      this.strval = Object.keys(arg).map(key => `${key}: ${arg[key]}`).join(',');
       for (const colName in arg) {
         const colValue = arg[colName]
         rows = rows.filter({has: ui.page.locator(xpath_column_selector(colName, colValue)) })
@@ -68,6 +71,10 @@ export class TableRow {
     this.ui = ui
     this.name = this.column('Name')
     this.status = this.column('Status', 'State')
+  }
+
+  toString() {
+    return this.strval
   }
 
   /**
@@ -94,9 +101,11 @@ export class TableRow {
   }
 
   async delete() {
-    await this.action('Delete')
-    await this.ui.page.getByTestId('prompt-remove-confirm-button').click()
-    await expect(this.row).not.toBeVisible();
+    await test.step(`Delete row: ${this}`, async () => {
+      await this.action('Delete')
+      await this.ui.page.getByTestId('prompt-remove-confirm-button').click()
+      await expect(this.row).not.toBeVisible();
+    })
   }
 
   async open() {
