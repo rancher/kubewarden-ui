@@ -1,13 +1,6 @@
-import test, { expect, Locator, Page } from '@playwright/test';
-
-function step(target: Function, context: ClassMethodDecoratorContext) {
-    return function replacementMethod(...args: any) {
-        const name = this.constructor.name + '.' + (context.name as string);
-        return test.step(name, async () => {
-            return await target.call(this, ...args);
-        });
-    };
-}
+import { expect, Locator, Page } from '@playwright/test';
+import { step } from '../rancher-test';
+import { Policy, PolicyKind } from '../pages/policies.page';
 
 export class Shell {
 
@@ -30,6 +23,7 @@ export class Shell {
     async open() {
         await this.page.locator('#btn-kubectl').click()
         await expect(this.win.locator('.status').getByText('Connected', { exact: true })).toBeVisible({ timeout: 30_000 })
+        await expect(this.prompt).toBeVisible()
     }
 
     // Close terminal
@@ -100,4 +94,17 @@ export class Shell {
         }
         await this.close()
     }
+
+    async privpod(options?: {ns?: string, status?: number }) {
+        const nsarg = options?.ns ? `-n ${options.ns}` : ''
+        await this.run(`k run privpod-${Date.now()} --image=busybox --command --restart=Never -it --rm --privileged ${nsarg} -- true`, options)
+    }
+
+    // PolicyActive | PolicyUniquelyReachable
+    async wait_policy(p: Policy, kind: PolicyKind) {
+        const nsarg = (kind == 'AdmissionPolicy' && p.namespace) ? `-n ${p.namespace}` : ''
+        await this.run(`kubectl wait --timeout=5m --for=condition=PolicyUniquelyReachable ${nsarg} ${kind} ${p.name} `)
+
+    }
+
 }
