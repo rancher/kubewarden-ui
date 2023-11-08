@@ -21,8 +21,10 @@ export interface Policy {
   settings?(ui: RancherUI): Promise<void>
 }
 
+export type PolicyKind = 'AdmissionPolicy' | 'ClusterAdmissionPolicy'
+
 /**
- * Return policy with generated default name
+ * Return policy with generated name
  */
 export const generatePolicy = (policy: Omit<Policy, 'name'>): Policy => {
   const defaultName = 'generated-' + policy.title.replace(/\s+/g, '-').toLowerCase()
@@ -30,14 +32,38 @@ export const generatePolicy = (policy: Omit<Policy, 'name'>): Policy => {
 }
 
 export abstract class BasePolicyPage extends BasePage {
+  abstract kind: PolicyKind
+  readonly name: Locator;
+  readonly module: Locator;
+  readonly server: Locator;
+  readonly namespace: Locator;
+  readonly modeGroup: Locator;
+  readonly auditGroup: Locator;
+
+  constructor(page: Page) {
+    super(page);
+    this.name = this.ui.input('Name*')
+    this.module = this.ui.input('Module*')
+    this.server = this.ui.combobox('Policy Server')
+    this.namespace = this.ui.combobox('Namespace*')
+    this.modeGroup = this.ui.radioGroup('Mode')
+    this.auditGroup = this.ui.radioGroup('Background Audit')
+  }
+
+  mode(mode: 'Monitor' | 'Protect') {
+    return this.modeGroup.getByRole('radio', {name: mode})
+  }
+  audit(state: 'On' | 'Off') {
+    return this.auditGroup.getByRole('radio', {name: state})
+  }
 
   async selectTab(name: 'General'|'Rules'|'Settings'|'Namespace Selector'|'Context Aware Resources') {
-    await this.page.getByRole('tab', { name: name, exact: true }).click()
+    await this.ui.tab(name).click()
     await expect(this.page.locator('.tab-header').getByRole('heading', {name: name})).toBeVisible()
   }
 
   async setName(name: string) {
-    await this.ui.input('Name*').fill(name)
+    await this.name.fill(name)
   }
 
   async setServer(server: string) {
@@ -45,27 +71,20 @@ export abstract class BasePolicyPage extends BasePage {
   }
 
   async setModule(module: string) {
-    await this.ui.input('Module*').fill(module)
+    await this.module.fill(module)
   }
 
-  async setNamespace(namespace: string) {
-    await this.ui.select('Namespace*', namespace)
-  }
 
   async setMode(mode: 'Monitor' | 'Protect') {
-    await this.ui.radio('Mode', mode).check()
+    await this.mode(mode).check()
   }
 
   async setBackgroundAudit(state: 'On' | 'Off') {
-    await this.ui.radio('Background Audit', state).check()
+    await this.audit(state).check()
   }
 
-  async setIgnoreRancherNS(checked: boolean) {
-    await this.ui.checkbox('Ignore Rancher Namespaces').setChecked(checked)
-  }
-
+  @step
   async open(p: Policy, options?: { navigate?: boolean}) {
-    await test.step(`Open policy: ${p.name}`, async () => {
       if (options?.navigate != false) {
         await this.goto()
         await this.ui.button('Create').click()
@@ -78,7 +97,6 @@ export abstract class BasePolicyPage extends BasePage {
       // Go to values tab, skip optional readme
       await this.page.getByRole('tab', { name: 'Values' }).click()
       await expect(this.page.getByRole('heading', { name: 'General' })).toBeVisible()
-    })
   }
 
   async setValues(p: Policy) {
@@ -88,13 +106,6 @@ export abstract class BasePolicyPage extends BasePage {
     if (p.mode) await this.setMode(p.mode)
     if (p.audit) await this.setBackgroundAudit(p.audit)
     if (p.module != null) await this.setModule(p.module)
-
-    // Fill Admission | ClusterAdmission specific fields
-    if ('namespace' in p && p.namespace != null)
-      await this.setNamespace(p.namespace)
-    if ('ignoreRancherNS' in p && p.ignoreRancherNS)
-      await this.setIgnoreRancherNS(p.ignoreRancherNS)
-
     // Extra policy settings
     if (p.settings) {
       await p.settings(this.ui)
@@ -138,15 +149,44 @@ export abstract class BasePolicyPage extends BasePage {
 }
 
 export class AdmissionPoliciesPage extends BasePolicyPage {
+  override kind: PolicyKind = 'AdmissionPolicy';
+
   async goto(): Promise<void> {
     // await this.nav.explorer('Kubewarden', 'AdmissionPolicies')
     await this.page.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.admissionpolicy')
   }
+
+  async setNamespace(namespace: string) {
+    await this.ui.select('Namespace*', namespace)
+  }
+
+  @step
+  override async setValues(p: Policy) {
+    if (p.namespace != null) {
+      await this.setNamespace(p.namespace)
+    }
+    await super.setValues(p)
+  }
 }
 
 export class ClusterAdmissionPoliciesPage extends BasePolicyPage {
+  override kind: PolicyKind = 'ClusterAdmissionPolicy'
+
   async goto(): Promise<void> {
     // await this.nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
     await this.page.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.clusteradmissionpolicy')
   }
+
+  async setIgnoreRancherNS(checked: boolean) {
+    await this.ui.checkbox('Ignore Rancher Namespaces').setChecked(checked)
+  }
+
+  @step
+  override async setValues(p: Policy) {
+    if (p.ignoreRancherNS) {
+      await this.setIgnoreRancherNS(p.ignoreRancherNS)
+    }
+    await super.setValues(p)
+  }
+
 }
