@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 import { BasePage } from './basepage';
 import { RancherAppsPage } from './rancher-apps.page';
 import { TableRow } from '../components/table-row';
+import { step } from '../rancher-test';
 
 export interface PolicyServer {
   name: string
@@ -37,6 +38,7 @@ export class PolicyServersPage extends BasePage {
     await this.ui.input('Image URL').fill(image)
   }
 
+  @step
   async setValues(ps: PolicyServer) {
     await this.setName(ps.name)
     if (ps.replicas != null) await this.setReplicas(ps.replicas)
@@ -47,22 +49,21 @@ export class PolicyServersPage extends BasePage {
     }
   }
 
+  @step
   async create(ps: PolicyServer, options?: {wait?: boolean, navigate?: boolean}): Promise<TableRow> {
-    return await test.step(`Create policy: ${ps.name}`, async () => {
-      if (options?.navigate != false) {
-        await this.goto()
-        await this.ui.button('Create').click()
-      }
-      await this.setValues(ps)
+    if (options?.navigate != false) {
+      await this.goto()
       await this.ui.button('Create').click()
-      // Get row and wait for Active state
-      const psRow = this.ui.getRow(ps.name)
-      await psRow.toBeVisible()
-      if (options?.wait) {
-        await psRow.toBeActive(20_000)
-      }
-      return psRow
-    })
+    }
+    await this.setValues(ps)
+    await this.ui.button('Create').click()
+    // Get row and wait for Active state
+    const psRow = this.ui.getRow(ps.name)
+    await psRow.toBeVisible()
+    if (options?.wait) {
+      await psRow.toBeActive(20_000)
+    }
+    return psRow
   }
 
   async delete(ps: string|TableRow) {

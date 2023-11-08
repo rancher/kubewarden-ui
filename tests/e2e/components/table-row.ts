@@ -1,5 +1,6 @@
 import { expect, test, Locator } from '@playwright/test';
 import { RancherUI } from './rancher-ui';
+import { step } from '../rancher-test';
 
 /**
  * Compare text of current element with parameter(s)
@@ -100,12 +101,11 @@ export class TableRow {
     await this.ui.page.getByRole('listitem').getByText(name, {exact: true}).click()
   }
 
+  @step
   async delete() {
-    await test.step(`Delete row: ${this}`, async () => {
-      await this.action('Delete')
-      await this.ui.page.getByTestId('prompt-remove-confirm-button').click()
-      await expect(this.row).not.toBeVisible();
-    })
+    await this.action('Delete')
+    await this.ui.page.getByTestId('prompt-remove-confirm-button').click()
+    await expect(this.row).not.toBeVisible();
   }
 
   async open() {

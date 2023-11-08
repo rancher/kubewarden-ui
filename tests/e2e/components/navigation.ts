@@ -1,5 +1,6 @@
 import { expect, Page } from '@playwright/test';
 import { RancherUI } from './rancher-ui';
+import { step } from '../rancher-test';
 
 type ExpGroup = 'Cluster' | 'Workloads' | 'Kubewarden' | 'Apps'
 type ExpItemMap = {
@@ -56,6 +57,7 @@ export class Navigation {
     }
 
     // Cluster Explorer
+    @step
     async explorer<T extends ExpGroup>(groupName: T, childName?: ExpItemMap[T]) {
         const groupHeader = this.page.getByRole('heading', { name: groupName, exact: true })
         const groupBlock = this.page.locator('nav.side-nav').locator('.accordion').filter({has: groupHeader})

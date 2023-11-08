@@ -1,7 +1,8 @@
-import { expect, test } from '@playwright/test';
+import { Locator, Page, expect, test } from '@playwright/test';
 import { BasePage } from './basepage';
 import { RancherUI } from '../components/rancher-ui';
 import { TableRow } from '../components/table-row';
+import { step } from '../rancher-test';
 
 export const policyTitles = ['Custom Policy', 'Allow Privilege Escalation PSP', 'Allowed Fs Groups PSP', 'Allowed Proc Mount Types PSP', 'Apparmor PSP', 'Capabilities PSP',
   'Deprecated API Versions', 'Disallow Service Loadbalancer', 'Disallow Service Nodeport', 'Echo', 'Environment Variable Secrets Scanner', 'Environment Variable Policy', 'Flexvolume Drivers Psp',
@@ -101,15 +102,16 @@ export abstract class BasePolicyPage extends BasePage {
     }
   }
 
+  @step
   async updateToProtect(row: TableRow) {
-    await row.action('Update Mode')
-    await this.ui.checkbox('Update to Protect Mode').check()
-    await this.page.getByRole('button', {name: 'Save', exact: true}).click()
-    await expect(row.column('Mode')).toHaveText('Protect')
+      await row.action('Update Mode')
+      await this.ui.checkbox('Update to Protect Mode').check()
+      await this.page.getByRole('button', {name: 'Save', exact: true}).click()
+      await expect(row.column('Mode')).toHaveText('Protect')
   }
 
+  @step
   async create(p: Policy, options?: { wait?: boolean, navigate?: boolean}): Promise<TableRow> {
-    return await test.step(`Create policy: ${p.name}`, async () => {
       await this.open(p, options)
       await this.setValues(p)
 
@@ -125,7 +127,6 @@ export abstract class BasePolicyPage extends BasePage {
         await this.page.waitForTimeout(2_000)
       }
       return polRow
-    })
   }
 
   async delete(policy: string|TableRow) {

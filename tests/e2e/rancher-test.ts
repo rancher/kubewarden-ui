@@ -3,6 +3,21 @@ import { expect as baseExpect } from '@playwright/test';
 import { RancherUI } from './components/rancher-ui';
 import { Navigation } from './components/navigation';
 import { Shell } from './components/kubectl-shell';
+import { isString } from 'lodash';
+
+export function step(target: Function, context: ClassMethodDecoratorContext) {
+  return function replacementMethod(...args: any) {
+      let name = this.constructor.name + '.' + (context.name as string)
+      // Log object if it overrides toString method
+      if (this.toString !== Object.prototype.toString) name += ': ' + this
+      // Log function parameters and remove []
+      if (isString(args[0])) name += ': ' + args[0] // JSON.stringify(args).slice(1, -1)
+      if (args[0]?.name) name += ': ' + args[0].name
+      return test.step(name, async () => {
+          return await target.call(this, ...args);
+      });
+  };
+}
 
 export type TestOptions = {
   ui: RancherUI
