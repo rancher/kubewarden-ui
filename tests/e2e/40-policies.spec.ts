@@ -1,104 +1,156 @@
 import { test, expect } from './rancher-test';
 import { PolicyServer, PolicyServersPage } from './pages/policyservers.page';
 import { AdmissionPoliciesPage, ClusterAdmissionPoliciesPage, BasePolicyPage, Policy } from './pages/policies.page';
-import { TableRow } from './components/table-row';
-import { RancherUI } from './pages/rancher-ui';
+import { RancherUI } from './components/rancher-ui';
 
-let row: TableRow
-let rui: RancherUI
+function isAP(polPage: BasePolicyPage) { return polPage instanceof AdmissionPoliciesPage }
+function isCAP(polPage: BasePolicyPage) { return polPage instanceof ClusterAdmissionPoliciesPage }
 
-async function testRequiredFields(polPage: BasePolicyPage) {
-    await test.step('Creation without required fields', async () => {
-        const p: Policy = { title: 'Pod Privileged Policy', name: 'test-policy-podpriv' }
-        const finishBtn = rui.button('Finish')
+const pMinimal: Policy = {
+    title: 'Pod Privileged Policy',
+    name: 'ppp-defaults',
+}
 
+async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
+    await test.step(`Policy checks: ${p.name}`, async () => {
+        // Set default values
+        const mode = p.mode || 'Protect'
+        const audit = p.audit || 'On'
+        const server = p.server || 'default'
+        const namespace = p.namespace || 'default'
+        const module = p.module || (
+            await polPage.open(p),
+            await polPage.module.inputValue()
+        )
+        const row = ui.getRow(p.name)
+
+        // Check overview page
         await polPage.goto()
-        await polPage.open(p)
-        // Try to create without name
-        await polPage.setName('')
-        await finishBtn.click()
-        await expect(rui.page.locator('div.error').getByText('Required value: name')).toBeVisible()
-        await finishBtn.waitFor({ timeout: 10_000 }) // button name changes back Error -> Finish
-        // Try without module
-        await polPage.setValues(p)
-        await polPage.setModule('')
-        await expect(finishBtn).not.toBeEnabled()
-    })
-}
+        await expect(row.column('Mode')).toHaveText(mode)
+        await expect(row.column('Policy Server')).toHaveText(server)
+        // TODO FEATUREs
+        // - Policy namespace should be visible
+        // - Policy title should be visible
 
-async function testModes(polPage: BasePolicyPage) {
-    await test.step('Try monitor & protect mode', async () => {
-        // Create in protect mode
-        row = await polPage.create({ title: 'Pod Privileged Policy', name: 'test-policy-mode-protect', mode: 'Protect' }, { wait: true })
-        await expect(row.column('Mode')).toHaveText('Protect')
-        await row.delete()
-
-        // Create in monitor, change to protect, can't change back
-        row = await polPage.create({ title: 'Pod Privileged Policy', name: 'test-policy-mode-monitor', mode: 'Monitor' }, { wait: true })
-        await expect(row.column('Mode')).toHaveText('Monitor')
-        await polPage.updateToProtect(row)
-        await expect(row.column('Mode')).toHaveText('Protect')
-        await row.delete()
-    })
-}
-
-async function testRules(polPage: BasePolicyPage) {
-    await test.step("Rules can't be edited", async () => {
-        await polPage.open({ title: 'Pod Privileged Policy', name: '' })
-        await polPage.selectTab('Rules')
-        await expect(rui.page.locator('section#rules').locator('input').first()).toBeDisabled()
-    })
-}
-
-async function testPolicyServers(polPage: BasePolicyPage) {
-    await test.step('Try default & custom policy server', async () => {
-        let customPS: PolicyServer = { name: 'test-cap-custom-ps' }
-        const ptype = polPage instanceof ClusterAdmissionPoliciesPage ? 'ClusterAdmission' : 'Admission'
-
-        // Create custom policy server
-        const psPage = new PolicyServersPage(rui.page)
-        await psPage.create(customPS)
-
-        // Create policy with custom PS
-        row = await polPage.create({ title: 'Pod Privileged Policy', name: 'test-policy-custom-ps', server: customPS.name })
-        await expect(row.column('Policy Server')).toHaveText(customPS.name)
-        // Delete custom PS, check policy is deleted too
-        await psPage.delete(customPS.name)
-        await polPage.goto()
-        await expect(row.row).not.toBeVisible()
-
-        // Create policy with default PS
-        row = await polPage.create({ title: 'Pod Privileged Policy', name: 'test-policy-default-ps' })
-        await expect(row.column('Policy Server')).toHaveText('default')
         // Check details page
         await row.open()
-        await expect(rui.page.getByText(`${ptype}Policy: test-policy-default-ps`)).toBeVisible()
-        await expect(rui.page.getByText('API Versions')).toBeVisible()
+        await expect(ui.page.getByText(new RegExp(`^\\s+${polPage.kind}:\\s+${p.name}`))).toBeVisible()
+        await expect(ui.page.getByText('API Versions')).toBeVisible()
+
         // Check config page
-        await rui.page.locator('div.actions-container').getByRole('button', { name: 'Config', exact: true }).click()
-        await expect(rui.input('Name*')).toHaveValue('test-policy-default-ps')
-        await polPage.delete(row)
+        await ui.button('Config').click()
+        await expect(polPage.name).toHaveValue(p.name)
+        await expect(polPage.module).toHaveValue(module)
+        await expect(polPage.mode(mode)).toBeChecked()
+        await expect(polPage.audit(audit)).toBeChecked()
+        await expect(polPage.server).toContainText(server)
+        if (isAP(polPage)) {
+            await expect(polPage.namespace).toContainText(namespace)
+        }
+
+        // Check edit config
+        await polPage.goto()
+        await row.action('Edit Config')
+        await expect(polPage.name).toBeDisabled()
+        await expect(polPage.module).toBeEnabled()
+        await expect(polPage.modeGroup).toBeAllEnabled({ enabled: mode == 'Monitor' })
+        await expect(polPage.auditGroup).toBeAllEnabled()
+        // TODO BUG
+        // await expect(polPage.server).toBeAllEnabled({enabled: false})
+        if (isAP(polPage)) {
+            await expect(polPage.namespace).toBeAllEnabled({ enabled: false })
+        }
+
+        // Check policy is active
+        await expect(ui.page.locator('div.primaryheader').locator('span.badge-state')).toHaveText('Active', { timeout: 2 * 60_000 })
     })
 }
 
-test('ClusterAdmissionPolicies ', async ({ page, ui }) => {
-    rui = ui
-    const capPage = new ClusterAdmissionPoliciesPage(page)
-    await testRequiredFields(capPage)
-    await testModes(capPage)
-    await testPolicyServers(capPage)
-    await testRules(capPage)
-});
+const pageTypes = [AdmissionPoliciesPage, ClusterAdmissionPoliciesPage];
 
-test('AdmissionPolicies ', async ({ page, ui }) => {
-    rui = ui
-    const apPage = new AdmissionPoliciesPage(page)
-    await testRequiredFields(apPage)
-    await testModes(apPage)
-    await testPolicyServers(apPage)
-    await testRules(apPage)
+for (const pageType of pageTypes) {
+    const abbrName = pageType.name.replace('Page', '').match(/[A-Z]/g)?.join('')
 
-    await test.step('Try default & custom policy server', async () => {
+    test(`${abbrName}: Form fields`, async ({ page, ui }) => {
+        const polPage = new pageType(page)
+        const p: Policy = { title: 'Pod Privileged Policy', name: '' }
 
+        await test.step('Missing required fields', async () => {
+            const finishBtn = ui.button('Finish')
+            await polPage.open(p)
+
+            // Create without name
+            await polPage.setName('')
+            await finishBtn.click()
+            await expect(page.locator('div.error').getByText('Required value: name')).toBeVisible()
+            await finishBtn.waitFor({ timeout: 10_000 }) // button name changes back Error -> Finish
+            await polPage.setName('name')
+
+            // Try without module
+            await polPage.setModule('')
+            await expect(finishBtn).not.toBeEnabled()
+            await polPage.setModule('module')
+            await expect(finishBtn).toBeEnabled()
+        })
+
+        await test.step("Policy specific fields A/CA", async () => {
+            // Open page and wait for the form
+            await polPage.open(p)
+            await expect(polPage.name).toBeVisible()
+            // Check fields based on policy type
+            await expect(polPage.namespace).toBeVisible({ visible: isAP(polPage) })
+            await expect(ui.tab('Namespace Selector')).toBeVisible({ visible: isCAP(polPage) })
+        })
+
+        await test.step("Rules are disabled", async () => {
+            await polPage.open(p)
+            await polPage.selectTab('Rules')
+            await expect(page.locator('section#rules')).toBeAllEnabled({ enabled: false })
+        })
+
+    });
+
+    test(`${abbrName}: Default policy settings`, async ({ page, ui }) => {
+        const polPage = new pageType(page)
+        const row = await polPage.create(pMinimal)
+        await checkPolicy(pMinimal, polPage, ui)
+        await polPage.delete(row)
     })
-});
+
+    test(`${abbrName}: Custom policy settings`, async ({ page, ui, shell }) => {
+        const polPage = new pageType(page)
+        const ps: PolicyServer = { name: 'ps-custom' }
+        const p: Policy = { ...pMinimal, mode: 'Monitor', audit: 'Off', server: ps.name, module: 'ghcr.io/kubewarden/policies/pod-privileged:v0.2.6' }
+
+        // Create custom server
+        const psPage = new PolicyServersPage(page)
+        await psPage.create(ps)
+        // Create custom namespace
+        if (isAP(polPage)) {
+            p.namespace = 'ns-custom'
+            await shell.run(`k create ns ${p.namespace}`)
+        }
+
+        // Create and check policy
+        const row = await polPage.create(p)
+        await checkPolicy(p, polPage, ui)
+        await shell.privpod({ ns: p.namespace })
+
+        // Update to Protect mode
+        await polPage.goto()
+        await polPage.updateToProtect(row)
+        await expect(row.column('Mode')).toHaveText('Protect')
+        // Check protect mode
+        // BUG - policy should be pending (mode or state) until it starts in protect mode
+        await shell.wait_policy(p, polPage.kind)
+        await shell.privpod({ ns: p.namespace, status: 1 })
+
+        // Delete custom PS & NS, policy is deleted too
+        await psPage.delete(ps.name)
+        await polPage.goto()
+        await expect(page.getByRole('cell', { name: 'Status' })).toBeVisible()
+        await expect(row.row).not.toBeVisible()
+        if (isAP(polPage)) await shell.run(`k delete ns ${p.namespace}`)
+    })
+
+}
