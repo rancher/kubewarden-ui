@@ -1,34 +1,33 @@
-import { expect, Locator, Page } from '@playwright/test';
-import { step } from '../rancher-test';
-import { Policy, PolicyKind } from '../pages/policies.page';
+import { expect, Locator, Page } from '@playwright/test'
+import { step } from '../rancher-test'
+import { Policy, PolicyKind } from '../pages/policies.page'
 
 export class Shell {
-
     readonly win: Locator
     readonly prompt: Locator
     readonly cursor: Locator
     readonly status: Locator
 
     constructor(private readonly page: Page) {
-        this.win = this.page.locator('div#windowmanager')
-        // Last line starting with >
-        this.prompt = this.win.locator('div.xterm-rows>div:has(span)').filter({ hasText: ">" }).last()
-        // Textarea where we type commands
-        this.cursor = this.win.getByLabel('Terminal input', { exact: true })
-        // Exit status of last command
-        this.status = this.prompt.locator('xpath=preceding-sibling::div[1]')
+      this.win = this.page.locator('div#windowmanager')
+      // Last line starting with >
+      this.prompt = this.win.locator('div.xterm-rows>div:has(span)').filter({ hasText: '>' }).last()
+      // Textarea where we type commands
+      this.cursor = this.win.getByLabel('Terminal input', { exact: true })
+      // Exit status of last command
+      this.status = this.prompt.locator('xpath=preceding-sibling::div[1]')
     }
 
     // Open terminal
     async open() {
-        await this.page.locator('#btn-kubectl').click()
-        await expect(this.win.locator('.status').getByText('Connected', { exact: true })).toBeVisible({ timeout: 30_000 })
-        await expect(this.prompt).toBeVisible()
+      await this.page.locator('#btn-kubectl').click()
+      await expect(this.win.locator('.status').getByText('Connected', { exact: true })).toBeVisible({ timeout: 30_000 })
+      await expect(this.prompt).toBeVisible()
     }
 
     // Close terminal
     async close() {
-        await this.win.locator('.tab').filter({ hasText: 'Kubectl: local' }).locator('i.closer').click()
+      await this.win.locator('.tab').filter({ hasText: 'Kubectl: local' }).locator('i.closer').click()
     }
 
     /**
@@ -41,23 +40,23 @@ export class Shell {
      */
     @step
     async run(cmd: string, options?: { status?: number, inPlace?: boolean, timeout?: number }): Promise<number> {
-        const status = options?.status ?? 0
-        const timeout = options?.timeout || 60_000
+      const status = options?.status ?? 0
+      const timeout = options?.timeout || 60_000
 
-        if (!options?.inPlace) await this.open()
+      if (!options?.inPlace) await this.open()
 
-        // Fill is faster but removes newlines, multiline commands require input.pressSequentially
-        await this.cursor.fill(cmd + '; echo EXITSTATUS-$?')
-        await this.cursor.press('Enter')
-        // Wait - command finished when prompt is empty
-        await expect(this.prompt.getByText(/^>\s+$/)).toBeVisible({ timeout: timeout })
-        // Verify command exit status
-        const status_text = await this.status.textContent() || 'Error'
-        const status_code = parseInt(status_text.replace(/EXITSTATUS-/, ''))
-        if (isFinite(status)) expect(status_code).toBe(status)
+      // Fill is faster but removes newlines, multiline commands require input.pressSequentially
+      await this.cursor.fill(`${cmd}; echo EXITSTATUS-$?`)
+      await this.cursor.press('Enter')
+      // Wait - command finished when prompt is empty
+      await expect(this.prompt.getByText(/^>\s+$/)).toBeVisible({ timeout })
+      // Verify command exit status
+      const statusText = await this.status.textContent() || 'Error'
+      const statusCode = parseInt(statusText.replace(/EXITSTATUS-/, ''))
+      if (isFinite(status)) expect(statusCode).toBe(status)
 
-        if (!options?.inPlace) await this.close()
-        return status_code
+      if (!options?.inPlace) await this.close()
+      return statusCode
     }
 
     /**
@@ -65,11 +64,11 @@ export class Shell {
      * @param commands to run. They are checked for success.
      */
     async runBatch(...commands: string[]) {
-        await this.open()
-        for (const cmd of commands) {
-            await this.run(cmd, { inPlace: true })
-        }
-        await this.close()
+      await this.open()
+      for (const cmd of commands) {
+        await this.run(cmd, { inPlace: true })
+      }
+      await this.close()
     }
 
     /**
@@ -80,31 +79,28 @@ export class Shell {
      */
     @step
     async retry(cmd: string, options?: { delay?: number, tries?: number }) {
-        const tries = options?.tries || 6
-        const delay = options?.delay || 10
+      const tries = options?.tries || 6
+      const delay = options?.delay || 10
 
-        await this.open()
-        for (let i = 1; i < tries; i++) {
-            // If command passed break retry loop
-            if (await this.run(cmd, { status: NaN, inPlace: true }) == 0) break
-            // If command failed wait before trying again
-            await this.page.waitForTimeout(delay * 1000)
-            // Final try
-            if (i == tries - 1) await this.run(cmd, { inPlace: true })
-        }
-        await this.close()
+      await this.open()
+      for (let i = 1; i < tries; i++) {
+        // If command passed break retry loop
+        if (await this.run(cmd, { status: NaN, inPlace: true }) === 0) break
+        // If command failed wait before trying again
+        await this.page.waitForTimeout(delay * 1000)
+        // Final try
+        if (i === tries - 1) await this.run(cmd, { inPlace: true })
+      }
+      await this.close()
     }
 
-    async privpod(options?: {ns?: string, status?: number }) {
-        const nsarg = options?.ns ? `-n ${options.ns}` : ''
-        await this.run(`k run privpod-${Date.now()} --image=busybox --command --restart=Never -it --rm --privileged ${nsarg} -- true`, options)
+    async privpod(options?: { ns?: string, status?: number }) {
+      const nsarg = options?.ns ? `-n ${options.ns}` : ''
+      await this.run(`k run privpod-${Date.now()} --image=busybox --command --restart=Never -it --rm --privileged ${nsarg} -- true`, options)
     }
 
-    // PolicyActive | PolicyUniquelyReachable
-    async wait_policy(p: Policy, kind: PolicyKind) {
-        const nsarg = (kind == 'AdmissionPolicy' && p.namespace) ? `-n ${p.namespace}` : ''
-        await this.run(`kubectl wait --timeout=5m --for=condition=PolicyUniquelyReachable ${nsarg} ${kind} ${p.name} `)
-
+    async waitPolicyState(p: Policy, kind: PolicyKind, state?: 'PolicyActive' | 'PolicyUniquelyReachable') {
+      const nsarg = (kind === 'AdmissionPolicy' && p.namespace) ? `-n ${p.namespace}` : ''
+      await this.run(`kubectl wait --timeout=5m --for=condition=${state || 'PolicyUniquelyReachable'} ${nsarg} ${kind} ${p.name} `)
     }
-
 }

@@ -1,13 +1,12 @@
-import { test, expect } from './rancher-test';
-import { PolicyServersPage } from './pages/policyservers.page';
-import { Policy, AdmissionPoliciesPage, ClusterAdmissionPoliciesPage } from './pages/policies.page';
-import { PolicyServer } from './pages/policyservers.page';
+import { test, expect } from './rancher-test'
+import { PolicyServersPage, PolicyServer } from './pages/policyservers.page'
+import { Policy, AdmissionPoliciesPage, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 
-const expect3m = expect.configure({timeout: 3*60_000})
+const expect3m = expect.configure({ timeout: 3 * 60_000 })
 
 test('Policy Servers', async({ page, ui }) => {
   const server: PolicyServer = { name: 'test-policyserver' }
-  const policy: Policy = {title: 'Pod Privileged Policy', name: 'test-policy-podpriv', server: server.name}
+  const policy: Policy = { title: 'Pod Privileged Policy', name: 'test-policy-podpriv', server: server.name }
 
   const psPage = new PolicyServersPage(page)
   const apPage = new AdmissionPoliciesPage(page)
@@ -31,8 +30,8 @@ test('Policy Servers', async({ page, ui }) => {
 
   // Check Policy Server details page
   await psRow.open()
-  const apRow = ui.getRow(policy.name, {group: 'AdmissionPolicy'})
-  const capRow = ui.getRow(policy.name, {group: 'ClusterAdmissionPolicy'})
+  const apRow = ui.getRow(policy.name, { group: 'AdmissionPolicy' })
+  const capRow = ui.getRow(policy.name, { group: 'ClusterAdmissionPolicy' })
   await expect3m(apRow.column('Status')).toHaveText('Active')
   await expect3m(capRow.column('Status')).toHaveText('Active')
 
@@ -44,4 +43,4 @@ test('Policy Servers', async({ page, ui }) => {
   await capPage.goto()
   await expect(page.locator('table.sortable-table')).toBeVisible()
   await expect(capRow.row).not.toBeVisible()
-});
+})

@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test'
 
 /**
  * Read environment variables from file.
@@ -10,51 +10,39 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './e2e',
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 1 : 0,
-  /* Opt out of parallel tests */
-  workers: 1,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: process.env.CI ? 'html' : 'list',
+  testDir   : './e2e',
+  forbidOnly: !!process.env.CI, /* Fail the build on CI if you accidentally left test.only in the source code. */
+  retries   : process.env.CI ? 1 : 0, /* Retry on CI only */
+  workers   : 1, /* Opt out of parallel tests */
+  reporter  : process.env.CI ? 'html' : 'list', /* Reporter to use. See https://playwright.dev/docs/test-reporters */
 
   // ===== Rancher specific config =====
-  /* Maximum time one test can run for. */
-  timeout: 7 * 60_000,
-  /* Expect timeout - increase from 5s to 10s because rancher is slow when loading pages */
-  expect: { timeout: 10_000 },
-  /* Whether to report slow test files. */
-  reportSlowTests: null,
-  /* Path to the global setup file. */
-  globalSetup: './global-setup',
+  timeout        : 7 * 60_000, /* Maximum time one test can run for. */
+  expect         : { timeout: 10_000 }, /* Expect timeout - increase from 5s to 10s because rancher is slow when loading pages */
+  reportSlowTests: null, /* Whether to report slow test files. */
+  globalSetup    : require.resolve('./global-setup'), /* Path to the global setup file. */
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.RANCHER_URL,
-    /* Maximum time each action such as `click()` can take. */
-    actionTimeout: 60_000,
-    /* Timeout for navigation actions like page.goto() */
-    navigationTimeout: 60_000,
-    /* Slows down Playwright operations by the specified amount of milliseconds. */
-    // launchOptions: { slowMo: 200 },
+    baseURL          : process.env.RANCHER_URL, /* Base URL to use in actions like `await page.goto('/')`. */
+    actionTimeout    : 60_000, /* Maximum time each action such as `click()` can take. */
+    navigationTimeout: 60_000, /* Timeout for navigation actions like page.goto() */
+    // launchOptions    : { slowMo: 200 }, /* Slows down Playwright operations by the specified amount of milliseconds. */
 
     ignoreHTTPSErrors: true,
-    storageState: 'storageState.json',
-    screenshot: 'only-on-failure',
-    trace: 'retain-on-failure',
+    storageState     : 'storageState.json',
+    screenshot       : 'only-on-failure',
+    trace            : 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: {
-         ...devices['Desktop Chrome'],
-         viewport: { width: 1600, height: 900 },
-        },
+      use : {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1600, height: 900 },
+      },
     },
 
     // {
@@ -69,10 +57,12 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: process.env.ORIGIN == 'source' ? {
-    command: 'yarn serve-pkgs',
-    url: 'http://127.0.0.1:4500',
-    reuseExistingServer: !process.env.CI,
-    cwd: '../',
-  } : undefined
-});
+  webServer: process.env.ORIGIN === 'source'
+    ? {
+        command            : 'yarn serve-pkgs',
+        url                : 'http://127.0.0.1:4500',
+        reuseExistingServer: !process.env.CI,
+        cwd                : '../',
+      }
+    : undefined
+})
