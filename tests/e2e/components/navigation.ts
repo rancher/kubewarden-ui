@@ -81,6 +81,7 @@ export class Navigation {
     // === Kubewarden specific navigation ===
 
     // Policy Servers
+    @step
     async pserver(name: string, tab?: 'Policies' | 'Metrics' | 'Tracing' | 'Conditions' | 'Recent Events' | 'Related Resources') {
       await this.explorer('Kubewarden', 'PolicyServers')
       await this.ui.getRow(name).open()
@@ -88,6 +89,7 @@ export class Navigation {
     }
 
     // Cluster Admission Policies
+    @step
     async capolicy(name: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events' | 'Related Resources') {
       await this.explorer('Kubewarden', 'ClusterAdmissionPolicies')
       await this.ui.getRow(name).open()
@@ -95,6 +97,7 @@ export class Navigation {
     }
 
     // Admission Policies
+    @step
     async apolicy(name: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events') {
       await this.explorer('Kubewarden', 'AdmissionPolicies')
       await this.ui.getRow(name).open()

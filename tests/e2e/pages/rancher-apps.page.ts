@@ -1,6 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import type { YAMLPatch } from '../components/rancher-ui'
+import { step } from '../rancher-test'
 import { BasePage } from './basepage'
 
 export interface Chart {
@@ -38,6 +39,7 @@ export class RancherAppsPage extends BasePage {
      * @param name
      * @param url Git or http(s) url of the repository
      */
+    @step
     async addRepository(name: string, url: string) {
       await this.nav.explorer('Apps', 'Repositories')
       await this.ui.button('Create').click()
@@ -81,6 +83,7 @@ export class RancherAppsPage extends BasePage {
       }
     }
 
+    @step
     async installChart(chart: Chart, options?: { questions?: () => Promise<void>, yamlPatch?: YAMLPatch, timeout?: number, navigate?: boolean }) {
       // Select chart by title
       if (options?.navigate !== false) {
@@ -126,6 +129,7 @@ export class RancherAppsPage extends BasePage {
     }
 
     // Without parameters only for upgrade/reload
+    @step
     async updateApp(name: string, options?: { questions?: () => Promise<void>, yamlPatch?: YAMLPatch, timeout?: number, navigate?: boolean }) {
       if (options?.navigate !== false) {
         await this.nav.explorer('Apps', 'Installed Apps')
