@@ -51,12 +51,12 @@ export default {
 
     await allHash(hash);
 
+    if ( this.showChecklist ) {
+      await refreshCharts({ store: this.$store, init: true });
+    }
+
     // If monitoring is installed look for the dashboard based on the METRICS_TYPE
     if ( this.monitoringStatus.installed ) {
-      if ( !this.monitoringChart ) {
-        await refreshCharts({ store: this.$store, init: true });
-      }
-
       try {
         this.metricsProxy = await grafanaProxy({ store: this.$store, type: this.METRICS_TYPE });
 
