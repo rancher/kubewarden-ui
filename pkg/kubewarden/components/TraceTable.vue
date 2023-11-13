@@ -147,8 +147,8 @@ export default {
     },
 
     tracingConfiguration() {
-      if ( this.controllerChart ) {
-        return this.controllerChart?.spec?.values?.telemetry?.tracing;
+      if ( this.controllerApp ) {
+        return this.controllerApp?.spec?.values?.telemetry?.tracing;
       }
 
       return null;
