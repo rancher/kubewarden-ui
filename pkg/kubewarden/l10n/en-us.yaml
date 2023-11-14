@@ -165,6 +165,7 @@ kubewarden:
         button: Add Dashboards
         tooltip:
           appNotInstalled: The Rancher Monitoring app is not yet installed.
+          nsNotFound: "The Namespace `cattle-dashboards` cannot be found."
           appNotConfigured: The Rancher Monitoring app is not configured correctly, please edit the configuration to add the appropriate Service Monitors.
       controllerConfig:
         label: The Kubewarden Controller must be configured to enable metrics. Follow <a href="https://docs.kubewarden.io/operator-manual/ui-extension/metrics#2-enable-telemetry-for-your-rancher-kubewarden-controller-resource" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to properly configure the kubewarden-controller chart.

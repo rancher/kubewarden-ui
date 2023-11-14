@@ -37,7 +37,9 @@ export async function grafanaProxy(config: MetricsConfig): Promise<any> {
       return base + proxy + path;
     }
   } catch (e) {
-    handleGrowl({ error: e as GrowlConfig | any, store });
+    handleGrowl({
+      error: e as GrowlConfig | any, store, type: 'warning'
+    });
   }
 
   return null;
@@ -50,7 +52,9 @@ export async function grafanaService(store: any) {
       id:   'cattle-monitoring-system/rancher-monitoring-grafana'
     }, { root: true });
   } catch (e) {
-    handleGrowl({ error: e as GrowlConfig | any, store });
+    handleGrowl({
+      error: e as GrowlConfig | any, store, type: 'warning'
+    });
   }
 }
 
@@ -61,7 +65,9 @@ export async function findKubewardenDashboards(store: any) {
       selector: `kubewarden/part-of=cattle-kubewarden-system`
     });
   } catch (e) {
-    handleGrowl({ error: e as GrowlConfig | any, store });
+    handleGrowl({
+      error: e as GrowlConfig | any, store, type: 'warning'
+    });
   }
 }
 
