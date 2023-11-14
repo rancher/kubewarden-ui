@@ -145,7 +145,7 @@ kubewarden:
     noTraces: No tracing data exists for this policy.
     config: 
       label: |
-        Tracing must be <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart#install-kubewarden" target="_blank" rel="noopener noreferrer nofollow">enabled and configured</a> with a Jaeger endpoint in the Kubewarden Controller chart.
+        Tracing must be <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart#install-kubewarden" target="_blank" rel="noopener noreferrer nofollow">configured</a> with a Jaeger endpoint in the "Telemetry" tab of the Kubewarden Controller chart settings.
       link: Update Config
   monitoring:
     notInstalled: |
