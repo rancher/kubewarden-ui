@@ -33,8 +33,20 @@ export default {
   computed: {
     ...mapGetters(['currentCluster']),
 
-    disableChartInstall() {
-      return !this.openTelSvc || !this.jaegerQuerySvc;
+    controllerLinkTooltip() {
+      if ( this.controllerLinkDisabled ) {
+        return this.t('kubewarden.monitoring.prerequisites.controllerConfig.tooltip');
+      }
+
+      if ( !this.controllerApp ) {
+        return this.t('kubewarden.monitoring.prerequisites.controllerConfig.chartError');
+      }
+
+      return null;
+    },
+
+    controllerLinkDisabled() {
+      return !this.openTelSvc || !this.jaegerQuerySvc || !this.controllerApp;
     },
 
     tracingEnabled() {
@@ -47,7 +59,7 @@ export default {
   },
 
   methods: {
-    chartRoute() {
+    controllerAppRoute() {
       if ( this.controllerApp ) {
         const metadata = this.controllerApp.spec?.chart?.metadata;
 
@@ -98,10 +110,11 @@ export default {
         <div class="checklist__config">
           <p v-clean-html="t('kubewarden.tracing.config.label', {}, true)" />
           <button
+            v-clean-tooltip="controllerLinkTooltip"
             data-testid="kw-tracing-checklist-step-config-button"
             class="btn role-primary ml-10"
-            :disabled="disableChartInstall"
-            @click.prevent="chartRoute"
+            :disabled="controllerLinkDisabled"
+            @click="controllerAppRoute"
           >
             {{ t("kubewarden.tracing.config.link") }}
           </button>

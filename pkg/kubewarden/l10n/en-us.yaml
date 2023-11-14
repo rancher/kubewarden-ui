@@ -146,7 +146,7 @@ kubewarden:
     config: 
       label: |
         Tracing must be <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart#install-kubewarden" target="_blank" rel="noopener noreferrer nofollow">enabled and configured</a> with a Jaeger endpoint in the Kubewarden Controller chart.
-      link: Update Chart
+      link: Update Config
   monitoring:
     notInstalled: |
       The Monitoring app is not installed, this will will need to be installed and configured to enable metrics. Follow <a href="https://docs.kubewarden.io/operator-manual/telemetry/metrics/quickstart#install-prometheus" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to add the Kubewarden ServiceMonitor for Prometheus.

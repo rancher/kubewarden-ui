@@ -6,7 +6,8 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 
 import { CATALOG, SERVICE } from '@shell/config/types';
 import { KUBERNETES } from '@shell/config/labels-annotations';
-import ResourceManager from '@shell/mixins/resource-manager';
+import ResourceFetch from '@shell/mixins/resource-fetch';
+import { allHash } from '@shell/utils/promise';
 
 import { BadgeState } from '@components/BadgeState';
 import { Banner } from '@components/Banner';
@@ -14,7 +15,7 @@ import Loading from '@shell/components/Loading';
 import SortableTable from '@shell/components/SortableTable';
 
 import { TRACE_HEADERS } from '../config/table-headers';
-import { KUBEWARDEN, KUBEWARDEN_APPS, MODE_MAP, OPERATION_MAP } from '../types';
+import { KUBEWARDEN, KUBEWARDEN_CHARTS, MODE_MAP, OPERATION_MAP } from '../types';
 import { jaegerTraces } from '../modules/jaegerTracing';
 import { formatDuration } from '../utils/duration-format';
 
@@ -42,14 +43,19 @@ export default {
     BadgeState, Banner, Loading, SortableTable, TraceChecklist
   },
 
-  mixins: [ResourceManager],
+  mixins: [ResourceFetch],
 
   async fetch() {
-    if ( this.$store.getters['cluster/canList'](SERVICE) ) {
-      this.allServices = await this.$store.dispatch('cluster/findAll', { type: SERVICE });
+    const types = [CATALOG.APP, CATALOG.CLUSTER_REPO, SERVICE];
+    const hash = [];
+
+    for ( const type of types ) {
+      if ( this.$store.getters['cluster/canList'](type) ) {
+        hash.push(this.$fetchType(type));
+      }
     }
-    this.secondaryResourceData = this.secondaryResourceDataConfig();
-    await this.resourceManagerFetchSecondaryResources(this.secondaryResourceData);
+
+    await allHash(hash);
 
     if ( this.jaegerQuerySvc ) {
       const options = {
@@ -76,16 +82,29 @@ export default {
       TRACE_HEADERS,
       OPERATION_MAP,
 
-      apps:                  null,
-      controllerChart:       null,
-      allServices:           null,
-      specificValidations:   null,
-      secondaryResourceData: this.secondaryResourceDataConfig()
+      specificValidations: null
     };
   },
 
   computed: {
     ...mapGetters(['currentCluster']),
+    ...mapGetters({ charts: 'catalog/charts' }),
+
+    allApps() {
+      return this.$store.getters['cluster/all'](CATALOG.APP);
+    },
+
+    allServices() {
+      return this.$store.getters['cluster/all'](SERVICE);
+    },
+
+    controllerApp() {
+      return this.allApps?.find(app => app?.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER);
+    },
+
+    controllerChart() {
+      return this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
+    },
 
     groupField() {
       if ( this.isPolicyServer ) {
@@ -128,8 +147,8 @@ export default {
     },
 
     tracingConfiguration() {
-      if ( this.controllerChart ) {
-        return this.controllerChart?.spec?.values?.telemetry?.tracing;
+      if ( this.controllerApp ) {
+        return this.controllerApp?.spec?.values?.telemetry?.tracing;
       }
 
       return null;
@@ -144,11 +163,7 @@ export default {
     },
 
     jaegerServices() {
-      if ( this.allServices ) {
-        return this.allServices.filter(svc => svc?.metadata?.labels?.['app.kubernetes.io/part-of'] === 'jaeger');
-      }
-
-      return null;
+      return this.allServices?.filter(svc => svc?.metadata?.labels?.['app.kubernetes.io/part-of'] === 'jaeger');
     },
 
     jaegerQuerySvc() {
@@ -166,11 +181,7 @@ export default {
     },
 
     openTelemetryServices() {
-      if ( this.allServices ) {
-        return this.allServices.filter(svc => svc?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === 'opentelemetry-operator');
-      }
-
-      return null;
+      return this.allServices?.filter(svc => svc?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === 'opentelemetry-operator');
     },
 
     openTelSvc() {
@@ -211,22 +222,6 @@ export default {
   },
 
   methods: {
-    secondaryResourceDataConfig() {
-      return {
-        data:      {
-          [CATALOG.APP]: {
-            applyTo: [
-              { var: 'apps' },
-              {
-                var:         'controllerChart',
-                parsingFunc: data => data.find(app => app?.metadata?.name === KUBEWARDEN_APPS.RANCHER_CONTROLLER)
-              }
-            ]
-          }
-        }
-      };
-    },
-
     modeColor(mode) {
       return this.MODE_MAP[mode];
     },
@@ -251,7 +246,7 @@ export default {
   <div v-else>
     <TraceChecklist
       v-if="showChecklist"
-      :controller-chart="controllerChart"
+      :controller-app="controllerApp"
       :tracing-configuration="tracingConfiguration"
       :jaeger-query-svc="jaegerQuerySvc"
       :open-tel-svc="openTelSvc"
