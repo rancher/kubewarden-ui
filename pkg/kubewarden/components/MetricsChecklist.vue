@@ -62,7 +62,7 @@ export default {
     },
 
     controllerLinkDisabled() {
-      return (!this.monitoringApp || !this.monitoringIsConfigured || !this.controllerChart || !this.controllerApp);
+      return (!this.monitoringApp || !this.monitoringIsConfigured || this.emptyKubewardenDashboards || !this.controllerChart || !this.controllerApp);
     },
 
     controllerLinkTooltip() {
