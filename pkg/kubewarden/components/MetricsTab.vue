@@ -2,7 +2,9 @@
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 
-import { CATALOG, CONFIG_MAP, MONITORING, SERVICE } from '@shell/config/types';
+import {
+  CATALOG, CONFIG_MAP, MONITORING, NAMESPACE, SERVICE
+} from '@shell/config/types';
 import { KUBERNETES } from '@shell/config/labels-annotations';
 import { dashboardExists } from '@shell/utils/grafana';
 import { monitoringStatus } from '@shell/utils/monitoring';
@@ -40,12 +42,42 @@ export default {
   mixins: [ResourceFetch],
 
   async fetch() {
-    const types = [CATALOG.APP, CATALOG.CLUSTER_REPO, CONFIG_MAP, KUBEWARDEN.POLICY_SERVER, MONITORING.SERVICEMONITOR, SERVICE];
+    const resourceMap = [
+      {
+        name:     CATALOG.APP,
+        property: this.allApps
+      },
+      {
+        name:     CATALOG.CLUSTER_REPO,
+        property: this.allRepos
+      },
+      {
+        name:     CONFIG_MAP,
+        property: this.allConfigMaps
+      },
+      {
+        name:     KUBEWARDEN.POLICY_SERVER,
+        property: this.allPolicyServers
+      },
+      {
+        name:     MONITORING.SERVICEMONITOR,
+        property: this.allServiceMonitors
+      },
+      {
+        name:     NAMESPACE,
+        property: this.allNamespaces
+      },
+      {
+        name:     SERVICE,
+        property: this.allServices
+      },
+    ];
     const hash = [];
 
-    for ( const type of types ) {
-      if ( this.$store.getters['cluster/canList'](type) ) {
-        hash.push(this.$fetchType(type));
+    // Check if the resources are already stored with their respective getters before fetching
+    for ( const resource of resourceMap ) {
+      if ( isEmpty(resource.property) && this.$store.getters['cluster/canList'](resource.name) ) {
+        hash.push(this.$fetchType(resource.name));
       }
     }
 
@@ -119,6 +151,10 @@ export default {
       return this.$store.getters['cluster/all'](CONFIG_MAP);
     },
 
+    allNamespaces() {
+      return this.$store.getters['cluster/all'](NAMESPACE);
+    },
+
     allPolicyServers() {
       return this.$store.getters['cluster/all'](KUBEWARDEN.POLICY_SERVER);
     },
@@ -129,6 +165,10 @@ export default {
 
     allServices() {
       return this.$store.getters['cluster/all'](SERVICE);
+    },
+
+    cattleDashboardNs() {
+      return this.allNamespaces.find(ns => ns?.metadata?.name === 'cattle-dashboards');
     },
 
     controllerApp() {
@@ -221,10 +261,11 @@ export default {
 </script>
 
 <template>
-  <Loading v-if="$fetchState.pending" />
+  <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-else>
     <MetricsChecklist
       v-if="showChecklist"
+      :cattle-dashboard-ns="cattleDashboardNs"
       :controller-app="controllerApp"
       :controller-chart="controllerChart"
       :kubewarden-dashboards="kubewardenGrafanaDashboards"

@@ -17,6 +17,10 @@ import { serviceMonitorsConfigured } from '../modules/metricsConfig';
 
 export default {
   props: {
+    cattleDashboardNs: {
+      type:    Object,
+      default: null
+    },
     controllerApp: {
       type:    Object,
       default: null
@@ -78,11 +82,21 @@ export default {
         return this.t('kubewarden.monitoring.prerequisites.configMap.tooltip.appNotInstalled');
       }
 
-      if ( this.monitoringApp && !this.monitoringIsConfigured ) {
-        return this.t('kubewarden.monitoring.prerequisites.configMap.tooltip.appNotConfigured');
+      if ( this.monitoringApp ) {
+        if ( isEmpty(this.cattleDashboardNs) ) {
+          return this.t('kubewarden.monitoring.prerequisites.configMap.tooltip.nsNotFound');
+        }
+
+        if ( !this.monitoringIsConfigured ) {
+          return this.t('kubewarden.monitoring.prerequisites.configMap.tooltip.appNotConfigured');
+        }
       }
 
       return null;
+    },
+
+    dashboardButtonDisabled() {
+      return (!this.monitoringApp || isEmpty(this.cattleDashboardNs) || !this.monitoringIsConfigured);
     },
 
     emptyKubewardenDashboards() {
@@ -239,7 +253,7 @@ export default {
             data-testid="kw-monitoring-checklist-step-config-map-button"
             mode="grafanaDashboard"
             class="ml-10"
-            :disabled="!monitoringApp || !monitoringIsConfigured"
+            :disabled="dashboardButtonDisabled"
             @click="addDashboards"
           />
         </div>

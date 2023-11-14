@@ -242,7 +242,7 @@ export default {
 </script>
 
 <template>
-  <Loading v-if="$fetchState.pending" />
+  <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-else>
     <TraceChecklist
       v-if="showChecklist"

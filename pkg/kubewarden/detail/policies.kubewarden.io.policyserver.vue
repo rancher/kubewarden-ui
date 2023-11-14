@@ -196,11 +196,11 @@ export default {
         </template>
       </Tab>
 
-      <Tab name="policy-tracing" label="Tracing" :weight="98">
+      <Tab name="policy-tracing" label="Tracing" :weight="98" class="relative">
         <TraceTable :resource="resource" :related-policies="relatedPolicies" />
       </Tab>
 
-      <Tab #default="props" name="policy-metrics" label="Metrics" :weight="97">
+      <Tab #default="props" name="policy-metrics" label="Metrics" :weight="97" class="relative">
         <MetricsTab :resource="resource" :active="props.active" />
       </Tab>
     </ResourceTabs>
@@ -208,6 +208,10 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+.relative {
+  position: relative;
+}
+
 .policy {
   &__mode {
     display: flex;
