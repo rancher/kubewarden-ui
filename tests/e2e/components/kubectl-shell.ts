@@ -79,7 +79,7 @@ export class Shell {
      */
     @step
     async retry(cmd: string, options?: { delay?: number, tries?: number }) {
-      const tries = options?.tries || 6
+      const tries = options?.tries || 2 * 6
       const delay = options?.delay || 10
 
       await this.open()
@@ -94,9 +94,10 @@ export class Shell {
       await this.close()
     }
 
-    async privpod(options?: { ns?: string, status?: number }) {
-      const nsarg = options?.ns ? `-n ${options.ns}` : ''
-      await this.run(`k run privpod-${Date.now()} --image=busybox --command --restart=Never -it --rm --privileged ${nsarg} -- true`, options)
+    async privpod(options?: { name?: string, ns?: string, status?: number }) {
+      const name = options?.name || `privpod-${Date.now()}`
+      const ns = options?.ns ? `-n ${options.ns}` : ''
+      await this.run(`k run ${name} --image=busybox --command --restart=Never -it --rm --privileged ${ns} -- true`, options)
     }
 
     async waitPolicyState(p: Policy, kind: PolicyKind, state?: 'PolicyActive' | 'PolicyUniquelyReachable') {

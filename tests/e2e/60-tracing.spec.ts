@@ -14,7 +14,7 @@ test('Set up tracing', async({ page, ui, nav, shell }) => {
   const tracing = page.locator('section#policy-tracing')
   const otel = tracing.getByTestId('kw-tracing-checklist-step-open-tel')
   const jaeger = tracing.getByTestId('kw-tracing-checklist-step-jaeger')
-  const enableBtn = tracing.getByTestId('kw-tracing-checklist-step-config-button')
+  const enableBtn = tracing.getByRole('button', { name: 'Update Config', exact: true })
 
   await nav.pserver('default', 'Tracing')
 
@@ -77,10 +77,7 @@ test('Check traces are visible', async({ page, ui, nav, shell }) => {
 
   // Create trace log line
   await nav.cluster('local')
-  await shell.runBatch(
-    'k run tracing-privpod --image=nginx:alpine --privileged',
-    'k delete pod tracing-privpod'
-  )
+  await shell.privpod({ name: 'tracing-privpod' })
 
   // Check logs on policy server
   await nav.pserver('default', 'Tracing')
