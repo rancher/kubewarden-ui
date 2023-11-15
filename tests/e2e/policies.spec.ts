@@ -59,10 +59,10 @@ async function setupPSALabelEnforcer(ui: RancherUI) {
 }
 
 async function setupCustomPolicy(ui: RancherUI) {
-  await ui.page.getByRole('tab', { name: 'General' }).click()
+  await ui.tab('General').click()
   await ui.input('Module*').fill('ghcr.io/kubewarden/policies/pod-privileged:v0.2.5')
 
-  await ui.page.getByRole('tab', { name: 'Rules' }).click()
+  await ui.tab('Rules').click()
   await ui.select('Resource type*', 'pods')
   await ui.select('API Versions*', 'v1')
   await ui.select('Operation type*', 'CREATE')

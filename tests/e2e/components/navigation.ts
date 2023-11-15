@@ -10,16 +10,6 @@ type ExpItemMap = {
     Kubewarden: 'PolicyServers' | 'ClusterAdmissionPolicies' | 'AdmissionPolicies' | 'Policy Reporter'
 };
 
-const kwTabId: Record<string, string> = {
-  Policies           : 'related-policies',
-  Rules              : 'policy-rules',
-  Metrics            : 'policy-metrics',
-  Tracing            : 'policy-tracing',
-  Conditions         : 'conditions',
-  'Recent Events'    : 'events',
-  'Related Resources': 'related',
-}
-
 export class Navigation {
     readonly page: Page
 
@@ -78,14 +68,12 @@ export class Navigation {
       }
     }
 
-    // === Kubewarden specific navigation ===
-
     // Policy Servers
     @step
     async pserver(name: string, tab?: 'Policies' | 'Metrics' | 'Tracing' | 'Conditions' | 'Recent Events' | 'Related Resources') {
       await this.explorer('Kubewarden', 'PolicyServers')
       await this.ui.getRow(name).open()
-      if (tab) await this.page.getByRole('tablist').locator(`li#${kwTabId[tab]}`).click()
+      if (tab) await this.ui.tab(tab).click()
     }
 
     // Cluster Admission Policies
@@ -93,7 +81,7 @@ export class Navigation {
     async capolicy(name: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events' | 'Related Resources') {
       await this.explorer('Kubewarden', 'ClusterAdmissionPolicies')
       await this.ui.getRow(name).open()
-      if (tab) await this.page.getByRole('tablist').locator(`li#${kwTabId[tab]}`).click()
+      if (tab) await this.ui.tab(tab).click()
     }
 
     // Admission Policies
@@ -101,6 +89,6 @@ export class Navigation {
     async apolicy(name: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events') {
       await this.explorer('Kubewarden', 'AdmissionPolicies')
       await this.ui.getRow(name).open()
-      if (tab) await this.page.getByRole('tablist').locator(`li#${kwTabId[tab]}`).click()
+      if (tab) await this.ui.tab(tab).click()
     }
 }

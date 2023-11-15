@@ -20,7 +20,7 @@ const expect2m = expect.configure({ timeout: 2 * 60_000 })
  *  - check errors are reported
  *  - delete policy and resources and check error are gone
  */
-test('New resources should be reported', async({ page, nav, shell }) => {
+test('New resources should be reported', async({ ui, page, nav, shell }) => {
   const capPage = new ClusterAdmissionPoliciesPage(page)
   const reporter = new PolicyReporterPage(page)
 
@@ -29,7 +29,7 @@ test('New resources should be reported', async({ page, nav, shell }) => {
     mode    : 'Monitor',
     name    : policyLabels,
     settings: async() => {
-      await page.getByRole('tab', { name: 'Settings' }).click()
+      await ui.tab('Settings').click()
       const den = page.locator('.row').filter({ hasText: 'Denied labels' })
       await den.getByRole('button', { name: 'Add' }).click()
       await den.getByRole('textbox').fill('unsafelbl')
@@ -62,11 +62,10 @@ test('New resources should be reported', async({ page, nav, shell }) => {
   await expect(reporter.failCpTable.getByRole('cell', { name: testNs, exact: true })).toBeVisible()
 })
 
-test('Check reports on resources details page', async({ page, ui, nav }) => {
+test('Check reports on resources details page', async({ ui, nav }) => {
   const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
   test.skip(ORIGIN === 'released', 'Requires kubewarden UI > 1.3.0')
 
-  const complianceTab = page.getByRole('tablist').locator('li#policy-report-tab')
   // Check Pods Compliance column
   await nav.explorer('Workloads', 'Pods')
   const failrow = ui.getRow(testPod, { group: testNs })
@@ -75,13 +74,13 @@ test('Check reports on resources details page', async({ page, ui, nav }) => {
 
   // Check Compliance tab on pod details
   await failrow.open()
-  await complianceTab.click()
+  await ui.tab('Compliance').click()
   await expect(ui.getRow({ Policy: policyPrivpod }).column('Status')).toHaveText('fail')
 
   // Check namespace
   await nav.explorer('Cluster', 'Projects/Namespaces')
   await ui.getRow(testNs).open()
-  await complianceTab.click()
+  await ui.tab('Compliance').click()
   await expect(ui.getRow({ Name: testPod, Policy: policyPrivpod }).column('Status')).toHaveText('fail')
 })
 
