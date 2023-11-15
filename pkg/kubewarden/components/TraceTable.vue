@@ -247,6 +247,7 @@ export default {
     <TraceChecklist
       v-if="showChecklist"
       :controller-app="controllerApp"
+      :controller-chart="controllerChart"
       :tracing-configuration="tracingConfiguration"
       :jaeger-query-svc="jaegerQuerySvc"
       :open-tel-svc="openTelSvc"
