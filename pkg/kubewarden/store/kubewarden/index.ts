@@ -12,7 +12,8 @@ export interface StateConfig {
   hideBannerArtifactHub: Boolean,
   hideBannerAirgapPolicy: Boolean,
   policyReports: PolicyReport[]
-  policyTraces: PolicyTraceConfig[]
+  policyTraces: PolicyTraceConfig[],
+  refreshingCharts: Boolean,
 }
 
 const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
@@ -24,7 +25,8 @@ const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
         hideBannerArtifactHub:  config.hideBannerArtifactHub,
         hideBannerAirgapPolicy: config.hideBannerAirgapPolicy,
         policyReports:          config.policyReports,
-        policyTraces:           config.policyTraces
+        policyTraces:           config.policyTraces,
+        refreshingCharts:       config.refreshingCharts
       };
     },
 
@@ -43,7 +45,8 @@ export default {
     hideBannerArtifactHub:  false,
     hideBannerAirgapPolicy: false,
     policyReports:          [],
-    policyTraces:           []
+    policyTraces:           [],
+    refreshingCharts:       false
   }),
   config
 };

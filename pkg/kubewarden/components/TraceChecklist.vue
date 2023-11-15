@@ -14,6 +14,10 @@ export default {
       type:    Object,
       default: null
     },
+    controllerChart: {
+      type:    Object,
+      default: null
+    },
     tracingConfiguration: {
       type:    Object,
       default: null
@@ -34,11 +38,11 @@ export default {
     ...mapGetters(['currentCluster']),
 
     controllerLinkTooltip() {
-      if ( this.controllerLinkDisabled ) {
+      if ( !this.openTelSvc || !this.jaegerQuerySvc ) {
         return this.t('kubewarden.monitoring.prerequisites.controllerConfig.tooltip');
       }
 
-      if ( !this.controllerApp ) {
+      if ( !this.controllerApp || !this.controllerChart ) {
         return this.t('kubewarden.monitoring.prerequisites.controllerConfig.chartError');
       }
 
@@ -46,7 +50,7 @@ export default {
     },
 
     controllerLinkDisabled() {
-      return !this.openTelSvc || !this.jaegerQuerySvc || !this.controllerApp;
+      return !this.openTelSvc || !this.jaegerQuerySvc || !this.controllerApp || !this.controllerChart;
     },
 
     tracingEnabled() {

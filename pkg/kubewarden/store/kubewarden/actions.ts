@@ -32,5 +32,10 @@ export default {
   },
   removePolicyTraceById({ commit }: any, policy: PolicyTraceConfig, trace: PolicyTrace) {
     commit('removePolicyTraceById', policy, trace);
+  },
+
+  // Charts
+  updateRefreshingCharts({ commit }: any, val: Boolean) {
+    commit('updateRefreshingCharts', val);
   }
 };

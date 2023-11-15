@@ -7,5 +7,6 @@ export default {
   hideBannerArtifactHub:  (state: StateConfig): Boolean => state.hideBannerArtifactHub,
   hideBannerAirgapPolicy: (state: StateConfig): Boolean => state.hideBannerAirgapPolicy,
   policyReports:          (state: StateConfig): PolicyReport[] => state.policyReports,
-  policyTraces:           (state: StateConfig): PolicyTraceConfig[] => state.policyTraces
+  policyTraces:           (state: StateConfig): PolicyTraceConfig[] => state.policyTraces,
+  refreshingCharts:       (state: StateConfig): Boolean => state.refreshingCharts,
 };
