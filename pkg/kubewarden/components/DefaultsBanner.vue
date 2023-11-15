@@ -9,13 +9,14 @@ import { Banner } from '@components/Banner';
 import { KUBEWARDEN_CHARTS } from '../types';
 import { getLatestStableVersion } from '../plugins/kubewarden-class';
 import { handleGrowl } from '../utils/handle-growl';
+import { refreshCharts } from '../utils/chart';
 
 export default {
   components: { Banner },
 
   async fetch() {
-    if ( this.$store.getters[`cluster/canList`](CATALOG.CLUSTER_REPO) ) {
-      await this.$store.dispatch('catalog/refresh');
+    if ( !this.defaultsChart ) {
+      await refreshCharts({ store: this.$store, init: true });
     }
   },
 

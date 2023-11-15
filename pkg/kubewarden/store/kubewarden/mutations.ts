@@ -83,5 +83,9 @@ export default {
     if ( idx && idx !== -1 ) {
       existingPolicyObj?.traces.splice(idx, 1);
     }
+  },
+
+  updateRefreshingCharts(state: StateConfig, val: Boolean) {
+    state.refreshingCharts = val;
   }
 };

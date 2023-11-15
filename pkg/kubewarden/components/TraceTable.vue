@@ -88,7 +88,7 @@ export default {
 
   computed: {
     ...mapGetters(['currentCluster']),
-    ...mapGetters({ charts: 'catalog/charts' }),
+    ...mapGetters({ charts: 'catalog/charts', refreshingCharts: 'kubewarden/refreshingCharts' }),
 
     allApps() {
       return this.$store.getters['cluster/all'](CATALOG.APP);
@@ -242,7 +242,7 @@ export default {
 </script>
 
 <template>
-  <Loading v-if="$fetchState.pending" mode="relative" />
+  <Loading v-if="$fetchState.pending || refreshingCharts" mode="relative" />
   <div v-else>
     <TraceChecklist
       v-if="showChecklist"

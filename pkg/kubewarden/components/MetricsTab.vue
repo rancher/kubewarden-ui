@@ -83,7 +83,7 @@ export default {
 
     await allHash(hash);
 
-    if ( this.showChecklist ) {
+    if ( this.showChecklist && !this.monitoringChart ) {
       await refreshCharts({ store: this.$store, init: true });
     }
 

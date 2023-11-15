@@ -1,5 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
+import isEmpty from 'lodash/isEmpty';
+
 import { _CREATE } from '@shell/config/query-params';
 import { allHash } from '@shell/utils/promise';
 import CreateEditView from '@shell/mixins/create-edit-view';
@@ -11,7 +13,6 @@ import ResourceTabs from '@shell/components/form/ResourceTabs';
 import ResourceTable from '@shell/components/ResourceTable';
 import Tab from '@shell/components/Tabbed/Tab';
 
-import { isEmpty } from 'lodash';
 import { RELATED_HEADERS } from '../config/table-headers';
 
 import MetricsTab from '../components/MetricsTab';
