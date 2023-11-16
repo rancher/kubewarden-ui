@@ -105,6 +105,7 @@ test.describe('Metrics', () => {
     await telPage.monitoringBtn.click()
     await apps.installChart(monitoringChart, {
       navigate : false,
+      timeout  : 7 * 60_000,
       yamlPatch: `{"prometheus": {"additionalServiceMonitors": [{
              "name": "kubewarden",
              "selector": {"matchLabels": {"app": "kubewarden-policy-server-default"}},

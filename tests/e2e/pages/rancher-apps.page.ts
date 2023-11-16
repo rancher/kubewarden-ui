@@ -64,7 +64,7 @@ export class RancherAppsPage extends BasePage {
     }
 
     /**
-     * Build regex matching successfull chart installation
+     * Build regex matching chart name or archive for a successfull installation
      * SUCCESS: helm upgrade ... rancher-kubewarden-defaults /home/shell/helm/kubewarden-defaults-1.7.3.tgz
      * SUCCESS: helm [install|upgrade] [--generate-name=true|name]  /home/shell/helm/opentelemetry-operator-0.38.0.tgz
      */
@@ -73,7 +73,10 @@ export class RancherAppsPage extends BasePage {
       const keepLog = options?.keepLog || false
 
       // Can't match ^..$ because output is sometimes mixed up
-      const regex = new RegExp(`SUCCESS: helm.*${text}`)
+      const nameMatch = `\\s${text}\\s\\/home` // app upgrades
+      const tarMatch = `helm\\/${text}-[0-9-.]+tgz` // chart installations
+      const regex = new RegExp(`SUCCESS: helm.*(${nameMatch}|${tarMatch})`)
+
       const passedMsg = this.page.locator('div.logs-container').locator('span.msg').getByText(regex)
       await expect(passedMsg).toBeVisible({ timeout })
       // Close the window
