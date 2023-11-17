@@ -4,13 +4,16 @@ import { TableRow } from '../components/table-row'
 import { step } from '../rancher-test'
 import { BasePage } from './basepage'
 
-export const policyTitles = ['Custom Policy', 'Allow Privilege Escalation PSP', 'Allowed Fs Groups PSP', 'Allowed Proc Mount Types PSP', 'Apparmor PSP', 'Capabilities PSP',
+export const policyList = ['Custom Policy', 'Allow Privilege Escalation PSP', 'Allowed Fs Groups PSP', 'Allowed Proc Mount Types PSP', 'Apparmor PSP', 'Capabilities PSP',
   'Deprecated API Versions', 'Disallow Service Loadbalancer', 'Disallow Service Nodeport', 'Echo', 'Environment Variable Secrets Scanner', 'Environment Variable Policy', 'Flexvolume Drivers Psp',
   'Host Namespaces PSP', 'Hostpaths PSP', 'Ingress Policy', 'Namespace label propagator', 'Pod Privileged Policy', 'Pod Runtime', 'PSA Label Enforcer', 'Readonly Root Filesystem PSP',
   'Safe Annotations', 'Safe Labels', 'Seccomp PSP', 'Selinux PSP', 'Sysctl PSP', 'Trusted Repos', 'User Group PSP', 'Verify Image Signatures', 'volumeMounts', 'Volumes PSP', 'Unique Ingress host'] as const
 
+export type policyTitle = typeof policyList[number]
+export type PolicyKind = 'AdmissionPolicy' | 'ClusterAdmissionPolicy'
+
 export interface Policy {
-    title: typeof policyTitles[number]
+    title: policyTitle
     name: string
     mode?: 'Monitor' | 'Protect'
     audit?: 'On' | 'Off'
@@ -21,8 +24,6 @@ export interface Policy {
     settings?(ui: RancherUI): Promise<void>
     yamlPatch?: YAMLPatch
 }
-
-export type PolicyKind = 'AdmissionPolicy' | 'ClusterAdmissionPolicy'
 
 /**
  * Return policy with generated name
