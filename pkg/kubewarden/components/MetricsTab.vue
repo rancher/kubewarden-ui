@@ -19,7 +19,6 @@ import { KUBEWARDEN, KUBEWARDEN_CHARTS, KubewardenDashboardLabels, KubewardenDas
 import { handleGrowl } from '../utils/handle-growl';
 import { refreshCharts } from '../utils/chart';
 import { grafanaProxy } from '../modules/grafana';
-import { monitoringIsConfigured } from '../modules/metricsConfig';
 
 import MetricsChecklist from './MetricsChecklist';
 
@@ -189,28 +188,16 @@ export default {
       return this.allConfigMaps.filter(configMap => configMap?.metadata?.labels?.[KubewardenDashboardLabels.DASHBOARD]);
     },
 
+    kubewardenControllerServiceMonitor() {
+      return this.allServiceMonitors?.find(sm => sm?.spec?.selector?.matchLabels?.[KUBERNETES.MANAGED_NAME] === KUBEWARDEN_CHARTS.CONTROLLER);
+    },
+
     monitoringApp() {
       return this.allApps?.find(app => app?.spec?.chart?.metadata?.name === 'rancher-monitoring');
     },
 
     monitoringChart() {
       return this.charts?.find(chart => chart.chartName === 'rancher-monitoring');
-    },
-
-    monitoringServiceMonitorsSpec() {
-      if ( this.monitoringApp ) {
-        return this.monitoringApp.spec?.values?.prometheus?.additionalServiceMonitors;
-      }
-
-      return null;
-    },
-
-    monitoringIsConfigured() {
-      return monitoringIsConfigured({
-        serviceMonitorSpec: this.monitoringServiceMonitorsSpec,
-        controllerApp:      this.controllerApp,
-        policyServerSvcs:   this.policyServerSvcs
-      });
     },
 
     openTelemetryServices() {
@@ -254,7 +241,7 @@ export default {
       const monitoringEnabled = this.controllerApp?.spec?.values?.telemetry?.metrics?.enabled;
       const grafanaDashboardsInstalled = !isEmpty(this.kubewardenGrafanaDashboards);
 
-      return !this.openTelSvc || !this.monitoringApp || !monitoringEnabled || !this.monitoringIsConfigured || !grafanaDashboardsInstalled;
+      return !this.openTelSvc || !this.monitoringApp || !monitoringEnabled || !grafanaDashboardsInstalled;
     }
   }
 };
@@ -268,6 +255,7 @@ export default {
       :cattle-dashboard-ns="cattleDashboardNs"
       :controller-app="controllerApp"
       :controller-chart="controllerChart"
+      :kubewarden-controller-service-monitor="kubewardenControllerServiceMonitor"
       :kubewarden-dashboards="kubewardenGrafanaDashboards"
       :monitoring-app="monitoringApp"
       :monitoring-chart="monitoringChart"

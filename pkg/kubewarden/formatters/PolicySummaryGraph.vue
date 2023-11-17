@@ -42,7 +42,7 @@ export default {
       const out = {};
 
       for ( const r of this.relatedPolicies ) {
-        const state = r.status?.policyStatus;
+        const state = r?.status?.policyStatus;
         const textColor = colorForStatus(state);
         const key = `${ textColor }/${ state }`;
 

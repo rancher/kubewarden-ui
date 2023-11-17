@@ -63,6 +63,12 @@ export default {
   },
 
   methods: {
+    badgeIcon(prop) {
+      return {
+        'icon-dot-open': !prop, 'icon-checkmark': prop, 'text-success': prop
+      };
+    },
+
     controllerAppRoute() {
       if ( this.controllerApp ) {
         const metadata = this.controllerApp.spec?.chart?.metadata;
@@ -102,15 +108,15 @@ export default {
     />
     <div class="checklist__container mt-20 mb-20">
       <div class="checklist__step mt-20 mb-20" data-testid="kw-tracing-checklist-step-open-tel">
-        <i class="icon mr-10" :class="{ 'icon-dot-open': !openTelSvc,'icon-checkmark': openTelSvc }" />
+        <i class="icon mr-10" :class="badgeIcon(openTelSvc)" />
         <p v-clean-html="t('kubewarden.tracing.openTelemetry', {}, true)" />
       </div>
       <div class="checklist__step mb-20" data-testid="kw-tracing-checklist-step-jaeger">
-        <i class="icon mr-10" :class="{ 'icon-dot-open': !jaegerQuerySvc,'icon-checkmark': jaegerQuerySvc }" />
+        <i class="icon mr-10" :class="badgeIcon(jaegerQuerySvc)" />
         <p v-clean-html="t('kubewarden.tracing.jaeger', {}, true)" p />
       </div>
       <div class="checklist__step mb-20" data-testid="kw-tracing-checklist-step-config">
-        <i class="icon mr-10" :class="{ 'icon-dot-open': !tracingEnabled,'icon-checkmark': tracingEnabled }" />
+        <i class="icon mr-10" :class="badgeIcon(tracingEnabled)" />
         <div class="checklist__config">
           <p v-clean-html="t('kubewarden.tracing.config.label', {}, true)" />
           <button
