@@ -14,17 +14,10 @@
   resolved "https://registry.npmjs.org/@types/js-yaml/-/js-yaml-4.0.5.tgz"
   integrity sha512-FhpRzf927MNQdRZP0J5DLIdTXhjLYzeUTmLAu69mnVksLH9CJY3IuSeEgbKUki7GQZm0WqDkGzyxju2EZGD2wA==
 
-"@types/lodash.merge@^4.6.7":
-  version "4.6.7"
-  resolved "https://registry.npmjs.org/@types/lodash.merge/-/lodash.merge-4.6.7.tgz"
-  integrity sha512-OwxUJ9E50gw3LnAefSHJPHaBLGEKmQBQ7CZe/xflHkyy/wH2zVyEIAKReHvVrrn7zKdF58p16We9kMfh7v0RRQ==
-  dependencies:
-    "@types/lodash" "*"
-
-"@types/lodash@*":
-  version "4.14.194"
-  resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.194.tgz"
-  integrity sha512-r22s9tAS7imvBt2lyHC9B8AGwWnXaYb1tY09oyLkXDs4vArpYJzw09nj8MLx5VfciBPGIb+ZwG0ssYnEPJxn/g==
+"@types/lodash@^4.14.201":
+  version "4.14.201"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.201.tgz#76f47cb63124e806824b6c18463daf3e1d480239"
+  integrity sha512-y9euML0cim1JrykNxADLfaG0FgD1g/yTHwUs/Jg9ZIU7WKj2/4IW9Lbb1WZbvck78W/lfGXFfe+u2EGfIJXdLQ==
 
 argparse@^2.0.1:
   version "2.0.1"
@@ -43,10 +36,10 @@ js-yaml@^4.1.0:
   dependencies:
     argparse "^2.0.1"
 
-lodash.merge@^4.6.2:
-  version "4.6.2"
-  resolved "https://registry.npmjs.org/lodash.merge/-/lodash.merge-4.6.2.tgz"
-  integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
+lodash@^4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
 playwright-core@1.39.0:
   version "1.39.0"
