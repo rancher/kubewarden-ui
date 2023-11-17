@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "@playwright/test": "^1.38.1",
+    "@playwright/test": "^1.39.0",
     "@types/js-yaml": "^4.0.5",
     "@types/lodash.merge": "^4.6.7",
     "js-yaml": "^4.1.0",
