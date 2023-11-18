@@ -1,6 +1,6 @@
 import { test } from './rancher-test'
 import type { RancherUI } from './components/rancher-ui'
-import { Policy, generateName, ClusterAdmissionPoliciesPage } from './pages/policies.page'
+import { Policy, policyTitle, policyList, generateName, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { PolicyServersPage } from './pages/policyservers.page'
 
 test.describe.configure({ mode: 'parallel' })
@@ -9,40 +9,23 @@ const polmode = 'Monitor'
 const pserver = { name: process.env.server || 'policies-private-ps' }
 const polkeep = !!process.env.keep || false
 
-const policyList: {title: Policy['title'], settings?: Policy['settings'], skip?: string }[] = [
-  { title: 'Custom Policy', settings: setupCustomPolicy },
-  { title: 'Allow Privilege Escalation PSP', settings: undefined },
-  { title: 'Allowed Fs Groups PSP', settings: undefined },
-  { title: 'Allowed Proc Mount Types PSP', settings: undefined },
-  { title: 'Apparmor PSP', settings: undefined },
-  { title: 'Capabilities PSP', settings: undefined },
-  { title: 'Deprecated API Versions', settings: setupDeprecatedAPIVersions },
-  { title: 'Disallow Service Loadbalancer' },
-  { title: 'Disallow Service Nodeport' },
-  { title: 'Echo' },
-  { title: 'Environment Variable Secrets Scanner' },
-  { title: 'Environment Variable Policy', settings: setupEnvironmentVariablePolicy },
-  { title: 'Flexvolume Drivers Psp', settings: undefined },
-  { title: 'Host Namespaces PSP', settings: undefined },
-  { title: 'Hostpaths PSP', settings: undefined },
-  { title: 'Ingress Policy', settings: undefined },
-  { title: 'Unique Ingress host' },
-  { title: 'Namespace label propagator', settings: setupNamespaceLabelPropagator },
-  { title: 'Pod Privileged Policy' },
-  { title: 'Pod Runtime', settings: undefined },
-  { title: 'PSA Label Enforcer', settings: setupPSALabelEnforcer },
-  { title: 'Readonly Root Filesystem PSP' },
-  { title: 'Safe Annotations', settings: undefined },
-  { title: 'Safe Labels', settings: undefined },
-  { title: 'Seccomp PSP', settings: undefined },
-  { title: 'Selinux PSP', settings: setupSelinuxPSP },
-  { title: 'Sysctl PSP', settings: undefined },
-  { title: 'Trusted Repos', settings: trustedRepos },
-  { title: 'User Group PSP', settings: setupUserGroupPSP },
-  { title: 'Verify Image Signatures', settings: setupVerifyImageSignatures },
-  { title: 'volumeMounts', settings: setupVolumeMounts },
-  { title: 'Volumes PSP', settings: undefined },
-]
+type PolicySettings = {
+  settings?: (ui: RancherUI) => Promise<void>;
+  skip?: string;
+}
+
+const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
+  'Custom Policy'              : { settings: setupCustomPolicy },
+  'Deprecated API Versions'    : { settings: setupDeprecatedAPIVersions },
+  'Environment Variable Policy': { settings: setupEnvironmentVariablePolicy },
+  'Namespace label propagator' : { settings: setupNamespaceLabelPropagator },
+  'PSA Label Enforcer'         : { settings: setupPSALabelEnforcer },
+  'Selinux PSP'                : { settings: setupSelinuxPSP },
+  'Trusted Repos'              : { settings: trustedRepos },
+  'User Group PSP'             : { settings: setupUserGroupPSP },
+  'Verify Image Signatures'    : { settings: setupVerifyImageSignatures },
+  volumeMounts                 : { settings: setupVolumeMounts },
+}
 
 async function trustedRepos(ui: RancherUI) {
   await ui.button('Add').first().click()
@@ -123,16 +106,17 @@ test.afterAll(async({ browser }) => {
 })
 
 // Generate installation test for every policy
-for (const policy of policyList) {
-  test(`install: ${policy.title}`, async({ page }) => {
-    // Skip broken tests
-    if (policy.skip) test.fixme(true, policy.skip)
+for (const title of policyList) {
+  test(`install: ${title}`, async({ page }) => {
+    const { settings, skip } = policySettingsMap[title] || {}
+    // Skip broken policies
+    test.fixme(!!skip, skip)
 
     const p: Policy = generateName({
-      title   : policy.title,
-      server  : pserver.name,
+      title,
+      server: pserver.name,
       mode    : polmode,
-      settings: policy.settings
+      settings
     })
 
     const capPage = new ClusterAdmissionPoliciesPage(page)

@@ -63,9 +63,6 @@ test('New resources should be reported', async({ ui, page, nav, shell }) => {
 })
 
 test('Check reports on resources details page', async({ ui, nav }) => {
-  const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
-  test.skip(ORIGIN === 'released', 'Requires kubewarden UI > 1.3.0')
-
   // Check Pods Compliance column
   await nav.explorer('Workloads', 'Pods')
   const failrow = ui.getRow(testPod, { group: testNs })

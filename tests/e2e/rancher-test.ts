@@ -1,6 +1,5 @@
 import { test as baseTest, Locator, expect as baseExpect } from '@playwright/test'
 
-import { isString } from 'lodash'
 import { RancherUI } from './components/rancher-ui'
 import { Navigation } from './components/navigation'
 import { Shell } from './components/kubectl-shell'
@@ -11,7 +10,7 @@ export function step(originalMethod: any, context: ClassMethodDecoratorContext) 
     // Log object if it overrides toString method
     if (this.toString !== Object.prototype.toString) name += `: ${this}`
     // Log function parameters and remove []
-    if (isString(args[0])) name += `: ${args[0]}` // JSON.stringify(args).slice(1, -1)
+    if (typeof args[0] === 'string') name += `: ${args[0]}`
     if (args[0]?.name) name += `: ${args[0].name}`
     return test.step(name, async() => {
       return await originalMethod.call(this, ...args)
