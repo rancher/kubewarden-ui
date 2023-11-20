@@ -56,9 +56,14 @@ export class KubewardenPage extends BasePage {
       try {
         await expect(installBtn).toBeVisible()
       } catch (e) {
-        test.info().annotations.push({ type: 'workaround', description: 'Failed to add kw repository' })
-        await expect(failRepo).toBeVisible()
-        await failRepoBtn.click()
+        test.info().annotations.push({ type: 'BUG', description: 'Failed to add kw repository' })
+        // 2 possible fails
+        await expect(failRepo.or(addRepoBtn)).toBeVisible()
+        if (await failRepo.isVisible()) {
+          await failRepoBtn.click()
+        } else {
+          await this.page.reload()
+        }
         await expect(welcomeStep).toBeVisible()
         await installBtn.click()
       }
