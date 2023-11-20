@@ -19,6 +19,7 @@ import { KUBEWARDEN, KUBEWARDEN_CHARTS, KubewardenDashboardLabels, KubewardenDas
 import { handleGrowl } from '../utils/handle-growl';
 import { refreshCharts } from '../utils/chart';
 import { grafanaProxy } from '../modules/grafana';
+import { findServiceMonitor } from '../modules/metricsConfig';
 
 import MetricsChecklist from './MetricsChecklist';
 
@@ -30,6 +31,14 @@ export default {
     },
     resource: {
       type:    String,
+      default: null
+    },
+    policyObj: {
+      type:    Object,
+      default: null
+    },
+    policyServerObj: {
+      type:    Object,
       default: null
     }
   },
@@ -188,8 +197,13 @@ export default {
       return this.allConfigMaps.filter(configMap => configMap?.metadata?.labels?.[KubewardenDashboardLabels.DASHBOARD]);
     },
 
-    kubewardenControllerServiceMonitor() {
-      return this.allServiceMonitors?.find(sm => sm?.spec?.selector?.matchLabels?.[KUBERNETES.MANAGED_NAME] === KUBEWARDEN_CHARTS.CONTROLLER);
+    kubewardenServiceMonitor() {
+      return findServiceMonitor({
+        policyObj:          this.policyObj,
+        policyServerObj:    this.policyServerObj,
+        controllerNs:       this.controllerApp?.metadata?.namespace,
+        allServiceMonitors: this.allServiceMonitors
+      });
     },
 
     monitoringApp() {
@@ -241,7 +255,13 @@ export default {
       const monitoringEnabled = this.controllerApp?.spec?.values?.telemetry?.metrics?.enabled;
       const grafanaDashboardsInstalled = !isEmpty(this.kubewardenGrafanaDashboards);
 
-      return !this.openTelSvc || !this.monitoringApp || !monitoringEnabled || !grafanaDashboardsInstalled;
+      return !this.openTelSvc || !this.monitoringApp || !this.kubewardenServiceMonitor || !monitoringEnabled || !grafanaDashboardsInstalled;
+    }
+  },
+
+  methods: {
+    async updateServiceMonitors() {
+      await this.$fetchType(MONITORING.SERVICEMONITOR);
     }
   }
 };
@@ -255,11 +275,14 @@ export default {
       :cattle-dashboard-ns="cattleDashboardNs"
       :controller-app="controllerApp"
       :controller-chart="controllerChart"
-      :kubewarden-controller-service-monitor="kubewardenControllerServiceMonitor"
+      :kubewarden-service-monitor="kubewardenServiceMonitor"
       :kubewarden-dashboards="kubewardenGrafanaDashboards"
       :monitoring-app="monitoringApp"
       :monitoring-chart="monitoringChart"
       :open-tel-svc="openTelSvc"
+      :policy-obj="policyObj"
+      :policy-server-obj="policyServerObj"
+      @updateServiceMonitors="updateServiceMonitors"
     />
 
     <template v-if="!showChecklist">

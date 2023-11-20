@@ -1,3 +1,5 @@
+import { State } from './core';
+
 export interface CatalogApp {
   id: string,
   type: string,
@@ -17,12 +19,7 @@ export interface CatalogApp {
     labels?: {[key: string]: string},
     name: string,
     namespace: string,
-    state: {
-      error?: boolean,
-      message?: string,
-      name?: string,
-      transitioning?: boolean
-    },
+    state: State,
   },
   spec: {
     chart: {

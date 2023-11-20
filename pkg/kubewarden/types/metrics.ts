@@ -15,11 +15,12 @@ export interface ServiceMonitorSpec {
 }
 
 export interface ServiceMonitor {
-  apiVersion: string,
-  kind: string,
+  apiVersion?: string,
+  kind?: string,
   metadata: {
     name: string
     namespace: string
   },
-  spec: ServiceMonitorSpec
+  spec: ServiceMonitorSpec,
+  type?: string
 }

@@ -39,11 +39,11 @@ export default {
 
     controllerLinkTooltip() {
       if ( !this.openTelSvc || !this.jaegerQuerySvc ) {
-        return this.t('kubewarden.monitoring.prerequisites.controllerConfig.tooltip');
+        return this.t('kubewarden.monitoring.prerequisites.tooltips.prerequisites');
       }
 
       if ( !this.controllerApp || !this.controllerChart ) {
-        return this.t('kubewarden.monitoring.prerequisites.controllerConfig.chartError');
+        return this.t('kubewarden.monitoring.prerequisites.tooltips.chartError', { chart: 'Kubewarden Controller' }, true);
       }
 
       return null;

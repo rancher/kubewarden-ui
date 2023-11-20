@@ -1,3 +1,5 @@
+import { State } from './core';
+
 export type Port ={
   name?: string,
   port?: number,
@@ -20,12 +22,7 @@ export interface Service {
     labels: {[key: string]: string},
     name: string,
     namespace: string,
-    state?: {
-      error?: boolean,
-      message?: string,
-      name?: string,
-      transitioning?: boolean
-    },
+    state?: State,
   },
   spec: {
     clusterIP?: string,

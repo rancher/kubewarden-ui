@@ -1,6 +1,8 @@
 import isEmpty from 'lodash/isEmpty';
+import { MONITORING } from '@shell/config/types';
 
-import { CatalogApp, Service, ServiceMonitorSpec } from '../types';
+import { CatalogApp, Service, ServiceMonitor, ServiceMonitorSpec } from '../types';
+import { handleGrowl, GrowlConfig } from '../utils/handle-growl';
 
 type ServiceMonitorConfigured = {
   namespace: boolean,
@@ -11,6 +13,15 @@ interface MonitoringConfig {
   serviceMonitorSpec: ServiceMonitorSpec[],
   controllerApp: CatalogApp,
   policyServerSvcs: Service[]
+}
+
+interface ServiceMonitorConfig {
+  store: any,
+  policyObj?: any,
+  policyServerObj?: any,
+  controllerNs: string,
+  allServiceMonitors?: ServiceMonitor[]
+  serviceMonitor?: ServiceMonitor
 }
 
 /**
@@ -84,4 +95,71 @@ export function serviceMonitorsConfigured(config: MonitoringConfig): ServiceMoni
   }
 
   return false;
+}
+
+/**
+ * Searches provided ServiceMonitors for a matching resource based on the `selector.matchLabels` including `kubewarden/policy-server` || `app`
+ * equal to the PolicyServer ID.
+ * @param config: `policyObj?, policyServerObj?, allServiceMonitors` | Needs either a policy object or policy server object with all fetched
+ * ServiceMonitors
+ * @returns `ServiceMonitor | void`
+ */
+export function findServiceMonitor(config: ServiceMonitorConfig): ServiceMonitor | void {
+  const { policyObj, policyServerObj, allServiceMonitors } = config;
+
+  if ( !isEmpty(allServiceMonitors) ) {
+    const smName: string = policyObj ? policyObj.spec?.policyServer : policyServerObj?.id;
+    const searchLabels = ['kubewarden/policy-server', 'app'];
+
+    return allServiceMonitors?.find((sm) => {
+      for ( const label of searchLabels ) {
+        if ( sm?.spec?.selector?.matchLabels?.[label] === smName ) {
+          return true;
+        }
+      }
+
+      return false;
+    });
+  }
+}
+
+/**
+ * Creates a Service Monitor for a PolicyServer when provided either a PS or a policy
+ * @param config: `store, policyObj?, policyServerObj?, controllerNs` | Needs kubewarden-controller app namespace, either a policy server or policy.
+ */
+export async function addKubewardenServiceMonitor(config: ServiceMonitorConfig): Promise<void> {
+  const {
+    store, policyObj, policyServerObj, controllerNs, serviceMonitor
+  } = config;
+
+  if ( store.getters['cluster/schemaFor'](MONITORING.SERVICEMONITOR) ) {
+    const smName: string = policyObj ? policyObj.spec?.policyServer : policyServerObj?.id;
+
+    const serviceMonitorTemplate: ServiceMonitor = {
+      kind:     'ServiceMonitor',
+      type:     MONITORING.SERVICEMONITOR,
+      metadata: {
+        name:        smName,
+        namespace:   controllerNs
+      },
+      spec: {
+        endpoints:         [{ interval: '10s', port: 'metrics' }],
+        namespaceSelector: { matchNames: [controllerNs] },
+        selector:          { matchLabels: { 'kubewarden/policy-server': smName } }
+      }
+    };
+
+    if ( !serviceMonitor ) {
+      const serviceMonitorObj = await store.dispatch(
+        'cluster/create',
+        serviceMonitorTemplate
+      );
+
+      try {
+        await serviceMonitorObj.save();
+      } catch (e) {
+        handleGrowl({ error: e as GrowlConfig | any, store });
+      }
+    }
+  }
 }

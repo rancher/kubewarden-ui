@@ -77,7 +77,7 @@ export default {
       </Tab>
 
       <Tab #default="props" name="policy-metrics" label="Metrics" :weight="97">
-        <MetricsTab :resource="resource" :active="props.active" />
+        <MetricsTab :resource="resource" :policy-obj="value" :active="props.active" />
       </Tab>
     </ResourceTabs>
   </div>
