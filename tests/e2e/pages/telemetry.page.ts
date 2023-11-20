@@ -2,14 +2,16 @@ import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import { BasePage } from './basepage'
 
-type ChecklistLine = 'otel' | 'jaeger' | 'monitoring' | 'configmap' | 'config'
+type ChecklistLine = 'otel' | 'jaeger' | 'monitoring' | 'servicemonitor' | 'configmap' | 'config'
+
+function getLine(tab: Page|Locator, text: string|RegExp) {
+  return tab.locator('div.checklist__step:visible', { hasText: text })
+}
 
 export class TelemetryPage extends BasePage {
   readonly tracingTab: Locator
   readonly metricsTab: Locator
   readonly configBtn: Locator
-  readonly monitoringBtn: Locator
-  readonly configmapBtn: Locator
   readonly lines: Record<ChecklistLine, Locator>
 
   constructor(page: Page) {
@@ -18,17 +20,14 @@ export class TelemetryPage extends BasePage {
     this.metricsTab = page.locator('section#policy-metrics:visible')
 
     this.lines = {
-      otel      : this.page.getByTestId(/^kw-(tracing|monitoring)-checklist-step-open-tel$/).filter({ has: this.page.locator(':visible') }),
-      jaeger    : this.tracingTab.getByTestId('kw-tracing-checklist-step-jaeger'),
-      monitoring: this.metricsTab.getByTestId('kw-monitoring-checklist-step-monitoring-app'),
-      configmap : this.metricsTab.getByTestId('kw-monitoring-checklist-step-config-map'),
-      config    : this.metricsTab.getByTestId('kw-monitoring-checklist-step-controller-config').or(
-        this.tracingTab.getByTestId('kw-tracing-checklist-step-config')
-      )
+      otel          : getLine(page, /^The OpenTelemetry Operator/),
+      jaeger        : getLine(this.tracingTab, /^The Jaeger Operator/),
+      monitoring    : getLine(this.metricsTab, /^The Rancher Monitoring app/),
+      servicemonitor: getLine(this.metricsTab, /^A Service Monitor/),
+      configmap     : getLine(this.metricsTab, /^Grafana Dashboards/),
+      config        : getLine(page, /^(Tracing must be configured|The Kubewarden Controller)/)
     }
     this.configBtn = this.lines.config.getByRole('button', { name: /^(Edit|Update) Config$/ })
-    this.monitoringBtn = this.lines.monitoring.getByRole('button', { name: 'Install App' })
-    this.configmapBtn = this.lines.configmap.getByRole('button', { name: 'Add Grafana Dashboards' })
   }
 
   goto(): Promise<void> {
