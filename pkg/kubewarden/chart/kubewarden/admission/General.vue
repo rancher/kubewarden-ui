@@ -156,6 +156,7 @@ export default {
             :value="value"
             :mode="mode"
             :options="policyServerOptions"
+            :disabled="!isCreate"
             :label="t('kubewarden.policyConfig.serverSelect.label')"
             :tooltip="t('kubewarden.policyConfig.serverSelect.tooltip')"
           />
