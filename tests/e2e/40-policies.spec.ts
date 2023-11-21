@@ -54,8 +54,7 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     await expect(polPage.module).toBeEnabled()
     await expect(polPage.modeGroup).toBeAllEnabled({ enabled: p.mode === 'Monitor' })
     await expect(polPage.auditGroup).toBeAllEnabled()
-    test.info().annotations.push({ type: 'BUG', description: 'Policy server option should be disabled' })
-    // await expect(polPage.server).toBeAllEnabled({enabled: false})
+    await expect(polPage.server).toBeAllEnabled({ enabled: false })
     if (isAP(polPage)) {
       await expect(polPage.namespace).toBeAllEnabled({ enabled: false })
     }
