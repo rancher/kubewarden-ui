@@ -5,6 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
 
 import CreateEditView from '@shell/mixins/create-edit-view';
+import { NAMESPACE } from '@shell/config/types';
 import { _CREATE } from '@shell/config/query-params';
 import { saferDump } from '@shell/utils/create-yaml';
 import { set } from '@shell/utils/object';
@@ -17,6 +18,7 @@ import Markdown from '@shell/components/Markdown';
 import Wizard from '@shell/components/Wizard';
 
 import {
+  KUBEWARDEN,
   KUBEWARDEN_PRODUCT_NAME,
   VALUES_STATE,
   ARTIFACTHUB_PKG_ANNOTATION,
@@ -31,16 +33,6 @@ import Values from './Values';
 export default ({
   name: 'Create',
 
-  components: {
-    AsyncButton,
-    Banner,
-    Loading,
-    Markdown,
-    Wizard,
-    PolicyGrid,
-    Values
-  },
-
   props: {
     mode: {
       type:    String,
@@ -52,6 +44,18 @@ export default ({
       default:  () => ({})
     },
   },
+
+  components: {
+    AsyncButton,
+    Banner,
+    Loading,
+    Markdown,
+    Wizard,
+    PolicyGrid,
+    Values
+  },
+
+  inject: ['chartType'],
 
   mixins: [CreateEditView],
 
@@ -236,6 +240,27 @@ export default ({
       }
     },
 
+    async createNamespace(ns) {
+      const allNamespaces = this.$store.getters['cluster/all'](NAMESPACE);
+      const nsTemplate = {
+        type:                     NAMESPACE,
+        metadata:                 { name: ns },
+        disableOpenApiValidation: false
+      };
+
+      const existing = allNamespaces?.find(n => n?.metadata?.name === ns);
+
+      if ( !existing ) {
+        const nsResource = await this.$store.dispatch('cluster/create', nsTemplate);
+
+        try {
+          await nsResource.save();
+        } catch (e) {
+          this.errors.push(e);
+        }
+      }
+    },
+
     async addArtifactHub(btnCb) {
       try {
         this.loadingPackages = true;
@@ -276,6 +301,11 @@ export default ({
 
         removeEmptyAttrs(out); // Clean up empty values from questions
         merge(this.value, out);
+
+        // If create new namespace option is selected, create the ns before saving the policy
+        if ( this.chartType === KUBEWARDEN.ADMISSION_POLICY && this.chartValues?.isNamespaceNew ) {
+          await this.createNamespace(this.value?.metadata?.namespace);
+        }
 
         await this.save(event);
       } catch (e) {
