@@ -13,3 +13,14 @@ export interface ServiceMonitorSpec {
     matchLabels?: {[key: string]: string}
   }
 }
+
+export interface ServiceMonitor {
+  apiVersion?: string,
+  kind?: string,
+  metadata: {
+    name: string
+    namespace: string
+  },
+  spec: ServiceMonitorSpec,
+  type?: string
+}

@@ -13,7 +13,7 @@ import { Banner } from '@components/Banner';
 
 import { handleGrowl } from '../utils/handle-growl';
 import { addKubewardenDashboards } from '../modules/grafana';
-import { serviceMonitorsConfigured } from '../modules/metricsConfig';
+import { addKubewardenServiceMonitor } from '../modules/metricsConfig';
 
 export default {
   props: {
@@ -26,6 +26,10 @@ export default {
       default: null
     },
     controllerChart: {
+      type:    Object,
+      default: null
+    },
+    kubewardenServiceMonitor: {
       type:    Object,
       default: null
     },
@@ -42,6 +46,14 @@ export default {
       default: null
     },
     openTelSvc: {
+      type:    Object,
+      default: null
+    },
+    policyObj: {
+      type:    Object,
+      default: null
+    },
+    policyServerObj: {
       type:    Object,
       default: null
     }
@@ -62,16 +74,16 @@ export default {
     },
 
     controllerLinkDisabled() {
-      return (!this.monitoringApp || !this.monitoringIsConfigured || this.emptyKubewardenDashboards || !this.controllerChart || !this.controllerApp);
+      return (!this.openTelSvc || !this.monitoringApp || !this.hasKubewardenDashboards || !this.controllerChart || !this.controllerApp);
     },
 
     controllerLinkTooltip() {
       if ( this.controllerLinkDisabled ) {
-        return this.t('kubewarden.monitoring.prerequisites.controllerConfig.tooltip');
+        return this.t('kubewarden.monitoring.prerequisites.tooltips.prerequisites');
       }
 
       if ( !this.controllerChart ) {
-        return this.t('kubewarden.monitoring.prerequisites.controllerConfig.chartError');
+        return this.t('kubewarden.monitoring.prerequisites.tooltips.chartError', { chart: 'Kubewarden Controller' }, true);
       }
 
       return null;
@@ -79,28 +91,22 @@ export default {
 
     dashboardsTooltip() {
       if ( !this.monitoringApp ) {
-        return this.t('kubewarden.monitoring.prerequisites.configMap.tooltip.appNotInstalled');
+        return this.t('kubewarden.monitoring.prerequisites.tooltips.appNotInstalled', { app: 'Rancher Monitoring' }, true);
       }
 
-      if ( this.monitoringApp ) {
-        if ( isEmpty(this.cattleDashboardNs) ) {
-          return this.t('kubewarden.monitoring.prerequisites.configMap.tooltip.nsNotFound');
-        }
-
-        if ( !this.monitoringIsConfigured ) {
-          return this.t('kubewarden.monitoring.prerequisites.configMap.tooltip.appNotConfigured');
-        }
+      if ( this.monitoringApp && isEmpty(this.cattleDashboardNs) ) {
+        return this.t('kubewarden.monitoring.prerequisites.tooltips.nsNotFound');
       }
 
       return null;
     },
 
     dashboardButtonDisabled() {
-      return (!this.monitoringApp || isEmpty(this.cattleDashboardNs) || !this.monitoringIsConfigured);
+      return (!this.monitoringApp || isEmpty(this.cattleDashboardNs));
     },
 
-    emptyKubewardenDashboards() {
-      return isEmpty(this.kubewardenDashboards);
+    hasKubewardenDashboards() {
+      return !isEmpty(this.kubewardenDashboards);
     },
 
     metricsEnabled() {
@@ -121,26 +127,30 @@ export default {
 
     monitoringLinkTooltip() {
       if ( !this.monitoringChart ) {
-        return this.t('kubewarden.monitoring.prerequisites.monitoringApp.chartError');
+        return this.t('kubewarden.monitoring.prerequisites.tooltips.chartError', { chart: 'Rancher Monitoring' }, true);
       }
 
       return null;
     },
 
-    monitoringServiceMonitorsSpec() {
-      if ( this.monitoringApp ) {
-        return this.monitoringApp.spec?.values?.prometheus?.additionalServiceMonitors;
+    serviceMonitorButtonDisabled() {
+      return (!this.controllerApp || !this.monitoringApp);
+    },
+
+    serviceMonitorsTooltip() {
+      if ( !this.monitoringApp ) {
+        return this.t('kubewarden.monitoring.prerequisites.tooltips.prerequisites');
+      }
+
+      if ( !this.kubewardenServiceMonitor && this.controllerApp ) {
+        return this.t(
+          'kubewarden.monitoring.prerequisites.tooltips.monitorsNotFound',
+          { namespace: this.controllerApp.metadata?.namespace },
+          true
+        );
       }
 
       return null;
-    },
-
-    monitoringIsConfigured() {
-      return serviceMonitorsConfigured({
-        serviceMonitorSpec: this.monitoringServiceMonitorsSpec,
-        controllerApp:      this.controllerApp,
-        policyServerSvcs:   this.policyServerSvcs
-      });
     }
   },
 
@@ -153,13 +163,41 @@ export default {
           controllerApp: this.controllerApp
         });
         btnCb(true);
-
-        this.reloadRequired = true;
       } catch (e) {
         handleGrowl({ error: e, store: this.$store });
-
         btnCb(false);
       }
+    },
+
+    async addServiceMonitor(btnCb) {
+      try {
+        await addKubewardenServiceMonitor({
+          store:           this.$store,
+          policyObj:       this.policyObj,
+          policyServerObj: this.policyServerObj,
+          controllerNs:    this.controllerApp?.metadata?.namespace,
+          serviceMonitor:  this.kubewardenServiceMonitor
+        });
+        this.$emit('updateServiceMonitors');
+        btnCb(true);
+      } catch (e) {
+        handleGrowl({ error: e, store: this.$store });
+        btnCb(false);
+      }
+    },
+
+    badgeIcon(prop) {
+      if ( Array.isArray(prop) ) {
+        const emptyProp = isEmpty(prop);
+
+        return {
+          'icon-dot-open': emptyProp, 'icon-checkmark': !emptyProp, 'text-success': !emptyProp
+        };
+      }
+
+      return {
+        'icon-dot-open': !prop, 'icon-checkmark': prop, 'text-success': prop
+      };
     },
 
     monitoringAppRoute() {
@@ -221,18 +259,19 @@ export default {
     />
     <div class="mt-20 mb-20">
       <div class="checklist__step mt-20 mb-20" data-testid="kw-monitoring-checklist-step-open-tel">
-        <i class="icon mr-10" :class="{ 'icon-dot-open': !openTelSvc,'icon-checkmark': openTelSvc }" />
+        <i class="icon mr-10" :class="badgeIcon(openTelSvc)" />
         <p v-clean-html="t('kubewarden.tracing.openTelemetry', {}, true)" />
       </div>
+
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-monitoring-app">
         <i
           class="icon mr-10"
-          :class="{ 'icon-dot-open': !monitoringApp || !monitoringIsConfigured,'icon-checkmark': monitoringApp && monitoringIsConfigured }"
+          :class="badgeIcon(monitoringApp)"
         />
         <div class="checklist__config">
           <p v-clean-html="t('kubewarden.monitoring.prerequisites.monitoringApp.label', {}, true)" p />
           <button
-            v-if="!monitoringApp || !monitoringIsConfigured"
+            v-if="!monitoringApp"
             v-clean-tooltip="monitoringLinkTooltip"
             data-testid="kw-monitoring-checklist-step-config-button"
             class="btn role-primary ml-10"
@@ -243,12 +282,29 @@ export default {
           </button>
         </div>
       </div>
+
+      <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-service-monitor-map">
+        <i class="icon mr-10" :class="badgeIcon(kubewardenServiceMonitor)" />
+        <div class="checklist__config">
+          <p v-clean-html="t('kubewarden.monitoring.prerequisites.serviceMonitor.label', {}, true)" p />
+          <AsyncButton
+            v-if="!kubewardenServiceMonitor"
+            v-clean-tooltip="serviceMonitorsTooltip"
+            data-testid="kw-monitoring-checklist-step-service-monitor-button"
+            mode="serviceMonitor"
+            class="ml-10"
+            :disabled="serviceMonitorButtonDisabled"
+            @click="addServiceMonitor"
+          />
+        </div>
+      </div>
+
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-config-map">
-        <i class="icon mr-10" :class="{ 'icon-dot-open': emptyKubewardenDashboards,'icon-checkmark': !emptyKubewardenDashboards }" />
+        <i class="icon mr-10" :class="badgeIcon(hasKubewardenDashboards)" />
         <div class="checklist__config">
           <p v-clean-html="t('kubewarden.monitoring.prerequisites.configMap.label', {}, true)" p />
           <AsyncButton
-            v-if="emptyKubewardenDashboards"
+            v-if="!hasKubewardenDashboards"
             v-clean-tooltip="dashboardsTooltip"
             data-testid="kw-monitoring-checklist-step-config-map-button"
             mode="grafanaDashboard"
@@ -258,8 +314,9 @@ export default {
           />
         </div>
       </div>
+
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-controller-config">
-        <i class="icon mr-10" :class="{ 'icon-dot-open': !metricsEnabled,'icon-checkmark': metricsEnabled }" />
+        <i class="icon mr-10" :class="badgeIcon(metricsEnabled)" />
         <div class="checklist__config">
           <p v-clean-html="t('kubewarden.monitoring.prerequisites.controllerConfig.label', {}, true)" p />
           <button

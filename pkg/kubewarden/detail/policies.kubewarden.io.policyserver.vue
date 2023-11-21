@@ -32,12 +32,10 @@ export default {
       type:    String,
       default: _CREATE,
     },
-
     resource: {
       type:    String,
       default: null
     },
-
     value: {
       type:     Object,
       required: true,
@@ -202,7 +200,7 @@ export default {
       </Tab>
 
       <Tab #default="props" name="policy-metrics" label="Metrics" :weight="97" class="relative">
-        <MetricsTab :resource="resource" :active="props.active" />
+        <MetricsTab :resource="resource" :policy-server-obj="value" :active="props.active" />
       </Tab>
     </ResourceTabs>
   </div>
