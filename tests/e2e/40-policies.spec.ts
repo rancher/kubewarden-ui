@@ -119,15 +119,11 @@ for (const PolicyPage of pageTypes) {
     const ps: PolicyServer = { name: 'ps-custom' }
     const p: Policy = { ...pMinimal, mode: 'Monitor', audit: 'Off', server: ps.name, module: 'ghcr.io/kubewarden/policies/pod-privileged:v0.2.6' }
 
+    if (isAP(polPage)) p.namespace = 'ns-custom'
+
     // Create custom server
     const psPage = new PolicyServersPage(page)
     await psPage.create(ps)
-
-    // Create custom namespace
-    if (isAP(polPage)) {
-      p.namespace = 'ns-custom'
-      await shell.run(`k create ns ${p.namespace}`)
-    }
 
     // Create and check policy
     const row = await polPage.create(p)
