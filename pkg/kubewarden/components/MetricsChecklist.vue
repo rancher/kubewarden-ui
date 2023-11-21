@@ -74,7 +74,7 @@ export default {
     },
 
     controllerLinkDisabled() {
-      return (!this.monitoringApp || !this.hasKubewardenDashboards || !this.controllerChart || !this.controllerApp);
+      return (!this.openTelSvc || !this.monitoringApp || !this.hasKubewardenDashboards || !this.controllerChart || !this.controllerApp);
     },
 
     controllerLinkTooltip() {

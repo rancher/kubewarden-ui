@@ -98,8 +98,8 @@ export function serviceMonitorsConfigured(config: MonitoringConfig): ServiceMoni
 }
 
 /**
- * Searches provided ServiceMonitors for a matching resource based on the `selector.matchLabels` including `kubewarden/policy-server` || `app`
- * equal to the PolicyServer ID.
+ * Searches provided ServiceMonitors for a matching resource based on the `selector.matchLabels` including:
+ * `app=kubewarden-policy-server-<policy-server-id>`
  * @param config: `policyObj?, policyServerObj?, allServiceMonitors` | Needs either a policy object or policy server object with all fetched
  * ServiceMonitors
  * @returns `ServiceMonitor | void`
@@ -109,17 +109,8 @@ export function findServiceMonitor(config: ServiceMonitorConfig): ServiceMonitor
 
   if ( !isEmpty(allServiceMonitors) ) {
     const smName: string = policyObj ? policyObj.spec?.policyServer : policyServerObj?.id;
-    const searchLabels = ['kubewarden/policy-server', 'app'];
 
-    return allServiceMonitors?.find((sm) => {
-      for ( const label of searchLabels ) {
-        if ( sm?.spec?.selector?.matchLabels?.[label] === smName ) {
-          return true;
-        }
-      }
-
-      return false;
-    });
+    return allServiceMonitors?.find(sm => sm?.spec?.selector?.matchLabels?.['app'] === `kubewarden-policy-server-${ smName }`);
   }
 }
 
@@ -145,7 +136,7 @@ export async function addKubewardenServiceMonitor(config: ServiceMonitorConfig):
       spec: {
         endpoints:         [{ interval: '10s', port: 'metrics' }],
         namespaceSelector: { matchNames: [controllerNs] },
-        selector:          { matchLabels: { 'kubewarden/policy-server': smName } }
+        selector:          { matchLabels: { app: `kubewarden-policy-server-${ smName }` } }
       }
     };
 
