@@ -71,7 +71,14 @@ export default {
     return {
       policy,
       initialPolicyMode: null,
+      isNamespaceNew:    false
     };
+  },
+
+  watch: {
+    isNamespaceNew(neu) {
+      this.$set(this.value, 'isNamespaceNew', neu);
+    }
   },
 
   created() {
@@ -142,8 +149,10 @@ export default {
           :value="policy"
           :description-hidden="true"
           :namespaced="!isGlobal"
+          :namespace-new-allowed="true"
           name-key="metadata.name"
           namespace-key="metadata.namespace"
+          @isNamespaceNew="isNamespaceNew = $event"
         />
       </div>
     </div>
