@@ -166,7 +166,7 @@ kubewarden:
         install: Install App
         edit: Edit Config
       serviceMonitor:
-        label: A Service Monitor for the Kubewarden Controller must be created. Follow the <a href="https://docs.kubewarden.io/operator-manual/ui-extension/metrics#install" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to create the additional Service Monitors.
+        label: A Service Monitor for this Policy Server does not exist. Follow the <a href="https://docs.kubewarden.io/operator-manual/ui-extension/metrics#install" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to learn more about Service Monitors.
       configMap:
         label: Grafana Dashboards (ConfigMaps) for the Policy Servers and for Kubewarden Policies must be created.
         button: Add Dashboards
