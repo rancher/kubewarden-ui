@@ -97,33 +97,36 @@ test.describe('Metrics', () => {
     await nav.pserver('default', 'Metrics')
   })
 
-  test('Install Monitoring', async({ nav }) => {
+  test('Install Monitoring', async({ ui, nav }) => {
     // Monitoring is not installed
     await telPage.toBeIncomplete('monitoring')
     await expect(telPage.configBtn).toBeDisabled()
     // Install Monitoring
-    await telPage.monitoringBtn.click()
+    await ui.button('Install App').click()
     await apps.installChart(monitoringChart, {
-      navigate : false,
-      timeout  : 7 * 60_000,
-      yamlPatch: `{"prometheus": {"additionalServiceMonitors": [{
-             "name": "kubewarden",
-             "selector": {"matchLabels": {"app": "kubewarden-policy-server-default"}},
-             "namespaceSelector": {"matchNames": ["cattle-kubewarden-system"]},
-             "endpoints": [{"port": "metrics","interval": "10s"}]
-            }]}}`
+      navigate: false,
+      timeout : 7 * 60_000
     })
     // Monitoring is installed
     await nav.pserver('default', 'Metrics')
     await telPage.toBeComplete('monitoring')
   })
 
-  test('Create Grafana ConfigMaps', async() => {
-    // ConfigMaps are not created
+  test('Create Prometheus ServiceMonitor', async({ ui }) => {
+    // ServiceMonitor does not exist
+    await telPage.toBeIncomplete('servicemonitor')
+    await expect(telPage.configBtn).toBeDisabled()
+    // Create service monitor
+    await ui.button('Add Service Monitor').click()
+    await telPage.toBeComplete('servicemonitor')
+  })
+
+  test('Create Grafana ConfigMaps', async({ ui }) => {
+    // ConfigMap does not exist
     await telPage.toBeIncomplete('configmap')
     await expect(telPage.configBtn).toBeDisabled()
     // Create configmaps
-    await telPage.configmapBtn.click()
+    await ui.button('Add Grafana Dashboards').click()
     await telPage.toBeComplete('configmap')
   })
 
