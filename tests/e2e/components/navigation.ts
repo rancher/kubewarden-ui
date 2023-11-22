@@ -70,25 +70,25 @@ export class Navigation {
 
     // Policy Servers
     @step
-    async pserver(name: string, tab?: 'Policies' | 'Metrics' | 'Tracing' | 'Conditions' | 'Recent Events' | 'Related Resources') {
+    async pserver(name?: string, tab?: 'Policies' | 'Metrics' | 'Tracing' | 'Conditions' | 'Recent Events' | 'Related Resources') {
       await this.explorer('Kubewarden', 'PolicyServers')
-      await this.ui.getRow(name).open()
+      if (name) await this.ui.getRow(name).open()
       if (tab) await this.ui.tab(tab).click()
     }
 
     // Cluster Admission Policies
     @step
-    async capolicy(name: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events' | 'Related Resources') {
+    async capolicy(name?: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events' | 'Related Resources') {
       await this.explorer('Kubewarden', 'ClusterAdmissionPolicies')
-      await this.ui.getRow(name).open()
+      if (name) await this.ui.getRow(name).open()
       if (tab) await this.ui.tab(tab).click()
     }
 
     // Admission Policies
     @step
-    async apolicy(name: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events') {
+    async apolicy(name?: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events') {
       await this.explorer('Kubewarden', 'AdmissionPolicies')
-      await this.ui.getRow(name).open()
+      if (name) await this.ui.getRow(name).open()
       if (tab) await this.ui.tab(tab).click()
     }
 }

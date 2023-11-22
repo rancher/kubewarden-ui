@@ -27,7 +27,7 @@ export class RancherUI {
 
   // Labeled Input
   input(label: string) {
-    return this.page.locator('div.labeled-input').filter({ hasText: label }).getByRole('textbox')
+    return this.page.locator('div.labeled-input').filter({ hasText: label }).locator('input')
   }
 
   // Labeled Checkbox
@@ -145,7 +145,7 @@ export class RancherUI {
   }
 
   /**
-     * Call ui.withReload(async()=> { <code> }, 'Reason')
+     * Call await ui.withReload(async()=> { <code> }, 'Reason')
      */
   async withReload(code: () => Promise<void>, message: string) {
     try {

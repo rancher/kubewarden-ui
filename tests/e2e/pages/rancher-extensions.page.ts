@@ -23,7 +23,7 @@ export class RancherExtensionsPage extends BasePage {
       await expect(this.page.getByRole('heading', { name: 'Extension support is not enabled' })).toBeVisible()
 
       // Enable extensions
-      await this.page.getByRole('button', { name: 'Enable' }).click()
+      await this.ui.button('Enable').click()
       await expect(this.page.getByRole('heading', { name: 'Enable Extension Support?' })).toBeVisible()
 
       // Add repositories
@@ -34,7 +34,7 @@ export class RancherExtensionsPage extends BasePage {
       }
 
       // Confirm and wait for extensions to be enabled
-      await this.page.getByRole('button', { name: 'OK' }).click()
+      await this.ui.button('OK').click()
       await this.ui.withReload(async() => {
         await expect(this.tabs).toBeVisible({ timeout: 60_000 })
       }, 'Extensions enabled but not visible')
