@@ -161,8 +161,9 @@ export class AdmissionPoliciesPage extends BasePolicyPage {
       await this.page.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.admissionpolicy')
     }
 
-    async setNamespace(namespace: string) {
-      await this.ui.select('Namespace*', namespace)
+    async setNamespace(name: string) {
+      await this.ui.select('Namespace*', /^Create a [nN]ew Namespace$/)
+      await this.ui.input('Namespace*').fill(name)
     }
 
     @step
