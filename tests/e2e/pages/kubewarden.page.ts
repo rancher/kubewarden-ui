@@ -37,20 +37,21 @@ export class KubewardenPage extends BasePage {
       const welcomeStep = this.page.getByText('Kubewarden is a policy engine for Kubernetes.')
       const addRepoStep = this.page.getByRole('heading', { name: 'Repository', exact: true })
       const appInstallStep = this.page.getByRole('heading', { name: 'Kubewarden App Install', exact: true })
-      const installBtn = this.page.getByRole('button', { name: 'Install Kubewarden', exact: true })
-      const addRepoBtn = this.page.getByRole('button', { name: 'Add Kubewarden Repository', exact: true })
+      const installBtn = this.ui.button('Install Kubewarden')
+      const addRepoBtn = this.ui.button('Add Kubewarden Repository')
       const failRepo = this.page.getByText('Unable to fetch Kubewarden Helm chart')
-      const failRepoBtn = this.page.getByRole('button', { name: 'Reload', exact: true })
+      const failRepoBtn = this.ui.button('Reload')
 
       // Welcome screen
       await this.goto()
       await expect(welcomeStep).toBeVisible()
       await installBtn.click()
 
-      // Add repository screen (shows if repo does not exist)
-      if (await addRepoStep.isVisible()) {
-        await addRepoBtn.click()
-      }
+      // Add repository screen
+      await expect(addRepoStep).toBeVisible()
+      await addRepoBtn.click()
+      // Wait repo state changes between Active / In Progress
+      await this.page.waitForTimeout(5_000)
 
       // Wait for install button or handle repo failure
       try {

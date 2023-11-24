@@ -54,7 +54,7 @@ export class RancherAppsPage extends BasePage {
       }
       await this.ui.button('Create').click()
 
-      // Transition: Active > [In Progress] > [Active|InProgress]
+      // Transitions: Active ?> In Progress ?> [Active|InProgress]
       const repo = this.ui.getRow(name)
       // Wait out first Active state
       await this.page.waitForTimeout(1000)
