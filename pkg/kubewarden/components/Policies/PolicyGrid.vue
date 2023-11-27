@@ -1,13 +1,15 @@
 <script>
 import isEmpty from 'lodash/isEmpty';
 
+import { SCHEMA } from '@shell/config/types';
 import { _CREATE, CATEGORY, SEARCH_QUERY } from '@shell/config/query-params';
 import { ensureRegex } from '@shell/utils/string';
 import { sortBy } from '@shell/utils/sort';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 
-import { KUBEWARDEN_PRODUCT_NAME } from '../../types';
+import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME } from '../../types';
+import { resourcesFromAnnotation, isGlobalPolicy } from '../../modules/artifacthub';
 
 export default {
   props: {
@@ -16,7 +18,7 @@ export default {
       default: _CREATE
     },
 
-    // packages
+    // ArtifactHub packages
     value: {
       type:    Array,
       default: () => {
@@ -24,6 +26,8 @@ export default {
       }
     }
   },
+
+  inject: ['chartType'],
 
   components: { LabeledSelect },
 
@@ -46,8 +50,8 @@ export default {
   },
 
   beforeMount() {
-    if ( !isEmpty(this.value) ) {
-      const officialExists = this.value.find(subtype => this.isOfficial(subtype));
+    if ( !isEmpty(this.filteredSubtypes) ) {
+      const officialExists = this.filteredSubtypes.find(subtype => this.isOfficial(subtype));
 
       this.$nextTick(() => {
         if ( officialExists && officialExists.repository?.organization_display_name ) {
@@ -58,8 +62,24 @@ export default {
   },
 
   computed: {
+    allSchemas() {
+      return this.$store.getters['cluster/all'](SCHEMA);
+    },
+
+    filteredPackages() {
+      const filteredPackages = this.value?.filter((artifactHubPackage) => {
+        if ( this.chartType === KUBEWARDEN.ADMISSION_POLICY ) {
+          return !isGlobalPolicy(artifactHubPackage, this.allSchemas);
+        }
+
+        return true;
+      });
+
+      return filteredPackages || [];
+    },
+
     filteredSubtypes() {
-      const subtypes = ( this.value || [] );
+      const subtypes = ( this.filteredPackages || [] );
 
       const out = subtypes.filter((subtype) => {
         if ( this.category ) {
@@ -103,8 +123,8 @@ export default {
     },
 
     keywordOptions() {
-      const flattened = this.value?.flatMap((subtype) => {
-        if ( subtype.keywords && subtype.keywords.length ) {
+      const flattened = this.filteredSubtypes?.flatMap((subtype) => {
+        if ( subtype?.keywords && subtype.keywords.length ) {
           return subtype.keywords;
         }
       });
@@ -117,8 +137,8 @@ export default {
     },
 
     organizationOptions() {
-      const out = this.value?.flatMap((subtype) => {
-        const name = subtype.repository?.organization_display_name || subtype.repository?.user_alias;
+      const out = this.filteredSubtypes?.flatMap((subtype) => {
+        const name = subtype?.repository?.organization_display_name || subtype?.repository?.user_alias;
 
         return name || [];
       });
@@ -131,35 +151,7 @@ export default {
     },
 
     resourceOptions() {
-      const out = [];
-
-      const resources = this.value?.flatMap((subtype) => {
-        const annotation = subtype.data?.['kubewarden/resources'];
-
-        if ( annotation ) {
-          return annotation;
-        }
-      });
-
-      resources?.flatMap((resource) => {
-        if ( resource ) {
-          const split = resource.split(',');
-
-          if ( split.length > 1 ) {
-            split.forEach(s => out.push(s));
-          } else {
-            out.push(resource);
-          }
-        }
-
-        return [];
-      })?.sort();
-
-      if ( !out || out?.length === 0 ) {
-        return [];
-      }
-
-      return [...new Set(out.filter(Boolean))];
+      return resourcesFromAnnotation(this.filteredSubtypes);
     }
   },
 
@@ -258,7 +250,7 @@ export default {
       <button
         ref="btn"
         data-testid="kw-grid-filter-refresh"
-        class="btn, btn-sm, role-primary"
+        class="btn, btn-sm, role-primary, filter__reset"
         type="button"
         @click="refresh"
       >
@@ -277,47 +269,53 @@ export default {
         @click="$emit('selectType', subtype)"
       >
         <div class="subtype__metadata">
-          <div v-if="hasAnnotation(subtype, 'kubewarden/resources')" class="subtype__badge">
-            <label>{{ resourceType(subtype.data['kubewarden/resources']) }}</label>
-          </div>
-
-          <div class="subtype__left">
-            <div v-if="subtype.signed" class="subtype__signed">
-              <span v-clean-tooltip="t('kubewarden.policyCharts.signedPolicy.tooltip', { signatures: subtypeSignature(subtype) })">
-                <i class="icon icon-lock" />
-              </span>
+          <div class="subtype__body">
+            <div v-if="hasAnnotation(subtype, 'kubewarden/resources')" class="subtype__badge">
+              <label>{{ resourceType(subtype.data['kubewarden/resources']) }}</label>
             </div>
 
-            <div v-if="isOfficial(subtype)" class="subtype__icon">
-              <img
-                v-clean-tooltip="t('kubewarden.policies.official')"
-                src="../../assets/icon-kubewarden.svg"
-                :alt="t('kubewarden.policies.official')"
-                class="ml-5"
-              >
+            <div class="subtype__label">
+              <h4>
+                {{ subtype.display_name }}
+              </h4>
+            </div>
+
+            <div v-if="subtype.description" class="subtype__description">
+              {{ subtype.description }}
             </div>
           </div>
 
-          <div v-if="hasAnnotation(subtype, 'kubewarden/mutation')" class="subtype__mutation">
-            <span v-clean-tooltip="t('kubewarden.policyCharts.mutationPolicy.tooltip')">
-              {{ t('kubewarden.policyCharts.mutationPolicy.label') }}
-            </span>
-          </div>
+          <div class="subtype__footer">
+            <div class="subtype__left">
+              <div v-if="subtype.signed" class="subtype__signed">
+                <span v-clean-tooltip="t('kubewarden.policyCharts.signedPolicy.tooltip', { signatures: subtypeSignature(subtype) })">
+                  <i class="icon icon-lock" />
+                </span>
+              </div>
 
-          <div v-if="hasAnnotation(subtype, 'kubewarden/contextAwareResources')" class="subtype__aware">
-            <span v-clean-tooltip="t('kubewarden.policyCharts.contextAware.tooltip')">
-              {{ t('kubewarden.policyCharts.contextAware.label') }}
-            </span>
-          </div>
+              <div v-if="isOfficial(subtype)" class="subtype__icon">
+                <img
+                  v-clean-tooltip="t('kubewarden.policies.official')"
+                  src="../../assets/icon-kubewarden.svg"
+                  :alt="t('kubewarden.policies.official')"
+                  class="ml-5"
+                >
+              </div>
+            </div>
 
-          <div class="subtype__label">
-            <h4>
-              {{ subtype.display_name }}
-            </h4>
-          </div>
+            <div class="subtype__right">
+              <div v-if="hasAnnotation(subtype, 'kubewarden/mutation')" class="subtype__mutation">
+                <span v-clean-tooltip="t('kubewarden.policyCharts.mutationPolicy.tooltip')">
+                  {{ t('kubewarden.policyCharts.mutationPolicy.label') }}
+                </span>
+              </div>
 
-          <div v-if="subtype.description" class="subtype__description mb-20">
-            {{ subtype.description }}
+              <div v-if="hasAnnotation(subtype, 'kubewarden/contextAwareResources')" class="subtype__aware">
+                <span v-clean-tooltip="t('kubewarden.policyCharts.contextAware.tooltip')">
+                  {{ t('kubewarden.policyCharts.contextAware.label') }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -350,6 +348,7 @@ $margin: 10px;
   flex-direction: row;
   justify-content: flex-end;
   align-self: flex-end;
+  align-items: center;
 
   & > * {
     margin: $margin;
@@ -366,9 +365,13 @@ $margin: 10px;
     min-width: 200px;
     height: unset;
   }
+
+  &__search, &__reset {
+    height: 61px;
+  }
 }
 
-@media only screen and (min-width: map-get($breakpoints, '--viewport-4')) {
+@media only screen and (max-width: map-get($breakpoints, '--viewport-12')) {
   .filter {
     width: 100%;
   }
@@ -432,6 +435,14 @@ $margin: 10px;
 }
 
 .subtype {
+  &__metadata {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 5px 10px;
+  }
+
   &__label {
     max-width: 205px;
 
@@ -445,28 +456,34 @@ $margin: 10px;
     padding: 4px 5px;
   }
 
-  &__left, &__mutation, &__aware {
-    position: absolute;
-    bottom: 5px;
+  &__body {
+    height: auto;
+  }
+
+  &__footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: $margin;
   }
 
   &__mutation, &__aware {
     border: 1px solid var(--border);
     padding: 0px 5px;
+    margin-left: 2px;
+  }
+
+  &__left, &__right {
+    display: flex;
+    flex-direction: row;
   }
 
   &__left {
-    display: flex;
-    flex-direction: row;
     align-items: flex-start;
   }
 
-  &__mutation {
-    right: 10px;
-  }
-
-  &__aware {
-    right: 80px;
+  &__right {
+    align-items: flex-end;
   }
 
   &__icon {

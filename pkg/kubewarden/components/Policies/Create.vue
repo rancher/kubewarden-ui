@@ -500,16 +500,18 @@ export default ({
           <template #customSubtype>
             <div data-testid="kw-grid-subtype-card-custom" class="subtype custom" @click="selectType('custom')">
               <div class="subtype__metadata">
-                <div class="subtype__badge" :style="{ 'background-color': 'var(--darker)' }">
-                  <label>{{ t('kubewarden.customPolicy.badge') }}</label>
-                </div>
+                <div class="subtype__body">
+                  <div class="subtype__badge" :style="{ 'background-color': 'var(--darker)' }">
+                    <label>{{ t('kubewarden.customPolicy.badge') }}</label>
+                  </div>
 
-                <h4 class="subtype__label">
-                  {{ t('kubewarden.customPolicy.title') }}
-                </h4>
+                  <h4 class="subtype__label">
+                    {{ t('kubewarden.customPolicy.title') }}
+                  </h4>
 
-                <div class="subtype__description">
-                  {{ t('kubewarden.customPolicy.description') }}
+                  <div class="subtype__description">
+                    {{ t('kubewarden.customPolicy.description') }}
+                  </div>
                 </div>
               </div>
             </div>
