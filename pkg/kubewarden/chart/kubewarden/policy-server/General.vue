@@ -154,6 +154,7 @@ export default {
           v-model="name"
           data-testid="ps-config-name-input"
           :mode="mode"
+          :disabled="!isCreate"
           :label="t('nameNsDescription.name.label')"
           :placeholder="t('nameNsDescription.name.placeholder')"
           required
