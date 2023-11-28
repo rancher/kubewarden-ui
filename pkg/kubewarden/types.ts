@@ -1,3 +1,4 @@
+export * from './types/artifacthub';
 export * from './types/core';
 export * from './types/catalog.cattle.io.app';
 export * from './types/chart';

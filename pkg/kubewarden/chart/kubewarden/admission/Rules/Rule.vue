@@ -41,8 +41,6 @@ export default {
   components: { LabeledSelect },
 
   fetch() {
-    this.schemas = this.$store.getters[`${ this.currentProduct.inStore }/all`](SCHEMA);
-
     if ( this.isCreate && isEmpty(this.value?.apiGroups) ) {
       if ( !Array.isArray(this.value.apiGroups) ) {
         this.$set(this.value, 'apiGroups', []);
@@ -73,8 +71,7 @@ export default {
       operationOptions,
       apiGroupValues,
 
-      noResourceOptions: false,
-      schemas:           null
+      noResourceOptions: false
     };
   },
 
@@ -85,7 +82,9 @@ export default {
       const out = ['*'];
 
       if ( !isEmpty(this.apiGroups) ) {
-        this.apiGroups.map(g => out.push(g.id));
+        this.apiGroups.forEach((g) => {
+          out.push(g.id);
+        });
 
         const coreIndex = out.indexOf('core');
 
@@ -147,6 +146,10 @@ export default {
       const resourceSet = [...new Set(filtered?.map(f => f.attributes.resource))];
 
       return resourceSet.sort();
+    },
+
+    schemas() {
+      return this.$store.getters[`${ this.currentProduct.inStore }/all`](SCHEMA);
     }
   },
 
