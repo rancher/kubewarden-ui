@@ -1,6 +1,6 @@
 import { test } from './rancher-test'
 import type { RancherUI } from './components/rancher-ui'
-import { Policy, policyTitle, policyList, generateName, ClusterAdmissionPoliciesPage } from './pages/policies.page'
+import { Policy, policyTitle, capList, generateName, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { PolicyServersPage } from './pages/policyservers.page'
 
 test.describe.configure({ mode: 'parallel' })
@@ -106,7 +106,7 @@ test.afterAll(async({ browser }) => {
 })
 
 // Generate installation test for every policy
-for (const title of policyList) {
+for (const title of capList) {
   test(`install: ${title}`, async({ page }) => {
     const { settings, skip } = policySettingsMap[title] || {}
     // Skip broken policies
