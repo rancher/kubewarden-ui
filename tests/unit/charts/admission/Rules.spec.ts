@@ -17,7 +17,7 @@ describe('component: Rules', () => {
         return { rules: policyConfig.spec.rules };
       },
       propsData: { value: { policy: policyConfig } },
-      provide:   { chartType: KUBEWARDEN.ADMISSION_POLICY },
+      provide:   { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
       computed:  {
         currentProduct: () => {
           return { inStore: 'cluster' };
@@ -28,9 +28,9 @@ describe('component: Rules', () => {
         $fetchState: { pending: false },
         $store:      {
           getters: {
-            currentStore:               () => 'current_store',
-            'current_store/all':        jest.fn(),
-            'i18n/t':                   jest.fn()
+            currentStore:         () => 'current_store',
+            'cluster/all':        jest.fn(),
+            'i18n/t':             jest.fn()
           },
         }
       }

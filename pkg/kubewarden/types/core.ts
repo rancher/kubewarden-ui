@@ -53,3 +53,21 @@ export type Metadata = {
   state?: State;
   uid: string;
 }
+
+export type ApiGroup = {
+  id: string,
+  type: string,
+  links: {
+    self: string
+  },
+  versions?: [
+    {
+      groupVersion: string,
+      version: string,
+    }
+  ],
+  preferredVersion?: {
+    groupVersion: string,
+    version: string
+  }
+}

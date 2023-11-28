@@ -3,10 +3,16 @@ import { DefaultProps } from 'vue/types/options';
 import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from '@jest/globals';
 
+import { KUBEWARDEN } from '@kubewarden/types';
+
 import PolicyGrid from '@kubewarden/components/Policies/PolicyGrid.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 
 import policyPackages from '../../templates/policyPackages.js';
+
+const defaultComputed = { allSchemas: jest.fn() };
+const defaultMocks = { $store: { getters: { 'i18n/t': jest.fn() } } };
+const defaultProvide = { chartType: KUBEWARDEN.ADMISSION_POLICY };
 
 describe('component: PolicyGrid', () => {
   it('should render custom card when provided empty packages', () => {
@@ -15,7 +21,9 @@ describe('component: PolicyGrid', () => {
 
     const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData: { targetNamespace: 'default', value: packages },
-      mocks:     { $store: { getters: { 'i18n/t': jest.fn() } } },
+      mocks:     defaultMocks,
+      provide:   defaultProvide,
+      computed:  defaultComputed,
       slots:     { customSubtype }
     });
 
@@ -28,7 +36,9 @@ describe('component: PolicyGrid', () => {
     const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData:  { targetNamespace: 'default', value: policyPackages },
       directives: { tooltip: jest.fn() },
-      mocks:      { $store: { getters: { 'i18n/t': jest.fn() } } },
+      mocks:      defaultMocks,
+      provide:    defaultProvide,
+      computed:   defaultComputed,
       slots:      { customSubtype }
     });
 
@@ -40,7 +50,9 @@ describe('component: PolicyGrid', () => {
     const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData:  { targetNamespace: 'default', value: policyPackages },
       directives: { tooltip: jest.fn() },
-      mocks:      { $store: { getters: { 'i18n/t': jest.fn() } } }
+      mocks:      defaultMocks,
+      provide:    defaultProvide,
+      computed:   defaultComputed
     });
 
     const selects = wrapper.findAllComponents(LabeledSelect);
@@ -52,7 +64,9 @@ describe('component: PolicyGrid', () => {
     const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData:  { targetNamespace: 'default', value: policyPackages },
       directives: { tooltip: jest.fn() },
-      mocks:      { $store: { getters: { 'i18n/t': jest.fn() } } }
+      mocks:      defaultMocks,
+      provide:    defaultProvide,
+      computed:   defaultComputed
     });
 
     expect(wrapper.html()).toContain('Allow Privilege Escalation PSP');
@@ -69,7 +83,9 @@ describe('component: PolicyGrid', () => {
     const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData:  { targetNamespace: 'default', value: policyPackages },
       directives: { tooltip: jest.fn() },
-      mocks:      { $store: { getters: { 'i18n/t': jest.fn() } } },
+      mocks:      defaultMocks,
+      provide:    defaultProvide,
+      computed:   defaultComputed,
     });
 
     const selects = wrapper.findAllComponents(LabeledSelect);
@@ -81,7 +97,9 @@ describe('component: PolicyGrid', () => {
     const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData:  { targetNamespace: 'default', value: policyPackages },
       directives: { tooltip: jest.fn() },
-      mocks:      { $store: { getters: { 'i18n/t': jest.fn() } } }
+      mocks:      defaultMocks,
+      provide:    defaultProvide,
+      computed:   defaultComputed
     });
 
     expect(wrapper.html()).toContain('Allow Privilege Escalation PSP');
@@ -100,7 +118,9 @@ describe('component: PolicyGrid', () => {
     const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData:  { targetNamespace: 'default', value: policyPackages },
       directives: { tooltip: jest.fn() },
-      mocks:      { $store: { getters: { 'i18n/t': jest.fn() } } }
+      mocks:      defaultMocks,
+      provide:    defaultProvide,
+      computed:   defaultComputed
     });
 
     const selects = wrapper.findAllComponents(LabeledSelect);
@@ -112,7 +132,9 @@ describe('component: PolicyGrid', () => {
     const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData:  { targetNamespace: 'default', value: policyPackages },
       directives: { tooltip: jest.fn() },
-      mocks:      { $store: { getters: { 'i18n/t': jest.fn() } } }
+      mocks:      defaultMocks,
+      provide:    defaultProvide,
+      computed:   defaultComputed
     });
 
     expect(wrapper.html()).toContain('Allow Privilege Escalation PSP');

@@ -4,11 +4,11 @@ import flatMap from 'lodash/flatMap';
 import isEmpty from 'lodash/isEmpty';
 
 import { _CREATE } from '@shell/config/query-params';
-import { SCHEMA } from '@shell/config/types';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 
-import { KUBEWARDEN } from '../../../../types';
+import { KUBEWARDEN } from '~/pkg/kubewarden/types';
+import { schemasForGroup } from '~/pkg/kubewarden/modules/core';
 
 export default {
   name: 'Rule',
@@ -17,7 +17,7 @@ export default {
     // Full list of available apiGroups
     apiGroups: {
       type:     Array,
-      required: true
+      default: () => []
     },
 
     disabled: {
@@ -28,6 +28,24 @@ export default {
     mode: {
       type:    String,
       default: _CREATE
+    },
+
+    // List of apiGroups which point to namespaced resources
+    namespacedGroups: {
+      type:    Array,
+      default: () => []
+    },
+
+    // List of schemas with namespaced resources
+    namespacedSchemas: {
+      type:    Array,
+      default: () => []
+    },
+
+    // List of all schemas
+    schemas: {
+      type:    Array,
+      default: () => []
     },
 
     value: {
@@ -78,11 +96,19 @@ export default {
   computed: {
     ...mapGetters(['currentProduct']),
 
+    filteredGroups() {
+      return this.chartType === KUBEWARDEN.ADMISSION_POLICY ? this.namespacedGroups : this.apiGroups;
+    },
+
+    filteredSchemas() {
+      return this.chartType === KUBEWARDEN.ADMISSION_POLICY ? this.namespacedSchemas : this.schemas;
+    },
+
     apiGroupOptions() {
       const out = ['*'];
 
-      if ( !isEmpty(this.apiGroups) ) {
-        this.apiGroups.forEach((g) => {
+      if ( !isEmpty(this.filteredGroups) ) {
+        this.filteredGroups.forEach((g) => {
           out.push(g.id);
         });
 
@@ -96,7 +122,7 @@ export default {
         return out.sort();
       }
 
-      out.push(this.apiGroups);
+      out.push(this.filteredGroups);
 
       return out.sort();
     },
@@ -136,40 +162,26 @@ export default {
         If no apiGroup or '*' is selected we want to show all of the available resources
         Comparable to `kubectl api-resources -o wide`
       */
-      let schemas = this.schemas;
+      let schemas = this.filteredSchemas;
 
       if ( this.value?.apiGroups?.length > 0 && !this.isGroupAll ) {
-        schemas = this.value.apiGroups.map(g => this.schemaForGroup(g))[0];
+        schemas = this.value.apiGroups.map(group => schemasForGroup(this.$store, group))[0];
       }
 
-      const filtered = schemas?.filter(s => s?.attributes?.resource);
+      const filtered = schemas?.filter(schema => schema?.attributes?.resource);
       const resourceSet = [...new Set(filtered?.map(f => f.attributes.resource))];
 
       return resourceSet.sort();
-    },
-
-    schemas() {
-      return this.$store.getters[`${ this.currentProduct.inStore }/all`](SCHEMA);
     }
   },
 
   methods: {
-    schemaForGroup(group) {
-      if ( !!group ) {
-        return this.schemas?.filter((s) => {
-          return s._group === group;
-        });
-      }
-
-      return null;
-    },
-
     // Determine which apiVersions to show, either from the apiGroup or targeted resource
     apiVersions(types, isGroup) {
       let versions = [];
 
       types?.forEach((type) => {
-        const toFind = isGroup ? this.apiGroups : this.schemas;
+        const toFind = isGroup ? this.apiGroups : this.filteredSchemas;
 
         toFind.find((f) => {
           if ( isGroup && f.id === type ) {
