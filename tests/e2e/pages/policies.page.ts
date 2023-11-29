@@ -123,7 +123,7 @@ export abstract class BasePolicyPage extends BasePage {
     async updateToProtect(row: TableRow) {
       await row.action('Update Mode')
       await this.ui.checkbox('Update to Protect Mode').check()
-      await this.page.getByRole('button', { name: 'Save', exact: true }).click()
+      await this.ui.button('Save').click()
       await expect(row.column('Mode')).toHaveText('Protect')
     }
 
@@ -157,8 +157,8 @@ export class AdmissionPoliciesPage extends BasePolicyPage {
     kind: PolicyKind = 'AdmissionPolicy';
 
     async goto(): Promise<void> {
-      // await this.nav.explorer('Kubewarden', 'AdmissionPolicies')
-      await this.page.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.admissionpolicy')
+      await this.nav.explorer('Kubewarden', 'AdmissionPolicies')
+      // await this.page.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.admissionpolicy')
     }
 
     async setNamespace(name: string) {
@@ -179,8 +179,8 @@ export class ClusterAdmissionPoliciesPage extends BasePolicyPage {
     kind: PolicyKind = 'ClusterAdmissionPolicy'
 
     async goto(): Promise<void> {
-      // await this.nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
-      await this.page.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.clusteradmissionpolicy')
+      await this.nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
+      // await this.page.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.clusteradmissionpolicy')
     }
 
     async setIgnoreRancherNS(checked: boolean) {

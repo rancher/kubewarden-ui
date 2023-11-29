@@ -24,9 +24,9 @@ export class RancherAppsPage extends BasePage {
       super(page)
       this.step1 = page.getByRole('heading', { name: 'Install: Step 1' })
       this.step2 = page.getByRole('heading', { name: 'Install: Step 2' })
-      this.nextBtn = page.getByRole('button', { name: 'Next' })
-      this.installBtn = page.getByRole('button', { name: 'Install' })
-      this.updateBtn = page.getByRole('button', { name: 'Update' })
+      this.nextBtn = this.ui.button('Next')
+      this.installBtn = this.ui.button('Install')
+      this.updateBtn = this.ui.button('Update')
     }
 
     async goto(): Promise<void> {

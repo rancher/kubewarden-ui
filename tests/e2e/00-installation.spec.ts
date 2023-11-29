@@ -68,7 +68,7 @@ test('03 Install kubewarden', async({ page, ui, nav }) => {
   }, 'Kubewarden installation not detected')
 })
 
-test('04 Install default policyserver', async({ page }) => {
+test('04 Install default policyserver', async({ page, ui }) => {
   const psPage = new PolicyServersPage(page)
   const kwPage = new KubewardenPage(page)
 
@@ -79,7 +79,7 @@ test('04 Install default policyserver', async({ page }) => {
   await psPage.goto()
   await expect(psPage.noDefaultPsBanner).toBeVisible()
 
-  await page.getByRole('button', { name: 'Install Chart', exact: true }).click()
+  await ui.button('Install Chart').click()
   await expect(page).toHaveURL(/.*\/apps\/charts\/install.*chart=kubewarden-defaults/)
 
   // Handle PolicyServer Installer Dialog

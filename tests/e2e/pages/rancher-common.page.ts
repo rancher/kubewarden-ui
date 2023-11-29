@@ -16,7 +16,7 @@ export class RancherCommonPage extends BasePage {
   async handleFirstLogin(password: string) {
     // Password
     await this.ui.input('Password').fill(password)
-    await this.page.getByRole('button', { name: 'Log in with Local User' }).click()
+    await this.ui.button('Log in with Local User').click()
     // End user agreement
     await this.ui.checkbox('Allow collection of anonymous statistics').uncheck()
     await this.ui.checkbox('End User License Agreement').check()
@@ -55,7 +55,7 @@ export class RancherCommonPage extends BasePage {
 
   async setHelmCharts(option: 'Show Releases Only' | 'Include Prerelease Versions') {
     await this.nav.userNav('Preferences')
-    const btn = this.page.getByRole('button', { name: option, exact: true })
+    const btn = this.ui.button(option)
     await btn.click()
     await expect(btn).toHaveClass(/bg-primary/)
     await this.page.waitForTimeout(100)

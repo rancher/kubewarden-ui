@@ -84,6 +84,7 @@ export class KubewardenPage extends BasePage {
       await expect(apps.step2).toBeVisible()
 
       // Rancher Application Values
+      await expect(this.ui.checkbox('Enable Background Audit check ')).toBeChecked()
       const schedule = this.ui.input('Schedule')
       await expect(schedule).toHaveValue('*/60 * * * *')
       await schedule.fill('*/1 * * * *')

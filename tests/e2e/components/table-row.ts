@@ -91,8 +91,12 @@ export class TableRow {
       }, 'Rancher showing duplicit rows')
     }
 
+    async toHaveState(state: string, timeout = 2 * 60_000) {
+      await expect(this.status).toHaveText(state, { timeout })
+    }
+
     async toBeActive(timeout = 200_000) {
-      await expect(this.status).toHaveText('Active', { timeout })
+      await this.toHaveState('Active', timeout)
     }
 
     async action(name: string) {
