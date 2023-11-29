@@ -63,6 +63,12 @@ export class RancherAppsPage extends BasePage {
       await repo.toBeActive()
     }
 
+    @step
+    async deleteRepository(name: string) {
+      await this.nav.explorer('Apps', 'Repositories')
+      await this.ui.getRow(name).delete()
+    }
+
     /**
      * Build regex matching chart name or archive for a successfull installation
      * SUCCESS: helm upgrade ... rancher-kubewarden-defaults /home/shell/helm/kubewarden-defaults-1.7.3.tgz
@@ -73,9 +79,10 @@ export class RancherAppsPage extends BasePage {
       const keepLog = options?.keepLog || false
 
       // Can't match ^..$ because output is sometimes mixed up
+      const rmMatch = `uninstall.*\\s${text}\\s` // delete app
       const nameMatch = `\\s${text}\\s\\/home` // app upgrades
       const tarMatch = `helm\\/${text}-[0-9-.]+tgz` // chart installations
-      const regex = new RegExp(`SUCCESS: helm.*(${nameMatch}|${tarMatch})`)
+      const regex = new RegExp(`SUCCESS: helm.*(${nameMatch}|${tarMatch}|${rmMatch})`)
 
       const passedMsg = this.page.locator('div.logs-container').locator('span.msg').getByText(regex)
       await expect(passedMsg).toBeVisible({ timeout })
@@ -154,5 +161,14 @@ export class RancherAppsPage extends BasePage {
 
       await this.updateBtn.click()
       await this.waitHelmSuccess(name, { timeout: options?.timeout })
+    }
+
+    @step
+    async deleteApp(name: string) {
+      await this.nav.explorer('Apps', 'Installed Apps')
+      await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
+      // Row is visible until helm uninstalls app
+      await this.ui.getRow(name).delete({ timeout: 60_0000 })
+      await this.waitHelmSuccess(name)
     }
 }

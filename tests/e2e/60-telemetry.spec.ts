@@ -85,6 +85,22 @@ test.describe('Tracing', () => {
     await nav.capolicy('no-privileged-pod', 'Tracing')
     await expect(logline).toBeVisible()
   })
+
+  test('Uninstall', async({ ui, nav }) => {
+    // Clean up
+    await apps.updateApp('rancher-kubewarden-controller', {
+      questions: async() => {
+        await ui.tab('Telemetry').click()
+        await ui.checkbox('Enable Tracing').uncheck()
+      }
+    })
+    await apps.deleteApp('jaeger-operator')
+    // Check
+    await nav.pserver('default', 'Tracing')
+    await telPage.toBeIncomplete('config')
+    await telPage.toBeIncomplete('jaeger')
+    await expect(telPage.configBtn).toBeDisabled()
+  })
 })
 
 test.describe('Metrics', () => {
@@ -151,4 +167,30 @@ test.describe('Metrics', () => {
       .getByLabel('Request accepted with no mutation percentage panel')
       .locator('div:text-matches("[1-9][0-9.]+%")')).toBeVisible({ timeout: 7 * 60_000 })
   })
+
+  test('Uninstall', async({ ui, nav, shell }) => {
+    // Clean up
+    await apps.updateApp('rancher-kubewarden-controller', {
+      questions: async() => {
+        await ui.tab('Telemetry').click()
+        await ui.checkbox('Enable Metrics').uncheck()
+      }
+    })
+    await apps.deleteApp('rancher-monitoring')
+    await apps.deleteApp('rancher-monitoring-crd')
+    await shell.run('k delete cm -n cattle-dashboards kubewarden-dashboard-policy kubewarden-dashboard-policyserver')
+    // Check
+    await nav.pserver('default', 'Metrics')
+    await telPage.toBeIncomplete('config')
+    await telPage.toBeIncomplete('monitoring')
+    await telPage.toBeIncomplete('servicemonitor')
+    await telPage.toBeIncomplete('configmap')
+    await expect(telPage.configBtn).toBeDisabled()
+  })
+})
+
+test('Uninstall OpenTelemetry', async({ page }) => {
+  const apps = new RancherAppsPage(page)
+  await apps.deleteApp('opentelemetry-operator')
+  await apps.deleteRepository('open-telemetry')
 })
