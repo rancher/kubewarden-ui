@@ -8,4 +8,5 @@ export * from './types/jaeger';
 export * from './types/metrics';
 export * from './types/policy';
 export * from './types/policy-reporter';
+export * from './types/rancher';
 export * from './types/service';
