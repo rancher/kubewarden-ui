@@ -3,7 +3,7 @@ import { RancherCommonPage } from './pages/rancher-common.page'
 import { RancherExtensionsPage } from './pages/rancher-extensions.page'
 import { KubewardenPage } from './pages/kubewarden.page'
 import { PolicyServersPage } from './pages/policyservers.page'
-import { policyList } from './pages/policies.page'
+import { apList, capList } from './pages/policies.page'
 import { RancherAppsPage } from './pages/rancher-apps.page'
 
 // source (yarn dev) | rc (add github repo) | released (just install)
@@ -86,15 +86,25 @@ test('04 Install default policyserver', async({ page, ui }) => {
   await psPage.installDefault({ recommended: true, mode: 'monitor' })
 })
 
-test('05 Whitelist artifacthub', async({ page, ui, nav }) => {
-  const kwPage = new KubewardenPage(page)
+test('05 Whitelist Artifact Hub', async({ page, ui, nav }) => {
+  const policyCards = page.getByTestId(/^kw-grid-subtype-card/)
+
   await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
   await ui.button('Create').click()
 
+  // Check counts before ArtifactHub
   await expect(page.getByRole('heading', { name: 'Custom Policy' })).toBeVisible()
-  await expect(page.locator('.subtype')).toHaveCount(1)
+  await expect(policyCards).toHaveCount(1)
 
-  await kwPage.whitelistArtifacthub()
+  // Whitelist ArtifactHub
+  await expect(page.getByText('Official Kubewarden policies are hosted on ArtifactHub')).toBeVisible()
+  await ui.button('Add ArtifactHub To Whitelist').click()
+
+  // Check counts after ArtifactHub
   await expect(page.getByRole('heading', { name: 'Pod Privileged Policy' })).toBeVisible()
-  await expect(page.locator('.subtype')).toHaveCount(policyList.length, { timeout: 5_000 })
+  await expect(policyCards).toHaveCount(capList.length)
+
+  await nav.explorer('Kubewarden', 'AdmissionPolicies')
+  await ui.button('Create').click()
+  await expect(policyCards).toHaveCount(apList.length)
 })

@@ -95,9 +95,4 @@ export class KubewardenPage extends BasePage {
       await apps.waitHelmSuccess('rancher-kubewarden-crds', { keepLog: true })
       await apps.waitHelmSuccess('rancher-kubewarden-controller')
     }
-
-    async whitelistArtifacthub() {
-      await expect(this.page.getByText('Official Kubewarden policies are hosted on ArtifactHub')).toBeVisible()
-      await this.page.getByRole('button', { name: 'Add ArtifactHub To Whitelist' }).click()
-    }
 }
