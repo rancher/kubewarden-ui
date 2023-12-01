@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       rancher:
+        # helm search repo rancher-latest --version '> 2.8.0-0 < 2.8.1-0'
         description: Rancher version
         type: choice
         default: 'released'
@@ -11,7 +12,8 @@ on:
         - 'released'
         - '= 2.7.8'
         - '= 2.7.9'
-        - '> 2.8.0-0 < 2.8.1-0'
+        - '= 2.8.0'
+        - '> 2.8.0-0'
       kubewarden:
         description: Kubewarden version
         type: choice
@@ -22,15 +24,17 @@ on:
         - rc
         - released
       testsuite:
-        description: Testsuite
+        description: Execute group of tests
         type: choice
-        default: 'install'
+        default: 'install + base tests'
         required: true
         options:
-        - install (15 min)
-        - install + policies (15+30 min)
-      policyfilter:
-        description: Policy Filter
+        - install
+        - install + base tests
+        - install + policy tests
+        - install + all tests
+      testfilter:
+        description: Filter files \/[0-9] or -g tests
         type: string
       k3s:
         description: Kubernetes
@@ -38,10 +42,10 @@ on:
         default: 'v1.26.9-k3s1'
         required: true
         options:
-        - v1.25.14-k3s1
-        - v1.26.9-k3s1
-        - v1.27.6-k3s1
-        - v1.28.2-k3s1
+        - v1.25.15-k3s2
+        - v1.26.10-k3s2
+        - v1.27.7-k3s2
+        - v1.28.3-k3s2
 
   pull_request:
     branches: main
@@ -55,6 +59,7 @@ on:
     - cron: "0 2 * * *"
 
 env:
+  # Github -> Secrets and variables -> Actions -> New repository variable
   RANCHER: ${{ vars.RANCHER || 'released' }}
   K3S_VERSION: ${{ inputs.k3s || 'v1.26.9-k3s1' }}
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
@@ -67,8 +72,8 @@ jobs:
     steps:
     # ==================================================================================================
     # Check out code and install requirements
+    # Use local kuberlr to avoid version skew
     - uses: actions/checkout@v3
-    - uses: azure/setup-kubectl@v3
     - uses: actions/setup-node@v3
       with:
         node-version: '16'
@@ -76,7 +81,8 @@ jobs:
       working-directory: tests
       run: |
         yarn
-        yarn playwright install chromium # --with-deps
+        yarn playwright install chromium  # --with-deps not supported on opensuse
+
 
     # ==================================================================================================
     # Set up parameters and ENV
@@ -85,11 +91,11 @@ jobs:
         case ${{github.event_name}} in
           pull_request)
             KUBEWARDEN=source
-            TESTSUITE=install
+            TESTSUITE='install + base'
             ;;
           schedule)
             KUBEWARDEN=released
-            TESTSUITE=policies
+            TESTSUITE='install + all'
             ;;
           workflow_dispatch)
             RANCHER="${{ inputs.rancher }}"
@@ -98,7 +104,7 @@ jobs:
             ;;
           push)
             KUBEWARDEN=rc
-            TESTSUITE=policies
+            TESTSUITE='install + all'
         esac
 
         echo "Event: ${{github.event_name}}"
@@ -164,25 +170,26 @@ jobs:
         yarn install --ignore-engines
         VERSION=0.0.1 yarn build-pkg kubewarden
 
-    - name: Install Kubewarden
+    - name: Install & Execute tests
+      timeout-minutes: 120
       working-directory: tests
       run: |
-        yarn playwright test "/[0-9]0-" -x
-      env:
-        RANCHER_URL: https://${{env.RANCHER_FQDN}}
-        ORIGIN: ${{ env.KUBEWARDEN }}
-        PLAYWRIGHT_HTML_REPORT: installation-report
+        # Translate TESTSUITE to FILTER
+        # Regex matches names of test files
+        case "$TESTSUITE" in
+          "install")           TFILTER="\/00";;
+          "install + base"*)   TFILTER="\/[0-8]";;
+          "install + policy"*) TFILTER="\/[09]";;
+          "install + all"*)    TFILTER="\/[0-9]";;
+        esac
+        # Custom filter to match file name or test (\/90 -g 'Privileged')
+        [ -n "${{inputs.testfilter}}" ] && TFILTER="${{inputs.testfilter}}"
 
-    - name: Install policies
-      if: ${{ contains(env.TESTSUITE, 'policies') || inputs.policyfilter }}
-      timeout-minutes: 90
-      working-directory: tests
-      run: |
-        yarn playwright test /policies -g "${{ inputs.policyfilter || '' }}" -x
+        yarn playwright test ${TFILTER:-} -x
       env:
         RANCHER_URL: https://${{env.RANCHER_FQDN}}
         ORIGIN: ${{ env.KUBEWARDEN }}
-        PLAYWRIGHT_HTML_REPORT: policies-report
+        # PLAYWRIGHT_HTML_REPORT: test-report
 
     # ==================================================================================================
     # Artifacts & Summary
@@ -190,10 +197,8 @@ jobs:
       if: always()
       with:
         name: playwright-report
-        path: |
-          tests/installation-report/
-          tests/policies-report/
-        retention-days: 30
+        path: tests/playwright-report/
+        retention-days: 15
 
     - name: Clean Up
       if: always()
