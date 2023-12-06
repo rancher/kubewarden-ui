@@ -34,12 +34,12 @@ on:
         - install + policy tests
         - install + all tests
       testfilter:
-        description: Filter files \/[0-9] or -g tests
+        description: Custom filter '\/[09]0' -g '00-|Privileged'
         type: string
       k3s:
         description: Kubernetes
         type: choice
-        default: 'v1.26.9-k3s1'
+        default: 'v1.26.10-k3s2'
         required: true
         options:
         - v1.25.15-k3s2
@@ -182,14 +182,17 @@ jobs:
           "install + policy"*) TFILTER="\/[09]";;
           "install + all"*)    TFILTER="\/[0-9]";;
         esac
-        # Custom filter to match file name or test (\/90 -g 'Privileged')
-        [ -n "${{inputs.testfilter}}" ] && TFILTER="${{inputs.testfilter}}"
 
+        # Custom filter to match file name or test
+        [ -n "$TESTFILTER" ] && TFILTER="$TESTFILTER"
+
+        # List tests and execute
+        echo yarn playwright test ${TFILTER:-} -x
         yarn playwright test ${TFILTER:-} -x
       env:
+        TESTFILTER: ${{inputs.testfilter}}
         RANCHER_URL: https://${{env.RANCHER_FQDN}}
         ORIGIN: ${{ env.KUBEWARDEN }}
-        # PLAYWRIGHT_HTML_REPORT: test-report
 
     # ==================================================================================================
     # Artifacts & Summary
