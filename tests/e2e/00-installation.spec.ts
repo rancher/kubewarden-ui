@@ -5,9 +5,11 @@ import { KubewardenPage } from './pages/kubewarden.page'
 import { PolicyServersPage } from './pages/policyservers.page'
 import { apList, capList } from './pages/policies.page'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
+import { RancherFleetPage } from './rancher/rancher-fleet.page'
 
 // source (yarn dev) | rc (add github repo) | released (just install)
 const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
+const FLEET = !!process.env.FLEET
 
 test('00 Initial rancher setup', async({ page, ui }) => {
   const rancher = new RancherCommonPage(page)
@@ -26,38 +28,42 @@ test('00 Initial rancher setup', async({ page, ui }) => {
   await rancher.setExtensionDeveloperFeatures(true)
 })
 
-test('01 Enable extension support', async({ page, ui }) => {
+test('01 Install UI extension', async({ page, ui }) => {
   const extensions = new RancherExtensionsPage(page)
 
-  await extensions.enable(ORIGIN === 'released')
+  await test.step('Enable extension support', async() => {
+    await extensions.enable(ORIGIN === 'released')
+    // Wait for default list of extensions
+    if (ORIGIN === 'released') {
+      await ui.withReload(async() => {
+        await extensions.selectTab('All')
+        await expect(page.locator('.plugin', { hasText: 'Kubewarden' })).toBeVisible()
+      }, 'Not showing kubewarden extension')
+    }
+  })
 
-  // Wait for default list of extensions
-  if (ORIGIN === 'released') {
-    await ui.withReload(async() => {
-      await extensions.selectTab('All')
-      await expect(page.locator('.plugin', { hasText: 'Kubewarden' })).toBeVisible()
-    }, 'Not showing kubewarden extension')
-  }
-})
-
-test('02 Install extension', async({ page }) => {
-  // Add UI charts repository
   if (ORIGIN === 'rc') {
-    const apps = new RancherAppsPage(page)
-    await apps.addRepository('kubewarden-extension-rc', 'https://rancher.github.io/kubewarden-ui/')
+    await test.step('Add UI charts repository', async() => {
+      const apps = new RancherAppsPage(page)
+      await page.getByTestId('extensions-page-menu').click()
+      await page.getByText('Manage Repositories', { exact: true }).click()
+      await apps.addRepository('kubewarden-extension-rc', 'https://rancher.github.io/kubewarden-ui/')
+    })
   }
 
-  // Install or developer load extension
-  const extensions = new RancherExtensionsPage(page)
-  await extensions.goto()
-  if (ORIGIN === 'source') {
-    await extensions.developerLoad('http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js')
-  } else {
-    await extensions.install('kubewarden')
-  }
+  await test.step('Install or developer load extension', async() => {
+    await extensions.goto()
+    if (ORIGIN === 'source') {
+      await extensions.developerLoad('http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js')
+    } else {
+      await extensions.install('kubewarden')
+    }
+  })
 })
 
-test('03 Install kubewarden', async({ page, ui, nav }) => {
+test('03a Install Kubewarden', async({ page, ui, nav }) => {
+  test.skip(FLEET)
+
   const kwPage = new KubewardenPage(page)
   await kwPage.installKubewarden()
 
@@ -66,24 +72,42 @@ test('03 Install kubewarden', async({ page, ui, nav }) => {
   await ui.withReload(async() => {
     await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
   }, 'Kubewarden installation not detected')
+
+  await test.step('Install default policyserver', async() => {
+    const psPage = new PolicyServersPage(page)
+
+    // Banner is visible on Overview page
+    await kwPage.goto()
+    await expect(psPage.noDefaultPsBanner).toBeVisible()
+    // Banner is visible on Policy Servers page
+    await psPage.goto()
+    await expect(psPage.noDefaultPsBanner).toBeVisible()
+
+    await ui.button('Install Chart').click()
+    await expect(page).toHaveURL(/.*\/apps\/charts\/install.*chart=kubewarden-defaults/)
+
+    // Handle PolicyServer Installer Dialog
+    await psPage.installDefault({ recommended: true, mode: 'monitor' })
+  })
 })
 
-test('04 Install default policyserver', async({ page, ui }) => {
-  const psPage = new PolicyServersPage(page)
-  const kwPage = new KubewardenPage(page)
+test('03b Install Kubewarden by Fleet', async({ page, ui }) => {
+  test.skip(!FLEET)
 
-  // Banner is visible on Overview page
-  await kwPage.goto()
-  await expect(psPage.noDefaultPsBanner).toBeVisible()
-  // Banner is visible on Policy Servers page
-  await psPage.goto()
-  await expect(psPage.noDefaultPsBanner).toBeVisible()
+  const fleetPage = new RancherFleetPage(page)
+  const repoRow = await fleetPage.addRepository({
+    name       : 'therepo',
+    url        : 'https://github.com/kravciak/kubewarden-ui.git',
+    branch     : 'fleet',
+    selfHealing: true,
+    paths      : ['tests/e2e/fleet/'],
+    workspace  : 'fleet-local',
+    yamlPatch  : (y) => { y.spec.correctDrift.force = true }
+  })
 
-  await ui.button('Install Chart').click()
-  await expect(page).toHaveURL(/.*\/apps\/charts\/install.*chart=kubewarden-defaults/)
-
-  // Handle PolicyServer Installer Dialog
-  await psPage.installDefault({ recommended: true, mode: 'monitor' })
+  await ui.withReload(async() => {
+    await expect(repoRow.column('Clusters Ready')).toHaveText('1/1', { timeout: 7 * 60_000 })
+  }, 'Installed but not refreshed?')
 })
 
 test('05 Whitelist Artifact Hub', async({ page, ui, nav }) => {

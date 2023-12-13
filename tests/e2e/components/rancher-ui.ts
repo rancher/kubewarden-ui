@@ -66,7 +66,7 @@ export class RancherUI {
 
   // Select option from (un)labeled Select
   async selectOption(label: string|Locator, option: string | RegExp) {
-    const select = (typeof label === 'string') ? this.select(label) : label
+    const select = (typeof label === 'string') ? this.select(label) : label.getByRole('combobox', { name: 'Search for option' })
     await select.click()
     await this.page.getByRole('option', { name: option, exact: true }).click()
   }
@@ -80,7 +80,7 @@ export class RancherUI {
   // ==================================================================================================
   // Helper functions
 
-  async openView(view: 'Edit Options' | 'Edit YAML' | 'Compare Changes') {
+  async openView(view: 'Edit Options' | 'Edit YAML' | 'Edit as YAML' | 'Compare Changes') {
     // Give generated fields time to get registered
     await this.page.waitForTimeout(200)
     // Show yaml with edited settings

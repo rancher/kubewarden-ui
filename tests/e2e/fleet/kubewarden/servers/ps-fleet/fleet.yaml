@@ -1,0 +1,11 @@
+# https://fleet.rancher.io/ref-fleet-yaml
+defaultNamespace: cattle-kubewarden-system
+
+dependsOn:
+  - selector:
+      matchLabels:
+        app: kubewarden-controller
+
+targetCustomizations:
+- clusterName: local
+  doNotDeploy: true

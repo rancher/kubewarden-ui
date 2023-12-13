@@ -1,0 +1,13 @@
+# https://fleet.rancher.io/ref-fleet-yaml
+defaultNamespace: cattle-kubewarden-system
+
+helm:
+  version: '*-0' # 1.4.4
+  releaseName: kubewarden-crds
+  chart: kubewarden-crds
+  repo: https://charts.kubewarden.io
+  # valuesFiles:
+  #   - values.yaml
+
+labels:
+  app: kubewarden-crds

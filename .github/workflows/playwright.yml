@@ -23,6 +23,11 @@ on:
         - source
         - rc
         - released
+      fleet:
+        description: Install by Fleet
+        type: boolean
+        default: false
+        required: true
       testsuite:
         description: Execute group of tests
         type: choice
@@ -57,6 +62,7 @@ on:
 
   schedule:
     - cron: "0 2 * * *"
+    - cron: "0 3 * * *"
 
 env:
   # Github -> Secrets and variables -> Actions -> New repository variable
@@ -190,6 +196,7 @@ jobs:
         echo yarn playwright test ${TFILTER:-} -x
         yarn playwright test ${TFILTER:-} -x
       env:
+        FLEET: ${{ github.event.schedule == '0 3 * * *' || inputs.fleet }}
         TESTFILTER: ${{inputs.testfilter}}
         RANCHER_URL: https://${{env.RANCHER_FQDN}}
         ORIGIN: ${{ env.KUBEWARDEN }}

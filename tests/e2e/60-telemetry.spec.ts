@@ -6,6 +6,8 @@ const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry
 const jaegerChart: Chart = { title: 'Jaeger Operator', namespace: 'jaeger', check: 'jaeger-operator' }
 const monitoringChart: Chart = { title: 'Monitoring', check: 'rancher-monitoring' }
 
+test.skip(!!process.env.FLEET)
+
 /**
  * Expect timeout has to be increased after telemetry installation on local cluster
  */
