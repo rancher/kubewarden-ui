@@ -1,4 +1,4 @@
-import { test, expect } from './rancher-test'
+import { test, expect } from './rancher/rancher-test'
 
 const expect1m = expect.configure({ timeout: 60_000 })
 

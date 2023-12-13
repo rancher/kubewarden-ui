@@ -1,6 +1,6 @@
 import { expect, test, Locator, Page } from '@playwright/test'
-import { BasePage } from './basepage'
-import { RancherAppsPage } from './rancher-apps.page'
+import { RancherAppsPage } from '../rancher/rancher-apps.page'
+import { BasePage } from '../rancher/basepage'
 
 type Pane = 'Policy Servers' | 'Admission Policies' | 'Cluster Admission Policies'
 

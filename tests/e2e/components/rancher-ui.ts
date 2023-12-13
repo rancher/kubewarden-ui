@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import jsyaml from 'js-yaml'
 import _ from 'lodash'
-import { step } from '../rancher-test'
+import { step } from '../rancher/rancher-test'
 import { TableRow } from './table-row'
 
 export type YAMLPatch = { [key: string]: unknown } | string | ((patch:any) => void)

@@ -1,5 +1,5 @@
 import { expect, Locator } from '@playwright/test'
-import { step } from '../rancher-test'
+import { step } from '../rancher/rancher-test'
 import { RancherUI } from './rancher-ui'
 
 export class TableRow {

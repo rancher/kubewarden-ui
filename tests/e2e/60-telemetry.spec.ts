@@ -1,5 +1,5 @@
-import { test, expect } from './rancher-test'
-import { Chart, RancherAppsPage } from './pages/rancher-apps.page'
+import { test, expect } from './rancher/rancher-test'
+import { Chart, RancherAppsPage } from './rancher/rancher-apps.page'
 import { TelemetryPage } from './pages/telemetry.page'
 
 const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator' }

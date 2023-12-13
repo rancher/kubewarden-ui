@@ -1,8 +1,8 @@
 import { Locator, Page, expect } from '@playwright/test'
 import { RancherUI, YAMLPatch } from '../components/rancher-ui'
 import { TableRow } from '../components/table-row'
-import { step } from '../rancher-test'
-import { BasePage } from './basepage'
+import { step } from '../rancher/rancher-test'
+import { BasePage } from '../rancher/basepage'
 
 export const apList = ['Custom Policy', 'Allow Privilege Escalation PSP', 'Allowed Fs Groups PSP', 'Allowed Proc Mount Types PSP', 'Apparmor PSP', 'Capabilities PSP',
   'Deprecated API Versions', 'Disallow Service Loadbalancer', 'Disallow Service Nodeport', 'Echo', 'Environment Variable Secrets Scanner', 'Environment Variable Policy', 'Flexvolume Drivers Psp',

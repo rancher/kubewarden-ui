@@ -1,4 +1,4 @@
-import { test } from './rancher-test'
+import { test } from './rancher/rancher-test'
 import type { RancherUI } from './components/rancher-ui'
 import { Policy, policyTitle, capList, generateName, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { PolicyServersPage } from './pages/policyservers.page'

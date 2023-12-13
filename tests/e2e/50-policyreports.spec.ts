@@ -1,4 +1,4 @@
-import { test, expect } from './rancher-test'
+import { test, expect } from './rancher/rancher-test'
 import { Policy, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { PolicyReporterPage } from './pages/policyreporter.page'
 

@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test'
 import type { Locator, FrameLocator } from '@playwright/test'
-import { BasePage } from './basepage'
+import { BasePage } from '../rancher/basepage'
 
 export class PolicyReporterPage extends BasePage {
     readonly frame: FrameLocator;

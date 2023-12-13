@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test'
-import { step } from '../rancher-test'
+import { step } from '../rancher/rancher-test'
 import { Policy, PolicyKind } from '../pages/policies.page'
 
 export class Shell {

@@ -1,9 +1,9 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import { TableRow } from '../components/table-row'
-import { step } from '../rancher-test'
-import { BasePage } from './basepage'
-import { RancherAppsPage } from './rancher-apps.page'
+import { step } from '../rancher/rancher-test'
+import { BasePage } from '../rancher/basepage'
+import { RancherAppsPage } from '../rancher/rancher-apps.page'
 
 export interface PolicyServer {
     name: string

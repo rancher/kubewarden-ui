@@ -1,10 +1,10 @@
-import { test, expect } from './rancher-test'
-import { RancherCommonPage } from './pages/rancher-common.page'
-import { RancherExtensionsPage } from './pages/rancher-extensions.page'
+import { test, expect } from './rancher/rancher-test'
+import { RancherCommonPage } from './rancher/rancher-common.page'
+import { RancherExtensionsPage } from './rancher/rancher-extensions.page'
 import { KubewardenPage } from './pages/kubewarden.page'
 import { PolicyServersPage } from './pages/policyservers.page'
 import { apList, capList } from './pages/policies.page'
-import { RancherAppsPage } from './pages/rancher-apps.page'
+import { RancherAppsPage } from './rancher/rancher-apps.page'
 
 // source (yarn dev) | rc (add github repo) | released (just install)
 const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')

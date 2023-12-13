@@ -1,5 +1,5 @@
 import { expect, Page } from '@playwright/test'
-import { step } from '../rancher-test'
+import { step } from '../rancher/rancher-test'
 import { RancherUI } from './rancher-ui'
 
 type ExpGroup = 'Cluster' | 'Workloads' | 'Kubewarden' | 'Apps'

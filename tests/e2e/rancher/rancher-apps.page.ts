@@ -1,7 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import type { YAMLPatch } from '../components/rancher-ui'
-import { step } from '../rancher-test'
+import { step } from './rancher-test'
 import { BasePage } from './basepage'
 
 export interface Chart {
