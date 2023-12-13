@@ -26,8 +26,10 @@ export class RancherUI {
   }
 
   // Labeled Input
-  input(label: string) {
-    return this.page.locator('div.labeled-input').filter({ hasText: label }).locator('input')
+  input(label: string|RegExp) {
+    return this.page.locator('div.labeled-input')
+      .filter({ has: this.page.getByText(label, { exact: true }) })
+      .locator('input')
   }
 
   // Labeled Checkbox
@@ -56,15 +58,16 @@ export class RancherUI {
     return this.radioGroup(label).getByRole('radio', { name })
   }
 
-  // Labeled Select combobox
-  combobox(label: string) {
+  // Labeled Select (ComboBox)
+  select(label: string) {
     return this.page.locator('div.labeled-select').filter({ hasText: label })
       .getByRole('combobox', { name: 'Search for option' })
   }
 
-  // Select option from labeled select
-  async select(label: string, option: string | RegExp) {
-    await this.combobox(label).click()
+  // Select option from (un)labeled Select
+  async selectOption(label: string|Locator, option: string | RegExp) {
+    const select = (typeof label === 'string') ? this.select(label) : label
+    await select.click()
     await this.page.getByRole('option', { name: option, exact: true }).click()
   }
 

@@ -81,10 +81,10 @@ export class PolicyServersPage extends BasePage {
       // Handle questions
       if (options?.recommended) {
         await this.ui.checkbox('Enable recommended policies').setChecked(options.recommended)
-        await expect(this.ui.combobox('Execution mode of the recommended policies ')).toContainText('monitor')
+        await expect(this.ui.select('Execution mode of the recommended policies ')).toContainText('monitor')
       }
       if (options?.mode) {
-        await this.ui.select('Execution mode', options.mode)
+        await this.ui.selectOption('Execution mode', options.mode)
       }
 
       // Install

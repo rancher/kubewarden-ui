@@ -48,8 +48,8 @@ export abstract class BasePolicyPage extends BasePage {
       super(page)
       this.name = this.ui.input('Name*')
       this.module = this.ui.input('Module*')
-      this.server = this.ui.combobox('Policy Server')
-      this.namespace = this.ui.combobox('Namespace*')
+      this.server = this.ui.select('Policy Server')
+      this.namespace = this.ui.select('Namespace*')
       this.modeGroup = this.ui.radioGroup('Mode')
       this.auditGroup = this.ui.radioGroup('Background Audit')
     }
@@ -72,7 +72,7 @@ export abstract class BasePolicyPage extends BasePage {
     }
 
     async setServer(server: string) {
-      await this.ui.select('Policy Server', server)
+      await this.ui.selectOption('Policy Server', server)
     }
 
     async setModule(module: string) {
@@ -163,7 +163,7 @@ export class AdmissionPoliciesPage extends BasePolicyPage {
     }
 
     async setNamespace(name: string) {
-      await this.ui.select('Namespace*', /^Create a [nN]ew Namespace$/)
+      await this.ui.selectOption('Namespace*', /^Create a [nN]ew Namespace$/)
       await this.ui.input('Namespace*').fill(name)
     }
 
