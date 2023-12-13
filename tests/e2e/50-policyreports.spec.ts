@@ -65,20 +65,20 @@ test('New resources should be reported', async({ ui, page, nav, shell }) => {
 test('Check reports on resources details page', async({ ui, nav }) => {
   // Check Pods Compliance column
   await nav.explorer('Workloads', 'Pods')
-  const failrow = ui.getRow(testPod, { group: testNs })
+  const failrow = ui.tableRow(testPod, { group: testNs })
   await expect(failrow.column('Compliance').locator('div.bg-error')).toHaveText('1')
   await expect(failrow.column('Compliance').locator('div.bg-success')).toHaveText('5')
 
   // Check Compliance tab on pod details
   await failrow.open()
   await ui.tab('Compliance').click()
-  await expect(ui.getRow({ Policy: policyPrivpod }).column('Status')).toHaveText('fail')
+  await expect(ui.tableRow({ Policy: policyPrivpod }).column('Status')).toHaveText('fail')
 
   // Check namespace
   await nav.explorer('Cluster', 'Projects/Namespaces')
-  await ui.getRow(testNs).open()
+  await ui.tableRow(testNs).open()
   await ui.tab('Compliance').click()
-  await expect(ui.getRow({ Name: testPod, Policy: policyPrivpod }).column('Status')).toHaveText('fail')
+  await expect(ui.tableRow({ Name: testPod, Policy: policyPrivpod }).column('Status')).toHaveText('fail')
 })
 
 test('Cleanup & check results are gone', async({ page, ui, nav, shell }) => {
@@ -86,7 +86,7 @@ test('Cleanup & check results are gone', async({ page, ui, nav, shell }) => {
 
   await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
   await shell.run(`k delete ns ${testNs}`)
-  await ui.getRow(policyLabels).delete()
+  await ui.tableRow(policyLabels).delete()
 
   await nav.explorer('Kubewarden', 'Policy Reporter')
   await reporter.selectTab('Dashboard')

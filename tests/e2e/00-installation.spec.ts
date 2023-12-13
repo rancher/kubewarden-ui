@@ -19,7 +19,7 @@ test('00 Initial rancher setup', async({ page, ui }) => {
     await rancher.handleFirstLogin('sa')
   }
   // wait for local cluster to be Active
-  await ui.getRow('local').toBeActive()
+  await ui.tableRow('local').toBeActive()
   // disable namespace filter
   await rancher.setNamespaceFilter('All Namespaces')
   // enable extension developer features

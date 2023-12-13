@@ -73,7 +73,7 @@ test.describe('Tracing', () => {
   })
 
   test('Check traces are visible', async({ ui, nav, shell }) => {
-    const logline = ui.getRow('tracing-privpod').row.first()
+    const logline = ui.tableRow('tracing-privpod').row.first()
 
     // Create trace log line
     await nav.cluster('local')

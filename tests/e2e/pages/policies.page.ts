@@ -138,8 +138,7 @@ export abstract class BasePolicyPage extends BasePage {
       await this.ui.button('Finish').click()
       await expect(this.page).toHaveURL(/.*admissionpolicy$/)
       // Check new policy
-      const polRow = this.ui.getRow(p.name)
-      await polRow.toBeVisible()
+      const polRow = await this.ui.tableRow(p.name).waitFor()
       if (options?.wait) {
         await polRow.toBeActive()
         // Prevent occasional wrong resource version error on follow-up tests
@@ -150,7 +149,7 @@ export abstract class BasePolicyPage extends BasePage {
 
     async delete(policy: string | TableRow) {
       await this.goto()
-      if (typeof policy === 'string') policy = this.ui.getRow(policy)
+      if (typeof policy === 'string') policy = this.ui.tableRow(policy)
       await policy.delete()
     }
 }

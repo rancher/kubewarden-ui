@@ -72,7 +72,7 @@ export class Navigation {
     @step
     async pserver(name?: string, tab?: 'Policies' | 'Metrics' | 'Tracing' | 'Conditions' | 'Recent Events' | 'Related Resources') {
       await this.explorer('Kubewarden', 'PolicyServers')
-      if (name) await this.ui.getRow(name).open()
+      if (name) await this.ui.tableRow(name).open()
       if (tab) await this.ui.tab(tab).click()
     }
 
@@ -80,7 +80,7 @@ export class Navigation {
     @step
     async capolicy(name?: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events' | 'Related Resources') {
       await this.explorer('Kubewarden', 'ClusterAdmissionPolicies')
-      if (name) await this.ui.getRow(name).open()
+      if (name) await this.ui.tableRow(name).open()
       if (tab) await this.ui.tab(tab).click()
     }
 
@@ -88,7 +88,7 @@ export class Navigation {
     @step
     async apolicy(name?: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events') {
       await this.explorer('Kubewarden', 'AdmissionPolicies')
-      if (name) await this.ui.getRow(name).open()
+      if (name) await this.ui.tableRow(name).open()
       if (tab) await this.ui.tab(tab).click()
     }
 }

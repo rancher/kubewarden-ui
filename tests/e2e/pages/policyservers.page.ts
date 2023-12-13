@@ -58,8 +58,7 @@ export class PolicyServersPage extends BasePage {
       await this.setValues(ps)
       await this.ui.button('Create').click()
       // Get row and wait for Active state
-      const psRow = this.ui.getRow(ps.name)
-      await psRow.toBeVisible()
+      const psRow = await this.ui.tableRow(ps.name).waitFor()
       if (options?.wait) {
         await psRow.toBeActive(20_000)
       }
@@ -68,7 +67,7 @@ export class PolicyServersPage extends BasePage {
 
     async delete(ps: string | TableRow) {
       await this.goto()
-      if (typeof ps === 'string') ps = this.ui.getRow(ps)
+      if (typeof ps === 'string') ps = this.ui.tableRow(ps)
       await ps.delete()
     }
 

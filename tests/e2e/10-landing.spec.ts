@@ -18,7 +18,7 @@ test('Brief check of landing pages', async({ page, ui, nav }) => {
     await expect(page.getByRole('heading', { name: 'PolicyServers' })).toBeVisible()
 
     // Default policy server
-    const psRow = ui.getRow('default')
+    const psRow = ui.tableRow('default')
     await expect(psRow.row).toBeVisible()
     await expect(psRow.column('Status')).toHaveText('Active')
     await expect(psRow.column('Policies')).toHaveText('6')

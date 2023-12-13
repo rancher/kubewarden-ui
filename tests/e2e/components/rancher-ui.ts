@@ -70,7 +70,7 @@ export class RancherUI {
 
   // ==================================================================================================
   // Table Handler
-  getRow(arg: string | { [key: string]: string }, options?: { group?: string }): TableRow {
+  tableRow(arg: string | RegExp | { [key: string]: string | RegExp }, options?: { group?: string }): TableRow {
     return new TableRow(this, arg, options)
   }
 

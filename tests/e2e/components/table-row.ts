@@ -2,41 +2,29 @@ import { expect, Locator } from '@playwright/test'
 import { step } from '../rancher-test'
 import { RancherUI } from './rancher-ui'
 
-/**
- * Compare text of current element with parameter(s)
- * @param args
- * @returns XPath predicate: normalize-space(.)="args[0]" [or ...]
- */
-function textIs(...args: string[]): string {
-  return args.map(str => `normalize-space(.)="${str}"`).join(' or ')
-}
-
-/**
- * Get table column index by it's name
- * @param name Name of the table column
- * @returns XPath predicate: count(ancestor::table[1]/thead/tr/th[normalize-space(.)="Name"]/preceding-sibling::th)+1
- */
-function columnIndex(...names: string[]): string {
-  // Find thead > th with requested name and count how many th were before it
-  return `count(ancestor::table[1]/thead/tr/th[${textIs(...names)}]/preceding-sibling::th)+1`
-}
-
-/**
- * Get table column by name and find cell with specified text
- * @param column find table column with this name
- * @param text find table cell with this text in selected column
- * @returns XPath predicate: td[count(ancestor::table[1]/thead/tr/th[normalize-space(.)="Name"]/preceding-sibling::th)+1][normalize-space(.)="podname"]
- */
-function xpathColumnSelector(column: string, text: string) {
-  return `xpath=td[${columnIndex(column)}][${textIs(text)}]`
-}
-
 export class TableRow {
-    private readonly ui: RancherUI
     readonly row: Locator
     readonly name: Locator
     readonly status: Locator
     readonly strval: string
+
+    /**
+     * Filter cells for requested column. Has to be applied to this.row (tr)
+     * Based on column counting - find th with requested name and count th preceeding siblings. Use this count as td index.
+     * @param name exact name of the table column
+     * @returns XPath locator for table cells under column. Returns first column if not found
+     */
+    private findColumn(...names: string[]): Locator {
+      // Compare text of column header with parameter(s)
+      const filter = names.map(str => `normalize-space(.)="${str}"`).join(' or ')
+      // Returns: xpath=td[count(ancestor::table[1]/thead/tr/th[normalize-space(.)="Name"]/preceding-sibling::th)+1]
+      return this.ui.page.locator(`xpath=td[count(ancestor::table[1]/thead/tr/th[${filter}]/preceding-sibling::th)+1]`)
+    }
+
+    // Locator to filter rows by [column & name] value. Has to be applied to this.row (tr)
+    private findCell(columnName: string, name: string | RegExp): Locator {
+      return this.findColumn(columnName).filter({ has: this.ui.page.getByText(name, { exact: true }) })
+    }
 
     /**
      *
@@ -45,7 +33,7 @@ export class TableRow {
      * @param arg:object row value under selected column(s) {column1: "value", "column 2": "value2"}
      * @param options.group When there are multiple tbodies filter by group-tab (Project, Namespace, ..)
      */
-    constructor(ui: RancherUI, arg: string | { [key: string]: string }, options?: { group?: string }) {
+    constructor(private readonly ui: RancherUI, arg: string | RegExp | { [key: string]: string | RegExp }, options?: { group?: string }) {
       let table = ui.page.locator('table.sortable-table > tbody:visible')
 
       // Filter by project / namespace
@@ -56,19 +44,18 @@ export class TableRow {
       let rows = table.locator('tr.main-row')
 
       // Filter by argument
-      if (typeof arg === 'string') {
-        this.strval = arg
-        rows = rows.filter({ has: ui.page.locator(xpathColumnSelector('Name', arg)) })
+      if (typeof arg === 'string' || arg instanceof RegExp) {
+        this.strval = arg.toString()
+        rows = rows.filter({ has: this.findCell('Name', arg) })
       } else if (typeof arg === 'object') {
         this.strval = Object.keys(arg).map(key => `${key}: ${arg[key]}`).join(',')
         for (const colName in arg) {
           const colValue = arg[colName]
-          rows = rows.filter({ has: ui.page.locator(xpathColumnSelector(colName, colValue)) })
+          rows = rows.filter({ has: this.findCell(colName, colValue) })
         }
       }
-      this.row = rows
 
-      this.ui = ui
+      this.row = rows
       this.name = this.column('Name')
       this.status = this.column('Status', 'State')
     }
@@ -81,14 +68,23 @@ export class TableRow {
      * @param names header(s) of the column, you can provide alternative names (State|Status)
      * @returns table cell (td) that is under requested column. Returns first cell if no match was found
      */
-    column(...names: string[]) {
-      return this.row.locator(`xpath=td[${columnIndex(...names)}]`)
+    column(...names: string[]): Locator {
+      return this.row.locator(this.findColumn(...names))
     }
 
-    async toBeVisible(options?: { timeout?: number }) {
+    /**
+     * Expects row to be visible and in requested state
+     */
+    @step
+    async waitFor(options?: { state?: string, timeout?: number }): Promise<TableRow> {
+      // To be visible
       await this.ui.withReload(async() => {
         await expect(this.row).toBeVisible({ timeout: options?.timeout })
       }, 'Rancher showing duplicit rows')
+      // Expected state
+      if (options?.state) await this.toHaveState(options.state, options.timeout)
+
+      return this
     }
 
     async toHaveState(state: string, timeout = 2 * 60_000) {
@@ -99,6 +95,7 @@ export class TableRow {
       await this.toHaveState('Active', timeout)
     }
 
+    @step
     async action(name: string) {
       await this.row.locator('button.actions').click()
       await this.ui.page.getByRole('listitem').getByText(name, { exact: true }).click()

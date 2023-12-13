@@ -12,9 +12,9 @@ test('Policy Servers', async({ page, ui, nav }) => {
   const apPage = new AdmissionPoliciesPage(page)
   const capPage = new ClusterAdmissionPoliciesPage(page)
 
-  const psRow = ui.getRow(server.name)
-  const apRow = ui.getRow(policy.name, { group: 'AdmissionPolicy' })
-  const capRow = ui.getRow(policy.name, { group: 'ClusterAdmissionPolicy' })
+  const psRow = ui.tableRow(server.name)
+  const apRow = ui.tableRow(policy.name, { group: 'AdmissionPolicy' })
+  const capRow = ui.tableRow(policy.name, { group: 'ClusterAdmissionPolicy' })
 
   await test.step('Create resources', async() => {
     await psPage.create(server)
@@ -28,7 +28,7 @@ test('Policy Servers', async({ page, ui, nav }) => {
     await expect3m(psRow.column('Status')).toHaveText('Active')
     await expect(psRow.column('Policies')).toHaveText('2')
     // PS image is the same as default one
-    const defaultImage = await ui.getRow('default').column('Image').textContent() || 'Empty'
+    const defaultImage = await ui.tableRow('default').column('Image').textContent() || 'Empty'
     await expect(psRow.column('Image')).toHaveText(defaultImage)
   })
 

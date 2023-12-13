@@ -55,7 +55,7 @@ export class RancherAppsPage extends BasePage {
       await this.ui.button('Create').click()
 
       // Transitions: Active ?> In Progress ?> [Active|InProgress]
-      const repo = this.ui.getRow(name)
+      const repo = await this.ui.tableRow(name).waitFor()
       // Wait out first Active state
       await this.page.waitForTimeout(1000)
       // Refresh for occasional freeze In Progress
@@ -66,7 +66,7 @@ export class RancherAppsPage extends BasePage {
     @step
     async deleteRepository(name: string) {
       await this.nav.explorer('Apps', 'Repositories')
-      await this.ui.getRow(name).delete()
+      await this.ui.tableRow(name).delete()
     }
 
     /**
@@ -145,7 +145,7 @@ export class RancherAppsPage extends BasePage {
         await this.nav.explorer('Apps', 'Installed Apps')
         await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
 
-        await this.ui.getRow(name).action('Edit/Upgrade')
+        await this.ui.tableRow(name).action('Edit/Upgrade')
         await expect(this.page.getByRole('heading', { name })).toBeVisible()
       }
       // Skip Step1
@@ -168,7 +168,7 @@ export class RancherAppsPage extends BasePage {
       await this.nav.explorer('Apps', 'Installed Apps')
       await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
       // Row is visible until helm uninstalls app
-      await this.ui.getRow(name).delete({ timeout: 60_0000 })
+      await this.ui.tableRow(name).delete({ timeout: 60_0000 })
       await this.waitHelmSuccess(name)
     }
 }

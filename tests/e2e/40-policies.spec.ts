@@ -22,7 +22,7 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
       await polPage.open(p),
       await polPage.module.inputValue()
     )
-    const row = ui.getRow(p.name)
+    const row = ui.tableRow(p.name)
 
     // Check overview page
     await polPage.goto()
