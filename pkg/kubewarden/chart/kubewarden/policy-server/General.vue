@@ -3,7 +3,7 @@ import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 
 import ResourceFetch from '@shell/mixins/resource-fetch';
-import { CATALOG } from '@shell/config/types';
+import { CATALOG, FLEET } from '@shell/config/types';
 import { _CREATE } from '@shell/config/query-params';
 
 import Loading from '@shell/components/Loading';
@@ -14,6 +14,7 @@ import { RadioGroup } from '@components/Form/Radio';
 
 import { KUBEWARDEN_CHARTS } from '../../../types';
 import { DEFAULT_POLICY_SERVER } from '../../../models/policies.kubewarden.io.policyserver';
+import { getPolicyServerModule, isFleetDeployment } from '../../../modules/fleet';
 import { getLatestStableVersion } from '../../../plugins/kubewarden-class';
 
 export default {
@@ -43,7 +44,21 @@ export default {
   async fetch() {
     await this.$initializeFetchData(CATALOG);
     await this.$fetchType(CATALOG.CLUSTER_REPO);
+
+    if ( !this.$store.getters['kubewarden/controllerApp'] ) {
+      await this.$fetchType(CATALOG.APP);
+    }
+
     await this.$store.dispatch('catalog/load');
+
+    if ( this.controllerApp ) {
+      this.isFleet = isFleetDeployment(this.controllerApp);
+
+      if ( this.isFleet ) {
+        await this.$initializeFetchData(FLEET);
+        await this.$store.dispatch('management/findAll', { type: FLEET.BUNDLE });
+      }
+    }
 
     if ( this.defaultsChart ) {
       const defaultsStable = getLatestStableVersion(this.defaultsChart.versions);
@@ -66,6 +81,10 @@ export default {
       }
     }
 
+    if ( this.isFleet && !this.defaultsChart ) {
+      this.latestStableVersion = getPolicyServerModule(this.fleetBundles);
+    }
+
     if ( this.latestStableVersion ) {
       if ( !this.image || this.image === DEFAULT_POLICY_SERVER.spec.image ) {
         // If the image doesn't exist or it's the default 'latest' image, set to the latestStableVersion
@@ -84,6 +103,7 @@ export default {
     return {
       defaultImage:        true,
       latestStableVersion: null,
+      isFleet:             false,
       name:                this.value.metadata.name,
       image:               this.value.spec.image,
       serviceAccountName:  this.value.spec.serviceAccountName,
@@ -118,6 +138,28 @@ export default {
   computed: {
     ...mapGetters({ charts: 'catalog/charts' }),
 
+    allApps() {
+      return this.$store.getters['cluster/all'](CATALOG.APP);
+    },
+
+    controllerApp() {
+      const storedApp = this.$store.getters['kubewarden/controllerApp'];
+
+      if ( !storedApp ) {
+        const controller = this.allApps?.find(a => a?.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER);
+
+        if ( controller ) {
+          this.$store.dispatch('kubewarden/updateControllerApp', controller);
+
+          return controller;
+        }
+
+        return null;
+      }
+
+      return storedApp;
+    },
+
     isCreate() {
       return this.mode === _CREATE;
     },
@@ -134,11 +176,19 @@ export default {
       return null;
     },
 
+    fleetBundles() {
+      return this.$store.getters['management/all'](FLEET.BUNDLE);
+    },
+
     kubewardenRepo() {
       return this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.DEFAULTS);
     },
 
     showVersionBanner() {
+      if ( this.isFleet ) {
+        return (this.isCreate && this.defaultImage && !this.latestStableVersion);
+      }
+
       return (this.isCreate && this.defaultImage && !this.defaultsChart && !this.latestStableVersion);
     }
   }

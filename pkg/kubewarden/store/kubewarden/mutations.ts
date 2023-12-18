@@ -1,4 +1,6 @@
-import { PolicyReport, PolicyTrace, PolicyTraceConfig } from '../../types';
+import {
+  CatalogApp, CustomResourceDefinition, PolicyReport, PolicyTrace, PolicyTraceConfig
+} from '../../types';
 import { StateConfig } from './index';
 
 export default {
@@ -13,6 +15,64 @@ export default {
   },
   updateHideBannerAirgapPolicy(state: StateConfig, val: Boolean) {
     state.hideBannerAirgapPolicy = val;
+  },
+
+  /**
+   * Updates/Adds Kubewarden Controller App into state
+   * @param state
+   * @param app `CatalogApp`
+   */
+  updateControllerApp(state: StateConfig, app: CatalogApp) {
+    if ( state.controllerApp?.id === app?.id ) {
+      state.controllerApp.metadata = app.metadata;
+      state.controllerApp.spec = app.spec;
+      state.controllerApp.status = app.status;
+    } else {
+      state.controllerApp = app;
+    }
+  },
+
+  /**
+   * Removes Kubewarden Controller App by ID
+   * @param state
+   * @param app `CatalogApp`
+   */
+  removeControllerApp(state: StateConfig, app: CatalogApp) {
+    const existing = state.controllerApp?.id === app?.id;
+
+    if ( existing ) {
+      state.controllerApp = null;
+    }
+  },
+
+  /**
+   * Updates/Adds CRD to state
+   * @param state
+   * @param crd `CustomResourceDefinition`
+   */
+  updateKubewardenCrds(state: StateConfig, crd: CustomResourceDefinition) {
+    const existingCrd = state.kubewardenCrds.find(c => c?.metadata?.name === crd?.metadata?.name);
+
+    if ( existingCrd ) {
+      existingCrd.metadata = crd.metadata;
+      existingCrd.spec = crd.spec;
+      existingCrd.status = crd.status;
+    } else {
+      state.kubewardenCrds.push(crd);
+    }
+  },
+
+  /**
+   * Removes CRD from state by `crd.metadata.name`
+   * @param state
+   * @param crd `CustomResourceDefinition`
+   */
+  removeKubewardenCrds(state: StateConfig, crd: CustomResourceDefinition) {
+    const idx = state.kubewardenCrds.findIndex(c => c?.metadata?.name === crd?.metadata?.name);
+
+    if ( idx !== -1 ) {
+      state.kubewardenCrds.splice(idx, 1);
+    }
   },
 
   /**
