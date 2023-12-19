@@ -20,32 +20,19 @@ export function isFleetDeployment(app: CatalogApp): Boolean {
 
 /**
  * Finds and returns the first `FleetBundle` from an array of `FleetBundle`s that meets a specific condition.
- * This function skips any `FleetBundle` that contains a resource named 'Chart.yaml' with a specified unwanted string in its `name` property.
+ * This function skips any `FleetBundle` that contains a chart that matches a specified unwanted chart name.
  * It then searches for a resource within each `FleetBundle` that has content including a specified `kind`.
  *
  * @param context - The string value to be matched within the `kind` property of a resource's content in each `FleetBundle`.
  * @param fleetBundles - An array of `FleetBundle` objects to be searched.
- * @param skipName? - The string value to be skipped. If a `FleetBundle` contains a 'Chart.yaml' resource with a `name` property matching this value, the bundle is skipped.
+ * @param skipChart? - The chart name string value to be skipped. If a `FleetBundle` contains a chart matching this value, the bundle is skipped.
  * @returns The first matching `FleetBundle` if found, or `null` if no match is found.
  */
-export function findFleetContent(context: string, fleetBundles: FleetBundle[], skipName?: string): FleetBundle | null {
+export function findFleetContent(context: string, fleetBundles: FleetBundle[], skipChart?: string): FleetBundle | null {
   if ( !isEmpty(fleetBundles) ) {
     for ( const bundle of fleetBundles ) {
-      if ( skipName ) {
-        // Check for Chart.yaml and skip if it contains the specific name
-        const chartYamlResource = bundle?.spec?.resources?.find(resource => resource.name === 'Chart.yaml');
-
-        if ( chartYamlResource ) {
-          try {
-            const chartYaml = jsyaml.load(chartYamlResource.content) as any;
-
-            if ( chartYaml?.name === skipName ) {
-              continue; // Skip this bundle
-            }
-          } catch (e) {
-            continue; // Skip this bundle if there's an error parsing
-          }
-        }
+      if ( skipChart && bundle?.spec?.helm?.chart === skipChart ) {
+        continue; // Skip this bundle
       }
 
       // Process the bundle for the context
