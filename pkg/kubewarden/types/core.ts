@@ -1,3 +1,5 @@
+export type Label = { [key: string]: string };
+
 export type Links = {
   remove?: string;
   self?: string;
@@ -40,6 +42,17 @@ export type Relationship = {
   state: string
 }
 
+export type MatchExpression = {
+  key: string,
+  operator: string,
+  values: string[]
+}
+
+export type Selector = {
+  matchExpressions?: MatchExpression[],
+  matchLabels?: Label
+}
+
 export type Metadata = {
   annotations?: {[key: string]: string},
   creationTimestamp: string;
@@ -69,5 +82,53 @@ export type ApiGroup = {
   preferredVersion?: {
     groupVersion: string,
     version: string
+  }
+}
+
+export type CustomResourceDefinition = {
+  apiVersion: string,
+  kind: string,
+  metadata: Metadata,
+  spec: {
+    conversion: {
+      strategy: string,
+    },
+    group: string,
+    names: {
+      kind: string,
+      listKind?: string,
+      plural: string,
+      singular: string,
+    },
+    scope?: string,
+    versions?: [
+      {
+        additionalPrinterColumns?: [
+          {
+            description: string,
+            jsonPath: string,
+            name: string,
+            type: string,
+          }
+        ],
+        name: string,
+        schema: any,
+        served?: boolean,
+        storage?: boolean,
+        subresources?: {
+          status: {}
+        }
+      }
+    ]
+  },
+  status?: {
+    acceptedNames?: {
+      kind: string,
+      listKind: string,
+      plural: string,
+      singular: string,
+    },
+    conditions?: Array<Condition>,
+    storedVersions?: string[]
   }
 }

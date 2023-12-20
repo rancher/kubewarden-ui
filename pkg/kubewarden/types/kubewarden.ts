@@ -28,6 +28,16 @@ export const KUBEWARDEN = {
   CLUSTER_POLICY_REPORT:    'wgpolicyk8s.io.clusterpolicyreport'
 };
 
+/* eslint-disable no-unused-vars */
+export enum KUBEWARDEN_CRD {
+  ADMISSION_POLICY = 'admissionpolicies.policies.kubewarden.io',
+  CLUSTER_ADMISSION_POLICY = 'clusteradmissionpolicies.policies.kubewarden.io',
+  POLICY_SERVER = 'policyservers.policies.kubewarden.io',
+  POLICY_REPORT = 'policyreports.wgpolicyk8s.io',
+  CLUSTER_POLICY_REPORT = 'clusterpolicyreports.wgpolicyk8s.io'
+}
+/* eslint-enable no-unused-vars */
+
 export type Rule = {
   apiGroups: string[],
   apiVersions: string[],
@@ -77,7 +87,7 @@ export type Policy = {
   kind: string,
   metadata: Metadata,
   spec: {
-    backgroundAudit?: true,
+    backgroundAudit?: boolean,
     mode: string,
     module: string,
     mutating?: boolean,

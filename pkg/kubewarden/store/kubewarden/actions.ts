@@ -1,4 +1,6 @@
-import { PolicyReport, PolicyTraceConfig, PolicyTrace } from '../../types';
+import {
+  CatalogApp, CustomResourceDefinition, PolicyReport, PolicyTraceConfig, PolicyTrace
+} from '../../types';
 
 export default {
   updateAirGapped({ commit }: any, val: Boolean) {
@@ -37,5 +39,19 @@ export default {
   // Charts
   updateRefreshingCharts({ commit }: any, val: Boolean) {
     commit('updateRefreshingCharts', val);
+  },
+
+  // Catalog
+  updateControllerApp({ commit }: any, val: CatalogApp) {
+    commit('updateControllerApp', val);
+  },
+  removeControllerApp({ commit }: any, val: CatalogApp) {
+    commit('removeControllerApp', val);
+  },
+  updateKubewardenCrds({ commit }: any, val: CustomResourceDefinition) {
+    commit('updateKubewardenCrds', val);
+  },
+  removeKubewardenCrds({ commit }: any, val: CustomResourceDefinition) {
+    commit('removeKubewardenCrds', val);
   }
 };

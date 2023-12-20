@@ -2,6 +2,7 @@ export * from './types/artifacthub';
 export * from './types/core';
 export * from './types/catalog.cattle.io.app';
 export * from './types/chart';
+export * from './types/fleet';
 export * from './types/grafana';
 export * from './types/kubewarden';
 export * from './types/jaeger';

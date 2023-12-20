@@ -4,10 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import semver from 'semver';
 
 import SteveModel from '@shell/plugins/steve/steve-class';
-import {
-  STATES,
-  STATES_ENUM,
-} from '@shell/plugins/dashboard-store/resource-class';
+import { STATES, STATES_ENUM } from '@shell/plugins/dashboard-store/resource-class';
 import { MANAGEMENT, SERVICE } from '@shell/config/types';
 import { isArray } from '@shell/utils/array';
 import { addParams } from '@shell/utils/url';
