@@ -1,9 +1,11 @@
 <script>
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
+import semver from 'semver';
 
 import { CATALOG, POD, WORKLOAD_TYPES } from '@shell/config/types';
 import { KUBERNETES, CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
+import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { allHash } from '@shell/utils/promise';
 import ResourceManager from '@shell/mixins/resource-manager';
 
@@ -12,6 +14,7 @@ import Loading from '@shell/components/Loading';
 
 import { DASHBOARD_HEADERS } from '../../config/table-headers';
 import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_LABELS } from '../../types';
+import { handleGrowl } from '../../utils/handle-growl';
 
 import DefaultsBanner from '../DefaultsBanner';
 import Card from './Card';
@@ -30,7 +33,8 @@ export default {
       KUBEWARDEN.ADMISSION_POLICY,
       KUBEWARDEN.CLUSTER_ADMISSION_POLICY,
       POD,
-      CATALOG.APP
+      CATALOG.APP,
+      CATALOG.CLUSTER_REPO
     ];
 
     for ( const type of types ) {
@@ -62,7 +66,8 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduct']),
+    ...mapGetters(['currentCluster', 'currentProduct']),
+    ...mapGetters({ charts: 'catalog/charts' }),
 
     allApps() {
       return this.$store.getters['cluster/all'](CATALOG.APP);
@@ -70,6 +75,24 @@ export default {
 
     allPods() {
       return this.$store.getters['cluster/all'](POD);
+    },
+
+    controllerApp() {
+      if ( this.allApps ) {
+        return this.allApps?.find((a) => {
+          return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_CONTROLLER;
+        });
+      }
+
+      return null;
+    },
+
+    controllerChart() {
+      if ( !isEmpty(this.charts) ) {
+        return this.charts.find(chart => chart?.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
+      }
+
+      return null;
     },
 
     defaultsApp() {
@@ -86,7 +109,11 @@ export default {
       if ( this.$store.getters['cluster/canList'](POD) ) {
         const pods = this.allPods?.filter(pod => pod?.metadata?.labels?.[KUBEWARDEN_LABELS.POLICY_SERVER]);
 
-        return Object.values(pods).flat();
+        if ( !isEmpty(pods) ) {
+          return Object.values(pods).flat();
+        }
+
+        return null;
       }
 
       return null;
@@ -135,7 +162,7 @@ export default {
     },
 
     globalPolicies() {
-      return this.$store.getters[`${ this.currentProduct.inStore }/all`](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
+      return this.$store.getters['cluster/all'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
     },
 
     globalGuages() {
@@ -147,7 +174,7 @@ export default {
     },
 
     namespacedPolicies() {
-      return this.$store.getters[`${ this.currentProduct.inStore }/all`](KUBEWARDEN.ADMISSION_POLICY);
+      return this.$store.getters['cluster/all'](KUBEWARDEN.ADMISSION_POLICY);
     },
 
     namespacedGuages() {
@@ -157,6 +184,21 @@ export default {
     version() {
       return this.controller?.metadata?.labels?.['app.kubernetes.io/version'];
     },
+
+    upgradeAvailable() {
+      if ( this.controllerApp && this.controllerChart ) {
+        const appVersion = this.controllerApp.spec?.chart?.metadata?.version;
+        const latestChartVersion = this.controllerChart.versions[0]?.version;
+
+        if ( appVersion && latestChartVersion ) {
+          return semver.gt(latestChartVersion, appVersion) ? latestChartVersion : null;
+        }
+
+        return null;
+      }
+
+      return null;
+    }
   },
 
   methods: {
@@ -179,26 +221,67 @@ export default {
     },
 
     getPolicyGauges(type) {
-      return type?.reduce((policy, neu) => {
-        return {
+      if ( !isEmpty(type) ) {
+        return type?.reduce((policy, neu) => {
+          return {
+            status: {
+              running: policy?.status?.running + ( neu?.status?.policyStatus === 'active' ? 1 : 0 ),
+              stopped: policy?.status?.stopped + ( neu?.status?.error ? 1 : 0 ),
+              pending: policy?.status?.pending + ( neu?.status?.policyStatus === 'pending' ? 1 : 0 ),
+            },
+            mode: {
+              protect: policy?.mode?.protect + ( neu?.spec?.mode === 'protect' ? 1 : 0 ),
+              monitor: policy?.mode?.monitor + ( neu?.spec?.mode === 'monitor' ? 1 : 0 )
+            },
+            total: policy?.total + 1
+          };
+        }, {
           status: {
-            running: policy?.status?.running + ( neu?.status?.policyStatus === 'active' ? 1 : 0 ),
-            stopped: policy?.status?.stopped + ( neu?.status?.error ? 1 : 0 ),
-            pending: policy?.status?.pending + ( neu?.status?.policyStatus === 'pending' ? 1 : 0 ),
+            running: 0, stopped: 0, pending: 0
           },
-          mode: {
-            protect: policy?.mode?.protect + ( neu?.spec?.mode === 'protect' ? 1 : 0 ),
-            monitor: policy?.mode?.monitor + ( neu?.spec?.mode === 'monitor' ? 1 : 0 )
-          },
-          total: policy?.total + 1
-        };
-      }, {
+          mode:   { protect: 0, monitor: 0 },
+          total:  0
+        });
+      }
+
+      return {
         status: {
           running: 0, stopped: 0, pending: 0
         },
         mode:   { protect: 0, monitor: 0 },
         total:  0
-      });
+      };
+    },
+
+    controllerChartRoute() {
+      if ( this.controllerChart ) {
+        const {
+          repoType, repoName, chartName, versions
+        } = this.controllerChart;
+        const latestVersion = versions[0]?.version;
+
+        if ( latestVersion ) {
+          const query = {
+            [REPO_TYPE]: repoType,
+            [REPO]:      repoName,
+            [CHART]:     chartName,
+            [VERSION]:   latestVersion
+          };
+
+          this.$router.push({
+            name:   'c-cluster-apps-charts-install',
+            params: { cluster: this.currentCluster?.id || '_' },
+            query,
+          });
+        } else {
+          const error = {
+            _statusText: this.t('kubewarden.dashboard.appInstall.versionError.title'),
+            message:     this.t('kubewarden.dashboard.appInstall.versionError.message')
+          };
+
+          handleGrowl({ error, store: this.$store });
+        }
+      }
     }
   }
 };
@@ -212,7 +295,19 @@ export default {
         <h1 data-testid="kw-dashboard-title">
           {{ t('kubewarden.dashboard.intro') }}
         </h1>
-        <span v-if="version">{{ version }}</span>
+        <div v-if="version">
+          <span class="head-version bg-primary">{{ version }}</span>
+          <span
+            v-if="upgradeAvailable"
+            data-testid="kw-app-upgrade-button"
+            class="head-upgrade badge-state bg-warning hand"
+            :disabled="!controllerChart"
+            @click.prevent="controllerChartRoute"
+          >
+            Upgrade Available
+            <i class="icon icon-upload" />
+          </span>
+        </div>
       </div>
 
       <p class="head-subheader">
@@ -335,12 +430,11 @@ export default {
       h1 {
         margin: 0;
       }
+    }
 
-      span {
-        background: var(--primary);
-        border-radius: var(--border-radius);
-        padding: 4px 8px;
-      }
+    &-version, &-upgrade {
+      border-radius: var(--border-radius);
+      padding: 4px 8px;
     }
 
     &-subheader {
