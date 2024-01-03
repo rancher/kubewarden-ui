@@ -6,8 +6,11 @@ import { _CREATE } from '@shell/config/query-params';
 import { monitoringStatus } from '@shell/utils/monitoring';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
+import Markdown from '@shell/components/Markdown';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
 import Tab from '@shell/components/Tabbed/Tab';
+
+import { ARTIFACTHUB_PKG_ANNOTATION } from '../../types';
 
 import MetricsTab from '../MetricsTab';
 import RulesTable from '../RulesTable';
@@ -17,7 +20,7 @@ export default {
   name: 'PolicyDetail',
 
   components: {
-    MetricsTab, ResourceTabs, RulesTable, Tab, TraceTable
+    Markdown, MetricsTab, ResourceTabs, RulesTable, Tab, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -39,6 +42,24 @@ export default {
     },
   },
 
+  async mounted() {
+    if ( this.value?.metadata?.annotations?.[ARTIFACTHUB_PKG_ANNOTATION] ) {
+      try {
+        const artifactHubPackage = await this.value.artifactHubPackageVersion();
+
+        if ( artifactHubPackage && !artifactHubPackage.error && artifactHubPackage.readme ) {
+          this.policyReadme = JSON.parse(JSON.stringify(artifactHubPackage.readme));
+        }
+      } catch (e) {
+        console.warn(`Unable to fetch artifacthub package: ${ e }`); // eslint-disable-line no-console
+      }
+    }
+  },
+
+  data() {
+    return { policyReadme: null };
+  },
+
   computed: {
     ...mapGetters(['currentCluster']),
     ...monitoringStatus(),
@@ -48,15 +69,15 @@ export default {
     },
 
     hasRelationships() {
-      return !!this.value.metadata?.relationships;
+      return !!this.value?.metadata?.relationships;
     },
 
     hasRules() {
-      return !isEmpty(this.rulesRows[0]);
+      return !isEmpty(this.rulesRows?.[0]);
     },
 
     rulesRows() {
-      return this.value.spec?.rules;
+      return this.value?.spec?.rules;
     }
   }
 };
@@ -68,15 +89,19 @@ export default {
       <h3>{{ t('namespace.resources') }}</h3>
     </div>
     <ResourceTabs v-model="value" data-testid="kw-policy-detail-tabs" :mode="mode" :need-related="hasRelationships">
-      <Tab v-if="hasRules" name="policy-rules" label="Rules" :weight="99">
-        <RulesTable data-testid="kw-polity-detail-rules-table" :rows="rulesRows" />
+      <Tab v-if="policyReadme" name="policy-readme" label="Readme" :weight="99">
+        <Markdown v-model="policyReadme" data-testid="kw-policy-detail-readme" />
       </Tab>
 
-      <Tab name="policy-tracing" label="Tracing" :weight="98">
+      <Tab v-if="hasRules" name="policy-rules" label="Rules" :weight="98">
+        <RulesTable :rows="rulesRows" data-testid="kw-policy-detail-rules-table" />
+      </Tab>
+
+      <Tab name="policy-tracing" label="Tracing" :weight="97">
         <TraceTable :resource="resource" :policy="value" data-testid="kw-policy-detail-trace-table" />
       </Tab>
 
-      <Tab #default="props" name="policy-metrics" label="Metrics" :weight="97">
+      <Tab #default="props" name="policy-metrics" label="Metrics" :weight="96">
         <MetricsTab :resource="resource" :policy-obj="value" :active="props.active" />
       </Tab>
     </ResourceTabs>

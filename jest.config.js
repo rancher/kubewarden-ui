@@ -1,15 +1,15 @@
 module.exports = {
   setupFilesAfterEnv:   ['./jest.setup.js'],
   modulePaths:          ['<rootDir>'],
-  moduleFileExtensions: ['js', 'json', 'vue', 'ts'],
+  moduleFileExtensions: ['js', 'json', 'vue', 'ts', 'tsx'],
   moduleNameMapper:     {
     '^~/(.*)$':         '<rootDir>/$1',
     '^~~/(.*)$':        '<rootDir>/$1',
     '^@/(.*)$':         '<rootDir>/$1',
     '@shell/(.*)':      '<rootDir>/node_modules/@rancher/shell/$1',
-    '@components/(.*)':
-      '<rootDir>/node_modules/@rancher/components/dist/@rancher/components.common.js',
+    '@components/(.*)': '<rootDir>/node_modules/@rancher/components/dist/@rancher/components.common.js',
     '@kubewarden/(.*)': '<rootDir>/pkg/kubewarden/$1',
+    '@tests/(.*)':      '<rootDir>/tests/$1'
   },
   transform: {
     '^.+\\.js$':   '<rootDir>/node_modules/babel-jest',
