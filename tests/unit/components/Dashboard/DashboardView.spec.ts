@@ -20,7 +20,8 @@ describe('component: DashboardView', () => {
         'catalog/chart':                 jest.fn(),
         'catalog/charts':                jest.fn(),
         'cluster/all':                   jest.fn(),
-        'cluster/canList':               () => true
+        'cluster/canList':               () => true,
+        'prefs/get':                     jest.fn()
       },
     }
   };
@@ -43,6 +44,59 @@ describe('component: DashboardView', () => {
       computed: commonComputed,
       ...overrides
     });
+  };
+
+  const controllerCharts = {
+    versions: [
+      { appVersion: 'v1.10.0-rc1', version: '2.0.6-rc1' },
+      { appVersion: 'v1.9.0', version: '2.0.5' },
+      { appVersion: 'v1.9.0', version: '2.0.4' },
+      { appVersion: 'v1.9.0', version: '2.0.3' },
+      { appVersion: 'v1.9.0-rc3', version: '2.0.3-rc3' },
+      { appVersion: 'v1.9.0-rc2', version: '2.0.3-rc2' },
+      { appVersion: 'v1.9.0-rc1', version: '2.0.3-rc1' },
+      { appVersion: 'v1.9.0', version: '2.0.3' },
+      { appVersion: 'v1.8.0', version: '2.0.2' },
+      { appVersion: 'v1.8.0', version: '2.0.1' },
+      { appVersion: 'v1.8.0', version: '2.0.0' },
+      { appVersion: 'v1.8.0-rc2', version: '2.0.0-rc1' },
+      { appVersion: 'v1.8.0-rc2', version: '2.0.0-rc1' },
+      { appVersion: 'v1.7.0', version: '1.6.2' },
+      { appVersion: 'v1.7.0', version: '1.6.1' },
+      { appVersion: 'v1.7.0', version: '1.6.0' },
+      { appVersion: 'v1.7.0-rc3', version: '1.6.0-rc4' },
+      { appVersion: 'v1.7.0-rc3', version: '1.6.0-rc3' },
+      { appVersion: 'v1.7.0-rc2', version: '1.6.0-rc2' },
+      { appVersion: 'v1.7.0-rc1', version: '1.6.0-rc1' },
+      { appVersion: 'v1.6.0', version: '1.5.3' },
+      { appVersion: 'v1.6.0', version: '1.5.2' },
+      { appVersion: 'v1.6.0', version: '1.5.1' },
+      { appVersion: 'v1.6.0', version: '1.5.0' },
+      { appVersion: 'v1.6.0-rc6', version: '1.5.0-rc6' },
+      { appVersion: 'v1.6.0-rc5', version: '1.5.0-rc5' },
+      { appVersion: '1.5.0', version: '1.4.1' },
+      { appVersion: '1.5.0', version: '1.4.0' },
+      { appVersion: 'v1.4.0', version: '1.3.1' },
+      { appVersion: 'v1.4.0', version: '1.3.0' },
+      { appVersion: 'v1.4.0', version: '1.2.8' },
+      { appVersion: 'v1.4.0-rc2', version: '1.2.8-rc2' },
+      { appVersion: 'v1.4.0-rc1', version: '1.2.8-rc1' },
+      { appVersion: 'v1.3.0', version: '1.2.7' },
+      { appVersion: 'v1.3.0', version: '1.2.6' },
+      { appVersion: 'v1.3.0', version: '1.2.4' },
+      { appVersion: 'v1.1.1', version: '1.2.3' },
+      { appVersion: 'v1.1.1', version: '1.2.2' },
+      { appVersion: 'v1.1.1', version: '1.2.1' },
+      { appVersion: 'v1.1.0', version: '1.2.0' },
+      { appVersion: 'v1.1.0', version: '1.1.1' },
+      { appVersion: 'v1.0.0', version: '1.0.0' },
+      { appVersion: 'v1.0.0-rc4', version: '1.0.0-rc4' },
+      { appVersion: 'v1.0.0-rc3', version: '1.0.0-rc3' },
+      { appVersion: 'v1.0.0-rc2', version: '1.0.0-rc2' },
+      { appVersion: 'v1.0.0-rc1', version: '1.0.0-rc1' },
+      { appVersion: 'v0.5.5', version: '0.4.6' },
+      { appVersion: 'v0.5.4', version: '0.4.5' }
+    ]
   };
 
   it('renders defaults banner when default app is not found', () => {
@@ -129,25 +183,141 @@ describe('component: DashboardView', () => {
     expect(gauges.at(1).props().used).toStrictEqual(1 as Number);
   });
 
-  it('renders the "Upgrade Available" button when an upgrade is available', () => {
-    const oldControllerApp = { spec: { chart: { metadata: { version: '1.0.0' } } } };
-    const newControllerChart = {
-      versions: [
-        { version: '1.1.0' }
-      ]
-    };
+  it('renders the Upgradable button when an upgrade is available', () => {
+    const oldControllerApp = { spec: { chart: { metadata: { version: '2.0.4', appVersion: 'v1.9.0' } } } };
 
     const wrapper = createWrapper({
       computed: {
-        controllerApp:   () => oldControllerApp,
-        controllerChart:  () => newControllerChart,
-        version:          () => '1.0.0',
+        controllerApp:    () => oldControllerApp,
+        controllerChart:  () => controllerCharts,
+        version:          () => 'v1.9.0',
       }
     });
 
     const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain('Upgrade Available');
+    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 2.0.5');
+  });
+
+  it('calculates the correct chart for a supported MAJOR version upgrade', () => {
+    const oldControllerApp = { spec: { chart: { metadata: { version: '0.4.6', appVersion: 'v0.5.5' } } } };
+
+    const wrapper = createWrapper({
+      computed: {
+        controllerApp:    () => oldControllerApp,
+        controllerChart:  () => controllerCharts,
+        version:          () => 'v0.5.5',
+      }
+    });
+
+    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+
+    expect(upgradeButton.exists()).toBe(true);
+    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 1.0.0');
+  });
+
+  it('calculates the correct chart for a supported MINOR version upgrade', () => {
+    const oldControllerApp = { spec: { chart: { metadata: { version: '1.1.1', appVersion: 'v1.1.0' } } } };
+
+    const wrapper = createWrapper({
+      computed: {
+        controllerApp:    () => oldControllerApp,
+        controllerChart:  () => controllerCharts,
+        version:          () => 'v1.1.0',
+      }
+    });
+
+    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+
+    expect(upgradeButton.exists()).toBe(true);
+    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 1.2.3');
+  });
+
+  it('calculates the correct chart for a supported PATCH version upgrade', () => {
+    const oldControllerApp = { spec: { chart: { metadata: { version: '2.0.0', appVersion: 'v1.8.0' } } } };
+
+    const wrapper = createWrapper({
+      computed: {
+        controllerApp:    () => oldControllerApp,
+        controllerChart:  () => controllerCharts,
+        version:          () => 'v1.8.0',
+      }
+    });
+
+    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+
+    expect(upgradeButton.exists()).toBe(true);
+    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 2.0.5');
+    expect(wrapper.vm.upgradeAvailable).toBe(controllerCharts.versions[1]);
+  });
+
+  it('calculates the correct chart for multiple appVersions with chart PATCH available', () => {
+    const oldControllerApp = { spec: { chart: { metadata: { version: '1.6.0', appVersion: 'v1.7.0' } } } };
+
+    const wrapper = createWrapper({
+      computed: {
+        controllerApp:    () => oldControllerApp,
+        controllerChart:  () => controllerCharts,
+        version:          () => 'v1.7.0',
+      }
+    });
+
+    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+
+    expect(upgradeButton.exists()).toBe(true);
+    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 2.0.2');
+  });
+
+  it('calculates the correct chart for inconsistent appVersion semantics', () => {
+    const oldControllerApp = { spec: { chart: { metadata: { version: '1.4.0', appVersion: '1.5.0' } } } };
+
+    const wrapper = createWrapper({
+      computed: {
+        controllerApp:    () => oldControllerApp,
+        controllerChart:  () => controllerCharts,
+        version:          () => '1.5.0',
+      }
+    });
+
+    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+
+    expect(upgradeButton.exists()).toBe(true);
+    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 1.5.3');
+  });
+
+  it('calculates the correct chart for pre-release versions', () => {
+    const oldControllerApp = { spec: { chart: { metadata: { version: '2.0.5', appVersion: 'v1.9.0' } } } };
+
+    const wrapper = createWrapper({
+      computed: {
+        controllerApp:   () => oldControllerApp,
+        controllerChart: () => controllerCharts,
+        version:         () => 'v1.9.0',
+        showPreRelease:  () => true
+      }
+    });
+
+    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+
+    expect(upgradeButton.exists()).toBe(true);
+    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 2.0.6-rc1');
+  });
+
+  it('does not show pre-release upgrades when preference is false', () => {
+    const oldControllerApp = { spec: { chart: { metadata: { version: '2.0.5', appVersion: 'v1.9.0' } } } };
+
+    const wrapper = createWrapper({
+      computed: {
+        controllerApp:   () => oldControllerApp,
+        controllerChart: () => controllerCharts,
+        version:         () => 'v1.9.0',
+        showPreRelease:  () => false
+      }
+    });
+
+    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+
+    expect(upgradeButton.exists()).toBe(false);
   });
 });

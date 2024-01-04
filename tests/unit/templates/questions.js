@@ -18,9 +18,8 @@ export const question = {
 };
 
 export const deepSequenceQuestion = {
-  default:     [],
-  description:
-    '',
+  default:            [],
+  description:        '',
   label:              'Keyless Subject Prefix',
   type:               'sequence[',
   variable:           'signatures',

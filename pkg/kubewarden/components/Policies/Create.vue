@@ -146,8 +146,8 @@ export default ({
 
     /** Determines if the required rules/settings are set, if not the resource can not be created */
     hasRequired() {
-      if ( !isEmpty(this.chartValues?.policy) ) {
-        const { rules, settings } = this.chartValues?.policy?.spec;
+      if ( !isEmpty(this.chartValues?.policy) && this.chartValues.policy.spec ) {
+        const { rules, settings } = this.chartValues.policy.spec;
 
         const requiredRules = ['apiVersions', 'operations', 'resources'];
         const acceptedRules = this.acceptedValues(rules, requiredRules);
@@ -220,13 +220,15 @@ export default ({
     checkProperties(requiredProp, requiredKeys) {
       const match = [];
 
-      for ( const key of requiredKeys?.values() ) {
-        if ( !isEmpty(requiredProp[key]) ) {
-          match.push(key);
+      if ( !isEmpty(requiredKeys) ) {
+        for ( const key of requiredKeys.values() ) {
+          if ( !isEmpty(requiredProp[key]) ) {
+            match.push(key);
+          }
         }
-      }
-      if ( requiredKeys && isEqual(match, requiredKeys) ) {
-        return requiredProp;
+        if ( requiredKeys && isEqual(match, requiredKeys) ) {
+          return requiredProp;
+        }
       }
 
       return null;
