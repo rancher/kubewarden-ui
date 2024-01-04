@@ -1,5 +1,3 @@
-import { ExtendedVue, Vue } from 'vue/types/vue';
-import { DefaultProps } from 'vue/types/options';
 import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from '@jest/globals';
 
@@ -11,31 +9,44 @@ import DEFAULTS_APP from '../../templates/defaultsApp';
 import PS_POD from '../../templates/policyServerPod';
 
 describe('component: DashboardView', () => {
+  const commonMocks = {
+    $fetchState: { pending: false },
+    $store:      {
+      getters: {
+        currentCluster:                  () => 'current_cluster',
+        currentProduct:                  () => 'current_product',
+        'kubewarden/hideBannerDefaults': jest.fn(),
+        'i18n/t':                        jest.fn(),
+        'catalog/chart':                 jest.fn(),
+        'catalog/charts':                jest.fn(),
+        'cluster/all':                   jest.fn(),
+        'cluster/canList':               () => true
+      },
+    }
+  };
+
+  const commonComputed = {
+    controllerApp:      () => null,
+    controllerChart:    () => null,
+    defaultsApp:        () => DEFAULTS_APP,
+    hideBannerDefaults: () => false,
+    policyServerPods:   () => [PS_POD],
+    globalPolicies:     () => [],
+    namespacedPolicies: () => [],
+    version:            () => '1.25',
+    upgradeAvailable:   () => null
+  };
+
+  const createWrapper = (overrides) => {
+    return shallowMount(DashboardView, {
+      mocks:    commonMocks,
+      computed: commonComputed,
+      ...overrides
+    });
+  };
+
   it('renders defaults banner when default app is not found', () => {
-    const wrapper = shallowMount(DashboardView as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      computed:  {
-        defaultsApp:        () => DEFAULTS_APP,
-        defaultsChart:      () => null,
-        hideBannerDefaults: () => false,
-        policyServerPods:   () => [PS_POD],
-        globalPolicies:     () => [],
-        namespacedPolicies: () => [],
-        version:            () => '1.25'
-      },
-      mocks:     {
-        $fetchState: { pending: false },
-        $store:      {
-          getters: {
-            currentCluster:                  () => 'current_cluster',
-            currentProduct:                  () => 'current_product',
-            'current_product/all':           jest.fn(),
-            'i18n/t':                        jest.fn(),
-            'kubewarden/hideBannerDefaults': jest.fn(),
-            'catalog/chart':                 jest.fn(),
-            'cluster/canList':               () => true
-          },
-        }
-      },
+    const wrapper = createWrapper({
       stubs: {
         Card:             { template: '<span />' },
         ConsumptionGauge: { template: '<span />' }
@@ -69,30 +80,9 @@ describe('component: DashboardView', () => {
       }
     ];
 
-    const wrapper = shallowMount(DashboardView as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
+    const wrapper = createWrapper({
       data() {
         return { psPods: pods };
-      },
-      computed:  {
-        defaultsApp:        () => DEFAULTS_APP,
-        policyServerPods:   () => [PS_POD],
-        globalPolicies:     () => [],
-        namespacedPolicies: () => [],
-        version:            () => '1.25'
-      },
-      mocks:     {
-        $fetchState: { pending: false },
-        $store:      {
-          getters: {
-            currentCluster:                  () => 'current_cluster',
-            currentProduct:                  () => 'current_product',
-            'current_product/all':           jest.fn(),
-            'i18n/t':                        jest.fn(),
-            'kubewarden/hideBannerDefaults': jest.fn(),
-            'catalog/chart':                 jest.fn(),
-            'cluster/canList':               () => true
-          },
-        }
       },
       stubs: { DefaultsBanner: { template: '<span />' } }
     });
@@ -128,34 +118,36 @@ describe('component: DashboardView', () => {
       }
     ];
 
-    const wrapper = shallowMount(DashboardView as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      computed:  {
-        defaultsApp:        () => DEFAULTS_APP,
-        policyServerPods:   () => [PS_POD],
-        globalPolicies:     () => [],
-        namespacedPolicies: () => policies,
-        version:            () => '1.25'
-      },
-      mocks:     {
-        $fetchState: { pending: false },
-        $store:      {
-          getters: {
-            currentCluster:                  () => 'current_cluster',
-            currentProduct:                  () => 'current_product',
-            'current_product/all':           jest.fn(),
-            'i18n/t':                        jest.fn(),
-            'kubewarden/hideBannerDefaults': jest.fn(),
-            'catalog/chart':                 jest.fn(),
-            'cluster/canList':               () => true
-          },
-        }
-      },
-      stubs: { DefaultsBanner: { template: '<span />' } }
+    const wrapper = createWrapper({
+      computed: { namespacedPolicies: () => policies },
+      stubs:    { DefaultsBanner: { template: '<span />' } }
     });
 
     const gauges = wrapper.findAllComponents(ConsumptionGauge);
 
     expect(gauges.at(1).props().capacity).toStrictEqual(policies.length as Number);
     expect(gauges.at(1).props().used).toStrictEqual(1 as Number);
+  });
+
+  it('renders the "Upgrade Available" button when an upgrade is available', () => {
+    const oldControllerApp = { spec: { chart: { metadata: { version: '1.0.0' } } } };
+    const newControllerChart = {
+      versions: [
+        { version: '1.1.0' }
+      ]
+    };
+
+    const wrapper = createWrapper({
+      computed: {
+        controllerApp:   () => oldControllerApp,
+        controllerChart:  () => newControllerChart,
+        version:          () => '1.0.0',
+      }
+    });
+
+    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+
+    expect(upgradeButton.exists()).toBe(true);
+    expect(upgradeButton.text()).toContain('Upgrade Available');
   });
 });
