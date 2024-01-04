@@ -37,8 +37,7 @@
     "sass-loader": "10.1.1",
     "ts-jest": "^29.0.5",
     "ts-loader": "~8.2.0",
-    "typescript": "4.1.6",
-    "vue-template-compiler": "2.7.14"
+    "typescript": "4.1.6"
   },
   "engines": {
     "node": ">=12"
