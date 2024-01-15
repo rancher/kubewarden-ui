@@ -6,7 +6,10 @@ test('Brief check of landing pages', async({ page, ui, nav }) => {
   await test.step('Kubewarden Landing page', async() => {
     await nav.explorer('Kubewarden')
     // Header contains version
-    await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
+    const head = page.locator('div.head')
+    await expect(head.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
+    await expect(head.getByText(/App Version:\s+v[1-9]/)).toBeVisible()
+
     // Recommended policies stats
     await expect1m(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
     await expect1m(page.getByText('Active 0 of 0 Namespaced Policies / 0%')).toBeVisible()
