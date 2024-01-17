@@ -11,6 +11,10 @@ kubewarden:
       Kubewarden is a policy engine for Kubernetes. It helps with keeping your Kubernetes clusters secure and compliant. Kubewarden policies can be written using regular programming languages or Domain Specific Languages (DSL). Policies are compiled into WebAssembly modules that are then distributed using traditional container registries.
     getStarted: Get Started
     issues: Issues
+    upgrade:
+      chart: Chart
+      appVersion: App Version
+      appUpgrade: App Upgrade
     headers:
       policyServer:
         title: Policy Servers
@@ -143,7 +147,7 @@ kubewarden:
     noRelatedPolicies: No related policies found.
     noRelatedTraces: No tracing data exists for the related policies.
     noTraces: No tracing data exists for this policy.
-    config: 
+    config:
       label: |
         Tracing must be <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart#install-kubewarden" target="_blank" rel="noopener noreferrer nofollow">configured</a> with a Jaeger endpoint in the "Telemetry" tab of the Kubewarden Controller chart settings.
       link: Update Config
@@ -158,7 +162,7 @@ kubewarden:
       tooltips:
         prerequisites: The prerequisite steps have not been completed.
         appNotInstalled: The { app } app is not yet installed.
-        nsNotFound: "The Namespace `cattle-dashboards` cannot be found."
+        nsNotFound: 'The Namespace `cattle-dashboards` cannot be found.'
         chartError: The { chart } chart cannot be found, ensure the repository exists and try reloading the page.
         monitorsNotFound: No Service Monitors found in the `{ namespace }` namespace connected to the Policy Server.
       monitoringApp:
@@ -314,7 +318,7 @@ kubewarden:
         unavailable: The Policy Reporter UI proxy URL is unavailble, please ensure that the UI is properly configured.
     deployment:
       banner:
-        unavailable: "The Policy Reporter UI Deployment is currently in a `{ state }` state, please wait."
+        unavailable: 'The Policy Reporter UI Deployment is currently in a `{ state }` state, please wait.'
     headers:
       label: Compliance
       description: When using the Kubewarden Audit Scanner, the results of the policy scans are stored using the PolicyReport Custom Resource.

@@ -6,6 +6,7 @@ import semver from 'semver';
 import { CATALOG, POD, WORKLOAD_TYPES } from '@shell/config/types';
 import { KUBERNETES, CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
+import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 import { allHash } from '@shell/utils/promise';
 import ResourceManager from '@shell/mixins/resource-manager';
 
@@ -44,6 +45,7 @@ export default {
     }
 
     await allHash(hash);
+    await this.$store.dispatch('catalog/refresh');
 
     this.secondaryResourceData = this.secondaryResourceDataConfig();
     this.resourceManagerFetchSecondaryResources(this.secondaryResourceData);
@@ -58,7 +60,7 @@ export default {
       DASHBOARD_HEADERS,
       colorStops,
 
-      controller:            null,
+      controllerDeployment:  null,
       deployments:           null,
       psPods:                [],
       secondaryResourceData: this.secondaryResourceDataConfig(),
@@ -80,7 +82,10 @@ export default {
     controllerApp() {
       if ( this.allApps ) {
         return this.allApps?.find((a) => {
-          return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_CONTROLLER;
+          return (
+            a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_CONTROLLER ||
+            a.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER
+          );
         });
       }
 
@@ -182,34 +187,69 @@ export default {
     },
 
     version() {
-      return this.controller?.metadata?.labels?.['app.kubernetes.io/version'];
+      return this.controllerDeployment?.metadata?.labels?.['app.kubernetes.io/version'];
     },
 
     upgradeAvailable() {
       if ( this.controllerApp && this.controllerChart ) {
-        const appVersion = this.controllerApp.spec?.chart?.metadata?.version;
-        const latestChartVersion = this.controllerChart.versions[0]?.version;
+        const installedAppVersion = this.controllerApp.spec?.chart?.metadata?.appVersion;
+        const installedChartVersion = this.controllerApp.spec?.chart?.metadata?.version;
+        const chartVersions = this.controllerChart.versions;
 
-        if ( appVersion && latestChartVersion ) {
-          return semver.gt(latestChartVersion, appVersion) ? latestChartVersion : null;
+        if ( installedAppVersion ) {
+          const uniqueSortedVersions = Array.from(new Set(chartVersions.map(v => v.appVersion)))
+            .filter(v => this.showPreRelease ? v : !semver.prerelease(v))
+            .sort(semver.compare);
+
+          let highestVersion = null;
+
+          for ( const version of uniqueSortedVersions ) {
+            const upgradeAvailable = this.getValidUpgrade(installedAppVersion, version, highestVersion);
+
+            if ( upgradeAvailable ) {
+              highestVersion = upgradeAvailable;
+            }
+          }
+
+          if ( !highestVersion ) {
+          // Find the highest chart version for the current appVersion
+            const chartsWithCurrentAppVersion = chartVersions.filter(v => v.appVersion === installedAppVersion);
+            const highestChartForCurrentVersion = chartsWithCurrentAppVersion
+              .sort((a, b) => semver.rcompare(a.version, b.version))[0];
+
+            if ( highestChartForCurrentVersion && semver.gt(highestChartForCurrentVersion.version, installedChartVersion) ) {
+              highestVersion = installedAppVersion;
+            }
+          }
+
+          if ( highestVersion ) {
+          // Find the chart with the highest chart version for the highest appVersion
+            const matchingCharts = chartVersions
+              .filter(v => v.appVersion === highestVersion)
+              .sort((a, b) => semver.rcompare(a.version, b.version));
+
+            return matchingCharts.length > 0 ? matchingCharts[0] : null;
+          }
         }
-
-        return null;
       }
 
       return null;
+    },
+
+    showPreRelease() {
+      return this.$store.getters['prefs/get'](SHOW_PRE_RELEASE);
     }
   },
 
   methods: {
     secondaryResourceDataConfig() {
       return {
-        namespace: this.controller?.metadata?.namespace,
+        namespace: this.controllerDeployment?.metadata?.namespace,
         data:      {
           [WORKLOAD_TYPES.DEPLOYMENT]: {
             applyTo: [
               {
-                var:         'controller',
+                var:         'controllerDeployment',
                 parsingFunc: (data) => {
                   return data.find(deploy => deploy?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === KUBEWARDEN_CHARTS.CONTROLLER);
                 }
@@ -253,19 +293,63 @@ export default {
       };
     },
 
-    controllerChartRoute() {
-      if ( this.controllerChart ) {
-        const {
-          repoType, repoName, chartName, versions
-        } = this.controllerChart;
-        const latestVersion = versions[0]?.version;
+    getValidUpgrade(currentVersion, upgradeVersion, highestVersion) {
+      const currentMajor = semver.major(currentVersion);
+      const currentMinor = semver.minor(currentVersion);
 
-        if ( latestVersion ) {
+      const upgradeMajor = semver.major(upgradeVersion);
+      const upgradeMinor = semver.minor(upgradeVersion);
+      const upgradePatch = semver.patch(upgradeVersion);
+
+      let highestMajor, highestMinor, highestPatch;
+
+      if ( highestVersion ) {
+        highestMajor = semver.major(highestVersion);
+        highestMinor = semver.minor(highestVersion);
+        highestPatch = semver.patch(highestVersion);
+      } else {
+        // Default to current version's major and minor, and -1 for patch if there's no highest version yet
+        highestMajor = currentMajor;
+        highestMinor = currentMinor;
+        highestPatch = -1;
+      }
+
+      // Skip versions that are not upgrades
+      if ( semver.lte(upgradeVersion, currentVersion) ) {
+        return null;
+      }
+
+      // Determine if the upgrade is valid based on the major and minor versions
+      const isValidUpgrade = ( upgradeMajor === currentMajor && upgradeMinor === currentMinor + 1 ) ||
+                             ( upgradeMajor === currentMajor + 1 && upgradeMinor === 0 );
+
+      if ( isValidUpgrade ) {
+        // If it's a valid upgrade, check if it's higher than the current highest version
+        if ( !highestVersion || semver.gt(upgradeVersion, highestVersion) ) {
+          return upgradeVersion;
+        }
+      }
+
+      // Check for a higher patch version within the same minor version
+      if ( upgradeMajor === highestMajor && upgradeMinor === highestMinor && upgradePatch > highestPatch ) {
+        return upgradeVersion;
+      }
+
+      return null;
+    },
+
+    controllerChartRoute() {
+      if ( this.upgradeAvailable ) {
+        const {
+          repoType, repoName, name, version
+        } = this.upgradeAvailable;
+
+        if ( version ) {
           const query = {
             [REPO_TYPE]: repoType,
             [REPO]:      repoName,
-            [CHART]:     chartName,
-            [VERSION]:   latestVersion
+            [CHART]:     name,
+            [VERSION]:   version
           };
 
           this.$router.push({
@@ -295,18 +379,22 @@ export default {
         <h1 data-testid="kw-dashboard-title">
           {{ t('kubewarden.dashboard.intro') }}
         </h1>
-        <div v-if="version">
-          <span class="head-version bg-primary">{{ version }}</span>
-          <span
+
+        <div v-if="version" class="head-version-container">
+          <div class="head-version bg-primary mr-10">
+            {{ t('kubewarden.dashboard.upgrade.appVersion') }}: {{ version }}
+          </div>
+          <div
             v-if="upgradeAvailable"
             data-testid="kw-app-upgrade-button"
             class="head-upgrade badge-state bg-warning hand"
             :disabled="!controllerChart"
             @click.prevent="controllerChartRoute"
           >
-            Upgrade Available
             <i class="icon icon-upload" />
-          </span>
+            <span>{{ t('kubewarden.dashboard.upgrade.appUpgrade') }}: {{ upgradeAvailable.appVersion }} &nbsp;-&nbsp;</span>
+            <span>{{ t('kubewarden.dashboard.upgrade.chart') }}: {{ upgradeAvailable.version }}</span>
+          </div>
         </div>
       </div>
 
@@ -423,13 +511,21 @@ export default {
 
     &-title {
       display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 10px;
+      flex-direction: column;
+      gap: 5px;
 
       h1 {
         margin: 0;
       }
+    }
+
+    &-version-container {
+      display: flex;
+      flex-direction: row;
+    }
+
+    &-upgrade {
+      display: flex;
     }
 
     &-version, &-upgrade {
