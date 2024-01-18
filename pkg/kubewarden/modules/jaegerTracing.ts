@@ -75,10 +75,9 @@ function jaegerTraceRequest(store: any, proxyUrl: any, policy: any, time?: any) 
   const lookbackTime = time || '2d';
 
   const options = `lookback=${ lookbackTime }&tags={"policy_id"%3A"${ name }"}`;
-  const operation = policy?.spec?.mode === 'monitor' ? 'policy_eval' : 'validation';
 
   // The service `kubewarden-policy-server` is **not** a k8s Service
-  apiPath = `api/traces?service=kubewarden-policy-server&operation=${ operation }&${ options }`;
+  apiPath = `api/traces?service=kubewarden-policy-server&operation=validation&${ options }`;
   const JAEGER_PATH = `${ proxyUrl + apiPath }`;
 
   return store.dispatch('cluster/request', { url: JAEGER_PATH });
