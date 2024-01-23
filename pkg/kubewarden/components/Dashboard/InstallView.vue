@@ -1,5 +1,6 @@
 <script>
 import { mapGetters } from 'vuex';
+import debounce from 'lodash/debounce';
 
 import { CATALOG, SERVICE } from '@shell/config/types';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
@@ -39,6 +40,12 @@ export default {
   mixins: [ResourceFetch],
 
   async fetch() {
+    this.debouncedRefreshCharts = debounce((init = false) => {
+      refreshCharts({
+        store: this.$store, chartName: KUBEWARDEN_CHARTS.DEFAULTS, init
+      });
+    }, 500);
+
     this.reloadReady = false;
 
     if ( !this.hasSchema ) {
@@ -60,7 +67,7 @@ export default {
       }
 
       if ( !this.kubewardenRepo || !this.controllerChart ) {
-        await refreshCharts({ store: this.$store, init: true });
+        this.debouncedRefreshCharts(true);
       }
     }
   },
@@ -81,10 +88,11 @@ export default {
 
     return {
       installSteps,
-      reloadReady:   false,
-      install:       false,
-      initStepIndex: 0,
-      docs:          { airgap: '' }
+      debouncedRefreshCharts: null,
+      reloadReady:            false,
+      install:                false,
+      initStepIndex:          0,
+      docs:                   { airgap: '' },
     };
   },
 
@@ -99,20 +107,14 @@ export default {
   },
 
   watch: {
-    async certService() {
+    certService() {
       this.installSteps[0].ready = true;
 
       if ( this.isAirgap ) {
-        await refreshCharts({ store: this.$store });
+        this.debouncedRefreshCharts();
       }
 
       this.$refs.wizard?.goToStep(2);
-    },
-
-    async kubewardenRepo() {
-      if ( !this.controllerChart ) {
-        await refreshCharts({ store: this.$store });
-      }
     }
   },
 
@@ -194,18 +196,19 @@ export default {
           return;
         }
 
-        await refreshCharts({ store: this.$store });
-        btnCb(true);
+        if ( !this.controllerChart ) {
+          this.debouncedRefreshCharts();
+        }
       } catch (e) {
         handleGrowl({ error: e, store: this.$store });
         btnCb(false);
       }
     },
 
-    async chartRoute() {
+    chartRoute() {
       if ( !this.controllerChart ) {
         try {
-          await refreshCharts({ store: this.$store });
+          this.debouncedRefreshCharts();
         } catch (e) {
           handleGrowl({ error: e, store: this.$store });
 
