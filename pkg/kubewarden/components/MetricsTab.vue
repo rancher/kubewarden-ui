@@ -1,6 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
+import debounce from 'lodash/debounce';
 
 import {
   CATALOG, CONFIG_MAP, MONITORING, NAMESPACE, SERVICE
@@ -50,6 +51,12 @@ export default {
   mixins: [ResourceFetch],
 
   async fetch() {
+    this.debouncedRefreshCharts = debounce((init = false) => {
+      refreshCharts({
+        store: this.$store, chartName: 'rancher-monitoring', init
+      });
+    }, 500);
+
     const resourceMap = [
       {
         name:     CATALOG.APP,
@@ -92,7 +99,7 @@ export default {
     await allHash(hash);
 
     if ( this.showChecklist && !this.monitoringChart ) {
-      await refreshCharts({ store: this.$store, init: true });
+      this.debouncedRefreshCharts(true);
     }
 
     // If monitoring is installed look for the dashboard based on the METRICS_TYPE
@@ -126,7 +133,8 @@ export default {
       [MONITORING.SERVICEMONITOR]: null,
       [SERVICE]:                   null,
       metricsProxy:                null,
-      metricsService:              null
+      metricsService:              null,
+      debouncedRefreshCharts:      null
     };
   },
 

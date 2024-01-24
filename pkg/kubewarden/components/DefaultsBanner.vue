@@ -1,5 +1,6 @@
 <script>
 import { mapGetters } from 'vuex';
+import debounce from 'lodash/debounce';
 
 import { CATALOG } from '@shell/config/types';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
@@ -14,10 +15,20 @@ import { refreshCharts } from '../utils/chart';
 export default {
   components: { Banner },
 
-  async fetch() {
+  fetch() {
+    this.debouncedRefreshCharts = debounce((init = false) => {
+      refreshCharts({
+        store: this.$store, chartName: KUBEWARDEN_CHARTS.CONTROLLER, init
+      });
+    }, 500);
+
     if ( !this.defaultsChart ) {
-      await refreshCharts({ store: this.$store, init: true });
+      this.debouncedRefreshCharts(true);
     }
+  },
+
+  data() {
+    return { debouncedRefreshCharts: null };
   },
 
   computed: {
@@ -59,14 +70,14 @@ export default {
 
       if ( !this.defaultsChart && retry === 0 ) {
         await this.$fetchType(CATALOG.CLUSTER_REPO);
-        await this.refreshCharts(retry + 1);
+        this.debouncedRefreshCharts();
       }
     },
 
     async chartRoute() {
       if ( !this.defaultsChart ) {
         try {
-          await this.refreshCharts();
+          this.debouncedRefreshCharts();
         } catch (e) {
           handleGrowl({ error: e, store: this.$store });
 
