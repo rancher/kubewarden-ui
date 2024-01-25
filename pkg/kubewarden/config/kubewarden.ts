@@ -38,6 +38,7 @@ export function init($plugin: any, store: any) {
   virtualType({
     label:      store.getters['i18n/t']('kubewarden.policyReporter.title'),
     icon:       'notifier',
+    ifHaveType: KUBEWARDEN.POLICY_REPORT,
     name:       POLICY_REPORTER_PRODUCT,
     namespaced: false,
     weight:     95,
