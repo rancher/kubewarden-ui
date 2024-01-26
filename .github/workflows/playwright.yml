@@ -12,8 +12,8 @@ on:
         - 'released'
         - '= 2.7.8'
         - '= 2.7.9'
-        - '= 2.8.0'
-        - '> 2.8.0-0'
+        - '= 2.8.1'
+        - '> 2.8.1-0'
       kubewarden:
         description: Kubewarden version
         type: choice
@@ -44,13 +44,13 @@ on:
       k3s:
         description: Kubernetes
         type: choice
-        default: 'v1.26.10-k3s2'
+        default: 'v1.27.9-k3s1'
         required: true
         options:
-        - v1.25.15-k3s2
-        - v1.26.10-k3s2
-        - v1.27.7-k3s2
-        - v1.28.3-k3s2
+        - v1.25.16-k3s4
+        - v1.26.12-k3s1
+        - v1.27.9-k3s1
+        - v1.28.5-k3s1
 
   pull_request:
     branches: main
@@ -61,13 +61,13 @@ on:
       - '*'
 
   schedule:
-    - cron: "0 2 * * *"
-    - cron: "0 3 * * *"
+    - cron: "0 2 * * *" # Manual
+    - cron: "0 3 * * *" # Fleet
 
 env:
   # Github -> Secrets and variables -> Actions -> New repository variable
   RANCHER: ${{ vars.RANCHER || 'released' }}
-  K3S_VERSION: ${{ inputs.k3s || 'v1.26.9-k3s1' }}
+  K3S_VERSION: ${{ inputs.k3s || 'v1.27.9-k3s1' }}
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
 
 jobs:
