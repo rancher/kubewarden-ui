@@ -15,8 +15,8 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "@rancher/components": "0.1.3",
-    "@rancher/shell": "0.3.26",
+    "@rancher/components": "^0.2.1-alpha.0",
+    "@rancher/shell": "0.5.1",
     "@types/lodash": "4.14.196",
     "core-js": "3.21.1",
     "css-loader": "4.3.0",
@@ -28,19 +28,16 @@
     "@jest/types": "^29.4.3",
     "@types/node": "18.11.9",
     "@vue/cli-plugin-unit-jest": "~5.0.0",
-    "@vue/server-test-utils": "1",
-    "@vue/test-utils": "1",
     "@vue/vue2-jest": "^28.0.1",
     "babel-jest": "^28.0.0-alpha.1",
     "jest": "^28.0.0-alpha.1",
     "jest-environment-jsdom": "^29.4.3",
     "sass-loader": "10.1.1",
     "ts-jest": "^29.0.5",
-    "ts-loader": "~8.2.0",
-    "typescript": "4.1.6"
+    "typescript": "4.5.5"
   },
   "engines": {
-    "node": ">=12"
+    "node": ">=14"
   },
   "resolutions": {
     "**/webpack": "4"
