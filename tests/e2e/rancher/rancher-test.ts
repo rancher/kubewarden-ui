@@ -1,8 +1,8 @@
 import { test as baseTest, Locator, expect as baseExpect } from '@playwright/test'
 
-import { RancherUI } from './components/rancher-ui'
-import { Navigation } from './components/navigation'
-import { Shell } from './components/kubectl-shell'
+import { RancherUI } from '../components/rancher-ui'
+import { Navigation } from '../components/navigation'
+import { Shell } from '../components/kubectl-shell'
 
 export function step(originalMethod: any, context: ClassMethodDecoratorContext) {
   return function replacementMethod(...args: any) {

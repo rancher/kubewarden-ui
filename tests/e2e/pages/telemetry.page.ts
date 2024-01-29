@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
-import { BasePage } from './basepage'
+import { BasePage } from '../rancher/basepage'
 
 type ChecklistLine = 'otel' | 'jaeger' | 'monitoring' | 'servicemonitor' | 'configmap' | 'config'
 

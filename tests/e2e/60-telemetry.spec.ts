@@ -1,10 +1,12 @@
-import { test, expect } from './rancher-test'
-import { Chart, RancherAppsPage } from './pages/rancher-apps.page'
+import { test, expect } from './rancher/rancher-test'
+import { Chart, RancherAppsPage } from './rancher/rancher-apps.page'
 import { TelemetryPage } from './pages/telemetry.page'
 
 const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator' }
 const jaegerChart: Chart = { title: 'Jaeger Operator', namespace: 'jaeger', check: 'jaeger-operator' }
 const monitoringChart: Chart = { title: 'Monitoring', check: 'rancher-monitoring' }
+
+test.skip(!!process.env.FLEET)
 
 /**
  * Expect timeout has to be increased after telemetry installation on local cluster
@@ -73,7 +75,7 @@ test.describe('Tracing', () => {
   })
 
   test('Check traces are visible', async({ ui, nav, shell }) => {
-    const logline = ui.getRow('tracing-privpod').row.first()
+    const logline = ui.tableRow('tracing-privpod').row.first()
 
     // Create trace log line
     await nav.cluster('local')

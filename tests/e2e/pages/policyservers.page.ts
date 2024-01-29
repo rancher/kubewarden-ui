@@ -1,9 +1,9 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import { TableRow } from '../components/table-row'
-import { step } from '../rancher-test'
-import { BasePage } from './basepage'
-import { RancherAppsPage } from './rancher-apps.page'
+import { step } from '../rancher/rancher-test'
+import { BasePage } from '../rancher/basepage'
+import { RancherAppsPage } from '../rancher/rancher-apps.page'
 
 export interface PolicyServer {
     name: string
@@ -58,8 +58,7 @@ export class PolicyServersPage extends BasePage {
       await this.setValues(ps)
       await this.ui.button('Create').click()
       // Get row and wait for Active state
-      const psRow = this.ui.getRow(ps.name)
-      await psRow.toBeVisible()
+      const psRow = await this.ui.tableRow(ps.name).waitFor()
       if (options?.wait) {
         await psRow.toBeActive(20_000)
       }
@@ -68,7 +67,7 @@ export class PolicyServersPage extends BasePage {
 
     async delete(ps: string | TableRow) {
       await this.goto()
-      if (typeof ps === 'string') ps = this.ui.getRow(ps)
+      if (typeof ps === 'string') ps = this.ui.tableRow(ps)
       await ps.delete()
     }
 
@@ -82,10 +81,10 @@ export class PolicyServersPage extends BasePage {
       // Handle questions
       if (options?.recommended) {
         await this.ui.checkbox('Enable recommended policies').setChecked(options.recommended)
-        await expect(this.ui.combobox('Execution mode of the recommended policies ')).toContainText('monitor')
+        await expect(this.ui.select('Execution mode of the recommended policies ')).toContainText('monitor')
       }
       if (options?.mode) {
-        await this.ui.select('Execution mode', options.mode)
+        await this.ui.selectOption('Execution mode', options.mode)
       }
 
       // Install

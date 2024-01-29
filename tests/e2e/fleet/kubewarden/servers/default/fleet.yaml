@@ -1,0 +1,21 @@
+# https://fleet.rancher.io/ref-fleet-yaml
+defaultNamespace: cattle-kubewarden-system
+
+helm:
+  version: '*-0'
+  releaseName: kubewarden-defaults
+  chart: kubewarden-defaults
+  repo: https://charts.kubewarden.io
+  # valuesFiles:
+  #   - values.yaml
+  values:
+    recommendedPolicies:
+      enabled: true
+    policyServer:
+      image:
+        tag: latest
+
+dependsOn:
+  - selector:
+      matchLabels:
+        app: kubewarden-controller

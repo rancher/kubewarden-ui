@@ -1,7 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import type { YAMLPatch } from '../components/rancher-ui'
-import { step } from '../rancher-test'
+import { step } from './rancher-test'
 import { BasePage } from './basepage'
 
 export interface Chart {
@@ -55,7 +55,7 @@ export class RancherAppsPage extends BasePage {
       await this.ui.button('Create').click()
 
       // Transitions: Active ?> In Progress ?> [Active|InProgress]
-      const repo = this.ui.getRow(name)
+      const repo = await this.ui.tableRow(name).waitFor()
       // Wait out first Active state
       await this.page.waitForTimeout(1000)
       // Refresh for occasional freeze In Progress
@@ -66,7 +66,7 @@ export class RancherAppsPage extends BasePage {
     @step
     async deleteRepository(name: string) {
       await this.nav.explorer('Apps', 'Repositories')
-      await this.ui.getRow(name).delete()
+      await this.ui.tableRow(name).delete()
     }
 
     /**
@@ -117,11 +117,11 @@ export class RancherAppsPage extends BasePage {
         await this.ui.input('Name').fill(chart.name)
       }
       if (chart.namespace) {
-        await this.ui.select('Namespace *', /^Create a [nN]ew Namespace$/)
+        await this.ui.selectOption('Namespace *', /^Create a [nN]ew Namespace$/)
         await this.ui.input('Namespace').fill(chart.namespace)
       }
       if (chart.project) {
-        await this.ui.select('Install into Project', chart.project)
+        await this.ui.selectOption('Install into Project', chart.project)
       }
       await this.nextBtn.click()
 
@@ -145,7 +145,7 @@ export class RancherAppsPage extends BasePage {
         await this.nav.explorer('Apps', 'Installed Apps')
         await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
 
-        await this.ui.getRow(name).action('Edit/Upgrade')
+        await this.ui.tableRow(name).action('Edit/Upgrade')
         await expect(this.page.getByRole('heading', { name })).toBeVisible()
       }
       // Skip Step1
@@ -168,7 +168,7 @@ export class RancherAppsPage extends BasePage {
       await this.nav.explorer('Apps', 'Installed Apps')
       await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
       // Row is visible until helm uninstalls app
-      await this.ui.getRow(name).delete({ timeout: 60_0000 })
+      await this.ui.tableRow(name).delete({ timeout: 60_0000 })
       await this.waitHelmSuccess(name)
     }
 }

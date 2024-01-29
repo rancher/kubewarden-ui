@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import jsyaml from 'js-yaml'
 import _ from 'lodash'
-import { step } from '../rancher-test'
+import { step } from '../rancher/rancher-test'
 import { TableRow } from './table-row'
 
 export type YAMLPatch = { [key: string]: unknown } | string | ((patch:any) => void)
@@ -26,8 +26,10 @@ export class RancherUI {
   }
 
   // Labeled Input
-  input(label: string) {
-    return this.page.locator('div.labeled-input').filter({ hasText: label }).locator('input')
+  input(label: string|RegExp) {
+    return this.page.locator('div.labeled-input')
+      .filter({ has: this.page.getByText(label, { exact: true }) })
+      .locator('input')
   }
 
   // Labeled Checkbox
@@ -56,28 +58,29 @@ export class RancherUI {
     return this.radioGroup(label).getByRole('radio', { name })
   }
 
-  // Labeled Select combobox
-  combobox(label: string) {
+  // Labeled Select (ComboBox)
+  select(label: string) {
     return this.page.locator('div.labeled-select').filter({ hasText: label })
       .getByRole('combobox', { name: 'Search for option' })
   }
 
-  // Select option from labeled select
-  async select(label: string, option: string | RegExp) {
-    await this.combobox(label).click()
+  // Select option from (un)labeled Select
+  async selectOption(label: string|Locator, option: string | RegExp) {
+    const select = (typeof label === 'string') ? this.select(label) : label.getByRole('combobox', { name: 'Search for option' })
+    await select.click()
     await this.page.getByRole('option', { name: option, exact: true }).click()
   }
 
   // ==================================================================================================
   // Table Handler
-  getRow(arg: string | { [key: string]: string }, options?: { group?: string }): TableRow {
+  tableRow(arg: string | RegExp | { [key: string]: string | RegExp }, options?: { group?: string }): TableRow {
     return new TableRow(this, arg, options)
   }
 
   // ==================================================================================================
   // Helper functions
 
-  async openView(view: 'Edit Options' | 'Edit YAML' | 'Compare Changes') {
+  async openView(view: 'Edit Options' | 'Edit YAML' | 'Edit as YAML' | 'Compare Changes') {
     // Give generated fields time to get registered
     await this.page.waitForTimeout(200)
     // Show yaml with edited settings

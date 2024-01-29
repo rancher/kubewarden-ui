@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test'
 import type { Locator, FrameLocator } from '@playwright/test'
-import { BasePage } from './basepage'
+import { BasePage } from '../rancher/basepage'
 
 export class PolicyReporterPage extends BasePage {
     readonly frame: FrameLocator;
@@ -45,7 +45,7 @@ export class PolicyReporterPage extends BasePage {
 
     async runJob() {
       await this.nav.explorer('Workloads', 'CronJobs')
-      await this.ui.getRow('audit-scanner').action('Run Now')
-      await this.ui.getRow({ State: 'Completed' }).toBeVisible({ timeout: 30_000 })
+      await this.ui.tableRow('audit-scanner').action('Run Now')
+      await this.ui.tableRow(/audit-scanner-[0-9]+/).waitFor({ state: 'Completed', timeout: 30_000 })
     }
 }

@@ -1,0 +1,16 @@
+defaultNamespace: cert-manager
+
+helm:
+  releaseName: cert-manager
+  chart: cert-manager
+  version: 1.13.2
+  repo: https://charts.jetstack.io
+  values:
+    installCRDs: true
+
+labels:
+  app: cert-manager
+
+targetCustomizations:
+- clusterName: local
+  doNotDeploy: true

@@ -69,7 +69,7 @@ export class RancherExtensionsPage extends BasePage {
 
       const dialog = this.page.locator('.plugin-install-dialog')
       if (options?.version) {
-        await this.ui.select('Version', options.version)
+        await this.ui.selectOption('Version', options.version)
       }
       await dialog.getByRole('button', { name: 'Install' }).click()
       await this.ui.withReload(async() => {

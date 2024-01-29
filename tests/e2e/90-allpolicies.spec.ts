@@ -1,4 +1,4 @@
-import { test } from './rancher-test'
+import { test } from './rancher/rancher-test'
 import type { RancherUI } from './components/rancher-ui'
 import { Policy, policyTitle, capList, generateName, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { PolicyServersPage } from './pages/policyservers.page'
@@ -39,7 +39,7 @@ async function setupNamespaceLabelPropagator(ui: RancherUI) {
 }
 
 async function setupPSALabelEnforcer(ui: RancherUI) {
-  await ui.select('Enforce', 'baseline')
+  await ui.selectOption('Enforce', 'baseline')
 }
 
 async function setupCustomPolicy(ui: RancherUI) {
@@ -47,19 +47,19 @@ async function setupCustomPolicy(ui: RancherUI) {
   await ui.input('Module*').fill('ghcr.io/kubewarden/policies/pod-privileged:v0.2.5')
 
   await ui.tab('Rules').click()
-  await ui.select('Resource type*', 'pods')
-  await ui.select('API Versions*', 'v1')
-  await ui.select('Operation type*', 'CREATE')
+  await ui.selectOption('Resource type*', 'pods')
+  await ui.selectOption('API Versions*', 'v1')
+  await ui.selectOption('Operation type*', 'CREATE')
 }
 
 async function setupVolumeMounts(ui: RancherUI) {
-  await ui.select('Reject', 'anyIn')
+  await ui.selectOption('Reject', 'anyIn')
   await ui.button('Add').click()
   await ui.page.getByPlaceholder('e.g. bar').fill('/nomount')
 }
 
 async function setupSelinuxPSP(ui: RancherUI) {
-  await ui.select('SE Linux Options', 'RunAsAny')
+  await ui.selectOption('SE Linux Options', 'RunAsAny')
 }
 
 async function setupDeprecatedAPIVersions(ui: RancherUI) {
@@ -67,7 +67,7 @@ async function setupDeprecatedAPIVersions(ui: RancherUI) {
 }
 
 async function setupVerifyImageSignatures(ui: RancherUI) {
-  await ui.select('Signature Type', 'GithubAction')
+  await ui.selectOption('Signature Type', 'GithubAction')
   await ui.button('Add').click()
   await ui.input('Image*').fill('ghcr.io/kubewarden/*')
   await ui.editYaml((y) => { y.githubActions.owner = 'kubewarden' })
@@ -75,7 +75,7 @@ async function setupVerifyImageSignatures(ui: RancherUI) {
 
 async function setupEnvironmentVariablePolicy(ui: RancherUI) {
   await ui.button('Add').click()
-  await ui.select('Reject Operator', 'anyIn')
+  await ui.selectOption('Reject Operator', 'anyIn')
   await ui.editYaml((y) => { y.environmentVariables[0].name = 'novar' })
 }
 

@@ -9,7 +9,7 @@ export class RancherCommonPage extends BasePage {
   async isLoggedIn() {
     const password = this.ui.input('Password')
     const userMenu = this.page.locator('div.user-menu')
-    await Promise.race([password.waitFor(), userMenu.waitFor()])
+    await userMenu.or(password).waitFor()
     return await userMenu.isVisible()
   }
 

@@ -1,0 +1,77 @@
+apiVersion: policies.kubewarden.io/v1
+kind: ClusterAdmissionPolicy
+metadata:
+  name: privpod-fleet
+  annotations:
+    artifacthub/pkg: pod-privileged-policy/pod-privileged-policy/0.2.7
+spec:
+  backgroundAudit: true
+  policyServer: ps-fleet
+  module: ghcr.io/kubewarden/policies/pod-privileged:v0.2.7
+  rules:
+    - apiGroups:
+        - ''
+      apiVersions:
+        - v1
+      resources:
+        - pods
+      operations:
+        - CREATE
+    - apiGroups:
+        - ''
+      apiVersions:
+        - v1
+      resources:
+        - replicationcontrollers
+      operations:
+        - CREATE
+        - UPDATE
+    - apiGroups:
+        - apps
+      apiVersions:
+        - v1
+      resources:
+        - deployments
+        - replicasets
+        - statefulsets
+        - daemonsets
+      operations:
+        - CREATE
+        - UPDATE
+    - apiGroups:
+        - batch
+      apiVersions:
+        - v1
+      resources:
+        - jobs
+        - cronjobs
+      operations:
+        - CREATE
+        - UPDATE
+  mutating: false
+  namespaceSelector:
+    matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+          - calico-system
+          - cattle-alerting
+          - cattle-fleet-local-system
+          - cattle-fleet-system
+          - cattle-global-data
+          - cattle-global-nt
+          - cattle-impersonation-system
+          - cattle-istio
+          - cattle-logging
+          - cattle-pipeline
+          - cattle-prometheus
+          - cattle-system
+          - cert-manager
+          - ingress-nginx
+          - kube-node-lease
+          - kube-public
+          - kube-system
+          - rancher-operator-system
+          - security-scan
+          - tigera-operator
+  mode: protect
