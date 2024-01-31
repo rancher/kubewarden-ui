@@ -18,8 +18,8 @@ export class KubewardenPage extends BasePage {
     }
 
     async goto(): Promise<void> {
-      // await this.nav.explorer('Kubewarden')
-      await this.nav.goto('dashboard/c/local/kubewarden')
+      await this.nav.explorer('Kubewarden')
+      // await this.nav.goto('dashboard/c/local/kubewarden')
     }
 
     getPane(name: Pane) {
@@ -46,7 +46,10 @@ export class KubewardenPage extends BasePage {
       const failRepoBtn = this.ui.button('Reload')
 
       // Welcome screen
-      await this.goto()
+      await this.ui.withReload(async() => {
+        await this.goto()
+      }, 'Kubewarden extension not visible')
+
       await expect(welcomeStep).toBeVisible()
       await installBtn.click()
 
