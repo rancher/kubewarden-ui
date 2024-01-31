@@ -24,7 +24,7 @@ export class RancherFleetPage extends BasePage {
 
     async goto(): Promise<void> {
       // await this.nav.fleet('', 'Dashboard')
-      await this.page.goto('dashboard/c/local/fleet')
+      await this.nav.goto('dashboard/c/local/fleet')
     }
 
     @step

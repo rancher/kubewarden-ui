@@ -159,7 +159,7 @@ export class AdmissionPoliciesPage extends BasePolicyPage {
 
     async goto(): Promise<void> {
       await this.nav.explorer('Kubewarden', 'AdmissionPolicies')
-      // await this.page.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.admissionpolicy')
+      // await this.nav.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.admissionpolicy')
     }
 
     async setNamespace(name: string) {
@@ -181,7 +181,7 @@ export class ClusterAdmissionPoliciesPage extends BasePolicyPage {
 
     async goto(): Promise<void> {
       await this.nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
-      // await this.page.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.clusteradmissionpolicy')
+      // await this.nav.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.clusteradmissionpolicy')
     }
 
     async setIgnoreRancherNS(checked: boolean) {
