@@ -11,21 +11,26 @@ import { RancherFleetPage } from './rancher/rancher-fleet.page'
 const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
 const FLEET = !!process.env.FLEET
 
-test('00 Initial rancher setup', async({ page, ui }) => {
+test('00 Initial rancher setup', async({ page, ui, nav }) => {
   const rancher = new RancherCommonPage(page)
 
-  await page.goto('/')
+  await test.step('Global setup', async() => {
+    await page.goto('/')
+    // Handle first-login, then reuse session for access
+    if (!await rancher.isLoggedIn()) {
+      await rancher.handleFirstLogin('sa')
+    }
+    // Wait for local cluster to be Active
+    await ui.tableRow('local').toBeActive()
+    // Enable extension developer features
+    await rancher.setExtensionDeveloperFeatures(true)
+  })
 
-  // We handle only first-login, then reuse session for access
-  if (!await rancher.isLoggedIn()) {
-    await rancher.handleFirstLogin('sa')
-  }
-  // wait for local cluster to be Active
-  await ui.tableRow('local').toBeActive()
-  // disable namespace filter
-  await rancher.setNamespaceFilter('All Namespaces')
-  // enable extension developer features
-  await rancher.setExtensionDeveloperFeatures(true)
+  await test.step('Cluster setup', async() => {
+    await nav.cluster()
+    // Disable namespace filter
+    await rancher.setNamespaceFilter('All Namespaces')
+  })
 })
 
 test('01 Install UI extension', async({ page, ui }) => {
@@ -61,11 +66,15 @@ test('01 Install UI extension', async({ page, ui }) => {
   })
 })
 
-test('03a Install Kubewarden', async({ page, ui, nav }) => {
+test('03a Install Kubewarden', async({ page, ui, nav, context }) => {
   test.skip(FLEET)
 
+  // Required by cert-manager copy on click
+  // Setting clipboard-write on model is broken, probably playwright issue
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   const kwPage = new KubewardenPage(page)
   await kwPage.installKubewarden()
+  await context.clearPermissions()
 
   // Check UI is active
   await nav.explorer('Kubewarden')
