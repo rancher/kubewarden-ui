@@ -8,6 +8,7 @@ export const apList = ['Custom Policy', 'Allow Privilege Escalation PSP', 'Allow
   'Deprecated API Versions', 'Disallow Service Loadbalancer', 'Disallow Service Nodeport', 'Echo', 'Environment Variable Secrets Scanner', 'Environment Variable Policy', 'Flexvolume Drivers Psp',
   'Host Namespaces PSP', 'Hostpaths PSP', 'Ingress Policy', 'Namespace label propagator', 'Pod Privileged Policy', 'Pod Runtime', 'Readonly Root Filesystem PSP', 'Share PID namespace',
   'Safe Annotations', 'Safe Labels', 'Seccomp PSP', 'Selinux PSP', 'Sysctl PSP', 'Trusted Repos', 'User Group PSP', 'Verify Image Signatures', 'volumeMounts', 'Volumes PSP', 'Unique Ingress host'] as const
+  // WIP: 'Unique service selector', 'CEL Policy'
 
 export const capList = [...apList, 'PSA Label Enforcer']
 
