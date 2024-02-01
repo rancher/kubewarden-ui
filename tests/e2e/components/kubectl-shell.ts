@@ -7,6 +7,7 @@ export class Shell {
     readonly prompt: Locator
     readonly cursor: Locator
     readonly status: Locator
+    readonly connected: Locator
 
     constructor(private readonly page: Page) {
       this.win = this.page.locator('div#windowmanager')
@@ -14,6 +15,8 @@ export class Shell {
       this.prompt = this.win.locator('div.xterm-rows>div:has(span)').filter({ hasText: '>' }).last()
       // Textarea where we type commands
       this.cursor = this.win.getByLabel('Terminal input', { exact: true })
+      // Connected message
+      this.connected = this.win.locator('.status').getByText('Connected', { exact: true })
       // Exit status of last command
       this.status = this.prompt.locator('xpath=preceding-sibling::div[1]')
     }
@@ -21,13 +24,13 @@ export class Shell {
     // Open terminal
     async open() {
       await this.page.locator('#btn-kubectl').click()
-      await expect(this.win.locator('.status').getByText('Connected', { exact: true })).toBeVisible({ timeout: 30_000 })
+      await expect(this.connected).toBeVisible({ timeout: 30_000 })
       await expect(this.prompt).toBeVisible()
     }
 
     // Close terminal
     async close() {
-      await this.win.locator('.tab').filter({ hasText: 'Kubectl: local' }).locator('i.closer').click()
+      await this.win.locator('.tab', { hasText: 'Kubectl:' }).locator('i.closer').click()
     }
 
     /**

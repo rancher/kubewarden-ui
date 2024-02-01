@@ -78,7 +78,7 @@ test.describe('Tracing', () => {
     const logline = ui.tableRow('tracing-privpod').row.first()
 
     // Create trace log line
-    await nav.cluster('local')
+    await nav.cluster()
     await shell.privpod({ name: 'tracing-privpod' })
     // Check logs on policy server
     await nav.pserver('default', 'Tracing')

@@ -20,7 +20,7 @@ export class PolicyReporterPage extends BasePage {
 
     async goto(): Promise<void> {
       // await this.nav.explorer('Kubewarden', 'Policy Reporter')
-      await this.page.goto('dashboard/c/local/kubewarden/policy-reporter')
+      await this.nav.goto('dashboard/c/local/kubewarden/policy-reporter')
     }
 
     async selectTab(name: 'Dashboard' | 'Policy Reports' | 'ClusterPolicy Reports' | 'Logs') {

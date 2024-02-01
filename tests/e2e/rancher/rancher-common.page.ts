@@ -32,7 +32,7 @@ export class RancherCommonPage extends BasePage {
      * @param filter Use #id or exact name of the filter
      */
   async setNamespaceFilter(filter: string) {
-    await this.nav.cluster('local')
+    await this.nav.cluster()
     await expect(this.page.getByRole('heading', { name: 'Cluster Dashboard' })).toBeVisible()
 
     const nsMenu = this.page.getByTestId('namespaces-menu')

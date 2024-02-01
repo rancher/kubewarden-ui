@@ -8,7 +8,7 @@ test('Brief check of landing pages', async({ page, ui, nav }) => {
     // Header contains version
     const head = page.locator('div.head')
     await expect(head.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
-    await expect(head.getByText(/App Version:\s+v[1-9]/)).toBeVisible()
+    await expect(head.getByText(/App Version:\s+v[1-9][0-9.]+[0-9]/)).toBeVisible()
 
     // Recommended policies stats
     await expect1m(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()

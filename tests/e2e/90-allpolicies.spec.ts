@@ -6,7 +6,7 @@ import { PolicyServersPage } from './pages/policyservers.page'
 test.describe.configure({ mode: 'parallel' })
 
 const polmode = 'Monitor'
-const pserver = { name: process.env.server || 'policies-private-ps' }
+const pserver = { name: process.env.CI ? 'allpolicies-pserver' : 'default' }
 const polkeep = !!process.env.keep || false
 
 type PolicySettings = {
@@ -21,14 +21,20 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'Namespace label propagator' : { settings: setupNamespaceLabelPropagator },
   'PSA Label Enforcer'         : { settings: setupPSALabelEnforcer },
   'Selinux PSP'                : { settings: setupSelinuxPSP },
-  'Trusted Repos'              : { settings: trustedRepos },
+  'Trusted Repos'              : { settings: setupTrustedRepos },
   'User Group PSP'             : { settings: setupUserGroupPSP },
   'Verify Image Signatures'    : { settings: setupVerifyImageSignatures },
-  'Container Resources'        : { skip: 'https://github.com/kubewarden/container-resources-policy/issues/6' },
+  'Container Resources'        : { settings: setupContainerResources, skip: 'https://github.com/kubewarden/container-resources-policy/issues/10' },
   volumeMounts                 : { settings: setupVolumeMounts },
 }
 
-async function trustedRepos(ui: RancherUI) {
+async function setupContainerResources(ui: RancherUI) {
+  await ui.input('Default CPU requested').fill('100m')
+  await ui.input('Default CPU limit').fill('200m')
+  await ui.input('Max CPU limit allowed').fill('500m')
+}
+
+async function setupTrustedRepos(ui: RancherUI) {
   await ui.button('Add').first().click()
   await ui.page.getByRole('textbox').last().fill('registry.my-corp.com')
 }

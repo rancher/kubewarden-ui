@@ -31,7 +31,7 @@ export class RancherAppsPage extends BasePage {
 
     async goto(): Promise<void> {
       // await this.nav.explorer('Apps', 'Charts')
-      await this.page.goto('dashboard/c/local/apps/charts')
+      await this.nav.goto('dashboard/c/local/apps/charts')
     }
 
     /**

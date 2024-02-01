@@ -17,11 +17,20 @@ type FleetItemMap = {
     'Advanced': 'Workspaces' | 'BundleNamespaceMappings' | 'Bundles' | 'Cluster Registration Tokens' | 'GitRepoRestrictions'
 };
 
+export interface Cluster {
+  id: string,
+  name: string
+}
+
 export class Navigation {
     readonly page: Page
+    readonly testCluster = { id: 'local', name: 'local' }
 
     constructor(private readonly ui: RancherUI) {
       this.page = ui.page
+      if (process.env.CLUSTER && process.env.CLUSTER_ID) {
+        this.testCluster = { id: process.env.CLUSTER_ID, name: process.env.CLUSTER }
+      }
     }
 
     isblank(): boolean {
@@ -68,8 +77,13 @@ export class Navigation {
 
     @step
     async explorer<T extends ExpGroup>(groupName: T, childName?: ExpItemMap[T]) {
-      if (this.isblank()) await this.cluster('local')
+      if (this.isblank()) await this.cluster()
       await this.sideNavHandler(groupName, childName)
+    }
+
+    // Wrapper for page.goto using default cluster
+    async goto(to: string) {
+      await this.page.goto(to.replace('dashboard/c/local/', `dashboard/c/${this.testCluster.id}/`))
     }
 
     // Main menu
@@ -81,10 +95,10 @@ export class Navigation {
     }
 
     // Cluster by name
-    async cluster(name: string) {
-      if (this.isblank()) { await this.page.goto(`dashboard/c/${name}/explorer`) } else {
+    async cluster(name?: string) {
+      if (this.isblank()) { await this.goto(`dashboard/c/${name || this.testCluster.id}/explorer`) } else {
         await this.page.getByTestId('top-level-menu').click()
-        await this.page.getByTestId('side-menu').getByRole('link', { name }).click()
+        await this.page.getByTestId('side-menu').getByRole('link', { name: name || this.testCluster.name }).click()
       }
     }
 
