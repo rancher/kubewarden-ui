@@ -184,7 +184,17 @@ export default {
     },
 
     cattleDashboardNs() {
-      return this.allNamespaces.find(ns => ns?.metadata?.name === 'cattle-dashboards');
+      return this.allNamespaces?.find(ns => ns?.metadata?.name === 'cattle-dashboards');
+    },
+
+    conflictingGrafanaDashboards() {
+      return this.allConfigMaps?.filter((configMap) => {
+        const name = configMap?.metadata?.name;
+
+        if ( name ) {
+          return name === KubewardenDashboards.POLICY_SERVER || name === KubewardenDashboards.POLICY;
+        }
+      });
     },
 
     controllerApp() {
@@ -202,7 +212,7 @@ export default {
     },
 
     kubewardenGrafanaDashboards() {
-      return this.allConfigMaps.filter(configMap => configMap?.metadata?.labels?.[KubewardenDashboardLabels.DASHBOARD]);
+      return this.allConfigMaps?.filter(configMap => configMap?.metadata?.labels?.[KubewardenDashboardLabels.DASHBOARD]);
     },
 
     kubewardenServiceMonitor() {
@@ -281,6 +291,7 @@ export default {
     <MetricsChecklist
       v-if="showChecklist"
       :cattle-dashboard-ns="cattleDashboardNs"
+      :conflicting-grafana-dashboards="conflictingGrafanaDashboards"
       :controller-app="controllerApp"
       :controller-chart="controllerChart"
       :kubewarden-service-monitor="kubewardenServiceMonitor"

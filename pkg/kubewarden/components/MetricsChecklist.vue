@@ -21,6 +21,10 @@ export default {
       type:    Object,
       default: null
     },
+    conflictingGrafanaDashboards: {
+      type:    Array,
+      default: null
+    },
     controllerApp: {
       type:    Object,
       default: null
@@ -102,7 +106,10 @@ export default {
     },
 
     dashboardButtonDisabled() {
-      return (!this.monitoringApp || isEmpty(this.cattleDashboardNs));
+      return (!this.monitoringApp ||
+              isEmpty(this.cattleDashboardNs) ||
+              (!this.hasKubewardenDashboards && !!this.conflictingGrafanaDashboards.length)
+      );
     },
 
     hasKubewardenDashboards() {
@@ -151,6 +158,10 @@ export default {
       }
 
       return null;
+    },
+
+    showConflictingDashboardsBanner() {
+      return !this.hasKubewardenDashboards && !isEmpty(this.conflictingGrafanaDashboards);
     }
   },
 
@@ -314,6 +325,24 @@ export default {
           />
         </div>
       </div>
+      <Banner
+        v-if="showConflictingDashboardsBanner"
+        color="error"
+      >
+        <div class="conflicting-banner">
+          <p>
+            {{ t('kubewarden.monitoring.prerequisites.configMap.conflictingDashboardsBanner', { count: conflictingGrafanaDashboards.length }, true) }}
+          </p>
+          <n-link
+            v-for="configMap of conflictingGrafanaDashboards"
+            :key="configMap.metadata.name"
+            :to="configMap.detailLocation"
+            class="text-bold"
+          >
+            {{ configMap.metadata.name }}
+          </n-link>
+        </div>
+      </Banner>
 
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-controller-config">
         <i class="icon mr-10" :class="badgeIcon(metricsEnabled)" />
@@ -355,5 +384,10 @@ export default {
   &__step {
     min-height: 40px;
   }
+}
+
+.conflicting-banner {
+  display: flex;
+  flex-direction: column;
 }
 </style>

@@ -174,6 +174,11 @@ kubewarden:
       configMap:
         label: Grafana Dashboards (ConfigMaps) for the Policy Servers and for Kubewarden Policies must be created.
         button: Add Dashboards
+        conflictingDashboardsBanner: |-
+          {count, plural,
+          =1 {There is a conflicting ConfigMap, this must be deleted before proceeding:}
+          other {There are conflicting ConfigMaps, the following must be deleted before proceeding:}
+          }
       controllerConfig:
         label: The Kubewarden Controller must be configured to enable metrics. Follow <a href="https://docs.kubewarden.io/operator-manual/ui-extension/metrics#2-enable-telemetry-for-your-rancher-kubewarden-controller-resource" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to properly configure the kubewarden-controller chart.
         button: Edit Config
