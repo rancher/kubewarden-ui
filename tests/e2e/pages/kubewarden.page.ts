@@ -1,7 +1,7 @@
 import { expect, test, Locator, Page } from '@playwright/test'
 import { RancherAppsPage } from '../rancher/rancher-apps.page'
 import { BasePage } from '../rancher/basepage'
-import { Shell } from '../components/kubectl-shell'
+import { Shell } from '../components/kubectl-xterm'
 
 type Pane = 'Policy Servers' | 'Admission Policies' | 'Cluster Admission Policies'
 
@@ -63,7 +63,7 @@ export class KubewardenPage extends BasePage {
         // Run copied command in shell
         await shellBtn.click()
         const shell = new Shell(this.page)
-        await expect(shell.prompt).toBeVisible()
+        await expect(shell.screen).toBeVisible()
         await shell.run(copiedText as string)
       }
 

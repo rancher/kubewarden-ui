@@ -10,11 +10,13 @@ import { defineConfig, devices } from '@playwright/test'
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir   : './e2e',
-  forbidOnly: !!process.env.CI, /* Fail the build on CI if you accidentally left test.only in the source code. */
-  retries   : process.env.CI ? 1 : 0, /* Retry on CI only */
-  workers   : 1, /* Opt out of parallel tests */
-  reporter  : process.env.CI ? 'html' : 'list', /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+  testDir             : './e2e',
+  forbidOnly          : !!process.env.CI, /* Fail the build on CI if you accidentally left test.only in the source code. */
+  retries             : process.env.CI ? 1 : 0, /* Retry on CI only */
+  workers             : 1, /* Opt out of parallel tests */
+  reporter            : process.env.CI ? 'html' : 'list', /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+  snapshotPathTemplate: '{testDir}/screenshots/{projectName}/{arg}{ext}', /* Use shared directory for screenshots instead of per-test dir */
+  updateSnapshots     : process.env.CI ? 'none' : 'missing', /* Don't generate snapshots by accident */
 
   // ===== Rancher specific config =====
   timeout        : 7 * 60_000, /* Maximum time one test can run for. */
