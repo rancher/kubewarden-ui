@@ -1,4 +1,8 @@
-import { Condition, Metadata } from './core';
+import {
+  V1SecurityContext, V1PodSecurityContext, V1ObjectMeta, V1EnvVar, V1LabelSelector
+} from '@kubernetes/client-node';
+
+import { Condition } from './core';
 
 export const KUBEWARDEN_PRODUCT_NAME = 'kubewarden';
 export const KUBEWARDEN_PRODUCT_GROUP = 'policies.kubewarden.io';
@@ -38,76 +42,70 @@ export enum KUBEWARDEN_CRD {
 }
 /* eslint-enable no-unused-vars */
 
-export type Rule = {
-  apiGroups: string[],
-  apiVersions: string[],
-  operations: string[],
-  resources: string[]
+export interface Rule {
+  apiGroups: string[];
+  apiVersions: string[];
+  operations: string[];
+  resources: string[];
 }
 
-export type PolicyServer = {
-  id: string,
-  type: string,
+export interface PolicyServer {
+  id: string;
+  type: string;
   links?: {
-    remove?: string,
-    self?: string,
-    update?: string,
-    view?: string
-  },
-  apiVersion: string,
-  kind: string,
-  metadata: Metadata,
+    remove?: string;
+    self?: string;
+    update?: string;
+    view?: string;
+  };
+  apiVersion: string;
+  kind: string;
+  metadata: V1ObjectMeta;
   spec: {
-    env: [
-      {
-        name: string,
-        value: string
-      }
-    ],
-    image?: string,
-    replicas?: number,
-    securityContexts?: any,
-    serviceAccountName?: string
-  },
+    env: V1EnvVar[];
+    image?: string;
+    replicas?: number;
+    securityContexts?: {
+      container?: V1SecurityContext;
+      pod?: V1PodSecurityContext;
+    };
+    serviceAccountName?: string;
+  };
   status: {
-    conditions: Array<Condition>
-  }
+    conditions: Array<Condition>;
+  };
 }
 
 export type Policy = {
-  id: string,
-  type: string,
+  id: string;
+  type: string;
   links?: {
-    remove?: string,
-    self?: string,
-    update?: string,
-    view?: string
-  },
-  apiVersion: string,
-  kind: string,
-  metadata: Metadata,
+    remove?: string;
+    self?: string;
+    update?: string;
+    view?: string;
+  };
+  apiVersion: string;
+  kind: string;
+  metadata: V1ObjectMeta;
   spec: {
-    backgroundAudit?: boolean,
-    mode: string,
-    module: string,
-    mutating?: boolean,
-    namespaceSelector?: {
-      matchExpressions: [
-        {
-          key: string,
-          operator: string,
-          values: string[]
-        }
-      ]
-    },
-    policyServer: string,
-    rules: Array<Rule>,
-    settings?: any,
-    timeoutSeconds?: number
-  },
+    backgroundAudit?: boolean;
+    matchPolicy?: string;
+    mode: string;
+    module: string;
+    mutating?: boolean;
+    namespaceSelector?: V1LabelSelector;
+    objectSelector?: V1LabelSelector;
+    policyServer: string;
+    rules: Array<Rule>;
+    failurePolicy?: string;
+    settings?: any;
+    sideEffects?: string;
+    timeoutSeconds?: number;
+  };
   status: {
-    conditions: Array<Condition>,
-    mode: string,
-    policyStatus: string
+    conditions: Array<Condition>;
+    mode: string;
+    policyStatus: string;
   }
 }

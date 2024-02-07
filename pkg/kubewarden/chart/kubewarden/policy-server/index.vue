@@ -9,6 +9,7 @@ import Tab from '@shell/components/Tabbed/Tab';
 import Labels from '@shell/components/form/Labels';
 
 import General from './General';
+import SecurityContexts from './SecurityContexts';
 import Registry from './Registry/Index';
 import Verification from './Verification';
 
@@ -26,7 +27,7 @@ export default {
   },
 
   components: {
-    General, Labels, Loading, Tab, Registry, Verification
+    General, SecurityContexts, Labels, Loading, Tab, Registry, Verification
   },
 
   mixins: [ResourceFetch],
@@ -41,6 +42,15 @@ export default {
   },
 
   data() {
+    if (!this.value.spec?.securityContexts) {
+      this.value.spec.securityContexts = {
+        container: {
+          capabilities: {}, seLinuxOptions: {}, seccompProfile: {}
+        },
+        pod: {}
+      };
+    }
+
     return { chartValues: this.value };
   },
 
@@ -80,6 +90,10 @@ export default {
       }
     },
 
+    updateSecurityContexts(prop, val) {
+      this.$set(this.chartValues.spec.securityContexts, prop, val);
+    },
+
     updateSpec(prop, val) {
       this.$set(this.chartValues.spec, prop, val);
     }
@@ -100,10 +114,18 @@ export default {
         @update-general="updateGeneral"
       />
     </Tab>
-    <Tab name="labels" label-key="generic.labelsAndAnnotations" :weight="98">
+    <Tab name="security-contexts" label-key="kubewarden.tabs.security-contexts.label" :weight="98">
+      <SecurityContexts
+        v-model="chartValues.spec"
+        data-testid="ps-config-security-contexts-tab"
+        :mode="mode"
+        @update-security-contexts="updateSecurityContexts"
+      />
+    </Tab>
+    <Tab name="labels" label-key="generic.labelsAndAnnotations" :weight="97">
       <Labels v-model="chartValues" data-testid="ps-config-labels-tab" :mode="mode" />
     </Tab>
-    <Tab name="verification" label-key="kubewarden.tabs.verification.label" :weight="97">
+    <Tab name="verification" label-key="kubewarden.tabs.verification.label" :weight="96">
       <Verification
         data-testid="ps-config-verification-tab"
         :value="chartValues.spec"
@@ -112,7 +134,7 @@ export default {
         @update-vconfig="updateSpec"
       />
     </Tab>
-    <Tab name="registry" label-key="kubewarden.tabs.registry.label" :weight="96" @active="refresh">
+    <Tab name="registry" label-key="kubewarden.tabs.registry.label" :weight="95" @active="refresh">
       <Registry
         ref="registry"
         data-testid="ps-config-registry-tab"

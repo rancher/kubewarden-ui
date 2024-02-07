@@ -62,6 +62,8 @@ kubewarden:
         docs: |
           Follow the documentation to setup an OCI registry for further installation.
   tabs:
+    security-contexts:
+      label: Security Contexts
     general:
       label: General
       nameOverride:
@@ -263,6 +265,51 @@ kubewarden:
           label: Kind
           tooltip: Singular PascalCase name of the resource
   policyServerConfig:
+    securityContexts:
+      containerConfig: Container configuration
+      podConfig: Pod configuration
+      allow-priv-escalation:
+        label: Allow Privilege Escalation
+        tooltip: Allow Privilege Escalation controls whether a process can gain more privileges than its parent process. This bool directly controls if the "no_new_privs" flag will be set on the container process
+      capabilities:
+        title: Capabilities
+        add: Add
+        drop: Drop
+        addLabel: Add Capability
+        placeholder: some-placeholder
+      privileged:
+        label: Run container in privileged mode
+        tooltip: Run container in privileged mode. Processes in privileged containers are essentially equivalent to root on the host
+      procMount:
+        label: ProcMount (needs ProcMountType feature flag to be enabled)
+        placeholder: type of proc mount to use for the containers
+      readOnlyRootFilesystem:
+        label: Whether this container has a read-only root filesystem
+      runAsNonRoot:
+        label: Container must run as a non-root user
+        tooltip: If true, the Kubelet will validate the image at runtime to ensure that it does not run as UID 0 (root) and fail to start the container if it does
+      runAsGroup: Run As Group
+      runAsUser: Run As User
+      seLinuxOptions:
+        title: SE Linux Options
+        level:
+          label: SELinux level
+          placeholder: SELinux level label
+        role:
+          label: SELinux role
+          placeholder: SELinux role label
+        type:
+          label: SELinux type
+          placeholder: SELinux type label
+        user:
+          label: SELinux user
+          placeholder: SELinux user label
+      seccompProfile:
+        title: Seccomp Profile
+        localhostProfile:
+          label: Localhost Profile
+          placeholder: Localhost Profile
+        type: Type
     defaultImage:
       label: Default Image
       tooltip: Use the default `policy-server` container image.

@@ -1,11 +1,12 @@
-import { Links, Metadata } from './core';
+import { V1ObjectMeta } from '@kubernetes/client-node';
+
+import { Links } from './core';
 
 export const POLICY_REPORTER_PRODUCT = 'policy-reporter';
 export const POLICY_REPORTER_RESOURCE = 'PolicyReporter';
+export const POLICY_REPORTER_CHART = 'policy-reporter';
 
 export const POLICY_REPORTER_REPO = 'https://kyverno.github.io/policy-reporter';
-
-export const POLICY_REPORTER_CHART = 'policy-reporter';
 
 export type Resource = {
   apiVersion: string;
@@ -62,7 +63,7 @@ export type PolicyReport = {
   id: string;
   kind: string;
   links?: Links;
-  metadata: Metadata;
+  metadata: V1ObjectMeta;
   results?: Array<PolicyReportResult>
   scope?: {
     name?: string;
