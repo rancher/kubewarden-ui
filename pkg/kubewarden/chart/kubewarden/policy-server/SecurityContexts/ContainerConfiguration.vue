@@ -61,6 +61,13 @@ export default {
   },
 
   methods: {
+    handleDataUpdate(data, key) {
+      const newDataObj = Object.assign({}, this.value);
+
+      newDataObj[key] = data;
+
+      return newDataObj;
+    },
     updateData(val, key) {
       let parsedVal = val;
 
@@ -68,25 +75,9 @@ export default {
         parsedVal = parseInt(val);
       }
 
-      console.log(`updateData Pod Container update ev key ::: ${ key }`, parsedVal);
-      this.$emit('update-container-config', `container.${ key }`, parsedVal);
-    },
-    updateCapabilities(val) {
-      console.log('updateCapabilities Container Config update ev', val);
-      this.$emit('update-container-config', 'container.capabilities', val);
-    },
-    updateSeLinuxOptions(val) {
-      console.log('updateSeLinuxOptions Container Config update ev', val);
-      this.$emit('update-container-config', 'container.seLinuxOptions', val);
-    },
-    updateSeccompProfile(val) {
-      console.log('updateSeccompProfile  Container Config update ev', val);
-      this.$emit('update-container-config', 'container.seccompProfile', val);
-    },
-    updateWindowsOptions(val) {
-      console.log('updateWindowsOptions  Container Config update ev', val);
-      this.$emit('update-container-config', 'container.windowsOptions', val);
-    },
+      console.log(`updateData Container Config ev key ::: ${ key }`, parsedVal);
+      this.$emit('update-container-config', this.handleDataUpdate(parsedVal, key));
+    }
   },
 };
 </script>
@@ -103,7 +94,7 @@ export default {
         <Checkbox
           v-model="allowPrivilegeEscalation"
           :mode="mode"
-          data-testid="ps-config-security-context-container-allow-priv-esc-input"
+          data-testid="ps-config-security-context-container-allow-priv-escalation-input"
           label-key="kubewarden.policyServerConfig.securityContexts.allow-priv-escalation.label"
           :tooltip="t('kubewarden.policyServerConfig.securityContexts.allow-priv-escalation.tooltip')"
           @input="updateData($event, 'allowPrivilegeEscalation')"
@@ -155,7 +146,7 @@ export default {
       :mode="mode"
       config-type="container"
       :disabled="disabledByOsWindows"
-      @update-capabilities="updateCapabilities($event, 'container')"
+      @update-capabilities="updateData($event, 'capabilities')"
     />
     <!-- PROC MOUNT -->
     <div class="row mb-20">
@@ -216,7 +207,7 @@ export default {
       :mode="mode"
       config-type="container"
       :disabled="disabledByOsWindows"
-      @update-se-linux-options="updateSeLinuxOptions($event, 'container')"
+      @update-se-linux-options="updateData($event, 'seLinuxOptions')"
     />
     <!-- SECCOMP PROFILE -->
     <SeccompProfile
@@ -224,7 +215,7 @@ export default {
       :mode="mode"
       config-type="container"
       :disabled="disabledByOsWindows"
-      @update-seccomp-profile="updateSeccompProfile($event, 'container')"
+      @update-seccomp-profile="updateData($event, 'seccompProfile')"
     />
     <!-- WINDOWS OPTIONS -->
     <WindowsOptions
@@ -232,7 +223,7 @@ export default {
       :mode="mode"
       config-type="container"
       :disabled="disabledByOsLinux"
-      @update-windows-options="updateWindowsOptions($event, 'container')"
+      @update-windows-options="updateData($event, 'windowsOptions')"
     />
   </div>
 </template>

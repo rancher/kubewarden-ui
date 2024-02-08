@@ -70,6 +70,13 @@ export default {
   },
 
   methods: {
+    handleDataUpdate(data, key) {
+      const newDataObj = Object.assign({}, this.value);
+
+      newDataObj[key] = data;
+
+      return newDataObj;
+    },
     updateData(val, key) {
       let parsedVal = val;
 
@@ -77,21 +84,9 @@ export default {
         parsedVal = parseInt(val);
       }
 
-      console.log(`updateData Pod Config update ev key ::: ${ key }`, parsedVal);
-      this.$emit('update-pod-config', `pod.${ key }`, parsedVal);
-    },
-    updateSeLinuxOptions(val) {
-      console.log('updateSeLinuxOptions Pod Config update ev', val);
-      this.$emit('update-pod-config', 'pod.seLinuxOptions', val);
-    },
-    updateSeccompProfile(val) {
-      console.log('updateSeccompProfile Pod Config update ev', val);
-      this.$emit('update-pod-config', 'pod.seccompProfile', val);
-    },
-    updateWindowsOptions(val) {
-      console.log('updateWindowsOptions Pod Config update ev', val);
-      this.$emit('update-pod-config', 'pod.windowsOptions', val);
-    },
+      console.log(`updateData Pod Config ev key ::: ${ key }`, parsedVal);
+      this.$emit('update-pod-config', this.handleDataUpdate(parsedVal, key));
+    }
   },
 };
 </script>
@@ -191,7 +186,7 @@ export default {
       :mode="mode"
       config-type="pod"
       :disabled="disabledByOsWindows"
-      @update-se-linux-options="updateSeLinuxOptions($event, 'pod')"
+      @update-se-linux-options="updateData($event, 'seLinuxOptions')"
     />
     <!-- SECCOMP PROFILE -->
     <SeccompProfile
@@ -199,7 +194,7 @@ export default {
       :mode="mode"
       config-type="pod"
       :disabled="disabledByOsWindows"
-      @update-seccomp-profile="updateSeccompProfile($event, 'pod')"
+      @update-seccomp-profile="updateData($event, 'seccompProfile')"
     />
     <!-- SUPLEMENTAL GROUPS -->
     <div class="row mb-40">
@@ -242,7 +237,7 @@ export default {
       :mode="mode"
       config-type="pod"
       :disabled="disabledByOsLinux"
-      @update-windows-options="updateWindowsOptions($event, 'pod')"
+      @update-windows-options="updateData($event, 'windowsOptions')"
     />
   </div>
 </template>
