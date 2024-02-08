@@ -74,7 +74,7 @@ export default {
         />
       </div>
     </div>
-    <div class="row mb-10">
+    <div class="row mb-40">
       <div class="col span-6">
         <LabeledSelect
           v-model="type"

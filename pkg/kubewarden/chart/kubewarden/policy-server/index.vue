@@ -45,9 +45,11 @@ export default {
     if (!this.value.spec?.securityContexts) {
       this.value.spec.securityContexts = {
         container: {
-          capabilities: {}, seLinuxOptions: {}, seccompProfile: {}
+          capabilities: {}, seLinuxOptions: {}, seccompProfile: {}, windowsOptions: {}
         },
-        pod: {}
+        pod: {
+          seLinuxOptions: {}, seccompProfile: {}, windowsOptions: {}, supplementalGroups: [], sysctls: []
+        }
       };
     }
 

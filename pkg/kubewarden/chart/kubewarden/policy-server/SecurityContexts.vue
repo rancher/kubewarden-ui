@@ -3,6 +3,7 @@ import { _CREATE } from '@shell/config/query-params';
 
 import Loading from '@shell/components/Loading';
 import ContainerConfiguration from './SecurityContexts/ContainerConfiguration.vue';
+import PodConfiguration from './SecurityContexts/PodConfiguration.vue';
 
 export default {
   props: {
@@ -19,7 +20,8 @@ export default {
 
   components: {
     Loading,
-    ContainerConfiguration
+    ContainerConfiguration,
+    PodConfiguration,
   },
 
   async fetch() {},
@@ -43,7 +45,10 @@ export default {
   computed: {
     disabledByOsWindows() {
       return !this.value.os?.name === 'windows';
-    }
+    },
+    disabledByOsLinux() {
+      return !this.value.os?.name === 'linux';
+    },
   },
 };
 </script>
@@ -55,14 +60,15 @@ export default {
       :value="containerConfiguration"
       :mode="mode"
       :disabled-by-os-windows="disabledByOsWindows"
+      :disabled-by-os-linux="disabledByOsLinux"
       @update-container-config="updateContainerConfig"
     />
-
-    <!-- POD CONFIGURATION -->
-    <div class="row mt-40">
-      <h3 class="row">
-        {{ t('kubewarden.policyServerConfig.securityContexts.podConfig') }}
-      </h3>
-    </div>
+    <PodConfiguration
+      :value="podConfiguration"
+      :mode="mode"
+      :disabled-by-os-windows="disabledByOsWindows"
+      :disabled-by-os-linux="disabledByOsLinux"
+      @update-pod-config="updatePodConfig"
+    />
   </div>
 </template>

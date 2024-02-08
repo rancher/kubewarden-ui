@@ -3,12 +3,11 @@ import { _CREATE } from '@shell/config/query-params';
 
 import Loading from '@shell/components/Loading';
 import { Checkbox } from '@components/Form/Checkbox';
-import ArrayList from '@shell/components/form/ArrayList';
-import LabeledSelect from '@shell/components/form/LabeledSelect';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import SeLinuxOptions from '../../../../components/PolicyServer/SeLinuxOptions.vue';
 import SeccompProfile from '../../../../components/PolicyServer/SeccompProfile.vue';
 import Capabilities from '../../../../components/PolicyServer/Capabilities.vue';
+import WindowsOptions from '../../../../components/PolicyServer/WindowsOptions.vue';
 
 export default {
   props: {
@@ -25,18 +24,22 @@ export default {
     disabledByOsWindows: {
       type:     Boolean,
       default: false
+    },
+
+    disabledByOsLinux: {
+      type:     Boolean,
+      default: false
     }
   },
 
   components: {
     Loading,
     Checkbox,
-    ArrayList,
     LabeledInput,
-    LabeledSelect,
     SeLinuxOptions,
     SeccompProfile,
-    Capabilities
+    Capabilities,
+    WindowsOptions
   },
 
   async fetch() {},
@@ -53,13 +56,20 @@ export default {
       runAsUser:                 this.value.runAsUser,
       seLinuxOptions:            this.value.seLinuxOptions,
       seccompProfile:            this.value.seccompProfile,
+      windowsOptions:            this.value.windowsOptions,
     };
   },
 
   methods: {
     updateData(val, key) {
-      console.log(`updateData Container Config update ev key ::: ${ key }`, val);
-      this.$emit('update-container-config', `container.${ key }`, val);
+      let parsedVal = val;
+
+      if (key === 'runAsGroup' || key === 'runAsUser') {
+        parsedVal = parseInt(val);
+      }
+
+      console.log(`updateData Pod Container update ev key ::: ${ key }`, parsedVal);
+      this.$emit('update-container-config', `container.${ key }`, parsedVal);
     },
     updateCapabilities(val) {
       console.log('updateCapabilities Container Config update ev', val);
@@ -72,6 +82,10 @@ export default {
     updateSeccompProfile(val) {
       console.log('updateSeccompProfile  Container Config update ev', val);
       this.$emit('update-container-config', 'container.seccompProfile', val);
+    },
+    updateWindowsOptions(val) {
+      console.log('updateWindowsOptions  Container Config update ev', val);
+      this.$emit('update-container-config', 'container.windowsOptions', val);
     },
   },
 };
@@ -125,7 +139,7 @@ export default {
     </div>
     <!-- RUN AS NON ROOT -->
     <div class="row">
-      <div class="col span-12 mb-20">
+      <div class="col span-12 mb-40">
         <Checkbox
           v-model="runAsNonRoot"
           :mode="mode"
@@ -145,7 +159,7 @@ export default {
     />
     <!-- PROC MOUNT -->
     <div class="row mb-20">
-      <div class="col span-6 mb-20">
+      <div class="col span-6">
         <h4>
           {{ t('kubewarden.policyServerConfig.securityContexts.procMount.label') }}
         </h4>
@@ -179,14 +193,14 @@ export default {
       </div>
     </div>
     <!-- RUN AS USER -->
-    <div class="row mb-30">
+    <div class="row mb-40">
       <div class="col span-6">
         <h4>
           {{ t('kubewarden.policyServerConfig.securityContexts.runAsUser') }}
         </h4>
         <LabeledInput
           v-model.number="runAsUser"
-          data-testid="ps-config-security-context-container-capabilities-runAsUser-input"
+          data-testid="ps-config-security-context-container-runAsUser-input"
           type="number"
           min="0"
           :mode="mode"
@@ -212,12 +226,13 @@ export default {
       :disabled="disabledByOsWindows"
       @update-seccomp-profile="updateSeccompProfile($event, 'container')"
     />
-
-    <!-- POD CONFIGURATION -->
-    <div class="row mt-40">
-      <h3 class="row">
-        {{ t('kubewarden.policyServerConfig.securityContexts.podConfig') }}
-      </h3>
-    </div>
+    <!-- WINDOWS OPTIONS -->
+    <WindowsOptions
+      :value="windowsOptions"
+      :mode="mode"
+      config-type="container"
+      :disabled="disabledByOsLinux"
+      @update-windows-options="updateWindowsOptions($event, 'container')"
+    />
   </div>
 </template>

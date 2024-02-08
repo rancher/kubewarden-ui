@@ -66,7 +66,7 @@ export default {
         </h4>
         <LabeledInput
           v-model="level"
-          :data-testid="`ps-config-security-context-${configType}-capabilities-seLinuxOptions-level-input`"
+          :data-testid="`ps-config-security-context-${configType}-seLinuxOptions-level-input`"
           :mode="mode"
           :disabled="disabled"
           :label="t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.level.label')"
@@ -79,7 +79,7 @@ export default {
       <div class="col span-6">
         <LabeledInput
           v-model="role"
-          :data-testid="`ps-config-security-context-${configType}-capabilities-seLinuxOptions-role-input`"
+          :data-testid="`ps-config-security-context-${configType}-seLinuxOptions-role-input`"
           :mode="mode"
           :disabled="disabled"
           :label="t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.role.label')"
@@ -92,7 +92,7 @@ export default {
       <div class="col span-6">
         <LabeledInput
           v-model="type"
-          :data-testid="`ps-config-security-context-${configType}-capabilities-seLinuxOptions-type-input`"
+          :data-testid="`ps-config-security-context-${configType}-seLinuxOptions-type-input`"
           :mode="mode"
           :disabled="disabled"
           :label="t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.type.label')"
@@ -101,11 +101,11 @@ export default {
         />
       </div>
     </div>
-    <div class="row mb-30">
+    <div class="row mb-40">
       <div class="col span-6">
         <LabeledInput
           v-model="user"
-          :data-testid="`ps-config-security-context-${configType}-capabilities-seLinuxOptions-user-input`"
+          :data-testid="`ps-config-security-context-${configType}-seLinuxOptions-user-input`"
           :mode="mode"
           :disabled="disabled"
           :label="t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.user.label')"

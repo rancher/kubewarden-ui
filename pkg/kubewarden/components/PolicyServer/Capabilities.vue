@@ -60,7 +60,7 @@ export default {
     <h5 class="mb-10">
       {{ t('kubewarden.policyServerConfig.securityContexts.capabilities.add') }}
     </h5>
-    <div class="row mb-20">
+    <div class="row mb-10">
       <div class="col span-6">
         <ArrayList
           v-model="add"
