@@ -106,8 +106,8 @@ test('03b Install Kubewarden by Fleet', async({ page, ui }) => {
   const fleetPage = new RancherFleetPage(page)
   const repoRow = await fleetPage.addRepository({
     name       : 'therepo',
-    url        : 'https://github.com/kravciak/kubewarden-ui.git',
-    branch     : 'fleet',
+    url        : 'https://github.com/rancher/kubewarden-ui.git',
+    branch     : 'main',
     selfHealing: true,
     paths      : ['tests/e2e/fleet/'],
     workspace  : 'fleet-local',
