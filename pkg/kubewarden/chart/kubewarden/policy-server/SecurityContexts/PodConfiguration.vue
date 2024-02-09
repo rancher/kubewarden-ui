@@ -70,13 +70,6 @@ export default {
   },
 
   methods: {
-    handleDataUpdate(data, key) {
-      const newDataObj = Object.assign({}, this.value);
-
-      newDataObj[key] = data;
-
-      return newDataObj;
-    },
     updateData(val, key) {
       let parsedVal = val;
 
@@ -84,8 +77,8 @@ export default {
         parsedVal = parseInt(val);
       }
 
-      console.log(`updateData Pod Config ev key ::: ${ key }`, parsedVal);
-      this.$emit('update-pod-config', this.handleDataUpdate(parsedVal, key));
+      this.value[key] = parsedVal;
+      this.$emit('update-pod-config', this.value);
     }
   },
 };

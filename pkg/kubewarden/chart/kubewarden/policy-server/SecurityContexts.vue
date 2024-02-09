@@ -34,11 +34,11 @@ export default {
   },
 
   methods: {
-    updateContainerConfig({ data }) {
-      this.$emit('update-security-contexts', { type: 'container', data });
+    updateContainerConfig(val) {
+      this.$emit('update-security-contexts', { type: 'container', data: val });
     },
-    updatePodConfig({ data }) {
-      this.$emit('update-security-contexts', { type: 'pod', data });
+    updatePodConfig(val) {
+      this.$emit('update-security-contexts', { type: 'pod', data: val });
     },
   },
 

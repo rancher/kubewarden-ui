@@ -41,7 +41,7 @@ describe('component: SecurityContexts', () => {
     await wrapper.vm.$nextTick();
 
     expect(wrapper.emitted()['update-security-contexts']?.length).toBe(2);
-    expect(wrapper.emitted()['update-security-contexts']?.[0][0]).toEqual({ type: 'container', ...contConfigData });
-    expect(wrapper.emitted()['update-security-contexts']?.[1][0]).toEqual({ type: 'pod', ...podConfigData });
+    expect(wrapper.emitted()['update-security-contexts']?.[0][0]).toEqual({ type: 'container', data: { ...contConfigData } });
+    expect(wrapper.emitted()['update-security-contexts']?.[1][0]).toEqual({ type: 'pod', data: { ...podConfigData } });
   });
 });

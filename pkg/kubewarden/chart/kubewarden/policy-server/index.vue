@@ -92,8 +92,8 @@ export default {
       }
     },
 
-    updateSecurityContexts(prop, val) {
-      this.$set(this.chartValues.spec.securityContexts, prop, val);
+    updateSecurityContexts({ type, data }) {
+      this.$set(this.chartValues.spec.securityContexts, type, data);
     },
 
     updateSpec(prop, val) {
