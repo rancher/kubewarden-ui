@@ -63,6 +63,7 @@ export default {
       <template v-slot:columns="scope">
         <LabeledInput
           v-model.number="scope.row.value"
+          data-testid="array-list-integer-input"
           type="number"
           min="0"
           :mode="mode"

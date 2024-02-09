@@ -14,6 +14,10 @@ export default {
       type:     Array,
       required: true
     },
+    configType: {
+      type:    String,
+      default: 'pod'
+    },
     addLabel: {
       type: String,
       default() {
@@ -27,12 +31,14 @@ export default {
       },
     },
     inputLabel: {
-      type:    Object,
-      default: () => {}
+      type:     Object,
+      default:  () => {},
+      required: true
     },
     inputPlaceholderLabel: {
-      type:    Object,
-      default: () => {}
+      type:     Object,
+      default:  () => {},
+      required: true
     },
     loading: {
       type:    Boolean,
@@ -83,6 +89,7 @@ export default {
       <template v-slot:columns="scope">
         <LabeledInput
           v-model="scope.row.value.name"
+          :data-testid="`ps-config-security-context-${configType}-sysctls-name-input`"
           :mode="mode"
           :disabled="disabled"
           :label="inputLabel.name"
@@ -92,6 +99,7 @@ export default {
         />
         <LabeledInput
           v-model="scope.row.value.value"
+          :data-testid="`ps-config-security-context-${configType}-sysctls-value-input`"
           :mode="mode"
           :disabled="disabled"
           :label="inputLabel.value"
