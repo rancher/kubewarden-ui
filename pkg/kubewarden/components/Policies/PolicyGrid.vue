@@ -1,8 +1,10 @@
 <script>
 import isEmpty from 'lodash/isEmpty';
+import semver from 'semver';
 
 import { SCHEMA } from '@shell/config/types';
 import { _CREATE, CATEGORY, SEARCH_QUERY } from '@shell/config/query-params';
+import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 import { ensureRegex } from '@shell/utils/string';
 import { sortBy } from '@shell/utils/sort';
 
@@ -68,6 +70,13 @@ export default {
 
     filteredPackages() {
       const filteredPackages = this.value?.filter((artifactHubPackage) => {
+        // Determine if the package is a pre-release
+        const isPreRelease = this.isPrerelease(artifactHubPackage);
+
+        if ( !this.showPreRelease && isPreRelease ) {
+          return false; // Exclude pre-releases if showPreRelease is false
+        }
+
         if ( this.chartType === KUBEWARDEN.ADMISSION_POLICY ) {
           return !isGlobalPolicy(artifactHubPackage, this.allSchemas);
         }
@@ -98,7 +107,7 @@ export default {
           }
         }
 
-        if ( this.keywords ) {
+        if ( this.keywords.length ) {
           for ( const selected of this.keywords ) {
             if ( !subtype.keywords || subtype.keywords?.length === 0 || !subtype.keywords?.includes(selected) ) {
               return false;
@@ -106,7 +115,7 @@ export default {
           }
         }
 
-        if ( this.organizations ) {
+        if ( this.organizations.length ) {
           for ( const org of this.organizations ) {
             const name = subtype.repository?.organization_display_name || subtype.repository?.user_alias;
 
@@ -152,6 +161,10 @@ export default {
 
     resourceOptions() {
       return resourcesFromAnnotation(this.filteredSubtypes);
+    },
+
+    showPreRelease() {
+      return this.$store.getters['prefs/get'](SHOW_PRE_RELEASE);
     }
   },
 
@@ -162,6 +175,20 @@ export default {
       }
 
       return false;
+    },
+
+    isPrerelease(artifactHubPackage) {
+      const parsed = semver.prerelease(artifactHubPackage.version);
+
+      /**
+       * Custom condition for Deprecated API Versions policy as these versions
+       * have specific k8s versions attached (e.g. `v0.1.12-k8sv1.29.0`).
+       */
+      if ( parsed && artifactHubPackage.name === 'deprecated-api-versions' ) {
+        return !!parsed.includes('rc');
+      }
+
+      return !!parsed;
     },
 
     refresh() {
