@@ -7,6 +7,7 @@ import ResourceFetch from '@shell/mixins/resource-fetch';
 import Loading from '@shell/components/Loading';
 import Tab from '@shell/components/Tabbed/Tab';
 import Labels from '@shell/components/form/Labels';
+import { SECCOMP_OPTIONS } from '../../../components/PolicyServer/SeccompProfile.vue';
 
 import General from './General';
 import SecurityContexts from './SecurityContexts';
@@ -53,7 +54,10 @@ export default {
       };
     }
 
-    return { chartValues: this.value };
+    return {
+      chartValues:      this.value,
+      validationPassed: true,
+    };
   },
 
   computed: {
@@ -94,6 +98,36 @@ export default {
 
     updateSecurityContexts({ type, data }) {
       this.$set(this.chartValues.spec.securityContexts, type, data);
+
+      // check "required" of sysctls
+      // based on https://doc.crds.dev/github.com/kubewarden/kubewarden-controller/policies.kubewarden.io/PolicyServer/v1@v1.9.0#spec-securityContexts
+      const sysctlsCheck = this.chartValues?.spec?.securityContexts?.pod.sysctls || [];
+      let isSysctlsValid = true;
+
+      if (sysctlsCheck.length) {
+        for (let i = 0; i < sysctlsCheck.length; i++) {
+          if (!sysctlsCheck[i].name || !sysctlsCheck[i].value) {
+            isSysctlsValid = false;
+            break;
+          }
+        }
+      }
+
+      // check "required" of seccompProfile
+      // based on https://doc.crds.dev/github.com/kubewarden/kubewarden-controller/policies.kubewarden.io/PolicyServer/v1@v1.9.0#spec-securityContexts
+      let isSeccompProfileValid = true;
+
+      ['container', 'pod'].forEach((type) => {
+        const seccompProfileContainerCheck = this.chartValues?.spec?.securityContexts?.[type]?.seccompProfile || {};
+        const objKeys = Object.keys(seccompProfileContainerCheck);
+
+        if ((objKeys.includes('type') && !seccompProfileContainerCheck.type) ||
+         (objKeys.includes('type') && seccompProfileContainerCheck.type === SECCOMP_OPTIONS.LOCALHOST && !seccompProfileContainerCheck.localhostProfile)) {
+          isSeccompProfileValid = false;
+        }
+      });
+
+      this.$emit('validation-passed', isSysctlsValid && isSeccompProfileValid);
     },
 
     updateSpec(prop, val) {

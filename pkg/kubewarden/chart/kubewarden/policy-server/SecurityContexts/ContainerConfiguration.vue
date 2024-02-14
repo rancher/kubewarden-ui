@@ -18,7 +18,7 @@ export default {
 
     value: {
       type:     Object,
-      required: true
+      default:  null
     },
 
     disabledByOsWindows: {
@@ -46,17 +46,17 @@ export default {
 
   data() {
     return {
-      allowPrivilegeEscalation:  this.value.allowPrivilegeEscalation,
-      capabilities:              this.value.capabilities,
-      privileged:                this.value.privileged,
-      procMount:                 this.value.procMount,
-      readOnlyRootFilesystem:    this.value.readOnlyRootFilesystem,
-      runAsNonRoot:              this.value.runAsNonRoot,
-      runAsGroup:                this.value.runAsGroup,
-      runAsUser:                 this.value.runAsUser,
-      seLinuxOptions:            this.value.seLinuxOptions,
-      seccompProfile:            this.value.seccompProfile,
-      windowsOptions:            this.value.windowsOptions,
+      allowPrivilegeEscalation:  this.value?.allowPrivilegeEscalation,
+      capabilities:              this.value?.capabilities,
+      privileged:                this.value?.privileged,
+      procMount:                 this.value?.procMount,
+      readOnlyRootFilesystem:    this.value?.readOnlyRootFilesystem,
+      runAsNonRoot:              this.value?.runAsNonRoot,
+      runAsGroup:                this.value?.runAsGroup,
+      runAsUser:                 this.value?.runAsUser,
+      seLinuxOptions:            this.value?.seLinuxOptions,
+      seccompProfile:            this.value?.seccompProfile,
+      windowsOptions:            this.value?.windowsOptions,
     };
   },
 

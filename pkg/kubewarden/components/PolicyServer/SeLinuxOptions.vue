@@ -13,7 +13,7 @@ export default {
 
     value: {
       type:     Object,
-      required: true
+      default:  null
     },
 
     configType: {
@@ -36,10 +36,10 @@ export default {
 
   data() {
     return {
-      level: this.value.level,
-      role:  this.value.role,
-      type:  this.value.type,
-      user:  this.value.user,
+      level: this.value?.level,
+      role:  this.value?.role,
+      type:  this.value?.type,
+      user:  this.value?.user,
     };
   },
   methods: {

@@ -14,7 +14,7 @@ export default {
 
     value: {
       type:     Object,
-      required: true
+      default:  null
     },
 
     configType: {
@@ -38,10 +38,10 @@ export default {
 
   data() {
     return {
-      gmsaCredentialSpec:     this.value.gmsaCredentialSpec,
-      gmsaCredentialSpecName: this.value.gmsaCredentialSpecName,
-      hostProcess:            this.value.hostProcess,
-      runAsUserName:          this.value.runAsUserName,
+      gmsaCredentialSpec:     this.value?.gmsaCredentialSpec,
+      gmsaCredentialSpecName: this.value?.gmsaCredentialSpecName,
+      hostProcess:            this.value?.hostProcess,
+      runAsUserName:          this.value?.runAsUserName,
     };
   },
   methods: {

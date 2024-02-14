@@ -34,8 +34,9 @@ export default {
 
   data() {
     return {
-      errors:      [],
-      chartValues: this.value
+      errors:           [],
+      chartValues:      this.value,
+      validationPassed: true,
     };
   },
 
@@ -52,6 +53,9 @@ export default {
   },
 
   methods: {
+    handleValidationPassed(val) {
+      this.validationPassed = val;
+    },
     async finish(event) {
       try {
         await this.save(event);
@@ -70,9 +74,15 @@ export default {
     :can-yaml="false"
     :done-route="doneRoute"
     :errors="errors"
+    :validation-passed="validationPassed"
     @finish="finish"
     @error="e => errors = e"
   >
-    <Values :value="value" :chart-values="chartValues" :mode="mode" />
+    <Values
+      :value="value"
+      :chart-values="chartValues"
+      :mode="mode"
+      @validation-passed="handleValidationPassed"
+    />
   </CruResource>
 </template>

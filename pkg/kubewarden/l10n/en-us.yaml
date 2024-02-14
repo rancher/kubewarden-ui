@@ -306,6 +306,7 @@ kubewarden:
           placeholder: SELinux user label
       seccompProfile:
         title: Seccomp Profile
+        inputEnabledLabel: Add Seccomp Profile Configuration
         localhostProfile:
           label: Localhost Profile
           placeholder: Localhost Profile
@@ -320,7 +321,7 @@ kubewarden:
           placeholder: GMSA Credential Spec Name
         hostProcess:
           label: Run as a 'Host Process' container
-          tooltip: All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers)
+          tooltip: All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers). In addition, if HostProcess is true then HostNetwork must also be set to true
         runAsUserName:
           label: Run As UserName
           placeholder: Run As UserName

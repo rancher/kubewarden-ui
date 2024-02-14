@@ -13,7 +13,7 @@ export default {
 
     value: {
       type:     Object,
-      required: true
+      default:  null
     },
 
     configType: {
@@ -36,8 +36,8 @@ export default {
 
   data() {
     return {
-      add:  this.value.add,
-      drop: this.value.drop
+      add:  this.value?.add,
+      drop: this.value?.drop
     };
   },
   methods: {

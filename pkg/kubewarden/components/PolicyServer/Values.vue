@@ -133,6 +133,10 @@ export default {
           merge(this.chartValues, parsed);
         }
       }
+    },
+
+    handleValidationPassed(val) {
+      this.$emit('validation-passed', val);
     }
   }
 };
@@ -163,6 +167,7 @@ export default {
             v-model="values"
             :resource="value"
             :mode="mode"
+            @validation-passed="handleValidationPassed"
           />
         </Tabbed>
       </template>

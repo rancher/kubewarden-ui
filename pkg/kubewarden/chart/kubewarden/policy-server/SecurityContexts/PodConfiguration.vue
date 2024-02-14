@@ -19,7 +19,7 @@ export default {
 
     value: {
       type:     Object,
-      required: true
+      default:  null
     },
 
     disabledByOsWindows: {
@@ -48,15 +48,15 @@ export default {
 
   data() {
     return {
-      fsGroup:             this.value.fsGroup,
-      fsGroupChangePolicy: this.value.fsGroupChangePolicy,
-      runAsNonRoot:        this.value.runAsNonRoot,
-      runAsGroup:          this.value.runAsGroup,
-      runAsUser:           this.value.runAsUser,
-      seLinuxOptions:      this.value.seLinuxOptions,
-      seccompProfile:      this.value.seccompProfile,
-      supplementalGroups:  this.value.supplementalGroups,
-      sysctls:             this.value.sysctls,
+      fsGroup:             this.value?.fsGroup,
+      fsGroupChangePolicy: this.value?.fsGroupChangePolicy,
+      runAsNonRoot:        this.value?.runAsNonRoot,
+      runAsGroup:          this.value?.runAsGroup,
+      runAsUser:           this.value?.runAsUser,
+      seLinuxOptions:      this.value?.seLinuxOptions,
+      seccompProfile:      this.value?.seccompProfile,
+      supplementalGroups:  this.value?.supplementalGroups,
+      sysctls:             this.value?.sysctls,
       sysctlsInputLabel:   {
         name:  this.t('kubewarden.policyServerConfig.securityContexts.sysctls.name.label'),
         value: this.t('kubewarden.policyServerConfig.securityContexts.sysctls.value.label'),
@@ -65,7 +65,7 @@ export default {
         name:  this.t('kubewarden.policyServerConfig.securityContexts.sysctls.name.placeholder'),
         value: this.t('kubewarden.policyServerConfig.securityContexts.sysctls.value.placeholder'),
       },
-      windowsOptions: this.value.windowsOptions,
+      windowsOptions: this.value?.windowsOptions,
     };
   },
 
