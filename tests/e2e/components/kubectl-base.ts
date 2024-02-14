@@ -1,31 +1,30 @@
 import { expect, Locator, Page } from '@playwright/test'
+
 import { step } from '../rancher/rancher-test'
 import { Policy, PolicyKind } from '../pages/policies.page'
 
-export class Shell {
-    readonly win: Locator
-    readonly prompt: Locator
+export abstract class BaseShell {
+    private readonly win: Locator
+    readonly screen: Locator
     readonly cursor: Locator
-    readonly status: Locator
     readonly connected: Locator
 
-    constructor(private readonly page: Page) {
+    constructor(protected readonly page: Page) {
+      // Window manager owns kubectl tab
       this.win = this.page.locator('div#windowmanager')
-      // Last line starting with >
-      this.prompt = this.win.locator('div.xterm-rows>div:has(span)').filter({ hasText: '>' }).last()
-      // Textarea where we type commands
-      this.cursor = this.win.getByLabel('Terminal input', { exact: true })
       // Connected message
       this.connected = this.win.locator('.status').getByText('Connected', { exact: true })
-      // Exit status of last command
-      this.status = this.prompt.locator('xpath=preceding-sibling::div[1]')
+      // Visible terminal screen
+      this.screen = this.win.locator('div.xterm-screen')
+      // Textarea where we type commands
+      this.cursor = this.screen.getByLabel('Terminal input', { exact: true })
     }
 
     // Open terminal
     async open() {
       await this.page.locator('#btn-kubectl').click()
       await expect(this.connected).toBeVisible({ timeout: 30_000 })
-      await expect(this.prompt).toBeVisible()
+      await expect(this.win.locator('div.shell-container.open')).toBeVisible()
     }
 
     // Close terminal
@@ -41,26 +40,7 @@ export class Shell {
      * @param options.inPlace it true kubectl shell is already opened
      * @returns exit status from executed command
      */
-    @step
-    async run(cmd: string, options?: { status?: number, inPlace?: boolean, timeout?: number }): Promise<number> {
-      const status = options?.status ?? 0
-      const timeout = options?.timeout || 60_000
-
-      if (!options?.inPlace) await this.open()
-
-      // Fill is faster but removes newlines, multiline commands require input.pressSequentially
-      await this.cursor.fill(`${cmd}; echo EXITSTATUS-$?`)
-      await this.cursor.press('Enter')
-      // Wait - command finished when prompt is empty
-      await expect(this.prompt.getByText(/^>\s+$/)).toBeVisible({ timeout })
-      // Verify command exit status
-      const statusText = await this.status.textContent() || 'Error'
-      const statusCode = parseInt(statusText.replace(/EXITSTATUS-/, ''))
-      if (isFinite(status)) expect(statusCode).toBe(status)
-
-      if (!options?.inPlace) await this.close()
-      return statusCode
-    }
+    abstract run(cmd: string, options?: { status?: number, inPlace?: boolean, timeout?: number }): Promise<number>
 
     /**
      * Execute one or more shell commands

@@ -79,7 +79,7 @@ export class RancherAppsPage extends BasePage {
       const keepLog = options?.keepLog || false
 
       // Can't match ^..$ because output is sometimes mixed up
-      const rmMatch = `uninstall.*\\s${text}\\s` // delete app
+      const rmMatch = `uninstall.*\\s${text}` // delete app
       const nameMatch = `\\s${text}\\s\\/home` // app upgrades
       const tarMatch = `helm\\/${text}-[0-9-.]+tgz` // chart installations
       const regex = new RegExp(`SUCCESS: helm.*(${nameMatch}|${tarMatch}|${rmMatch})`)
