@@ -21,7 +21,7 @@ export function resourcesFromAnnotation(artifactHubPackages: ArtifactHubPackage[
       const split = resource.split(',');
 
       if ( split.length > 1 ) {
-        split.forEach((s: string) => out.push(s));
+        split.forEach((s: string) => out.push(s.trim()));
       } else {
         out.push(resource);
       }
