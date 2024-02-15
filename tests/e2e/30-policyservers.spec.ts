@@ -4,8 +4,17 @@ import { Policy, AdmissionPoliciesPage, ClusterAdmissionPoliciesPage } from './p
 
 const expect3m = expect.configure({ timeout: 3 * 60_000 })
 
+const securityContexts = {
+  container: {
+    capabilities: {}, seLinuxOptions: {}, seccompProfile: {}, windowsOptions: {}
+  },
+  pod: {
+    seLinuxOptions: {}, seccompProfile: {}, windowsOptions: {}, supplementalGroups: [], sysctls: []
+  }
+}
+
 test('Policy Servers', async({ page, ui, nav }) => {
-  const server: PolicyServer = { name: 'test-policyserver' }
+  const server: PolicyServer = { name: 'test-policyserver', spec: { securityContexts } }
   const policy: Policy = { title: 'Pod Privileged Policy', name: 'test-policy-podpriv', server: server.name }
 
   const psPage = new PolicyServersPage(page)

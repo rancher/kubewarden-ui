@@ -5,8 +5,17 @@ import { PolicyServersPage } from './pages/policyservers.page'
 
 test.describe.configure({ mode: 'parallel' })
 
+const securityContexts = {
+  container: {
+    capabilities: {}, seLinuxOptions: {}, seccompProfile: {}, windowsOptions: {}
+  },
+  pod: {
+    seLinuxOptions: {}, seccompProfile: {}, windowsOptions: {}, supplementalGroups: [], sysctls: []
+  }
+}
+
 const polmode = 'Monitor'
-const pserver = { name: process.env.CI ? 'allpolicies-pserver' : 'default' }
+const pserver = { name: process.env.CI ? 'allpolicies-pserver' : 'default', spec: { securityContexts } }
 const polkeep = !!process.env.keep || false
 
 type PolicySettings = {
