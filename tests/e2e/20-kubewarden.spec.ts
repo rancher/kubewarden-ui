@@ -13,22 +13,13 @@ function statsPlusOne(stats: string): string {
   return stats.replace(/\d+ of \d+/, `${m} of ${n}`).replace(/\d+%$/, '')
 }
 
-const securityContexts = {
-  container: {
-    capabilities: {}, seLinuxOptions: {}, seccompProfile: {}, windowsOptions: {}
-  },
-  pod: {
-    seLinuxOptions: {}, seccompProfile: {}, windowsOptions: {}, supplementalGroups: [], sysctls: []
-  }
-}
-
 test('Stats reflect resource changes', async({ page, nav }) => {
   const kwPage = new KubewardenPage(page)
   const psPage = new PolicyServersPage(page)
   const apPage = new AdmissionPoliciesPage(page)
   const capPage = new ClusterAdmissionPoliciesPage(page)
 
-  const ps = { name: 'kw-policyserver', spec: { securityContexts } }
+  const ps = { name: 'kw-policyserver' }
   const policy: Policy = { title: 'Pod Privileged Policy', name: 'kw-policy-privpod', server: ps.name }
 
   await nav.explorer('Kubewarden')

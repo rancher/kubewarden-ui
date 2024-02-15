@@ -115,17 +115,8 @@ for (const PolicyPage of pageTypes) {
   })
 
   test(`${abbrName}: Custom policy settings`, async({ page, ui, shell }) => {
-    const securityContexts = {
-      container: {
-        capabilities: {}, seLinuxOptions: {}, seccompProfile: {}, windowsOptions: {}
-      },
-      pod: {
-        seLinuxOptions: {}, seccompProfile: {}, windowsOptions: {}, supplementalGroups: [], sysctls: []
-      }
-    }
-
     const polPage = new PolicyPage(page)
-    const ps: PolicyServer = { name: 'ps-custom', spec: { securityContexts } }
+    const ps: PolicyServer = { name: 'ps-custom' }
     const p: Policy = { ...pMinimal, mode: 'Monitor', audit: 'Off', server: ps.name, module: 'ghcr.io/kubewarden/policies/pod-privileged:v0.2.6' }
 
     if (isAP(polPage)) p.namespace = 'ns-custom'
