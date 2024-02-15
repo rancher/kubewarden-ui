@@ -16,9 +16,9 @@ const defaultMocks = {
   $store: {
     getters: {
       'i18n/t':    jest.fn(),
-      'prefs/get': () => false
-    }
-  }
+      'prefs/get': () => false,
+    },
+  },
 };
 const defaultProvide = { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY };
 
@@ -27,13 +27,16 @@ describe('component: PolicyGrid', () => {
     const packages: Array<any> = [];
     const customSubtype = `<div>Custom Policy</div>`;
 
-    const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData: { targetNamespace: 'default', value: packages },
-      mocks:     defaultMocks,
-      provide:   defaultProvide,
-      computed:  defaultComputed,
-      slots:     { customSubtype }
-    });
+    const wrapper = shallowMount(
+      PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>,
+      {
+        propsData: { targetNamespace: 'default', value: packages },
+        mocks:     defaultMocks,
+        provide:   defaultProvide,
+        computed:  defaultComputed,
+        slots:     { customSubtype },
+      }
+    );
 
     expect(wrapper.html()).toContain('Custom Policy');
   });
@@ -41,41 +44,55 @@ describe('component: PolicyGrid', () => {
   it('should render provided packages', () => {
     const customSubtype = `<div>Custom Policy</div>`;
 
-    const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData:  { targetNamespace: 'default', value: policyPackages },
-      directives: { tooltip: jest.fn() },
-      mocks:      defaultMocks,
-      provide:    defaultProvide,
-      computed:   defaultComputed,
-      slots:      { customSubtype }
-    });
+    const wrapper = shallowMount(
+      PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>,
+      {
+        propsData:  { targetNamespace: 'default', value: policyPackages },
+        directives: { tooltip: jest.fn() },
+        mocks:      defaultMocks,
+        provide:    defaultProvide,
+        computed:   defaultComputed,
+        slots:      { customSubtype },
+      }
+    );
 
     expect(wrapper.html()).toContain('Custom Policy');
     expect(wrapper.html()).toContain('Allow Privilege Escalation PSP');
   });
 
   it('should render correct organization options in LabeledSelect', () => {
-    const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData:  { targetNamespace: 'default', value: policyPackages },
-      directives: { tooltip: jest.fn() },
-      mocks:      defaultMocks,
-      provide:    defaultProvide,
-      computed:   defaultComputed
-    });
+    const wrapper = shallowMount(
+      PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>,
+      {
+        propsData:  { targetNamespace: 'default', value: policyPackages },
+        directives: { tooltip: jest.fn() },
+        mocks:      defaultMocks,
+        provide:    defaultProvide,
+        computed:   defaultComputed,
+      }
+    );
 
     const selects = wrapper.findAllComponents(LabeledSelect);
 
-    expect(selects.at(0).props().options).toStrictEqual(['Kubewarden Developers', 'evil'] as String[]);
+    expect(selects.at(0).props().options).toStrictEqual([
+      'Kubewarden Developers',
+      'honorable',
+      'dishonorable',
+      'evil',
+    ] as String[]);
   });
 
   it('filters shown cards by organization when selected', async() => {
-    const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData:  { targetNamespace: 'default', value: policyPackages },
-      directives: { tooltip: jest.fn() },
-      mocks:      defaultMocks,
-      provide:    defaultProvide,
-      computed:   defaultComputed
-    });
+    const wrapper = shallowMount(
+      PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>,
+      {
+        propsData:  { targetNamespace: 'default', value: policyPackages },
+        directives: { tooltip: jest.fn() },
+        mocks:      defaultMocks,
+        provide:    defaultProvide,
+        computed:   defaultComputed,
+      }
+    );
 
     expect(wrapper.html()).toContain('Allow Privilege Escalation PSP');
     expect(wrapper.html()).toContain('Signed Test Policy');
@@ -89,27 +106,41 @@ describe('component: PolicyGrid', () => {
   });
 
   it('should render correct keyword options in LabeledSelect', () => {
-    const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData:  { targetNamespace: 'default', value: policyPackages },
-      directives: { tooltip: jest.fn() },
-      mocks:      defaultMocks,
-      provide:    defaultProvide,
-      computed:   defaultComputed,
-    });
+    const wrapper = shallowMount(
+      PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>,
+      {
+        propsData:  { targetNamespace: 'default', value: policyPackages },
+        directives: { tooltip: jest.fn() },
+        mocks:      defaultMocks,
+        provide:    defaultProvide,
+        computed:   defaultComputed,
+      }
+    );
 
     const selects = wrapper.findAllComponents(LabeledSelect);
 
-    expect(selects.at(1).props().options).toStrictEqual(['PSP', 'privilege escalation', 'compliance', 'deprecated API', 'namespace', 'psa', 'kubewarden'] as String[]);
+    expect(selects.at(1).props().options).toStrictEqual([
+      'PSP',
+      'privilege escalation',
+      'compliance',
+      'deprecated API',
+      'namespace',
+      'psa',
+      'kubewarden',
+    ] as String[]);
   });
 
   it('filters shown cards by keywords when selected', async() => {
-    const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData:  { targetNamespace: 'default', value: policyPackages },
-      directives: { tooltip: jest.fn() },
-      mocks:      defaultMocks,
-      provide:    defaultProvide,
-      computed:   defaultComputed
-    });
+    const wrapper = shallowMount(
+      PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>,
+      {
+        propsData:  { targetNamespace: 'default', value: policyPackages },
+        directives: { tooltip: jest.fn() },
+        mocks:      defaultMocks,
+        provide:    defaultProvide,
+        computed:   defaultComputed,
+      }
+    );
 
     expect(wrapper.html()).toContain('Allow Privilege Escalation PSP');
     expect(wrapper.html()).toContain('Signed Test Policy');
@@ -123,15 +154,29 @@ describe('component: PolicyGrid', () => {
   });
 
   it('should render correct resource options in LabeledSelect', () => {
-    const options: String[] = ['Deployment', 'Replicaset', 'Statefulset', 'Daemonset', 'Replicationcontroller', 'Job', 'Cronjob', 'Pod', '*', 'Namespace'];
+    const options: String[] = [
+      'Deployment',
+      'Replicaset',
+      'Statefulset',
+      'Daemonset',
+      'Replicationcontroller',
+      'Job',
+      'Cronjob',
+      'Pod',
+      '*',
+      'Namespace',
+    ];
 
-    const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData:  { targetNamespace: 'default', value: policyPackages },
-      directives: { tooltip: jest.fn() },
-      mocks:      defaultMocks,
-      provide:    defaultProvide,
-      computed:   defaultComputed
-    });
+    const wrapper = shallowMount(
+      PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>,
+      {
+        propsData:  { targetNamespace: 'default', value: policyPackages },
+        directives: { tooltip: jest.fn() },
+        mocks:      defaultMocks,
+        provide:    defaultProvide,
+        computed:   defaultComputed,
+      }
+    );
 
     const selects = wrapper.findAllComponents(LabeledSelect);
 
@@ -139,13 +184,16 @@ describe('component: PolicyGrid', () => {
   });
 
   it('filters shown cards by resources when selected', async() => {
-    const wrapper = shallowMount(PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData:  { targetNamespace: 'default', value: policyPackages },
-      directives: { tooltip: jest.fn() },
-      mocks:      defaultMocks,
-      provide:    defaultProvide,
-      computed:   defaultComputed
-    });
+    const wrapper = shallowMount(
+      PolicyGrid as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>,
+      {
+        propsData:  { targetNamespace: 'default', value: policyPackages },
+        directives: { tooltip: jest.fn() },
+        mocks:      defaultMocks,
+        provide:    defaultProvide,
+        computed:   defaultComputed,
+      }
+    );
 
     expect(wrapper.html()).toContain('Allow Privilege Escalation PSP');
     expect(wrapper.html()).toContain('Signed Test Policy');
@@ -170,7 +218,9 @@ describe('component: PolicyGrid', () => {
 
     const filteredPackages = wrapper.vm.filteredPackages;
 
-    const containsRc = filteredPackages.some(pkg => pkg.name === 'container-resources');
+    const containsRc = filteredPackages.some(
+      pkg => pkg.name === 'container-resources'
+    );
 
     expect(containsRc).toBe(false);
   });
@@ -183,16 +233,18 @@ describe('component: PolicyGrid', () => {
         $store: {
           getters: {
             'i18n/t':    jest.fn(),
-            'prefs/get': () => true
-          }
-        }
+            'prefs/get': () => true,
+          },
+        },
       },
-      provide:    defaultProvide,
-      computed:   defaultComputed,
+      provide:  defaultProvide,
+      computed: defaultComputed,
     });
 
     const filteredPackages = wrapper.vm.filteredPackages;
-    const containsRc = filteredPackages.some(pkg => pkg.name === 'container-resources');
+    const containsRc = filteredPackages.some(
+      pkg => pkg.name === 'container-resources'
+    );
 
     expect(containsRc).toBe(true);
   });
@@ -205,16 +257,18 @@ describe('component: PolicyGrid', () => {
         $store: {
           getters: {
             'i18n/t':    jest.fn(),
-            'prefs/get': () => false
-          }
-        }
+            'prefs/get': () => false,
+          },
+        },
       },
-      provide:    defaultProvide,
-      computed:   defaultComputed,
+      provide:  defaultProvide,
+      computed: defaultComputed,
     });
 
     const filteredPackages = wrapper.vm.filteredPackages;
-    const containsRc = filteredPackages.some(pkg => pkg.name === 'deprecated-api-versions');
+    const containsRc = filteredPackages.some(
+      pkg => pkg.name === 'deprecated-api-versions'
+    );
 
     expect(containsRc).toBe(true);
   });
@@ -229,7 +283,9 @@ describe('component: PolicyGrid', () => {
     });
 
     const filteredPackages = wrapper.vm.filteredPackages;
-    const containsCap = filteredPackages.some(pkg => pkg.name === 'psa-label-enforcer');
+    const containsCap = filteredPackages.some(
+      pkg => pkg.name === 'psa-label-enforcer'
+    );
 
     expect(containsCap).toBe(false);
   });

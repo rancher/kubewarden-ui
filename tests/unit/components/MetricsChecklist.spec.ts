@@ -2,47 +2,47 @@ import { createWrapper } from '@tests/unit/utils/wrapper';
 
 import MetricsChecklist from '@kubewarden/components/MetricsChecklist.vue';
 
-const commonMocks = {
-  $store: {
-    getters: {
-      currentCluster: () => ({ id: 'test-cluster' }),
-      'i18n/t':       () => jest.fn(),
-    }
+const commons = {
+  propsData: {},
+  computed:  { hasKubewardenDashboards: () => false },
+  mocks:     {
+    $store: {
+      getters: {
+        currentCluster: () => ({ id: 'test-cluster' }),
+        'i18n/t':       () => jest.fn(),
+      },
+    },
+    $router: jest.fn(),
+    $route:  jest.fn(),
   },
-  $router: jest.fn(),
-  $route:  jest.fn(),
 };
 
-const commonComputed = { hasKubewardenDashboards: () => false };
-
-const defaultPropsData = {};
-
-const createMetricChecklistWrapper = createWrapper(MetricsChecklist, commonMocks, commonComputed, defaultPropsData);
+const wrapperFactory = createWrapper(MetricsChecklist, commons);
 
 describe('MetricChecklist.vue', () => {
   it('shows the conflicting dashboards banner when there are conflicting dashboards and no Kubewarden dashboards', () => {
     const conflictingGrafanaDashboards = [{ metadata: { name: 'Dashboard1' } }];
 
-    const wrapper = createMetricChecklistWrapper({
+    const wrapper = wrapperFactory({
       propsData: { conflictingGrafanaDashboards },
       computed:  { hasKubewardenDashboards: () => false },
       stubs:     {
         'n-link': { template: '<span />' },
         Banner:   { template: '<span />' },
-      }
+      },
     });
 
     expect(wrapper.vm.showConflictingDashboardsBanner).toBe(true);
   });
 
   it('does not show the conflicting dashboards banner when there are no conflicting dashboards', () => {
-    const wrapper = createMetricChecklistWrapper({
+    const wrapper = wrapperFactory({
       propsData: { conflictingGrafanaDashboards: [] },
       computed:  { hasKubewardenDashboards: () => false },
       stubs:     {
         'n-link': { template: '<span />' },
         Banner:   { template: '<span />' },
-      }
+      },
     });
 
     expect(wrapper.vm.showConflictingDashboardsBanner).toBe(false);
@@ -51,20 +51,20 @@ describe('MetricChecklist.vue', () => {
   it('does not show the conflicting dashboards banner when there are Kubewarden dashboards, even if there are conflicting dashboards', () => {
     const conflictingGrafanaDashboards = [{ metadata: { name: 'Dashboard1' } }];
 
-    const wrapper = createMetricChecklistWrapper({
+    const wrapper = wrapperFactory({
       propsData: { conflictingGrafanaDashboards },
       computed:  { hasKubewardenDashboards: () => true }, // Simulate presence of KubeWarden dashboards
       stubs:     {
         'n-link': { template: '<span />' },
         Banner:   { template: '<span />' },
-      }
+      },
     });
 
     expect(wrapper.vm.showConflictingDashboardsBanner).toBe(false);
   });
 
   it('disables the dashboard button when there is no monitoring app', () => {
-    const wrapper = createMetricChecklistWrapper({
+    const wrapper = wrapperFactory({
       propsData: {
         monitoringApp:                null,
         cattleDashboardNs:            {},
@@ -73,14 +73,14 @@ describe('MetricChecklist.vue', () => {
       stubs: {
         'n-link': { template: '<span />' },
         Banner:   { template: '<span />' },
-      }
+      },
     });
 
     expect(wrapper.vm.dashboardButtonDisabled).toBe(true);
   });
 
   it('disables the dashboard button when the cattleDashboardNs is empty', () => {
-    const wrapper = createMetricChecklistWrapper({
+    const wrapper = wrapperFactory({
       propsData: {
         monitoringApp:                {},
         cattleDashboardNs:            null,
@@ -89,14 +89,14 @@ describe('MetricChecklist.vue', () => {
       stubs: {
         'n-link': { template: '<span />' },
         Banner:   { template: '<span />' },
-      }
+      },
     });
 
     expect(wrapper.vm.dashboardButtonDisabled).toBe(true);
   });
 
   it('disables the dashboard button when there are conflicting Grafana dashboards', () => {
-    const wrapper = createMetricChecklistWrapper({
+    const wrapper = wrapperFactory({
       propsData: {
         monitoringApp:                {},
         cattleDashboardNs:            {},
@@ -105,14 +105,14 @@ describe('MetricChecklist.vue', () => {
       stubs: {
         'n-link': { template: '<span />' },
         Banner:   { template: '<span />' },
-      }
+      },
     });
 
     expect(wrapper.vm.dashboardButtonDisabled).toBe(true);
   });
 
   it('enables the dashboard button when monitoring app is present, cattleDashboardNs is not empty, and there are no conflicting Grafana dashboards', () => {
-    const wrapper = createMetricChecklistWrapper({
+    const wrapper = wrapperFactory({
       propsData: {
         monitoringApp:                {},
         cattleDashboardNs:            { someKey: 'someValue' },
@@ -121,7 +121,7 @@ describe('MetricChecklist.vue', () => {
       stubs: {
         'n-link': { template: '<span />' },
         Banner:   { template: '<span />' },
-      }
+      },
     });
 
     expect(wrapper.vm.dashboardButtonDisabled).toBe(false);
@@ -130,17 +130,17 @@ describe('MetricChecklist.vue', () => {
   it('enables the dashboard button when monitoring app is present, cattleDashboardNs is not empty, kubewarden dashboards exists and there are conflicting Grafana dashboards', () => {
     const conflictingGrafanaDashboards = [{ metadata: { name: 'Dashboard1' } }];
 
-    const wrapper = createMetricChecklistWrapper({
+    const wrapper = wrapperFactory({
       propsData: {
-        monitoringApp:                {},
-        cattleDashboardNs:            { someKey: 'someValue' },
+        monitoringApp:     {},
+        cattleDashboardNs: { someKey: 'someValue' },
         conflictingGrafanaDashboards,
       },
-      computed:  { hasKubewardenDashboards: () => true },
+      computed: { hasKubewardenDashboards: () => true },
       stubs:    {
         'n-link': { template: '<span />' },
         Banner:   { template: '<span />' },
-      }
+      },
     });
 
     expect(wrapper.vm.dashboardButtonDisabled).toBe(false);
