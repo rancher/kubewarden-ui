@@ -9,7 +9,6 @@ export interface PolicyServer {
     name: string
     replicas?: number
     image?: string
-    spec?: Record<string, unknown>
     settings?(): Promise<void>
 }
 
