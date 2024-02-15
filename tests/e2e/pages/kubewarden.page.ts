@@ -2,19 +2,33 @@ import { expect, test, Locator, Page } from '@playwright/test'
 import { RancherAppsPage } from '../rancher/rancher-apps.page'
 import { BasePage } from '../rancher/basepage'
 import { Shell } from '../components/kubectl-xterm'
+import { step } from '../rancher/rancher-test'
 
 type Pane = 'Policy Servers' | 'Admission Policies' | 'Cluster Admission Policies'
+
+export interface AppVersion {
+  app: string
+  controller?: string
+  crds?: string
+  defaults?: string
+}
 
 export class KubewardenPage extends BasePage {
     readonly createPsBtn: Locator;
     readonly createApBtn: Locator;
     readonly createCapBtn: Locator;
+    readonly currentVer: Locator;
+    readonly upgradeVer: Locator;
 
     constructor(page: Page) {
       super(page)
       this.createPsBtn = this.ui.button('Create Policy Server')
       this.createApBtn = this.ui.button('Create Admission Policy')
       this.createCapBtn = this.ui.button('Create Cluster Admission Policy')
+
+      const head = this.page.locator('div.head')
+      this.currentVer = head.locator('div.head-version')
+      this.upgradeVer = head.locator('div.head-upgrade')
     }
 
     async goto(): Promise<void> {
@@ -32,7 +46,19 @@ export class KubewardenPage extends BasePage {
       return this.getPane(pane).locator('span.numbers-stats')
     }
 
-    async installKubewarden() {
+    @step
+    async getUpgrade(): Promise<AppVersion|null> {
+      await this.nav.kubewarden()
+      if (await this.upgradeVer.isVisible()) {
+        // Parse versions from "App Upgrade: v1.9.0 - Chart: 2.0.5"
+        const upText = await this.upgradeVer.innerText()
+        const parts = upText.split(/\s+/)
+        return { app: parts[2], controller: parts[5] }
+      } else return null
+    }
+
+    @step
+    async installKubewarden(options?: { version?: string }) {
       // ==================================================================================================
       // Requirements Dialog
       const welcomeStep = this.page.getByText('Kubewarden is a policy engine for Kubernetes.')
@@ -97,6 +123,8 @@ export class KubewardenPage extends BasePage {
       // ==================================================================================================
       // Rancher Application Metadata
       const apps = new RancherAppsPage(this.page)
+      // Use custom version if requested
+      if (options?.version) await apps.swapUrlVersion(options.version)
       await expect(apps.step1).toBeVisible()
       await apps.nextBtn.click()
       await expect(apps.step2).toBeVisible()
@@ -112,5 +140,31 @@ export class KubewardenPage extends BasePage {
       await apps.installBtn.click()
       await apps.waitHelmSuccess('rancher-kubewarden-crds', { keepLog: true })
       await apps.waitHelmSuccess('rancher-kubewarden-controller')
+    }
+
+    @step
+    async upgrade(options?: { from?: AppVersion, to?: AppVersion }) {
+      const from = options?.from
+      const to = options?.to
+      const apps = new RancherAppsPage(this.page)
+
+      // Check versions before upgrade
+      if (from) await expect(this.currentVer).toContainText(`App Version: ${from.app}`)
+      if (to) await expect(this.upgradeVer).toContainText(`App Upgrade: ${to.app}`)
+      if (to?.controller) await expect(this.upgradeVer).toContainText(`Chart: ${to.controller}`)
+
+      // Perform upgrade
+      await this.upgradeVer.click()
+      if (from?.controller || to?.controller) {
+        await expect(apps.stepTitle).toContainText(`${from?.controller || ''} > ${to?.controller || ''}`)
+      }
+      await apps.updateApp('rancher-kubewarden-controller', { navigate: false })
+
+      // Check resources are online
+      await this.nav.explorer('Apps', 'Installed Apps')
+      for (const chart of ['controller', 'crds', 'defaults']) {
+        await apps.checkChart(`rancher-kubewarden-${chart}`, to ? to[chart] : undefined)
+      }
+      await new Shell(this.page).waitPods()
     }
 }

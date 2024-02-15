@@ -65,10 +65,14 @@ export class RancherUI {
   }
 
   // Select option from (un)labeled Select
-  async selectOption(label: string|Locator, option: string | RegExp) {
+  async selectOption(label: string|Locator, option: string | RegExp | number) {
     const select = (typeof label === 'string') ? this.select(label) : label.getByRole('combobox', { name: 'Search for option' })
     await select.click()
-    await this.page.getByRole('option', { name: option, exact: true }).click()
+
+    const optionItem = typeof option === 'number'
+      ? this.page.getByRole('option').nth(option)
+      : this.page.getByRole('option', { name: option, exact: true })
+    await optionItem.click()
   }
 
   // ==================================================================================================

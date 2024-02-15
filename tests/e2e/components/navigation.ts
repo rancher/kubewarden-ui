@@ -105,6 +105,12 @@ export class Navigation {
     // ==================================================================================================
     // Kubewarden specific helpers
 
+    @step // Overview
+    async kubewarden() {
+      await this.explorer('Kubewarden')
+      await expect(this.page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
+    }
+
     @step // Policy Servers
     async pserver(name?: string, tab?: 'Policies' | 'Metrics' | 'Tracing' | 'Conditions' | 'Recent Events' | 'Related Resources') {
       await this.explorer('Kubewarden', 'PolicyServers')

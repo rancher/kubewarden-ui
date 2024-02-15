@@ -16,6 +16,7 @@ export interface Chart {
 export class RancherAppsPage extends BasePage {
     readonly step1: Locator
     readonly step2: Locator
+    readonly stepTitle: Locator
     readonly nextBtn: Locator
     readonly installBtn: Locator
     readonly updateBtn: Locator
@@ -24,14 +25,21 @@ export class RancherAppsPage extends BasePage {
       super(page)
       this.step1 = page.getByRole('heading', { name: 'Install: Step 1' })
       this.step2 = page.getByRole('heading', { name: 'Install: Step 2' })
+      this.stepTitle = page.locator('div.top.choice-banner>.title')
       this.nextBtn = this.ui.button('Next')
       this.installBtn = this.ui.button('Install')
-      this.updateBtn = this.ui.button('Update')
+      this.updateBtn = page.getByRole('button', { name: /Update|Upgrade/ })
     }
 
     async goto(): Promise<void> {
       // await this.nav.explorer('Apps', 'Charts')
       await this.nav.goto('dashboard/c/local/apps/charts')
+    }
+
+    async swapUrlVersion(version: string) {
+      const url = this.page.url()
+      await this.page.goto(url.replace(/version=[0-9.]+/, `version=${version}`))
+      await expect(this.stepTitle).toContainText(version)
     }
 
     /**
@@ -94,6 +102,15 @@ export class RancherAppsPage extends BasePage {
     }
 
     @step
+    async checkChart(name: string, version?: string) {
+      const row = this.ui.tableRow(name)
+      await row.toHaveState('Deployed')
+      if (version) {
+        await expect(row.column('Chart')).toContainText(`:${version}`)
+      }
+    }
+
+    @step
     async installChart(chart: Chart, options?: { questions?: () => Promise<void>, yamlPatch?: YAMLPatch, timeout?: number, navigate?: boolean }) {
       // Select chart by title
       if (options?.navigate !== false) {
@@ -138,9 +155,8 @@ export class RancherAppsPage extends BasePage {
       await this.waitHelmSuccess(chart.check, { timeout: options?.timeout })
     }
 
-    // Without parameters only for upgrade/reload
     @step
-    async updateApp(name: string, options?: { questions?: () => Promise<void>, yamlPatch?: YAMLPatch, timeout?: number, navigate?: boolean }) {
+    async updateApp(name: string, options?: { questions?: () => Promise<void>, yamlPatch?: YAMLPatch, timeout?: number, navigate?: boolean, version?: string|RegExp|number }) {
       if (options?.navigate !== false) {
         await this.nav.explorer('Apps', 'Installed Apps')
         await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
@@ -148,10 +164,20 @@ export class RancherAppsPage extends BasePage {
         await this.ui.tableRow(name).action('Edit/Upgrade')
         await expect(this.page.getByRole('heading', { name })).toBeVisible()
       }
-      // Skip Step1
+
+      // Step 1
+      let v = options.version
+      if (v !== undefined) {
+        // Translate 1.9.3 -> ^\s*1[.]9[.]3\s
+        if (typeof v === 'string') v = new RegExp(`^\\s*${v.replace(/[.]/g, '[.]')}\\s`)
+        await this.ui.selectOption('Version', v)
+        await this.ui.withReload(async() => {
+          await expect(this.ui.checkbox('Container Registry')).toBeChecked()
+        }, 'Container Registry is unchecked after version change')
+      }
       await this.nextBtn.click()
 
-      // Chart questions
+      // Step 2
       if (options?.questions) await options.questions()
       if (options?.yamlPatch) {
         await this.ui.openView('Edit YAML')

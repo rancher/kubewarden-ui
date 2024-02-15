@@ -71,9 +71,10 @@ export class PolicyServersPage extends BasePage {
       await ps.delete()
     }
 
-    async installDefault(options?: { recommended?: boolean, mode?: 'monitor' | 'protect' }) {
+    async installDefault(options?: {version?: string, recommended?: boolean, mode?: 'monitor' | 'protect' }) {
       const apps = new RancherAppsPage(this.page)
-      // Skip metadata
+      // Use custom version if requested
+      if (options?.version) await apps.swapUrlVersion(options.version)
       await expect(apps.step1).toBeVisible()
       await apps.nextBtn.click()
       await expect(apps.step2).toBeVisible()

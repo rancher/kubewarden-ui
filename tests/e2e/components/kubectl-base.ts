@@ -77,6 +77,12 @@ export abstract class BaseShell {
       await this.close()
     }
 
+    async waitPods(options?: { ns?: string, filter?: string }) {
+      const ns = options?.ns || '-n cattle-kubewarden-system'
+      const filter = options?.filter || ''
+      await this.retry(`kubectl get pods --no-headers ${ns} ${filter} 2>&1 | sed -E '/([0-9]+)[/]\\1\\s+Running|Completed/d' | wc -l | grep -qx 0`)
+    }
+
     async privpod(options?: { name?: string, ns?: string, status?: number }) {
       const name = options?.name || `privpod-${Date.now()}`
       const ns = options?.ns ? `-n ${options.ns}` : ''
