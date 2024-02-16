@@ -11,53 +11,40 @@ npx playwright install
 alias pw='npx playwright'
 ```
 
-## Kubewarden Installation
+## Run tests
+
+Tests only require `RANCHER_URL` parameter.
+This should be clean rancher if you want to run all the tests.
 
 ```bash
-# Requires RANCHER_URL variable:
-export RANCHER_URL=https://172.31.0.2.nip.io/
-pw test installation
+# Create cluster with rancher
+docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged -e CATTLE_BOOTSTRAP_PASSWORD=sa rancher/rancher:latest
+
+# Run tests
+export RANCHER_URL=https://127.0.0.1.nip.io/
+pw test --ui -x
 ```
 
-## Howtos 
 
-### Set up tracing
+## Parameters
+
+ENV variables can be used to change behaviour
 
 ```bash
-# ==================================================================================================
-# Open Telemetry
+# Install UI extension from source, tag or official one
+ORIGIN=[source|rc|released] pw test --ui -x
 
-helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
-helm upgrade -i --wait my-opentelemetry-operator open-telemetry/opentelemetry-operator \
-  --namespace open-telemetry --create-namespace
+# Install old kubewarden and upgrade it before tests
+UPGRADE=1 pw test --ui -x
 
-# ==================================================================================================
-# Jaeger Tracing (can be installed from rancher)
-
-app=jaeger pw test helpers -g 'appInstall'
-kubectl patch apps.catalog.cattle.io -n jaeger jaeger-operator --type merge -p '
-    { "spec": { "values": {
-          "rbac": { "clusterRole": true },
-          "jaeger": { "create": true }
-    }}}'
-app=jaeger pw test helpers -g 'appReload'
-
-
-# ==================================================================================================
-# enable telemetry & jaeger (controller & defaults)
-
-kubectl patch apps.catalog.cattle.io -n cattle-kubewarden-system rancher-kubewarden-controller --type merge -p '
-    {"spec": {"values": {"telemetry": {
-        "enabled": true,
-        "tracing": {"jaeger": {
-            "endpoint": "jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:14250",
-            "tls": {"insecure": true}
-    }}}}}}'
-
-kubectl patch apps.catalog.cattle.io -n cattle-kubewarden-system rancher-kubewarden-defaults --type merge -p '
-    {"spec": {"values": {"policyServer": {"telemetry": { "enabled": true }}}}}'
-
-app=kubewarden pw test helpers -g 'appReload'
-app=kubewarden-defaults pw test helpers -g 'appReload'
-
+# Install kubewarden by Fleet, not compatible with UPGRADE=1
+FLEET=1 pw test --ui -x
 ```
+
+## Howtos
+
+### When UI tests fail in github
+
+- Download playwright-report from action summary
+- Extract and load zip file from `playwright-report/data/` into https://trace.playwright.dev/
+
