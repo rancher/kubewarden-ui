@@ -176,10 +176,8 @@ export default ({
     },
 
     packageValues() {
-      if ( this.type?.name ) {
-        const pkg = this.packages?.find(p => p.name === this.type.name);
-
-        return pkg;
+      if ( this.type?.repository?.url ) {
+        return this.packages?.find(p => p.repository?.url === this.type.repository.url);
       }
 
       return null;
@@ -357,7 +355,7 @@ export default ({
         return;
       }
 
-      const policyDetails = this.packages.find(pkg => pkg.name === this.type?.name);
+      const policyDetails = this.packages.find(pkg => pkg.repository?.url === this.type?.repository?.url);
       const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.['kubewarden/questions-ui']);
       const packageAnnotation = `${ policyDetails.repository.name }/${ policyDetails.name }/${ policyDetails.version }`;
       /** Return spec from package if annotation exists */
