@@ -102,6 +102,7 @@ test('03a Install Kubewarden', async({ page, ui, nav, context }) => {
 
 test('03b Install Kubewarden by Fleet', async({ page, ui }) => {
   test.skip(!FLEET)
+  test.setTimeout(15 * 60_000)
 
   const fleetPage = new RancherFleetPage(page)
   const repoRow = await fleetPage.addRepository({
@@ -115,6 +116,7 @@ test('03b Install Kubewarden by Fleet', async({ page, ui }) => {
   })
 
   await ui.withReload(async() => {
+    await fleetPage.selectWorkspace('fleet-local')
     await expect(repoRow.column('Clusters Ready')).toHaveText('1/1', { timeout: 7 * 60_000 })
   }, 'Installed but not refreshed?')
 })

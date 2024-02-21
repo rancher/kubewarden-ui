@@ -27,6 +27,10 @@ export class RancherFleetPage extends BasePage {
       await this.nav.goto('dashboard/c/local/fleet')
     }
 
+    async selectWorkspace(workspace: string) {
+      await this.ui.selectOption(this.page.locator('.rd-header-right').locator('.unlabeled-select'), workspace)
+    }
+
     @step
     async addRepository(repo: GitRepo) {
       // Rancher navigation
@@ -34,9 +38,7 @@ export class RancherFleetPage extends BasePage {
       await this.ui.button('Add Repository').first().click()
       await expect(this.page.getByRole('heading', { name: 'Create: Step 1', exact: true })).toBeVisible()
 
-      if (repo.workspace !== undefined) {
-        await this.ui.selectOption(this.page.locator('.rd-header-right').locator('.unlabeled-select'), repo.workspace)
-      }
+      if (repo.workspace !== undefined) await this.selectWorkspace(repo.workspace)
 
       // Repository details
       await this.ui.input('Name *').fill(repo.name)
