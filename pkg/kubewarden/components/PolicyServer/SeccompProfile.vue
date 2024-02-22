@@ -21,7 +21,7 @@ export default {
 
     value: {
       type:     Object,
-      default:  null
+      default:  () => {}
     },
 
     configType: {
@@ -77,7 +77,7 @@ export default {
 
 <template>
   <Loading v-if="$fetchState.pending" />
-  <div v-else>
+  <div v-else class="mb-40">
     <!-- SECCOMP PROFILE -->
     <div class="row mb-20">
       <div class="col span-12">
@@ -108,7 +108,7 @@ export default {
           />
         </div>
       </div>
-      <div class="row mb-40">
+      <div class="row">
         <div class="col span-6">
           <LabeledSelect
             v-model="type"

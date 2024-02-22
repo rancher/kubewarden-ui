@@ -44,15 +44,41 @@ export default {
 
   data() {
     if (!this.value.spec?.securityContexts) {
-      this.value.spec.securityContexts = {
-        container: {
-          capabilities: {}, seLinuxOptions: {}, seccompProfile: {}, windowsOptions: {}
-        },
-        pod: {
-          seLinuxOptions: {}, seccompProfile: {}, windowsOptions: {}, supplementalGroups: [], sysctls: []
-        }
-      };
+      this.value.spec.securityContexts = {};
     }
+
+    if (!this.value.spec?.securityContexts?.container) {
+      this.value.spec.securityContexts.container = {};
+    }
+
+    if (!this.value.spec?.securityContexts?.pod) {
+      this.value.spec.securityContexts.pod = {};
+    }
+
+    // defaults for this.value.spec.securityContexts.container object properties
+    [
+      ['capabilities', {}],
+      ['seLinuxOptions', {}],
+      ['seccompProfile', {}],
+      ['windowsOptions', {}],
+    ].forEach((item) => {
+      if (!this.value.spec?.securityContexts?.container[item[0]]) {
+        this.value.spec.securityContexts.container[item[0]] = item[1];
+      }
+    });
+
+    // defaults for this.value.spec.securityContexts.pod object properties
+    [
+      ['seLinuxOptions', {}],
+      ['seccompProfile', {}],
+      ['windowsOptions', {}],
+      ['supplementalGroups', []],
+      ['sysctls', []],
+    ].forEach((item) => {
+      if (!this.value.spec?.securityContexts?.pod[item[0]]) {
+        this.value.spec.securityContexts.pod[item[0]] = item[1];
+      }
+    });
 
     return {
       chartValues:      this.value,
@@ -101,7 +127,7 @@ export default {
 
       // check "required" of sysctls
       // based on https://doc.crds.dev/github.com/kubewarden/kubewarden-controller/policies.kubewarden.io/PolicyServer/v1@v1.9.0#spec-securityContexts
-      const sysctlsCheck = this.chartValues?.spec?.securityContexts?.pod.sysctls || [];
+      const sysctlsCheck = this.chartValues?.spec?.securityContexts?.pod?.sysctls || [];
       let isSysctlsValid = true;
 
       if (sysctlsCheck.length) {

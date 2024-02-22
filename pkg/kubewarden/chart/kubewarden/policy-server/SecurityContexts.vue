@@ -14,6 +14,7 @@ export default {
 
     value: {
       type:     Object,
+      default:  () => {},
       required: true
     }
   },

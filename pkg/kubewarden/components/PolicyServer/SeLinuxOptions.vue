@@ -13,7 +13,7 @@ export default {
 
     value: {
       type:     Object,
-      default:  null
+      default:  () => {}
     },
 
     configType: {

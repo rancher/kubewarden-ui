@@ -12,7 +12,7 @@ export default {
     },
     value: {
       type:     Array,
-      default:  null
+      default:  () => []
     },
     addLabel: {
       type: String,
@@ -39,11 +39,17 @@ export default {
       default: true
     }
   },
-
+  data() {
+    return { arrayListInteger: this.value };
+  },
   methods: {
+    handleArrayListUpdate(data) {
+      this.arrayListInteger = data;
+      this.$emit('input', this.arrayListInteger);
+    },
     updateRow(index, value) {
-      this.value.splice(index, 1, parseInt(value));
-      this.$emit('input', this.value);
+      this.arrayListInteger.splice(index, 1, parseInt(value));
+      this.$emit('input', this.arrayListInteger);
     }
   }
 };
@@ -52,13 +58,13 @@ export default {
 <template>
   <div>
     <ArrayList
-      :value="value"
+      :value="arrayListInteger"
       class="array-list-integer"
       :add-allowed="true"
       :add-label="addLabel"
       :disabled="disabled"
       :default-add-value="0"
-      @input="$emit('input', $event)"
+      @input="handleArrayListUpdate"
     >
       <template v-slot:columns="scope">
         <LabeledInput

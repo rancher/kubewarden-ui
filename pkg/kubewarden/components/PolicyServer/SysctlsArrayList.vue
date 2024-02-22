@@ -12,7 +12,7 @@ export default {
     },
     value: {
       type:     Array,
-      default:  null
+      default:  () => []
     },
     configType: {
       type:    String,
