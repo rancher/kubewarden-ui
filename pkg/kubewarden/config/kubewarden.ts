@@ -1,5 +1,7 @@
 import { rootKubewardenRoute } from '../utils/custom-routing';
-import { KUBEWARDEN, KUBEWARDEN_DASHBOARD, POLICY_REPORTER_PRODUCT, KUBEWARDEN_PRODUCT_NAME } from '../types';
+import {
+  KUBEWARDEN, KUBEWARDEN_DASHBOARD, POLICY_REPORTER_PRODUCT, KUBEWARDEN_PRODUCT_NAME, WG_POLICY_K8S
+} from '../types';
 import { POLICY_SERVER_HEADERS, POLICY_HEADERS } from './table-headers';
 
 export function init($plugin: any, store: any) {
@@ -38,7 +40,7 @@ export function init($plugin: any, store: any) {
   virtualType({
     label:      store.getters['i18n/t']('kubewarden.policyReporter.title'),
     icon:       'notifier',
-    ifHaveType: KUBEWARDEN.POLICY_REPORT,
+    ifHaveType: WG_POLICY_K8S.POLICY_REPORT.TYPE,
     name:       POLICY_REPORTER_PRODUCT,
     namespaced: false,
     weight:     95,
