@@ -51,7 +51,7 @@ export default {
   data() {
     return {
       colorForResult,
-      reports:          null,
+      reports:          [],
       resourceHeaders:  POLICY_REPORTER_HEADERS.RESOURCE,
       namespaceHeaders: POLICY_REPORTER_HEADERS.NAMESPACE
     };
