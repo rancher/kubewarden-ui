@@ -1,9 +1,11 @@
-import { Label, Condition, Metadata, Selector } from './core';
+import { V1LabelSelector, V1ObjectMeta } from '@kubernetes/client-node';
+
+import { Label, Condition } from './core';
 
 export type FleetGitRepo = {
   apiVersion: string,
   kind: string,
-  metadata: Metadata,
+  metadata: V1ObjectMeta,
   spec: {
     branch?: string,
     correctDrift?: {
@@ -20,9 +22,9 @@ export type FleetGitRepo = {
       },
       {
         clusterGroup?: string,
-        clusterGroupSelector?: Selector,
+        clusterGroupSelector?: V1LabelSelector,
         clusterName?: string,
-        clusterSelector?: Selector,
+        clusterSelector?: V1LabelSelector,
         name?: string,
       }
     ],
@@ -86,7 +88,7 @@ export type FleetGitRepo = {
 export type FleetBundle = {
   apiVersion: string,
   kind: string,
-  metadata: Metadata,
+  metadata: V1ObjectMeta,
   spec: {
     correctDrift: {
       enabled: boolean,
@@ -97,7 +99,7 @@ export type FleetBundle = {
     dependsOn: [
       {
         name: string,
-        selector: Selector
+        selector: V1LabelSelector
       }
     ],
     diff: {
@@ -175,9 +177,9 @@ export type FleetBundle = {
       partitions: [
         {
           clusterGroup: string,
-          clusterGroupSelector: Selector,
+          clusterGroupSelector: V1LabelSelector,
           clusterName: string,
-          clusterSelector: Selector,
+          clusterSelector: V1LabelSelector,
           maxUnavailable: string,
           name: string
         }
@@ -187,18 +189,18 @@ export type FleetBundle = {
     targetRestrictions: [
       {
         clusterGroup: string,
-        clusterGroupSelector: Selector,
+        clusterGroupSelector: V1LabelSelector,
         clusterName: string,
-        clusterSelector: Selector,
+        clusterSelector: V1LabelSelector,
         name: string
       }
     ],
     targets: [
       {
         clusterGroup: string,
-        clusterGroupSelector: Selector,
+        clusterGroupSelector: V1LabelSelector,
         clusterName: string,
-        clusterSelector: Selector,
+        clusterSelector: V1LabelSelector,
         correctDrift: {
           enabled: boolean,
           force: boolean,

@@ -7,8 +7,10 @@ import ResourceFetch from '@shell/mixins/resource-fetch';
 import Loading from '@shell/components/Loading';
 import Tab from '@shell/components/Tabbed/Tab';
 import Labels from '@shell/components/form/Labels';
+import { SECCOMP_OPTIONS } from '../../../components/PolicyServer/SeccompProfile.vue';
 
 import General from './General';
+import SecurityContexts from './SecurityContexts';
 import Registry from './Registry/Index';
 import Verification from './Verification';
 
@@ -26,7 +28,7 @@ export default {
   },
 
   components: {
-    General, Labels, Loading, Tab, Registry, Verification
+    General, SecurityContexts, Labels, Loading, Tab, Registry, Verification
   },
 
   mixins: [ResourceFetch],
@@ -41,7 +43,47 @@ export default {
   },
 
   data() {
-    return { chartValues: this.value };
+    if (!this.value.spec?.securityContexts) {
+      this.value.spec.securityContexts = {};
+    }
+
+    if (!this.value.spec?.securityContexts?.container) {
+      this.value.spec.securityContexts.container = {};
+    }
+
+    if (!this.value.spec?.securityContexts?.pod) {
+      this.value.spec.securityContexts.pod = {};
+    }
+
+    // defaults for this.value.spec.securityContexts.container object properties
+    [
+      ['capabilities', {}],
+      ['seLinuxOptions', {}],
+      ['seccompProfile', {}],
+      ['windowsOptions', {}],
+    ].forEach((item) => {
+      if (!this.value.spec?.securityContexts?.container[item[0]]) {
+        this.value.spec.securityContexts.container[item[0]] = item[1];
+      }
+    });
+
+    // defaults for this.value.spec.securityContexts.pod object properties
+    [
+      ['seLinuxOptions', {}],
+      ['seccompProfile', {}],
+      ['windowsOptions', {}],
+      ['supplementalGroups', []],
+      ['sysctls', []],
+    ].forEach((item) => {
+      if (!this.value.spec?.securityContexts?.pod[item[0]]) {
+        this.value.spec.securityContexts.pod[item[0]] = item[1];
+      }
+    });
+
+    return {
+      chartValues:      this.value,
+      validationPassed: true,
+    };
   },
 
   computed: {
@@ -80,6 +122,40 @@ export default {
       }
     },
 
+    updateSecurityContexts({ type, data }) {
+      this.$set(this.chartValues.spec.securityContexts, type, data);
+
+      // check "required" of sysctls
+      // based on https://doc.crds.dev/github.com/kubewarden/kubewarden-controller/policies.kubewarden.io/PolicyServer/v1@v1.9.0#spec-securityContexts
+      const sysctlsCheck = this.chartValues?.spec?.securityContexts?.pod?.sysctls || [];
+      let isSysctlsValid = true;
+
+      if (sysctlsCheck.length) {
+        for (let i = 0; i < sysctlsCheck.length; i++) {
+          if (!sysctlsCheck[i].name || !sysctlsCheck[i].value) {
+            isSysctlsValid = false;
+            break;
+          }
+        }
+      }
+
+      // check "required" of seccompProfile
+      // based on https://doc.crds.dev/github.com/kubewarden/kubewarden-controller/policies.kubewarden.io/PolicyServer/v1@v1.9.0#spec-securityContexts
+      let isSeccompProfileValid = true;
+
+      ['container', 'pod'].forEach((type) => {
+        const seccompProfileCheck = this.chartValues?.spec?.securityContexts?.[type]?.seccompProfile || {};
+        const objKeys = Object.keys(seccompProfileCheck);
+
+        if ((objKeys.includes('type') && !seccompProfileCheck.type) ||
+         (objKeys.includes('type') && seccompProfileCheck.type === SECCOMP_OPTIONS.LOCALHOST && !seccompProfileCheck.localhostProfile)) {
+          isSeccompProfileValid = false;
+        }
+      });
+
+      this.$emit('validation-passed', isSysctlsValid && isSeccompProfileValid);
+    },
+
     updateSpec(prop, val) {
       this.$set(this.chartValues.spec, prop, val);
     }
@@ -100,10 +176,18 @@ export default {
         @update-general="updateGeneral"
       />
     </Tab>
-    <Tab name="labels" label-key="generic.labelsAndAnnotations" :weight="98">
+    <Tab name="security-contexts" label-key="kubewarden.tabs.security-contexts.label" :weight="98">
+      <SecurityContexts
+        v-model="chartValues.spec"
+        data-testid="ps-config-security-contexts-tab"
+        :mode="mode"
+        @update-security-contexts="updateSecurityContexts"
+      />
+    </Tab>
+    <Tab name="labels" label-key="generic.labelsAndAnnotations" :weight="97">
       <Labels v-model="chartValues" data-testid="ps-config-labels-tab" :mode="mode" />
     </Tab>
-    <Tab name="verification" label-key="kubewarden.tabs.verification.label" :weight="97">
+    <Tab name="verification" label-key="kubewarden.tabs.verification.label" :weight="96">
       <Verification
         data-testid="ps-config-verification-tab"
         :value="chartValues.spec"
@@ -112,7 +196,7 @@ export default {
         @update-vconfig="updateSpec"
       />
     </Tab>
-    <Tab name="registry" label-key="kubewarden.tabs.registry.label" :weight="96" @active="refresh">
+    <Tab name="registry" label-key="kubewarden.tabs.registry.label" :weight="95" @active="refresh">
       <Registry
         ref="registry"
         data-testid="ps-config-registry-tab"

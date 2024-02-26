@@ -62,6 +62,8 @@ kubewarden:
         docs: |
           Follow the documentation to setup an OCI registry for further installation.
   tabs:
+    security-contexts:
+      label: Security Contexts
     general:
       label: General
       nameOverride:
@@ -263,6 +265,83 @@ kubewarden:
           label: Kind
           tooltip: Singular PascalCase name of the resource
   policyServerConfig:
+    securityContexts:
+      containerConfig: Container configuration
+      podConfig: Pod configuration
+      allow-priv-escalation:
+        label: Allow Privilege Escalation
+        tooltip: Allow Privilege Escalation controls whether a process can gain more privileges than its parent process. This bool directly controls if the "no_new_privs" flag will be set on the container process
+      capabilities:
+        title: Capabilities
+        add: Added Capabilities
+        drop: Dropped Capabilities
+        addLabel: Add
+        placeholder: Capability
+      privileged:
+        label: Run container in privileged mode
+        tooltip: Run container in privileged mode. Processes in privileged containers are essentially equivalent to root on the host
+      procMount:
+        label: ProcMount
+        placeholder: ProcMount type
+      readOnlyRootFilesystem:
+        label: Whether this container has a read-only root filesystem
+      runAsNonRoot:
+        label: Container must run as a non-root user
+        tooltip: If true, the Kubelet will validate the image at runtime to ensure that it does not run as UID 0 (root) and fail to start the container if it does
+      runAsGroup: Run As Group
+      runAsUser: Run As User
+      seLinuxOptions:
+        title: SE Linux Options
+        level:
+          label: SELinux level
+          placeholder: SELinux level label
+        role:
+          label: SELinux role
+          placeholder: SELinux role label
+        type:
+          label: SELinux type
+          placeholder: SELinux type label
+        user:
+          label: SELinux user
+          placeholder: SELinux user label
+      seccompProfile:
+        title: Seccomp Profile
+        inputEnabledLabel: Add Seccomp Profile Configuration
+        localhostProfile:
+          label: Localhost Profile
+          placeholder: Localhost Profile
+        type: Type
+      windowsOptions:
+        title: Windows Options
+        gmsaCredentialSpec:
+          label: GMSA Credential Spec
+          placeholder: GMSA Credential Spec
+        gmsaCredentialSpecName:
+          label: GMSA Credential Spec Name
+          placeholder: GMSA Credential Spec Name
+        hostProcess:
+          label: Run as a 'Host Process' container
+          tooltip: All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers). In addition, if HostProcess is true then HostNetwork must also be set to true
+        runAsUserName:
+          label: Run As UserName
+          placeholder: Run As UserName
+      fsGroup:
+        label: FS Group
+      fsGroupChangePolicy:
+        label: FS Group change Policy
+        placeholder: FS Group change Policy
+      supplementalGroups:
+        addLabel: Add Group
+        label: Supplemental Group
+      sysctls:
+        addLabel: Add Sysctls
+        label: Sysctls
+        name:
+          label: Name
+          placeholder: Name
+        value:
+          label: Value
+          placeholder: Value
     defaultImage:
       label: Default Image
       tooltip: Use the default `policy-server` container image.

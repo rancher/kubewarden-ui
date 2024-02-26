@@ -1,13 +1,15 @@
-export type Label = { [key: string]: string };
+import { V1ObjectMeta } from '@kubernetes/client-node';
 
-export type Links = {
+export interface Label { [key: string]: string; }
+
+export interface Links {
   remove?: string;
   self?: string;
   update?: string;
   view?: string;
 }
 
-export type Route = {
+export interface Route {
   name: string;
   params: {
     resource?: string;
@@ -17,7 +19,7 @@ export type Route = {
   }
 }
 
-export type Condition = {
+export interface Condition {
   error: boolean,
   lastTransitionTime?: string,
   lastUpdateTime?: string,
@@ -28,46 +30,21 @@ export type Condition = {
   type: string
 }
 
-export type State = {
+export interface State {
   error?: boolean,
   message?: string,
   name?: string,
   transitioning?: boolean
 }
 
-export type Relationship = {
+export interface Relationship {
   fromId: string,
   fromType: string,
   rel: string,
   state: string
 }
 
-export type MatchExpression = {
-  key: string,
-  operator: string,
-  values: string[]
-}
-
-export type Selector = {
-  matchExpressions?: MatchExpression[],
-  matchLabels?: Label
-}
-
-export type Metadata = {
-  annotations?: {[key: string]: string},
-  creationTimestamp: string;
-  fields?: Array<string>;
-  generation?: number;
-  labels?: {[key: string]: string}
-  name: string;
-  namespace?: string;
-  relationships?: Array<Relationship>;
-  resourceVersion?: string;
-  state?: State;
-  uid: string;
-}
-
-export type ApiGroup = {
+export interface ApiGroup {
   id: string,
   type: string,
   links: {
@@ -85,10 +62,10 @@ export type ApiGroup = {
   }
 }
 
-export type CustomResourceDefinition = {
+export interface CustomResourceDefinition {
   apiVersion: string,
   kind: string,
-  metadata: Metadata,
+  metadata: V1ObjectMeta,
   spec: {
     conversion: {
       strategy: string,
