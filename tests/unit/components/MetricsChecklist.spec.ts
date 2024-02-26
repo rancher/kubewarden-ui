@@ -1,4 +1,4 @@
-import { createWrapper } from '@tests/unit/utils/wrapper';
+import { createWrapper } from '@tests/unit/_utils_/wrapper';
 
 import MetricsChecklist from '@kubewarden/components/MetricsChecklist.vue';
 

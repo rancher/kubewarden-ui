@@ -9,7 +9,7 @@ import General from '@kubewarden/chart/kubewarden/admission/General.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import { RadioGroup } from '@components/Form/Radio';
 
-import policyConfig from '../../templates/policyConfig';
+import policyConfig from '@tests/unit/_templates_/policyConfig';
 
 describe('component: General', () => {
   it('should display the PolicyServer options if available', () => {

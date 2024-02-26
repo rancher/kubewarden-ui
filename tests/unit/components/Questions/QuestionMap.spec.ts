@@ -7,7 +7,7 @@ import Question from '@kubewarden/components/Questions/index.vue';
 import QuestionMap from '@kubewarden/components/Questions/QuestionMap.vue';
 import SequenceType from '@kubewarden/components/Questions/SequenceTree.vue';
 
-import { deepMapQuestion } from '../../templates/questions';
+import { deepMapQuestion } from '@tests/unit/_templates_/questions';
 
 describe('component: QuestionMap', () => {
   it('emits addSeq with question props', () => {

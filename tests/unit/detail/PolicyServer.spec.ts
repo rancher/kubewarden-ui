@@ -6,7 +6,7 @@ import { describe, expect, it } from '@jest/globals';
 import PolicyServer from '@kubewarden/detail/policies.kubewarden.io.policyserver.vue';
 import CountGauge from '@shell/components/CountGauge';
 
-import TraceTestData from '../templates/policyTraces';
+import TraceTestData from '@tests/unit/_templates_/policyTraces';
 
 const policyGauges = {
   Active: {

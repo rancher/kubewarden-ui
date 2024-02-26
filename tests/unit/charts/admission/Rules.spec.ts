@@ -8,7 +8,7 @@ import { KUBEWARDEN } from '@kubewarden/types';
 import Rules from '@kubewarden/chart/kubewarden/admission/Rules';
 import Rule from '@kubewarden/chart/kubewarden/admission/Rules/Rule.vue';
 
-import policyConfig from '../../templates/policyConfig';
+import policyConfig from '@tests/unit/_templates_/policyConfig';
 
 describe('component: Rules', () => {
   it('rules should render rule components based on policy config', async() => {

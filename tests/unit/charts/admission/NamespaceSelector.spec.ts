@@ -9,7 +9,7 @@ import NamespaceSelector from '@kubewarden/chart/kubewarden/admission/NamespaceS
 import KeyValue from '@shell/components/form/KeyValue';
 import MatchExpressions from '@shell/components/form/MatchExpressions';
 
-import policyConfig from '../../templates/policyConfig';
+import policyConfig from '@tests/unit/_templates_/policyConfig';
 
 describe('component: NamespaceSelector', () => {
   it('matchExpressions should add to the policy namespaceSelector spec', async() => {

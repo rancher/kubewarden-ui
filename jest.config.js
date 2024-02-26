@@ -27,5 +27,5 @@ module.exports = {
   coverageDirectory: '<rootDir>/coverage/unit',
   coverageReporters: ['json', 'text-summary'],
   preset:            '@vue/cli-plugin-unit-jest/presets/typescript-and-babel',
-  testEnvironment:   './tests/unit/FixJSDOMEnvironment.ts',
+  testEnvironment:   './tests/unit/_config_/FixJSDOMEnvironment.ts',
 };

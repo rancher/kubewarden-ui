@@ -6,7 +6,7 @@ import { describe, expect, it } from '@jest/globals';
 import Question from '@kubewarden/components/Questions/index.vue';
 import SequenceType from '@kubewarden/components/Questions/SequenceTree.vue';
 
-import { question, deepSequenceQuestion } from '../../templates/questions';
+import { question, deepSequenceQuestion } from '@tests/unit/_templates_/questions';
 
 function getGroups(flattenedQuestions) {
   const map = {};
