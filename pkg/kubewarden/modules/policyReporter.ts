@@ -1,31 +1,43 @@
+import { Store } from 'vuex';
+import semver from 'semver';
 import isEmpty from 'lodash/isEmpty';
+
 import { randomStr } from '@shell/utils/string';
+
 import {
-  KUBEWARDEN, Severity, Result, PolicyReport, PolicyReportResult, PolicyReportSummary, WG_POLICY_K8S
+  KUBEWARDEN, CatalogApp, Severity, Result, PolicyReport, PolicyReportResult, PolicyReportSummary, WG_POLICY_K8S
 } from '../types';
 import * as coreTypes from '../core/core-resources';
 import { createKubewardenRoute } from '../utils/custom-routing';
 import { splitGroupKind } from './core';
+import { fetchControllerApp } from './kubewardenController';
 
 /**
  * Attempts to fetch PolicyReports by dispatching a findAll against `wgpolicyk8s.io.policyreport`
  * @param store
  * @returns `PolicyReport[] | void` - Scaffolded value of a PolicyReport accomplished by scaffoldPolicyReport()
  */
-export async function getPolicyReports(store: any): Promise<PolicyReport[] | void> {
+export async function getPolicyReports(store: Store<any>): Promise<PolicyReport[] | void> {
   const schema = store.getters['cluster/schemaFor'](WG_POLICY_K8S.POLICY_REPORT.TYPE);
+  let controllerApp: CatalogApp | undefined = store.getters['kubewarden/controllerApp'];
 
-  if ( schema ) {
-    try {
-      const reports = await fetchPolicyReports(store);
+  if ( !controllerApp ) {
+    controllerApp = await fetchControllerApp(store);
+  }
 
-      if ( !isEmpty(reports) ) {
-        reports?.forEach((report: PolicyReport) => store.dispatch('kubewarden/updatePolicyReports', report));
+  if ( schema && controllerApp ) {
+    if ( controllerAppCompatible(controllerApp) ) {
+      try {
+        const reports = await fetchPolicyReports(store);
 
-        return reports;
+        if ( !isEmpty(reports) ) {
+          reports?.forEach((report: PolicyReport) => store.dispatch('kubewarden/updatePolicyReports', report));
+
+          return reports;
+        }
+      } catch (e) {
+        console.warn(`Error fetching PolicyReports: ${ e }`); // eslint-disable-line no-console
       }
-    } catch (e) {
-      console.warn(`Error fetching PolicyReports: ${ e }`); // eslint-disable-line no-console
     }
   }
 }
@@ -35,7 +47,7 @@ export async function getPolicyReports(store: any): Promise<PolicyReport[] | voi
  * @param store
  * @returns `PolicyReport[] | void`
  */
-export async function fetchPolicyReports(store: any): Promise<Array<PolicyReport>> {
+export async function fetchPolicyReports(store: Store<any>): Promise<Array<PolicyReport>> {
   return await store.dispatch('cluster/findMatching', {
     type:     WG_POLICY_K8S.POLICY_REPORT.TYPE,
     selector: 'app.kubernetes.io/managed-by=kubewarden'
@@ -48,7 +60,7 @@ export async function fetchPolicyReports(store: any): Promise<Array<PolicyReport
  * @param resource
  * @returns `PolicyReportSummary | null | void`
  */
-export function getFilteredSummary(store: any, resource: any): PolicyReportSummary | null | void {
+export function getFilteredSummary(store: Store<any>, resource: any): PolicyReportSummary | null | void {
   const schema = store.getters['cluster/schemaFor'](resource.type);
 
   if ( schema ) {
@@ -95,7 +107,7 @@ export function getFilteredSummary(store: any, resource: any): PolicyReportSumma
  * @param resource
  * @returns `PolicyReport | PolicyReportResult[] | null | void`
  */
-export async function getFilteredReports(store: any, resource: any): Promise<PolicyReport[] | PolicyReportResult[] | null | void> {
+export async function getFilteredReports(store: Store<any>, resource: any): Promise<PolicyReport[] | PolicyReportResult[] | null | void> {
   const schema = store.getters['cluster/schemaFor'](resource?.type);
 
   if ( schema ) {
@@ -146,7 +158,7 @@ export async function getFilteredReports(store: any, resource: any): Promise<Pol
  * @param report: `PolicyReportResult`
  * @returns `createKubewardenRoute` | Will return a route to either a ClusterAdmissionPolicy or AdmissionPolicy
  */
-export function getLinkForPolicy(store: any, report: PolicyReportResult): Object | void {
+export function getLinkForPolicy(store: Store<any>, report: PolicyReportResult): Object | void {
   if ( report?.policy ) {
     const apSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.ADMISSION_POLICY);
     const capSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
@@ -276,4 +288,14 @@ export function colorForSeverity(severity: Severity): string {
   default:
     return 'bg-muted';
   }
+}
+
+/**
+ * Determines if the kubewarden-controller app has a compatible version for PolicyReports,
+ * this requires a version `>= 1.11`
+ * @param controllerApp
+ * @returns boolean
+ */
+export function controllerAppCompatible(controllerApp: CatalogApp) {
+  return semver.gte(controllerApp?.spec?.chart?.metadata?.appVersion, '1.11.0');
 }

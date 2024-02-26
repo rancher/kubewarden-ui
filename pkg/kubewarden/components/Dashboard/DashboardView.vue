@@ -12,17 +12,19 @@ import ResourceManager from '@shell/mixins/resource-manager';
 
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 import Loading from '@shell/components/Loading';
+import { Banner } from '@components/Banner';
 
 import { DASHBOARD_HEADERS } from '../../config/table-headers';
 import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_LABELS } from '../../types';
 import { handleGrowl } from '../../utils/handle-growl';
+import { controllerAppCompatible } from '../../modules/policyReporter';
 
 import DefaultsBanner from '../DefaultsBanner';
 import Card from './Card';
 
 export default {
   components: {
-    Card, ConsumptionGauge, DefaultsBanner, Loading
+    Banner, Card, ConsumptionGauge, DefaultsBanner, Loading
   },
 
   mixins: [ResourceManager],
@@ -238,6 +240,14 @@ export default {
 
     showPreRelease() {
       return this.$store.getters['prefs/get'](SHOW_PRE_RELEASE);
+    },
+
+    policyReportsCompatible() {
+      if ( this.controllerApp ) {
+        return controllerAppCompatible(this.controllerApp);
+      }
+
+      return null;
     }
   },
 
@@ -374,6 +384,14 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else class="dashboard">
+    <Banner
+      v-if="controllerApp && !policyReportsCompatible"
+      :label="t('kubewarden.dashboard.policyReports.incompatible', { version: controllerApp.spec?.chart?.metadata?.appVersion }, true)"
+      color="warning"
+      class="mb-40"
+      data-testid="kw-dashboard-pr-incompatible-banner"
+    />
+
     <div class="head">
       <div class="head-title">
         <h1 data-testid="kw-dashboard-title">
