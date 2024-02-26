@@ -3,7 +3,7 @@ import { RancherCommonPage } from './rancher/rancher-common.page'
 import { RancherExtensionsPage } from './rancher/rancher-extensions.page'
 import { AppVersion, KubewardenPage } from './pages/kubewarden.page'
 import { PolicyServersPage } from './pages/policyservers.page'
-import { apList, capList } from './pages/policies.page'
+import { apList, capList, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherFleetPage } from './rancher/rancher-fleet.page'
 
@@ -135,26 +135,44 @@ test('03b Install Kubewarden by Fleet', async({ page, ui }) => {
 })
 
 test('05 Whitelist Artifact Hub', async({ page, ui, nav }) => {
-  const policyCards = page.getByTestId(/^kw-grid-subtype-card/)
+  const cap = new ClusterAdmissionPoliciesPage(page)
 
-  await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
-  await ui.button('Create').click()
+  await test.step('Whitelist ArtifactHub', async() => {
+    await nav.capolicy()
+    await ui.button('Create').click()
+    await expect(cap.cards({ name: 'Custom Policy' })).toBeVisible()
+    await expect(cap.cards()).toHaveCount(1)
+    await cap.whitelist()
+  })
 
-  // Check counts before ArtifactHub
-  await expect(page.getByRole('heading', { name: 'Custom Policy' })).toBeVisible()
-  await expect(policyCards).toHaveCount(1)
+  await test.step('Check Official policies', async() => {
+    // CAP
+    await nav.capolicy()
+    await ui.button('Create').click()
+    await expect(cap.cards()).toHaveCount(capList.length)
+    await expect(cap.cards({ signed: true, official: true })).toHaveCount(capList.length - 1) // -1 for Custom Policy
+    // AP
+    await nav.apolicy()
+    await ui.button('Create').click()
+    await expect(cap.cards()).toHaveCount(apList.length)
+    await expect(cap.cards({ signed: true, official: true })).toHaveCount(apList.length - 1) // -1 for Custom Policy
+  })
 
-  // Whitelist ArtifactHub
-  await expect(page.getByText('Official Kubewarden policies are hosted on ArtifactHub')).toBeVisible()
-  await ui.button('Add ArtifactHub To Whitelist').click()
-
-  // Check counts after ArtifactHub
-  await expect(page.getByRole('heading', { name: 'Pod Privileged Policy' })).toBeVisible()
-  await expect(policyCards).toHaveCount(capList.length)
-
-  await nav.explorer('Kubewarden', 'AdmissionPolicies')
-  await ui.button('Create').click()
-  await expect(policyCards).toHaveCount(apList.length)
+  await test.step('Check User policies', async() => {
+    await nav.capolicy()
+    await ui.button('Create').click()
+    // Custom Policy is unofficial & unsigned
+    await expect(cap.cards({ signed: false })).toHaveCount(1)
+    await expect(cap.cards({ official: false })).toHaveCount(1)
+    // Display User policies
+    await ui.button('Deselect Kubewarden Developers').click()
+    await expect(cap.cards().nth(capList.length)).toBeVisible()
+    // Check User policies
+    const extraCount = await cap.cards().count() - capList.length
+    expect(extraCount, 'Extra policies should be visible').toBeGreaterThanOrEqual(1)
+    await expect(cap.cards({ official: false }), 'Extra policies should be unofficial').toHaveCount(extraCount + 1)
+    await expect(cap.cards({ official: true }), 'Official count should not change').toHaveCount(capList.length - 1)
+  })
 })
 
 test('06 Upgrade Kubewarden', async({ page, nav, shell }) => {

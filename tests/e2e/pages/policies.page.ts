@@ -55,6 +55,24 @@ export abstract class BasePolicyPage extends BasePage {
       this.auditGroup = this.ui.radioGroup('Background Audit')
     }
 
+    cards = (options?: {name?: policyTitle, signed?: boolean, official?: boolean, aware?: boolean, mutation?: boolean }): Locator => {
+      let cards = this.page.getByTestId(/^kw-grid-subtype-card/)
+      if (options?.name) cards = cards.filter({ has: this.page.getByRole('heading', { name: options.name, exact: true }) })
+
+      const optionMap: Partial<Record<keyof NonNullable<typeof options>, Locator>> = {
+        signed  : this.page.locator('div.subtype__signed').locator('i.icon-lock'),
+        official: this.page.locator('div.subtype__icon').getByAltText('Official Kubewarden Policy'),
+        aware   : this.page.locator('div.subtype__aware').getByText('Context Aware'),
+        mutation: this.page.locator('div.subtype__mutation').getByText('Mutation'),
+      }
+      for (const o in optionMap) {
+        if (options && options[o] !== undefined) {
+          cards = options[o] ? cards.filter({ has: optionMap[o] }) : cards.filter({ hasNot: optionMap[o] })
+        }
+      }
+      return cards
+    }
+
     mode(mode: 'Monitor' | 'Protect'): Locator {
       return this.modeGroup.getByRole('radio', { name: mode })
     }
@@ -88,6 +106,11 @@ export abstract class BasePolicyPage extends BasePage {
       await this.audit(state).check()
     }
 
+    async whitelist() {
+      await expect(this.page.getByText('Official Kubewarden policies are hosted on ArtifactHub')).toBeVisible()
+      await this.ui.button('Add ArtifactHub To Whitelist').click()
+    }
+
     @step
     async open(p: Policy, options?: { navigate?: boolean }) {
       if (options?.navigate !== false) {
@@ -97,7 +120,7 @@ export abstract class BasePolicyPage extends BasePage {
       await expect(this.page.getByRole('heading', { name: 'Finish: Step 1' })).toBeVisible()
       // Open requested policy
       await this.ui.withReload(async() => {
-        await this.page.getByRole('heading', { name: p.title, exact: true }).click()
+        await this.cards({ name: p.title }).click()
       }, 'Could not get policy list from artifacthub')
       // Go to values tab, skip optional readme
       await this.page.getByRole('tab', { name: 'Values' }).click()
