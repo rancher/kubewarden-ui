@@ -1,7 +1,7 @@
 import { test, expect } from './rancher/rancher-test'
 import { RancherCommonPage } from './rancher/rancher-common.page'
 import { RancherExtensionsPage } from './rancher/rancher-extensions.page'
-import { KubewardenPage } from './pages/kubewarden.page'
+import { AppVersion, KubewardenPage } from './pages/kubewarden.page'
 import { PolicyServersPage } from './pages/policyservers.page'
 import { apList, capList } from './pages/policies.page'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
@@ -9,7 +9,18 @@ import { RancherFleetPage } from './rancher/rancher-fleet.page'
 
 // source (yarn dev) | rc (add github repo) | released (just install)
 const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
-const FLEET = !!process.env.FLEET
+// Use Fleet to install Kubewarden instead of UI extension
+const FLEET = !!process.env.FLEET && process.env.FLEET !== 'false'
+// Install first version on the list. Then upgrade to the latest one.
+const UPGRADE = !!process.env.UPGRADE && process.env.UPGRADE !== 'false'
+
+// Known Kubewarden versions for UPGRADE test, start at [0]
+// Skip defaults version checks - it's not auto updated
+const upMap: AppVersion[] = [
+  { app: 'v1.8.0', controller: '2.0.0', crds: '1.4.2', defaults: '1.8.0' },
+  { app: 'v1.9.0', controller: '2.0.5', crds: '1.4.4' }, // defaults: '1.9.2'
+  { app: 'v1.10.0', controller: '2.0.8', crds: '1.4.5' }, // defaults: '1.9.3'
+]
 
 test('00 Initial rancher setup', async({ page, ui, nav }) => {
   const rancher = new RancherCommonPage(page)
@@ -24,6 +35,8 @@ test('00 Initial rancher setup', async({ page, ui, nav }) => {
     await ui.tableRow('local').toBeActive()
     // Enable extension developer features
     await rancher.setExtensionDeveloperFeatures(true)
+    // Enable RC Helm Charts
+    await rancher.setHelmCharts('Include Prerelease Versions')
   })
 
   await test.step('Cluster setup', async() => {
@@ -73,7 +86,7 @@ test('03a Install Kubewarden', async({ page, ui, nav, context }) => {
   // Setting clipboard-write on model is broken, probably playwright issue
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   const kwPage = new KubewardenPage(page)
-  await kwPage.installKubewarden()
+  await kwPage.installKubewarden({ version: UPGRADE ? upMap[0].controller : undefined })
   await context.clearPermissions()
 
   // Check UI is active
@@ -96,12 +109,13 @@ test('03a Install Kubewarden', async({ page, ui, nav, context }) => {
     await expect(page).toHaveURL(/.*\/apps\/charts\/install.*chart=kubewarden-defaults/)
 
     // Handle PolicyServer Installer Dialog
-    await psPage.installDefault({ recommended: true, mode: 'monitor' })
+    await psPage.installDefault({ version: UPGRADE ? upMap[0].defaults : undefined, recommended: true, mode: 'monitor' })
   })
 })
 
 test('03b Install Kubewarden by Fleet', async({ page, ui }) => {
   test.skip(!FLEET)
+  test.setTimeout(15 * 60_000)
 
   const fleetPage = new RancherFleetPage(page)
   const repoRow = await fleetPage.addRepository({
@@ -115,6 +129,7 @@ test('03b Install Kubewarden by Fleet', async({ page, ui }) => {
   })
 
   await ui.withReload(async() => {
+    await fleetPage.selectWorkspace('fleet-local')
     await expect(repoRow.column('Clusters Ready')).toHaveText('1/1', { timeout: 7 * 60_000 })
   }, 'Installed but not refreshed?')
 })
@@ -140,4 +155,41 @@ test('05 Whitelist Artifact Hub', async({ page, ui, nav }) => {
   await nav.explorer('Kubewarden', 'AdmissionPolicies')
   await ui.button('Create').click()
   await expect(policyCards).toHaveCount(apList.length)
+})
+
+test('06 Upgrade Kubewarden', async({ page, nav, shell }) => {
+  test.skip(!UPGRADE)
+
+  const kwPage = new KubewardenPage(page)
+  const apps = new RancherAppsPage(page)
+
+  // Keep track of last upgraded version
+  let last: AppVersion = upMap[upMap.length - 1]
+
+  await test.step('Upgrade predefined versions', async() => {
+    for (let i = 0; i < upMap.length - 1; i++) {
+      await nav.kubewarden()
+      await kwPage.upgrade({ from: upMap[i], to: upMap[i + 1] })
+    }
+  })
+
+  await test.step('Upgrade unknown versions', async() => {
+    let next: AppVersion|null
+    while ((next = await kwPage.getUpgrade()) !== null) {
+      await kwPage.upgrade({ from: last, to: next })
+      last = next
+    }
+    // Check there are no more upgrades
+    await expect(kwPage.currentVer).toContainText(`App Version: ${last.app}`)
+    await expect(kwPage.upgradeVer).not.toBeVisible()
+  })
+
+  await test.step('Upgrade Policy Server', async() => {
+    // Update to last known version or latest one
+    await apps.updateApp('rancher-kubewarden-defaults', { version: last.defaults || 0 })
+    // Check resources are online and with right versions
+    await nav.explorer('Apps', 'Installed Apps')
+    await apps.checkChart('rancher-kubewarden-defaults', last.defaults)
+    await shell.waitPods()
+  })
 })

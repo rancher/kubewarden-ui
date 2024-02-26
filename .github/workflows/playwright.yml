@@ -23,6 +23,11 @@ on:
         - source
         - rc
         - released
+      upgrade:
+        description: Test Kubewarden Upgrade
+        type: boolean
+        default: false
+        required: true
       fleet:
         description: Install by Fleet
         type: boolean
@@ -62,6 +67,7 @@ on:
   schedule:
     - cron: "0 2 * * *" # Manual
     - cron: "0 3 * * *" # Fleet
+    - cron: "0 4 * * *" # Upgrade
 
 env:
   # Github -> Secrets and variables -> Actions -> New repository variable
@@ -147,6 +153,7 @@ jobs:
         RANCHER_PSP=$(kubectl version -o json | jq -r '.serverVersion.minor <= "24"')
 
         helm repo add --force-update rancher-latest https://releases.rancher.com/server-charts/latest
+        helm repo add --force-update rancher-prime https://charts.rancher.com/server-charts/prime
         helm search repo rancher-latest/rancher ${RANCHER:+--version "$RANCHER"}
         helm upgrade --install rancher rancher-latest/rancher --wait \
             --namespace cattle-system --create-namespace \
@@ -196,6 +203,7 @@ jobs:
         yarn playwright test ${TFILTER:-} -x
       env:
         FLEET: ${{ github.event.schedule == '0 3 * * *' || inputs.fleet }}
+        UPGRADE: ${{ github.event.schedule == '0 4 * * *' || inputs.upgrade }}
         TESTFILTER: ${{inputs.testfilter}}
         RANCHER_URL: https://${{env.RANCHER_FQDN}}
         ORIGIN: ${{ env.KUBEWARDEN }}
