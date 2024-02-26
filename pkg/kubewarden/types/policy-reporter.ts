@@ -7,11 +7,13 @@ export const POLICY_REPORTER_REPO = 'https://kyverno.github.io/policy-reporter';
 
 export const POLICY_REPORTER_CHART = 'policy-reporter';
 
-export type Resource = {
+export interface Resource {
   apiVersion: string;
+  fieldPath?: string;
   kind: string;
   name: string;
   namespace?: string;
+  resourceVersion: string;
   uid: string;
 }
 
@@ -33,7 +35,7 @@ export enum Result {
 }
 /* eslint-enable no-unused-vars */
 
-export type PolicyReportSummary = {
+export interface PolicyReportSummary {
   pass?: number;
   fail?: number;
   warn?: number;
@@ -41,23 +43,32 @@ export type PolicyReportSummary = {
   skip?: number;
 }
 
-export type PolicyReportResult = {
-  message: string;
-  policy: string;
-  rule: string;
-  priority?: string;
-  status?: string;
-  source?: string;
-  severity?: string;
+export interface PolicyReportResult {
   category?: string;
+  message?: string;
+  policy: string;
   properties?: {[key: string]: string};
-  scored: boolean;
-  result?: string;
+  resourceSelector?: {
+    matchExpressions?: {
+      key: string;
+      operator: string;
+      values?: string[];
+    };
+    matchLabels?: {[key: string]: string};
+  };
   resources?: Resource[];
-  uid?: string;
+  result?: Result;
+  rule?: string;
+  scored?: boolean;
+  severity?: Severity;
+  source?: string;
+  timestamp?: {
+    nanos: number;
+    seconds: number;
+  }
 }
 
-export type PolicyReport = {
+export interface PolicyReport {
   apiVersion: string;
   id: string;
   kind: string;
@@ -65,7 +76,10 @@ export type PolicyReport = {
   metadata: Metadata;
   results?: Array<PolicyReportResult>
   scope?: {
-    name?: string;
+    apiVersion: string;
+    kind: string;
+    name: string;
+    namespace?: string;
     uid?: string;
   }
   summary?: PolicyReportSummary

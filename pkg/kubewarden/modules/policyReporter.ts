@@ -1,7 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
 import { randomStr } from '@shell/utils/string';
 import {
-  KUBEWARDEN, Resource, Severity, Result, PolicyReport, PolicyReportResult, PolicyReportSummary
+  KUBEWARDEN, Severity, Result, PolicyReport, PolicyReportResult, PolicyReportSummary, WG_POLICY_K8S
 } from '../types';
 import * as coreTypes from '../core/core-resources';
 import { createKubewardenRoute } from '../utils/custom-routing';
@@ -13,7 +13,7 @@ import { splitGroupKind } from './core';
  * @returns `PolicyReport[] | void` - Scaffolded value of a PolicyReport accomplished by scaffoldPolicyReport()
  */
 export async function getPolicyReports(store: any): Promise<PolicyReport[] | void> {
-  const schema = store.getters['cluster/schemaFor'](KUBEWARDEN.POLICY_REPORT);
+  const schema = store.getters['cluster/schemaFor'](WG_POLICY_K8S.POLICY_REPORT.TYPE);
 
   if ( schema ) {
     try {
@@ -36,11 +36,14 @@ export async function getPolicyReports(store: any): Promise<PolicyReport[] | voi
  * @returns `PolicyReport[] | void`
  */
 export async function fetchPolicyReports(store: any): Promise<Array<PolicyReport>> {
-  return await store.dispatch('cluster/findAll', { type: KUBEWARDEN.POLICY_REPORT }, { root: true });
+  return await store.dispatch('cluster/findMatching', {
+    type:     WG_POLICY_K8S.POLICY_REPORT.TYPE,
+    selector: 'app.kubernetes.io/managed-by=kubewarden'
+  }, { root: true });
 }
 
 /**
- * Filters PolicyReports to return a summary of the results per namespace
+ * Filters PolicyReports to return a summary of the report determined by the scope.
  * @param store
  * @param resource
  * @returns `PolicyReportSummary | null | void`
@@ -52,58 +55,35 @@ export function getFilteredSummary(store: any, resource: any): PolicyReportSumma
     const reports = store.getters['kubewarden/policyReports'];
 
     if ( !isEmpty(reports) ) {
-      const hasNamespace = resource?.metadata?.namespace;
+      let filtered: PolicyReportResult[] | undefined;
 
-      if ( hasNamespace ) {
-        let filtered: PolicyReportResult[] | undefined;
+      // Find the report that is scoped to the resource name
+      if ( Array.isArray(reports) && reports.length ) {
+        reports.forEach((report: any) => {
+          if ( report.scope?.name === resource.metadata.name ) {
+            filtered = report.results;
+          }
+        });
+      }
 
-        // Find the report that is scoped to the resource namespace
-        if ( Array.isArray(reports) ) {
-          reports.forEach((report: any) => {
-            if ( report.scope?.name === resource.metadata.namespace ) {
-              const filteredResult = report.results?.filter((result: PolicyReportResult) => {
-                const filteredResource = result?.resources?.find((r: Resource) => {
-                  const { kind, name, namespace } = r;
+      if ( !isEmpty(filtered) ) {
+        const out: PolicyReportSummary = {
+          pass:  0,
+          fail:  0,
+          warn:  0,
+          error: 0,
+          skip:  0
+        };
 
-                  if ( kind === resource.kind && name === resource.metadata.name && namespace === resource.metadata.namespace ) {
-                    return r;
-                  }
-                });
+        filtered?.forEach((r: PolicyReportResult) => {
+          const resultVal = r.result;
 
-                if ( !isEmpty(filteredResource) ) {
-                  // Assign uid for SortableTable sub-row
-                  Object.assign(result, { uid: randomStr() });
+          if ( resultVal ) {
+            (out as any)[resultVal]++;
+          }
+        });
 
-                  return result;
-                }
-              });
-
-              if ( !isEmpty(filteredResult) ) {
-                filtered = filteredResult;
-              }
-            }
-          });
-        }
-
-        if ( !isEmpty(filtered) ) {
-          const out: PolicyReportSummary = {
-            pass:  0,
-            fail:  0,
-            warn:  0,
-            error: 0,
-            skip:  0
-          };
-
-          filtered?.forEach((r: PolicyReportResult) => {
-            const resultVal = r.result;
-
-            if ( resultVal ) {
-              (out as any)[resultVal]++;
-            }
-          });
-
-          return out;
-        }
+        return out;
       }
     }
   }
@@ -115,66 +95,43 @@ export function getFilteredSummary(store: any, resource: any): PolicyReportSumma
  * @param resource
  * @returns `PolicyReport | PolicyReportResult[] | null | void`
  */
-export async function getFilteredReports(store: any, resource: any): Promise<PolicyReport | PolicyReportResult[] | null | void> {
-  const schema = store.getters['cluster/schemaFor'](resource.type);
+export async function getFilteredReports(store: any, resource: any): Promise<PolicyReport[] | PolicyReportResult[] | null | void> {
+  const schema = store.getters['cluster/schemaFor'](resource?.type);
 
   if ( schema ) {
     try {
       const reports = await getPolicyReports(store);
 
       if ( !isEmpty(reports) ) {
-        const hasNamespace = resource?.metadata?.namespace;
-
-        // If the resource is a namespace, return the all reports for the ns
+        // If the resource is of type `namespace`, return the all reports for the ns
         if ( resource?.type === 'namespace' ) {
-          let out: PolicyReport | undefined | null = null;
+          let outReports: PolicyReport[] = [];
 
           if ( Array.isArray(reports) ) {
-            out = reports.find((report: PolicyReport) => report.scope?.name === resource?.name);
+            outReports = reports.filter((report: PolicyReport) => report.scope?.namespace === resource?.name);
           }
 
-          if ( !isEmpty(out) ) {
-            // Assign uid for SortableTable sub-row
-            out.results?.forEach((result: any) => {
-              Object.assign(result, { uid: randomStr() });
-            });
-
-            return out;
-          }
+          return outReports;
         }
 
-        if ( hasNamespace ) {
-          let out: PolicyReportResult[] | null = null;
+        let outResults: PolicyReportResult[] = [];
 
-          // Find the report that is scoped to the resource namespace
-          if ( Array.isArray(reports) ) {
-            reports.forEach((report: any) => {
-              if ( report.scope?.name === resource.metadata.namespace ) {
-                const filteredResult = report.results?.filter((result: PolicyReportResult) => {
-                  const filteredResource = result?.resources?.find((r: Resource) => {
-                    const { kind, name, namespace } = r;
+        // Find the report that is scoped to the resource name
+        if ( Array.isArray(reports) ) {
+          reports.forEach((report: any) => {
+            if ( report.scope?.name === resource.metadata.name ) {
+              outResults = report.results;
+            }
+          });
 
-                    if ( kind === resource.kind && name === resource.metadata.name && namespace === resource.metadata.namespace ) {
-                      return r;
-                    }
-                  });
-
-                  if ( !isEmpty(filteredResource) ) {
-                    // Assign uid for SortableTable sub-row
-                    Object.assign(result, { uid: randomStr() });
-
-                    return result;
-                  }
-                });
-
-                if ( !isEmpty(filteredResult) ) {
-                  out = filteredResult;
-                }
-              }
+          if ( !isEmpty(outResults) ) {
+            // Assign uid for SortableTable sub-row
+            outResults?.forEach((report: any) => {
+              Object.assign(report, { uid: randomStr() });
             });
-          }
 
-          return out;
+            return outResults;
+          }
         }
       }
     } catch (e) {
@@ -241,12 +198,12 @@ export function getLinkForPolicy(store: any, report: PolicyReportResult): Object
  * not passed in from the report, it needs to be determined by the `kind` of the resource. For core
  * resources this works as is, but for non-core resources (e.g. `apps.deployments`), this is extrapolated
  * by the `apiVersion` combined with the `kind`.
- * @param report: `PolicyReportResult
+ * @param report: `PolicyReport
  * @returns `Route | void`
  */
-export function getLinkForResource(report: PolicyReportResult): Object | void {
-  if ( !isEmpty(report.resources?.[0]) ) {
-    const resource = report.resources?.[0];
+export function getLinkForResource(report: PolicyReport): Object | void {
+  if ( !isEmpty(report.scope) ) {
+    const resource = report.scope;
 
     if ( resource ) {
       const isCore = Object.values(coreTypes).find(type => resource.kind === type.attributes.kind);

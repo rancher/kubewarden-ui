@@ -23,18 +23,14 @@ export const KUBEWARDEN_LABELS = { POLICY_SERVER: 'kubewarden/policy-server' };
 export const KUBEWARDEN = {
   ADMISSION_POLICY:         'policies.kubewarden.io.admissionpolicy',
   CLUSTER_ADMISSION_POLICY: 'policies.kubewarden.io.clusteradmissionpolicy',
-  POLICY_SERVER:            'policies.kubewarden.io.policyserver',
-  POLICY_REPORT:            'wgpolicyk8s.io.policyreport',
-  CLUSTER_POLICY_REPORT:    'wgpolicyk8s.io.clusterpolicyreport'
+  POLICY_SERVER:            'policies.kubewarden.io.policyserver'
 };
 
 /* eslint-disable no-unused-vars */
 export enum KUBEWARDEN_CRD {
   ADMISSION_POLICY = 'admissionpolicies.policies.kubewarden.io',
   CLUSTER_ADMISSION_POLICY = 'clusteradmissionpolicies.policies.kubewarden.io',
-  POLICY_SERVER = 'policyservers.policies.kubewarden.io',
-  POLICY_REPORT = 'policyreports.wgpolicyk8s.io',
-  CLUSTER_POLICY_REPORT = 'clusterpolicyreports.wgpolicyk8s.io'
+  POLICY_SERVER = 'policyservers.policies.kubewarden.io'
 }
 /* eslint-enable no-unused-vars */
 
