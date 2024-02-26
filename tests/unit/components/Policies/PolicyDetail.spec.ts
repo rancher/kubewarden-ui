@@ -1,6 +1,6 @@
 import { ARTIFACTHUB_PKG_ANNOTATION } from '@kubewarden/types';
 
-import { createWrapper } from '@tests/unit/utils/wrapper';
+import { createWrapper } from '@tests/unit/_utils_/wrapper';
 import PolicyDetail from '@kubewarden/components/Policies/PolicyDetail.vue';
 
 const commonMocks = { $fetchState: { pending: false } };

@@ -8,8 +8,8 @@ import { KUBEWARDEN } from '@kubewarden/types';
 import PolicyGrid from '@kubewarden/components/Policies/PolicyGrid.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 
-import policyPackages from '../../templates/policyPackages.js';
-import schemas from '../../templates/schemas.js';
+import policyPackages from '@tests/unit/_templates_/policyPackages.js';
+import schemas from '@tests/unit/_templates_/schemas.js';
 
 const defaultComputed = { allSchemas: jest.fn() };
 const defaultMocks = {

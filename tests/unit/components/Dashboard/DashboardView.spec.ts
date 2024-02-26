@@ -5,8 +5,8 @@ import DashboardView from '@kubewarden/components/Dashboard/DashboardView.vue';
 import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 
-import DEFAULTS_APP from '../../templates/defaultsApp';
-import PS_POD from '../../templates/policyServerPod';
+import DEFAULTS_APP from '@tests/unit/_templates_/defaultsApp';
+import PS_POD from '@tests/unit/_templates_/policyServerPod';
 
 describe('component: DashboardView', () => {
   const commonMocks = {

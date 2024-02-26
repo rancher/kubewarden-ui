@@ -8,8 +8,8 @@ import Settings from '@kubewarden/chart/kubewarden/admission/Settings.vue';
 import Questions from '@kubewarden/components/Questions/index.vue';
 
 import { DEFAULT_POLICY, KUBEWARDEN } from '@kubewarden/types';
-import policyConfig from '../../templates/policyConfig';
-import { question } from '../../templates/questions';
+import policyConfig from '@tests/unit/_templates_/policyConfig';
+import { question } from '@tests/unit/_templates_/questions';
 
 describe('component: Admission', () => {
   it('settings component should be shown when custom policy', () => {

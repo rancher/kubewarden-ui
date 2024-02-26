@@ -2,11 +2,11 @@ import { describe, expect, it } from '@jest/globals';
 import jsyaml from 'js-yaml';
 
 import { KUBEWARDEN } from '@kubewarden/types';
-import { createWrapper } from '@tests/unit/utils/wrapper';
+import { createWrapper } from '@tests/unit/_utils_/wrapper';
 
 import Create from '@kubewarden/components/Policies/Create.vue';
 
-import policyPackages from '@tests/unit/templates/policyPackages';
+import policyPackages from '@tests/unit/_templates_/policyPackages';
 
 function mockParsePackageMetadata(data) {
   if (data) {
