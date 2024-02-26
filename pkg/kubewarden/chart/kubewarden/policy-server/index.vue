@@ -144,11 +144,11 @@ export default {
       let isSeccompProfileValid = true;
 
       ['container', 'pod'].forEach((type) => {
-        const seccompProfileContainerCheck = this.chartValues?.spec?.securityContexts?.[type]?.seccompProfile || {};
-        const objKeys = Object.keys(seccompProfileContainerCheck);
+        const seccompProfileCheck = this.chartValues?.spec?.securityContexts?.[type]?.seccompProfile || {};
+        const objKeys = Object.keys(seccompProfileCheck);
 
-        if ((objKeys.includes('type') && !seccompProfileContainerCheck.type) ||
-         (objKeys.includes('type') && seccompProfileContainerCheck.type === SECCOMP_OPTIONS.LOCALHOST && !seccompProfileContainerCheck.localhostProfile)) {
+        if ((objKeys.includes('type') && !seccompProfileCheck.type) ||
+         (objKeys.includes('type') && seccompProfileCheck.type === SECCOMP_OPTIONS.LOCALHOST && !seccompProfileCheck.localhostProfile)) {
           isSeccompProfileValid = false;
         }
       });
