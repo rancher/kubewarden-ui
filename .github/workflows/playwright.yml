@@ -1,4 +1,5 @@
 name: Playwright Tests
+run-name: ${{ github.workflow }}${{ github.event.schedule == '0 4 * * *' || inputs.upgrade && ' - Upgrade' ||''}}${{ github.event.schedule == '0 3 * * *' || inputs.fleet && ' - Fleet' || ''}}
 
 on:
   workflow_dispatch:
