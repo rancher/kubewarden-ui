@@ -14,7 +14,6 @@ describe('component: DashboardView', () => {
     $store:      {
       getters: {
         currentCluster:                  () => 'current_cluster',
-        currentProduct:                  () => 'current_product',
         'kubewarden/hideBannerDefaults': jest.fn(),
         'i18n/t':                        jest.fn(),
         'catalog/chart':                 jest.fn(),

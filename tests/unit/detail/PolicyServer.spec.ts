@@ -47,7 +47,6 @@ describe('component: PolicyServer', () => {
         $store:      {
           getters: {
             currentCluster:                  () => 'current_cluster',
-            currentProduct:                  () => 'current_product',
             'current_product/all':           jest.fn(),
             'i18n/t':                        jest.fn(),
             'kubewarden/policyTraces':       () => TraceTestData
@@ -108,7 +107,6 @@ describe('component: PolicyServer', () => {
         $store:      {
           getters: {
             currentCluster:                  () => 'current_cluster',
-            currentProduct:                  () => 'current_product',
             'current_product/all':           jest.fn(),
             'i18n/t':                        jest.fn(),
             'kubewarden/policyTraces':       () => TraceTestData

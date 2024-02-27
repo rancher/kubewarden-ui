@@ -29,7 +29,7 @@ export default {
   },
 
   async fetch() {
-    await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: 'apigroup' });
+    await this.$store.dispatch('cluster/findAll', { type: 'apigroup' });
 
     this.contextAwareResources = [];
 
@@ -43,10 +43,8 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduct']),
-
     apiGroups() {
-      return this.$store.getters[`${ this.currentProduct.inStore }/all`]('apigroup');
+      return this.$store.getters['cluster/all']('apigroup');
     },
 
     /** Return the group ID and groupVersion for each apiGroup */

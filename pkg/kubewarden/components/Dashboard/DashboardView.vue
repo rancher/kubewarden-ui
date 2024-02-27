@@ -28,7 +28,6 @@ export default {
   mixins: [ResourceManager],
 
   async fetch() {
-    const inStore = this.currentProduct.inStore;
     const hash = {};
     const types = [
       KUBEWARDEN.ADMISSION_POLICY,
@@ -39,8 +38,8 @@ export default {
     ];
 
     for ( const type of types ) {
-      if ( this.$store.getters[`${ inStore }/canList`](type) ) {
-        hash[type] = this.$store.dispatch(`${ inStore }/findAll`, { type });
+      if ( this.$store.getters['cluster/canList'](type) ) {
+        hash[type] = this.$store.dispatch('cluster/findAll', { type });
       }
     }
 
@@ -68,7 +67,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentCluster', 'currentProduct']),
+    ...mapGetters(['currentCluster']),
     ...mapGetters({ charts: 'catalog/charts' }),
 
     allApps() {
