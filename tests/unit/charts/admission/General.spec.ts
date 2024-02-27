@@ -9,14 +9,14 @@ import General from '@kubewarden/chart/kubewarden/admission/General.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import { RadioGroup } from '@components/Form/Radio';
 
-import policyConfig from '@tests/unit/_templates_/policyConfig';
+import { userGroupPolicy } from '@tests/unit/_templates_/policyConfig';
 
 describe('component: General', () => {
   it('should display the PolicyServer options if available', () => {
     const ps = [{ id: 'default' }, { id: 'custom-ps' }];
 
     const wrapper = shallowMount(General as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData: { targetNamespace: 'default', value: { policy: policyConfig } },
+      propsData: { targetNamespace: 'default', value: { policy: userGroupPolicy } },
       provide:   { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
       computed:  {
         policyServers:       () => ps,
@@ -47,7 +47,7 @@ describe('component: General', () => {
 
   it('monitor mode should be protect by default', async() => {
     const wrapper = shallowMount(General as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData: { targetNamespace: 'default', value: { policy: policyConfig } },
+      propsData: { targetNamespace: 'default', value: { policy: userGroupPolicy } },
       provide:   { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
       computed:  { policyServerOptions: () => ['default', 'custom-ps'], isGlobal: () => true },
       mocks:     {

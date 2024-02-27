@@ -1,8 +1,6 @@
 import {
-  V1SecurityContext, V1PodSecurityContext, V1ObjectMeta, V1EnvVar, V1LabelSelector
+  V1SecurityContext, V1PodSecurityContext, V1ObjectMeta, V1EnvVar, V1LabelSelector, V1Condition
 } from '@kubernetes/client-node';
-
-import { Condition } from './core';
 
 export const KUBEWARDEN_PRODUCT_NAME = 'kubewarden';
 export const KUBEWARDEN_PRODUCT_GROUP = 'policies.kubewarden.io';
@@ -72,13 +70,13 @@ export interface PolicyServer {
     serviceAccountName?: string;
   };
   status: {
-    conditions: Array<Condition>;
+    conditions: Array<V1Condition>;
   };
 }
 
-export type Policy = {
-  id: string;
-  type: string;
+export interface Policy {
+  id?: string;
+  type?: string;
   links?: {
     remove?: string;
     self?: string;
@@ -91,7 +89,7 @@ export type Policy = {
   spec: {
     backgroundAudit?: boolean;
     matchPolicy?: string;
-    mode: string;
+    mode?: string;
     module: string;
     mutating?: boolean;
     namespaceSelector?: V1LabelSelector;
@@ -103,8 +101,8 @@ export type Policy = {
     sideEffects?: string;
     timeoutSeconds?: number;
   };
-  status: {
-    conditions: Array<Condition>;
+  status?: {
+    conditions: Array<V1Condition>;
     mode: string;
     policyStatus: string;
   }

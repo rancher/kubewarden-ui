@@ -6,7 +6,7 @@ import { createWrapper } from '@tests/unit/_utils_/wrapper';
 
 import Create from '@kubewarden/components/Policies/Create.vue';
 
-import policyPackages from '@tests/unit/_templates_/policyPackages';
+import { policyPackages } from '@tests/unit/_templates_/policyPackages';
 
 function mockParsePackageMetadata(data) {
   if (data) {

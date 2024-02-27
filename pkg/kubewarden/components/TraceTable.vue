@@ -26,8 +26,8 @@ dayjs.extend(relativeTime);
 export default {
   props: {
     resource: {
-      type:     String,
-      required: true
+      type:    String,
+      default: () => ''
     },
     relatedPolicies: {
       type:    Array,

@@ -27,6 +27,7 @@ import {
 import { removeEmptyAttrs } from '../../utils/object';
 import { handleGrowl } from '../../utils/handle-growl';
 
+import { DATA_ANNOTATIONS } from '../../types/artifacthub';
 import PolicyGrid from './PolicyGrid';
 import Values from './Values';
 
@@ -356,7 +357,7 @@ export default ({
       }
 
       const policyDetails = this.packages.find(pkg => pkg.repository?.url === this.type?.repository?.url);
-      const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.['kubewarden/questions-ui']);
+      const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.[DATA_ANNOTATIONS.QUESTIONS]);
       const packageAnnotation = `${ policyDetails.repository.name }/${ policyDetails.name }/${ policyDetails.version }`;
       /** Return spec from package if annotation exists */
       const parseAnnotation = (annotation, obj) => {
@@ -384,9 +385,9 @@ export default ({
         metadata:   { annotations: { [ARTIFACTHUB_PKG_ANNOTATION]: packageAnnotation } },
         spec:       {
           module:                policyDetails.containers_images[0].image,
-          contextAwareResources: parseAnnotation('kubewarden/contextAwareResources', 'contextAwareResources'),
-          rules:                 parseAnnotation('kubewarden/rules', 'rules'),
-          mutating:              determineAnnotation('kubewarden/mutation')
+          contextAwareResources: parseAnnotation(DATA_ANNOTATIONS.CONTEXT_AWARE, 'contextAwareResources'),
+          rules:                 parseAnnotation(DATA_ANNOTATIONS.RULES, 'rules'),
+          mutating:              determineAnnotation(DATA_ANNOTATIONS.MUTATION)
         }
       };
 
