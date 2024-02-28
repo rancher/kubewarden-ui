@@ -1,4 +1,7 @@
-export const DEFAULT_POLICY = {
+import { V1LabelSelectorRequirement } from '@kubernetes/client-node';
+import { Policy } from './kubewarden';
+
+export const DEFAULT_POLICY: Policy = {
   apiVersion: '',
   kind:       '',
   metadata:   {
@@ -64,7 +67,7 @@ export const RANCHER_NAMESPACES = [
   'tigera-operator',
 ];
 
-export const RANCHER_NS_MATCH_EXPRESSION = {
+export const RANCHER_NS_MATCH_EXPRESSION: V1LabelSelectorRequirement = {
   key:      'kubernetes.io/metadata.name',
   operator: 'NotIn',
   values:   RANCHER_NAMESPACES,

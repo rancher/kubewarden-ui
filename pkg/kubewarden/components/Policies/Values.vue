@@ -24,7 +24,7 @@ export default {
     },
     chartValues: {
       type:     Object,
-      required: true
+      default:  () => {}
     },
     customPolicy: {
       type:    Boolean,

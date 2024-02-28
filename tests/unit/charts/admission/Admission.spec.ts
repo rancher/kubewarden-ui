@@ -8,7 +8,7 @@ import Settings from '@kubewarden/chart/kubewarden/admission/Settings.vue';
 import Questions from '@kubewarden/components/Questions/index.vue';
 
 import { DEFAULT_POLICY, KUBEWARDEN } from '@kubewarden/types';
-import policyConfig from '@tests/unit/_templates_/policyConfig';
+import { userGroupPolicy } from '@tests/unit/_templates_/policyConfig';
 import { question } from '@tests/unit/_templates_/questions';
 
 describe('component: Admission', () => {
@@ -30,7 +30,7 @@ describe('component: Admission', () => {
     const wrapper = shallowMount(Admission as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData: {
         customPolicy: false,
-        value:        { policy: policyConfig, questions: {} }
+        value:        { policy: userGroupPolicy, questions: {} }
       },
       provide: { chartType: KUBEWARDEN.ADMISSION_POLICY },
 
@@ -45,7 +45,7 @@ describe('component: Admission', () => {
     const wrapper = shallowMount(Admission as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData: {
         customPolicy: false,
-        value:        { policy: policyConfig, questions: { questions: question } }
+        value:        { policy: userGroupPolicy, questions: { questions: question } }
       },
       provide: { chartType: KUBEWARDEN.ADMISSION_POLICY },
     });

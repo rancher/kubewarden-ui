@@ -37,8 +37,8 @@ export default {
     },
 
     value: {
-      type:     Object,
-      required: true,
+      type:    Object,
+      default: () => {},
     },
   },
 
