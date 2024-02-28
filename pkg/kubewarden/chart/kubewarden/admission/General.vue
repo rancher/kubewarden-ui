@@ -44,7 +44,7 @@ export default {
   },
 
   async fetch() {
-    await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: KUBEWARDEN.POLICY_SERVER });
+    await this.$store.dispatch('cluster/findAll', { type: KUBEWARDEN.POLICY_SERVER });
 
     if ( this.isCreate && !isEmpty(this.policy.spec) ) {
       set(this.policy.spec, 'mode', 'protect');
@@ -88,8 +88,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduct']),
-
     isCreate() {
       return this.mode === _CREATE;
     },
@@ -112,7 +110,7 @@ export default {
     },
 
     policyServers() {
-      return this.$store.getters[`${ this.currentProduct.inStore }/all`](KUBEWARDEN.POLICY_SERVER);
+      return this.$store.getters['cluster/all'](KUBEWARDEN.POLICY_SERVER);
     },
 
     policyServerOptions() {

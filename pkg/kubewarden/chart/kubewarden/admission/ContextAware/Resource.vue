@@ -40,10 +40,9 @@ export default {
   watch: { 'value.apiVersion': 'clearKind' },
 
   computed: {
-    ...mapGetters(['currentProduct']),
 
     allSchemas() {
-      return this.$store.getters[`${ this.currentProduct.inStore }/all`](SCHEMA);
+      return this.$store.getters['cluster/all'](SCHEMA);
     },
 
     isCreate() {

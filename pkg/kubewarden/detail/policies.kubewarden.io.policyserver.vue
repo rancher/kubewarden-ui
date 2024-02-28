@@ -68,7 +68,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentCluster', 'currentProduct']),
+    ...mapGetters(['currentCluster']),
     ...mapGetters({ policyTraces: 'kubewarden/policyTraces' }),
     _group: mapPref(GROUP_RESOURCES),
 

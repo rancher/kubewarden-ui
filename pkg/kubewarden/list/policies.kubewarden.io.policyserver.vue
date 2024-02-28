@@ -28,11 +28,11 @@ export default {
   },
 
   async fetch() {
-    await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: this.resource });
+    await this.$store.dispatch('cluster/findAll', { type: this.resource });
     await this.$store.dispatch('catalog/load');
 
     if ( !this.hideBannerDefaults ) {
-      this.apps = await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: CATALOG.APP });
+      this.apps = await this.$store.dispatch('cluster/findAll', { type: CATALOG.APP });
     }
   },
 
@@ -41,7 +41,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduct']),
 
     defaultsApp() {
       return this.apps?.find((a) => {
@@ -54,7 +53,7 @@ export default {
     },
 
     rows() {
-      return this.$store.getters[`${ this.currentProduct.inStore }/all`](this.resource);
+      return this.$store.getters['cluster/all'](this.resource);
     }
   }
 };

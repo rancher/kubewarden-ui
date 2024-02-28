@@ -19,15 +19,14 @@ import {
 
 export default class KubewardenModel extends SteveModel {
   async allServices() {
-    const inStore = this.$rootGetters['currentProduct'].inStore;
-    const services = this.$rootGetters[`${ inStore }/all`](SERVICE);
+    const services = this.$rootGetters['cluster/all'](SERVICE);
 
     if ( !isEmpty(services) ) {
       return services;
     }
 
     return await this.$dispatch(
-      `${ inStore }/findAll`,
+      'cluster/findAll',
       { type: SERVICE },
       { root: true }
     );

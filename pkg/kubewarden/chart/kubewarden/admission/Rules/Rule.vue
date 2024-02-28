@@ -94,7 +94,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduct']),
 
     filteredGroups() {
       return this.chartType === KUBEWARDEN.ADMISSION_POLICY ? this.namespacedGroups : this.apiGroups;

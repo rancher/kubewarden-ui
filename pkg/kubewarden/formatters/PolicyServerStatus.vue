@@ -18,14 +18,13 @@ export default {
   },
 
   async fetch() {
-    await this.$store.dispatch(`${ this.currentProduct.inStore }/findAll`, { type: WORKLOAD_TYPES.DEPLOYMENT });
+    await this.$store.dispatch('cluster/findAll', { type: WORKLOAD_TYPES.DEPLOYMENT });
   },
 
   computed: {
-    ...mapGetters(['currentProduct']),
 
     allDeployments() {
-      return this.$store.getters[`${ this.currentProduct.inStore }/all`](WORKLOAD_TYPES.DEPLOYMENT);
+      return this.$store.getters['cluster/all'](WORKLOAD_TYPES.DEPLOYMENT);
     },
 
     deployment() {

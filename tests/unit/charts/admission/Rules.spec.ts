@@ -18,12 +18,7 @@ describe('component: Rules', () => {
       },
       propsData: { value: { policy: policyConfig } },
       provide:   { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
-      computed:  {
-        currentProduct: () => {
-          return { inStore: 'cluster' };
-        },
-        apiGroups: () => []
-      },
+      computed:  { apiGroups: () => [] },
       mocks:     {
         $fetchState: { pending: false },
         $store:      {

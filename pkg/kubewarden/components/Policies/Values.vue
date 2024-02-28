@@ -126,8 +126,7 @@ export default {
 
   methods: {
     generateYaml() {
-      const inStore = this.$store.getters['currentStore'](this.value);
-      const schemas = this.$store.getters[`${ inStore }/all`](SCHEMA);
+      const schemas = this.$store.getters['cluster/all'](SCHEMA);
       const cloned = this.chartValues?.policy ? structuredClone(this.chartValues.policy) : this.value;
 
       if ( this.yamlValues?.length ) {

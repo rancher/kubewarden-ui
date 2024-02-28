@@ -49,12 +49,11 @@ export default {
     this.reloadReady = false;
 
     if ( !this.hasSchema ) {
-      const inStore = this.currentProduct.inStore;
       const hash = [];
       const listTypes = [SERVICE, CATALOG.CLUSTER_REPO];
 
       listTypes.forEach((type) => {
-        if ( this.$store.getters[`${ inStore }/canList`](type) ) {
+        if ( this.$store.getters['cluster/canList'](type) ) {
           hash.push(this.$fetchType(type));
         }
       });
@@ -119,7 +118,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentCluster', 'currentProduct']),
+    ...mapGetters(['currentCluster']),
     ...mapGetters({
       charts: 'catalog/charts', repos: 'catalog/repos', t: 'i18n/t'
     }),
@@ -129,7 +128,7 @@ export default {
     },
 
     certService() {
-      return this.$store.getters[`${ this.currentProduct.inStore }/all`](SERVICE).find(s => s.metadata?.labels?.['app'] === 'cert-manager');
+      return this.$store.getters['cluster/all'](SERVICE).find(s => s.metadata?.labels?.['app'] === 'cert-manager');
     },
 
     controllerChart() {
