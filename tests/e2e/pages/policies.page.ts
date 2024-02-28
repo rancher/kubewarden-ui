@@ -10,7 +10,7 @@ export const apList = ['Custom Policy', 'Allow Privilege Escalation PSP', 'Allow
   'Safe Annotations', 'Safe Labels', 'Seccomp PSP', 'Selinux PSP', 'Sysctl PSP', 'Trusted Repos', 'User Group PSP', 'Verify Image Signatures', 'volumeMounts', 'Volumes PSP', 'Unique Ingress host',
   'Unique service selector'] as const // WIP: 'CEL Policy'
 
-export const capList = [...apList, 'PSA Label Enforcer']
+export const capList = [...apList, 'PSA Label Enforcer'] as const
 
 export type policyTitle = typeof capList[number]
 export type PolicyKind = 'AdmissionPolicy' | 'ClusterAdmissionPolicy'

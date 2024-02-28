@@ -156,14 +156,19 @@ test('05 Whitelist Artifact Hub', async({ page, ui, nav }) => {
     await ui.button('Create').click()
     await expect(cap.cards()).toHaveCount(apList.length)
     await expect(cap.cards({ signed: true, official: true })).toHaveCount(apList.length - 1) // -1 for Custom Policy
+
+    // Only Custom Policy is unofficial & unsigned
+    await expect(cap.cards({ signed: false })).toHaveCount(1)
+    await expect(cap.cards({ official: false })).toHaveCount(1)
+    await expect(cap.cards({ name: 'Custom Policy', signed: false, official: false })).toBeVisible()
+    // We have context-aware and mutating policy
+    await expect(cap.cards({ aware: true }).first()).toBeVisible()
+    await expect(cap.cards({ mutation: true }).first()).toBeVisible()
   })
 
   await test.step('Check User policies', async() => {
     await nav.capolicy()
     await ui.button('Create').click()
-    // Custom Policy is unofficial & unsigned
-    await expect(cap.cards({ signed: false })).toHaveCount(1)
-    await expect(cap.cards({ official: false })).toHaveCount(1)
     // Display User policies
     await ui.button('Deselect Kubewarden Developers').click()
     await expect(cap.cards().nth(capList.length)).toBeVisible()
