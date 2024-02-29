@@ -1,14 +1,13 @@
 <script>
 import { mapGetters } from 'vuex';
-import isEmpty from 'lodash/isEmpty';
 import semver from 'semver';
+import isEmpty from 'lodash/isEmpty';
 
-import { CATALOG, POD, WORKLOAD_TYPES } from '@shell/config/types';
-import { KUBERNETES, CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
+import { CATALOG, POD } from '@shell/config/types';
+import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 import { allHash } from '@shell/utils/promise';
-import ResourceManager from '@shell/mixins/resource-manager';
 
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 import Loading from '@shell/components/Loading';
@@ -24,8 +23,6 @@ export default {
   components: {
     Card, ConsumptionGauge, DefaultsBanner, Loading
   },
-
-  mixins: [ResourceManager],
 
   async fetch() {
     const hash = {};
@@ -44,10 +41,10 @@ export default {
     }
 
     await allHash(hash);
-    await this.$store.dispatch('catalog/refresh');
 
-    this.secondaryResourceData = this.secondaryResourceDataConfig();
-    this.resourceManagerFetchSecondaryResources(this.secondaryResourceData);
+    if ( isEmpty(this.charts) ) {
+      await this.$store.dispatch('catalog/load');
+    }
   },
 
   data() {
@@ -57,12 +54,7 @@ export default {
 
     return {
       DASHBOARD_HEADERS,
-      colorStops,
-
-      controllerDeployment:  null,
-      deployments:           null,
-      psPods:                [],
-      secondaryResourceData: this.secondaryResourceDataConfig(),
+      colorStops
     };
   },
 
@@ -185,8 +177,8 @@ export default {
       return this.getPolicyGauges(this.namespacedPolicies);
     },
 
-    version() {
-      return this.controllerDeployment?.metadata?.labels?.['app.kubernetes.io/version'];
+    appVersion() {
+      return this.controllerApp?.spec?.chart?.metadata?.appVersion;
     },
 
     upgradeAvailable() {
@@ -241,24 +233,6 @@ export default {
   },
 
   methods: {
-    secondaryResourceDataConfig() {
-      return {
-        namespace: this.controllerDeployment?.metadata?.namespace,
-        data:      {
-          [WORKLOAD_TYPES.DEPLOYMENT]: {
-            applyTo: [
-              {
-                var:         'controllerDeployment',
-                parsingFunc: (data) => {
-                  return data.find(deploy => deploy?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === KUBEWARDEN_CHARTS.CONTROLLER);
-                }
-              }
-            ]
-          }
-        }
-      };
-    },
-
     getPolicyGauges(type) {
       if ( !isEmpty(type) ) {
         return type?.reduce((policy, neu) => {
@@ -379,9 +353,9 @@ export default {
           {{ t('kubewarden.dashboard.intro') }}
         </h1>
 
-        <div v-if="version" class="head-version-container">
+        <div v-if="appVersion" class="head-version-container">
           <div class="head-version bg-primary mr-10">
-            {{ t('kubewarden.dashboard.upgrade.appVersion') }}: {{ version }}
+            {{ t('kubewarden.dashboard.upgrade.appVersion') }}: {{ appVersion }}
           </div>
           <div
             v-if="upgradeAvailable"

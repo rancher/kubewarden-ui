@@ -1,4 +1,4 @@
-export default {
+export const policyServerPod: any = {
   id:         'cattle-kubewarden-system/policy-server-default-7f59869c46-wjg4v',
   type:       'pod',
   apiVersion: 'v1',
