@@ -6,7 +6,6 @@ import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 
 import DEFAULTS_APP from '@tests/unit/_templates_/defaultsApp';
-import PS_POD from '@tests/unit/_templates_/policyServerPod';
 
 describe('component: DashboardView', () => {
   const commonMocks = {
@@ -30,7 +29,6 @@ describe('component: DashboardView', () => {
     controllerChart:    () => null,
     defaultsApp:        () => DEFAULTS_APP,
     hideBannerDefaults: () => false,
-    policyServerPods:   () => [PS_POD],
     globalPolicies:     () => [],
     namespacedPolicies: () => [],
     version:            () => '1.25',
@@ -134,15 +132,13 @@ describe('component: DashboardView', () => {
     ];
 
     const wrapper = createWrapper({
-      data() {
-        return { psPods: pods };
-      },
-      stubs: { DefaultsBanner: { template: '<span />' } }
+      computed: { policyServerPods: () => pods },
+      stubs:    { DefaultsBanner: { template: '<span />' } }
     });
 
     const gauges = wrapper.findAllComponents(ConsumptionGauge);
 
-    expect(gauges.at(0).props().capacity).toStrictEqual([PS_POD].length as Number);
+    expect(gauges.at(0).props().capacity).toStrictEqual(pods.length as Number);
     expect(gauges.at(0).props().used).toStrictEqual(1 as Number);
   });
 
