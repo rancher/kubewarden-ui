@@ -296,6 +296,8 @@ export function colorForSeverity(severity: Severity): string {
  * @param controllerApp
  * @returns boolean
  */
-export function controllerAppCompatible(controllerApp: CatalogApp) {
-  return semver.gte(controllerApp?.spec?.chart?.metadata?.appVersion, '1.11.0');
+export function controllerAppCompatible(controllerApp: CatalogApp): Boolean | void {
+  if ( controllerApp?.spec?.chart?.metadata?.appVersion ) {
+    return semver.gte(controllerApp.spec.chart.metadata.appVersion, '1.11.0');
+  }
 }
