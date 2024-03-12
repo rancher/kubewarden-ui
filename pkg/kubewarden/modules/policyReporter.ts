@@ -331,7 +331,6 @@ export function colorForSeverity(severity: Severity): string {
  * @returns Object
  */
 export function newPolicyReportCompatible(controllerAppVersion: string, uiPluginVersion: string): Object | void {
-  uiPluginVersion = '1.4.0';
   if (semver.gte(uiPluginVersion, '1.4.0')) {
     return {
       oldSPolicyReports: semver.gte(controllerAppVersion, '1.11.0'),
