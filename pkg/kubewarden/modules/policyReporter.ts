@@ -1,4 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
+import semver from 'semver';
 import { randomStr } from '@shell/utils/string';
 import {
   KUBEWARDEN, Resource, Severity, Result, PolicyReport, PolicyReportResult, PolicyReportSummary
@@ -319,4 +320,34 @@ export function colorForSeverity(severity: Severity): string {
   default:
     return 'bg-muted';
   }
+}
+
+/**
+ * Determines if the kubewarden-controller app has a compatible version for PolicyReports,
+ * for kubewarden-controller version `>= 1.11` it requires an extension version of `>= 1.4.0`
+ * for kubewarden-controller version `<= 1.10` it requires an extension version of `< 1.4.0`
+ * @param string
+ * @param string
+ * @returns Object
+ */
+export function newPolicyReportCompatible(controllerAppVersion: string, uiPluginVersion: string): Object | void {
+  uiPluginVersion = '1.4.0';
+  if (semver.gte(uiPluginVersion, '1.4.0')) {
+    return {
+      oldSPolicyReports: semver.gte(controllerAppVersion, '1.11.0'),
+      newPolicyReports:  true
+    };
+  }
+
+  if (semver.lt(uiPluginVersion, '1.4.0')) {
+    return {
+      oldSPolicyReports: true,
+      newPolicyReports:  semver.lte(controllerAppVersion, '1.10.0')
+    };
+  }
+
+  return {
+    oldSPolicyReports: true,
+    newPolicyReports:  true
+  };
 }

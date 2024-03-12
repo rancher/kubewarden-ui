@@ -15,6 +15,9 @@ kubewarden:
       chart: Chart
       appVersion: App Version
       appUpgrade: App Upgrade
+    policyReports:
+      oldPolicyReportsIncompatible: 'Policy Reports are incompatible with the Kubewarden Controller version: {version}, please upgrade the Kubewarden Controller to version v1.11.0 or greater.'
+      newPolicyReportsIncompatible: 'Policy Reports are incompatible with the Kubewarden Extension version: {version}, please upgrade your Kubewarden Extension to version v1.4.0 or greater.'
     headers:
       policyServer:
         title: Policy Servers
