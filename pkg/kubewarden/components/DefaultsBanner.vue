@@ -74,7 +74,7 @@ export default {
       }
     },
 
-    async chartRoute() {
+    chartRoute() {
       if ( !this.defaultsChart ) {
         try {
           this.debouncedRefreshCharts();

@@ -1,6 +1,7 @@
 import * as policyReporterModule from '@kubewarden/modules/policyReporter.ts';
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN, CatalogApp } from '@kubewarden/types';
 import { mockPolicyReport } from '../_templates_/policyReports';
+import { mockControllerApp } from '../_templates_/controllerApp';
 
 // Mocking lodash's isEmpty function
 jest.mock('lodash/isEmpty', () => ({
@@ -15,6 +16,7 @@ const mockStore = {
   getters: {
     'cluster/schemaFor':        jest.fn(),
     'kubewarden/policyReports': [mockPolicyReport],
+    'kubewarden/controllerApp': mockControllerApp
   },
   dispatch: jest.fn(),
 };
@@ -63,5 +65,31 @@ describe('getLinkForPolicy', () => {
       name:   expect.any(String),
       params: expect.objectContaining({ id: 'example-policy' })
     });
+  });
+});
+
+describe('controllerAppCompatible', () => {
+  it('should return true for a controller app version >= 1.11.0', () => {
+    const controllerApp: CatalogApp = { spec: { chart: { metadata: { appVersion: '1.11.0' } } } };
+
+    const result = policyReporterModule.controllerAppCompatible(controllerApp);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return true for a controller app version > 1.11.0', () => {
+    const controllerApp: CatalogApp = { spec: { chart: { metadata: { appVersion: '1.12.0' } } } };
+
+    const result = policyReporterModule.controllerAppCompatible(controllerApp);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false for a controller app version < 1.11.0', () => {
+    const controllerApp: CatalogApp = { spec: { chart: { metadata: { appVersion: '1.10.9' } } } };
+
+    const result = policyReporterModule.controllerAppCompatible(controllerApp);
+
+    expect(result).toBe(false);
   });
 });
