@@ -13,7 +13,7 @@ import { Banner } from '@components/Banner';
 
 import { handleGrowl } from '../../utils/handle-growl';
 import { rootKubewardenRoute } from '../../utils/custom-routing';
-import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS } from '../../types';
+import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '../../types';
 
 export default {
   components: { Banner, Loading },
@@ -61,11 +61,11 @@ export default {
     },
 
     hasClusterPolicyReportSchema() {
-      return this.$store.getters['cluster/schemaFor'](KUBEWARDEN.CLUSTER_POLICY_REPORT);
+      return this.$store.getters['cluster/schemaFor'](WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
     },
 
     hasPolicyReportSchema() {
-      return this.$store.getters['cluster/schemaFor'](KUBEWARDEN.POLICY_REPORT);
+      return this.$store.getters['cluster/schemaFor'](WG_POLICY_K8S.POLICY_REPORT.TYPE);
     },
 
     reporterCrds() {
