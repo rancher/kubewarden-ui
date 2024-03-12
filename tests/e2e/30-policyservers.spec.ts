@@ -1,8 +1,10 @@
+import semver from 'semver'
 import { test, expect } from './rancher/rancher-test'
 import { PolicyServersPage, PolicyServer } from './pages/policyservers.page'
 import { Policy, AdmissionPoliciesPage, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 
 const expect3m = expect.configure({ timeout: 3 * 60_000 })
+const UPGRADE = !!process.env.UPGRADE && process.env.UPGRADE !== 'false'
 
 test('Policy Servers', async({ page, ui, nav }) => {
   const server: PolicyServer = { name: 'test-policyserver' }
@@ -23,13 +25,34 @@ test('Policy Servers', async({ page, ui, nav }) => {
   })
 
   await test.step('Check Overview page', async() => {
-    await nav.pserver()
     // PS is active and has 2 policies
+    await nav.pserver()
     await expect3m(psRow.column('Status')).toHaveText('Active')
     await expect(psRow.column('Policies')).toHaveText('2')
-    // PS image is the same as default one
-    const defaultImage = await ui.tableRow('default').column('Image').textContent() || 'Empty'
-    await expect(psRow.column('Image')).toHaveText(defaultImage)
+
+    const defaultImage = (await ui.tableRow('default').column('Image').textContent())?.trim().split(':') || []
+    const createdImage = (await psRow.column('Image').textContent())?.trim().split(':') || []
+    const [dImg, dVer] = [defaultImage[0], semver.parse(defaultImage[1])]
+    const [cImg, cVer] = [createdImage[0], semver.parse(createdImage[1])]
+
+    // Validate parsed text is not empty
+    expect(cVer, `Invalid semver: ${cVer}`).not.toBeNull()
+    expect(dVer, `Invalid semver: ${dVer}`).not.toBeNull()
+    if (!cVer || !dVer || !cImg || !dImg) throw new Error('Should not happen')
+
+    // Validate image URLs
+    expect(cImg).toEqual(dImg)
+    expect(cImg).toContain('policy-server')
+
+    // Created PS should use released version
+    expect(cVer.prerelease.length).toBe(0)
+
+    // Default PS could be updated to latest rc
+    if (UPGRADE && dVer.prerelease.length > 0) {
+      expect(semver.lt(cVer, dVer)).toBeTruthy()
+    } else {
+      expect(semver.eq(cVer, dVer)).toBeTruthy()
+    }
   })
 
   await test.step('Check Details page', async() => {
