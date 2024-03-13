@@ -2,8 +2,9 @@
 import { mapGetters } from 'vuex';
 import semver from 'semver';
 import isEmpty from 'lodash/isEmpty';
+import { Banner } from '@components/Banner';
 
-import { CATALOG, POD } from '@shell/config/types';
+import { CATALOG, POD, UI_PLUGIN } from '@shell/config/types';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
@@ -11,9 +12,12 @@ import { allHash } from '@shell/utils/promise';
 
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 import Loading from '@shell/components/Loading';
+import { newPolicyReportCompatible } from '../../modules/policyReporter';
 
 import { DASHBOARD_HEADERS } from '../../config/table-headers';
-import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_LABELS } from '../../types';
+import {
+  KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_LABELS, KUBEWARDEN_PRODUCT_NAME
+} from '../../types';
 import { handleGrowl } from '../../utils/handle-growl';
 
 import DefaultsBanner from '../DefaultsBanner';
@@ -21,7 +25,7 @@ import Card from './Card';
 
 export default {
   components: {
-    Card, ConsumptionGauge, DefaultsBanner, Loading
+    Banner, Card, ConsumptionGauge, DefaultsBanner, Loading
   },
 
   async fetch() {
@@ -31,7 +35,8 @@ export default {
       KUBEWARDEN.CLUSTER_ADMISSION_POLICY,
       POD,
       CATALOG.APP,
-      CATALOG.CLUSTER_REPO
+      CATALOG.CLUSTER_REPO,
+      UI_PLUGIN
     ];
 
     for ( const type of types ) {
@@ -229,6 +234,26 @@ export default {
 
     showPreRelease() {
       return this.$store.getters['prefs/get'](SHOW_PRE_RELEASE);
+    },
+
+    kubewardenExtension() {
+      const extensionsInstalled = this.$store.getters['uiplugins/plugins'] || [];
+
+      return extensionsInstalled.find(ext => ext.id === KUBEWARDEN_PRODUCT_NAME);
+    },
+
+    policyReportsCompatible() {
+      const controllerAppVersion = this.controllerApp?.spec?.chart?.metadata?.appVersion;
+      const uiPluginVersion = this.kubewardenExtension?.version;
+
+      if ( controllerAppVersion && uiPluginVersion) {
+        return newPolicyReportCompatible(controllerAppVersion, uiPluginVersion);
+      }
+
+      return {
+        oldSPolicyReports: true,
+        newPolicyReports:  true
+      };
     }
   },
 
@@ -347,6 +372,20 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else class="dashboard">
+    <Banner
+      v-if="controllerApp && kubewardenExtension && !policyReportsCompatible.newPolicyReports"
+      :label="t('kubewarden.dashboard.policyReports.newPolicyReportsIncompatible', { version: kubewardenExtension?.version }, true)"
+      color="warning"
+      class="mb-40"
+      data-testid="kw-dashboard-pr-incompatible-banner-new-policy-structure"
+    />
+    <Banner
+      v-else-if="controllerApp && kubewardenExtension && !policyReportsCompatible.oldSPolicyReports"
+      :label="t('kubewarden.dashboard.policyReports.oldPolicyReportsIncompatible', { version: controllerApp.spec?.chart?.metadata?.appVersion }, true)"
+      color="warning"
+      class="mb-40"
+      data-testid="kw-dashboard-pr-incompatible-banner-old-policy-structure"
+    />
     <div class="head">
       <div class="head-title">
         <h1 data-testid="kw-dashboard-title">
