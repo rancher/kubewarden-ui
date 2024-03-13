@@ -37,10 +37,7 @@ export async function getPolicyReports(store: any): Promise<PolicyReport[] | voi
  * @returns `PolicyReport[] | void`
  */
 export async function fetchPolicyReports(store: any): Promise<Array<PolicyReport>> {
-  return await store.dispatch('cluster/findMatching', {
-    type:     WG_POLICY_K8S.POLICY_REPORT.TYPE,
-    selector: 'app.kubernetes.io/managed-by=kubewarden'
-  }, { root: true });
+  return await store.dispatch('cluster/findAll', { type: WG_POLICY_K8S.POLICY_REPORT.TYPE }, { root: true });
 }
 
 /**
@@ -61,7 +58,7 @@ export function getFilteredSummary(store: any, resource: any): PolicyReportSumma
       // Find the report that is scoped to the resource name
       if ( Array.isArray(reports) && reports.length ) {
         reports.forEach((report: any) => {
-          if ( report.scope?.name === resource.metadata.name ) {
+          if ( report.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'kubewarden' && report.metadata?.name === resource.metadata?.uid ) {
             filtered = report.results;
           }
         });
