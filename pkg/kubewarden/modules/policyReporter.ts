@@ -58,7 +58,7 @@ export function getFilteredSummary(store: any, resource: any): PolicyReportSumma
       // Find the report that is scoped to the resource name
       if ( Array.isArray(reports) && reports.length ) {
         reports.forEach((report: any) => {
-          if ( report.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'kubewarden' && report.metadata?.name === resource.metadata?.uid ) {
+          if ( report.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'kubewarden' && report.scope?.uid === resource.metadata?.uid ) {
             filtered = report.results;
           }
         });

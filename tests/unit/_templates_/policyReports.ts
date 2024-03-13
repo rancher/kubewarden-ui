@@ -8,7 +8,7 @@ export const mockResource: Resource = {
   name:            'example-pod',
   namespace:       'default',
   resourceVersion: '12345',
-  uid:             'uid123',
+  metadata:        { uid: 'mock-pod-uid' }
 };
 
 export const mockPolicyReportResult: PolicyReportResult = {
@@ -27,7 +27,10 @@ export const mockPolicyReport: PolicyReport = {
   id:         'policyreport-123',
   kind:       'PolicyReport',
   metadata:   {
-    creationTimestamp: '2021-03-19T10:52:00Z', name: 'policyreport-123', namespace: 'default'
+    labels:            { 'app.kubernetes.io/managed-by': 'kubewarden' },
+    creationTimestamp: '2021-03-19T10:52:00Z',
+    name:              'policyreport-123',
+    namespace:         'default',
   },
   results:    [mockPolicyReportResult],
   scope:      {

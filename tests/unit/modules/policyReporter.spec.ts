@@ -37,7 +37,7 @@ describe('getPolicyReports', () => {
 
 describe('getFilteredSummary', () => {
   it('should correctly summarize policy report results', () => {
-    const resource = { type: 'pod', metadata: { name: 'mock-pod' } };
+    const resource = { type: 'pod', metadata: { name: 'mock-pod', uid: 'mock-pod-uid' } };
     const summary = policyReporterModule.getFilteredSummary(mockStore, resource);
 
     expect(summary).toEqual({
