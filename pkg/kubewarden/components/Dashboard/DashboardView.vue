@@ -251,7 +251,7 @@ export default {
       }
 
       return {
-        oldSPolicyReports: true,
+        oldPolicyReports: true,
         newPolicyReports:  true
       };
     }
@@ -380,7 +380,7 @@ export default {
       data-testid="kw-dashboard-pr-incompatible-banner-new-policy-structure"
     />
     <Banner
-      v-else-if="controllerApp && kubewardenExtension && !policyReportsCompatible.oldSPolicyReports"
+      v-else-if="controllerApp && kubewardenExtension && !policyReportsCompatible.oldPolicyReports"
       :label="t('kubewarden.dashboard.policyReports.oldPolicyReportsIncompatible', { version: controllerApp.spec?.chart?.metadata?.appVersion }, true)"
       color="warning"
       class="mb-40"
