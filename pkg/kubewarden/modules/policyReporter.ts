@@ -333,20 +333,20 @@ export function colorForSeverity(severity: Severity): string {
 export function newPolicyReportCompatible(controllerAppVersion: string, uiPluginVersion: string): Object | void {
   if (semver.gte(uiPluginVersion, '1.4.0')) {
     return {
-      oldSPolicyReports: semver.gte(controllerAppVersion, '1.11.0'),
+      oldPolicyReports: semver.gt(controllerAppVersion, '1.10.100'),
       newPolicyReports:  true
     };
   }
 
   if (semver.lt(uiPluginVersion, '1.4.0')) {
     return {
-      oldSPolicyReports: true,
-      newPolicyReports:  semver.lte(controllerAppVersion, '1.10.0')
+      oldPolicyReports: true,
+      newPolicyReports:  semver.lte(controllerAppVersion, '1.10.100')
     };
   }
 
   return {
-    oldSPolicyReports: true,
+    oldPolicyReports: true,
     newPolicyReports:  true
   };
 }
