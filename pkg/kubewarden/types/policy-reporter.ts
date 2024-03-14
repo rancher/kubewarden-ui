@@ -60,6 +60,13 @@ export interface PolicyReportResult {
   resources?: Resource[];
   result?: Result;
   rule?: string;
+  scope?: {
+    apiVersion: string;
+    kind: string;
+    name: string;
+    namespace?: string;
+    uid?: string;
+  },
   scored?: boolean;
   severity?: Severity;
   source?: string;

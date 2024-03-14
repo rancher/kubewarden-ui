@@ -284,10 +284,22 @@ export const POLICY_REPORTER_HEADERS = {
       sort:     'name'
     },
     {
-      name:     'summary',
-      labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.summary.label',
-      value:    'summary',
-      sort:     'summary'
+      name:     'policy',
+      labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.policy.label',
+      value:    'policy',
+      sort:     'policy'
     },
+    {
+      name:     'severity',
+      labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.severity.label',
+      value:    'severity',
+      sort:     'severity'
+    },
+    {
+      name:     'status',
+      labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.status.label',
+      value:    'status',
+      sort:     'result'
+    }
   ]
 };

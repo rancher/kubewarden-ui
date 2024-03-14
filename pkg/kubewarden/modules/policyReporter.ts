@@ -98,29 +98,37 @@ export async function getFilteredReports(store: any, resource: any): Promise<Pol
 
   if ( schema ) {
     try {
-      const reports = await getPolicyReports(store);
+      const reports:any = await getPolicyReports(store);
 
       if ( !isEmpty(reports) ) {
+        let outReports: PolicyReport[] = [];
+
         // If the resource is of type `namespace`, return the all reports for the ns
         if ( resource?.type === 'namespace' ) {
-          let outReports: PolicyReport[] = [];
-
           if ( Array.isArray(reports) ) {
             outReports = reports.filter((report: PolicyReport) => report.scope?.namespace === resource?.name);
           }
-
-          return outReports;
+        } else {
+          outReports = reports;
         }
 
         let outResults: PolicyReportResult[] = [];
 
         // Find the report that is scoped to the resource name
-        if ( Array.isArray(reports) ) {
-          reports.forEach((report: any) => {
-            if ( report.scope?.name === resource.metadata.name ) {
-              outResults = report.results;
-            }
-          });
+        if ( Array.isArray(outReports) ) {
+          if ( resource?.type === 'namespace' ) {
+            outReports.forEach((report: any) => {
+              report.results?.forEach((result: any) => {
+                outResults.push({ ...result, scope: report.scope });
+              });
+            });
+          } else {
+            outReports.forEach((report: any) => {
+              if ( report.scope?.name === resource.metadata.name ) {
+                outResults = report.results;
+              }
+            });
+          }
 
           if ( !isEmpty(outResults) ) {
             // Assign uid for SortableTable sub-row

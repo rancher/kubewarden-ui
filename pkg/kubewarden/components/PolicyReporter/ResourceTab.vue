@@ -17,8 +17,6 @@ import {
 import { splitGroupKind } from '../../modules/core';
 import * as coreTypes from '../../core/core-resources';
 
-import PolicyReportSummary from '../../formatters/PolicyReportSummary';
-
 export default {
   props: {
     resource: {
@@ -28,7 +26,7 @@ export default {
   },
 
   components: {
-    BadgeState, Banner, Loading, SortableTable, PolicyReportSummary
+    BadgeState, Banner, Loading, SortableTable
   },
 
   mixins: [ResourceFetch],
@@ -79,6 +77,10 @@ export default {
 
     isNamespaceResource() {
       return this.resource?.type === NAMESPACE;
+    },
+
+    tableHeaders() {
+      return this.isNamespaceResource ? this.namespaceHeaders : this.resourceHeaders;
     }
   },
 
@@ -148,22 +150,31 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-else class="pr-tab__container">
-    <template v-if="isNamespaceResource">
+    <template>
       <SortableTable
         :rows="reports"
-        :headers="namespaceHeaders"
+        :headers="tableHeaders"
         :table-actions="false"
         :row-actions="false"
         key-field="uid"
+        :sub-expandable="true"
+        :sub-expand-column="true"
+        :sub-rows="true"
         :paging="true"
         :rows-per-page="25"
         :extra-search-fields="['summary']"
         default-sort-by="status"
       >
-        <template #col:kind="{row}">
+        <template
+          v-if="isNamespaceResource"
+          #col:kind="{row}"
+        >
           <td>{{ getResourceValue(row, 'kind', true) }}</td>
         </template>
-        <template #col:name="{row}">
+        <template
+          v-if="isNamespaceResource"
+          #col:name="{row}"
+        >
           <td>
             <template v-if="canGetResourceLink(row)">
               <n-link :to="getResourceLink(row)">
@@ -176,29 +187,6 @@ export default {
           </td>
         </template>
 
-        <template #col:summary>
-          <td>
-            <PolicyReportSummary :value="resource" />
-          </td>
-        </template>
-      </SortableTable>
-    </template>
-
-    <template v-else>
-      <SortableTable
-        :rows="reports"
-        :headers="resourceHeaders"
-        :table-actions="false"
-        :row-actions="false"
-        key-field="uid"
-        :sub-expandable="true"
-        :sub-expand-column="true"
-        :sub-rows="true"
-        :paging="true"
-        :rows-per-page="25"
-        :extra-search-fields="['result']"
-        default-sort-by="status"
-      >
         <template #col:policy="{row}">
           <td v-if="row.policy && row.rule">
             <template v-if="canGetKubewardenLinks">
@@ -230,7 +218,10 @@ export default {
 
         <!-- Sub-rows -->
         <template #sub-row="{row, fullColspan}">
-          <td :colspan="fullColspan" class="pr-tab__sub-row">
+          <td
+            :colspan="fullColspan"
+            class="pr-tab__sub-row"
+          >
             <Banner v-if="row.message" color="info" class="message">
               <span class="text-muted">{{ t('kubewarden.policyReporter.headers.policyReportsTab.message.title') }}:</span>
               <span>{{ row.message }}</span>
