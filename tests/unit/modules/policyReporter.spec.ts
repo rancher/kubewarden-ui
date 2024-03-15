@@ -56,12 +56,22 @@ describe('getLinkForPolicy', () => {
       return type === KUBEWARDEN.CLUSTER_ADMISSION_POLICY || type === KUBEWARDEN.ADMISSION_POLICY;
     });
 
-    const report = { policy: 'cap-example-policy' };
-    const route = policyReporterModule.getLinkForPolicy(mockStore, report);
+    const report1 = { policy: 'clusterwide-example-policy', policyName: 'example-policy' };
+    const route1 = policyReporterModule.getLinkForPolicy(mockStore, report1);
 
-    expect(route).toMatchObject({
+    expect(route1).toMatchObject({
       name:   expect.any(String),
-      params: expect.objectContaining({ id: 'example-policy' })
+      params: expect.objectContaining({ id: 'example-policy', resource: 'policies.kubewarden.io.clusteradmissionpolicy' })
+    });
+
+    const report2 = {
+      policy: 'namespaced-something-example-policy', policyName: 'example-policy', namespace: 'something'
+    };
+    const route2 = policyReporterModule.getLinkForPolicy(mockStore, report2);
+
+    expect(route2).toMatchObject({
+      name:   expect.any(String),
+      params: expect.objectContaining({ id: 'example-policy', resource: 'policies.kubewarden.io.admissionpolicy' })
     });
   });
 });
