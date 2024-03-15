@@ -47,7 +47,9 @@ export interface PolicyReportSummary {
 export interface PolicyReportResult {
   category?: string;
   message?: string;
+  namespace?: string;
   policy: string;
+  policyName?: string;
   properties?: {[key: string]: string};
   resourceSelector?: {
     matchExpressions?: {

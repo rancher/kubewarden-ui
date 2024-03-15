@@ -112,20 +112,31 @@ export async function getFilteredReports(store: any, resource: any): Promise<Pol
           outReports = reports;
         }
 
-        let outResults: PolicyReportResult[] = [];
+        const outResults: PolicyReportResult[] = [];
 
         // Find the report that is scoped to the resource name
         if ( Array.isArray(outReports) ) {
           if ( resource?.type === 'namespace' ) {
             outReports.forEach((report: any) => {
               report.results?.forEach((result: any) => {
-                outResults.push({ ...result, scope: report.scope });
+                outResults.push({
+                  ...result,
+                  scope:      report.scope,
+                  namespace:  report.metadata?.namespace,
+                  policyName: result.properties?.['policy-name'],
+                });
               });
             });
           } else {
             outReports.forEach((report: any) => {
               if ( report.scope?.name === resource.metadata.name ) {
-                outResults = report.results;
+                report.results?.forEach((result: any) => {
+                  outResults.push({
+                    ...result,
+                    namespace:  report.metadata?.namespace,
+                    policyName: result.properties?.['policy-name'],
+                  });
+                });
               }
             });
           }
@@ -135,10 +146,10 @@ export async function getFilteredReports(store: any, resource: any): Promise<Pol
             outResults?.forEach((report: any) => {
               Object.assign(report, { uid: randomStr() });
             });
-
-            return outResults;
           }
         }
+
+        return outResults;
       }
     } catch (e) {
       console.warn(`Error fetching PolicyReports: ${ e }`); // eslint-disable-line no-console
@@ -157,35 +168,19 @@ export function getLinkForPolicy(store: any, report: PolicyReportResult): Object
     const apSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.ADMISSION_POLICY);
     const capSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
 
-    /**
-     * Split policy name as it is formatted like: 'cap-do-not-run-as-root'
-     * To determine which type of policy we need the first part of the string,
-     * 'cap' or 'ap' for ClusterAdmissionPolicy and AdmissionPolicy respectively.
-     */
     let policyType: string = '';
-    let policyParts: string[] = report.policy.split('-');
-    let policyNs: string | null = null;
 
-    if ( policyParts.length >= 2 ) {
-      policyParts = [policyParts[0], policyParts.slice(1).join('-')];
-      policyType = policyParts[0] === 'cap' ? KUBEWARDEN.CLUSTER_ADMISSION_POLICY : KUBEWARDEN.ADMISSION_POLICY;
+    const policyParts: string[] = report.policy?.split('-');
 
-      // Find the namespace of the AdmissionPolicy
-      if ( policyType === KUBEWARDEN.ADMISSION_POLICY && apSchema ) {
-        const admissionPolicies = store.getters['cluster/all'](KUBEWARDEN.ADMISSION_POLICY);
-        const resource = admissionPolicies?.find((ap: any) => ap.metadata?.name === policyParts[1]);
-
-        if ( resource ) {
-          policyNs = resource.metadata?.namespace;
-        }
-      }
+    if (policyParts?.length >= 2 ) {
+      policyType = policyParts[0] === 'clusterwide' ? KUBEWARDEN.CLUSTER_ADMISSION_POLICY : KUBEWARDEN.ADMISSION_POLICY;
     }
 
     if ( policyType === KUBEWARDEN.ADMISSION_POLICY && apSchema ) {
       return createKubewardenRoute({
         name:   'c-cluster-product-resource-namespace-id',
         params: {
-          resource: policyType, id: policyParts[1], namespace: policyNs
+          resource: policyType, id: report?.policyName, namespace: report.namespace
         }
       });
     }
@@ -193,7 +188,7 @@ export function getLinkForPolicy(store: any, report: PolicyReportResult): Object
     if ( policyType === KUBEWARDEN.CLUSTER_ADMISSION_POLICY && capSchema ) {
       return createKubewardenRoute({
         name:   'c-cluster-product-resource-id',
-        params: { resource: policyType, id: policyParts[1] }
+        params: { resource: policyType, id: report?.policyName }
       });
     }
   }

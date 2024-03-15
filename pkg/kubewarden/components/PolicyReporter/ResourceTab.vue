@@ -188,14 +188,14 @@ export default {
         </template>
 
         <template #col:policy="{row}">
-          <td v-if="row.policy && row.rule">
+          <td v-if="row.policy && row.policyName">
             <template v-if="canGetKubewardenLinks">
               <n-link :to="getPolicyLink(row)">
-                <span>{{ row.rule }}</span>
+                <span>{{ row.policyName }}</span>
               </n-link>
             </template>
             <template v-else>
-              <span>{{ row.rule }}</span>
+              <span>{{ row.policyName }}</span>
             </template>
           </td>
         </template>
@@ -218,14 +218,29 @@ export default {
 
         <!-- Sub-rows -->
         <template #sub-row="{row, fullColspan}">
-          <td
-            :colspan="fullColspan"
-            class="pr-tab__sub-row"
-          >
+          <td :colspan="fullColspan" class="pr-tab__sub-row">
             <Banner v-if="row.message" color="info" class="message">
               <span class="text-muted">{{ t('kubewarden.policyReporter.headers.policyReportsTab.message.title') }}:</span>
               <span>{{ row.message }}</span>
             </Banner>
+            <div class="details">
+              <section class="col">
+                <div class="title">
+                  {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.mutating') }}
+                </div>
+                <span>
+                  {{ row.properties['mutating'] || '-' }}
+                </span>
+              </section>
+              <section class="col">
+                <div class="title">
+                  {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.validating') }}
+                </div>
+                <span>
+                  {{ row.properties['validating'] || '-' }}
+                </span>
+              </section>
+            </div>
           </td>
         </template>
       </SortableTable>
