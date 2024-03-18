@@ -47,6 +47,14 @@ export class KubewardenPage extends BasePage {
     }
 
     @step
+    async getCurrentVersion(): Promise<AppVersion> {
+      await this.nav.kubewarden()
+      const verText = await this.currentVer.innerText()
+      const parts = verText.split(/\s+/)
+      return { app: parts[2] }
+    }
+
+    @step
     async getUpgrade(): Promise<AppVersion|null> {
       await this.nav.kubewarden()
       if (await this.upgradeVer.isVisible()) {

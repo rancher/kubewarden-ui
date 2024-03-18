@@ -214,6 +214,28 @@ test('06 Upgrade Kubewarden', async({ page, nav, shell }) => {
     // Check resources are online and with right versions
     await nav.explorer('Apps', 'Installed Apps')
     await apps.checkChart('rancher-kubewarden-defaults', last.defaults)
-    await shell.waitPods()
   })
+})
+
+// Extra test to validate audit scanner UI PRs
+test('06a Upgrade KW 1.10.0 to 1.11.0-rc', async({ page }) => {
+  test.skip(UPGRADE || FLEET || ORIGIN !== 'source')
+
+  const apps = new RancherAppsPage(page)
+  const kwPage = new KubewardenPage(page)
+
+  const current = (await kwPage.getCurrentVersion()).app
+  if (current === 'v1.10.0') {
+    await apps.updateApp('rancher-kubewarden-controller', { version: 0, yamlPatch: (y) => { y.auditScanner.image.tag = 'latest' } })
+    await apps.updateApp('rancher-kubewarden-defaults', { version: 0 })
+  }
+})
+
+test('09 Check resources are active', async({ page, nav, shell }) => {
+  const apps = new RancherAppsPage(page)
+  await nav.explorer('Apps', 'Installed Apps')
+  for (const chart of ['controller', 'crds', 'defaults']) {
+    await apps.checkChart(`rancher-kubewarden-${chart}`)
+  }
+  await shell.waitPods()
 })
