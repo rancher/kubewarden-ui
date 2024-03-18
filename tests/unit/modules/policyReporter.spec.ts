@@ -2,7 +2,7 @@ import * as policyReporterModule from '@kubewarden/modules/policyReporter.ts';
 import { KUBEWARDEN } from '@kubewarden/types';
 import { mockPolicyReport } from '../_templates_/policyReports';
 
-// Mocking lodash's isEmpty function
+// Mocking lodash's isEmpty function//
 jest.mock('lodash/isEmpty', () => ({
   __esModule: true,
   default:    jest.fn().mockImplementation(data => data.length === 0),
@@ -65,13 +65,15 @@ describe('getLinkForPolicy', () => {
     });
 
     const report2 = {
-      policy: 'namespaced-something-example-policy', policyName: 'example-policy', namespace: 'something'
+      policy: 'namespaced-something-example-policy', policyName: 'example-policy', properties: { 'policy-namespace': 'something' }
     };
     const route2 = policyReporterModule.getLinkForPolicy(mockStore, report2);
 
     expect(route2).toMatchObject({
       name:   expect.any(String),
-      params: expect.objectContaining({ id: 'example-policy', resource: 'policies.kubewarden.io.admissionpolicy' })
+      params: expect.objectContaining({
+        id: 'example-policy', resource: 'policies.kubewarden.io.admissionpolicy', namespace: 'something'
+      })
     });
   });
 });
