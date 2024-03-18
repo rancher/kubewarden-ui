@@ -122,7 +122,6 @@ export async function getFilteredReports(store: any, resource: any): Promise<Pol
                 outResults.push({
                   ...result,
                   scope:      report.scope,
-                  namespace:  report.metadata?.namespace,
                   policyName: result.properties?.['policy-name'],
                 });
               });
@@ -133,7 +132,6 @@ export async function getFilteredReports(store: any, resource: any): Promise<Pol
                 report.results?.forEach((result: any) => {
                   outResults.push({
                     ...result,
-                    namespace:  report.metadata?.namespace,
                     policyName: result.properties?.['policy-name'],
                   });
                 });
@@ -167,20 +165,13 @@ export function getLinkForPolicy(store: any, report: PolicyReportResult): Object
   if ( report?.policy ) {
     const apSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.ADMISSION_POLICY);
     const capSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
-
-    let policyType: string = '';
-
-    const policyParts: string[] = report.policy?.split('-');
-
-    if (policyParts?.length >= 2 ) {
-      policyType = policyParts[0] === 'clusterwide' ? KUBEWARDEN.CLUSTER_ADMISSION_POLICY : KUBEWARDEN.ADMISSION_POLICY;
-    }
+    const policyType: string = report.properties?.['policy-namespace'] ? KUBEWARDEN.ADMISSION_POLICY : KUBEWARDEN.CLUSTER_ADMISSION_POLICY;
 
     if ( policyType === KUBEWARDEN.ADMISSION_POLICY && apSchema ) {
       return createKubewardenRoute({
         name:   'c-cluster-product-resource-namespace-id',
         params: {
-          resource: policyType, id: report?.policyName, namespace: report.namespace
+          resource: policyType, id: report?.policyName, namespace: report.properties?.['policy-namespace']
         }
       });
     }
