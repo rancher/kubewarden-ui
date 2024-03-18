@@ -1,6 +1,7 @@
 import * as policyReporterModule from '@kubewarden/modules/policyReporter.ts';
 import { KUBEWARDEN } from '@kubewarden/types';
 import { mockPolicyReport } from '../_templates_/policyReports';
+import { mockControllerApp } from '../_templates_/controllerApp';
 
 // Mocking lodash's isEmpty function//
 jest.mock('lodash/isEmpty', () => ({
@@ -15,6 +16,7 @@ const mockStore = {
   getters: {
     'cluster/schemaFor':        jest.fn(),
     'kubewarden/policyReports': [mockPolicyReport],
+    'kubewarden/controllerApp': mockControllerApp
   },
   dispatch: jest.fn(),
 };
@@ -74,6 +76,25 @@ describe('getLinkForPolicy', () => {
       params: expect.objectContaining({
         id: 'example-policy', resource: 'policies.kubewarden.io.admissionpolicy', namespace: 'something'
       })
+    });
+  });
+});
+
+describe('newPolicyReportCompatible', () => {
+  it('should be incompatible with OLD data structure for a controller app version >= 1.10.0 && UI plugin version >= 1.4.0', () => {
+    const result = policyReporterModule.newPolicyReportCompatible('1.10.0', '1.4.0');
+
+    expect(result).toStrictEqual({
+      oldPolicyReports: false,
+      newPolicyReports:  true
+    });
+  });
+  it('should be incompatible with NEW data structure for a controller app version >= 1.11.0 && UI plugin version >= 1.3.6', () => {
+    const result = policyReporterModule.newPolicyReportCompatible('1.11.0', '1.3.6');
+
+    expect(result).toStrictEqual({
+      oldPolicyReports: true,
+      newPolicyReports:  false
     });
   });
 });
