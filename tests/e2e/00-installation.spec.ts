@@ -181,7 +181,7 @@ test('05 Whitelist Artifact Hub', async({ page, ui, nav }) => {
   })
 })
 
-test('06 Upgrade Kubewarden', async({ page, nav, shell }) => {
+test('06 Upgrade Kubewarden', async({ page, nav }) => {
   test.skip(!UPGRADE)
 
   const kwPage = new KubewardenPage(page)
@@ -226,7 +226,7 @@ test('06a Upgrade KW 1.10.0 to 1.11.0-rc', async({ page }) => {
 
   const current = (await kwPage.getCurrentVersion()).app
   if (current === 'v1.10.0') {
-    await apps.updateApp('rancher-kubewarden-controller', { version: 0, yamlPatch: (y) => { y.auditScanner.image.tag = 'latest' } })
+    await apps.updateApp('rancher-kubewarden-controller', { version: 0 })
     await apps.updateApp('rancher-kubewarden-defaults', { version: 0 })
   }
 })
