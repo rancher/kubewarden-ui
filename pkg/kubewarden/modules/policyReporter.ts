@@ -2,6 +2,7 @@ import { Store } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 import semver from 'semver';
 import { randomStr } from '@shell/utils/string';
+import { NAMESPACE } from '@shell/config/types';
 import {
   KUBEWARDEN, CatalogApp, Severity, Result, PolicyReport, PolicyReportResult, PolicyReportSummary, WG_POLICY_K8S
 } from '../types';
@@ -63,16 +64,7 @@ export function getFilteredSummary(store: Store<any>, resource: any): PolicyRepo
     const reports = store.getters['kubewarden/policyReports'];
 
     if ( !isEmpty(reports) ) {
-      let filtered: PolicyReportResult[] | undefined;
-
-      // Find the report that is scoped to the resource name
-      if ( Array.isArray(reports) && reports.length ) {
-        reports.forEach((report: any) => {
-          if ( report.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'kubewarden' && report.scope?.uid === resource.metadata?.uid ) {
-            filtered = report.results;
-          }
-        });
-      }
+      const filtered: PolicyReportResult[] = getFilteredArrayOfReportResults(reports, resource);
 
       if ( !isEmpty(filtered) ) {
         const out: PolicyReportSummary = {
@@ -111,58 +103,68 @@ export async function getFilteredReports(store: Store<any>, resource: any): Prom
       const reports:any = await getPolicyReports(store);
 
       if ( !isEmpty(reports) ) {
-        let outReports: PolicyReport[] = [];
-
-        // If the resource is of type `namespace`, return the all reports for the ns
-        if ( resource?.type === 'namespace' ) {
-          if ( Array.isArray(reports) ) {
-            outReports = reports.filter((report: PolicyReport) => report.scope?.namespace === resource?.name);
-          }
-        } else {
-          outReports = reports;
-        }
-
-        const outResults: PolicyReportResult[] = [];
-
-        // Find the report that is scoped to the resource name
-        if ( Array.isArray(outReports) ) {
-          if ( resource?.type === 'namespace' ) {
-            outReports.forEach((report: any) => {
-              report.results?.forEach((result: any) => {
-                outResults.push({
-                  ...result,
-                  scope:      report.scope,
-                  policyName: result.properties?.['policy-name'],
-                });
-              });
-            });
-          } else {
-            outReports.forEach((report: any) => {
-              if ( report.scope?.name === resource.metadata.name ) {
-                report.results?.forEach((result: any) => {
-                  outResults.push({
-                    ...result,
-                    policyName: result.properties?.['policy-name'],
-                  });
-                });
-              }
-            });
-          }
-
-          if ( !isEmpty(outResults) ) {
-            // Assign uid for SortableTable sub-row
-            outResults?.forEach((report: any) => {
-              Object.assign(report, { uid: randomStr() });
-            });
-          }
-        }
-
-        return outResults;
+        return getFilteredArrayOfReportResults(reports, resource);
       }
     } catch (e) {
       console.warn(`Error fetching PolicyReports: ${ e }`); // eslint-disable-line no-console
     }
   }
+}
+
+/**
+ * Helper function to get array of Policy Report Results filtered by the correct conditions `wgpolicyk8s.io.policyreport`
+ * @param reports
+ * @param resource
+ * @returns `PolicyReportResult[] | null | void`
+ */
+function getFilteredArrayOfReportResults(reports: PolicyReport[], resource: any): PolicyReportResult[] {
+  let outReports: PolicyReport[] = [];
+
+  // If the resource is of type `namespace`, return the all reports for the ns
+  if ( resource?.type === NAMESPACE ) {
+    if ( Array.isArray(reports) ) {
+      outReports = reports.filter((report: PolicyReport) => report.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'kubewarden' && report.scope?.namespace === resource?.name);
+    }
+  } else {
+    outReports = reports.filter((report: PolicyReport) => report.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'kubewarden');
+  }
+
+  const outResults: PolicyReportResult[] = [];
+
+  // Find the report that is scoped to the resource name
+  if ( Array.isArray(outReports) ) {
+    if ( resource?.type === 'namespace' ) {
+      outReports.forEach((report: any) => {
+        report.results?.forEach((result: any) => {
+          outResults.push({
+            ...result,
+            scope:      report.scope,
+            policyName: result.properties?.['policy-name'],
+          });
+        });
+      });
+    } else {
+      outReports.forEach((report: any) => {
+        if ( report.scope?.name === resource.metadata.name ) {
+          report.results?.forEach((result: any) => {
+            outResults.push({
+              ...result,
+              policyName: result.properties?.['policy-name'],
+            });
+          });
+        }
+      });
+    }
+
+    if ( !isEmpty(outResults) ) {
+      // Assign uid for SortableTable sub-row
+      outResults?.forEach((report: any) => {
+        Object.assign(report, { uid: randomStr() });
+      });
+    }
+  }
+
+  return outResults;
 }
 
 /**
