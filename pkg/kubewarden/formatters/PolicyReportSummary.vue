@@ -2,7 +2,6 @@
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 import { sortBy } from '@shell/utils/sort';
-import { NAMESPACE } from '@shell/config/query-params';
 
 import { colorForResult, getFilteredSummary } from '../modules/policyReporter';
 
@@ -11,16 +10,6 @@ export default {
     value: {
       type:     Object,
       default:  () => {}
-    }
-  },
-
-  data() {
-    return { expanded: false, filteredReports: null };
-  },
-
-  created() {
-    if ( !this.isNamespaceResource ) {
-      this.filteredReports = getFilteredSummary(this.$store, this.value);
     }
   },
 
@@ -43,8 +32,22 @@ export default {
       return false;
     },
 
-    isNamespaceResource() {
-      return this.value?.type === NAMESPACE;
+    colorParts() {
+      const out = {};
+
+      for ( const p of this.summaryParts ) {
+        out[p.color] = {
+          color: p.color,
+          label: p.label,
+          value: p.value
+        };
+      }
+
+      return sortBy(Object.values(out), 'sort:desc').reverse();
+    },
+
+    summary() {
+      return getFilteredSummary(this.$store, this.value);
     },
 
     summaryParts() {
@@ -69,32 +72,6 @@ export default {
 
       return sortBy(Object.values(out), 'sort:desc').reverse();
     },
-
-    colorParts() {
-      const out = {};
-
-      for ( const p of this.summaryParts ) {
-        out[p.color] = {
-          color: p.color,
-          label: p.label,
-          value: p.value
-        };
-      }
-
-      return sortBy(Object.values(out), 'sort:desc').reverse();
-    },
-
-    summary() {
-      if ( this.isNamespaceResource ) {
-        const connectedReport = this.reports?.find(r => r.metadata?.namespace === this.value?.id);
-
-        if ( connectedReport ) {
-          return connectedReport.summary;
-        }
-      }
-
-      return getFilteredSummary(this.$store, this.value);
-    }
   },
 
   methods: {
