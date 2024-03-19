@@ -34,11 +34,7 @@ export default {
   async fetch() {
     const fetchedReports = await getFilteredReports(this.$store, this.resource);
 
-    if ( this.isNamespaceResource ) {
-      this.reports = fetchedReports?.results || [];
-    } else {
-      this.reports = fetchedReports || [];
-    }
+    this.reports = fetchedReports || [];
 
     if ( !isEmpty(this.reports) ) {
       const hash = [
@@ -53,15 +49,10 @@ export default {
   data() {
     return {
       colorForResult,
-      headers:      POLICY_REPORTER_HEADERS,
-      reports:      null
+      reports:          [],
+      resourceHeaders:  POLICY_REPORTER_HEADERS.RESOURCE,
+      namespaceHeaders: POLICY_REPORTER_HEADERS.NAMESPACE
     };
-  },
-
-  created() {
-    if ( !this.isNamespaceResource ) {
-      this.headers = this.headers.slice(2);
-    }
   },
 
   computed: {
@@ -80,14 +71,22 @@ export default {
       return this.resource?.metadata?.namespace;
     },
 
+    hasReports() {
+      return !isEmpty(this.reports);
+    },
+
     isNamespaceResource() {
       return this.resource?.type === NAMESPACE;
+    },
+
+    tableHeaders() {
+      return this.isNamespaceResource ? this.namespaceHeaders : this.resourceHeaders;
     }
   },
 
   methods: {
     canGetResourceLink(row) {
-      const resource = row?.resources[0];
+      const resource = row.scope;
 
       if ( resource ) {
         const isCore = Object.values(coreTypes).find(type => resource.kind === type.attributes.kind);
@@ -106,9 +105,9 @@ export default {
       return null;
     },
 
-    getResourceValue(row, val, needsResource = false) {
-      if ( this.isNamespaceResource && needsResource && !isEmpty(row.resources) ) {
-        return row.resources[0][val] || '-';
+    getResourceValue(row, val, needScope = false) {
+      if ( this.isNamespaceResource && needScope ) {
+        return row.scope?.[val] || '-';
       }
 
       if ( !isEmpty(row) ) {
@@ -151,95 +150,101 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-else class="pr-tab__container">
-    <SortableTable
-      v-if="reports"
-      :rows="reports"
-      :headers="headers"
-      :table-actions="false"
-      :row-actions="false"
-      key-field="uid"
-      :sub-expandable="true"
-      :sub-expand-column="true"
-      :sub-rows="true"
-      :paging="true"
-      :rows-per-page="25"
-      :extra-search-fields="['result']"
-      default-sort-by="status"
-    >
-      <!-- Namespace Resource columns -->
-      <template v-if="isNamespaceResource" #col:kind="{row}">
-        <td>{{ getResourceValue(row, 'kind', true) }}</td>
-      </template>
-      <template v-if="isNamespaceResource" #col:name="{row}">
-        <td>
-          <template v-if="canGetResourceLink(row)">
-            <n-link :to="getResourceLink(row)">
+    <template>
+      <SortableTable
+        :rows="reports"
+        :headers="tableHeaders"
+        :table-actions="false"
+        :row-actions="false"
+        key-field="uid"
+        :sub-expandable="true"
+        :sub-expand-column="true"
+        :sub-rows="true"
+        :paging="true"
+        :rows-per-page="25"
+        :extra-search-fields="['summary']"
+        default-sort-by="status"
+      >
+        <template
+          v-if="isNamespaceResource"
+          #col:kind="{row}"
+        >
+          <td>{{ getResourceValue(row, 'kind', true) }}</td>
+        </template>
+        <template
+          v-if="isNamespaceResource"
+          #col:name="{row}"
+        >
+          <td>
+            <template v-if="canGetResourceLink(row)">
+              <n-link :to="getResourceLink(row)">
+                <span>{{ getResourceValue(row, 'name', true) }}</span>
+              </n-link>
+            </template>
+            <template v-else>
               <span>{{ getResourceValue(row, 'name', true) }}</span>
-            </n-link>
-          </template>
-          <template v-else>
-            <span>{{ getResourceValue(row, 'name', true) }}</span>
-          </template>
-        </td>
-      </template>
+            </template>
+          </td>
+        </template>
 
-      <template #col:policy="{row}">
-        <td v-if="row.policy && row.rule" :class="{ 'text-bold': isNamespaceResource}">
-          <template v-if="canGetKubewardenLinks">
-            <n-link :to="getPolicyLink(row)">
-              <span>{{ row.rule }}</span>
-            </n-link>
-          </template>
-          <template v-else>
-            <span>{{ row.rule }}</span>
-          </template>
-        </td>
-      </template>
-      <template #col:severity="{row}">
-        <td>
-          <BadgeState
-            :label="getResourceValue(row, 'severity')"
-            :color="severityColor(row)"
-          />
-        </td>
-      </template>
-      <template #col:status="{row}">
-        <td>
-          <BadgeState
-            :label="getResourceValue(row, 'result')"
-            :color="statusColor(row)"
-          />
-        </td>
-      </template>
+        <template #col:policy="{row}">
+          <td v-if="row.policy && row.policyName">
+            <template v-if="canGetKubewardenLinks">
+              <n-link :to="getPolicyLink(row)">
+                <span>{{ row.policyName }}</span>
+              </n-link>
+            </template>
+            <template v-else>
+              <span>{{ row.policyName }}</span>
+            </template>
+          </td>
+        </template>
+        <template #col:severity="{row}">
+          <td>
+            <BadgeState
+              :label="getResourceValue(row, 'severity')"
+              :color="severityColor(row)"
+            />
+          </td>
+        </template>
+        <template #col:status="{row}">
+          <td>
+            <BadgeState
+              :label="getResourceValue(row, 'result')"
+              :color="statusColor(row)"
+            />
+          </td>
+        </template>
 
-      <!-- Sub-rows -->
-      <template #sub-row="{row, fullColspan}">
-        <td :colspan="fullColspan" class="pr-tab__sub-row">
-          <Banner v-if="row.message" color="info" class="message">
-            <span class="text-muted">{{ t('kubewarden.policyReporter.headers.policyReportsTab.message.title') }}:</span>
-            <span>{{ row.message }}</span>
-          </Banner>
-          <div class="details">
-            <section class="col">
-              <div class="title">
-                {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.mutating') }}
-              </div>
-              <span>
-                {{ row.properties['mutating'] || '-' }}
-              </span>
-            </section>
-            <section class="col">
-              <div class="title">
-                {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.validating') }}
-              </div>
-              <span>
-                {{ row.properties['validating'] || '-' }}
-              </span>
-            </section>
-          </div>
-        </td>
-      </template>
-    </SortableTable>
+        <!-- Sub-rows -->
+        <template #sub-row="{row, fullColspan}">
+          <td :colspan="fullColspan" class="pr-tab__sub-row">
+            <Banner v-if="row.message" color="info" class="message">
+              <span class="text-muted">{{ t('kubewarden.policyReporter.headers.policyReportsTab.message.title') }}:</span>
+              <span>{{ row.message }}</span>
+            </Banner>
+            <div class="details">
+              <section class="col">
+                <div class="title">
+                  {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.mutating') }}
+                </div>
+                <span>
+                  {{ row.properties['mutating'] || '-' }}
+                </span>
+              </section>
+              <section class="col">
+                <div class="title">
+                  {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.validating') }}
+                </div>
+                <span>
+                  {{ row.properties['validating'] || '-' }}
+                </span>
+              </section>
+            </div>
+          </td>
+        </template>
+      </SortableTable>
+    </template>
   </div>
 </template>
 

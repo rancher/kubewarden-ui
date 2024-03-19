@@ -418,6 +418,8 @@ kubewarden:
           label: Severity
         status:
           label: Status
+        summary:
+          label: Summary
         message:
           title: Message
         properties:

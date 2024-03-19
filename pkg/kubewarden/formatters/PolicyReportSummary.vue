@@ -93,7 +93,7 @@ export default {
         }
       }
 
-      return this.filteredReports;
+      return getFilteredSummary(this.$store, this.value);
     }
   },
 
