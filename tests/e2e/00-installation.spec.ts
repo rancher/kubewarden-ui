@@ -219,7 +219,7 @@ test('06 Upgrade Kubewarden', async({ page, nav }) => {
 
 // Extra test to validate audit scanner UI PRs
 test('06a Upgrade KW 1.10.0 to 1.11.0-rc', async({ page }) => {
-  test.skip(UPGRADE || FLEET || ORIGIN !== 'source')
+  test.skip(UPGRADE || FLEET)
 
   const apps = new RancherAppsPage(page)
   const kwPage = new KubewardenPage(page)
