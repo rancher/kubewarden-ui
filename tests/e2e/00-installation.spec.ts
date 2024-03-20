@@ -51,7 +51,7 @@ test('01 Install UI extension', async({ page, ui }) => {
   const extensions = new RancherExtensionsPage(page)
 
   await test.step('Enable extension support', async() => {
-    await extensions.enable(ORIGIN === 'released')
+    await extensions.enable({ rancherRepo: ORIGIN === 'released' ? true : undefined })
     // Wait for default list of extensions
     if (ORIGIN === 'released') {
       await ui.withReload(async() => {
@@ -125,8 +125,7 @@ test('03b Install Kubewarden by Fleet', async({ page, ui }) => {
     branch     : 'main',
     selfHealing: true,
     paths      : ['tests/e2e/fleet/'],
-    workspace  : 'fleet-local',
-    yamlPatch  : (y) => { y.spec.correctDrift.force = true }
+    workspace  : 'fleet-local'
   })
 
   await ui.withReload(async() => {

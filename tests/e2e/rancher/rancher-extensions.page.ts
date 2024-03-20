@@ -18,7 +18,7 @@ export class RancherExtensionsPage extends BasePage {
       await this.tabs.getByRole('tab', { name, exact: true }).click()
     }
 
-    async enable(rancherRepo = true, partnersRepo = true) {
+    async enable(options?: { rancherRepo?: boolean, partnersRepo?: boolean }) {
       await this.goto()
       await expect(this.page.getByRole('heading', { name: 'Extension support is not enabled' })).toBeVisible()
 
@@ -26,11 +26,13 @@ export class RancherExtensionsPage extends BasePage {
       await this.ui.button('Enable').click()
       await expect(this.page.getByRole('heading', { name: 'Enable Extension Support?' })).toBeVisible()
 
-      // Add repositories
-      await this.ui.checkbox('Rancher Extension').setChecked(rancherRepo)
-      // New option in rancher 2.7.7
-      if (await this.ui.checkbox('Partners Extension').isVisible()) {
-        await this.ui.checkbox('Partners Extension').setChecked(partnersRepo)
+      // Available only on Rancher Prime since 2.8.3
+      if (options?.rancherRepo !== undefined) {
+        await this.ui.checkbox('Rancher Extension').setChecked(options.rancherRepo)
+      }
+      // New option in rancher 2.7.7, checked by default
+      if (options?.partnersRepo !== undefined) {
+        await this.ui.checkbox('Partners Extension').setChecked(options.partnersRepo)
       }
 
       // Confirm and wait for extensions to be enabled

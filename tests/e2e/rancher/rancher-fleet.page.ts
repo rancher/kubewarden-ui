@@ -9,7 +9,7 @@ export interface GitRepo {
   branch: string
   selfHealing?: boolean
   keepResources?: boolean
-  paths: string[]
+  paths?: string[]
   yamlPatch?: YAMLPatch
   workspace?: string
 }
