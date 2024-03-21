@@ -20,7 +20,7 @@ const upMap: AppVersion[] = [
   { app: 'v1.8.0', controller: '2.0.0', crds: '1.4.2', defaults: '1.8.0' },
   { app: 'v1.9.0', controller: '2.0.5', crds: '1.4.4' }, // defaults: '1.9.2'
   { app: 'v1.10.0', controller: '2.0.8', crds: '1.4.5' }, // defaults: '1.9.3'
-  // { app: 'v1.11.0', controller: '2.0.9', crds: '1.4.5?' }, // defaults: '1.9.4'
+  { app: 'v1.11.0', controller: '2.0.9', crds: '1.4.6' }, // defaults: '1.9.4'
 ]
 
 test('00 Initial rancher setup', async({ page, ui, nav }) => {
@@ -51,7 +51,7 @@ test('01 Install UI extension', async({ page, ui }) => {
   const extensions = new RancherExtensionsPage(page)
 
   await test.step('Enable extension support', async() => {
-    await extensions.enable({ rancherRepo: ORIGIN === 'released' ? true : undefined })
+    await extensions.enable({ rancherRepo: ORIGIN === 'released' })
     // Wait for default list of extensions
     if (ORIGIN === 'released') {
       await ui.withReload(async() => {
@@ -214,20 +214,6 @@ test('06 Upgrade Kubewarden', async({ page, nav }) => {
     await nav.explorer('Apps', 'Installed Apps')
     await apps.checkChart('rancher-kubewarden-defaults', last.defaults)
   })
-})
-
-// Extra test to validate audit scanner UI PRs
-test('06a Upgrade KW 1.10.0 to 1.11.0-rc', async({ page }) => {
-  test.skip(UPGRADE || FLEET)
-
-  const apps = new RancherAppsPage(page)
-  const kwPage = new KubewardenPage(page)
-
-  const current = (await kwPage.getCurrentVersion()).app
-  if (current === 'v1.10.0') {
-    await apps.updateApp('rancher-kubewarden-controller', { version: 0 })
-    await apps.updateApp('rancher-kubewarden-defaults', { version: 0 })
-  }
 })
 
 test('09 Check resources are active', async({ page, nav, shell }) => {
