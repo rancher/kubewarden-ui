@@ -72,5 +72,12 @@ export default {
 
 <template>
   <Loading v-if="$fetchState.pending" />
-  <Values v-else :value="value" :chart-values="chartValues" :yaml-values="yamlValues" :mode="mode" />
+  <Values
+    v-else
+    :value="value"
+    :chart-values="chartValues"
+    :yaml-values="yamlValues"
+    :mode="mode"
+    @updateYamlValues="$emit('updateYamlValues', $event)"
+  />
 </template>
