@@ -21,6 +21,7 @@ import { handleGrowl } from '../utils/handle-growl';
 import { refreshCharts } from '../utils/chart';
 import { grafanaProxy } from '../modules/grafana';
 import { findServiceMonitor } from '../modules/metricsConfig';
+import { jaegerPolicyName } from '../modules/jaegerTracing';
 
 import MetricsChecklist from './MetricsChecklist';
 
@@ -154,6 +155,10 @@ export default {
     ...mapGetters(['currentCluster', 'productId']),
     ...mapGetters({ charts: 'catalog/charts' }),
     ...monitoringStatus(),
+
+    policyName() {
+      return jaegerPolicyName(this.policyObj);
+    },
 
     allApps() {
       return this.$store.getters['cluster/all'](CATALOG.APP);
@@ -315,6 +320,7 @@ export default {
         data-testid="kw-ps-metrics-dashboard"
         :detail-url="metricsProxy"
         :summary-url="metricsProxy"
+        :vars="{'policy_name': policyName}"
         graph-height="825px"
       />
     </template>
