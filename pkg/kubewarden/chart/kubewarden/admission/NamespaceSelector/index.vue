@@ -48,6 +48,16 @@ export default {
   },
 
   watch: {
+    value: {
+      deep: true,
+      handler(neu) {
+        const matchExpressions = neu?.matchExpressions || [];
+        const matchLabels = neu?.matchLabels || {};
+
+        this.$set(this, 'matchExpressions', matchExpressions);
+        this.$set(this, 'matchLabels', matchLabels);
+      }
+    },
     matchExpressions(neu) {
       this.$set(this.namespaceSelector, 'matchExpressions', neu);
       this.$emit('input', this.namespaceSelector);

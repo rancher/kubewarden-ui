@@ -20,10 +20,8 @@ describe('component: NamespaceSelector', () => {
     const wrapper = shallowMount(NamespaceSelector as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData: { value: userGroupPolicy.spec.namespaceSelector },
       provide:   { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
-      stubs:     { Checkbox: { template: '<span />' } }
     });
 
-    await wrapper.setData({ addSelector: true });
     const matchExp = wrapper.findComponent(MatchExpressions);
 
     expect(matchExp.props().value).toStrictEqual(userGroupPolicy.spec.namespaceSelector.matchExpressions);
@@ -39,10 +37,7 @@ describe('component: NamespaceSelector', () => {
     const wrapper = shallowMount(NamespaceSelector as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData: { value: userGroupPolicy.spec.namespaceSelector },
       provide:   { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
-      stubs:     { Checkbox: { template: '<span />' } }
     });
-
-    await wrapper.setData({ addSelector: true });
 
     const matchExp = wrapper.findComponent(MatchExpressions);
 
@@ -58,10 +53,7 @@ describe('component: NamespaceSelector', () => {
     const wrapper = shallowMount(NamespaceSelector as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData: { value: userGroupPolicy.spec.namespaceSelector },
       provide:   { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
-      stubs:     { Checkbox: { template: '<span />' } }
     });
-
-    await wrapper.setData({ addSelector: true });
 
     const keyValue = wrapper.findComponent(KeyValue);
 
