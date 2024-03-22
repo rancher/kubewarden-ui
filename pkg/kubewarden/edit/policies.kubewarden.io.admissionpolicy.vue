@@ -1,4 +1,5 @@
 <script>
+import jsyaml from 'js-yaml';
 import { _CREATE, _EDIT } from '@shell/config/query-params';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
@@ -55,6 +56,14 @@ export default {
         handleGrowl({ error: e, store: this.$store });
       }
     },
+    // this updates the "value" obj for CAP's
+    // with the updated values that came from the "edit YAML" scenario
+    updateYamlValuesFromEdit(val) {
+      const parsed = jsyaml.load(val);
+
+      removeEmptyAttrs(parsed);
+      Object.assign(this.value, parsed);
+    }
   }
 };
 </script>
@@ -68,6 +77,10 @@ export default {
     :can-yaml="false"
     @finish="finish"
   >
-    <Config :value="value" :mode="realMode" />
+    <Config
+      :value="value"
+      :mode="realMode"
+      @updateYamlValues="updateYamlValuesFromEdit"
+    />
   </CruResource>
 </template>

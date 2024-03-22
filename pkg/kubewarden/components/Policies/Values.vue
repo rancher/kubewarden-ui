@@ -12,7 +12,7 @@ import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
 
-import { KUBEWARDEN_CHARTS, VALUES_STATE, YAML_OPTIONS } from '../../types';
+import { KUBEWARDEN_CHARTS, VALUES_STATE, YAML_OPTIONS, RANCHER_NS_MATCH_EXPRESSION } from '../../types';
 
 export default {
   name: 'Values',
@@ -86,6 +86,19 @@ export default {
       preYamlOption:       VALUES_STATE.FORM,
       yamlOption:          VALUES_STATE.FORM
     };
+  },
+
+  mounted() {
+    // by default, every clusterAdmissionPolicy created will ignore Rancher system namespaces
+    // so that policies in PROTECT mode don't crash the system
+    // needs to be in this component because MatchExpression component is not automatically updated
+    if (this.mode === _CREATE && this.chartValues?.policy?.kind === 'ClusterAdmissionPolicy') {
+      if (!this.chartValues?.policy?.spec?.namespaceSelector) {
+        this.chartValues.policy.spec.namespaceSelector = {};
+      }
+
+      this.chartValues.policy.spec.namespaceSelector.matchExpressions = [RANCHER_NS_MATCH_EXPRESSION];
+    }
   },
 
   watch: {

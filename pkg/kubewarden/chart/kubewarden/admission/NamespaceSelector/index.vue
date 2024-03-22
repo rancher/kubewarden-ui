@@ -25,26 +25,16 @@ export default {
   },
 
   data() {
-    const parsedRancherNs = JSON.stringify(RANCHER_NS_MATCH_EXPRESSION);
     const namespaceSelector = Object.assign({}, this.value) || {};
     const matchExpressions = this.value?.matchExpressions || [];
     const matchLabels = this.value?.matchLabels || {};
 
     return {
       POD,
-      parsedRancherNs,
       namespaceSelector,
       matchExpressions,
       matchLabels
     };
-  },
-
-  mounted() {
-    // by default, every clusterAdmissionPolicy created will ignore Rancher system namespaces
-    // so that policies in PROTECT mode don't crash the system
-    if (this.mode === _CREATE) {
-      this.$set(this.namespaceSelector, 'matchExpressions', [RANCHER_NS_MATCH_EXPRESSION]);
-    }
   },
 
   watch: {
