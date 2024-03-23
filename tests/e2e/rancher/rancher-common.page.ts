@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test'
+import { SemVer } from 'semver'
 import { BasePage } from './basepage'
 
 export class RancherCommonPage extends BasePage {
@@ -69,5 +70,17 @@ export class RancherCommonPage extends BasePage {
     await this.nav.userNav('Preferences')
     await expect(this.page.getByRole('heading', { name: 'Advanced Features' })).toBeVisible()
     await this.ui.checkbox('Enable Extension developer features').setChecked(enabled)
+  }
+
+  async isPrime(): Promise<boolean> {
+    const resp = await this.page.request.get('/rancherversion')
+    const data = await resp.json()
+    return data.RancherPrime === 'true'
+  }
+
+  async getVersion(): Promise<SemVer> {
+    const resp = await this.page.request.get('/rancherversion')
+    const data = await resp.json()
+    return new SemVer(data.Version)
   }
 }

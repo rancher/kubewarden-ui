@@ -24,8 +24,14 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'Trusted Repos'              : { settings: setupTrustedRepos },
   'User Group PSP'             : { settings: setupUserGroupPSP },
   'Verify Image Signatures'    : { settings: setupVerifyImageSignatures },
-  'Container Resources'        : { settings: setupContainerResources, skip: 'https://github.com/kubewarden/container-resources-policy/issues/10' },
+  'Container Resources'        : { settings: setupContainerResources },
+  'PVC StorageClass Validator' : { settings: setupPvcScValidator },
   volumeMounts                 : { settings: setupVolumeMounts },
+}
+
+async function setupPvcScValidator(ui: RancherUI) {
+  await ui.button('Add').click()
+  await ui.page.getByPlaceholder('e.g. bar').fill('denyname')
 }
 
 async function setupContainerResources(ui: RancherUI) {
