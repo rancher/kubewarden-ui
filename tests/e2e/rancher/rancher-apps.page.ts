@@ -102,7 +102,7 @@ export class RancherAppsPage extends BasePage {
     }
 
     @step
-    async checkChart(name: string, version?: string) {
+    async checkChart(name: string|RegExp, version?: string) {
       const row = this.ui.tableRow(name)
       await row.toHaveState('Deployed')
       if (version) {

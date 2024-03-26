@@ -3,7 +3,7 @@ defaultNamespace: cattle-kubewarden-system
 
 helm:
   version: '*-0'  # 2.0.5
-  releaseName: kubewarden-controller
+  releaseName: rancher-kubewarden-controller
   chart: kubewarden-controller
   repo: https://charts.kubewarden.io
   # valuesFiles:
@@ -15,9 +15,9 @@ helm:
         schedule: "*/1 * * * *" # every minute
 
 labels:
-  app: kubewarden-controller
+  app: rancher-kubewarden-controller
 
 dependsOn:
   - selector:
       matchLabels:
-        app: kubewarden-crds
+        app: rancher-kubewarden-crds
