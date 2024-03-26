@@ -1,14 +1,10 @@
 <script>
-import isEmpty from 'lodash/isEmpty';
-
 import { _CREATE } from '@shell/config/query-params';
-import { set } from '@shell/utils/object';
 import { POD } from '@shell/config/types';
 
 import KeyValue from '@shell/components/form/KeyValue';
 import MatchExpressions from '@shell/components/form/MatchExpressions';
 import InfoBox from '@shell/components/InfoBox';
-import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
 
 import { RANCHER_NS_MATCH_EXPRESSION } from '../../../../types';
 
@@ -25,55 +21,41 @@ export default {
   },
 
   components: {
-    KeyValue, MatchExpressions, InfoBox, Checkbox
+    KeyValue, MatchExpressions, InfoBox
   },
 
   data() {
-    const parsedRancherNs = JSON.stringify(RANCHER_NS_MATCH_EXPRESSION);
+    const namespaceSelector = Object.assign({}, this.value) || {};
     const matchExpressions = this.value?.matchExpressions || [];
     const matchLabels = this.value?.matchLabels || {};
 
     return {
       POD,
-      parsedRancherNs,
+      namespaceSelector,
       matchExpressions,
-      matchLabels,
-      ignoreRancherNamespaces: false,
-      addSelector:             false
+      matchLabels
     };
   },
 
-  created() {
-    set(this, 'ignoreRancherNamespaces', this.hasNamespaceSelector);
-  },
+  watch: {
+    value: {
+      deep: true,
+      handler(neu) {
+        const matchExpressions = neu?.matchExpressions || [];
+        const matchLabels = neu?.matchLabels || {};
 
-  watch: { ignoreRancherNamespaces: 'updateNamespaceSelector' },
-
-  computed: {
-    hasNamespaceSelector() {
-      if ( !this.isCreate ) {
-        return !isEmpty(this.value);
+        this.$set(this, 'matchExpressions', matchExpressions);
+        this.$set(this, 'matchLabels', matchLabels);
       }
-
-      return true;
-    }
-  },
-
-  methods: {
-    updateNamespaceSelector(ignore) {
-      if ( this.value ) {
-        const expressions = this.value.matchExpressions || [];
-        const exists = expressions?.some(exp => JSON.stringify(exp) === this.parsedRancherNs);
-
-        if ( ignore ) {
-          if ( !exists ) {
-            this.$set(this.value, 'matchExpressions', [...expressions, RANCHER_NS_MATCH_EXPRESSION]);
-          }
-        } else if ( exists ) {
-          this.$set(this.value, 'matchExpressions', expressions.filter(exp => JSON.stringify(exp) !== this.parsedRancherNs));
-        }
-      }
-    }
+    },
+    matchExpressions(neu) {
+      this.$set(this.namespaceSelector, 'matchExpressions', neu);
+      this.$emit('input', this.namespaceSelector);
+    },
+    matchLabels(neu) {
+      this.$set(this.namespaceSelector, 'matchLabels', neu);
+      this.$emit('input', this.namespaceSelector);
+    },
   }
 };
 </script>
@@ -83,24 +65,7 @@ export default {
     <p class="col span-12 mb-20">
       {{ t('kubewarden.policyConfig.namespaceSelector.description') }}
     </p>
-    <div class="col span-6 mb-20">
-      <Checkbox
-        v-model="ignoreRancherNamespaces"
-        :mode="mode"
-        :label="t('kubewarden.policyConfig.ignoreRancherNamespaces.label')"
-        :tooltip="t('kubewarden.policyConfig.ignoreRancherNamespaces.tooltip')"
-      />
-    </div>
-
-    <div class="col span-6 mb-20">
-      <Checkbox
-        v-model="addSelector"
-        :mode="mode"
-        :label="t('kubewarden.policyConfig.namespaceSelector.addSelector')"
-      />
-    </div>
-
-    <template v-if="addSelector">
+    <template>
       <InfoBox ref="infobox">
         <div class="row mb-20">
           <div class="col span-12">
@@ -114,7 +79,7 @@ export default {
             <span v-clean-tooltip="t('kubewarden.policyConfig.namespaceSelector.matchExpressions.tooltip')"></span>
             <MatchExpressions
               ref="matchexp"
-              v-model="value.matchExpressions"
+              v-model="matchExpressions"
               :mode="mode"
               :show-remove="false"
               :type="POD"
@@ -131,7 +96,7 @@ export default {
         <div class="row mb-20">
           <div class="col span-12">
             <KeyValue
-              v-model="value.matchLabels"
+              v-model="matchLabels"
               :mode="mode"
             />
           </div>
