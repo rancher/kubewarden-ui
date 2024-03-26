@@ -3,7 +3,7 @@ defaultNamespace: cattle-kubewarden-system
 
 helm:
   version: '*-0'
-  releaseName: kubewarden-defaults
+  releaseName: rancher-kubewarden-defaults
   chart: kubewarden-defaults
   repo: https://charts.kubewarden.io
   # valuesFiles:
@@ -18,4 +18,4 @@ helm:
 dependsOn:
   - selector:
       matchLabels:
-        app: kubewarden-controller
+        app: rancher-kubewarden-controller

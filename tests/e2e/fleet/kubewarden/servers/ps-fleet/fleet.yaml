@@ -4,7 +4,7 @@ defaultNamespace: cattle-kubewarden-system
 dependsOn:
   - selector:
       matchLabels:
-        app: kubewarden-controller
+        app: rancher-kubewarden-controller
 
 targetCustomizations:
 - clusterName: local
