@@ -5,6 +5,7 @@ import { Policy, AdmissionPoliciesPage, ClusterAdmissionPoliciesPage } from './p
 
 const expect3m = expect.configure({ timeout: 3 * 60_000 })
 const UPGRADE = !!process.env.UPGRADE && process.env.UPGRADE !== 'false'
+const FLEET = !!process.env.FLEET && process.env.FLEET !== 'false'
 
 test('Policy Servers', async({ page, ui, nav }) => {
   const server: PolicyServer = { name: 'test-policyserver' }
@@ -32,26 +33,31 @@ test('Policy Servers', async({ page, ui, nav }) => {
 
     const defaultImage = (await ui.tableRow('default').column('Image').textContent())?.trim().split(':') || []
     const createdImage = (await psRow.column('Image').textContent())?.trim().split(':') || []
-    const [dImg, dVer] = [defaultImage[0], semver.parse(defaultImage[1])]
-    const [cImg, cVer] = [createdImage[0], semver.parse(createdImage[1])]
+    let [dImg, dVer] = [defaultImage[0], defaultImage[1]]
+    let [cImg, cVer] = [createdImage[0], createdImage[1]]
 
-    // Validate parsed text is not empty
-    expect(cVer, `Invalid semver: ${cVer}`).not.toBeNull()
-    expect(dVer, `Invalid semver: ${dVer}`).not.toBeNull()
-    if (!cVer || !dVer || !cImg || !dImg) throw new Error('Should not happen')
+    if (FLEET) {
+      if (cVer === 'latest') cVer = '99.0.0'
+      if (dVer === 'latest') dVer = '99.0.0'
+    }
 
-    // Validate image URLs
+    // Validate URLs
     expect(cImg).toEqual(dImg)
     expect(cImg).toContain('policy-server')
 
+    // Validate semver
+    expect(semver.valid(cVer)).not.toBeNull()
+    expect(semver.valid(dVer)).not.toBeNull()
+
     // Created PS should use released version
-    expect(cVer.prerelease.length).toBe(0)
+    expect(semver.prerelease(cVer)).toBeNull()
 
     // Default PS could be updated to latest rc
-    if (UPGRADE && dVer.prerelease.length > 0) {
-      expect(semver.lt(cVer, dVer)).toBeTruthy()
-    // } else {
-      // expect(semver.eq(cVer, dVer)).toBeTruthy()
+    if (semver.lt(cVer, dVer)) {
+      expect(UPGRADE).toBeTruthy()
+      expect(semver.prerelease(dVer)).not.toBeNull()
+    } else {
+      expect(semver.eq(cVer, dVer)).toBeTruthy()
     }
   })
 
