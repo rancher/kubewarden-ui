@@ -171,9 +171,12 @@ export class RancherAppsPage extends BasePage {
         // Translate 1.9.3 -> ^\s*1[.]9[.]3\s
         if (typeof v === 'string') v = new RegExp(`^\\s*${v.replace(/[.]/g, '[.]')}\\s`)
         await this.ui.selectOption('Version', v)
-        await this.ui.withReload(async() => {
-          await expect(this.ui.checkbox('Container Registry')).toBeChecked()
-        }, 'Container Registry is unchecked after version change')
+
+        // Wrong registry - https://github.com/rancher/dashboard/issues/10703
+        await expect(this.ui.select('Version')).toBeVisible()
+        if (await this.ui.checkbox('Container Registry').isVisible()) {
+          await this.page.reload()
+        }
       }
       await this.nextBtn.click()
 
