@@ -59,11 +59,12 @@ export abstract class BaseShell {
      * @param cmd shell command to run in a loop
      * @param options.delay delay between retries in seconds
      * @param options.tries number of retries
+     * @param options.timeout time in seconds, guess short for delay * tries
      */
     @step
-    async retry(cmd: string, options?: { delay?: number, tries?: number }) {
-      const tries = options?.tries || 2 * 6
-      const delay = options?.delay || 10
+    async retry(cmd: string, options?: { delay?: number, tries?: number, timeout?: number}) {
+      const delay = options?.delay || (options?.timeout ? Math.sqrt(options.timeout) : 10)
+      const tries = options?.tries || (options?.timeout ? options.timeout / delay : 5 * 6)
 
       await this.open()
       for (let i = 1; i < tries; i++) {
@@ -77,10 +78,11 @@ export abstract class BaseShell {
       await this.close()
     }
 
-    async waitPods(options?: { ns?: string, filter?: string }) {
+    async waitPods(options?: { ns?: string, filter?: string, timeout?: number }) {
       const ns = options?.ns || '-n cattle-kubewarden-system'
+
       const filter = options?.filter || ''
-      await this.retry(`kubectl get pods --no-headers ${ns} ${filter} 2>&1 | sed -E '/([0-9]+)[/]\\1\\s+Running|Completed/d' | wc -l | grep -qx 0`)
+      await this.retry(`kubectl get pods --no-headers ${ns} ${filter} 2>&1 | sed -E '/([0-9]+)[/]\\1\\s+Running|Completed/d' | wc -l | grep -qx 0`, options)
     }
 
     async privpod(options?: { name?: string, ns?: string, status?: number }) {
