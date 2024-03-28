@@ -69,7 +69,7 @@ const pageTypes = [AdmissionPoliciesPage, ClusterAdmissionPoliciesPage]
 for (const PolicyPage of pageTypes) {
   const abbrName = PolicyPage.name.replace('Page', '').match(/[A-Z]/g)?.join('')
 
-  test(`${abbrName}: Form fields`, async({ page, ui }) => {
+  test(`Form fields (${abbrName})`, async({ page, ui }) => {
     const polPage = new PolicyPage(page)
     const p: Policy = { title: 'Pod Privileged Policy', name: '' }
 
@@ -107,14 +107,14 @@ for (const PolicyPage of pageTypes) {
     })
   })
 
-  test(`${abbrName}: Default policy settings`, async({ page, ui }) => {
+  test(`Default policy settings (${abbrName})`, async({ page, ui }) => {
     const polPage = new PolicyPage(page)
     const row = await polPage.create(pMinimal)
     await checkPolicy(pMinimal, polPage, ui)
     await polPage.delete(row)
   })
 
-  test(`${abbrName}: Custom policy settings`, async({ page, ui, shell }) => {
+  test(`Custom policy settings (${abbrName})`, async({ page, ui, shell }) => {
     const polPage = new PolicyPage(page)
     const ps: PolicyServer = { name: 'ps-custom' }
     const p: Policy = { ...pMinimal, mode: 'Monitor', audit: 'Off', server: ps.name, module: 'ghcr.io/kubewarden/policies/pod-privileged:v0.2.6' }
@@ -147,3 +147,20 @@ for (const PolicyPage of pageTypes) {
     if (isAP(polPage)) await shell.run(`k delete ns ${p.namespace}`)
   })
 }
+
+test('Recommended policies', async({ page, ui, nav }) => {
+  test.fail(true, 'https://github.com/rancher/kubewarden-ui/issues/669')
+  const capPage = new ClusterAdmissionPoliciesPage(page)
+
+  await test.step('Settings are rendered correctly', async() => {
+    await nav.capolicy('no-privileged-pod')
+    await ui.button('Config').click()
+    await capPage.selectTab('Settings')
+    await expect(ui.checkbox('Skip init containers')).toBeChecked({ checked: false })
+
+    await nav.capolicy('no-privilege-escalation')
+    await ui.button('Config').click()
+    await capPage.selectTab('Settings')
+    await expect(ui.checkbox('Allow privilege escalation')).toBeChecked()
+  })
+})
