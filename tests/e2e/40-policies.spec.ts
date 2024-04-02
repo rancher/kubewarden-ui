@@ -47,7 +47,7 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     await expect(polPage.server).toContainText(p.server)
     if (isAP(polPage)) {
       // Workaround for https://github.com/rancher/kubewarden-ui/issues/672
-      if (MODE === 'fleet') p.namespace = 'fleet-local'
+      if (MODE === 'fleet' && p.namespace === 'default') p.namespace = 'fleet-local'
       await expect(polPage.namespace).toContainText(p.namespace)
     }
 
