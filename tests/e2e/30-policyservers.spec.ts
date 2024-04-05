@@ -4,8 +4,7 @@ import { PolicyServersPage, PolicyServer } from './pages/policyservers.page'
 import { Policy, AdmissionPoliciesPage, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 
 const expect3m = expect.configure({ timeout: 3 * 60_000 })
-const UPGRADE = !!process.env.UPGRADE && process.env.UPGRADE !== 'false'
-const FLEET = !!process.env.FLEET && process.env.FLEET !== 'false'
+const MODE = process.env.MODE
 
 test('Policy Servers', async({ page, ui, nav }) => {
   const server: PolicyServer = { name: 'test-policyserver' }
@@ -36,7 +35,7 @@ test('Policy Servers', async({ page, ui, nav }) => {
     let [dImg, dVer] = [defaultImage[0], defaultImage[1]]
     let [cImg, cVer] = [createdImage[0], createdImage[1]]
 
-    if (FLEET) {
+    if (MODE === 'fleet') {
       if (cVer === 'latest') cVer = '99.0.0'
       if (dVer === 'latest') dVer = '99.0.0'
     }
@@ -54,7 +53,7 @@ test('Policy Servers', async({ page, ui, nav }) => {
 
     // Default PS could be updated to latest rc
     if (semver.lt(cVer, dVer)) {
-      expect(UPGRADE).toBeTruthy()
+      expect(MODE).toBe('upgrade')
       expect(semver.prerelease(dVer)).not.toBeNull()
     } else {
       expect(semver.eq(cVer, dVer)).toBeTruthy()

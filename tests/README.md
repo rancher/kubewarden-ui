@@ -7,6 +7,10 @@ cd ui/tests/
 npm install
 npx playwright install
 
+# Upgrade
+yarn upgrade @playwright/test --latest
+yarn playwright install chromium
+
 # Optionally create an alias
 alias pw='npx playwright'
 ```

@@ -3,6 +3,8 @@ import { PolicyServer, PolicyServersPage } from './pages/policyservers.page'
 import { AdmissionPoliciesPage, ClusterAdmissionPoliciesPage, BasePolicyPage, Policy } from './pages/policies.page'
 import { RancherUI } from './components/rancher-ui'
 
+const MODE = process.env.MODE || 'base'
+
 function isAP(polPage: BasePolicyPage) { return polPage instanceof AdmissionPoliciesPage }
 function isCAP(polPage: BasePolicyPage) { return polPage instanceof ClusterAdmissionPoliciesPage }
 
@@ -44,6 +46,8 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     await expect(polPage.audit(p.audit)).toBeChecked()
     await expect(polPage.server).toContainText(p.server)
     if (isAP(polPage)) {
+      // Workaround for https://github.com/rancher/kubewarden-ui/issues/672
+      if (MODE === 'fleet' && p.namespace === 'default') p.namespace = 'fleet-local'
       await expect(polPage.namespace).toContainText(p.namespace)
     }
 

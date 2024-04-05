@@ -9,18 +9,18 @@ import { RancherFleetPage } from './rancher/rancher-fleet.page'
 
 // source (yarn dev) | rc (add github repo) | released (just install)
 const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
-// Use Fleet to install Kubewarden instead of UI extension
-const FLEET = !!process.env.FLEET && process.env.FLEET !== 'false'
-// Install first version on the list. Then upgrade to the latest one.
-const UPGRADE = !!process.env.UPGRADE && process.env.UPGRADE !== 'false'
+expect(ORIGIN).toMatch(/^(source|rc|released)$/)
 
-// Known Kubewarden versions for UPGRADE test, start at [0]
+const MODE = process.env.MODE || 'base'
+expect(MODE).toMatch(/^(base|fleet|upgrade)$/)
+
+// Known Kubewarden versions for upgrade test, start at [0]
 // Skip defaults version checks - it's not auto updated
 const upMap: AppVersion[] = [
   { app: 'v1.8.0', controller: '2.0.0', crds: '1.4.2', defaults: '1.8.0' },
   { app: 'v1.9.0', controller: '2.0.5', crds: '1.4.4' }, // defaults: '1.9.2'
   { app: 'v1.10.0', controller: '2.0.8', crds: '1.4.5' }, // defaults: '1.9.3'
-  { app: 'v1.11.0', controller: '2.0.9', crds: '1.4.6' }, // defaults: '1.9.4'
+  { app: 'v1.11.0', controller: '2.0.10', crds: '1.4.6' }, // defaults: '1.9.4'
 ]
 
 test('00 Initial rancher setup', async({ page, ui, nav }) => {
@@ -81,13 +81,13 @@ test('01 Install UI extension', async({ page, ui }) => {
 })
 
 test('03a Install Kubewarden', async({ page, ui, nav, context }) => {
-  test.skip(FLEET)
+  test.skip(MODE === 'fleet')
 
   // Required by cert-manager copy on click
   // Setting clipboard-write on model is broken, probably playwright issue
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   const kwPage = new KubewardenPage(page)
-  await kwPage.installKubewarden({ version: UPGRADE ? upMap[0].controller : undefined })
+  await kwPage.installKubewarden({ version: MODE === 'upgrade' ? upMap[0].controller : undefined })
   await context.clearPermissions()
 
   // Check UI is active
@@ -110,12 +110,12 @@ test('03a Install Kubewarden', async({ page, ui, nav, context }) => {
     await expect(page).toHaveURL(/.*\/apps\/charts\/install.*chart=kubewarden-defaults/)
 
     // Handle PolicyServer Installer Dialog
-    await psPage.installDefault({ version: UPGRADE ? upMap[0].defaults : undefined, recommended: true, mode: 'monitor' })
+    await psPage.installDefault({ version: MODE === 'upgrade' ? upMap[0].defaults : undefined, recommended: true, mode: 'monitor' })
   })
 })
 
 test('03b Install Kubewarden by Fleet', async({ page, ui }) => {
-  test.skip(!FLEET)
+  test.skip(MODE !== 'fleet')
   test.setTimeout(15 * 60_000)
 
   const fleetPage = new RancherFleetPage(page)
@@ -181,7 +181,7 @@ test('05 Whitelist Artifact Hub', async({ page, ui, nav }) => {
 })
 
 test('06 Upgrade Kubewarden', async({ page, nav }) => {
-  test.skip(!UPGRADE)
+  test.skip(MODE !== 'upgrade')
 
   const kwPage = new KubewardenPage(page)
   const apps = new RancherAppsPage(page)

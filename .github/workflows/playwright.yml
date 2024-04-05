@@ -1,9 +1,17 @@
 name: Playwright Tests
-run-name: ${{ github.workflow }}${{ (github.event.schedule == '0 4 * * *' || inputs.upgrade) && ' - Upgrade' || '' }}${{ (github.event.schedule == '0 3 * * *' || inputs.fleet) && ' - Fleet' || '' }}
 
 on:
   workflow_dispatch:
     inputs:
+      kubewarden:
+        description: Kubewarden version
+        type: choice
+        default: 'rc'
+        required: true
+        options:
+        - source
+        - rc
+        - released
       rancher:
         description: Rancher version
         type: choice
@@ -17,40 +25,8 @@ on:
         - '~ 2.7-0'
         - '~ 2.8-0'
         - '~ 2.9-0'
-      kubewarden:
-        description: Kubewarden version
-        type: choice
-        default: 'rc'
-        required: true
-        options:
-        - source
-        - rc
-        - released
-      upgrade:
-        description: Test Kubewarden Upgrade
-        type: boolean
-        default: false
-        required: true
-      fleet:
-        description: Install by Fleet
-        type: boolean
-        default: false
-        required: true
-      testsuite:
-        description: Execute group of tests
-        type: choice
-        default: 'install + base tests'
-        required: true
-        options:
-        - install
-        - install + base tests
-        - install + policy tests
-        - install + all tests
-      testfilter:
-        description: Custom filter '\/[09]0' -g '00-|Privileged'
-        type: string
       k3s:
-        description: Kubernetes
+        description: Kubernetes version
         type: choice
         default: 'v1.27.12-k3s1'
         required: true
@@ -58,6 +34,24 @@ on:
         - v1.26.15-k3s1
         - v1.27.12-k3s1
         - v1.28.8-k3s1
+        - v1.29.3-k3s1
+      mode:
+        description: Installation mode
+        type: choice
+        default: 'base'
+        required: true
+        options:
+        - base
+        - fleet
+        - upgrade
+      testbase:
+        description: Run base tests
+        type: boolean
+        default: true
+      testpolicies:
+        description: Run policy tests
+        type: boolean
+        default: false
 
   pull_request:
     branches: main
@@ -68,27 +62,32 @@ on:
       - '*'
 
   schedule:
-    - cron: "0 2 * * *" # Manual
-    - cron: "0 3 * * *" # Fleet
-    - cron: "0 4 * * *" # Upgrade
+    - cron: "0 1 * * *"
 
 env:
   # Github -> Secrets and variables -> Actions -> New repository variable
-  RANCHER: ${{ vars.RANCHER || 'released' }}
+  RANCHER: ${{ inputs.rancher || vars.RANCHER || 'released' }}
   K3S_VERSION: ${{ inputs.k3s || 'v1.27.12-k3s1' }}
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
+  # First value after the && must be truthy. Otherwise, the value after the || will always be returned
+  TESTBASE: ${{ github.event_name != 'workflow_dispatch' && true || inputs.testbase }}
+  TESTPOLICIES: ${{ inputs.testpolicies || false }}
 
 jobs:
   e2e:
-    # run schedule workflows only on original repo, not forks
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: ${{ github.event_name == 'schedule' && fromJSON('["base", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'base')) }}
+    # Run schedule workflows only on original repo, not forks
     if: github.repository_owner == 'rancher' || github.event_name != 'schedule'
     runs-on: self-hosted
     steps:
     # ==================================================================================================
     # Check out code and install requirements
     # Use local kuberlr to avoid version skew
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
       with:
         node-version: '16'
     - name: Install playwright
@@ -103,32 +102,31 @@ jobs:
     - name: Setup global ENV
       run: |
         case ${{github.event_name}} in
+          workflow_dispatch)
+            KUBEWARDEN="${{ inputs.kubewarden }}"
+            ;;
           pull_request)
             KUBEWARDEN=source
-            TESTSUITE='install + base'
             ;;
           schedule)
             KUBEWARDEN=released
-            TESTSUITE='install + all'
-            ;;
-          workflow_dispatch)
-            RANCHER="${{ inputs.rancher }}"
-            KUBEWARDEN="${{ inputs.kubewarden }}"
-            TESTSUITE="${{ inputs.testsuite }}"
+            TESTPOLICIES=true
             ;;
           push)
             KUBEWARDEN=rc
-            TESTSUITE='install + all'
+            TESTPOLICIES=true
         esac
 
         # KW extension is prime since 2.8.3
         [[ "$KUBEWARDEN" =~ ^(released|rc)$ ]] && REPO=rancher-prime || REPO=rancher-latest
 
         echo "Event: ${{github.event_name}}"
+        echo "Mode: ${{matrix.mode}}"
+        echo "Rancher: $RANCHER"
         echo REPO="$REPO" | tee -a $GITHUB_ENV
-        echo RANCHER="$RANCHER" | tee -a $GITHUB_ENV
         echo KUBEWARDEN="$KUBEWARDEN" | tee -a $GITHUB_ENV
-        echo TESTSUITE="$TESTSUITE" | tee -a $GITHUB_ENV
+        echo TESTBASE=$TESTBASE
+        echo TESTPOLICIES="$TESTPOLICIES" | tee -a $GITHUB_ENV
 
     # ==================================================================================================
     # Create k3d cluster and install rancher
@@ -194,34 +192,40 @@ jobs:
       timeout-minutes: 120
       working-directory: tests
       run: |
-        # Translate TESTSUITE to FILTER
-        # Regex matches names of test files
-        case "$TESTSUITE" in
-          "install")           TFILTER="\/00";;
-          "install + base"*)   TFILTER="\/[0-8]";;
-          "install + policy"*) TFILTER="\/[09]";;
-          "install + all"*)    TFILTER="\/[0-9]";;
-        esac
+        TFILTER="\/00" # Installation tests
+        [[ "$TESTBASE" == "true" ]] && TFILTER+=" \/[1-8]"
+        [[ "$TESTPOLICIES" == "true" ]] && TFILTER+=" \/90"
 
-        # Custom filter to match file name or test
-        [ -n "$TESTFILTER" ] && TFILTER="$TESTFILTER"
+        # Policy tests are hitting artifacthub rate limits
+        # Filter to exclude policies except those starting with random letter
+        EXCLUDE=$(yarn playwright test "/90-" --list | grep -o 'install: .' | cut -d' ' -f2 | sort -fRu | sed 1d | paste -sd '')
+        EXCLUDE="90-.*install: [$EXCLUDE]"
+
+        # Add few random policies to base tests
+        if [[ "$TESTBASE" == "true" && "$TESTPOLICIES" != "true" ]]; then
+          TFILTER+=" \/90"
+          GFILTER="$EXCLUDE"
+        fi
+
+        # Use policy filter on automated runs in extra install modes
+        if [[ "${{github.event_name}}" != "workflow_dispatch" && "${{matrix.mode}}" != "base" ]]; then
+          GFILTER="$EXCLUDE"
+        fi
 
         # List tests and execute
-        echo yarn playwright test ${TFILTER:-} -x
-        yarn playwright test ${TFILTER:-} -x
+        echo yarn playwright test ${TFILTER:-} ${GFILTER:+-gv "$GFILTER"} -x
+        yarn playwright test ${TFILTER:-} ${GFILTER:+-gv "$GFILTER"} -x
       env:
-        FLEET: ${{ github.event.schedule == '0 3 * * *' || inputs.fleet }}
-        UPGRADE: ${{ github.event.schedule == '0 4 * * *' || inputs.upgrade }}
-        TESTFILTER: ${{inputs.testfilter}}
+        MODE: ${{ matrix.mode }}
         RANCHER_URL: https://${{env.RANCHER_FQDN}}
         ORIGIN: ${{ env.KUBEWARDEN }}
 
     # ==================================================================================================
     # Artifacts & Summary
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: playwright-report
+        name: playwright-report-${{ matrix.mode }}
         path: tests/playwright-report/
         retention-days: 15
 
