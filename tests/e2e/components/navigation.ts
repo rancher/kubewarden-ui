@@ -98,7 +98,7 @@ export class Navigation {
     async cluster(name?: string) {
       if (this.isblank()) { await this.goto(`dashboard/c/${name || this.testCluster.id}/explorer`) } else {
         await this.page.getByTestId('top-level-menu').click()
-        await this.page.getByTestId('side-menu').getByRole('link', { name: name || this.testCluster.name }).click()
+        await this.page.getByTestId('side-menu').locator('div.cluster-name', { hasText: name || this.testCluster.name }).click()
       }
     }
 
