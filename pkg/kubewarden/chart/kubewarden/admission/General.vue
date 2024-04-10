@@ -68,6 +68,12 @@ export default {
       policy = this.value || {};
     }
 
+    // fix for https://github.com/rancher/kubewarden-ui/issues/672
+    // enforce `default` as namespace for creation of AP's
+    if ( this.mode === _CREATE && this.chartType === KUBEWARDEN.ADMISSION_POLICY ) {
+      set(policy.metadata, 'namespace', 'default');
+    }
+
     return {
       policy,
       initialPolicyMode: null,
