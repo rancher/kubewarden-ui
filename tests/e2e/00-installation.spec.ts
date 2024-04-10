@@ -23,7 +23,7 @@ const upMap: AppVersion[] = [
   { app: 'v1.11.0', controller: '2.0.10', crds: '1.4.6' }, // defaults: '1.9.4'
 ]
 
-test('00 Initial rancher setup', async({ page, ui, nav }) => {
+test('Initial rancher setup', async({ page, ui, nav }) => {
   const rancher = new RancherCommonPage(page)
 
   await test.step('Global setup', async() => {
@@ -47,7 +47,7 @@ test('00 Initial rancher setup', async({ page, ui, nav }) => {
   })
 })
 
-test('01 Install UI extension', async({ page, ui }) => {
+test('Install UI extension', async({ page, ui }) => {
   const extensions = new RancherExtensionsPage(page)
 
   await test.step('Enable extension support', async() => {
@@ -80,7 +80,7 @@ test('01 Install UI extension', async({ page, ui }) => {
   })
 })
 
-test('03a Install Kubewarden', async({ page, ui, nav, context }) => {
+test('Install Kubewarden', async({ page, ui, nav, context }) => {
   test.skip(MODE === 'fleet')
 
   // Required by cert-manager copy on click
@@ -114,7 +114,7 @@ test('03a Install Kubewarden', async({ page, ui, nav, context }) => {
   })
 })
 
-test('03b Install Kubewarden by Fleet', async({ page, ui }) => {
+test('Install Kubewarden by Fleet', async({ page, ui }) => {
   test.skip(MODE !== 'fleet')
   test.setTimeout(15 * 60_000)
 
@@ -134,7 +134,7 @@ test('03b Install Kubewarden by Fleet', async({ page, ui }) => {
   }, 'Installed but not refreshed?')
 })
 
-test('05 Whitelist Artifact Hub', async({ page, ui, nav }) => {
+test('Whitelist Artifact Hub', async({ page, ui, nav }) => {
   const cap = new ClusterAdmissionPoliciesPage(page)
 
   await test.step('Whitelist ArtifactHub', async() => {
@@ -180,7 +180,7 @@ test('05 Whitelist Artifact Hub', async({ page, ui, nav }) => {
   })
 })
 
-test('06 Upgrade Kubewarden', async({ page, nav }) => {
+test('Upgrade Kubewarden', async({ page, nav }) => {
   test.skip(MODE !== 'upgrade')
 
   const kwPage = new KubewardenPage(page)
@@ -216,7 +216,7 @@ test('06 Upgrade Kubewarden', async({ page, nav }) => {
   })
 })
 
-test('09 Check kubewarden resources', async({ page, nav, shell }) => {
+test('Check kubewarden resources', async({ page, nav, shell }) => {
   await test.step('Check kubewarden apps', async() => {
     const apps = new RancherAppsPage(page)
     await nav.explorer('Apps', 'Installed Apps')

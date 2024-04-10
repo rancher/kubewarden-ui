@@ -14,9 +14,24 @@ export default defineConfig({
   forbidOnly          : !!process.env.CI, /* Fail the build on CI if you accidentally left test.only in the source code. */
   retries             : process.env.CI ? 1 : 0, /* Retry on CI only */
   workers             : 1, /* Opt out of parallel tests */
-  reporter            : process.env.CI ? 'html' : 'list', /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   snapshotPathTemplate: '{testDir}/screenshots/{projectName}/{arg}{ext}', /* Use shared directory for screenshots instead of per-test dir */
   updateSnapshots     : process.env.CI ? 'none' : 'missing', /* Don't generate snapshots by accident */
+
+  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+  reporter: [
+    [process.env.CI ? 'html' : 'list'],
+    process.env.QASE_REPORT
+      ? ['playwright-qase-reporter',
+          {
+            apiToken         : process.env.QASE_APITOKEN,
+            projectCode      : 'KUBEWARDEN',
+            runComplete      : true,
+            basePath         : 'https://api.qase.io/v1',
+            logging          : true,
+            uploadAttachments: true,
+          }]
+      : ['null'],
+  ],
 
   // ===== Rancher specific config =====
   timeout        : 7 * 60_000, /* Maximum time one test can run for. */
