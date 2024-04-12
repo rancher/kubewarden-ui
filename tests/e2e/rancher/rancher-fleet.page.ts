@@ -49,7 +49,7 @@ export class RancherFleetPage extends BasePage {
       if (repo.paths) {
         for (const path of repo.paths) {
           await this.ui.button('Add Path').click()
-          await this.page.getByTestId('gitRepo-paths').getByRole('textbox').last().fill(path)
+          await this.page.getByPlaceholder('e.g. /directory/in/your/repo').fill(path)
         }
       }
 

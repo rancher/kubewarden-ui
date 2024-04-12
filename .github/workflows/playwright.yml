@@ -57,16 +57,17 @@ on:
     branches: main
     paths: pkg/kubewarden/**
 
-  push:
-    tags:
-      - '*'
+  workflow_run:
+    workflows: ["Build and Release Extension Charts"]
+    types:
+      - completed
 
   schedule:
     - cron: "0 1 * * *"
 
 env:
   # Github -> Secrets and variables -> Actions -> New repository variable
-  RANCHER: ${{ inputs.rancher || vars.RANCHER || 'released' }}
+  KUBEWARDEN: ${{ inputs.kubewarden || 'rc' }}
   K3S_VERSION: ${{ inputs.k3s || 'v1.27.12-k3s1' }}
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
   # First value after the && must be truthy. Otherwise, the value after the || will always be returned
@@ -78,9 +79,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mode: ${{ github.event_name == 'schedule' && fromJSON('["base", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'base')) }}
+        rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.7", "2.8"]') || fromJSON(format('["{0}"]', inputs.rancher || 'released')) }}
+        mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["base", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'base')) }}
+        exclude:
+          - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.7' }}
+            mode: upgrade
+          - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.7' }}
+            mode: fleet
+
+
     # Run schedule workflows only on original repo, not forks
-    if: github.repository_owner == 'rancher' || github.event_name != 'schedule'
+    if: |
+      (github.event_name != 'schedule' || github.repository_owner == 'rancher') &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: self-hosted
     steps:
     # ==================================================================================================
@@ -101,28 +112,23 @@ jobs:
     # Set up parameters and ENV
     - name: Setup global ENV
       run: |
+        # Override KUBEWARDEN for automated triggers
         case ${{github.event_name}} in
-          workflow_dispatch)
-            KUBEWARDEN="${{ inputs.kubewarden }}"
-            ;;
           pull_request)
-            KUBEWARDEN=source
-            ;;
+            KUBEWARDEN=source;;
           schedule)
-            KUBEWARDEN=released
-            TESTPOLICIES=true
-            ;;
-          push)
-            KUBEWARDEN=rc
-            TESTPOLICIES=true
+            KUBEWARDEN=released;;
+          workflow_run)
+            KUBEWARDEN=rc;;
         esac
 
         # KW extension is prime since 2.8.3
-        [[ "$KUBEWARDEN" =~ ^(released|rc)$ ]] && REPO=rancher-prime || REPO=rancher-latest
+        [[ "$KUBEWARDEN" == "source" ]] && REPO=rancher-latest || REPO=rancher-prime
 
+        # Print matrix
         echo "Event: ${{github.event_name}}"
         echo "Mode: ${{matrix.mode}}"
-        echo "Rancher: $RANCHER"
+        echo "Rancher: ${{matrix.rancher}}"
         echo REPO="$REPO" | tee -a $GITHUB_ENV
         echo KUBEWARDEN="$KUBEWARDEN" | tee -a $GITHUB_ENV
         echo TESTBASE=$TESTBASE
@@ -178,6 +184,8 @@ jobs:
         done
 
         echo "RANCHER_FQDN=$RANCHER_FQDN" | tee -a $GITHUB_ENV
+      env:
+        RANCHER: ${{ matrix.rancher }}
 
     # ==================================================================================================
     # Setup playwright ENV and run tests
@@ -192,25 +200,14 @@ jobs:
       timeout-minutes: 120
       working-directory: tests
       run: |
-        TFILTER="\/00" # Installation tests
-        [[ "$TESTBASE" == "true" ]] && TFILTER+=" \/[1-8]"
-        [[ "$TESTPOLICIES" == "true" ]] && TFILTER+=" \/90"
-
         # Policy tests are hitting artifacthub rate limits
         # Filter to exclude policies except those starting with random letter
         EXCLUDE=$(yarn playwright test "/90-" --list | grep -o 'install: .' | cut -d' ' -f2 | sort -fRu | sed 1d | paste -sd '')
         EXCLUDE="90-.*install: [$EXCLUDE]"
 
-        # Add few random policies to base tests
-        if [[ "$TESTBASE" == "true" && "$TESTPOLICIES" != "true" ]]; then
-          TFILTER+=" \/90"
-          GFILTER="$EXCLUDE"
-        fi
-
-        # Use policy filter on automated runs in extra install modes
-        if [[ "${{github.event_name}}" != "workflow_dispatch" && "${{matrix.mode}}" != "base" ]]; then
-          GFILTER="$EXCLUDE"
-        fi
+        TFILTER="\/00"                                        # Always run installation tests
+        [[ "$TESTBASE" == "true" ]] && TFILTER+=" \/[1-9]"    # Schedule everything else as base test
+        [[ "$TESTPOLICIES" != "true" ]] && GFILTER="$EXCLUDE" # Limit number of tested policies
 
         # List tests and execute
         echo yarn playwright test ${TFILTER:-} ${GFILTER:+-gv "$GFILTER"} -x
@@ -225,7 +222,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: playwright-report-${{ matrix.mode }}
+        name: playwright-report-${{ matrix.mode }}-${{ matrix.rancher }}
         path: tests/playwright-report/
         retention-days: 15
 
