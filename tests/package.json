@@ -5,7 +5,7 @@
   "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.43.1",
-    "@types/js-yaml": "^4.0.5",
+    "@types/js-yaml": "^4.0.9",
     "@types/lodash": "^4.14.201",
     "@types/semver": "^7.5.8",
     "js-yaml": "^4.1.0",

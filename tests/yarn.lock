@@ -9,10 +9,10 @@
   dependencies:
     playwright "1.43.1"
 
-"@types/js-yaml@^4.0.5":
-  version "4.0.5"
-  resolved "https://registry.npmjs.org/@types/js-yaml/-/js-yaml-4.0.5.tgz"
-  integrity sha512-FhpRzf927MNQdRZP0J5DLIdTXhjLYzeUTmLAu69mnVksLH9CJY3IuSeEgbKUki7GQZm0WqDkGzyxju2EZGD2wA==
+"@types/js-yaml@^4.0.9":
+  version "4.0.9"
+  resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-4.0.9.tgz#cd82382c4f902fed9691a2ed79ec68c5898af4c2"
+  integrity sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==
 
 "@types/lodash@^4.14.201":
   version "4.14.201"
