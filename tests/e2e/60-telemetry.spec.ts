@@ -171,13 +171,17 @@ test.describe('Metrics', () => {
   })
 
   test('Uninstall', async({ ui, nav, shell }) => {
-    // Clean up
+    // Disable metrics
     await apps.updateApp('rancher-kubewarden-controller', {
       questions: async() => {
         await ui.tab('Telemetry').click()
         await ui.checkbox('Enable Metrics').uncheck()
       }
     })
+    // Workaround for https://github.com/rancher/rancher/issues/45167
+    if (ui.isVersion('~2.7')) {
+      await shell.run('k patch clusterrole -n cattle-monitoring-system rancher-monitoring-crd-manager --type json -p \'[{"op": "add", "path": "/rules/0/verbs/-", "value":"list"}]\'')
+    }
     await apps.deleteApp('rancher-monitoring')
     await apps.deleteApp('rancher-monitoring-crd')
     await shell.run('k delete cm -n cattle-dashboards kubewarden-dashboard-policy kubewarden-dashboard-policyserver')
