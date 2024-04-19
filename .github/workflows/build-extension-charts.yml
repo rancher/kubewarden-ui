@@ -38,11 +38,6 @@ jobs:
         with:
           version: v3.8.0
 
-      - name: Setup yq
-        uses: chrisdickinson/setup-yq@v1.0.1
-        with:
-          yq-version: v4.34.2
-
       - name: Setup Nodejs and npm
         uses: actions/setup-node@v4
         with:
@@ -78,7 +73,7 @@ jobs:
           if [[ -n "${{ github.ref_name }}" ]]; then
             publish="$publish -t ${{ github.ref_name }}"
           fi
-          
+
           $publish
 
       - name: Upload charts artifact
