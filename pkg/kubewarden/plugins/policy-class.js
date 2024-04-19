@@ -35,7 +35,11 @@ export default class PolicyModel extends KubewardenModel {
     if (helmChart && helmChart.includes('-')) {
       const arr = helmChart.split('-');
 
-      version = arr[arr.length - 1];
+      if (arr[arr.length - 1].includes('rc')) {
+        version = `${ arr[arr.length - 2] }-${ arr[arr.length - 1] }`;
+      } else {
+        version = arr[arr.length - 1];
+      }
     }
 
     const query = {

@@ -15,6 +15,13 @@ import { refreshCharts } from '../utils/chart';
 export default {
   components: { Banner },
 
+  props: {
+    mode: {
+      type:    String,
+      default: 'install'
+    },
+  },
+
   fetch() {
     this.debouncedRefreshCharts = debounce((init = false) => {
       refreshCharts({
@@ -50,6 +57,22 @@ export default {
     kubewardenRepo() {
       return this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.DEFAULTS);
     },
+
+    bannerCopy() {
+      return this.mode === 'upgrade' ? this.t('kubewarden.clusterAdmissionPolicy.kwDefaultsSettingsCompatibility', {}, true) : this.t('kubewarden.policyServer.noDefaultsInstalled.description', {}, true);
+    },
+
+    btnText() {
+      return this.mode === 'upgrade' ? this.t('kubewarden.clusterAdmissionPolicy.defaultsUpdateBtn') : this.t('kubewarden.policyServer.noDefaultsInstalled.button');
+    },
+
+    isClosable() {
+      return !this.mode === 'upgrade';
+    },
+
+    colorMode() {
+      return this.mode === 'upgrade' ? 'warning' : 'info';
+    }
   },
 
   methods: {
@@ -120,18 +143,18 @@ export default {
   <Banner
     data-testid="kw-defaults-banner"
     class="mb-20 mt-0"
-    color="info"
-    :closable="true"
+    :color="colorMode"
+    :closable="isClosable"
     @close="closeDefaultsBanner()"
   >
-    <span v-clean-html="t('kubewarden.policyServer.noDefaultsInstalled.description', {}, true)" />
+    <span v-clean-html="bannerCopy" />
     <button
       v-if="defaultsChart"
       data-testid="kw-defaults-banner-button"
       class="btn role-primary ml-10"
       @click.prevent="chartRoute"
     >
-      {{ t("kubewarden.policyServer.noDefaultsInstalled.button") }}
+      {{ btnText }}
     </button>
   </Banner>
 </template>

@@ -13,6 +13,7 @@ export default class ClusterAdmissionPolicy extends PolicyModel {
       return act;
     });
 
+    // add Edit Policy Settings
     if (this.isKubewardenDefaultPolicy) {
       const defaultPolicySettings = {
         action:  'editPolicySettings',
@@ -26,13 +27,17 @@ export default class ClusterAdmissionPolicy extends PolicyModel {
     return filteredActions;
   }
 
+  set _availableActions(actions) {
+    this._availableActions = actions;
+  }
+
   editPolicySettings() {
     this.currentRouter().push(this.kubewardenDefaultsRoute);
   }
 
   get source() {
     if (this.isKubewardenDefaultPolicy) {
-      return 'Default Policy';
+      return 'kubewarden-default';
     }
 
     // right now we are adding 'artifacthub/pkg' anontation
@@ -40,9 +45,9 @@ export default class ClusterAdmissionPolicy extends PolicyModel {
     // that only happens for template based CAP's
     // https://github.com/rancher/kubewarden-ui/issues/682
     if (this.metadata?.annotations?.['artifacthub/pkg']) {
-      return 'Template';
+      return 'template';
     }
 
-    return 'Custom';
+    return 'custom';
   }
 }
