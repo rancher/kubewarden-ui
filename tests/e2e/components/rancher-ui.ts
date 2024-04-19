@@ -1,3 +1,4 @@
+import semver, { Range } from 'semver'
 import type { Locator, Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import jsyaml from 'js-yaml'
@@ -162,5 +163,15 @@ export class RancherUI {
       await this.page.reload()
       await code()
     }
+  }
+
+  isPrime(): boolean {
+    if (!process.env.RANCHER_PRIME) throw new Error('RANCHER_PRIME not set')
+    return process.env.RANCHER_PRIME === 'true'
+  }
+
+  isVersion(query: string|Range): boolean {
+    if (!process.env.RANCHER_VERSION) throw new Error('RANCHER_VERSION not set')
+    return semver.satisfies(process.env.RANCHER_VERSION, query)
   }
 }
