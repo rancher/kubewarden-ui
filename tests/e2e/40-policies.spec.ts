@@ -2,6 +2,7 @@ import { test, expect } from './rancher/rancher-test'
 import { PolicyServer, PolicyServersPage } from './pages/policyservers.page'
 import { AdmissionPoliciesPage, ClusterAdmissionPoliciesPage, BasePolicyPage, Policy } from './pages/policies.page'
 import { RancherUI } from './components/rancher-ui'
+import { RancherAppsPage } from './rancher/rancher-apps.page'
 
 const MODE = process.env.MODE || 'base'
 
@@ -152,18 +153,23 @@ for (const PolicyPage of pageTypes) {
 }
 
 test('Recommended policies', async({ page, ui, nav }) => {
-  test.fail(true, 'https://github.com/rancher/kubewarden-ui/issues/669')
-  const capPage = new ClusterAdmissionPoliciesPage(page)
+  await test.step('Edit Recommended policy settings', async() => {
+    await nav.capolicy()
+    await ui.tableRow('no-privileged-pod').action('Edit Policy Settings')
 
-  await test.step('Settings are rendered correctly', async() => {
+    const apps = new RancherAppsPage(page)
+    await apps.updateApp('rancher-kubewarden-defaults', {
+      navigate : false,
+      questions: async() => {
+        await ui.tab('no-privileged-pod policy settings').click()
+        await ui.checkbox('Skip init containers').check()
+      }
+    })
+
+    const capPage = new ClusterAdmissionPoliciesPage(page)
     await nav.capolicy('no-privileged-pod')
     await ui.button('Config').click()
     await capPage.selectTab('Settings')
-    await expect(ui.checkbox('Skip init containers')).toBeChecked({ checked: false })
-
-    await nav.capolicy('no-privilege-escalation')
-    await ui.button('Config').click()
-    await capPage.selectTab('Settings')
-    await expect(ui.checkbox('Allow privilege escalation')).toBeChecked()
+    await expect(ui.codeMirror).toContainText('skip_init_containers: true')
   })
 })

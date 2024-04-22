@@ -13,9 +13,11 @@ export type YAMLPatch = { [key: string]: unknown } | string | ((patch:any) => vo
  */
 export class RancherUI {
   readonly page: Page
+  readonly codeMirror: Locator
 
   constructor(page: Page) {
     this.page = page
+    this.codeMirror = page.locator('div.CodeMirror-code')
   }
 
   // ==================================================================================================
@@ -103,11 +105,9 @@ export class RancherUI {
    */
   @step
   async editYaml(patch: YAMLPatch) {
-    const cmEditor = this.page.locator('div.CodeMirror-lines[role="presentation"]')
-
     // Load yaml from code editor
-    await expect(cmEditor).toBeVisible()
-    const lines = await cmEditor.locator('pre.CodeMirror-line').allTextContents()
+    await expect(this.codeMirror).toBeVisible()
+    const lines = await this.codeMirror.locator('pre.CodeMirror-line').allTextContents()
     const cmYaml = jsyaml.load(lines.join('\n')
       .replace(/\u00A0/g, ' ') // replace &nbsp; with space
       .replace(/\u200B/g, '') // remove ZERO WIDTH SPACE last line
@@ -125,7 +125,7 @@ export class RancherUI {
     }
 
     // Paste edited yaml
-    await this.page.locator('.CodeMirror-code').click()
+    await this.codeMirror.click()
     await this.page.keyboard.press('Control+A')
     await this.page.keyboard.insertText(jsyaml.dump(cmYaml))
   }
