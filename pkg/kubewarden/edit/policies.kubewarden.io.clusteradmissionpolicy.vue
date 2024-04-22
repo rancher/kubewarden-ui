@@ -1,6 +1,6 @@
 <script>
 import jsyaml from 'js-yaml';
-import { _CREATE, _EDIT } from '@shell/config/query-params';
+import { _CREATE, _EDIT, _CLONE } from '@shell/config/query-params';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import CruResource from '@shell/components/CruResource';
@@ -44,12 +44,22 @@ export default {
     isCreate() {
       return this.realMode === _CREATE;
     },
+
+    isClone() {
+      return this.realMode === _CLONE;
+    }
   },
 
   methods: {
     async finish(event) {
       try {
         removeEmptyAttrs(this.value);
+
+        // remove metadata that identifies a CAP as a default policy, so that we can edit it later on the UI
+        // https://github.com/rancher/kubewarden-ui/issues/682
+        if (this.isClone && this.value.isKubewardenDefaultPolicy && this.value?.metadata?.labels?.['app.kubernetes.io/name'] === 'kubewarden-defaults') {
+          delete this.value?.metadata?.labels?.['app.kubernetes.io/name'];
+        }
 
         await this.save(event);
       } catch (e) {

@@ -3,6 +3,7 @@ import jsyaml from 'js-yaml';
 import { colorForState, stateBackground, stateDisplay } from '@shell/plugins/dashboard-store/resource-class';
 import { get } from '@shell/utils/object';
 
+import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION } from '../types';
 import KubewardenModel, { colorForStatus } from './kubewarden-class';
 
@@ -20,6 +21,41 @@ export default class PolicyModel extends KubewardenModel {
     out.unshift(policyMode);
 
     return out;
+  }
+
+  get kubewardenDefaultsRoute() {
+    let version = '';
+    const cluster = this.$rootGetters['currentCluster']?.id || '_';
+    const helmChart = this.metadata?.labels?.['helm.sh/chart'] || '';
+
+    if (helmChart && helmChart.includes('-')) {
+      const arr = helmChart.split('-');
+
+      if (arr[arr.length - 1].includes('rc')) {
+        version = `${ arr[arr.length - 2] }-${ arr[arr.length - 1] }`;
+      } else {
+        version = arr[arr.length - 1];
+      }
+    }
+
+    const query = {
+      [REPO_TYPE]: 'cluster',
+      [REPO]:      'kubewarden-charts',
+      [CHART]:     'kubewarden-defaults',
+      [VERSION]:   version
+    };
+
+    return {
+      name:   'c-cluster-apps-charts-install',
+      params: { cluster },
+      query,
+    };
+  }
+
+  get isKubewardenDefaultPolicy() {
+    return this.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'Helm' &&
+    this.metadata?.labels?.['app.kubernetes.io/name'] === 'kubewarden-defaults' &&
+    this.metadata?.labels?.['app.kubernetes.io/part-of'] === 'kubewarden';
   }
 
   get stateDisplay() {
