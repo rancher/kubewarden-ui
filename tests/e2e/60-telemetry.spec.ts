@@ -88,7 +88,7 @@ test.describe('Tracing', () => {
     await expect(logline).toBeVisible()
   })
 
-  test('Uninstall', async({ ui, nav }) => {
+  test('Uninstall tracing', async({ ui, nav }) => {
     // Clean up
     await apps.updateApp('rancher-kubewarden-controller', {
       questions: async() => {
@@ -170,7 +170,7 @@ test.describe('Metrics', () => {
       .locator('div:text-matches("[1-9][0-9.]+%")')).toBeVisible({ timeout: 7 * 60_000 })
   })
 
-  test('Uninstall', async({ ui, nav, shell }) => {
+  test('Uninstall metrics', async({ ui, nav, shell }) => {
     // Disable metrics
     await apps.updateApp('rancher-kubewarden-controller', {
       questions: async() => {

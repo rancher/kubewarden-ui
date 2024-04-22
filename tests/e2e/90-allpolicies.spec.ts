@@ -24,7 +24,7 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'Trusted Repos'              : { settings: setupTrustedRepos },
   'User Group PSP'             : { settings: setupUserGroupPSP },
   'Verify Image Signatures'    : { settings: setupVerifyImageSignatures },
-  'Container Resources'        : { settings: setupContainerResources },
+  'Container Resources'        : { settings: setupContainerResources, skip: 'https://github.com/kubewarden/container-resources-policy/issues/33' },
   'PVC StorageClass Validator' : { settings: setupPvcScValidator },
   volumeMounts                 : { settings: setupVolumeMounts },
 }
