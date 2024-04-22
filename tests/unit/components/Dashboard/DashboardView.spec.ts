@@ -19,9 +19,9 @@ describe('component: DashboardView', () => {
         'catalog/charts':                jest.fn(),
         'cluster/all':                   jest.fn(),
         'cluster/canList':               () => true,
-        'prefs/get':                     jest.fn()
+        'prefs/get':                     jest.fn(),
       },
-    }
+    },
   };
 
   const commonComputed = {
@@ -32,14 +32,14 @@ describe('component: DashboardView', () => {
     globalPolicies:     () => [],
     namespacedPolicies: () => [],
     version:            () => '1.25',
-    upgradeAvailable:   () => null
+    upgradeAvailable:   () => null,
   };
 
   const createWrapper = (overrides) => {
     return shallowMount(DashboardView, {
       mocks:    commonMocks,
       computed: commonComputed,
-      ...overrides
+      ...overrides,
     });
   };
 
@@ -92,16 +92,16 @@ describe('component: DashboardView', () => {
       { appVersion: 'v1.0.0-rc2', version: '1.0.0-rc2' },
       { appVersion: 'v1.0.0-rc1', version: '1.0.0-rc1' },
       { appVersion: 'v0.5.5', version: '0.4.6' },
-      { appVersion: 'v0.5.4', version: '0.4.5' }
-    ]
+      { appVersion: 'v0.5.4', version: '0.4.5' },
+    ],
   };
 
   it('renders defaults banner when default app is not found', () => {
     const wrapper = createWrapper({
       stubs: {
         Card:             { template: '<span />' },
-        ConsumptionGauge: { template: '<span />' }
-      }
+        ConsumptionGauge: { template: '<span />' },
+      },
     });
 
     const banner = wrapper.findComponent(DefaultsBanner);
@@ -116,24 +116,24 @@ describe('component: DashboardView', () => {
           state: {
             name:          'running',
             error:         false,
-            transitioning: false
-          }
-        }
+            transitioning: false,
+          },
+        },
       },
       {
         metadata: {
           state: {
             name:          'pending',
             error:         false,
-            transitioning: true
-          }
-        }
-      }
+            transitioning: true,
+          },
+        },
+      },
     ];
 
     const wrapper = createWrapper({
       computed: { policyServerPods: () => pods },
-      stubs:    { DefaultsBanner: { template: '<span />' } }
+      stubs:    { DefaultsBanner: { template: '<span />' } },
     });
 
     const gauges = wrapper.findAllComponents(ConsumptionGauge);
@@ -149,32 +149,34 @@ describe('component: DashboardView', () => {
           policyStatus: 'active',
           error:        false,
         },
-        spec: { mode: 'protect' }
+        spec: { mode: 'protect' },
       },
       {
         status: {
           policyStatus: 'pending',
           error:        false,
         },
-        spec: { mode: 'protect' }
+        spec: { mode: 'protect' },
       },
       {
         status: {
           policyStatus: 'unschedulable',
           error:        true,
         },
-        spec: { mode: 'monitor' }
-      }
+        spec: { mode: 'monitor' },
+      },
     ];
 
     const wrapper = createWrapper({
       computed: { namespacedPolicies: () => policies },
-      stubs:    { DefaultsBanner: { template: '<span />' } }
+      stubs:    { DefaultsBanner: { template: '<span />' } },
     });
 
     const gauges = wrapper.findAllComponents(ConsumptionGauge);
 
-    expect(gauges.at(1).props().capacity).toStrictEqual(policies.length as Number);
+    expect(gauges.at(1).props().capacity).toStrictEqual(
+      policies.length as Number
+    );
     expect(gauges.at(1).props().used).toStrictEqual(1 as Number);
   });
 
@@ -183,16 +185,18 @@ describe('component: DashboardView', () => {
 
     const wrapper = createWrapper({
       computed: {
-        controllerApp:    () => oldControllerApp,
-        controllerChart:  () => controllerCharts,
-        version:          () => 'v1.9.0',
-      }
+        controllerApp:   () => oldControllerApp,
+        controllerChart: () => controllerCharts,
+        version:         () => 'v1.9.0',
+      },
     });
 
     const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 2.0.5');
+    expect(upgradeButton.text()).toContain(
+      '%kubewarden.dashboard.upgrade.chart%: 2.0.5'
+    );
   });
 
   it('calculates the correct chart for a supported MAJOR version upgrade', () => {
@@ -200,16 +204,18 @@ describe('component: DashboardView', () => {
 
     const wrapper = createWrapper({
       computed: {
-        controllerApp:    () => oldControllerApp,
-        controllerChart:  () => controllerCharts,
-        version:          () => 'v0.5.5',
-      }
+        controllerApp:   () => oldControllerApp,
+        controllerChart: () => controllerCharts,
+        version:         () => 'v0.5.5',
+      },
     });
 
     const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 1.0.0');
+    expect(upgradeButton.text()).toContain(
+      '%kubewarden.dashboard.upgrade.chart%: 1.0.0'
+    );
   });
 
   it('calculates the correct chart for a supported MINOR version upgrade', () => {
@@ -217,16 +223,18 @@ describe('component: DashboardView', () => {
 
     const wrapper = createWrapper({
       computed: {
-        controllerApp:    () => oldControllerApp,
-        controllerChart:  () => controllerCharts,
-        version:          () => 'v1.1.0',
-      }
+        controllerApp:   () => oldControllerApp,
+        controllerChart: () => controllerCharts,
+        version:         () => 'v1.1.0',
+      },
     });
 
     const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 1.2.3');
+    expect(upgradeButton.text()).toContain(
+      '%kubewarden.dashboard.upgrade.chart%: 1.2.3'
+    );
   });
 
   it('calculates the correct chart for a supported PATCH version upgrade', () => {
@@ -234,16 +242,18 @@ describe('component: DashboardView', () => {
 
     const wrapper = createWrapper({
       computed: {
-        controllerApp:    () => oldControllerApp,
-        controllerChart:  () => controllerCharts,
-        version:          () => 'v1.8.0',
-      }
+        controllerApp:   () => oldControllerApp,
+        controllerChart: () => controllerCharts,
+        version:         () => 'v1.8.0',
+      },
     });
 
     const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 2.0.5');
+    expect(upgradeButton.text()).toContain(
+      '%kubewarden.dashboard.upgrade.chart%: 2.0.5'
+    );
     expect(wrapper.vm.upgradeAvailable).toBe(controllerCharts.versions[1]);
   });
 
@@ -252,16 +262,18 @@ describe('component: DashboardView', () => {
 
     const wrapper = createWrapper({
       computed: {
-        controllerApp:    () => oldControllerApp,
-        controllerChart:  () => controllerCharts,
-        version:          () => 'v1.7.0',
-      }
+        controllerApp:   () => oldControllerApp,
+        controllerChart: () => controllerCharts,
+        version:         () => 'v1.7.0',
+      },
     });
 
     const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 2.0.2');
+    expect(upgradeButton.text()).toContain(
+      '%kubewarden.dashboard.upgrade.chart%: 2.0.2'
+    );
   });
 
   it('calculates the correct chart for inconsistent appVersion semantics', () => {
@@ -269,16 +281,18 @@ describe('component: DashboardView', () => {
 
     const wrapper = createWrapper({
       computed: {
-        controllerApp:    () => oldControllerApp,
-        controllerChart:  () => controllerCharts,
-        version:          () => '1.5.0',
-      }
+        controllerApp:   () => oldControllerApp,
+        controllerChart: () => controllerCharts,
+        version:         () => '1.5.0',
+      },
     });
 
     const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 1.5.3');
+    expect(upgradeButton.text()).toContain(
+      '%kubewarden.dashboard.upgrade.chart%: 1.5.3'
+    );
   });
 
   it('calculates the correct chart for pre-release versions', () => {
@@ -289,14 +303,16 @@ describe('component: DashboardView', () => {
         controllerApp:   () => oldControllerApp,
         controllerChart: () => controllerCharts,
         version:         () => 'v1.9.0',
-        showPreRelease:  () => true
-      }
+        showPreRelease:  () => true,
+      },
     });
 
     const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain('%kubewarden.dashboard.upgrade.chart%: 2.0.6-rc1');
+    expect(upgradeButton.text()).toContain(
+      '%kubewarden.dashboard.upgrade.chart%: 2.0.6-rc1'
+    );
   });
 
   it('does not show pre-release upgrades when preference is false', () => {
@@ -307,8 +323,8 @@ describe('component: DashboardView', () => {
         controllerApp:   () => oldControllerApp,
         controllerChart: () => controllerCharts,
         version:         () => 'v1.9.0',
-        showPreRelease:  () => false
-      }
+        showPreRelease:  () => false,
+      },
     });
 
     const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
