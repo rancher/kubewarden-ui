@@ -12,7 +12,7 @@ export default class PolicyModel extends KubewardenModel {
     const out = super._availableActions;
 
     const policyMode = {
-      action:  this.isKubewardenDefaultPolicy ? 'kwDefaultEditPolicyMode' : 'toggleUpdateMode',
+      action:  'toggleUpdateMode',
       enabled: this.spec.mode === 'monitor',
       icon:    'icon icon-fw icon-notifier',
       label:   'Update Mode',
@@ -21,10 +21,6 @@ export default class PolicyModel extends KubewardenModel {
     out.unshift(policyMode);
 
     return out;
-  }
-
-  kwDefaultEditPolicyMode() {
-    this.currentRouter().push(this.kubewardenDefaultsRoute);
   }
 
   get kubewardenDefaultsRoute() {

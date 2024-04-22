@@ -5,6 +5,7 @@ export default class ClusterAdmissionPolicy extends PolicyModel {
     const out = super._availableActions;
 
     // remove edit actions for KW default policies
+    // https://github.com/rancher/kubewarden-ui/issues/682
     const filteredActions = out.filter((act) => {
       if (this.isKubewardenDefaultPolicy) {
         return act.action !== 'goToEdit' && act.action !== 'goToEditYaml';
@@ -13,7 +14,8 @@ export default class ClusterAdmissionPolicy extends PolicyModel {
       return act;
     });
 
-    // add Edit Policy Settings
+    // add Edit Policy Settings for default policies
+    // https://github.com/rancher/kubewarden-ui/issues/682
     if (this.isKubewardenDefaultPolicy) {
       const defaultPolicySettings = {
         action:  'editPolicySettings',
