@@ -18,8 +18,7 @@
     "@kubernetes/client-node": "^0.20.0",
     "@rancher/components": "^0.2.1-alpha.0",
     "@rancher/shell": "0.5.3",
-    "@types/lodash": "4.14.196",
-    "core-js": "3.21.1",
+    "core-js": "^3.37.0",
     "css-loader": "4.3.0",
     "v-tooltip": "^2.1.3"
   },
@@ -28,6 +27,7 @@
     "@babel/preset-typescript": "^7.24.1",
     "@jest/globals": "^29.7.0",
     "@jest/types": "^29.6.3",
+    "@types/lodash": "^4.17.0",
     "@types/node": "18.11.9",
     "@types/semver": "^7.5.8",
     "@vue/cli-plugin-unit-jest": "^5.0.8",
