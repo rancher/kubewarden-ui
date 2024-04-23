@@ -55,7 +55,9 @@ on:
 
   pull_request:
     branches: main
-    paths: pkg/kubewarden/**
+    paths:
+      - pkg/kubewarden/**
+      - package.json
 
   workflow_run:
     workflows: ["Build and Release Extension Charts"]
@@ -74,7 +76,7 @@ env:
   TESTBASE: ${{ github.event_name != 'workflow_dispatch' && true || inputs.testbase }}
   TESTPOLICIES: ${{ inputs.testpolicies || false }}
   # Enable QASE integration only for original repo
-  QASE: ${{ github.repository_owner == 'rancher' }}
+  QASE: ${{ github.repository_owner == 'rancher' && github.event_name != 'pull_request'}}
 
 defaults:
   run:
