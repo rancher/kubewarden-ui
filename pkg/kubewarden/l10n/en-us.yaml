@@ -121,7 +121,7 @@ kubewarden:
   clusterAdmissionPolicy:
     title: Cluster Admission Policies
     description: ClusterAdmissionPolicy is a cluster-wide resource. These policies will process all requests within the cluster where the ClusterAdmissionPolicy is defined.
-    kwDefaultsSettingsCompatibility: ClusterAdmissionPolicies that derive from kubewarden-default Helm Chart will not have editable policy settings since the kubewarden-default Helm Chart version should be greater or equal than 1.9.5
+    kwDefaultsSettingsCompatibility: ClusterAdmissionPolicies that derive from kubewarden-default Helm Chart will not have editable policy settings since the kubewarden-default Helm Chart version should be greater or equal than 2.0.0
     defaultsUpdateBtn: Update
   customPolicy:
     badge: Custom
