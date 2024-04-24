@@ -21,6 +21,7 @@ const upMap: AppVersion[] = [
   { app: 'v1.9.0', controller: '2.0.5', crds: '1.4.4' }, // defaults: '1.9.2'
   { app: 'v1.10.0', controller: '2.0.8', crds: '1.4.5' }, // defaults: '1.9.3'
   { app: 'v1.11.0', controller: '2.0.10', crds: '1.4.6' }, // defaults: '1.9.4'
+  { app: 'v1.12.0', controller: '2.0.11', crds: '1.5.0' }, // defaults: '2.0.0'
 ]
 
 test('Initial rancher setup', async({ page, ui, nav }) => {
@@ -239,7 +240,7 @@ test('Check kubewarden resources', async({ page, nav, shell }) => {
     // Ignore known errors
     const ignore = [
       'Reconciler.*object has been modified',
-      'policy_server:.*(TufError|Sigstore)', // Fix in https://github.com/kubewarden/kwctl/issues/753
+      // 'policy_server:.*(TufError|Sigstore)', // Fix in https://github.com/kubewarden/kwctl/issues/753
     ].join('|')
 
     // Check for ERROR text in logs
