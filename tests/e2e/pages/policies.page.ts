@@ -138,6 +138,8 @@ export abstract class BasePolicyPage extends BasePage {
       if (p.settings) {
         await this.selectTab('Settings')
         await p.settings(this.ui)
+        // Wait for generated fields
+        await this.page.waitForTimeout(200)
       }
       if (p.yamlPatch) {
         await this.ui.openView('Edit YAML')

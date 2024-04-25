@@ -51,6 +51,8 @@ export class RancherFleetPage extends BasePage {
           await this.ui.button('Add Path').click()
           await this.page.getByPlaceholder('e.g. /directory/in/your/repo').fill(path)
         }
+        // Wait for generated fields
+        await this.page.waitForTimeout(200)
       }
 
       // Target details
