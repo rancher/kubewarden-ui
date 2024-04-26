@@ -58,7 +58,7 @@ export default {
     kubewardenExtension() {
       const extensionsInstalled = this.$store.getters['uiplugins/plugins'] || [];
 
-      return extensionsInstalled.find(ext => ext.id.includes(KUBEWARDEN_PRODUCT_NAME));
+      return extensionsInstalled?.find(ext => ext?.id?.includes(KUBEWARDEN_PRODUCT_NAME));
     },
     kwDefaultsHelmChartSettingsCompatible() {
       const kwDefaultsVersion = this.kubewardenDefaultsApp?.spec?.chart?.metadata?.version;

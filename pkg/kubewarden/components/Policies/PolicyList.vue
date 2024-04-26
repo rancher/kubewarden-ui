@@ -4,7 +4,6 @@ import { sortBy } from '@shell/utils/sort';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import ResourceTable from '@shell/components/ResourceTable';
-import { KUBEWARDEN } from '../../types';
 
 export default {
   components: { LabeledSelect, ResourceTable },
@@ -37,22 +36,7 @@ export default {
 
   computed: {
     headers() {
-      const headers = this.$store.getters['type-map/headersFor'](this.schema);
-
-      // adding Source col for CAP's
-      // https://github.com/rancher/kubewarden-ui/issues/682
-      if (this.resource === KUBEWARDEN.CLUSTER_ADMISSION_POLICY) {
-        const sourceHeader = {
-          name:  'source',
-          label: 'Source',
-          value: 'source',
-          sort:  ['source'],
-        };
-
-        headers.splice(2, 0, sourceHeader);
-      }
-
-      return headers;
+      return this.$store.getters['type-map/headersFor'](this.schema);
     },
 
     filteredRows() {

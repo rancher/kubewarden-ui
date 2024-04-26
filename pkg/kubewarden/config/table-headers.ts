@@ -34,6 +34,13 @@ export const ADMISSION_POLICY_OPERATIONS = {
   formatter: 'PolicyResources'
 };
 
+export const ADMISSION_POLICY_SOURCE = {
+  name:  'source',
+  label: 'Source',
+  value: 'source',
+  sort:  ['source']
+};
+
 export const POLICY_SERVER_STATE = {
   name:      'state',
   sort:      ['stateSort', 'nameSort'],
@@ -66,6 +73,7 @@ export const RELATED_HEADERS = [
   ADMISSION_POLICY_MODE,
   ADMISSION_POLICY_RESOURCES,
   ADMISSION_POLICY_OPERATIONS,
+  ADMISSION_POLICY_SOURCE,
   {
     name:      'age',
     labelKey:  'tableHeaders.age',
@@ -128,6 +136,7 @@ export const POLICY_HEADERS = [
   },
   ADMISSION_POLICY_RESOURCES,
   ADMISSION_POLICY_OPERATIONS,
+  ADMISSION_POLICY_SOURCE,
   {
     name:      'age',
     labelKey:  'tableHeaders.age',

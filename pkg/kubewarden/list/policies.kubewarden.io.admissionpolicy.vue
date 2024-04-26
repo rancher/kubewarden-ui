@@ -1,6 +1,4 @@
 <script>
-import { mapGetters } from 'vuex';
-
 import { Banner } from '@components/Banner';
 import Loading from '@shell/components/Loading';
 
@@ -27,7 +25,6 @@ export default {
   },
 
   computed: {
-
     rows() {
       return this.$store.getters['cluster/all'](this.resource);
     }

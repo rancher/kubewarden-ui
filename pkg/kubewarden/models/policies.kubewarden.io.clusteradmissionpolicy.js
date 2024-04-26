@@ -2,31 +2,26 @@ import PolicyModel from '../plugins/policy-class';
 
 export default class ClusterAdmissionPolicy extends PolicyModel {
   get _availableActions() {
-    const out = super._availableActions;
+    let actions = super._availableActions;
 
-    // remove edit actions for KW default policies
+    // Remove edit actions for KW default policies and fleet policies
     // https://github.com/rancher/kubewarden-ui/issues/682
-    const filteredActions = out.filter((act) => {
-      if (this.isKubewardenDefaultPolicy) {
-        return act.action !== 'goToEdit' && act.action !== 'goToEditYaml';
-      }
+    if ( this.isKubewardenDefaultPolicy && !this.isDeployedWithFleet) {
+      const editActions = ['goToEdit', 'goToEditYaml'];
 
-      return act;
-    });
+      actions = actions.filter(action => !editActions.includes(action.action));
 
-    // add Edit Policy Settings for default policies
-    // https://github.com/rancher/kubewarden-ui/issues/682
-    if (this.isKubewardenDefaultPolicy) {
+      // Add Edit Policy Settings action
       const defaultPolicySettings = {
-        action:  'editPolicySettings',
-        icon:    'icon icon-edit',
-        label:   'Edit Policy Settings',
+        action: 'editPolicySettings',
+        icon:   'icon icon-edit',
+        label:  'Edit Policy Settings',
       };
 
-      filteredActions.unshift(defaultPolicySettings);
+      actions.unshift(defaultPolicySettings);
     }
 
-    return filteredActions;
+    return actions;
   }
 
   set _availableActions(actions) {
@@ -35,21 +30,5 @@ export default class ClusterAdmissionPolicy extends PolicyModel {
 
   editPolicySettings() {
     this.currentRouter().push(this.kubewardenDefaultsRoute);
-  }
-
-  get source() {
-    if (this.isKubewardenDefaultPolicy) {
-      return 'kubewarden-default';
-    }
-
-    // right now we are adding 'artifacthub/pkg' anontation
-    // so that we can fetch the questions info from there
-    // that only happens for template based CAP's
-    // https://github.com/rancher/kubewarden-ui/issues/682
-    if (this.metadata?.annotations?.['artifacthub/pkg']) {
-      return 'template';
-    }
-
-    return 'custom';
   }
 }

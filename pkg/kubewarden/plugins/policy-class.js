@@ -2,14 +2,15 @@ import jsyaml from 'js-yaml';
 
 import { colorForState, stateBackground, stateDisplay } from '@shell/plugins/dashboard-store/resource-class';
 import { get } from '@shell/utils/object';
-
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
-import { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION } from '../types';
+import { KUBERNETES, WORKSPACE_ANNOTATION } from '@shell/config/labels-annotations';
+
+import { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '../types';
 import KubewardenModel, { colorForStatus } from './kubewarden-class';
 
 export default class PolicyModel extends KubewardenModel {
   get _availableActions() {
-    const out = super._availableActions;
+    let out = super._availableActions;
 
     const policyMode = {
       action:  'toggleUpdateMode',
@@ -19,6 +20,13 @@ export default class PolicyModel extends KubewardenModel {
     };
 
     out.unshift(policyMode);
+
+    // Filter out actions if deployed with fleet
+    if ( this.isDeployedWithFleet ) {
+      const fleetActions = ['goToEdit', 'goToEditYaml', 'toggleUpdateMode'];
+
+      out = out.filter(action => !fleetActions.includes(action.action));
+    }
 
     return out;
   }
@@ -53,9 +61,36 @@ export default class PolicyModel extends KubewardenModel {
   }
 
   get isKubewardenDefaultPolicy() {
-    return this.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'Helm' &&
-    this.metadata?.labels?.['app.kubernetes.io/name'] === 'kubewarden-defaults' &&
-    this.metadata?.labels?.['app.kubernetes.io/part-of'] === 'kubewarden';
+    const labels = this.metadata?.labels;
+    const isManagedByHelm = labels?.[KUBERNETES.MANAGED_BY] === 'Helm';
+    const isKubewardenDefaults = labels?.[KUBERNETES.MANAGED_NAME] === KUBEWARDEN_CHARTS.DEFAULTS;
+    const isPartOfKubewarden = labels?.['app.kubernetes.io/part-of'] === KUBEWARDEN_PRODUCT_NAME;
+
+    return isManagedByHelm && isKubewardenDefaults && isPartOfKubewarden;
+  }
+
+  get isDeployedWithFleet() {
+    return this.metadata?.annotations?.[WORKSPACE_ANNOTATION];
+  }
+
+  get source() {
+    if ( this.isKubewardenDefaultPolicy && !this.isDeployedWithFleet ) {
+      return 'kubewarden-defaults';
+    }
+
+    if ( this.isDeployedWithFleet ) {
+      return 'fleet';
+    }
+
+    // right now we are adding 'artifacthub/pkg' anontation
+    // so that we can fetch the questions info from there
+    // that only happens for template based CAP's
+    // https://github.com/rancher/kubewarden-ui/issues/682
+    if ( this.metadata?.annotations?.['artifacthub/pkg'] ) {
+      return 'template';
+    }
+
+    return 'custom';
   }
 
   get stateDisplay() {
