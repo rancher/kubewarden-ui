@@ -153,6 +153,8 @@ for (const PolicyPage of pageTypes) {
 }
 
 test('Recommended policies', async({ page, ui, nav }) => {
+  test.skip(MODE === 'fleet', 'https://github.com/rancher/kubewarden-ui/pull/703')
+
   await test.step('Edit Recommended policy settings', async() => {
     await nav.capolicy()
     await ui.tableRow('no-privileged-pod').action('Edit Policy Settings')
