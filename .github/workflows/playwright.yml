@@ -224,7 +224,7 @@ jobs:
         MODE: ${{ matrix.mode }}
         RANCHER_URL: https://${{ env.RANCHER_FQDN }}
         ORIGIN: ${{ env.KUBEWARDEN }}
-        QASE_REPORT: ${{ env.QASE == true || '' }} # Pass 'false' as ''
+        QASE_REPORT: ${{ env.QASE == 'true' || '' }} # Pass 'false' as ''
         QASE_APITOKEN: ${{ secrets.QASE_APITOKEN }}
         QASE_RUN_NAME: "Run[${{github.event_name}}]: UI[${{ env.KUBEWARDEN }}] - MODE[${{ matrix.mode }}] - RANCHER[${{ matrix.rancher }}] "
         QASE_RUN_DESCRIPTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -234,39 +234,39 @@ jobs:
 
     # Delete previous run if we have new one
     - name: Find previous QASE run
-      if: ${{ env.QASE == true && !cancelled() && github.run_attempt > 1 }}
+      if: ${{ env.QASE == 'true' && !cancelled() && github.run_attempt > 1 }}
       uses: dawidd6/action-download-artifact@v3
       with:
-        name: QASE_RUN_ID-${{ matrix.mode }}-${{ matrix.rancher }}
+        name: QASE_RUN_ID-${{ matrix.rancher }}-${{ matrix.mode }}
         run_id: ${{ github.run_id }}
         if_no_artifact_found: ignore # maybe first attempt was canceled
         workflow_conclusion: completed
         allow_forks: false
 
     - name: Delete previous QASE run
-      if: ${{ env.QASE == true && !cancelled() && hashFiles('QASE_RUN_ID.txt') != '' }}
+      if: ${{ env.QASE == 'true' && !cancelled() && hashFiles('QASE_RUN_ID.txt') != '' }}
       run: |
         qid=$(< QASE_RUN_ID.txt)
         curl --request DELETE --url https://api.qase.io/v1/run/KUBEWARDEN/$qid --header 'Token: ${{secrets.QASE_APITOKEN_MKRAVEC}}' --header 'accept: application/json'
 
     # Delete current run if it was canceled
     - name: Find current QASE run
-      if: ${{ env.QASE == true && always() && hashFiles('tests/qase-report.log') != '' }}
+      if: ${{ env.QASE == 'true' && always() && hashFiles('tests/qase-report.log') != '' }}
       run: |
         grep -Eo 'qase: Using run [0-9]+' tests/qase-report.log | awk '{print $NF}' | tee QASE_RUN_ID.txt
 
     - name: Delete current QASE run if job was canceled
-      if: ${{ env.QASE == true && cancelled() && hashFiles('tests/qase-report.log') != '' }}
+      if: ${{ env.QASE == 'true' && cancelled() && hashFiles('tests/qase-report.log') != '' }}
       run: |
         qid=$(< QASE_RUN_ID.txt)
         curl --request DELETE --url https://api.qase.io/v1/run/KUBEWARDEN/$qid --header 'Token: ${{secrets.QASE_APITOKEN_MKRAVEC}}' --header 'accept: application/json'
 
     # Set current run ID
     - name: Upload current QASE_RUN_ID
-      if: ${{ env.QASE == true && !cancelled() }}
+      if: ${{ env.QASE == 'true' && !cancelled() }}
       uses: actions/upload-artifact@v4
       with:
-        name: QASE_RUN_ID-${{ matrix.mode }}-${{ matrix.rancher }}
+        name: QASE_RUN_ID-${{ matrix.rancher }}-${{ matrix.mode }}
         path: QASE_RUN_ID.txt
         overwrite: true
         if-no-files-found: ignore
@@ -276,7 +276,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: playwright-report-${{ matrix.mode }}-${{ matrix.rancher }}
+        name: playwright-report-${{ matrix.rancher }}-${{ matrix.mode }}
         path: tests/playwright-report/
         retention-days: 15
 
