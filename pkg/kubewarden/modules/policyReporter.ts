@@ -23,29 +23,38 @@ function isValidAppVersion(controllerApp?: CatalogApp): boolean {
  * @param isClusterLevel
  * @returns `PolicyReport[] | ClusterPolicyReport[] | void`
  */
-export async function getReports(store: Store<any>, isClusterLevel: boolean = false): Promise<Array<PolicyReport | ClusterPolicyReport> | void> {
-  const reportType = isClusterLevel ? WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE : WG_POLICY_K8S.POLICY_REPORT.TYPE;
-  const schema = store.getters['cluster/schemaFor'](reportType);
+export async function getReports(store: Store<any>, isClusterLevel: boolean = false, resourceType?: string): Promise<Array<PolicyReport | ClusterPolicyReport> | void> {
+  const reportTypes = [];
 
-  let controllerApp: CatalogApp | undefined = store.getters['kubewarden/controllerApp'];
-
-  if ( !controllerApp ) {
-    controllerApp = await fetchControllerApp(store);
+  if ( isClusterLevel ) {
+    reportTypes.push(WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
+  }
+  if ( resourceType ) {
+    reportTypes.push(WG_POLICY_K8S.POLICY_REPORT.TYPE);
   }
 
-  if ( schema && isValidAppVersion(controllerApp) ) {
-    try {
-      const reports = await store.dispatch('cluster/findAll', { type: reportType }, { root: true });
+  for ( const reportType of reportTypes ) {
+    const schema = store.getters['cluster/schemaFor'](reportType);
+    let controllerApp: CatalogApp | undefined = store.getters['kubewarden/controllerApp'];
 
-      if (!isEmpty(reports)) {
-        const updateAction = isClusterLevel ? 'kubewarden/updateClusterPolicyReports' : 'kubewarden/updatePolicyReports';
+    if ( !controllerApp ) {
+      controllerApp = await fetchControllerApp(store);
+    }
 
-        reports.forEach((report: PolicyReport | ClusterPolicyReport) => store.dispatch(updateAction, report));
+    if ( schema && isValidAppVersion(controllerApp) ) {
+      try {
+        const reports = await store.dispatch('cluster/findAll', { type: reportType }, { root: true });
 
-        return reports;
+        if ( !isEmpty(reports) ) {
+          const updateAction = reportType === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE ? 'kubewarden/updateClusterPolicyReports' : 'kubewarden/updatePolicyReports';
+
+          reports.forEach((report: PolicyReport | ClusterPolicyReport) => store.dispatch(updateAction, report));
+
+          return reports;
+        }
+      } catch (e) {
+        console.warn(`Error fetching ${ reportType }: ${ e }`); // eslint-disable-line no-console
       }
-    } catch (e) {
-      console.warn(`Error fetching ${ isClusterLevel ? 'ClusterPolicyReports' : 'PolicyReports' }: ${ e }`); // eslint-disable-line no-console
     }
   }
 }
@@ -158,23 +167,23 @@ export async function getFilteredReports(store: Store<any>, resource: any): Prom
 
   if ( schema ) {
     try {
-      let isClusterLevel = false;
+      // Determine if we need to fetch cluster level reports or resource-specific reports
+      const isClusterLevel = resource?.type !== NAMESPACE && !isResourceNamespaced(resource);
+      const resourceType = resource?.type;
 
-      if ( resource?.type === NAMESPACE ) {
-        isClusterLevel = false;
-      } else {
-        isClusterLevel = !isResourceNamespaced(resource);
-      }
-
-      const reports:any = await getReports(store, isClusterLevel);
+      // Fetch the appropriate reports based on the resource context
+      const reports: any = await getReports(store, isClusterLevel, resourceType);
 
       if ( !isEmpty(reports) ) {
+        // Filter and return the applicable report results
         return getFilteredArrayOfReportResults(reports, resource);
       }
     } catch (e) {
       console.warn(`Error fetching PolicyReports: ${ e }`); // eslint-disable-line no-console
     }
   }
+
+  return null;
 }
 
 /**
