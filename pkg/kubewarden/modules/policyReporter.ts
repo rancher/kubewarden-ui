@@ -23,7 +23,12 @@ function isValidAppVersion(controllerApp?: CatalogApp): boolean {
  * @param isClusterLevel
  * @returns `PolicyReport[] | ClusterPolicyReport[] | void`
  */
-export async function getReports(store: Store<any>, isClusterLevel: boolean = false, resourceType?: string): Promise<Array<PolicyReport | ClusterPolicyReport> | void> {
+export async function getReports(
+  store: Store<any>,
+  isClusterLevel: boolean = false,
+  resourceType?: string
+): Promise<Array<PolicyReport | ClusterPolicyReport> | void> {
+  let outReports: Array<PolicyReport | ClusterPolicyReport> = [];
   const reportTypes = [];
 
   if ( isClusterLevel ) {
@@ -51,13 +56,15 @@ export async function getReports(store: Store<any>, isClusterLevel: boolean = fa
 
           reports.forEach((report: PolicyReport | ClusterPolicyReport) => store.dispatch(updateAction, report));
 
-          return reports;
+          outReports = outReports.concat(reports);
         }
       } catch (e) {
         console.warn(`Error fetching ${ reportType }: ${ e }`); // eslint-disable-line no-console
       }
     }
   }
+
+  return outReports;
 }
 
 /**
@@ -67,7 +74,11 @@ export async function getReports(store: Store<any>, isClusterLevel: boolean = fa
  * @param isClusterLevel
  * @returns `PolicyReportSummary | null | void`
  */
-export function getFilteredSummary(store: Store<any>, resource: any, isClusterLevel: boolean = false): PolicyReportSummary | null | void {
+export function getFilteredSummary(
+  store: Store<any>,
+  resource: any,
+  isClusterLevel: boolean = false
+): PolicyReportSummary | null | void {
   const reportKey = isClusterLevel ? 'clusterPolicyReports' : 'policyReports';
   const reports = store.getters[`kubewarden/${ reportKey }`];
 
@@ -104,7 +115,11 @@ export function getFilteredSummary(store: Store<any>, resource: any, isClusterLe
  * @param resource
  * @returns `PolicyReportResult[]`
  */
-function getFilteredArrayOfReportResults(reports: Array<PolicyReport | ClusterPolicyReport>, resource: any, isClusterLevel?: boolean): PolicyReportResult[] {
+function getFilteredArrayOfReportResults(
+  reports: Array<PolicyReport | ClusterPolicyReport>,
+  resource: any,
+  isClusterLevel?: boolean
+): PolicyReportResult[] {
   let outReports: Array<PolicyReport | ClusterPolicyReport> = [];
 
   // Filter out reports based on 'app.kubernetes.io/managed-by' label
@@ -112,8 +127,15 @@ function getFilteredArrayOfReportResults(reports: Array<PolicyReport | ClusterPo
 
   if ( resource?.type === NAMESPACE ) {
     if ( isClusterLevel ) {
-      // Filter ClusterPolicyReports for name, since ClusterPolicyReports don't have a namespace scope
-      outReports = reports.filter(report => report?.scope?.name === resource?.name);
+      // Include both PolicyReports and ClusterPolicyReports for Namespace when isClusterLevel is true
+      outReports = reports.filter((report) => {
+        if (report.scope) {
+          return (
+            report.scope.name === resource.name ||
+            (('namespace' in report.scope) && report.scope.namespace === resource.name)
+          );
+        }
+      });
     } else {
       // Filter PolicyReports for namespace scope
       outReports = reports.filter((report) => {
@@ -135,6 +157,7 @@ function getFilteredArrayOfReportResults(reports: Array<PolicyReport | ClusterPo
         outResults.push({
           ...result,
           scope:      report.scope,
+          kind:       report.kind,
           policyName: result.properties?.['policy-name'],
         });
       });
@@ -174,15 +197,16 @@ export async function getFilteredReports(store: Store<any>, resource: any): Prom
   if ( schema ) {
     try {
       // Determine if we need to fetch cluster level reports or resource-specific reports
-      const isClusterLevel = resource?.type !== NAMESPACE && !isResourceNamespaced(resource);
+      // const isClusterLevel = resource?.type !== NAMESPACE && !isResourceNamespaced(resource);
+      const isClusterLevel = resource?.type === NAMESPACE || !isResourceNamespaced(resource);
       const resourceType = resource?.type;
 
       // Fetch the appropriate reports based on the resource context
-      const reports: any = await getReports(store, isClusterLevel, resourceType);
+      const reports = await getReports(store, isClusterLevel, resourceType);
 
-      if ( !isEmpty(reports) ) {
+      if ( reports && !isEmpty(reports) ) {
         // Filter and return the applicable report results
-        return getFilteredArrayOfReportResults(reports, resource);
+        return getFilteredArrayOfReportResults(reports, resource, isClusterLevel);
       }
     } catch (e) {
       console.warn(`Error fetching PolicyReports: ${ e }`); // eslint-disable-line no-console

@@ -1,9 +1,10 @@
 import { createWrapper } from '@tests/unit/_utils_/wrapper';
 
 import ResourceTab from '@kubewarden/components/PolicyReporter/ResourceTab.vue';
+import { mockPolicyReport, mockClusterPolicyReport } from '../../_templates_/policyReports';
 
 const commons = {
-  mocks:     {
+  mocks: {
     $store: {
       getters: {
         currentCluster:               () => ({ id: 'test-cluster' }),
@@ -23,7 +24,6 @@ describe('ResourceTab.vue', () => {
   it('computes canGetKubewardenLinks correctly', () => {
     const wrapper = wrapperFactory({ propsData: { resource: {} } });
 
-    // Example: Assuming canGetKubewardenLinks depends on some Vuex getters being true/false
     expect(wrapper.vm.canGetKubewardenLinks).toBeTruthy(); // or .toBeFalsy(), based on your logic
   });
 
@@ -31,25 +31,19 @@ describe('ResourceTab.vue', () => {
     const wrapper = wrapperFactory({ propsData: { resource: { type: 'namespace', metadata: { name: 'default' } } } });
 
     await wrapper.vm.$nextTick();
-    wrapper.setData({
-      reports: [{
-        uid: '1', kind: 'Pod', name: 'nginx-pod', result: 'fail', severity: 'critical'
-      }]
-    });
+    wrapper.setData({ reports: [mockPolicyReport, mockClusterPolicyReport] });
 
     await wrapper.vm.$nextTick();
 
     expect(wrapper.find('.pr-tab__container').exists()).toBe(true);
     expect(wrapper.findAll('sortabletable-stub').length).toBe(1);
     expect(wrapper.vm.isNamespaceResource).toBeTruthy();
-    // Additional checks on rendered content, like table rows, based on your logic
   });
 
   it('hasNamespace returns false when namespace is absent', async() => {
     const wrapper = wrapperFactory({ propsData: { resource: { metadata: {} } } });
 
     await wrapper.vm.$nextTick();
-
     expect(wrapper.vm.hasNamespace).toBeFalsy();
   });
 
