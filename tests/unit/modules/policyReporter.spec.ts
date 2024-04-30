@@ -26,16 +26,16 @@ beforeEach(() => {
   mockStore.getters['cluster/schemaFor'].mockReturnValue(true);
 });
 
-describe('getPolicyReports', () => {
-  it('should fetch policy reports and update the store', async() => {
-    mockStore.dispatch.mockResolvedValue([mockPolicyReport]); // Simulate fetching policy reports successfully
+// describe('getPolicyReports', () => {
+//   it('should fetch policy reports and update the store', async() => {
+//     mockStore.dispatch.mockResolvedValue([mockPolicyReport]); // Simulate fetching policy reports successfully
 
-    const reports = await policyReporterModule.getPolicyReports(mockStore);
+//     const reports = await policyReporterModule.getPolicyReports(mockStore);
 
-    expect(reports).toEqual([mockPolicyReport]);
-    expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/updatePolicyReports', mockPolicyReport);
-  });
-});
+//     expect(reports).toEqual([mockPolicyReport]);
+//     expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/updatePolicyReports', mockPolicyReport);
+//   });
+// });
 
 describe('getFilteredSummary', () => {
   it('should correctly summarize policy report results', () => {

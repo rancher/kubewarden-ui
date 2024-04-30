@@ -1,5 +1,5 @@
 <script>
-import { getPolicyReports } from '../../modules/policyReporter';
+import { getReports } from '../../modules/policyReporter';
 
 /**
  * Invisible panel to fetch PolicyReports for ResourceList
@@ -9,7 +9,8 @@ import { getPolicyReports } from '../../modules/policyReporter';
  */
 export default {
   async fetch() {
-    await getPolicyReports(this.$store);
+    await getReports(this.$store, false);
+    await getReports(this.$store, true);
   },
 };
 </script>

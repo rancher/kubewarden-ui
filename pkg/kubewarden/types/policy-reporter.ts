@@ -95,3 +95,12 @@ export interface PolicyReport {
   type: string;
   uid: string;
 }
+
+export interface ClusterPolicyReport extends PolicyReport {
+  scope: {
+    apiVersion: string;
+    kind: string;
+    name: string;
+    uid: string;
+  }
+}

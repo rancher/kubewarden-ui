@@ -1,5 +1,4 @@
 <script>
-import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 import { sortBy } from '@shell/utils/sort';
 
@@ -14,8 +13,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters({ reports: 'kubewarden/policyReports' }),
-
     canShow() {
       if ( !isEmpty(this.summary) ) {
         const counts = [];

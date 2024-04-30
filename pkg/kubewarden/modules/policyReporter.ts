@@ -4,89 +4,147 @@ import semver from 'semver';
 import { randomStr } from '@shell/utils/string';
 import { NAMESPACE } from '@shell/config/types';
 import {
-  KUBEWARDEN, CatalogApp, Severity, Result, PolicyReport, PolicyReportResult, PolicyReportSummary, WG_POLICY_K8S
+  KUBEWARDEN, CatalogApp, Severity, Result, PolicyReport, ClusterPolicyReport, PolicyReportResult, PolicyReportSummary, WG_POLICY_K8S
 } from '../types';
 import * as coreTypes from '../core/core-resources';
 import { createKubewardenRoute } from '../utils/custom-routing';
-import { splitGroupKind } from './core';
+import { splitGroupKind, isResourceNamespaced } from './core';
 import { fetchControllerApp } from './kubewardenController';
 
+function isValidAppVersion(controllerApp?: CatalogApp): boolean {
+  return !!controllerApp &&
+         !!controllerApp.spec?.chart?.metadata?.appVersion &&
+         semver.gte(controllerApp.spec.chart.metadata.appVersion, '1.10.100');
+}
+
 /**
- * Attempts to fetch PolicyReports by dispatching a findAll against `wgpolicyk8s.io.policyreport`
+ * Fetches either PolicyReports or ClusterPolicyReports based on version compatibility and dispatches update actions.
  * @param store
- * @returns `PolicyReport[] | void` - Scaffolded value of a PolicyReport accomplished by scaffoldPolicyReport()
+ * @param isClusterLevel
+ * @returns `PolicyReport[] | ClusterPolicyReport[] | void`
  */
-export async function getPolicyReports(store: Store<any>): Promise<PolicyReport[] | void> {
-  const schema = store.getters['cluster/schemaFor'](WG_POLICY_K8S.POLICY_REPORT.TYPE);
+export async function getReports(store: Store<any>, isClusterLevel: boolean = false): Promise<Array<PolicyReport | ClusterPolicyReport> | void> {
+  const reportType = isClusterLevel ? WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE : WG_POLICY_K8S.POLICY_REPORT.TYPE;
+  const schema = store.getters['cluster/schemaFor'](reportType);
+
   let controllerApp: CatalogApp | undefined = store.getters['kubewarden/controllerApp'];
 
   if ( !controllerApp ) {
     controllerApp = await fetchControllerApp(store);
   }
 
-  if ( schema && controllerApp && controllerApp?.spec?.chart?.metadata?.appVersion ) {
-    // only fetch reports if app version is compatible with new data structure
-    if ( semver.gte(controllerApp.spec.chart.metadata.appVersion, '1.10.100') ) {
-      try {
-        const reports = await fetchPolicyReports(store);
+  if ( schema && isValidAppVersion(controllerApp) ) {
+    try {
+      const reports = await store.dispatch('cluster/findAll', { type: reportType }, { root: true });
 
-        if ( !isEmpty(reports) ) {
-          reports?.forEach((report: PolicyReport) => store.dispatch('kubewarden/updatePolicyReports', report));
+      if (!isEmpty(reports)) {
+        const updateAction = isClusterLevel ? 'kubewarden/updateClusterPolicyReports' : 'kubewarden/updatePolicyReports';
 
-          return reports;
-        }
-      } catch (e) {
-        console.warn(`Error fetching PolicyReports: ${ e }`); // eslint-disable-line no-console
+        reports.forEach((report: PolicyReport | ClusterPolicyReport) => store.dispatch(updateAction, report));
+
+        return reports;
       }
+    } catch (e) {
+      console.warn(`Error fetching ${ isClusterLevel ? 'ClusterPolicyReports' : 'PolicyReports' }: ${ e }`); // eslint-disable-line no-console
     }
   }
 }
 
 /**
- * Dispatches findAll for PolicyReports (`wgpolicyk8s.io.policyreport`)
- * @param store
- * @returns `PolicyReport[] | void`
- */
-export async function fetchPolicyReports(store: Store<any>): Promise<Array<PolicyReport>> {
-  return await store.dispatch('cluster/findAll', { type: WG_POLICY_K8S.POLICY_REPORT.TYPE }, { root: true });
-}
-
-/**
- * Filters PolicyReports to return a summary of the report determined by the scope.
+ * Retrieves a filtered summary for both PolicyReports and ClusterPolicyReports.
  * @param store
  * @param resource
+ * @param isClusterLevel
  * @returns `PolicyReportSummary | null | void`
  */
-export function getFilteredSummary(store: Store<any>, resource: any): PolicyReportSummary | null | void {
-  const schema = store.getters['cluster/schemaFor'](resource.type);
+export function getFilteredSummary(store: Store<any>, resource: any, isClusterLevel: boolean = false): PolicyReportSummary | null | void {
+  const reportKey = isClusterLevel ? 'clusterPolicyReports' : 'policyReports';
+  const reports = store.getters[`kubewarden/${ reportKey }`];
 
-  if ( schema ) {
-    const reports = store.getters['kubewarden/policyReports'];
+  if ( !isEmpty(reports) ) {
+    const filtered: PolicyReportResult[] = getFilteredArrayOfReportResults(reports, resource);
 
-    if ( !isEmpty(reports) ) {
-      const filtered: PolicyReportResult[] = getFilteredArrayOfReportResults(reports, resource);
+    if ( !isEmpty(filtered) ) {
+      const out: PolicyReportSummary = {
+        pass:  0,
+        fail:  0,
+        warn:  0,
+        error: 0,
+        skip:  0
+      };
 
-      if ( !isEmpty(filtered) ) {
-        const out: PolicyReportSummary = {
-          pass:  0,
-          fail:  0,
-          warn:  0,
-          error: 0,
-          skip:  0
-        };
+      filtered.forEach((r: PolicyReportResult) => {
+        const resultVal = r.result;
 
-        filtered?.forEach((r: PolicyReportResult) => {
-          const resultVal = r.result;
+        if (resultVal) {
+          (out as any)[resultVal]++;
+        }
+      });
 
-          if ( resultVal ) {
-            (out as any)[resultVal]++;
-          }
-        });
-
-        return out;
-      }
+      return out;
     }
   }
+
+  return null;
+}
+
+/**
+ * Helper function to filter report results based on resource type and managed-by labels
+ * @param reports
+ * @param resource
+ * @returns `PolicyReportResult[]`
+ */
+function getFilteredArrayOfReportResults(reports: Array<PolicyReport | ClusterPolicyReport>, resource: any): PolicyReportResult[] {
+  let outReports: Array<PolicyReport | ClusterPolicyReport> = [];
+
+  // Filter out reports based on 'app.kubernetes.io/managed-by' label
+  reports = reports.filter(report => report.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'kubewarden');
+
+  if ( resource?.type === NAMESPACE ) {
+    // Filter PolicyReports for namespace, since ClusterPolicyReports don't have a namespace scope
+    outReports = reports.filter((report) => {
+      if ( report.scope ) {
+        return 'namespace' in report.scope && report.scope.namespace === resource?.name;
+      }
+    });
+  } else {
+    outReports = reports;
+  }
+
+  const outResults: PolicyReportResult[] = [];
+
+  // Find the report that is scoped to the resource name
+  if ( resource?.type === 'namespace' ) {
+    outReports.forEach((report: any) => {
+      report.results?.forEach((result: any) => {
+        outResults.push({
+          ...result,
+          scope:      report.scope,
+          policyName: result.properties?.['policy-name'],
+        });
+      });
+    });
+  } else {
+    outReports.forEach((report: any) => {
+      if ( report.scope?.name === resource.metadata.name ) {
+        report.results?.forEach((result: any) => {
+          outResults.push({
+            ...result,
+            policyName: result.properties?.['policy-name'],
+          });
+        });
+      }
+    });
+  }
+
+  if ( !isEmpty(outResults) ) {
+    // Assign uid for SortableTable sub-row
+    outResults?.forEach((report: any) => {
+      Object.assign(report, { uid: randomStr() });
+    });
+  }
+
+  return outResults;
 }
 
 /**
@@ -100,7 +158,15 @@ export async function getFilteredReports(store: Store<any>, resource: any): Prom
 
   if ( schema ) {
     try {
-      const reports:any = await getPolicyReports(store);
+      let isClusterLevel = false;
+
+      if ( resource?.type === NAMESPACE ) {
+        isClusterLevel = false;
+      } else {
+        isClusterLevel = !isResourceNamespaced(resource);
+      }
+
+      const reports:any = await getReports(store, isClusterLevel);
 
       if ( !isEmpty(reports) ) {
         return getFilteredArrayOfReportResults(reports, resource);
@@ -109,62 +175,6 @@ export async function getFilteredReports(store: Store<any>, resource: any): Prom
       console.warn(`Error fetching PolicyReports: ${ e }`); // eslint-disable-line no-console
     }
   }
-}
-
-/**
- * Helper function to get array of Policy Report Results filtered by the correct conditions `wgpolicyk8s.io.policyreport`
- * @param reports
- * @param resource
- * @returns `PolicyReportResult[] | null | void`
- */
-function getFilteredArrayOfReportResults(reports: PolicyReport[], resource: any): PolicyReportResult[] {
-  let outReports: PolicyReport[] = [];
-
-  // If the resource is of type `namespace`, return the all reports for the ns
-  if ( resource?.type === NAMESPACE ) {
-    if ( Array.isArray(reports) ) {
-      outReports = reports.filter((report: PolicyReport) => report.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'kubewarden' && report.scope?.namespace === resource?.name);
-    }
-  } else {
-    outReports = reports.filter((report: PolicyReport) => report.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'kubewarden');
-  }
-
-  const outResults: PolicyReportResult[] = [];
-
-  // Find the report that is scoped to the resource name
-  if ( Array.isArray(outReports) ) {
-    if ( resource?.type === 'namespace' ) {
-      outReports.forEach((report: any) => {
-        report.results?.forEach((result: any) => {
-          outResults.push({
-            ...result,
-            scope:      report.scope,
-            policyName: result.properties?.['policy-name'],
-          });
-        });
-      });
-    } else {
-      outReports.forEach((report: any) => {
-        if ( report.scope?.name === resource.metadata.name ) {
-          report.results?.forEach((result: any) => {
-            outResults.push({
-              ...result,
-              policyName: result.properties?.['policy-name'],
-            });
-          });
-        }
-      });
-    }
-
-    if ( !isEmpty(outResults) ) {
-      // Assign uid for SortableTable sub-row
-      outResults?.forEach((report: any) => {
-        Object.assign(report, { uid: randomStr() });
-      });
-    }
-  }
-
-  return outResults;
 }
 
 /**

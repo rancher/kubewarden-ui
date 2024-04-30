@@ -1,4 +1,6 @@
-import { CatalogApp, CustomResourceDefinition, PolicyReport, PolicyTraceConfig } from '../../types';
+import {
+  CatalogApp, CustomResourceDefinition, PolicyReport, ClusterPolicyReport, PolicyTraceConfig
+} from '../../types';
 import { StateConfig } from './index';
 
 export default {
@@ -9,6 +11,7 @@ export default {
   controllerApp:           (state: StateConfig): CatalogApp | null => state.controllerApp,
   kubewardenCrds:          (state: StateConfig): CustomResourceDefinition[] => state.kubewardenCrds,
   policyReports:           (state: StateConfig): PolicyReport[] => state.policyReports,
+  clusterPolicyReports:    (state: StateConfig): ClusterPolicyReport[] => state.clusterPolicyReports,
   policyTraces:            (state: StateConfig): PolicyTraceConfig[] => state.policyTraces,
   refreshingCharts:        (state: StateConfig): Boolean => state.refreshingCharts,
 };

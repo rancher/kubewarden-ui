@@ -75,3 +75,12 @@ export function namespacedGroups(store: any, apiGroups: ApiGroup[]): ApiGroup[] 
 export function namespacedSchemas(schemas: Schema[]): Schema[] | void {
   return schemas?.filter(schema => !(schema?.attributes?.namespaced === false || undefined));
 }
+
+/**
+ * Determines if a Kubernetes resource is namespaced based on its metadata.
+ * @param resource The Kubernetes resource object.
+ * @returns boolean indicating if the resource is namespaced.
+ */
+export function isResourceNamespaced(resource: any): boolean {
+  return 'namespace' in resource.metadata;
+}

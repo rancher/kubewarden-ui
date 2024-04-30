@@ -1,7 +1,9 @@
 import {
-  CatalogApp, CustomResourceDefinition, PolicyReport, PolicyTrace, PolicyTraceConfig
+  CatalogApp, ClusterPolicyReport, CustomResourceDefinition, PolicyReport, PolicyTrace, PolicyTraceConfig
 } from '../../types';
 import { StateConfig } from './index';
+
+type ReportKeys = 'policyReports' | 'clusterPolicyReports';
 
 export default {
   updateAirGapped(state: StateConfig, val: Boolean) {
@@ -76,20 +78,23 @@ export default {
   },
 
   /**
-   * Updates/Adds policy reports to the state
-   * @param state
-   * @param updatedReport - PolicyReport interface
-   */
-  updatePolicyReports(state: StateConfig, updatedReport: PolicyReport) {
-    const existingReport = state.policyReports.find(report => report.id === updatedReport.id);
+ * Updates/Adds a policy or cluster policy report to the store.
+ * @param state - The current state object.
+ * @param reportArrayKey - The key to the report array in the state to update (e.g., 'policyReports' or 'clusterPolicyReports').
+ * @param updatedReport - The report object to update or add.
+ */
+  updateReports<T extends PolicyReport | ClusterPolicyReport>(
+    state: StateConfig,
+    { reportArrayKey, updatedReport }: { reportArrayKey: ReportKeys, updatedReport: T }
+  ): void {
+    const reportArray = state[reportArrayKey] as Array<T>;
+    const existingReport = reportArray.find(report => report.id === updatedReport.id);
 
     if ( existingReport ) {
-      // We only need to update the results and summary of the report
       existingReport.results = updatedReport.results;
       existingReport.summary = updatedReport.summary;
     } else {
-      // If the report doesn't exist, add it to the store
-      state.policyReports.push(updatedReport);
+      reportArray.push(updatedReport);
     }
   },
 
