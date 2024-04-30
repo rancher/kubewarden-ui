@@ -1,5 +1,5 @@
 import {
-  Resource, PolicyReportResult, PolicyReport, Result, Severity
+  Resource, PolicyReportResult, PolicyReport, ClusterPolicyReport, Result, Severity
 } from '@kubewarden/types';
 
 export const mockResource: Resource = {
@@ -48,4 +48,31 @@ export const mockPolicyReport: PolicyReport = {
   },
   type: 'PolicyReport',
   uid:  'report-uid-123',
+};
+
+export const mockClusterPolicyReport: ClusterPolicyReport = {
+  apiVersion: 'policy.k8s.io/v1beta1',
+  id:         'clusterpolicyreport-123',
+  kind:       'ClusterPolicyReport',
+  metadata:   {
+    labels:            { 'app.kubernetes.io/managed-by': 'kubewarden' },
+    creationTimestamp: '2021-03-19T10:52:00Z',
+    name:              'clusterpolicyreport-123',
+  },
+  results:    [mockPolicyReportResult],
+  scope:      {
+    apiVersion: 'v1',
+    kind:       'Cluster',
+    name:       'cluster-wide',
+    uid:        'cluster-wide-uid',
+  },
+  summary: {
+    fail:  1,
+    pass:  0,
+    warn:  0,
+    error: 0,
+    skip:  0,
+  },
+  type: 'ClusterPolicyReport',
+  uid:  'report-uid-cluster-123',
 };

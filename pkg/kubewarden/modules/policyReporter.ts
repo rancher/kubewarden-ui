@@ -29,7 +29,8 @@ export async function getReports(store: Store<any>, isClusterLevel: boolean = fa
   if ( isClusterLevel ) {
     reportTypes.push(WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
   }
-  if ( resourceType ) {
+
+  if ( resourceType || !isClusterLevel ) {
     reportTypes.push(WG_POLICY_K8S.POLICY_REPORT.TYPE);
   }
 
