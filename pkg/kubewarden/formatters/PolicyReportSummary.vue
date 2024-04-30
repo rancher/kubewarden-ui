@@ -44,9 +44,7 @@ export default {
     },
 
     summary() {
-      const isClusterLevel = this.$attrs.col.name === 'cluster-policy-reports';
-
-      return getFilteredSummary(this.$store, this.value, isClusterLevel);
+      return getFilteredSummary(this.$store, this.value);
     },
 
     summaryParts() {

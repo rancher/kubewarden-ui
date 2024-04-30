@@ -69,44 +69,53 @@ export async function getReports(
 
 /**
  * Retrieves a filtered summary for both PolicyReports and ClusterPolicyReports.
- * @param store
- * @param resource
- * @param isClusterLevel
- * @returns `PolicyReportSummary | null | void`
+ * @param store The store containing the reports.
+ * @param resource The resource for which the summary is generated.
+ * @param isClusterLevel Flag to determine if the summary should include cluster level reports.
+ * @returns `PolicyReportSummary`.
  */
 export function getFilteredSummary(
   store: Store<any>,
   resource: any,
   isClusterLevel: boolean = false
-): PolicyReportSummary | null | void {
-  const reportKey = isClusterLevel ? 'clusterPolicyReports' : 'policyReports';
-  const reports = store.getters[`kubewarden/${ reportKey }`];
+): PolicyReportSummary {
+  const outSummary: PolicyReportSummary = {
+    pass:  0,
+    fail:  0,
+    warn:  0,
+    error: 0,
+    skip:  0
+  };
+  const reportTypes: string[] = [];
 
-  if ( !isEmpty(reports) ) {
-    const filtered: PolicyReportResult[] = getFilteredArrayOfReportResults(reports, resource, isClusterLevel);
+  if ( isClusterLevel || resource?.type === NAMESPACE ) {
+    reportTypes.push(WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
+  }
 
-    if ( !isEmpty(filtered) ) {
-      const out: PolicyReportSummary = {
-        pass:  0,
-        fail:  0,
-        warn:  0,
-        error: 0,
-        skip:  0
-      };
+  if ( isResourceNamespaced(resource) || resource?.type === NAMESPACE ) {
+    reportTypes.push(WG_POLICY_K8S.POLICY_REPORT.TYPE);
+  }
 
-      filtered.forEach((r: PolicyReportResult) => {
-        const resultVal = r.result;
+  for ( const report of reportTypes ) {
+    const storeKey = report === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE ? 'clusterPolicyReports' : 'policyReports';
+    const reports = store.getters[`kubewarden/${ storeKey }`];
 
-        if (resultVal) {
-          (out as any)[resultVal]++;
-        }
-      });
+    if ( !isEmpty(reports) ) {
+      const filtered: PolicyReportResult[] = getFilteredArrayOfReportResults(reports, resource, report === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
 
-      return out;
+      if ( !isEmpty(filtered) ) {
+        filtered.forEach((r: PolicyReportResult) => {
+          const resultVal = r.result;
+
+          if ( resultVal ) {
+            (outSummary as any)[resultVal]++;
+          }
+        });
+      }
     }
   }
 
-  return null;
+  return outSummary;
 }
 
 /**
@@ -197,7 +206,6 @@ export async function getFilteredReports(store: Store<any>, resource: any): Prom
   if ( schema ) {
     try {
       // Determine if we need to fetch cluster level reports or resource-specific reports
-      // const isClusterLevel = resource?.type !== NAMESPACE && !isResourceNamespaced(resource);
       const isClusterLevel = resource?.type === NAMESPACE || !isResourceNamespaced(resource);
       const resourceType = resource?.type;
 
