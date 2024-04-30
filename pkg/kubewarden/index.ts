@@ -64,18 +64,33 @@ export default function($plugin: IPlugin, args: any) {
   );
 
   /** Columns */
+  // Policy Reports for Project Namespaces
   $plugin.addTableColumn(
     TableColumnLocation.RESOURCE,
     { path: [{ urlPath: 'explorer/projectsnamespaces', endsWith: true }] },
     {
       name:      'policy-reports',
-      labelKey:  'kubewarden.policyReporter.headers.label',
+      labelKey:  'kubewarden.policyReporter.headers.policyReports.label',
       getValue:  (row: any) => row,
       weight:    3,
       formatter: 'PolicyReportSummary'
     }
   );
 
+  // Cluster Policy Reports for Project Namespaces
+  $plugin.addTableColumn(
+    TableColumnLocation.RESOURCE,
+    { path: [{ urlPath: 'explorer/projectsnamespaces', endsWith: true }] },
+    {
+      name:      'cluster-policy-reports',
+      labelKey:  'kubewarden.policyReporter.headers.clusterPolicyReports.label',
+      getValue:  (row: any) => row,
+      weight:    2,
+      formatter: 'PolicyReportSummary'
+    }
+  );
+
+  // Policy Reports for namespaced resources
   $plugin.addTableColumn(
     TableColumnLocation.RESOURCE,
     {

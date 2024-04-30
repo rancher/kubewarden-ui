@@ -72,7 +72,7 @@ export function getFilteredSummary(store: Store<any>, resource: any, isClusterLe
   const reports = store.getters[`kubewarden/${ reportKey }`];
 
   if ( !isEmpty(reports) ) {
-    const filtered: PolicyReportResult[] = getFilteredArrayOfReportResults(reports, resource);
+    const filtered: PolicyReportResult[] = getFilteredArrayOfReportResults(reports, resource, isClusterLevel);
 
     if ( !isEmpty(filtered) ) {
       const out: PolicyReportSummary = {
@@ -104,19 +104,24 @@ export function getFilteredSummary(store: Store<any>, resource: any, isClusterLe
  * @param resource
  * @returns `PolicyReportResult[]`
  */
-function getFilteredArrayOfReportResults(reports: Array<PolicyReport | ClusterPolicyReport>, resource: any): PolicyReportResult[] {
+function getFilteredArrayOfReportResults(reports: Array<PolicyReport | ClusterPolicyReport>, resource: any, isClusterLevel?: boolean): PolicyReportResult[] {
   let outReports: Array<PolicyReport | ClusterPolicyReport> = [];
 
   // Filter out reports based on 'app.kubernetes.io/managed-by' label
   reports = reports.filter(report => report.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'kubewarden');
 
   if ( resource?.type === NAMESPACE ) {
-    // Filter PolicyReports for namespace, since ClusterPolicyReports don't have a namespace scope
-    outReports = reports.filter((report) => {
-      if ( report.scope ) {
-        return 'namespace' in report.scope && report.scope.namespace === resource?.name;
-      }
-    });
+    if ( isClusterLevel ) {
+      // Filter ClusterPolicyReports for name, since ClusterPolicyReports don't have a namespace scope
+      outReports = reports.filter(report => report?.scope?.name === resource?.name);
+    } else {
+      // Filter PolicyReports for namespace scope
+      outReports = reports.filter((report) => {
+        if ( report.scope ) {
+          return 'namespace' in report.scope && report.scope.namespace === resource?.name;
+        }
+      });
+    }
   } else {
     outReports = reports;
   }
