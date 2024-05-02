@@ -86,16 +86,20 @@ export default {
 
   methods: {
     canGetResourceLink(row) {
-      const resource = row.scope;
+      const outResource = row.scope;
 
-      if ( resource ) {
-        const isCore = Object.values(coreTypes).find(type => resource.kind === type.attributes.kind);
+      if ( this.resource?.type === NAMESPACE && outResource.kind?.toLowerCase() === NAMESPACE ) {
+        return null;
+      }
+
+      if ( outResource ) {
+        const isCore = Object.values(coreTypes).find(type => outResource.kind === type.attributes.kind);
 
         if ( isCore ) {
-          return this.$store.getters['cluster/schemaFor'](resource.kind?.toLowerCase());
+          return this.$store.getters['cluster/schemaFor'](outResource.kind?.toLowerCase());
         }
 
-        const groupType = splitGroupKind(resource);
+        const groupType = splitGroupKind(outResource);
 
         if ( groupType ) {
           return this.$store.getters['cluster/schemaFor'](groupType);
@@ -157,6 +161,7 @@ export default {
         :table-actions="false"
         :row-actions="false"
         key-field="uid"
+        :group-by="isNamespaceResource ? 'kind' : null"
         :sub-expandable="true"
         :sub-expand-column="true"
         :sub-rows="true"

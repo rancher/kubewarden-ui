@@ -1,5 +1,4 @@
 <script>
-import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 import { sortBy } from '@shell/utils/sort';
 
@@ -14,8 +13,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters({ reports: 'kubewarden/policyReports' }),
-
     canShow() {
       if ( !isEmpty(this.summary) ) {
         const counts = [];
@@ -134,7 +131,7 @@ export default {
 
 <style lang="scss" scoped>
 $height: 30px;
-$width: 143px;
+$width: 100%;
 $error: #614EA2;
 
 .pr-summary {
@@ -147,8 +144,6 @@ $error: #614EA2;
 
     width: $width;
     height: $height;
-
-    border: solid thin var(--sortable-table-top-divider);
 
     .badge {
       padding: 4px;

@@ -1,5 +1,5 @@
 import {
-  CatalogApp, CustomResourceDefinition, PolicyReport, PolicyTraceConfig, PolicyTrace
+  CatalogApp, CustomResourceDefinition, PolicyReport, ClusterPolicyReport, PolicyTraceConfig, PolicyTrace
 } from '../../types';
 
 export default {
@@ -20,12 +20,12 @@ export default {
     commit('updateHideBannerAirgapPolicy', val);
   },
 
-  // Policy reports
-  updatePolicyReports({ commit }: any, val: PolicyReport[]) {
-    commit('updatePolicyReports', val);
+  // Policy and Cluster Policy Reports
+  updatePolicyReports({ commit }: any, updatedReport: PolicyReport) {
+    commit('updateReports', { reportArrayKey: 'policyReports', updatedReport });
   },
-  removePolicyReportById({ commit }: any, val: PolicyReport) {
-    commit('removePolicyReportById', val.id);
+  updateClusterPolicyReports({ commit }: any, updatedReport: ClusterPolicyReport) {
+    commit('updateReports', { reportArrayKey: 'clusterPolicyReports', updatedReport });
   },
 
   // Policy traces

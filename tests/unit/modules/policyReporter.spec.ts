@@ -1,22 +1,21 @@
 import * as policyReporterModule from '@kubewarden/modules/policyReporter.ts';
 import { KUBEWARDEN } from '@kubewarden/types';
-import { mockPolicyReport } from '../_templates_/policyReports';
+import { mockPolicyReport, mockClusterPolicyReport } from '../_templates_/policyReports';
 import { mockControllerApp } from '../_templates_/controllerApp';
 
-// Mocking lodash's isEmpty function//
 jest.mock('lodash/isEmpty', () => ({
   __esModule: true,
   default:    jest.fn().mockImplementation(data => data.length === 0),
 }));
 
-// Mocking @shell/utils/string randomStr function
 jest.mock('@shell/utils/string', () => ({ randomStr: jest.fn().mockReturnValue('randomString') }));
 
 const mockStore = {
   getters: {
-    'cluster/schemaFor':        jest.fn(),
-    'kubewarden/policyReports': [mockPolicyReport],
-    'kubewarden/controllerApp': mockControllerApp
+    'cluster/schemaFor':               jest.fn(),
+    'kubewarden/policyReports':        [mockPolicyReport],
+    'kubewarden/clusterPolicyReports': [mockClusterPolicyReport],
+    'kubewarden/controllerApp':        mockControllerApp
   },
   dispatch: jest.fn(),
 };
@@ -26,11 +25,29 @@ beforeEach(() => {
   mockStore.getters['cluster/schemaFor'].mockReturnValue(true);
 });
 
-describe('getPolicyReports', () => {
-  it('should fetch policy reports and update the store', async() => {
-    mockStore.dispatch.mockResolvedValue([mockPolicyReport]); // Simulate fetching policy reports successfully
+describe('getReports', () => {
+  it('should fetch and dispatch cluster policy reports when cluster level is true', async() => {
+    // Setting up the store to return a cluster policy report
+    mockStore.dispatch.mockResolvedValue([mockClusterPolicyReport]);
+    const reports = await policyReporterModule.getReports(mockStore, true);
 
-    const reports = await policyReporterModule.getPolicyReports(mockStore);
+    expect(reports).toEqual([mockClusterPolicyReport]);
+    expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/updateClusterPolicyReports', mockClusterPolicyReport);
+  });
+
+  it('should fetch and dispatch policy reports when cluster level is false', async() => {
+    // Setting up the store to return a regular policy report
+    mockStore.dispatch.mockResolvedValue([mockPolicyReport]);
+    const reports = await policyReporterModule.getReports(mockStore, false);
+
+    expect(reports).toEqual([mockPolicyReport]);
+    expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/updatePolicyReports', mockPolicyReport);
+  });
+
+  it('should fetch and dispatch policy reports when cluster level is false and resourceType is specified', async() => {
+    // Setting up the store to return a regular policy report
+    mockStore.dispatch.mockResolvedValue([mockPolicyReport]);
+    const reports = await policyReporterModule.getReports(mockStore, false, 'test.resource');
 
     expect(reports).toEqual([mockPolicyReport]);
     expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/updatePolicyReports', mockPolicyReport);
@@ -39,7 +56,12 @@ describe('getPolicyReports', () => {
 
 describe('getFilteredSummary', () => {
   it('should correctly summarize policy report results', () => {
-    const resource = { type: 'pod', metadata: { name: 'mock-pod', uid: 'mock-pod-uid' } };
+    const resource = {
+      type:     'pod',
+      metadata: {
+        name: 'mock-pod', namespace: 'default', uid: 'mock-pod-uid'
+      }
+    };
     const summary = policyReporterModule.getFilteredSummary(mockStore, resource);
 
     expect(summary).toEqual({

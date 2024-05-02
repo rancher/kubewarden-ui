@@ -409,6 +409,12 @@ kubewarden:
       banner:
         unavailable: 'The Policy Reporter UI Deployment is currently in a `{ state }` state, please wait.'
     headers:
+      policyReports:
+        label: Compliance
+        description: Policy Reports are the results of the policy scans that are stored using the PolicyReport Custom Resource.
+      clusterPolicyReports:
+        label: Cluster Compliance
+        description: Cluster Policy Reports are the results of the policy scans that are stored using the ClusterPolicyReport Custom Resource.
       label: Compliance
       description: When using the Kubewarden Audit Scanner, the results of the policy scans are stored using the PolicyReport Custom Resource.
       policyReportsTab:

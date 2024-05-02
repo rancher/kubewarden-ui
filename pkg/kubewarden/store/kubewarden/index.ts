@@ -6,7 +6,8 @@ import {
   CustomResourceDefinition,
   FleetGitRepo,
   PolicyReport,
-  PolicyTraceConfig
+  PolicyTraceConfig,
+  ClusterPolicyReport
 } from '../../types';
 
 import getters from './getters';
@@ -14,16 +15,17 @@ import mutations from './mutations';
 import actions from './actions';
 
 export interface StateConfig {
-  airGapped: Boolean,
-  fleetRepos: FleetGitRepo[],
-  hideBannerDefaults: Boolean,
-  hideBannerArtifactHub: Boolean,
-  hideBannerAirgapPolicy: Boolean,
-  controllerApp: CatalogApp | null,
-  kubewardenCrds: CustomResourceDefinition[],
-  policyReports: PolicyReport[]
-  policyTraces: PolicyTraceConfig[],
-  refreshingCharts: Boolean,
+  airGapped: Boolean;
+  fleetRepos: FleetGitRepo[];
+  hideBannerDefaults: Boolean;
+  hideBannerArtifactHub: Boolean;
+  hideBannerAirgapPolicy: Boolean;
+  controllerApp: CatalogApp | null;
+  kubewardenCrds: CustomResourceDefinition[];
+  policyReports: PolicyReport[];
+  clusterPolicyReports: ClusterPolicyReport[];
+  policyTraces: PolicyTraceConfig[];
+  refreshingCharts: Boolean;
 }
 
 const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
@@ -38,6 +40,7 @@ const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
         controllerApp:          config.controllerApp,
         kubewardenCrds:         config.kubewardenCrds,
         policyReports:          config.policyReports,
+        clusterPolicyReports:   config.clusterPolicyReports,
         policyTraces:           config.policyTraces,
         refreshingCharts:       config.refreshingCharts
       };
@@ -61,6 +64,7 @@ export default {
     controllerApp:          null,
     kubewardenCrds:         [],
     policyReports:          [],
+    clusterPolicyReports:   [],
     policyTraces:           [],
     refreshingCharts:       false
   }),
