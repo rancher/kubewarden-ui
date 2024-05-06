@@ -106,6 +106,14 @@ export default {
       return false;
     },
 
+    defaultsChart() {
+      if ( !isEmpty(this.charts) ) {
+        return this.charts.find(chart => chart?.chartName === KUBEWARDEN_CHARTS.DEFAULTS);
+      }
+
+      return null;
+    },
+
     policyServerPods() {
       if ( this.$store.getters['cluster/canList'](POD) ) {
         const pods = this.allPods?.filter(pod => pod?.metadata?.labels?.[KUBEWARDEN_LABELS.POLICY_SERVER]);
@@ -186,47 +194,17 @@ export default {
       return this.controllerApp?.spec?.chart?.metadata?.appVersion;
     },
 
-    upgradeAvailable() {
+    controllerUpgradeAvailable() {
       if ( this.controllerApp && this.controllerChart ) {
-        const installedAppVersion = this.controllerApp.spec?.chart?.metadata?.appVersion;
-        const installedChartVersion = this.controllerApp.spec?.chart?.metadata?.version;
-        const chartVersions = this.controllerChart.versions;
+        return this.checkUpgradeAvailable(this.controllerApp, this.controllerChart);
+      }
 
-        if ( installedAppVersion ) {
-          const uniqueSortedVersions = Array.from(new Set(chartVersions.map(v => v.appVersion)))
-            .filter(v => this.showPreRelease ? v : !semver.prerelease(v))
-            .sort(semver.compare);
+      return null;
+    },
 
-          let highestVersion = null;
-
-          for ( const version of uniqueSortedVersions ) {
-            const upgradeAvailable = this.getValidUpgrade(installedAppVersion, version, highestVersion);
-
-            if ( upgradeAvailable ) {
-              highestVersion = upgradeAvailable;
-            }
-          }
-
-          if ( !highestVersion ) {
-          // Find the highest chart version for the current appVersion
-            const chartsWithCurrentAppVersion = chartVersions.filter(v => v.appVersion === installedAppVersion);
-            const highestChartForCurrentVersion = chartsWithCurrentAppVersion
-              .sort((a, b) => semver.rcompare(a.version, b.version))[0];
-
-            if ( highestChartForCurrentVersion && semver.gt(highestChartForCurrentVersion.version, installedChartVersion) ) {
-              highestVersion = installedAppVersion;
-            }
-          }
-
-          if ( highestVersion ) {
-          // Find the chart with the highest chart version for the highest appVersion
-            const matchingCharts = chartVersions
-              .filter(v => v.appVersion === highestVersion)
-              .sort((a, b) => semver.rcompare(a.version, b.version));
-
-            return matchingCharts.length > 0 ? matchingCharts[0] : null;
-          }
-        }
+    defaultsUpgradeAvailable() {
+      if ( this.defaultsApp && this.controllerChart ) {
+        return this.checkUpgradeAvailable(this.defaultsApp, this.defaultsChart);
       }
 
       return null;
@@ -336,11 +314,11 @@ export default {
       return null;
     },
 
-    controllerChartRoute() {
-      if ( this.upgradeAvailable ) {
+    getChartRoute(upgradeAvailable) {
+      if ( upgradeAvailable ) {
         const {
           repoType, repoName, name, version
-        } = this.upgradeAvailable;
+        } = upgradeAvailable;
 
         if ( version ) {
           const query = {
@@ -364,7 +342,54 @@ export default {
           handleGrowl({ error, store: this.$store });
         }
       }
+    },
+
+    checkUpgradeAvailable(app, chart) {
+      if ( app && chart ) {
+        const installedAppVersion = app.spec?.chart?.metadata?.appVersion;
+        const installedChartVersion = app.spec?.chart?.metadata?.version;
+        const chartVersions = chart.versions;
+
+        if ( installedAppVersion ) {
+          const uniqueSortedVersions = Array.from(new Set(chartVersions.map(v => v.appVersion)))
+            .filter(v => this.showPreRelease ? v : !semver.prerelease(v))
+            .sort(semver.compare);
+
+          let highestVersion = null;
+
+          for ( const version of uniqueSortedVersions ) {
+            const upgradeAvailable = this.getValidUpgrade(installedAppVersion, version, highestVersion);
+
+            if ( upgradeAvailable ) {
+              highestVersion = upgradeAvailable;
+            }
+          }
+
+          if ( !highestVersion ) {
+            // Find the highest chart version for the current appVersion
+            const chartsWithCurrentAppVersion = chartVersions.filter(v => v.appVersion === installedAppVersion);
+            const highestChartForCurrentVersion = chartsWithCurrentAppVersion
+              .sort((a, b) => semver.rcompare(a.version, b.version))[0];
+
+            if ( highestChartForCurrentVersion && semver.gt(highestChartForCurrentVersion.version, installedChartVersion) ) {
+              highestVersion = installedAppVersion;
+            }
+          }
+
+          if ( highestVersion ) {
+            // Find the chart with the highest chart version for the highest appVersion
+            const matchingCharts = chartVersions
+              .filter(v => v.appVersion === highestVersion)
+              .sort((a, b) => semver.rcompare(a.version, b.version));
+
+            return matchingCharts.length > 0 ? matchingCharts[0] : null;
+          }
+        }
+      }
+
+      return null;
     }
+
   }
 };
 </script>
@@ -396,16 +421,29 @@ export default {
           <div class="head-version bg-primary mr-10">
             {{ t('kubewarden.dashboard.upgrade.appVersion') }}: {{ appVersion }}
           </div>
+          <!-- Controller upgrade -->
           <div
-            v-if="upgradeAvailable"
-            data-testid="kw-app-upgrade-button"
-            class="head-upgrade badge-state bg-warning hand"
+            v-if="controllerUpgradeAvailable"
+            data-testid="kw-app-controller-upgrade-button"
+            class="head-upgrade badge-state bg-warning hand mr-10"
             :disabled="!controllerChart"
-            @click.prevent="controllerChartRoute"
+            @click.prevent="getChartRoute(controllerUpgradeAvailable)"
           >
             <i class="icon icon-upload" />
-            <span>{{ t('kubewarden.dashboard.upgrade.appUpgrade') }}: {{ upgradeAvailable.appVersion }} &nbsp;-&nbsp;</span>
-            <span>{{ t('kubewarden.dashboard.upgrade.chart') }}: {{ upgradeAvailable.version }}</span>
+            <span>{{ t('kubewarden.dashboard.upgrade.appUpgrade') }}: {{ controllerUpgradeAvailable.appVersion }} &nbsp;-&nbsp;</span>
+            <span>{{ t('kubewarden.dashboard.upgrade.chart') }}: {{ controllerUpgradeAvailable.version }}</span>
+          </div>
+          <!-- Defaults upgrade -->
+          <div
+            v-if="defaultsUpgradeAvailable"
+            data-testid="kw-app-defaults-upgrade-button"
+            class="head-upgrade badge-state bg-warning hand"
+            :disabled="!defaultsChart"
+            @click.prevent="getChartRoute(defaultsUpgradeAvailable)"
+          >
+            <i class="icon icon-upload" />
+            <span>{{ t('kubewarden.dashboard.upgrade.defaultsUpgrade') }}: {{ defaultsUpgradeAvailable.appVersion }} &nbsp;-&nbsp;</span>
+            <span>{{ t('kubewarden.dashboard.upgrade.chart') }}: {{ defaultsUpgradeAvailable.version }}</span>
           </div>
         </div>
       </div>
@@ -514,6 +552,7 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    align-content: center;
     gap: $space-m;
     outline: 1px solid var(--border);
     border-radius: var(--border-radius);
@@ -534,10 +573,12 @@ export default {
     &-version-container {
       display: flex;
       flex-direction: row;
+      align-items: center;
     }
 
     &-upgrade {
       display: flex;
+      align-items: center;
     }
 
     &-version, &-upgrade {
