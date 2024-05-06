@@ -32,7 +32,6 @@ export class RancherCommonPage extends BasePage {
      * @param filter Use #id or exact name of the filter
      */
   async setNamespaceFilter(filter: string) {
-    await this.nav.cluster()
     await expect(this.page.getByRole('heading', { name: 'Cluster Dashboard' })).toBeVisible()
 
     const nsMenu = this.page.getByTestId('namespaces-menu')
@@ -54,7 +53,6 @@ export class RancherCommonPage extends BasePage {
   }
 
   async setHelmCharts(option: 'Show Releases Only' | 'Include Prerelease Versions') {
-    await this.nav.userNav('Preferences')
     const btn = this.ui.button(option)
     await btn.click()
     await expect(btn).toHaveClass(/bg-primary/)
@@ -66,7 +64,6 @@ export class RancherCommonPage extends BasePage {
      * @param checked Switch developer features on | off
      */
   async setExtensionDeveloperFeatures(enabled: boolean) {
-    await this.nav.userNav('Preferences')
     await expect(this.page.getByRole('heading', { name: 'Advanced Features' })).toBeVisible()
     await this.ui.checkbox('Enable Extension developer features').setChecked(enabled)
   }

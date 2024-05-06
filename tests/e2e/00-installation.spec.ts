@@ -35,6 +35,7 @@ test('Initial rancher setup', async({ page, ui, nav }) => {
     }
     // Wait for local cluster to be Active
     await ui.tableRow('local').toBeActive()
+    await nav.userNav('Preferences')
     // Enable extension developer features
     await rancher.setExtensionDeveloperFeatures(true)
     // Enable RC Helm Charts

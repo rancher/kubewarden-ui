@@ -19,14 +19,18 @@ export class Shell extends BaseShell {
       const status = options?.status ?? 0
       const timeout = options?.timeout || 60_000
 
-      if (!options?.inPlace) await this.open()
+      if (!options?.inPlace) {
+        await this.open()
+        await expect(this.prompt).toHaveText(/^>\s+$/)
+      }
 
       // Fill is faster but removes newlines, multiline commands require input.pressSequentially
       await this.cursor.fill(`${cmd}; echo EXITSTATUS-$?`)
       await this.cursor.press('Enter')
 
       // Wait - command finished when prompt is empty
-      await expect(this.prompt.getByText(/^>\s+$/)).toBeVisible({ timeout })
+      await expect(this.prompt).toHaveText(/^>\s+$/, { timeout })
+
       // Verify command exit status
       const statusText = await this.status.textContent() || 'Error'
       const statusCode = parseInt(statusText.replace(/EXITSTATUS-/, ''))

@@ -41,7 +41,7 @@ export class Navigation {
     async userNav(to: 'Preferences' | 'Account & API Keys' | 'Log Out') {
       if (this.isblank()) await this.page.goto('/')
 
-      await this.page.locator('div.user-menu').click()
+      await this.page.locator('div.user-image').click()
       await this.page.getByTestId('user-menu-dropdown').getByRole('link', { name: to, exact: true }).click()
     }
 
