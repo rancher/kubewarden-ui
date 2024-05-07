@@ -12,10 +12,10 @@ kubewarden:
     getStarted: Get Started
     issues: Issues
     upgrade:
-      chart: Chart
       appVersion: App Version
       appUpgrade: App Upgrade
-      defaultsUpgrade: Defaults Upgrade
+      controllerChart: Controller
+      defaultsChart: Defaults
     policyReports:
       oldPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Kubewarden App. Please update to version v1.11.0 or newer.'
       newPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Kubewarden extension. Please update to version 1.4.0 or newer.'

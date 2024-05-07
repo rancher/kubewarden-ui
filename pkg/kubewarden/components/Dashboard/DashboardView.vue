@@ -204,7 +204,14 @@ export default {
 
     defaultsUpgradeAvailable() {
       if ( this.defaultsApp && this.controllerChart ) {
-        return this.checkUpgradeAvailable(this.defaultsApp, this.defaultsChart);
+        const defaultsAppVersion = this.defaultsApp.spec?.chart?.metadata?.appVersion;
+        const appVersionSatisfies = semver.satisfies(this.appVersion, `>${ defaultsAppVersion }`);
+
+        if ( appVersionSatisfies ) {
+          return this.checkUpgradeAvailable(this.defaultsApp, this.defaultsChart);
+        }
+
+        return null;
       }
 
       return null;
@@ -430,8 +437,9 @@ export default {
             @click.prevent="getChartRoute(controllerUpgradeAvailable)"
           >
             <i class="icon icon-upload" />
-            <span>{{ t('kubewarden.dashboard.upgrade.appUpgrade') }}: {{ controllerUpgradeAvailable.appVersion }} &nbsp;-&nbsp;</span>
-            <span>{{ t('kubewarden.dashboard.upgrade.chart') }}: {{ controllerUpgradeAvailable.version }}</span>
+            <span>{{ t('kubewarden.dashboard.upgrade.appUpgrade') }}: {{ controllerUpgradeAvailable.appVersion }}</span>
+            <span class="p-0">-</span>
+            <span>{{ t('kubewarden.dashboard.upgrade.controllerChart') }}: {{ controllerUpgradeAvailable.version }}</span>
           </div>
           <!-- Defaults upgrade -->
           <div
@@ -442,8 +450,9 @@ export default {
             @click.prevent="getChartRoute(defaultsUpgradeAvailable)"
           >
             <i class="icon icon-upload" />
-            <span>{{ t('kubewarden.dashboard.upgrade.defaultsUpgrade') }}: {{ defaultsUpgradeAvailable.appVersion }} &nbsp;-&nbsp;</span>
-            <span>{{ t('kubewarden.dashboard.upgrade.chart') }}: {{ defaultsUpgradeAvailable.version }}</span>
+            <span>{{ t('kubewarden.dashboard.upgrade.appUpgrade') }}: {{ defaultsUpgradeAvailable.appVersion }}</span>
+            <span class="p-0">-</span>
+            <span>{{ t('kubewarden.dashboard.upgrade.defaultsChart') }}: {{ defaultsUpgradeAvailable.version }}</span>
           </div>
         </div>
       </div>
