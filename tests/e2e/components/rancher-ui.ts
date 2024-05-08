@@ -165,12 +165,12 @@ export class RancherUI {
     }
   }
 
-  isPrime(): boolean {
+  static isPrime(): boolean {
     if (!process.env.RANCHER_PRIME) throw new Error('RANCHER_PRIME not set')
     return process.env.RANCHER_PRIME === 'true'
   }
 
-  isVersion(query: string|Range): boolean {
+  static isVersion(query: string|Range): boolean {
     if (!process.env.RANCHER_VERSION) throw new Error('RANCHER_VERSION not set')
     return semver.satisfies(process.env.RANCHER_VERSION, query)
   }
