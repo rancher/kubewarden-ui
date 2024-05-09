@@ -190,8 +190,12 @@ export default {
       return this.getPolicyGauges(this.namespacedPolicies);
     },
 
-    appVersion() {
+    controllerAppVersion() {
       return this.controllerApp?.spec?.chart?.metadata?.appVersion;
+    },
+
+    defaultsAppVersion() {
+      return this.defaultsApp?.spec?.chart?.metadata?.appVersion;
     },
 
     controllerUpgradeAvailable() {
@@ -202,16 +206,21 @@ export default {
       return null;
     },
 
-    defaultsUpgradeAvailable() {
-      if ( this.defaultsApp && this.controllerChart ) {
-        const defaultsAppVersion = this.defaultsApp.spec?.chart?.metadata?.appVersion;
-        const appVersionSatisfies = semver.satisfies(this.appVersion, `>${ defaultsAppVersion }`);
-
-        if ( appVersionSatisfies ) {
-          return this.checkUpgradeAvailable(this.defaultsApp, this.defaultsChart);
+    appVersionSatisfies() {
+      if ( this.controllerChart ) {
+        if ( this.defaultsApp ) {
+          return semver.satisfies(this.controllerAppVersion, `=${ this.defaultsAppVersion }`, { includePrerelease: true });
         }
 
-        return null;
+        return true;
+      }
+
+      return null;
+    },
+
+    defaultsUpgradeAvailable() {
+      if ( !this.appVersionSatisfies ) {
+        return this.checkUpgradeAvailable(this.defaultsApp, this.defaultsChart);
       }
 
       return null;
@@ -228,11 +237,10 @@ export default {
     },
 
     policyReportsCompatible() {
-      const controllerAppVersion = this.controllerApp?.spec?.chart?.metadata?.appVersion;
       const uiPluginVersion = this.kubewardenExtension?.version;
 
-      if ( controllerAppVersion && uiPluginVersion) {
-        return newPolicyReportCompatible(controllerAppVersion, uiPluginVersion);
+      if ( this.controllerAppVersion && uiPluginVersion) {
+        return newPolicyReportCompatible(this.controllerAppVersion, uiPluginVersion);
       }
 
       return {
@@ -413,7 +421,7 @@ export default {
     />
     <Banner
       v-else-if="controllerApp && kubewardenExtension && !policyReportsCompatible.oldPolicyReports"
-      :label="t('kubewarden.dashboard.policyReports.oldPolicyReportsIncompatible', { version: controllerApp.spec?.chart?.metadata?.appVersion }, true)"
+      :label="t('kubewarden.dashboard.policyReports.oldPolicyReportsIncompatible', { version: controllerAppVersion }, true)"
       color="warning"
       class="mb-40"
       data-testid="kw-dashboard-pr-incompatible-banner-old-policy-structure"
@@ -424,13 +432,22 @@ export default {
           {{ t('kubewarden.dashboard.intro') }}
         </h1>
 
-        <div v-if="appVersion" class="head-version-container">
+        <div v-if="controllerAppVersion && defaultsApp && !appVersionSatisfies">
+          <Banner
+            :label="t('kubewarden.dashboard.upgrade.appVersionUnsatisfied', { controllerAppVersion, defaultsAppVersion }, true)"
+            color="warning"
+            class="mb-20"
+            data-testid="kw-dashboard-upgrade-unsatisfied-banner"
+          />
+        </div>
+
+        <div v-if="controllerAppVersion" class="head-version-container">
           <div class="head-version bg-primary mr-10">
-            {{ t('kubewarden.dashboard.upgrade.appVersion') }}: {{ appVersion }}
+            {{ t('kubewarden.dashboard.upgrade.appVersion') }}: {{ controllerAppVersion }}
           </div>
           <!-- Controller upgrade -->
           <div
-            v-if="controllerUpgradeAvailable"
+            v-if="controllerUpgradeAvailable && appVersionSatisfies"
             data-testid="kw-app-controller-upgrade-button"
             class="head-upgrade badge-state bg-warning hand mr-10"
             :disabled="!controllerChart"
