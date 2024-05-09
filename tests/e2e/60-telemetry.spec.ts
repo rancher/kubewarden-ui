@@ -179,9 +179,8 @@ test.describe('Metrics', () => {
       }
     })
     // Workaround for https://github.com/rancher/rancher/issues/45167
-    if (ui.isVersion('~2.7')) {
-      await shell.run('k patch clusterrole -n cattle-monitoring-system rancher-monitoring-crd-manager --type json -p \'[{"op": "add", "path": "/rules/0/verbs/-", "value":"list"}]\'')
-    }
+    await shell.run('k patch clusterrole -n cattle-monitoring-system rancher-monitoring-crd-manager --type json -p \'[{"op": "add", "path": "/rules/0/verbs/-", "value":"list"}]\'')
+
     await apps.deleteApp('rancher-monitoring')
     await apps.deleteApp('rancher-monitoring-crd')
     await shell.run('k delete cm -n cattle-dashboards kubewarden-dashboard-policy kubewarden-dashboard-policyserver')

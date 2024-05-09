@@ -1,7 +1,7 @@
 import { expect, test, Locator, Page } from '@playwright/test'
 import { RancherAppsPage } from '../rancher/rancher-apps.page'
 import { BasePage } from '../rancher/basepage'
-import { Shell } from '../components/kubectl-xterm'
+import { Shell } from '../components/kubectl-shell'
 import { step } from '../rancher/rancher-test'
 
 type Pane = 'Policy Servers' | 'Admission Policies' | 'Cluster Admission Policies'

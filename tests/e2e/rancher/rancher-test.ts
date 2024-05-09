@@ -2,7 +2,7 @@ import { test as baseTest, Locator, expect as baseExpect } from '@playwright/tes
 
 import { RancherUI } from '../components/rancher-ui'
 import { Navigation } from '../components/navigation'
-import { Shell } from '../components/kubectl-xterm'
+import { Shell } from '../components/kubectl-shell'
 
 export function step(originalMethod: any, context: ClassMethodDecoratorContext) {
   return function replacementMethod(...args: any) {
