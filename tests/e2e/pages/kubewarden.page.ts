@@ -17,8 +17,10 @@ export class KubewardenPage extends BasePage {
     readonly createPsBtn: Locator;
     readonly createApBtn: Locator;
     readonly createCapBtn: Locator;
-    readonly currentVer: Locator;
-    readonly upgradeVer: Locator;
+    readonly currentApp: Locator;
+    readonly upgradeApp: Locator;
+    readonly upController: Locator;
+    readonly upDefaults: Locator;
 
     constructor(page: Page) {
       super(page)
@@ -27,8 +29,10 @@ export class KubewardenPage extends BasePage {
       this.createCapBtn = this.ui.button('Create Cluster Admission Policy')
 
       const head = this.page.locator('div.head')
-      this.currentVer = head.locator('div.head-version')
-      this.upgradeVer = head.locator('div.head-upgrade')
+      this.currentApp = head.locator('div.head-version')
+      this.upgradeApp = head.locator('div.head-upgrade')
+      this.upController = head.getByTestId('kw-app-controller-upgrade-button')
+      this.upDefaults = head.getByTestId('kw-app-defaults-upgrade-button')
     }
 
     async goto(): Promise<void> {
@@ -49,7 +53,7 @@ export class KubewardenPage extends BasePage {
     @step
     async getCurrentVersion(): Promise<AppVersion> {
       await this.nav.kubewarden()
-      const verText = await this.currentVer.innerText()
+      const verText = await this.currentApp.innerText()
       const parts = verText.split(/\s+/)
       return { app: parts[2] }
     }
@@ -57,9 +61,9 @@ export class KubewardenPage extends BasePage {
     @step
     async getUpgrade(): Promise<AppVersion|null> {
       await this.nav.kubewarden()
-      if (await this.upgradeVer.isVisible()) {
-        // Parse versions from "App Upgrade: v1.9.0 - Chart: 2.0.5"
-        const upText = await this.upgradeVer.innerText()
+      if (await this.upgradeApp.isVisible()) {
+        // Parse versions from "App Upgrade: v1.9.0 - Controller|Defaults: 2.0.5"
+        const upText = await this.upgradeApp.innerText()
         const parts = upText.split(/\s+/)
         return { app: parts[2], controller: parts[5] }
       } else return null
@@ -156,23 +160,35 @@ export class KubewardenPage extends BasePage {
       const to = options?.to
       const apps = new RancherAppsPage(this.page)
 
-      // Check versions before upgrade
-      if (from) await expect(this.currentVer).toContainText(`App Version: ${from.app}`)
-      if (to) await expect(this.upgradeVer).toContainText(`App Upgrade: ${to.app}`)
-      if (to?.controller) await expect(this.upgradeVer).toContainText(`Chart: ${to.controller}`)
+      const shell = new Shell(this.page)
 
-      // Perform upgrade
-      await this.upgradeVer.click()
+      // Check versions before upgrade
+      if (from) await expect(this.currentApp).toContainText(`App Version: ${from.app}`)
+      if (to) await expect(this.upgradeApp).toContainText(`App Upgrade: ${to.app}`)
+
+      // Controller upgrade
+      if (to?.controller) await expect(this.upController).toContainText(`Controller: ${to.controller}`)
+      await this.upController.click()
       if (from?.controller || to?.controller) {
         await expect(apps.stepTitle).toContainText(`${from?.controller || ''} > ${to?.controller || ''}`)
       }
-      await apps.updateApp('rancher-kubewarden-controller', { navigate: false })
+      await apps.updateApp('rancher-kubewarden-controller', { navigate: false, timeout: 120_000 })
+      await shell.waitPods()
+
+      // Defaults upgrade
+      await this.nav.kubewarden()
+      if (to?.defaults) await expect(this.upDefaults).toContainText(`Defaults: ${to.defaults}`)
+      await this.upDefaults.click()
+      if (from?.defaults || to?.defaults) {
+        await expect(apps.stepTitle).toContainText(`${from?.defaults || ''} > ${to?.defaults || ''}`)
+      }
+      await apps.updateApp('rancher-kubewarden-defaults', { navigate: false })
 
       // Check resources are online
       await this.nav.explorer('Apps', 'Installed Apps')
       for (const chart of ['controller', 'crds', 'defaults']) {
         await apps.checkChart(`rancher-kubewarden-${chart}`, to ? to[chart] : undefined)
       }
-      await new Shell(this.page).waitPods()
+      await shell.waitPods()
     }
 }
