@@ -11,7 +11,7 @@
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "playwright-qase-reporter": "^1.2.2",
-    "semver": "^7.6.0"
+    "semver": "^7.6.2"
   },
   "scripts": {}
 }
