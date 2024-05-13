@@ -62,12 +62,14 @@ export class RancherAppsPage extends BasePage {
       }
       await this.ui.button('Create').click()
 
-      // Transitions: Active ?> In Progress ?> [Active|InProgress]
+      // Transitions: Active ?> In Progress ?> [Active|InProgress] - https://github.com/rancher/dashboard/issues/10079
       const repo = await this.ui.tableRow(name).waitFor()
       // Wait out first Active state
       await this.page.waitForTimeout(1000)
       // Refresh for occasional freeze In Progress
       await repo.action('Refresh')
+      // Prevent matching Active before refresh is processed
+      await repo.toHaveState('In Progress')
       await repo.toBeActive()
     }
 

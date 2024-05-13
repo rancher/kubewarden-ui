@@ -70,6 +70,7 @@ on:
 env:
   # Github -> Secrets and variables -> Actions -> New repository variable
   KUBEWARDEN: ${{ inputs.kubewarden || 'rc' }}
+  K3D_VERSION: # 'v5.6.3' - optionally pin version
   K3S_VERSION: ${{ inputs.k3s || 'v1.27.12-k3s1' }}
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
   # First value after the && must be truthy. Otherwise, the value after the || will always be returned
@@ -145,10 +146,9 @@ jobs:
     # ==================================================================================================
     # Create k3d cluster and install rancher
     - name: "Create kubernetes cluster"
-      uses: AbsaOSS/k3d-action@v2.4.0
-      with:
-        cluster-name: ${{ env.K3D_CLUSTER_NAME }}
-        args: "--agents 1 --image rancher/k3s:${{ env.K3S_VERSION }}"
+      run: |
+        TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG k3d-install
+        k3d cluster create ${{ env.K3D_CLUSTER_NAME }} --agents 1 --image rancher/k3s:${{ env.K3S_VERSION }}
 
     - name: Install Rancher
       run: |
@@ -233,21 +233,16 @@ jobs:
     # QASE Integration
 
     # Delete previous run if we have new one
-    - name: Find previous QASE run
-      if: ${{ env.QASE == 'true' && !cancelled() && github.run_attempt > 1 }}
-      uses: dawidd6/action-download-artifact@v3
-      with:
-        name: QASE_RUN_ID-${{ matrix.rancher }}-${{ matrix.mode }}
-        run_id: ${{ github.run_id }}
-        if_no_artifact_found: ignore # maybe first attempt was canceled
-        workflow_conclusion: completed
-        allow_forks: false
-
     - name: Delete previous QASE run
-      if: ${{ env.QASE == 'true' && !cancelled() && hashFiles('QASE_RUN_ID.txt') != '' }}
+      if: ${{ env.QASE == 'true' && !cancelled() && github.run_attempt > 1 }}
       run: |
-        qid=$(< QASE_RUN_ID.txt)
-        curl --request DELETE --url https://api.qase.io/v1/run/KUBEWARDEN/$qid --header 'Token: ${{secrets.QASE_APITOKEN_MKRAVEC}}' --header 'accept: application/json'
+        gh run download ${{ github.run_id }} -n QASE_RUN_ID-${{ matrix.rancher }}-${{ matrix.mode }} ||:
+        if [ -f QASE_RUN_ID.txt ]; then
+          qid=$(< QASE_RUN_ID.txt)
+          curl --request DELETE --url https://api.qase.io/v1/run/KUBEWARDEN/$qid --header 'Token: ${{secrets.QASE_APITOKEN_MKRAVEC}}' --header 'accept: application/json'
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }}
 
     # Delete current run if it was canceled
     - name: Find current QASE run
