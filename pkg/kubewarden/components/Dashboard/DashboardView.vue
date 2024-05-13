@@ -207,9 +207,13 @@ export default {
     },
 
     appVersionSatisfies() {
-      if ( this.controllerChart ) {
+      if ( this.controllerAppVersion ) {
         if ( this.defaultsApp ) {
-          return semver.satisfies(this.controllerAppVersion, `=${ this.defaultsAppVersion }`, { includePrerelease: true });
+          return semver.satisfies(
+            this.controllerAppVersion,
+            `=${ this.defaultsAppVersion }`,
+            { includePrerelease: this.showPreRelease }
+          );
         }
 
         return true;
@@ -285,6 +289,10 @@ export default {
     },
 
     getValidUpgrade(currentVersion, upgradeVersion, highestVersion) {
+      if ( !currentVersion || !upgradeVersion ) {
+        return null;
+      }
+
       const currentMajor = semver.major(currentVersion);
       const currentMinor = semver.minor(currentVersion);
 
