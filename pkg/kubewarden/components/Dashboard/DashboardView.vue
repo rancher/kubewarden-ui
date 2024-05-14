@@ -106,6 +106,14 @@ export default {
       return false;
     },
 
+    defaultsChart() {
+      if ( !isEmpty(this.charts) ) {
+        return this.charts.find(chart => chart?.chartName === KUBEWARDEN_CHARTS.DEFAULTS);
+      }
+
+      return null;
+    },
+
     policyServerPods() {
       if ( this.$store.getters['cluster/canList'](POD) ) {
         const pods = this.allPods?.filter(pod => pod?.metadata?.labels?.[KUBEWARDEN_LABELS.POLICY_SERVER]);
@@ -182,51 +190,41 @@ export default {
       return this.getPolicyGauges(this.namespacedPolicies);
     },
 
-    appVersion() {
+    controllerAppVersion() {
       return this.controllerApp?.spec?.chart?.metadata?.appVersion;
     },
 
-    upgradeAvailable() {
+    defaultsAppVersion() {
+      return this.defaultsApp?.spec?.chart?.metadata?.appVersion;
+    },
+
+    controllerUpgradeAvailable() {
       if ( this.controllerApp && this.controllerChart ) {
-        const installedAppVersion = this.controllerApp.spec?.chart?.metadata?.appVersion;
-        const installedChartVersion = this.controllerApp.spec?.chart?.metadata?.version;
-        const chartVersions = this.controllerChart.versions;
+        return this.checkUpgradeAvailable(this.controllerApp, this.controllerChart);
+      }
 
-        if ( installedAppVersion ) {
-          const uniqueSortedVersions = Array.from(new Set(chartVersions.map(v => v.appVersion)))
-            .filter(v => this.showPreRelease ? v : !semver.prerelease(v))
-            .sort(semver.compare);
+      return null;
+    },
 
-          let highestVersion = null;
-
-          for ( const version of uniqueSortedVersions ) {
-            const upgradeAvailable = this.getValidUpgrade(installedAppVersion, version, highestVersion);
-
-            if ( upgradeAvailable ) {
-              highestVersion = upgradeAvailable;
-            }
-          }
-
-          if ( !highestVersion ) {
-          // Find the highest chart version for the current appVersion
-            const chartsWithCurrentAppVersion = chartVersions.filter(v => v.appVersion === installedAppVersion);
-            const highestChartForCurrentVersion = chartsWithCurrentAppVersion
-              .sort((a, b) => semver.rcompare(a.version, b.version))[0];
-
-            if ( highestChartForCurrentVersion && semver.gt(highestChartForCurrentVersion.version, installedChartVersion) ) {
-              highestVersion = installedAppVersion;
-            }
-          }
-
-          if ( highestVersion ) {
-          // Find the chart with the highest chart version for the highest appVersion
-            const matchingCharts = chartVersions
-              .filter(v => v.appVersion === highestVersion)
-              .sort((a, b) => semver.rcompare(a.version, b.version));
-
-            return matchingCharts.length > 0 ? matchingCharts[0] : null;
-          }
+    appVersionSatisfies() {
+      if ( this.controllerAppVersion ) {
+        if ( this.defaultsApp ) {
+          return semver.satisfies(
+            this.controllerAppVersion,
+            `=${ this.defaultsAppVersion }`,
+            { includePrerelease: this.showPreRelease }
+          );
         }
+
+        return true;
+      }
+
+      return null;
+    },
+
+    defaultsUpgradeAvailable() {
+      if ( !this.appVersionSatisfies ) {
+        return this.checkUpgradeAvailable(this.defaultsApp, this.defaultsChart);
       }
 
       return null;
@@ -243,11 +241,10 @@ export default {
     },
 
     policyReportsCompatible() {
-      const controllerAppVersion = this.controllerApp?.spec?.chart?.metadata?.appVersion;
       const uiPluginVersion = this.kubewardenExtension?.version;
 
-      if ( controllerAppVersion && uiPluginVersion) {
-        return newPolicyReportCompatible(controllerAppVersion, uiPluginVersion);
+      if ( this.controllerAppVersion && uiPluginVersion) {
+        return newPolicyReportCompatible(this.controllerAppVersion, uiPluginVersion);
       }
 
       return {
@@ -292,6 +289,10 @@ export default {
     },
 
     getValidUpgrade(currentVersion, upgradeVersion, highestVersion) {
+      if ( !currentVersion || !upgradeVersion ) {
+        return null;
+      }
+
       const currentMajor = semver.major(currentVersion);
       const currentMinor = semver.minor(currentVersion);
 
@@ -336,11 +337,11 @@ export default {
       return null;
     },
 
-    controllerChartRoute() {
-      if ( this.upgradeAvailable ) {
+    getChartRoute(upgradeAvailable) {
+      if ( upgradeAvailable ) {
         const {
           repoType, repoName, name, version
-        } = this.upgradeAvailable;
+        } = upgradeAvailable;
 
         if ( version ) {
           const query = {
@@ -364,7 +365,54 @@ export default {
           handleGrowl({ error, store: this.$store });
         }
       }
+    },
+
+    checkUpgradeAvailable(app, chart) {
+      if ( app && chart ) {
+        const installedAppVersion = app.spec?.chart?.metadata?.appVersion;
+        const installedChartVersion = app.spec?.chart?.metadata?.version;
+        const chartVersions = chart.versions;
+
+        if ( installedAppVersion ) {
+          const uniqueSortedVersions = Array.from(new Set(chartVersions.map(v => v.appVersion)))
+            .filter(v => this.showPreRelease ? v : !semver.prerelease(v))
+            .sort(semver.compare);
+
+          let highestVersion = null;
+
+          for ( const version of uniqueSortedVersions ) {
+            const upgradeAvailable = this.getValidUpgrade(installedAppVersion, version, highestVersion);
+
+            if ( upgradeAvailable ) {
+              highestVersion = upgradeAvailable;
+            }
+          }
+
+          if ( !highestVersion ) {
+            // Find the highest chart version for the current appVersion
+            const chartsWithCurrentAppVersion = chartVersions.filter(v => v.appVersion === installedAppVersion);
+            const highestChartForCurrentVersion = chartsWithCurrentAppVersion
+              .sort((a, b) => semver.rcompare(a.version, b.version))[0];
+
+            if ( highestChartForCurrentVersion && semver.gt(highestChartForCurrentVersion.version, installedChartVersion) ) {
+              highestVersion = installedAppVersion;
+            }
+          }
+
+          if ( highestVersion ) {
+            // Find the chart with the highest chart version for the highest appVersion
+            const matchingCharts = chartVersions
+              .filter(v => v.appVersion === highestVersion)
+              .sort((a, b) => semver.rcompare(a.version, b.version));
+
+            return matchingCharts.length > 0 ? matchingCharts[0] : null;
+          }
+        }
+      }
+
+      return null;
     }
+
   }
 };
 </script>
@@ -381,7 +429,7 @@ export default {
     />
     <Banner
       v-else-if="controllerApp && kubewardenExtension && !policyReportsCompatible.oldPolicyReports"
-      :label="t('kubewarden.dashboard.policyReports.oldPolicyReportsIncompatible', { version: controllerApp.spec?.chart?.metadata?.appVersion }, true)"
+      :label="t('kubewarden.dashboard.policyReports.oldPolicyReportsIncompatible', { version: controllerAppVersion }, true)"
       color="warning"
       class="mb-40"
       data-testid="kw-dashboard-pr-incompatible-banner-old-policy-structure"
@@ -392,20 +440,44 @@ export default {
           {{ t('kubewarden.dashboard.intro') }}
         </h1>
 
-        <div v-if="appVersion" class="head-version-container">
+        <div v-if="controllerAppVersion && defaultsApp && !appVersionSatisfies">
+          <Banner
+            :label="t('kubewarden.dashboard.upgrade.appVersionUnsatisfied', { controllerAppVersion, defaultsAppVersion }, true)"
+            color="warning"
+            class="mb-20"
+            data-testid="kw-dashboard-upgrade-unsatisfied-banner"
+          />
+        </div>
+
+        <div v-if="controllerAppVersion" class="head-version-container">
           <div class="head-version bg-primary mr-10">
-            {{ t('kubewarden.dashboard.upgrade.appVersion') }}: {{ appVersion }}
+            {{ t('kubewarden.dashboard.upgrade.appVersion') }}: {{ controllerAppVersion }}
           </div>
+          <!-- Controller upgrade -->
           <div
-            v-if="upgradeAvailable"
-            data-testid="kw-app-upgrade-button"
-            class="head-upgrade badge-state bg-warning hand"
+            v-if="controllerUpgradeAvailable && appVersionSatisfies"
+            data-testid="kw-app-controller-upgrade-button"
+            class="head-upgrade badge-state bg-warning hand mr-10"
             :disabled="!controllerChart"
-            @click.prevent="controllerChartRoute"
+            @click.prevent="getChartRoute(controllerUpgradeAvailable)"
           >
             <i class="icon icon-upload" />
-            <span>{{ t('kubewarden.dashboard.upgrade.appUpgrade') }}: {{ upgradeAvailable.appVersion }} &nbsp;-&nbsp;</span>
-            <span>{{ t('kubewarden.dashboard.upgrade.chart') }}: {{ upgradeAvailable.version }}</span>
+            <span>{{ t('kubewarden.dashboard.upgrade.appUpgrade') }}: {{ controllerUpgradeAvailable.appVersion }}</span>
+            <span class="p-0">-</span>
+            <span>{{ t('kubewarden.dashboard.upgrade.controllerChart') }}: {{ controllerUpgradeAvailable.version }}</span>
+          </div>
+          <!-- Defaults upgrade -->
+          <div
+            v-if="defaultsUpgradeAvailable"
+            data-testid="kw-app-defaults-upgrade-button"
+            class="head-upgrade badge-state bg-warning hand"
+            :disabled="!defaultsChart"
+            @click.prevent="getChartRoute(defaultsUpgradeAvailable)"
+          >
+            <i class="icon icon-upload" />
+            <span>{{ t('kubewarden.dashboard.upgrade.appUpgrade') }}: {{ defaultsUpgradeAvailable.appVersion }}</span>
+            <span class="p-0">-</span>
+            <span>{{ t('kubewarden.dashboard.upgrade.defaultsChart') }}: {{ defaultsUpgradeAvailable.version }}</span>
           </div>
         </div>
       </div>
@@ -514,6 +586,7 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    align-content: center;
     gap: $space-m;
     outline: 1px solid var(--border);
     border-radius: var(--border-radius);
@@ -534,10 +607,12 @@ export default {
     &-version-container {
       display: flex;
       flex-direction: row;
+      align-items: center;
     }
 
     &-upgrade {
       display: flex;
+      align-items: center;
     }
 
     &-version, &-upgrade {

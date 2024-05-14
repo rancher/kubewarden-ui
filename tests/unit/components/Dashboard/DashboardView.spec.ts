@@ -191,11 +191,11 @@ describe('component: DashboardView', () => {
       },
     });
 
-    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
     expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.chart%: 2.0.5'
+      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.9.0 - %kubewarden.dashboard.upgrade.controllerChart%: 2.0.5'
     );
   });
 
@@ -210,11 +210,12 @@ describe('component: DashboardView', () => {
       },
     });
 
-    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
     expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.chart%: 1.0.0'
+      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.0.0 - %kubewarden.dashboard.upgrade.controllerChart%: 1.0.0'
+
     );
   });
 
@@ -229,11 +230,11 @@ describe('component: DashboardView', () => {
       },
     });
 
-    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
     expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.chart%: 1.2.3'
+      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.1.1 - %kubewarden.dashboard.upgrade.controllerChart%: 1.2.3'
     );
   });
 
@@ -248,13 +249,13 @@ describe('component: DashboardView', () => {
       },
     });
 
-    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
     expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.chart%: 2.0.5'
+      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.9.0 - %kubewarden.dashboard.upgrade.controllerChart%: 2.0.5'
     );
-    expect(wrapper.vm.upgradeAvailable).toBe(controllerCharts.versions[1]);
+    expect(wrapper.vm.controllerUpgradeAvailable).toBe(controllerCharts.versions[1]);
   });
 
   it('calculates the correct chart for multiple appVersions with chart PATCH available', () => {
@@ -268,11 +269,11 @@ describe('component: DashboardView', () => {
       },
     });
 
-    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
     expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.chart%: 2.0.2'
+      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.8.0 - %kubewarden.dashboard.upgrade.controllerChart%: 2.0.2'
     );
   });
 
@@ -287,11 +288,11 @@ describe('component: DashboardView', () => {
       },
     });
 
-    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
     expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.chart%: 1.5.3'
+      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.6.0 - %kubewarden.dashboard.upgrade.controllerChart%: 1.5.3'
     );
   });
 
@@ -307,11 +308,11 @@ describe('component: DashboardView', () => {
       },
     });
 
-    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(true);
     expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.chart%: 2.0.6-rc1'
+      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.10.0-rc1 - %kubewarden.dashboard.upgrade.controllerChart%: 2.0.6-rc1'
     );
   });
 
@@ -327,7 +328,7 @@ describe('component: DashboardView', () => {
       },
     });
 
-    const upgradeButton = wrapper.find('[data-testid="kw-app-upgrade-button"]');
+    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
 
     expect(upgradeButton.exists()).toBe(false);
   });

@@ -1,4 +1,6 @@
-export default {
+import { CatalogApp } from '@kubewarden/types';
+
+export const mockDefaultsApp: CatalogApp = {
   id:         'cattle-kubewarden-system/rancher-kubewarden-defaults',
   type:       'catalog.cattle.io.app',
   apiVersion: 'catalog.cattle.io/v1',
