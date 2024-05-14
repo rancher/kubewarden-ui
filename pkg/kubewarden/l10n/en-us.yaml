@@ -55,7 +55,7 @@ kubewarden:
         title: Install Cert-Manager Package
         description: The kubewarden-controller depends on cert-manager. You need cert-manager to be installed before installing the kubewarden-controller chart.
         manualStep: |
-          Click the button below and follow the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/quick-start#installation">Documentation</a>, or run the <code>kubectl</code> command to install the latest version of cert-manager:
+          Click the button below and follow the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/next/quick-start#installation">Documentation</a>, or run the <code>kubectl</code> command to install the latest version of cert-manager:
         applyCommand: 'kubectl apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml'
         openShell: Open Kubectl Shell
         stepProgress: The active step will progress once Cert-Manager is installed.
@@ -110,7 +110,7 @@ kubewarden:
     title: Policy Servers
     noDefaultsInstalled:
       description: |
-        The default PolicyServer and policies are not installed, click the button below to begin installing this chart. See the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/quick-start#installation">documentation</a> for more information on installing charts.
+        The default PolicyServer and policies are not installed, click the button below to begin installing this chart. See the <a target="_blank" rel="noopener noreferrer nofollow" href="https://docs.kubewarden.io/next/quick-start#installation">documentation</a> for more information on installing charts.
       button: Install Chart
     policyGauge:
       byStatus: Policies by Status
@@ -150,19 +150,19 @@ kubewarden:
     installOpenTelemetry: |
       Click the button below  or run the <code>kubectl</code> command to install the latest version of OpenTelemetry.
     openTelemetry: |
-      The <a href="https://github.com/open-telemetry/opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Operator</a> must be installed, follow the <a href="https://docs.kubewarden.io/operator-manual/telemetry/opentelemetry/quickstart#install-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to setup the OpenTelemetry Operator.
+      The <a href="https://github.com/open-telemetry/opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Operator</a> must be installed, follow the <a href="https://docs.kubewarden.io/next/howtos/telemetry/opentelemetry-qs" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to setup the OpenTelemetry Operator.
     jaeger: |
-      The <a href="https://github.com/jaegertracing/jaeger-operator" target="_blank" rel="noopener noreferrer nofollow">Jaeger Operator and Instance</a> must be installed, follow the <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to setup tracing for your policies.
+      The <a href="https://github.com/jaegertracing/jaeger-operator" target="_blank" rel="noopener noreferrer nofollow">Jaeger Operator and Instance</a> must be installed, follow the <a href="https://docs.kubewarden.io/next/howtos/telemetry/tracing-qs" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to setup tracing for your policies.
     noRelatedPolicies: No related policies found.
     noRelatedTraces: No tracing data exists for the related policies.
     noTraces: No tracing data exists for this policy.
     config:
       label: |
-        Tracing must be <a href="https://docs.kubewarden.io/operator-manual/telemetry/tracing/quickstart#install-kubewarden" target="_blank" rel="noopener noreferrer nofollow">configured</a> with a Jaeger endpoint in the "Telemetry" tab of the Kubewarden Controller chart settings.
+        Tracing must be <a href="https://docs.kubewarden.io/next/howtos/ui-extension/tracing#update-rancher-kubewarden-controller-with-jaeger-endpoint" target="_blank" rel="noopener noreferrer nofollow">configured</a> with a Jaeger endpoint in the "Telemetry" tab of the Kubewarden Controller chart settings.
       link: Update Config
   monitoring:
     notInstalled: |
-      The Monitoring app is not installed, this will will need to be installed and configured to enable metrics. Follow <a href="https://docs.kubewarden.io/operator-manual/ui-extension/metrics#install" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to add the Kubewarden ServiceMonitor for Prometheus.
+      The Monitoring app is not installed, this will will need to be installed and configured to enable metrics. Follow <a href="https://docs.kubewarden.io/next/howtos/ui-extension/metrics" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to add the Kubewarden ServiceMonitor for Prometheus.
     install: Install Monitoring
     prerequisites:
       label: Prerequisites
@@ -179,7 +179,7 @@ kubewarden:
         install: Install App
         edit: Edit Config
       serviceMonitor:
-        label: A Service Monitor for this Policy Server does not exist. Follow the <a href="https://docs.kubewarden.io/operator-manual/ui-extension/metrics#install" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to learn more about Service Monitors.
+        label: A Service Monitor for this Policy Server does not exist. Follow the <a href="https://docs.kubewarden.io/next/howtos/ui-extension/metrics#install" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to learn more about Service Monitors.
       configMap:
         label: Grafana Dashboards (ConfigMaps) for the Policy Servers and for Kubewarden Policies must be created.
         button: Add Dashboards
@@ -189,7 +189,7 @@ kubewarden:
           other {There are conflicting ConfigMaps, the following must be deleted before proceeding:}
           }
       controllerConfig:
-        label: The Kubewarden Controller must be configured to enable metrics. Follow <a href="https://docs.kubewarden.io/operator-manual/ui-extension/metrics#2-enable-telemetry-for-your-rancher-kubewarden-controller-resource" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to properly configure the kubewarden-controller chart.
+        label: The Kubewarden Controller must be configured to enable metrics. Follow <a href="https://docs.kubewarden.io/next/howtos/ui-extension/metrics#enable-telemetry-for-your-rancher-kubewarden-controller-resource" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to properly configure the kubewarden-controller chart.
         button: Edit Config
     warning:
       noProxy: The Grafana proxy URL can not be found or is configured incorrectly.
@@ -358,7 +358,7 @@ kubewarden:
       tooltip: This is the container image the policy server.
     replicas: Replicas
     registry:
-      description: The PolicyServer allows you to pull policies from OCI registries and HTTP servers, by default HTTPS is enforced with host TLS verification. You can interact with registries using untrusted certificates or even without TLS by using the `insecureSources` setting. This approach is highly discouraged in environments closer to production. More information on configuring custom certificate authorities can be found <a href="https://docs.kubewarden.io/operator-manual/policy-servers/custom-cas" target="_blank" rel="noopener noreferrer nofollow">here</a>.
+      description: The PolicyServer allows you to pull policies from OCI registries and HTTP servers, by default HTTPS is enforced with host TLS verification. You can interact with registries using untrusted certificates or even without TLS by using the `insecureSources` setting. This approach is highly discouraged in environments closer to production. More information on configuring custom certificate authorities can be found <a href="https://docs.kubewarden.io/next/howtos/policy-servers/custom-cas" target="_blank" rel="noopener noreferrer nofollow">here</a>.
     insecureSources:
       title: Insecure Sources
       addLabel: Add Insecure Source
@@ -375,7 +375,7 @@ kubewarden:
         file: Read Certificate from File
     verification:
       label: Verification Config
-      description: This is the name of a VerificationConfig configmap within the same namespace, containing a Sigstore verification configuration. The configuration must be under a key named verification-config in the Configmap. More information can be found in the <a href="https://docs.kubewarden.io/distributing-policies/secure-supply-chain#configuring-the-policy-server-to-check-policy-signatures" target="_blank" rel="noopener noreferrer nofollow">Kubewarden docs</a>.
+      description: This is the name of a VerificationConfig configmap within the same namespace, containing a Sigstore verification configuration. The configuration must be under a key named verification-config in the Configmap. More information can be found in the <a href="https://docs.kubewarden.io/next/howtos/secure-supply-chain#configuring-the-policy-server-to-check-policy-signatures" target="_blank" rel="noopener noreferrer nofollow">Kubewarden docs</a>.
   policyCharts:
     signedPolicy:
       label: Signed
