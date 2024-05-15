@@ -76,6 +76,7 @@ test('Check reports on resources details page', async({ ui, nav }) => {
 
   // Check namespace
   await nav.explorer('Cluster', 'Projects/Namespaces')
+  await expect(ui.tableRow(testNs).column('Compliance').locator('div.bg-error')).toHaveText('2')
   await ui.tableRow(testNs).open()
   await ui.tab('Compliance').click()
   await expect(ui.tableRow({ Name: testPod, Policy: policyPrivpod }).column('Status')).toHaveText('fail')
@@ -85,7 +86,10 @@ test('Cleanup & check results are gone', async({ page, ui, nav, shell }) => {
   const reporter = new PolicyReporterPage(page)
 
   await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
-  await shell.run(`kubectl delete ns ${testNs}`)
+  await shell.runBatch(
+    `kubectl delete ns ${testNs}`,
+    'kubectl delete cpolr,polr -A --all'
+  )
   await ui.tableRow(policyLabels).delete()
 
   await nav.explorer('Kubewarden', 'Policy Reporter')
