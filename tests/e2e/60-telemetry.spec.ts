@@ -71,7 +71,7 @@ test.describe('Tracing', () => {
     })
     // Wait until kubewarden controller restarts policyserver
     const now = new Date().toISOString()
-    await shell.retry(`k logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container --since-time ${now} | grep -F "Everything is ready."`)
+    await shell.retry(`kubectl logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container --since-time ${now} | grep -F "Everything is ready."`)
   })
 
   test('Check traces are visible', async({ ui, nav, shell }) => {
@@ -160,7 +160,7 @@ test.describe('Metrics', () => {
     })
     // Wait until kubewarden controller restarts policyserver
     const now = new Date().toISOString()
-    await shell.retry(`k logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container --since-time ${now} | grep -F "Everything is ready."`)
+    await shell.retry(`kubectl logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container --since-time ${now} | grep -F "Everything is ready."`)
   })
 
   test('Check metrics are visible', async({ page, nav }) => {
@@ -179,11 +179,11 @@ test.describe('Metrics', () => {
       }
     })
     // Workaround for https://github.com/rancher/rancher/issues/45167
-    await shell.run('k patch clusterrole -n cattle-monitoring-system rancher-monitoring-crd-manager --type json -p \'[{"op": "add", "path": "/rules/0/verbs/-", "value":"list"}]\'')
+    await shell.run('kubectl patch clusterrole -n cattle-monitoring-system rancher-monitoring-crd-manager --type json -p \'[{"op": "add", "path": "/rules/0/verbs/-", "value":"list"}]\'')
 
     await apps.deleteApp('rancher-monitoring')
     await apps.deleteApp('rancher-monitoring-crd')
-    await shell.run('k delete cm -n cattle-dashboards kubewarden-dashboard-policy kubewarden-dashboard-policyserver')
+    await shell.run('kubectl delete cm -n cattle-dashboards kubewarden-dashboard-policy kubewarden-dashboard-policyserver')
     // Check
     await nav.pserver('default', 'Metrics')
     await telPage.toBeIncomplete('config')

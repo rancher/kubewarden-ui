@@ -148,7 +148,7 @@ for (const PolicyPage of pageTypes) {
     await polPage.goto()
     await expect(page.getByRole('cell', { name: 'Status' })).toBeVisible()
     await expect(row.row).not.toBeVisible()
-    if (isAP(polPage)) await shell.run(`k delete ns ${p.namespace}`)
+    if (isAP(polPage)) await shell.run(`kubectl delete ns ${p.namespace}`)
   })
 }
 

@@ -44,9 +44,9 @@ test('New resources should be reported', async({ ui, page, nav, shell }) => {
   // Create policy and resources that break rules
   await capPage.goto()
   await shell.runBatch(
-        `k create ns ${testNs}`,
-        `k label ns ${testNs} unsafelbl=secret`,
-        `k run ${testPod} -n ${testNs} --image=nginx:alpine --privileged`,
+        `kubectl create ns ${testNs}`,
+        `kubectl label ns ${testNs} unsafelbl=secret`,
+        `kubectl run ${testPod} -n ${testNs} --image=nginx:alpine --privileged`,
   )
   await capPage.create(p, { wait: true })
 
@@ -85,7 +85,7 @@ test('Cleanup & check results are gone', async({ page, ui, nav, shell }) => {
   const reporter = new PolicyReporterPage(page)
 
   await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
-  await shell.run(`k delete ns ${testNs}`)
+  await shell.run(`kubectl delete ns ${testNs}`)
   await ui.tableRow(policyLabels).delete()
 
   await nav.explorer('Kubewarden', 'Policy Reporter')
