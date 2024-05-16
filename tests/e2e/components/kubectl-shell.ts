@@ -1,8 +1,10 @@
+import { execSync } from 'child_process'
 import { expect, Locator, Page } from '@playwright/test'
-
 import { step } from '../rancher/rancher-test'
 import { Policy, PolicyKind } from '../pages/policies.page'
 import { RancherUI } from './rancher-ui'
+
+type Runner = 'rancher' | 'nodejs'
 
 export class Shell {
     private readonly win: Locator
@@ -12,16 +14,6 @@ export class Shell {
     // Xterm locators
     readonly prompt: Locator
     readonly status: Locator
-
-    /**
-     * Execute single command in shell, opens and closes it by default
-     * @param cmd shell command to execute
-     * @param options.status expected exit code to check, defaults to 0. If NaN check is skipped
-     * @param options.timeout for command to finish, defaults to 60s
-     * @param options.inPlace if true shell is extected to be already open
-     * @returns exit status from executed command
-     */
-    readonly run: (cmd: string, options?: { status?: number, inPlace?: boolean, timeout?: number }) => Promise<number>
 
     constructor(protected readonly page: Page) {
       // Window manager owns kubectl tab
@@ -36,9 +28,6 @@ export class Shell {
       this.prompt = this.screen.locator('div.xterm-rows>div:has(span)').filter({ hasText: '>' }).last()
       // Exit status of last command
       this.status = this.prompt.locator('xpath=preceding-sibling::div[1]')
-
-      // Default command runner
-      this.run = RancherUI.isVersion('>=2.9-0') ? this.runCanvas : this.runXterm
     }
 
     // Open terminal
@@ -53,7 +42,33 @@ export class Shell {
       await this.win.locator('.tab', { hasText: 'Kubectl:' }).locator('i.closer').click()
     }
 
+    /**
+     * Wrapper for invidual shell implementations
+     * @param cmd shell command to execute
+     * @param options.status expected exit code to check, defaults to 0. If NaN check is skipped
+     * @param options.timeout for command to finish, defaults to 60s
+     * @param options.inPlace if true shell is extected to be already open
+     * @param options.runner which runner should execute command, defaults to rancher shell
+     * @returns exit status from executed command
+     */
     @step
+    async run(cmd: string, options?: { status?: number, inPlace?: boolean, timeout?: number, runner?: Runner }): Promise<number> {
+      const runner = options?.runner || 'rancher'
+
+      switch (runner) {
+        case 'nodejs': return this.runExec(cmd, options)
+        case 'rancher':
+          if (RancherUI.isVersion('>=2.9-0')) {
+            return await this.runCanvas(cmd, options)
+          } else {
+            return await this.runXterm(cmd, options)
+          }
+      }
+    }
+
+    /**
+     * Execute command in rancher shell (canvas)
+     */
     async runCanvas(cmd: string, options?: { status?: number, inPlace?: boolean, timeout?: number }): Promise<number> {
       const status = options?.status ?? 0
       const timeout = options?.timeout || 60_000
@@ -90,7 +105,9 @@ export class Shell {
       return statusCode
     }
 
-    @step
+    /**
+     * Execute command in rancher shell (xterm)
+     */
     async runXterm(cmd: string, options?: { status?: number, inPlace?: boolean, timeout?: number }): Promise<number> {
       const status = options?.status ?? 0
       const timeout = options?.timeout || 60_000
@@ -116,6 +133,25 @@ export class Shell {
     }
 
     /**
+     * Execute in nodejs shell
+     * Could produce differents results from Rancher shell since it's running on host os
+     */
+    runExec(cmd: string, options?: { status?: number, timeout?: number }): number {
+      const status = options?.status ?? 0
+      const timeout = options?.timeout || 60_000
+
+      let statusCode = 0
+      try {
+        execSync(cmd, { timeout })
+      } catch (e) {
+        statusCode = e.status
+      }
+
+      if (isFinite(status)) expect(statusCode).toBe(status)
+      return statusCode
+    }
+
+    /**
      * Execute one or more shell commands
      * @param commands to run. They are checked for success.
      */
@@ -135,20 +171,21 @@ export class Shell {
      * @param options.timeout time in seconds, guess short for delay * tries
      */
     @step
-    async retry(cmd: string, options?: { delay?: number, tries?: number, timeout?: number}) {
+    async retry(cmd: string, options?: { delay?: number, tries?: number, timeout?: number, runner?: Runner}) {
       const delay = options?.delay || (options?.timeout ? Math.sqrt(options.timeout) : 10)
       const tries = options?.tries || (options?.timeout ? options.timeout / delay : 5 * 6)
+      const runner = options?.runner || 'nodejs'
 
-      await this.open()
+      if (runner === 'rancher') await this.open()
       for (let i = 1; i < tries; i++) {
         // If command passed break retry loop
-        if (await this.run(cmd, { status: NaN, inPlace: true }) === 0) break
+        if (await this.run(cmd, { status: NaN, inPlace: true, runner }) === 0) break
         // If command failed wait before trying again
         await this.page.waitForTimeout(delay * 1000)
         // Final try
-        if (i === tries - 1) await this.run(cmd, { inPlace: true })
+        if (i === tries - 1) await this.run(cmd, { inPlace: true, runner })
       }
-      await this.close()
+      if (runner === 'rancher') await this.close()
     }
 
     async waitPods(options?: { ns?: string, filter?: string, timeout?: number }) {
@@ -158,14 +195,14 @@ export class Shell {
       await this.retry(`kubectl get pods --no-headers ${ns} ${filter} 2>&1 | sed -E '/([0-9]+)[/]\\1\\s+Running|Completed/d' | wc -l | grep -qx 0`, options)
     }
 
-    async privpod(options?: { name?: string, ns?: string, status?: number }) {
+    privpod(options?: { name?: string, ns?: string, status?: number }) {
       const name = options?.name || `privpod-${Date.now()}`
       const ns = options?.ns ? `-n ${options.ns}` : ''
-      await this.run(`k run ${name} --image=busybox --command --restart=Never -it --rm --privileged ${ns} -- true`, options)
+      this.runExec(`kubectl run ${name} --image=busybox --command --restart=Never -it --rm --privileged ${ns} -- true`, options)
     }
 
-    async waitPolicyState(p: Policy, kind: PolicyKind, state?: 'PolicyActive' | 'PolicyUniquelyReachable') {
+    waitPolicyState(p: Policy, kind: PolicyKind, state?: 'PolicyActive' | 'PolicyUniquelyReachable') {
       const nsarg = (kind === 'AdmissionPolicy' && p.namespace) ? `-n ${p.namespace}` : ''
-      await this.run(`kubectl wait --timeout=5m --for=condition=${state || 'PolicyUniquelyReachable'} ${nsarg} ${kind} ${p.name} `)
+      this.runExec(`kubectl wait --timeout=5m --for=condition=${state || 'PolicyUniquelyReachable'} ${nsarg} ${kind} ${p.name} `)
     }
 }

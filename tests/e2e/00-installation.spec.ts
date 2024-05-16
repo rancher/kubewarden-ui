@@ -15,13 +15,12 @@ const MODE = process.env.MODE || 'base'
 expect(MODE).toMatch(/^(base|fleet|upgrade)$/)
 
 // Known Kubewarden versions for upgrade test, start at [0]
-// Skip defaults version checks - it's not auto updated
 const upMap: AppVersion[] = [
   { app: 'v1.8.0', controller: '2.0.0', crds: '1.4.2', defaults: '1.8.0' },
-  { app: 'v1.9.0', controller: '2.0.5', crds: '1.4.4' }, // defaults: '1.9.2'
-  { app: 'v1.10.0', controller: '2.0.8', crds: '1.4.5' }, // defaults: '1.9.3'
-  { app: 'v1.11.0', controller: '2.0.10', crds: '1.4.6' }, // defaults: '1.9.4'
-  { app: 'v1.12.0', controller: '2.0.11', crds: '1.5.0' }, // defaults: '2.0.0'
+  { app: 'v1.9.0', controller: '2.0.5', crds: '1.4.4', defaults: '1.9.2' },
+  { app: 'v1.10.0', controller: '2.0.8', crds: '1.4.5', defaults: '1.9.3' },
+  { app: 'v1.11.0', controller: '2.0.10', crds: '1.4.6', defaults: '1.9.4' },
+  { app: 'v1.12.0', controller: '2.0.11', crds: '1.5.0', defaults: '2.0.0' },
 ]
 
 test('Initial rancher setup', async({ page, ui, nav }) => {
@@ -118,7 +117,7 @@ test('Install Kubewarden', async({ page, ui, nav, context }) => {
 
 test('Install Kubewarden by Fleet', async({ page, ui }) => {
   test.skip(MODE !== 'fleet')
-  test.setTimeout(15 * 60_000)
+  test.slow()
 
   const fleetPage = new RancherFleetPage(page)
   const repoRow = await fleetPage.addRepository({
@@ -184,6 +183,7 @@ test('Whitelist Artifact Hub', async({ page, ui, nav }) => {
 
 test('Upgrade Kubewarden', async({ page, nav }) => {
   test.skip(MODE !== 'upgrade')
+  test.slow()
 
   const kwPage = new KubewardenPage(page)
   const apps = new RancherAppsPage(page)
@@ -205,8 +205,8 @@ test('Upgrade Kubewarden', async({ page, nav }) => {
       last = next
     }
     // Check there are no more upgrades
-    await expect(kwPage.currentVer).toContainText(`App Version: ${last.app}`)
-    await expect(kwPage.upgradeVer).not.toBeVisible()
+    await expect(kwPage.currentApp).toContainText(`App Version: ${last.app}`)
+    await expect(kwPage.upgradeApp).not.toBeVisible()
   })
 
   await test.step('Upgrade Policy Server', async() => {

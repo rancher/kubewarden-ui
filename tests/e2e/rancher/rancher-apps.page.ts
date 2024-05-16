@@ -166,7 +166,7 @@ export class RancherAppsPage extends BasePage {
       }
 
       // Step 1
-      let v = options.version
+      let v = options?.version
       if (v !== undefined) {
         // Translate 1.9.3 -> ^\s*1[.]9[.]3\s
         if (typeof v === 'string') v = new RegExp(`^\\s*${v.replace(/[.]/g, '[.]')}\\s`)
