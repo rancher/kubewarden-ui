@@ -1,8 +1,13 @@
-import { Chart } from '../types';
+import { Store } from 'vuex';
+import semver from 'semver';
+
+import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
+
+import { CatalogApp, Chart, Version } from '../types';
 import { handleGrowl } from './handle-growl';
 
 export interface RefreshConfig {
-  store: any;
+  store: Store<any>;
   chartName: string;
   retry?: number;
   init?: boolean;
@@ -66,4 +71,187 @@ export async function refreshCharts(config: RefreshConfig): Promise<ReloadReady>
   }
 
   return { reloadReady: false };
+}
+
+/**
+ * Checks if the installed app version satisfies the given constraint.
+ *
+ * @param store - The Vuex store instance.
+ * @param installedAppVersion - The version of the installed application.
+ * @param targetAppVersion - The target application version to compare against.
+ * @param constraint - The semantic versioning constraint.
+ * @returns boolean - True if the installed version satisfies the constraint, otherwise false.
+ */
+export function appVersionSatisfiesConstraint(
+  store: Store<any>,
+  installedAppVersion: string,
+  targetAppVersion?: string,
+  constraint?: string
+): boolean {
+  if ( installedAppVersion ) {
+    if ( targetAppVersion ) {
+      const showPreRelease = store.getters['prefs/get'](SHOW_PRE_RELEASE);
+      const versionRange = `${ constraint }${ targetAppVersion }`;
+
+      return semver.satisfies(
+        installedAppVersion,
+        versionRange,
+        { includePrerelease: showPreRelease }
+      );
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Checks if there is an upgrade available for the installed application.
+ *
+ * @param store - The Vuex store instance.
+ * @param app - The installed application object.
+ * @param chart - The chart object containing version information.
+ * @returns Version | null - The highest available upgrade version or null if no upgrade is available.
+ */
+export function checkUpgradeAvailable(store: Store<any>, app: CatalogApp, chart: Chart): Version | null {
+  if ( app && chart ) {
+    const installedAppVersion = app.spec?.chart?.metadata?.appVersion;
+    const installedChartVersion = app.spec?.chart?.metadata?.version;
+    const chartVersions = chart.versions;
+
+    const showPreRelease = store.getters['prefs/get'](SHOW_PRE_RELEASE);
+
+    if ( installedAppVersion ) {
+      const uniqueSortedVersions = Array.from(new Set(chartVersions?.map(v => v.appVersion)))
+        .filter(v => showPreRelease ? v : !semver.prerelease(v))
+        .sort(semver.compare);
+
+      let highestVersion: string = '';
+
+      for ( const version of uniqueSortedVersions ) {
+        const upgradeAvailable = getValidUpgrade(installedAppVersion, version, highestVersion);
+
+        if ( upgradeAvailable ) {
+          highestVersion = upgradeAvailable;
+        }
+      }
+
+      if ( !highestVersion ) {
+        // Find the highest chart version for the current appVersion
+        const chartsWithCurrentAppVersion = chartVersions?.filter(v => v.appVersion === installedAppVersion);
+
+        if ( !chartsWithCurrentAppVersion ) {
+          return null;
+        }
+
+        const highestChartForCurrentVersion = chartsWithCurrentAppVersion
+          .sort((a, b) => semver.rcompare(a.version, b.version))[0];
+
+        if ( highestChartForCurrentVersion && installedChartVersion && semver.gt(highestChartForCurrentVersion.version, installedChartVersion) ) {
+          highestVersion = installedAppVersion;
+        }
+      }
+
+      if ( highestVersion && chartVersions && chartVersions.length > 0 ) {
+        // Find the chart with the highest chart version for the highest appVersion
+        const matchingCharts = chartVersions
+          .filter(v => v.appVersion === highestVersion)
+          .sort((a, b) => semver.rcompare(a.version, b.version));
+
+        return matchingCharts.length > 0 ? matchingCharts[0] : null;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Validates if an upgrade version is a valid upgrade from the current version.
+ *
+ * @param currentVersion - The current version of the application.
+ * @param upgradeVersion - The potential upgrade version.
+ * @param highestVersion - The highest version found so far.
+ * @returns string | null - The valid upgrade version or null if no valid upgrade is found.
+ */
+function getValidUpgrade(currentVersion: string, upgradeVersion: string, highestVersion: string): string | null {
+  if ( !currentVersion || !upgradeVersion ) {
+    return null;
+  }
+
+  const currentMajor = semver.major(currentVersion);
+  const currentMinor = semver.minor(currentVersion);
+
+  const upgradeMajor = semver.major(upgradeVersion);
+  const upgradeMinor = semver.minor(upgradeVersion);
+  const upgradePatch = semver.patch(upgradeVersion);
+
+  let highestMajor, highestMinor, highestPatch;
+
+  if ( highestVersion ) {
+    highestMajor = semver.major(highestVersion);
+    highestMinor = semver.minor(highestVersion);
+    highestPatch = semver.patch(highestVersion);
+  } else {
+    // Default to current version's major and minor, and -1 for patch if there's no highest version yet
+    highestMajor = currentMajor;
+    highestMinor = currentMinor;
+    highestPatch = -1;
+  }
+
+  // Skip versions that are not upgrades
+  if ( semver.lte(upgradeVersion, currentVersion) ) {
+    return null;
+  }
+
+  // Determine if the upgrade is valid based on the major and minor versions
+  const isValidUpgrade = ( upgradeMajor === currentMajor && upgradeMinor === currentMinor + 1 ) ||
+                         ( upgradeMajor === currentMajor + 1 && upgradeMinor === 0 );
+
+  if ( isValidUpgrade ) {
+    // If it's a valid upgrade, check if it's higher than the current highest version
+    if ( !highestVersion || semver.gt(upgradeVersion, highestVersion) ) {
+      return upgradeVersion;
+    }
+  }
+
+  // Check for a higher patch version within the same minor version
+  if ( upgradeMajor === highestMajor && upgradeMinor === highestMinor && upgradePatch > highestPatch ) {
+    return upgradeVersion;
+  }
+
+  return null;
+}
+
+/**
+ * Finds the kubewarden-defaults chart that has an appVersion matching the appVersion of the installed kubewarden-controller chart.
+ *
+ * @param store - The Vuex store instance.
+ * @param controllerApp - The installed kubewarden-controller application object.
+ * @param defaultsChart - The kubewarden-defaults chart object containing version information.
+ * @returns Version | null - The matching kubewarden-defaults chart version or null if no matching version is found.
+ */
+export function findCompatibleDefaultsChart(
+  controllerApp: CatalogApp,
+  defaultsChart: Chart
+): Version | null {
+  if ( controllerApp && defaultsChart ) {
+    const controllerAppVersion = controllerApp.spec?.chart?.metadata?.appVersion;
+    const defaultsChartVersions = defaultsChart.versions;
+
+    if ( controllerAppVersion ) {
+      // Filter the defaultsChart versions to find a matching appVersion
+      const matchingDefaults = defaultsChartVersions?.filter(v => v.appVersion === controllerAppVersion);
+
+      if ( matchingDefaults && matchingDefaults.length > 0 ) {
+        // Sort the matching versions and return the highest one
+        const highestMatchingDefaults = matchingDefaults.sort((a, b) => semver.rcompare(a.version, b.version))[0];
+
+        return highestMatchingDefaults;
+      }
+    }
+  }
+
+  return null;
 }

@@ -10,7 +10,8 @@ import { Banner } from '@components/Banner';
 import { KUBEWARDEN_CHARTS } from '../types';
 import { getLatestStableVersion } from '../plugins/kubewarden-class';
 import { handleGrowl } from '../utils/handle-growl';
-import { refreshCharts } from '../utils/chart';
+import { refreshCharts, findCompatibleDefaultsChart } from '../utils/chart';
+import { fetchControllerApp } from '../modules/kubewardenController';
 
 export default {
   components: { Banner },
@@ -22,7 +23,7 @@ export default {
     },
   },
 
-  fetch() {
+  async fetch() {
     this.debouncedRefreshCharts = debounce((init = false) => {
       refreshCharts({
         store: this.$store, chartName: KUBEWARDEN_CHARTS.CONTROLLER, init
@@ -32,6 +33,10 @@ export default {
     if ( !this.defaultsChart ) {
       this.debouncedRefreshCharts(true);
     }
+
+    if ( !this.controllerApp ) {
+      await fetchControllerApp(this.$store);
+    }
   },
 
   data() {
@@ -40,7 +45,13 @@ export default {
 
   computed: {
     ...mapGetters(['currentCluster']),
-    ...mapGetters({ charts: 'catalog/charts', t: 'i18n/t' }),
+    ...mapGetters({
+      charts: 'catalog/charts', t: 'i18n/t', controllerApp: 'kubewarden/controllerApp'
+    }),
+
+    controllerAppVersion() {
+      return this.controllerApp?.spec?.chart?.metadata?.appVersion;
+    },
 
     defaultsChart() {
       if ( this.kubewardenRepo ) {
@@ -49,6 +60,16 @@ export default {
           repoType:  this.kubewardenRepo.repoType,
           chartName: KUBEWARDEN_CHARTS.DEFAULTS
         });
+      }
+
+      return null;
+    },
+
+    highestCompatibleDefaultsChart() {
+      if ( this.controllerAppVersion && this.defaultsChart ) {
+        const compatibleVersion = findCompatibleDefaultsChart(this.controllerApp, this.defaultsChart);
+
+        return compatibleVersion;
       }
 
       return null;
@@ -97,7 +118,7 @@ export default {
       }
     },
 
-    async chartRoute() {
+    chartRoute() {
       if ( !this.defaultsChart ) {
         try {
           this.debouncedRefreshCharts();
@@ -118,7 +139,7 @@ export default {
           [REPO_TYPE]: repoType,
           [REPO]:      repoName,
           [CHART]:     chartName,
-          [VERSION]:   latestStableVersion.version
+          [VERSION]:   this.highestCompatibleDefaultsChart?.version || latestStableVersion
         };
 
         this.$router.push({
@@ -141,6 +162,7 @@ export default {
 
 <template>
   <Banner
+    v-if="$fetchState.pending === false"
     data-testid="kw-defaults-banner"
     class="mb-20 mt-0"
     :color="colorMode"
@@ -149,7 +171,7 @@ export default {
   >
     <span v-clean-html="bannerCopy" />
     <button
-      v-if="defaultsChart"
+      v-if="highestCompatibleDefaultsChart"
       data-testid="kw-defaults-banner-button"
       class="btn role-primary ml-10"
       @click.prevent="chartRoute"
