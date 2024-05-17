@@ -36,7 +36,7 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v4
         with:
-          version: v3.8.0
+          version: v3.14.4
 
       - name: Setup Nodejs and npm
         uses: actions/setup-node@v4
