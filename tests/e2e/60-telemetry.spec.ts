@@ -2,7 +2,7 @@ import { test, expect } from './rancher/rancher-test'
 import { Chart, RancherAppsPage } from './rancher/rancher-apps.page'
 import { TelemetryPage } from './pages/telemetry.page'
 
-const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator', version: '0.49.1' }
+const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator' }
 const jaegerChart: Chart = { title: 'Jaeger Operator', namespace: 'jaeger', check: 'jaeger-operator' }
 const monitoringChart: Chart = { title: 'Monitoring', check: 'rancher-monitoring' }
 
@@ -23,7 +23,9 @@ test('Install OpenTelemetry', async({ page, nav }) => {
   }
   // Install OpenTelemetry
   await apps.addRepository('open-telemetry', 'https://open-telemetry.github.io/opentelemetry-helm-charts')
-  await apps.installChart(otelChart)
+  await apps.installChart(otelChart,
+    { yamlPatch: (y) => { y.manager.collectorImage.repository = 'otel/opentelemetry-collector-contrib' } })
+
   // Otel is installed
   for (const tab of ['Tracing', 'Metrics'] as const) {
     await nav.pserver('default', tab)
