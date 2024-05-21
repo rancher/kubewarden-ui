@@ -248,7 +248,7 @@ jobs:
     - name: Find current QASE run
       if: ${{ env.QASE == 'true' && always() && hashFiles('tests/qase-report.log') != '' }}
       run: |
-        grep -Eo 'qase: Using run [0-9]+' tests/qase-report.log | awk '{print $NF}' | tee QASE_RUN_ID.txt
+        grep -Eom1 'qase:.* [Rr]un.* [0-9]+' tests/qase-report.log | awk '{print $NF}' | tee QASE_RUN_ID.txt
 
     - name: Delete current QASE run if job was canceled
       if: ${{ env.QASE == 'true' && cancelled() && hashFiles('tests/qase-report.log') != '' }}
