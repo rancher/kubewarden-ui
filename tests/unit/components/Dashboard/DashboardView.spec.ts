@@ -1,6 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from '@jest/globals';
 
+import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
+
 import DashboardView from '@kubewarden/components/Dashboard/DashboardView.vue';
 import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
@@ -299,6 +301,14 @@ describe('component: DashboardView', () => {
   it('calculates the correct chart for pre-release versions', () => {
     const oldControllerApp = { spec: { chart: { metadata: { version: '2.0.5', appVersion: 'v1.9.0' } } } };
 
+    commonMocks.$store.getters['prefs/get'].mockImplementation((key) => {
+      if ( key === SHOW_PRE_RELEASE ) {
+        return true;
+      }
+
+      return undefined;
+    });
+
     const wrapper = createWrapper({
       computed: {
         controllerApp:   () => oldControllerApp,
@@ -318,6 +328,14 @@ describe('component: DashboardView', () => {
 
   it('does not show pre-release upgrades when preference is false', () => {
     const oldControllerApp = { spec: { chart: { metadata: { version: '2.0.5', appVersion: 'v1.9.0' } } } };
+
+    commonMocks.$store.getters['prefs/get'].mockImplementation((key) => {
+      if ( key === SHOW_PRE_RELEASE ) {
+        return false;
+      }
+
+      return undefined;
+    });
 
     const wrapper = createWrapper({
       computed: {
