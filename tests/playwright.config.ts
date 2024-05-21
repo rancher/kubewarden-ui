@@ -20,16 +20,16 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     [process.env.CI ? 'html' : 'list'],
-    process.env.QASE_REPORT
-      ? ['playwright-qase-reporter',
-          {
-            apiToken         : process.env.QASE_APITOKEN,
-            projectCode      : 'KUBEWARDEN',
-            runComplete      : true,
-            basePath         : 'https://api.qase.io/v1',
-            logging          : true,
-            uploadAttachments: true,
-          }]
+    process.env.QASE_MODE === 'testops'
+      ? ['playwright-qase-reporter', {
+          debug  : true,
+          testops: {
+            api              : { token: process.env.QASE_APITOKEN },
+            project          : 'KUBEWARDEN',
+            run              : { complete: true },
+            uploadAttachments: true
+          }
+        }]
       : ['null'],
   ],
 

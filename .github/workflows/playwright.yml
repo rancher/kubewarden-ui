@@ -224,10 +224,10 @@ jobs:
         MODE: ${{ matrix.mode }}
         RANCHER_URL: https://${{ env.RANCHER_FQDN }}
         ORIGIN: ${{ env.KUBEWARDEN }}
-        QASE_REPORT: ${{ env.QASE == 'true' || '' }} # Pass 'false' as ''
-        QASE_APITOKEN: ${{ secrets.QASE_APITOKEN }}
-        QASE_RUN_NAME: "Run[${{github.event_name}}]: UI[${{ env.KUBEWARDEN }}] - MODE[${{ matrix.mode }}] - RANCHER[${{ matrix.rancher }}] "
-        QASE_RUN_DESCRIPTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        QASE_MODE: ${{ env.QASE == 'true' && 'testops' || 'off' }}
+        QASE_TESTOPS_API_TOKEN: ${{ secrets.QASE_APITOKEN }}
+        QASE_TESTOPS_RUN_TITLE: "Run[${{github.event_name}}]: UI[${{ env.KUBEWARDEN }}] - MODE[${{ matrix.mode }}] - RANCHER[${{ matrix.rancher }}] "
+        QASE_TESTOPS_RUN_DESCRIPTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     # ==================================================================================================
     # QASE Integration
