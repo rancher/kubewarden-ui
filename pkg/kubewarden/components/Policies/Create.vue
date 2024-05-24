@@ -14,7 +14,7 @@ import { Banner } from '@components/Banner';
 
 import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
-import Markdown from '@shell/components/Markdown';
+import ChartReadme from '@shell/components/ChartReadme';
 import Wizard from '@shell/components/Wizard';
 
 import {
@@ -28,7 +28,7 @@ import { removeEmptyAttrs } from '../../utils/object';
 import { handleGrowl } from '../../utils/handle-growl';
 
 import { DATA_ANNOTATIONS } from '../../types/artifacthub';
-import PolicyGrid from './PolicyGrid';
+import PolicyTable from './PolicyTable';
 import Values from './Values';
 
 export default ({
@@ -50,9 +50,9 @@ export default ({
     AsyncButton,
     Banner,
     Loading,
-    Markdown,
+    ChartReadme,
     Wizard,
-    PolicyGrid,
+    PolicyTable,
     Values
   },
 
@@ -497,31 +497,20 @@ export default ({
       @finish="finish"
     >
       <template #policies>
-        <PolicyGrid data-testid="kw-policy-create-grid" :value="packages" @selectType="selectType($event)">
-          <template #customSubtype>
-            <div data-testid="kw-grid-subtype-card-custom" class="subtype custom" @click="selectType('custom')">
-              <div class="subtype__metadata">
-                <div class="subtype__body">
-                  <div class="subtype__badge" :style="{ 'background-color': 'var(--darker)' }">
-                    <label>{{ t('kubewarden.customPolicy.badge') }}</label>
-                  </div>
-
-                  <h4 class="subtype__label">
-                    {{ t('kubewarden.customPolicy.title') }}
-                  </h4>
-
-                  <div class="subtype__description">
-                    {{ t('kubewarden.customPolicy.description') }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-        </PolicyGrid>
+        <PolicyTable
+          data-testid="kw-policy-create-table"
+          :value="packages"
+          @selectType="selectType($event)"
+        />
       </template>
 
       <template #readme>
-        <Markdown v-if="packageValues && packageValues.readme" data-testid="kw-policy-create-readme" :value="packageValues.readme" class="mb-20" />
+        <ChartReadme
+          v-if="packageValues && packageValues.readme"
+          data-testid="kw-policy-create-readme"
+          :version-info="packageValues"
+          class="mb-20"
+        />
       </template>
 
       <template #values>

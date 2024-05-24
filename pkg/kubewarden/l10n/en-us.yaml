@@ -1,5 +1,7 @@
 kubewarden:
   title: Kubewarden
+  generic:
+    name: Name
   dashboard:
     title: Dashboard
     install: Install
@@ -129,6 +131,10 @@ kubewarden:
     badge: Custom
     title: Custom Policy
     description: A generic template for using your own policy.
+  policyTable:
+    headers:
+      resource: Resource Type
+      features: Features
   policies:
     noArtifactHub: Official Kubewarden policies are hosted on <a href="https://artifacthub.io/packages/search?kind=13" target="_blank" rel="noopener noreferrer nofollow">ArtifactHub</a>, in order to show these you will need to add `artifacthub.io` to the whitelist-domain setting.
     noRules: There are no rules configured for this policy.
@@ -137,9 +143,10 @@ kubewarden:
     airgap:
       banner: 'An air-gapped installation is detected, you will be unable to use the policies listed within the ArtifactHub catalog. You are still able to deploy a custom policy by referencing a WebAssembly module that is accessible to this cluster.'
   utils:
-    keyword: Filter by Keyword
-    organization: Filter by Organization
-    resource: Filter by Resource Type
+    keyword: Show Keywords & Features
+    source: Show Source
+    resource: Show Resource Types
+    search: Filter by Name
     resetFilter: Reset Filter
   tracing:
     description: Tracing allows to collect fine grained details about policy evaluations. It can be a useful tool for debugging issues inside of your Kubewarden deployment and policies.
