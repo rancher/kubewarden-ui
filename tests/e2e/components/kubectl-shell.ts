@@ -1,5 +1,5 @@
 import { execSync } from 'child_process'
-import { expect, Locator, Page } from '@playwright/test'
+import { expect, test, Locator, Page } from '@playwright/test'
 import { step } from '../rancher/rancher-test'
 import { Policy, PolicyKind } from '../pages/policies.page'
 import { RancherUI } from './rancher-ui'
@@ -140,15 +140,18 @@ export class Shell {
       const status = options?.status ?? 0
       const timeout = options?.timeout || 60_000
 
-      let statusCode = 0
+      let cmdStatus = 0
+      let cmdOutput: string
       try {
-        execSync(cmd, { timeout })
+        cmdOutput = execSync(cmd, { timeout }).toString()
       } catch (e) {
-        statusCode = e.status
+        cmdStatus = e.status
+        cmdOutput = e.stderr.toString()
       }
+      test.info().annotations.push({ type: `runExec [${cmdStatus}]`, description: cmdOutput })
 
-      if (isFinite(status)) expect(statusCode).toBe(status)
-      return statusCode
+      if (isFinite(status)) expect(cmdStatus).toBe(status)
+      return cmdStatus
     }
 
     /**
@@ -188,6 +191,7 @@ export class Shell {
       if (runner === 'rancher') await this.close()
     }
 
+    @step
     async waitPods(options?: { ns?: string, filter?: string, timeout?: number }) {
       const ns = options?.ns || '-n cattle-kubewarden-system'
 
@@ -195,12 +199,14 @@ export class Shell {
       await this.retry(`kubectl get pods --no-headers ${ns} ${filter} 2>&1 | sed -E '/([0-9]+)[/]\\1\\s+Running|Completed/d' | wc -l | grep -qx 0`, options)
     }
 
+    @step
     privpod(options?: { name?: string, ns?: string, status?: number }) {
       const name = options?.name || `privpod-${Date.now()}`
       const ns = options?.ns ? `-n ${options.ns}` : ''
       this.runExec(`kubectl run ${name} --image=busybox --command --restart=Never -it --rm --privileged ${ns} -- true`, options)
     }
 
+    @step
     waitPolicyState(p: Policy, kind: PolicyKind, state?: 'PolicyActive' | 'PolicyUniquelyReachable') {
       const nsarg = (kind === 'AdmissionPolicy' && p.namespace) ? `-n ${p.namespace}` : ''
       this.runExec(`kubectl wait --timeout=5m --for=condition=${state || 'PolicyUniquelyReachable'} ${nsarg} ${kind} ${p.name} `)
