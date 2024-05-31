@@ -40,7 +40,7 @@ export class RancherExtensionsPage extends BasePage {
 
       // Confirm and wait for extensions to be enabled
       await this.ui.button('OK').click()
-      await this.ui.withReload(async() => {
+      await this.ui.retry(async() => {
         await expect(this.tabs).toBeVisible({ timeout: 60_000 })
       }, 'Extensions enabled but not visible')
     }
@@ -77,7 +77,7 @@ export class RancherExtensionsPage extends BasePage {
         await this.ui.selectOption('Version', options.version)
       }
       await dialog.getByRole('button', { name: 'Install' }).click()
-      await this.ui.withReload(async() => {
+      await this.ui.retry(async() => {
         await expect(plugin.getByRole('button', { name: 'Uninstall' })).toBeEnabled({ timeout: 60_000 })
       }, 'Extension stuck in "Installing..."')
     }

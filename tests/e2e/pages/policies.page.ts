@@ -119,7 +119,7 @@ export abstract class BasePolicyPage extends BasePage {
       }
       await expect(this.page.getByRole('heading', { name: 'Finish: Step 1' })).toBeVisible()
       // Open requested policy
-      await this.ui.withReload(async() => {
+      await this.ui.retry(async() => {
         await this.cards({ name: p.title }).click()
       }, 'Could not get policy list from artifacthub')
       // Go to values tab, skip optional readme

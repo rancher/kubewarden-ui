@@ -78,7 +78,7 @@ export class TableRow {
     @step
     async waitFor(options?: { state?: string, timeout?: number }): Promise<TableRow> {
       // To be visible
-      await this.ui.withReload(async() => {
+      await this.ui.retry(async() => {
         await expect(this.row).toBeVisible({ timeout: options?.timeout })
       }, 'Rancher showing duplicit rows')
       // Expected state
