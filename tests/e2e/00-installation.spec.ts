@@ -55,7 +55,7 @@ test('Install UI extension', async({ page, ui }) => {
     await extensions.enable({ rancherRepo: ORIGIN === 'released' })
     // Wait for default list of extensions
     if (ORIGIN === 'released') {
-      await ui.withReload(async() => {
+      await ui.retry(async() => {
         await extensions.selectTab('All')
         await expect(page.locator('.plugin', { hasText: 'Kubewarden' })).toBeVisible()
       }, 'Not showing kubewarden extension')
@@ -93,7 +93,7 @@ test('Install Kubewarden', async({ page, ui, nav, context }) => {
 
   // Check UI is active
   await nav.explorer('Kubewarden')
-  await ui.withReload(async() => {
+  await ui.retry(async() => {
     await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
   }, 'Kubewarden installation not detected')
 
@@ -129,7 +129,7 @@ test('Install Kubewarden by Fleet', async({ page, ui }) => {
     workspace  : 'fleet-local'
   })
 
-  await ui.withReload(async() => {
+  await ui.retry(async() => {
     await fleetPage.selectWorkspace('fleet-local')
     await expect(repoRow.column('Clusters Ready')).toHaveText('1/1', { timeout: 7 * 60_000 })
   }, 'Installed but not refreshed?')

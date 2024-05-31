@@ -153,14 +153,15 @@ export class RancherUI {
   }
 
   /**
-     * Call await ui.withReload(async()=> { <code> }, 'Reason')
+     * Call await ui.retry(async()=> { <code> }, 'Reason')
      */
-  async withReload(code: () => Promise<void>, message: string) {
+  async retry(code: () => Promise<void>, message: string, options?: { reload?: boolean }) {
+    const optReload = options?.reload || true
     try {
       await code()
     } catch (e) {
-      test.info().annotations.push({ type: 'workaround', description: `Reload: ${message}` })
-      await this.page.reload()
+      test.info().annotations.push({ type: 'Retry', description: message })
+      if (optReload) await this.page.reload()
       await code()
     }
   }

@@ -84,7 +84,7 @@ export class KubewardenPage extends BasePage {
       const failRepoBtn = this.ui.button('Reload')
 
       // Welcome screen
-      await this.ui.withReload(async() => {
+      await this.ui.retry(async() => {
         await this.goto()
       }, 'Kubewarden extension not visible')
 

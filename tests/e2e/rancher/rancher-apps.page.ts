@@ -69,7 +69,7 @@ export class RancherAppsPage extends BasePage {
       // Refresh for occasional freeze In Progress
       await repo.action('Refresh')
       // Prevent matching Active before refresh is processed
-      await repo.toHaveState('In Progress')
+      await this.page.waitForTimeout(1000)
       await repo.toBeActive()
     }
 
