@@ -51,10 +51,10 @@ export default {
       KUBEWARDEN_PRODUCT_NAME,
       POLICY_TABLE_HEADERS,
 
-      category:      null,
-      keywords:      [],
-      organizations: [],
-      searchQuery:   null
+      attributes:  [],
+      searchQuery: null,
+
+      hidePackages: []
     };
   },
 
@@ -64,7 +64,7 @@ export default {
 
       this.$nextTick(() => {
         if ( officialExists && officialExists.repository?.organization_display_name ) {
-          this.organizations.push(officialExists.repository.organization_display_name);
+          this.attributes.push(officialExists.repository.organization_display_name);
         }
       });
     }
@@ -95,40 +95,38 @@ export default {
     },
 
     filteredSubtypes() {
-      const subtypes = ( this.filteredPackages || [] );
+      const subtypes = (this.filteredPackages || []);
 
       const out = subtypes.filter((subtype) => {
-        if ( this.category ) {
-          if ( !this.hasAnnotation(subtype, 'kubewarden/resources') || !subtype.data?.['kubewarden/resources']?.includes(this.category) ) {
+        // Search query filtering
+        if ( this.searchQuery ) {
+          const searchTokens = this.searchQuery.split(/\s*[, ]\s*/).map(x => ensureRegex(x, false));
+
+          const matchesSearch = searchTokens.every(token => (
+            subtype.display_name?.match(token) ||
+            ( subtype.description && subtype.description.match(token) )
+          ));
+
+          if ( !matchesSearch ) {
             return false;
           }
         }
 
-        if ( this.searchQuery ) {
-          const searchTokens = this.searchQuery.split(/\s*[, ]\s*/).map(x => ensureRegex(x, false));
-
-          for ( const token of searchTokens ) {
-            if ( !subtype.display_name?.match(token) && (subtype.description && !subtype.description.match(token)) ) {
-              return false;
-            }
+        // Attribute filtering
+        if ( this.attributes.length ) {
+          if ( this.attributes.includes(this.t('kubewarden.utils.attributes.optionLabels.all')) ) {
+            return true;
           }
-        }
 
-        if ( this.keywords.length ) {
-          for ( const selected of this.keywords ) {
-            if ( !subtype.keywords || subtype.keywords?.length === 0 || !subtype.keywords?.includes(selected) ) {
-              return false;
-            }
-          }
-        }
+          const matchesAttributes = this.attributes.some(attribute => (
+            subtype.keywords?.includes(attribute) ||
+            subtype.repository?.organization_display_name?.includes(attribute) ||
+            subtype.repository?.user_alias?.includes(attribute) ||
+            subtype.data?.['kubewarden/resources']?.includes(attribute)
+          ));
 
-        if ( this.organizations.length ) {
-          for ( const org of this.organizations ) {
-            const name = subtype.repository?.organization_display_name || subtype.repository?.user_alias;
-
-            if ( !name || name !== org ) {
-              return false;
-            }
+          if ( !matchesAttributes ) {
+            return false;
           }
         }
 
@@ -138,8 +136,42 @@ export default {
       return sortBy(out, ['name']);
     },
 
+    attributeOptions() {
+      const out = [];
+
+      if ( this.organizationOptions.length ) {
+        out.push({
+          kind:  'group',
+          label: this.t('kubewarden.utils.attributes.optionLabels.organization'),
+        }, ...this.organizationOptions);
+      }
+
+      if ( this.resourceOptions.length ) {
+        out.push({
+          kind:  'group',
+          label: this.t('kubewarden.utils.attributes.optionLabels.resource'),
+        }, ...this.resourceOptions);
+      }
+
+      if ( this.keywordOptions.length ) {
+        out.push({
+          kind:  'group',
+          label: this.t('kubewarden.utils.attributes.optionLabels.keyword'),
+        }, ...this.keywordOptions);
+      }
+
+      if ( out.length ) {
+        out.unshift(
+          this.t('kubewarden.utils.attributes.optionLabels.all'),
+          { kind: 'divider', label: 'divider' }
+        );
+      }
+
+      return out;
+    },
+
     keywordOptions() {
-      const flattened = this.filteredSubtypes?.flatMap((subtype) => {
+      const flattened = this.filteredPackages?.flatMap((subtype) => {
         if ( subtype?.keywords && subtype.keywords.length ) {
           return subtype.keywords;
         }
@@ -153,21 +185,21 @@ export default {
     },
 
     organizationOptions() {
-      const out = this.filteredSubtypes?.flatMap((subtype) => {
+      const flattened = this.filteredPackages?.flatMap((subtype) => {
         const name = subtype?.repository?.organization_display_name || subtype?.repository?.user_alias;
 
-        return name || [];
+        return name || null;
       });
 
-      if ( !out || out?.length === 0 ) {
+      if ( !flattened || flattened.length === 0 ) {
         return [];
       }
 
-      return [...new Set(out)];
+      return [...new Set(flattened.filter(Boolean))];
     },
 
     resourceOptions() {
-      return resourcesFromAnnotation(this.filteredSubtypes);
+      return resourcesFromAnnotation(this.filteredPackages);
     },
 
     showPreRelease() {
@@ -200,31 +232,26 @@ export default {
 
     refresh() {
       this.category = null;
-      this.keywords = [];
-      this.organizations = [];
+      this.attributes = [];
       this.searchQuery = null;
-    },
-
-    resourceType(type) {
-      if ( type === undefined ) {
-        return null;
-      }
-
-      const t = type?.split(',');
-
-      if ( t?.length > 1 ) {
-        return 'Multiple';
-      }
-
-      return type === '*' ? 'Global' : type;
     },
 
     isOfficial(subtype) {
       return subtype?.repository?.organization_name?.toLowerCase() === KUBEWARDEN_PRODUCT_NAME;
     },
 
-    subtypeSignature(subtype) {
-      return subtype.signatures?.[0] || 'unknown';
+    handleAttributeSelect(selected) {
+      const allOption = this.t('kubewarden.utils.attributes.optionLabels.all');
+
+      if ( selected.includes(allOption) ) {
+        if ( selected.length === 1 || selected.indexOf(allOption) !== 0 ) {
+          this.attributes = [allOption];
+        } else {
+          this.attributes = selected.filter(attr => attr !== allOption);
+        }
+      } else {
+        this.attributes = selected.filter(attr => attr !== allOption);
+      }
     }
   }
 };
@@ -234,41 +261,17 @@ export default {
   <div class="policy-table-container">
     <div class="filter">
       <LabeledSelect
-        v-if="organizationOptions.length"
-        v-model="organizations"
+        v-if="attributeOptions.length"
+        v-model="attributes"
         data-testid="kw-table-filter-source"
         :clearable="true"
         :taggable="true"
         :mode="mode"
         :multiple="true"
-        class="filter__source"
-        :label="t('kubewarden.utils.source')"
-        :options="organizationOptions"
-      />
-
-      <LabeledSelect
-        v-model="keywords"
-        data-testid="kw-table-filter-keywords"
-        :clearable="true"
-        :taggable="true"
-        :mode="mode"
-        :multiple="true"
-        class="filter__keywords"
-        :label="t('kubewarden.utils.keyword')"
-        :options="keywordOptions"
-      />
-
-      <LabeledSelect
-        v-model="category"
-        data-testid="kw-table-filter-resource"
-        :clearable="true"
-        :searchable="false"
-        :mode="mode"
-        :multiple="true"
-        placement="bottom"
-        class="filter__resource"
-        :label="t('kubewarden.utils.resource')"
-        :options="resourceOptions"
+        class="filter__attributes"
+        label-key="kubewarden.utils.attributes.label"
+        :options="attributeOptions"
+        @selecting="e => handleAttributeSelect(e)"
       />
 
       <LabeledInput
@@ -284,11 +287,13 @@ export default {
       <button
         ref="btn"
         data-testid="kw-table-filter-refresh"
-        class="btn, btn-sm, role-primary, filter__reset"
+        class="btn role-tertiary filter__reset"
         type="button"
         @click="refresh"
       >
-        {{ t('kubewarden.utils.resetFilter') }}
+        <p>
+          {{ t('kubewarden.utils.resetFilter') }}
+        </p>
       </button>
     </div>
 
@@ -316,10 +321,10 @@ export default {
 .filter {
   width: 100%;
   display: grid;
-  grid-template-columns: 20% 20% 20% 20% 8%;
   grid-template-rows: 1fr;
+  grid-template-columns: repeat(2, 1fr) .25fr;
   grid-template-areas:
-    "source keywords resource search reset";
+    "attributes search reset";
 
   gap: 1rem;
 
@@ -327,16 +332,8 @@ export default {
     margin: 0.5rem 0;
   }
 
-  &__source {
-    grid-area: source;
-  }
-
-  &__keywords {
-    grid-area: keywords;
-  }
-
-  &__resource {
-    grid-area: resource;
+  &__attributes {
+    grid-area: attributes;
   }
 
   &__search {
@@ -345,8 +342,11 @@ export default {
 
   &__reset {
     grid-area: reset;
-    display: flex;
-    line-height: 1.5;
+
+    p {
+      line-height: 1.5;
+      white-space: wrap;
+    }
   }
 }
 

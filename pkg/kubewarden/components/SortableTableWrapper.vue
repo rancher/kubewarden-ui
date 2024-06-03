@@ -27,7 +27,6 @@ export default {
 
   methods: {
     addRowClickListener() {
-      // Wait until the next tick to ensure the table is rendered
       this.$nextTick(() => {
         const table = this.$refs.sortableTable.$el.querySelector('table');
 

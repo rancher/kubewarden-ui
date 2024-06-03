@@ -93,24 +93,27 @@ export default ({
 
       // Steps
       stepPolicies: {
-        hidden: false,
-        name:   'policies',
-        label:  'Policies',
-        ready:  false,
-        weight: 99
+        hidden:    false,
+        name:      'policies',
+        label:     'Policies',
+        ready:     false,
+        showSteps: false,
+        weight:    99
       },
       stepReadme: {
-        hidden: false,
-        name:   'readme',
-        label:  'Readme',
-        ready:  true,
-        weight: 98
+        hidden:    false,
+        name:      'readme',
+        label:     'Readme',
+        ready:     true,
+        showSteps: false,
+        weight:    98
       },
       stepValues: {
-        name:   'values',
-        label:  'Values',
-        ready:  true,
-        weight: 97
+        name:      'values',
+        label:     'Values',
+        ready:     true,
+        showSteps: false,
+        weight:    97
       },
     };
   },
@@ -358,7 +361,7 @@ export default ({
 
       const policyDetails = this.packages.find(pkg => pkg.repository?.url === this.type?.repository?.url);
       const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.[DATA_ANNOTATIONS.QUESTIONS]);
-      const packageAnnotation = `${ policyDetails.repository.name }/${ policyDetails.name }/${ policyDetails.version }`;
+      const packageAnnotation = `${ policyDetails?.repository?.name }/${ policyDetails?.name }/${ policyDetails?.version }`;
       /** Return spec from package if annotation exists */
       const parseAnnotation = (annotation, obj) => {
         const spec = this.value.parsePackageMetadata(policyDetails?.data?.[annotation]);
@@ -384,7 +387,7 @@ export default ({
         kind:       this.value.kind,
         metadata:   { annotations: { [ARTIFACTHUB_PKG_ANNOTATION]: packageAnnotation } },
         spec:       {
-          module:                policyDetails.containers_images[0].image,
+          module:                policyDetails?.containers_images[0].image,
           contextAwareResources: parseAnnotation(DATA_ANNOTATIONS.CONTEXT_AWARE, 'contextAwareResources'),
           rules:                 parseAnnotation(DATA_ANNOTATIONS.RULES, 'rules'),
           mutating:              determineAnnotation(DATA_ANNOTATIONS.MUTATION)
@@ -489,8 +492,7 @@ export default ({
       :errors="errors"
       :steps="steps"
       :edit-first-step="true"
-      :banner-title="bannerTitle"
-      :banner-title-subtext="typeModule"
+      :show-banner="false"
       class="wizard"
       @next="reset"
       @cancel="done"
@@ -543,24 +545,12 @@ $height: 110px;
 $margin: 10px;
 $color: var(--body-text) !important;
 
-::v-deep .step-container {
-  height: auto;
-}
-
 ::v-deep .header {
-  .step-sequence {
-    display: block;
-
-    .steps {
-      & .divider {
-        top: 22px;
-      }
-    }
-  }
+  display: none;
 }
 
 ::v-deep .controls-row {
-  position: relative;
+  position: sticky;
   width: auto;
 
   .controls-steps {

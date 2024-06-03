@@ -143,10 +143,17 @@ kubewarden:
     airgap:
       banner: 'An air-gapped installation is detected, you will be unable to use the policies listed within the ArtifactHub catalog. You are still able to deploy a custom policy by referencing a WebAssembly module that is accessible to this cluster.'
   utils:
+    attributes:
+      label: Attributes
+      optionLabels:
+        all: All
+        organization: Organization
+        keyword: Keyword
+        resource: Resource
     keyword: Show Keywords & Features
     source: Show Source
     resource: Show Resource Types
-    search: Filter by Name
+    search: Filter
     resetFilter: Reset Filter
   tracing:
     description: Tracing allows to collect fine grained details about policy evaluations. It can be a useful tool for debugging issues inside of your Kubewarden deployment and policies.
