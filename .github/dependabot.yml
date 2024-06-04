@@ -9,11 +9,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+      day: "monday"
   - package-ecosystem: "npm"
-    directory: "/tests"
+    directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
-    labels:
-      - "area/qa"
+      day: "monday"
