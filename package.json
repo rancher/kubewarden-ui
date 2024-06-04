@@ -19,7 +19,7 @@
     "@rancher/components": "^0.2.1-alpha.0",
     "@rancher/shell": "0.5.3",
     "core-js": "^3.37.0",
-    "css-loader": "4.3.0",
+    "css-loader": "7.1.2",
     "v-tooltip": "^2.1.3"
   },
   "devDependencies": {
