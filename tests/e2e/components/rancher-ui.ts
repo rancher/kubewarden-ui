@@ -173,6 +173,7 @@ export class RancherUI {
 
   static isVersion(query: string|Range): boolean {
     if (!process.env.RANCHER_VERSION) throw new Error('RANCHER_VERSION not set')
-    return semver.satisfies(process.env.RANCHER_VERSION, query)
+    if (!semver.validRange(query)) throw new Error(`Invalid range: ${query}`)
+    return semver.satisfies(process.env.RANCHER_VERSION, query, { includePrerelease: true })
   }
 }

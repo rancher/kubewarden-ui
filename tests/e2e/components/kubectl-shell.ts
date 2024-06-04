@@ -58,7 +58,7 @@ export class Shell {
       switch (runner) {
         case 'nodejs': return this.runExec(cmd, options)
         case 'rancher':
-          if (RancherUI.isVersion('>=2.9-0')) {
+          if (RancherUI.isVersion('>=2.9')) {
             return await this.runCanvas(cmd, options)
           } else {
             return await this.runXterm(cmd, options)
