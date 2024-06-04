@@ -78,7 +78,7 @@ test('Check reports on resources details page', async({ ui, nav }) => {
   // Check namespace
   await nav.explorer('Cluster', 'Projects/Namespaces')
   // https://github.com/rancher/kubewarden-ui/issues/720
-  if (RancherUI.isVersion('>=2.8-0')) {
+  if (RancherUI.isVersion('>=2.8')) {
     await expect(ui.tableRow(testNs).column('Compliance').locator('div.bg-error')).toHaveText('2')
   }
   await ui.tableRow(testNs).open()
