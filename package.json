@@ -15,7 +15,7 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "@kubernetes/client-node": "^0.20.0",
+    "@kubernetes/client-node": "^0.21.0",
     "@rancher/components": "^0.2.1-alpha.0",
     "@rancher/shell": "0.5.3",
     "core-js": "^3.37.0",
