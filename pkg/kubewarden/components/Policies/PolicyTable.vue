@@ -10,6 +10,7 @@ import { sortBy } from '@shell/utils/sort';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import { LabeledInput } from '@components/Form/LabeledInput';
+import { Checkbox } from '@components/Form/Checkbox';
 
 import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME } from '../../types';
 import { POLICY_TABLE_HEADERS } from '../../config/table-headers';
@@ -36,7 +37,7 @@ export default {
   inject: ['chartType'],
 
   components: {
-    LabeledSelect, LabeledInput, SortableTableWrapper
+    Checkbox, LabeledSelect, LabeledInput, SortableTableWrapper
   },
 
   fetch() {
@@ -54,21 +55,22 @@ export default {
       attributes:  [],
       searchQuery: null,
 
-      hidePackages: []
+      hidePackages:           [],
+      showKubewardenOfficial: true
     };
   },
 
-  beforeMount() {
-    if ( !isEmpty(this.filteredSubtypes) ) {
-      const officialExists = this.filteredSubtypes.find(subtype => this.isOfficial(subtype));
+  // beforeMount() {
+  //   if ( !isEmpty(this.filteredSubtypes) ) {
+  //     const officialExists = this.filteredSubtypes.find(subtype => this.isOfficial(subtype));
 
-      this.$nextTick(() => {
-        if ( officialExists && officialExists.repository?.organization_display_name ) {
-          this.attributes.push(officialExists.repository.organization_display_name);
-        }
-      });
-    }
-  },
+  //     this.$nextTick(() => {
+  //       if ( officialExists && officialExists.repository?.organization_display_name ) {
+  //         this.attributes.push(officialExists.repository.organization_display_name);
+  //       }
+  //     });
+  //   }
+  // },
 
   computed: {
     allSchemas() {
@@ -98,6 +100,11 @@ export default {
       const subtypes = (this.filteredPackages || []);
 
       const out = subtypes.filter((subtype) => {
+        // Show official only when showKubewardenOfficial is true
+        if ( this.showKubewardenOfficial && !this.isOfficial(subtype) ) {
+          return false;
+        }
+
         // Search query filtering
         if ( this.searchQuery ) {
           const searchTokens = this.searchQuery.split(/\s*[, ]\s*/).map(x => ensureRegex(x, false));
@@ -120,7 +127,6 @@ export default {
 
           const matchesAttributes = this.attributes.some(attribute => (
             subtype.keywords?.includes(attribute) ||
-            subtype.repository?.organization_display_name?.includes(attribute) ||
             subtype.repository?.user_alias?.includes(attribute) ||
             subtype.data?.['kubewarden/resources']?.includes(attribute)
           ));
@@ -138,13 +144,6 @@ export default {
 
     attributeOptions() {
       const out = [];
-
-      if ( this.organizationOptions.length ) {
-        out.push({
-          kind:  'group',
-          label: this.t('kubewarden.utils.attributes.optionLabels.organization'),
-        }, ...this.organizationOptions);
-      }
 
       if ( this.resourceOptions.length ) {
         out.push({
@@ -295,6 +294,13 @@ export default {
           {{ t('kubewarden.utils.resetFilter') }}
         </p>
       </button>
+    </div>
+
+    <div>
+      <Checkbox
+        v-model="showKubewardenOfficial"
+        :label="t('kubewarden.utils.official.label')"
+      />
     </div>
 
     <SortableTableWrapper
