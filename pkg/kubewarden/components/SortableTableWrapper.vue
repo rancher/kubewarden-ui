@@ -15,6 +15,10 @@ export default {
 
   components: { SortableTable },
 
+  data() {
+    return { listeners: [] };
+  },
+
   watch: {
     rows() {
       this.addRowClickListener();
@@ -31,14 +35,22 @@ export default {
         const table = this.$refs.sortableTable.$el.querySelector('table');
 
         if ( table ) {
+          this.removeRowClickListener();
+
           table.querySelectorAll('tbody tr').forEach((row, index) => {
-            row.addEventListener('click', () => {
-              this.$emit('selectRow', this.rows[index]);
-            });
+            const listener = () => this.$emit('selectRow', this.rows[index]);
+
+            row.addEventListener('click', listener);
+            this.listeners.push({ row, listener });
           });
         }
       });
     },
+
+    removeRowClickListener() {
+      this.listeners?.forEach(({ row, listener }) => row.removeEventListener('click', listener));
+      this.listeners = [];
+    }
   }
 };
 </script>
