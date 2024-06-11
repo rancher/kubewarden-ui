@@ -3,7 +3,7 @@ import { Chart, RancherAppsPage } from './rancher/rancher-apps.page'
 import { TelemetryPage } from './pages/telemetry.page'
 
 const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator' }
-const jaegerChart: Chart = { title: 'Jaeger Operator', namespace: 'jaeger', check: 'jaeger-operator', version: '2.53.0' }
+const jaegerChart: Chart = { title: 'jaeger-operator', name: 'jaeger-operator', namespace: 'jaeger', check: 'jaeger-operator', version: '2.53.0' }
 const monitoringChart: Chart = { title: 'Monitoring', check: 'rancher-monitoring' }
 
 test.skip(process.env.MODE === 'fleet')
@@ -48,6 +48,7 @@ test.describe('Tracing', () => {
     await telPage.toBeIncomplete('jaeger')
     await expect(telPage.configBtn).toBeDisabled()
     // Install Jaeger
+    await apps.addRepository('jaegertracing', 'https://jaegertracing.github.io/helm-charts')
     await apps.installChart(jaegerChart, {
       yamlPatch: (y) => {
         y.jaeger.create = true
@@ -99,6 +100,7 @@ test.describe('Tracing', () => {
       }
     })
     await apps.deleteApp('jaeger-operator')
+    await apps.deleteRepository('jaegertracing')
     // Check
     await nav.pserver('default', 'Tracing')
     await telPage.toBeIncomplete('config')

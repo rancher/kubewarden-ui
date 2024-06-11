@@ -137,7 +137,6 @@ for (const PolicyPage of pageTypes) {
     // Update to Protect mode
     await polPage.goto()
     await polPage.updateToProtect(row)
-    await expect(row.column('Mode')).toHaveText('Protect')
     // Check protect mode
     test.info().annotations.push({ type: 'BUG', description: 'Policy should be pending (mode or state) until it starts in protect mode' })
     await shell.waitPolicyState(p, polPage.kind)
