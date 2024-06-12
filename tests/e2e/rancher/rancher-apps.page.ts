@@ -125,11 +125,12 @@ export class RancherAppsPage extends BasePage {
           const showMore = versionPane.getByText('Show More', { exact: true })
           const chartVersion = versionPane.getByText(chart.version, { exact: true })
 
-          // Expand versions is necessary
-          await expect(chartVersion.or(showMore)).toBeVisible()
+          await expect(versionPane).toBeVisible()
+          // Expand versions
           if (await showMore.isVisible()) await showMore.click()
-          // Active version has bold text, not active are links
+          // Select requested version
           await chartVersion.click()
+          // Active version has bold text, not active are links
           await expect(versionPane.locator(`b:text-is("${chart.version}")`)).toBeVisible()
         }
         await this.installBtn.click()
