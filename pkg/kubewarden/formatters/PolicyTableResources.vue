@@ -9,7 +9,7 @@ export default {
 
   computed: {
     resources() {
-      const resourceList = this.value?.['kubewarden/resources'].split(',');
+      const resourceList = this.value?.['kubewarden/resources']?.split(',');
 
       if ( Array.isArray(resourceList) ) {
         if ( resourceList.length > 1 ) {

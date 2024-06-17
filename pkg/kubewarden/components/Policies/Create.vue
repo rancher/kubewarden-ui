@@ -348,7 +348,7 @@ export default ({
     policyQuestions() {
       const defaultPolicy = structuredClone(DEFAULT_POLICY);
 
-      if ( this.type === 'custom' ) {
+      if ( this.customPolicy ) {
         // Add contextAwareResources to custom policy spec
         const updatedCustomPolicy = { spec: { contextAwareResources: [] } };
 
@@ -435,9 +435,8 @@ export default ({
 
     selectType(type) {
       this.type = type;
-      const isCustom = type === 'custom';
 
-      if ( isCustom ) {
+      if ( this.customPolicy ) {
         this.stepReadme.hidden = true;
         this.$set(this, 'hasCustomPolicy', true);
       } else {
@@ -448,7 +447,7 @@ export default ({
       this.policyQuestions();
       this.stepPolicies.ready = true;
       this.$refs.wizard.next();
-      this.bannerTitle = isCustom ? 'Custom Policy' : type?.display_name;
+      this.bannerTitle = this.customPolicy ? 'Custom Policy' : type?.display_name;
       this.typeModule = this.chartValues?.policy?.spec.module;
     }
   }

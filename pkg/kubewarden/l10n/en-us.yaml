@@ -157,6 +157,8 @@ kubewarden:
     resetFilter: Reset Filter
     official:
       label: Show only official Kubewarden policies
+    custom:
+      create: Create Custom Policy
   tracing:
     description: Tracing allows to collect fine grained details about policy evaluations. It can be a useful tool for debugging issues inside of your Kubewarden deployment and policies.
     prerequisites:

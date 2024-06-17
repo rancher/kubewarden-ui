@@ -52,25 +52,13 @@ export default {
       KUBEWARDEN_PRODUCT_NAME,
       POLICY_TABLE_HEADERS,
 
-      attributes:  [],
+      attributes:  [this.t('kubewarden.utils.attributes.optionLabels.all')],
       searchQuery: null,
 
       hidePackages:           [],
       showKubewardenOfficial: true
     };
   },
-
-  // beforeMount() {
-  //   if ( !isEmpty(this.filteredSubtypes) ) {
-  //     const officialExists = this.filteredSubtypes.find(subtype => this.isOfficial(subtype));
-
-  //     this.$nextTick(() => {
-  //       if ( officialExists && officialExists.repository?.organization_display_name ) {
-  //         this.attributes.push(officialExists.repository.organization_display_name);
-  //       }
-  //     });
-  //   }
-  // },
 
   computed: {
     allSchemas() {
@@ -231,7 +219,7 @@ export default {
 
     refresh() {
       this.category = null;
-      this.attributes = [];
+      this.attributes = [this.t('kubewarden.utils.attributes.optionLabels.all')];
       this.searchQuery = null;
     },
 
@@ -296,11 +284,23 @@ export default {
       </button>
     </div>
 
-    <div>
+    <div class="policy-table-actions">
       <Checkbox
         v-model="showKubewardenOfficial"
         :label="t('kubewarden.utils.official.label')"
       />
+
+      <button
+        ref="btn"
+        data-testid="kw-table-custom-buttom"
+        class="btn role-tertiary"
+        type="button"
+        @click="$emit('selectType', 'custom')"
+      >
+        <p>
+          {{ t('kubewarden.utils.custom.create') }}
+        </p>
+      </button>
     </div>
 
     <SortableTableWrapper
@@ -322,6 +322,12 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.policy-table-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .filter {
