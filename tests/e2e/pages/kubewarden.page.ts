@@ -172,7 +172,7 @@ export class KubewardenPage extends BasePage {
       if (from?.controller || to?.controller) {
         await expect(apps.stepTitle).toContainText(`${from?.controller || ''} > ${to?.controller || ''}`)
       }
-      await apps.updateApp('rancher-kubewarden-controller', { navigate: false, timeout: 120_000 })
+      await apps.updateApp('rancher-kubewarden-controller', { navigate: false, timeout: 4 * 60_000 })
       await shell.waitPods()
 
       // Defaults upgrade
