@@ -11,9 +11,9 @@ helm:
   values:
     recommendedPolicies:
       enabled: true
-    policyServer:
-      image:
-        tag: latest
+    # policyServer:
+    #   image:
+    #     tag: latest
 
 dependsOn:
   - selector:

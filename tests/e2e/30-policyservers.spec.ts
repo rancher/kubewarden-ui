@@ -32,13 +32,12 @@ test('Policy Servers', async({ page, ui, nav }) => {
 
     const defaultImage = (await ui.tableRow('default').column('Image').textContent())?.trim().split(':') || []
     const createdImage = (await psRow.column('Image').textContent())?.trim().split(':') || []
-    let [dImg, dVer] = [defaultImage[0], defaultImage[1]]
+    const [dImg, dVer] = [defaultImage[0], defaultImage[1]]
     let [cImg, cVer] = [createdImage[0], createdImage[1]]
+    const latestVer = '99.0.0'
 
-    if (MODE === 'fleet') {
-      if (cVer === 'latest') cVer = '99.0.0'
-      if (dVer === 'latest') dVer = '99.0.0'
-    }
+    // Convert "latest" string to a valid version
+    if (MODE === 'fleet' && cVer === 'latest') cVer = latestVer
 
     // Validate URLs
     expect(cImg).toEqual(dImg)
@@ -51,10 +50,18 @@ test('Policy Servers', async({ page, ui, nav }) => {
     // Created PS should use released version
     expect(semver.prerelease(cVer)).toBeNull()
 
-    // Default PS could be updated to latest rc
-    if (semver.lt(cVer, dVer)) {
-      expect(MODE).toBe('upgrade')
-      expect(semver.prerelease(dVer)).not.toBeNull()
+    if (MODE === 'upgrade') {
+      expect(semver.lte(cVer, dVer)).toBeTruthy()
+      // Default PS could be updated to latest rc
+      if (semver.lt(cVer, dVer)) {
+        expect(semver.prerelease(dVer)).not.toBeNull()
+      }
+    } else if (MODE === 'fleet') {
+      expect(semver.gte(cVer, dVer)).toBeTruthy()
+      // Stable version could not be determined, using latest
+      if (semver.gt(cVer, dVer)) {
+        expect(semver.eq(cVer, latestVer)).toBeTruthy()
+      }
     } else {
       expect(semver.eq(cVer, dVer)).toBeTruthy()
     }

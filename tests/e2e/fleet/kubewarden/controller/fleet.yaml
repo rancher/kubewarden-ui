@@ -9,8 +9,8 @@ helm:
   # valuesFiles:
   #   - values.yaml
   values:
-    image:
-      tag: latest
+    # image:
+    #   tag: latest
     auditScanner:
       policyReporter: true
       cronJob:
