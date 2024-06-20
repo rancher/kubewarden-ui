@@ -490,8 +490,8 @@ export default ({
       data-testid="kw-policy-create-wizard"
       :errors="errors"
       :steps="steps"
-      :edit-first-step="true"
       :show-banner="false"
+      :edit-first-step="true"
       class="wizard"
       @next="reset"
       @cancel="done"
@@ -506,6 +506,9 @@ export default ({
       </template>
 
       <template #readme>
+        <h2 class="banner-title">
+          {{ bannerTitle }}
+        </h2>
         <ChartReadme
           v-if="packageValues && packageValues.readme"
           data-testid="kw-policy-create-readme"
@@ -515,6 +518,9 @@ export default ({
       </template>
 
       <template #values>
+        <h2 class="banner-title">
+          {{ bannerTitle }}
+        </h2>
         <Values
           :value="value"
           :chart-values="chartValues"
@@ -627,5 +633,12 @@ $color: var(--body-text) !important;
 .wizard {
   position: relative;
   height: 100%;
+}
+
+.banner-title {
+  padding-top: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  min-height: 60px;
 }
 </style>

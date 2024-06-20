@@ -150,6 +150,7 @@ kubewarden:
         organization: Organization
         keyword: Keyword
         resource: Resource
+        features: Features
     keyword: Show Keywords & Features
     source: Show Source
     resource: Show Resource Types

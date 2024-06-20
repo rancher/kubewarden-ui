@@ -99,7 +99,8 @@ export default {
 
           const matchesSearch = searchTokens.every(token => (
             subtype.display_name?.match(token) ||
-            ( subtype.description && subtype.description.match(token) )
+            ( subtype.description && subtype.description.match(token) ) ||
+            subtype.keywords?.some(keyword => keyword.match(token))
           ));
 
           if ( !matchesSearch ) {
@@ -113,11 +114,18 @@ export default {
             return true;
           }
 
-          const matchesAttributes = this.attributes.some(attribute => (
-            subtype.keywords?.includes(attribute) ||
-            subtype.repository?.user_alias?.includes(attribute) ||
-            subtype.data?.['kubewarden/resources']?.includes(attribute)
-          ));
+          const matchesAttributes = this.attributes.some((attribute) => {
+            const isFeature = this.featureOptions.includes(attribute);
+
+            if ( isFeature ) {
+              const normalizedAttribute = attribute === 'Mutation' ? 'mutation' : 'contextAwareResources';
+
+              return subtype.data?.[`kubewarden/${ normalizedAttribute }`];
+            }
+
+            return subtype.data?.['kubewarden/resources']?.includes(attribute);
+          }
+          );
 
           if ( !matchesAttributes ) {
             return false;
@@ -140,11 +148,11 @@ export default {
         }, ...this.resourceOptions);
       }
 
-      if ( this.keywordOptions.length ) {
+      if ( this.featureOptions.length ) {
         out.push({
           kind:  'group',
-          label: this.t('kubewarden.utils.attributes.optionLabels.keyword'),
-        }, ...this.keywordOptions);
+          label: this.t('kubewarden.utils.attributes.optionLabels.features'),
+        }, ...this.featureOptions);
       }
 
       if ( out.length ) {
@@ -155,6 +163,26 @@ export default {
       }
 
       return out;
+    },
+
+    featureOptions() {
+      const featuresList = [];
+
+      for ( const subtype of this.filteredPackages ) {
+        if ( subtype?.data?.['kubewarden/mutation'] === 'true' ) {
+          featuresList.push('Mutation');
+        }
+
+        if ( subtype?.data?.['kubewarden/contextAwareResources'] ) {
+          featuresList.push('Context Aware');
+        }
+      }
+
+      if ( !featuresList || featuresList.length === 0 ) {
+        return [];
+      }
+
+      return [...new Set(featuresList.filter(Boolean))];
     },
 
     keywordOptions() {
@@ -288,6 +316,7 @@ export default {
       <Checkbox
         v-model="showKubewardenOfficial"
         :label="t('kubewarden.utils.official.label')"
+        data-testid="kw-table-filter-official"
       />
 
       <button
@@ -322,6 +351,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  padding: 1rem;
 }
 
 .policy-table-actions {

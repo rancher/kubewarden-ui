@@ -317,7 +317,7 @@ export const POLICY_TABLE_HEADERS = [
   {
     name:     'name',
     labelKey: 'tableHeaders.name',
-    value:    'name',
+    value:    'display_name',
     sort:     'name',
     width:    300
   },
