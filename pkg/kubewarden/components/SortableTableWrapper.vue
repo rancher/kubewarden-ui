@@ -40,7 +40,7 @@ export default {
           table.querySelectorAll('tbody tr').forEach((row, index) => {
             const listener = () => this.$emit('selectRow', this.rows[index]);
 
-            row.addEventListener('click', listener);
+            row?.addEventListener('click', listener);
             this.listeners.push({ row, listener });
           });
         }
@@ -48,7 +48,7 @@ export default {
     },
 
     removeRowClickListener() {
-      this.listeners?.forEach(({ row, listener }) => row.removeEventListener('click', listener));
+      this.listeners?.forEach(({ row, listener }) => row?.removeEventListener('click', listener));
       this.listeners = [];
     }
   }
