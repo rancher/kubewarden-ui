@@ -348,31 +348,37 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-.sub-row {
-  background-color: var(--body-bg);
-  border-bottom: 1px solid var(--sortable-table-top-divider);
-  padding-left: 1rem;
-  padding-right: 1rem;
+.policy-table-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.details {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: 1em;
+.filter {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-self: flex-end;
+  align-items: center;
 
-  .col {
-    display: flex;
-    flex-direction: column;
+  & > * {
+    margin: 10px;
+    max-width: 33%;
+  }
+  & > *:first-child {
+    margin-left: 0;
+  }
+  & > *:last-child {
+    margin-right: 0;
+  }
 
-    section {
-      margin-bottom: 1.5rem;
-    }
+  &__category {
+    min-width: 200px;
+    height: unset;
+  }
 
-    .title {
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-    }
+  &__search, &__reset {
+    height: 61px;
   }
 }
 </style>

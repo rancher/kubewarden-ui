@@ -312,3 +312,37 @@ export const POLICY_REPORTER_HEADERS = {
     }
   ]
 };
+
+export const POLICY_TABLE_HEADERS = [
+  {
+    name:     'name',
+    labelKey: 'tableHeaders.name',
+    value:    'display_name',
+    sort:     'name',
+    width:    300
+  },
+  {
+    name:      'resource',
+    labelKey:  'kubewarden.policyTable.headers.resource',
+    value:     'data',
+    getValue:  (row: any) => row.data,
+    formatter: 'PolicyTableResources',
+    width:     150
+  },
+  {
+    name:      'features',
+    labelKey:  'kubewarden.policyTable.headers.features',
+    value:     'data',
+    getValue:  (row: any) => row.data,
+    formatter: 'PolicyTableFeatures',
+    width:     150
+
+  },
+  {
+    name:      '',
+    label:     '',
+    value:     'row',
+    formatter: 'PolicyTableBadges',
+    width:     40
+  }
+];

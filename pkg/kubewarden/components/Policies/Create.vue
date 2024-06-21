@@ -14,7 +14,7 @@ import { Banner } from '@components/Banner';
 
 import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
-import Markdown from '@shell/components/Markdown';
+import ChartReadme from '@shell/components/ChartReadme';
 import Wizard from '@shell/components/Wizard';
 
 import {
@@ -28,7 +28,7 @@ import { removeEmptyAttrs } from '../../utils/object';
 import { handleGrowl } from '../../utils/handle-growl';
 
 import { DATA_ANNOTATIONS } from '../../types/artifacthub';
-import PolicyGrid from './PolicyGrid';
+import PolicyTable from './PolicyTable';
 import Values from './Values';
 
 export default ({
@@ -50,9 +50,9 @@ export default ({
     AsyncButton,
     Banner,
     Loading,
-    Markdown,
+    ChartReadme,
     Wizard,
-    PolicyGrid,
+    PolicyTable,
     Values
   },
 
@@ -93,24 +93,27 @@ export default ({
 
       // Steps
       stepPolicies: {
-        hidden: false,
-        name:   'policies',
-        label:  'Policies',
-        ready:  false,
-        weight: 99
+        hidden:    false,
+        name:      'policies',
+        label:     'Policies',
+        ready:     false,
+        showSteps: false,
+        weight:    99
       },
       stepReadme: {
-        hidden: false,
-        name:   'readme',
-        label:  'Readme',
-        ready:  true,
-        weight: 98
+        hidden:    false,
+        name:      'readme',
+        label:     'Readme',
+        ready:     true,
+        showSteps: false,
+        weight:    98
       },
       stepValues: {
-        name:   'values',
-        label:  'Values',
-        ready:  true,
-        weight: 97
+        name:      'values',
+        label:     'Values',
+        ready:     true,
+        showSteps: false,
+        weight:    97
       },
     };
   },
@@ -345,7 +348,7 @@ export default ({
     policyQuestions() {
       const defaultPolicy = structuredClone(DEFAULT_POLICY);
 
-      if ( this.type === 'custom' ) {
+      if ( this.customPolicy ) {
         // Add contextAwareResources to custom policy spec
         const updatedCustomPolicy = { spec: { contextAwareResources: [] } };
 
@@ -358,7 +361,7 @@ export default ({
 
       const policyDetails = this.packages.find(pkg => pkg.repository?.url === this.type?.repository?.url);
       const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.[DATA_ANNOTATIONS.QUESTIONS]);
-      const packageAnnotation = `${ policyDetails.repository.name }/${ policyDetails.name }/${ policyDetails.version }`;
+      const packageAnnotation = `${ policyDetails?.repository?.name }/${ policyDetails?.name }/${ policyDetails?.version }`;
       /** Return spec from package if annotation exists */
       const parseAnnotation = (annotation, obj) => {
         const spec = this.value.parsePackageMetadata(policyDetails?.data?.[annotation]);
@@ -384,7 +387,7 @@ export default ({
         kind:       this.value.kind,
         metadata:   { annotations: { [ARTIFACTHUB_PKG_ANNOTATION]: packageAnnotation } },
         spec:       {
-          module:                policyDetails.containers_images[0].image,
+          module:                policyDetails?.containers_images[0].image,
           contextAwareResources: parseAnnotation(DATA_ANNOTATIONS.CONTEXT_AWARE, 'contextAwareResources'),
           rules:                 parseAnnotation(DATA_ANNOTATIONS.RULES, 'rules'),
           mutating:              determineAnnotation(DATA_ANNOTATIONS.MUTATION)
@@ -432,9 +435,8 @@ export default ({
 
     selectType(type) {
       this.type = type;
-      const isCustom = type === 'custom';
 
-      if ( isCustom ) {
+      if ( this.customPolicy ) {
         this.stepReadme.hidden = true;
         this.$set(this, 'hasCustomPolicy', true);
       } else {
@@ -445,7 +447,7 @@ export default ({
       this.policyQuestions();
       this.stepPolicies.ready = true;
       this.$refs.wizard.next();
-      this.bannerTitle = isCustom ? 'Custom Policy' : type?.display_name;
+      this.bannerTitle = this.customPolicy ? 'Custom Policy' : type?.display_name;
       this.typeModule = this.chartValues?.policy?.spec.module;
     }
   }
@@ -488,43 +490,37 @@ export default ({
       data-testid="kw-policy-create-wizard"
       :errors="errors"
       :steps="steps"
+      :show-banner="false"
       :edit-first-step="true"
-      :banner-title="bannerTitle"
-      :banner-title-subtext="typeModule"
       class="wizard"
       @next="reset"
       @cancel="done"
       @finish="finish"
     >
       <template #policies>
-        <PolicyGrid data-testid="kw-policy-create-grid" :value="packages" @selectType="selectType($event)">
-          <template #customSubtype>
-            <div data-testid="kw-grid-subtype-card-custom" class="subtype custom" @click="selectType('custom')">
-              <div class="subtype__metadata">
-                <div class="subtype__body">
-                  <div class="subtype__badge" :style="{ 'background-color': 'var(--darker)' }">
-                    <label>{{ t('kubewarden.customPolicy.badge') }}</label>
-                  </div>
-
-                  <h4 class="subtype__label">
-                    {{ t('kubewarden.customPolicy.title') }}
-                  </h4>
-
-                  <div class="subtype__description">
-                    {{ t('kubewarden.customPolicy.description') }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-        </PolicyGrid>
+        <PolicyTable
+          data-testid="kw-policy-create-table"
+          :value="packages"
+          @selectType="selectType($event)"
+        />
       </template>
 
       <template #readme>
-        <Markdown v-if="packageValues && packageValues.readme" data-testid="kw-policy-create-readme" :value="packageValues.readme" class="mb-20" />
+        <h2 class="banner-title">
+          {{ bannerTitle }}
+        </h2>
+        <ChartReadme
+          v-if="packageValues && packageValues.readme"
+          data-testid="kw-policy-create-readme"
+          :version-info="packageValues"
+          class="mb-20"
+        />
       </template>
 
       <template #values>
+        <h2 class="banner-title">
+          {{ bannerTitle }}
+        </h2>
         <Values
           :value="value"
           :chart-values="chartValues"
@@ -554,24 +550,12 @@ $height: 110px;
 $margin: 10px;
 $color: var(--body-text) !important;
 
-::v-deep .step-container {
-  height: auto;
-}
-
 ::v-deep .header {
-  .step-sequence {
-    display: block;
-
-    .steps {
-      & .divider {
-        top: 22px;
-      }
-    }
-  }
+  display: none;
 }
 
 ::v-deep .controls-row {
-  position: relative;
+  position: sticky;
   width: auto;
 
   .controls-steps {
@@ -649,5 +633,12 @@ $color: var(--body-text) !important;
 .wizard {
   position: relative;
   height: 100%;
+}
+
+.banner-title {
+  padding-top: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  min-height: 60px;
 }
 </style>
