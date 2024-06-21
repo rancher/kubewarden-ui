@@ -138,12 +138,15 @@ test('Install Kubewarden by Fleet', async({ page, ui }) => {
 
 test('Whitelist Artifact Hub', async({ page, ui, nav }) => {
   const cap = new ClusterAdmissionPoliciesPage(page)
+  // Count -1 because of Custom Policy
+  const apCount = apList.length - 1
+  const capCount = capList.length - 1
 
   await test.step('Whitelist ArtifactHub', async() => {
     await nav.capolicy()
     await ui.button('Create').click()
-    await expect(cap.cards({ name: 'Custom Policy' })).toBeVisible()
-    await expect(cap.cards()).toHaveCount(1)
+    await expect(ui.button('Create Custom Policy')).toBeVisible()
+    await expect(cap.cards()).toHaveCount(0)
     await cap.whitelist()
   })
 
@@ -151,34 +154,33 @@ test('Whitelist Artifact Hub', async({ page, ui, nav }) => {
     // CAP
     await nav.capolicy()
     await ui.button('Create').click()
-    await expect(cap.cards()).toHaveCount(capList.length)
-    await expect(cap.cards({ signed: true, official: true })).toHaveCount(capList.length - 1) // -1 for Custom Policy
+    await expect(cap.cards()).toHaveCount(capCount)
+    await expect(cap.cards({ signed: true, official: true })).toHaveCount(capCount)
     // AP
     await nav.apolicy()
     await ui.button('Create').click()
-    await expect(cap.cards()).toHaveCount(apList.length)
-    await expect(cap.cards({ signed: true, official: true })).toHaveCount(apList.length - 1) // -1 for Custom Policy
+    await expect(cap.cards()).toHaveCount(apCount)
+    await expect(cap.cards({ signed: true, official: true })).toHaveCount(apCount)
 
-    // Only Custom Policy is unofficial & unsigned
-    await expect(cap.cards({ signed: false })).toHaveCount(1)
-    await expect(cap.cards({ official: false })).toHaveCount(1)
-    await expect(cap.cards({ name: 'Custom Policy', signed: false, official: false })).toBeVisible()
+    // All policies should be signed and official
+    await expect(cap.cards({ signed: false })).toHaveCount(0)
+    await expect(cap.cards({ official: false })).toHaveCount(0)
     // We have context-aware and mutating policy
     await expect(cap.cards({ aware: true }).first()).toBeVisible()
     await expect(cap.cards({ mutation: true }).first()).toBeVisible()
   })
 
-  await test.step('Check User policies', async() => {
+  await test.step('Check Unofficial policies', async() => {
     await nav.capolicy()
     await ui.button('Create').click()
     // Display User policies
-    await ui.button('Deselect Kubewarden Developers').click()
-    await expect(cap.cards().nth(capList.length)).toBeVisible()
+    await ui.checkbox('Show only official Kubewarden policies').uncheck()
+    await expect(cap.cards().nth(capCount + 1)).toBeVisible()
     // Check User policies
-    const extraCount = await cap.cards().count() - capList.length
+    const extraCount = await cap.cards().count() - capCount
     expect(extraCount, 'Extra policies should be visible').toBeGreaterThanOrEqual(1)
-    await expect(cap.cards({ official: false }), 'Extra policies should be unofficial').toHaveCount(extraCount + 1)
-    await expect(cap.cards({ official: true }), 'Official count should not change').toHaveCount(capList.length - 1)
+    await expect(cap.cards({ official: false }), 'Extra policies should be unofficial').toHaveCount(extraCount)
+    await expect(cap.cards({ official: true }), 'Official count should not change').toHaveCount(capCount)
   })
 })
 

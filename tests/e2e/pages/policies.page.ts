@@ -56,14 +56,15 @@ export abstract class BasePolicyPage extends BasePage {
     }
 
     cards = (options?: {name?: policyTitle, signed?: boolean, official?: boolean, aware?: boolean, mutation?: boolean }): Locator => {
-      let cards = this.page.getByTestId(/^kw-grid-subtype-card/)
-      if (options?.name) cards = cards.filter({ has: this.page.getByRole('heading', { name: options.name, exact: true }) })
+      let cards = options?.name
+        ? this.ui.tableRow(options.name).row
+        : this.page.locator('table.sortable-table > tbody:visible').locator('tr.main-row')
 
       const optionMap: Partial<Record<keyof NonNullable<typeof options>, Locator>> = {
-        signed  : this.page.locator('div.subtype__signed').locator('i.icon-lock'),
-        official: this.page.locator('div.subtype__icon').getByAltText('Official Kubewarden Policy'),
-        aware   : this.page.locator('div.subtype__aware').getByText('Context Aware'),
-        mutation: this.page.locator('div.subtype__mutation').getByText('Mutation'),
+        signed  : this.page.locator('div.badge__signed').locator('i.icon-lock'),
+        official: this.page.locator('div.badge__icon').getByAltText('Official Kubewarden Policy'),
+        aware   : this.page.getByText('Context Aware'),
+        mutation: this.page.getByText('Mutation'),
       }
       for (const o in optionMap) {
         if (options && options[o] !== undefined) {
@@ -117,13 +118,17 @@ export abstract class BasePolicyPage extends BasePage {
         await this.goto()
         await this.ui.button('Create').click()
       }
-      await expect(this.page.getByRole('heading', { name: 'Finish: Step 1' })).toBeVisible()
       // Open requested policy
-      await this.ui.retry(async() => {
-        await this.cards({ name: p.title }).click()
-      }, 'Could not get policy list from artifacthub')
-      // Go to values tab, skip optional readme
-      await this.page.getByRole('tab', { name: 'Values' }).click()
+      if (p.title === 'Custom Policy') {
+        await this.ui.button('Create Custom Policy').click()
+      } else {
+        await this.ui.tableRow(p.title).row.click()
+        // Go to policy tab, skip readme
+        await expect(this.page.getByTestId('kw-policy-create-readme')).toBeVisible()
+        await this.ui.button('Next').click()
+      }
+      // Check we are on policy creation page
+      await expect(this.page.getByRole('heading', { name: p.title })).toBeVisible()
       await expect(this.page.getByRole('heading', { name: 'General' })).toBeVisible()
     }
 
