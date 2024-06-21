@@ -1,5 +1,4 @@
 <script>
-import isEmpty from 'lodash/isEmpty';
 import semver from 'semver';
 
 import { SCHEMA } from '@shell/config/types';
