@@ -33,7 +33,7 @@ export class TableRow {
      * @param arg:object row value under selected column(s) {column1: "value", "column 2": "value2"}
      * @param options.group When there are multiple tbodies filter by group-tab (Project, Namespace, ..)
      */
-    constructor(private readonly ui: RancherUI, arg: string | RegExp | { [key: string]: string | RegExp }, options?: { group?: string }) {
+    constructor(private readonly ui: RancherUI, arg: number | string | RegExp | { [key: string]: string | RegExp }, options?: { group?: string }) {
       let table = ui.page.locator('table.sortable-table > tbody:visible')
 
       // Filter by project / namespace
@@ -44,7 +44,10 @@ export class TableRow {
       let rows = table.locator('tr.main-row')
 
       // Filter by argument
-      if (typeof arg === 'string' || arg instanceof RegExp) {
+      if (typeof arg === 'number') {
+        this.strval = arg.toString()
+        rows = rows.nth(arg)
+      } else if (typeof arg === 'string' || arg instanceof RegExp) {
         this.strval = arg.toString()
         rows = rows.filter({ has: this.findCell('Name', arg) })
       } else if (typeof arg === 'object') {
