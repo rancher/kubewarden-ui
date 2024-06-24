@@ -1,8 +1,10 @@
 <script>
 import { mapGetters } from 'vuex';
 import debounce from 'lodash/debounce';
+import semver from 'semver';
 
 import { CATALOG, SERVICE } from '@shell/config/types';
+import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { allHash } from '@shell/utils/promise';
 import ResourceFetch from '@shell/mixins/resource-fetch';
@@ -152,6 +154,10 @@ export default {
     shellEnabled() {
       return !!this.currentCluster?.links?.shell;
     },
+
+    showPreRelease() {
+      return this.$store.getters['prefs/get'](SHOW_PRE_RELEASE);
+    },
   },
 
   methods: {
@@ -218,14 +224,18 @@ export default {
       const {
         repoType, repoName, chartName, versions
       } = this.controllerChart;
-      const latestStableVersion = getLatestStableVersion(versions);
 
-      if ( latestStableVersion ) {
+      const versionMap = versions?.map(v => v.version)
+        .filter(v => this.showPreRelease ? v : !semver.prerelease(v));
+
+      const latestChartVersion = this.showPreRelease ? semver.rsort(versionMap)[0] : getLatestStableVersion(versions)?.version;
+
+      if ( latestChartVersion ) {
         const query = {
           [REPO_TYPE]: repoType,
           [REPO]:      repoName,
           [CHART]:     chartName,
-          [VERSION]:   latestStableVersion.version
+          [VERSION]:   latestChartVersion
         };
 
         this.$router.push({
@@ -285,7 +295,7 @@ export default {
 
       <!-- Non Air-Gapped -->
       <template v-else>
-        <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps">
+        <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps" data-testid="kw-install-wizard">
           <template #certmanager>
             <h2 class="mt-20 mb-10" data-testid="kw-cm-title">
               {{ t("kubewarden.dashboard.prerequisites.certManager.title") }}
@@ -346,7 +356,7 @@ export default {
                     <span class="mb-20">
                       {{ t('kubewarden.dashboard.appInstall.reload' ) }}
                     </span>
-                    <button class="ml-10 btn btn-sm role-primary" @click="reload()">
+                    <button data-testid="kw-app-install-reload" class="ml-10 btn btn-sm role-primary" @click="reload()">
                       {{ t('generic.reload') }}
                     </button>
                   </Banner>
