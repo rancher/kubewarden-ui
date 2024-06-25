@@ -1,8 +1,10 @@
 import { mount } from '@vue/test-utils';
 
-import InstallView from '@kubewarden/components/Dashboard/InstallView.vue';
+import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 
 import { controllerCharts } from '@tests/unit/_templates_/controllerCharts';
+
+import InstallView from '@kubewarden/components/Dashboard/InstallView.vue';
 
 // Mock @rancher/shell/utils/clipboard.js
 jest.mock('@rancher/shell/utils/clipboard', () => ({ writeText: jest.fn() }));
@@ -140,6 +142,14 @@ describe('InstallView.vue', () => {
   });
 
   it('chartRoute returns stable version when showPreRelease is false', async() => {
+    commonMocks.$store.getters['prefs/get'].mockImplementation((key) => {
+      if ( key === SHOW_PRE_RELEASE ) {
+        return false;
+      }
+
+      return undefined;
+    });
+
     const wrapper = createWrapper({
       data() {
         return { initStepIndex: 1 };
@@ -185,6 +195,14 @@ describe('InstallView.vue', () => {
   });
 
   it('chartRoute returns RC version when showPreRelease is true', async() => {
+    commonMocks.$store.getters['prefs/get'].mockImplementation((key) => {
+      if ( key === SHOW_PRE_RELEASE ) {
+        return true;
+      }
+
+      return undefined;
+    });
+
     const wrapper = createWrapper({
       data() {
         return { initStepIndex: 1 };

@@ -1,10 +1,8 @@
 <script>
 import { mapGetters } from 'vuex';
 import debounce from 'lodash/debounce';
-import semver from 'semver';
 
 import { CATALOG, SERVICE } from '@shell/config/types';
-import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { allHash } from '@shell/utils/promise';
 import ResourceFetch from '@shell/mixins/resource-fetch';
@@ -16,7 +14,7 @@ import Loading from '@shell/components/Loading';
 import Markdown from '@shell/components/Markdown';
 
 import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPO } from '../../types';
-import { getLatestStableVersion } from '../../plugins/kubewarden-class';
+import { getLatestVersion } from '../../plugins/kubewarden-class';
 import { handleGrowl } from '../../utils/handle-growl';
 import { refreshCharts } from '../../utils/chart';
 
@@ -153,11 +151,7 @@ export default {
 
     shellEnabled() {
       return !!this.currentCluster?.links?.shell;
-    },
-
-    showPreRelease() {
-      return this.$store.getters['prefs/get'](SHOW_PRE_RELEASE);
-    },
+    }
   },
 
   methods: {
@@ -225,10 +219,7 @@ export default {
         repoType, repoName, chartName, versions
       } = this.controllerChart;
 
-      const versionMap = versions?.map(v => v.version)
-        .filter(v => this.showPreRelease ? v : !semver.prerelease(v));
-
-      const latestChartVersion = this.showPreRelease ? semver.rsort(versionMap)[0] : getLatestStableVersion(versions)?.version;
+      const latestChartVersion = getLatestVersion(this.$store, versions);
 
       if ( latestChartVersion ) {
         const query = {

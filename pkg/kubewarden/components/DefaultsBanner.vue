@@ -8,7 +8,7 @@ import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { Banner } from '@components/Banner';
 
 import { KUBEWARDEN_CHARTS } from '../types';
-import { getLatestStableVersion } from '../plugins/kubewarden-class';
+import { getLatestVersion } from '../plugins/kubewarden-class';
 import { handleGrowl } from '../utils/handle-growl';
 import { refreshCharts, findCompatibleDefaultsChart } from '../utils/chart';
 import { fetchControllerApp } from '../modules/kubewardenController';
@@ -132,14 +132,14 @@ export default {
       const {
         repoType, repoName, chartName, versions
       } = this.defaultsChart;
-      const latestStableVersion = getLatestStableVersion(versions);
+      const latestVersion = getLatestVersion(this.$store, versions);
 
-      if ( latestStableVersion ) {
+      if ( latestVersion ) {
         const query = {
           [REPO_TYPE]: repoType,
           [REPO]:      repoName,
           [CHART]:     chartName,
-          [VERSION]:   this.highestCompatibleDefaultsChart?.version || latestStableVersion
+          [VERSION]:   this.highestCompatibleDefaultsChart?.version || latestVersion
         };
 
         this.$router.push({

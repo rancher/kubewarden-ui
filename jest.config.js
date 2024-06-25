@@ -14,7 +14,7 @@ module.exports = {
   transform: {
     '^.+\\.js$':   '<rootDir>/node_modules/babel-jest',
     '.*\\.(vue)$': '<rootDir>/node_modules/@vue/vue2-jest',
-    '^.+\\.tsx?$': ['ts-jest', { isolatedModules: true }],
+    '^.+\\.tsx?$': ['ts-jest'],
   },
   transformIgnorePatterns:  ['/node_modules/(?!(@vue|@rancher|jsonpath-plus))'],
   modulePathIgnorePatterns: [
@@ -28,4 +28,5 @@ module.exports = {
   coverageReporters: ['json', 'text-summary'],
   preset:            '@vue/cli-plugin-unit-jest/presets/typescript-and-babel',
   testEnvironment:   './tests/unit/_config_/FixJSDOMEnvironment.ts',
+  globals:           { 'ts-jest': { isolatedModules: true } },
 };

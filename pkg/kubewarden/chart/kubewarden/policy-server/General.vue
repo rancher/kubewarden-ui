@@ -15,7 +15,7 @@ import { RadioGroup } from '@components/Form/Radio';
 import { KUBEWARDEN_CHARTS } from '../../../types';
 import { DEFAULT_POLICY_SERVER } from '../../../models/policies.kubewarden.io.policyserver';
 import { getPolicyServerModule, isFleetDeployment } from '../../../modules/fleet';
-import { getLatestStableVersion } from '../../../plugins/kubewarden-class';
+import { getLatestVersion } from '../../../plugins/kubewarden-class';
 
 export default {
   props: {
@@ -61,7 +61,7 @@ export default {
     }
 
     if ( this.defaultsChart ) {
-      const defaultsStable = getLatestStableVersion(this.defaultsChart.versions);
+      const defaultsStable = getLatestVersion(this.$store, this.defaultsChart.versions);
 
       const chartInfo = await this.$store.dispatch('catalog/getVersionInfo', {
         repoType:    this.defaultsChart?.repoType,
@@ -76,21 +76,21 @@ export default {
         const psTag = chartInfo.values?.policyServer?.image?.tag;
 
         if ( psImage && psTag ) {
-          this.latestStableVersion = `${ registry || 'ghcr.io' }/${ psImage }:${ psTag }`;
+          this.latestChartVersion = `${ registry || 'ghcr.io' }/${ psImage }:${ psTag }`;
         }
       }
     }
 
     if ( this.isFleet && !this.defaultsChart ) {
-      this.latestStableVersion = getPolicyServerModule(this.fleetBundles);
+      this.latestChartVersion = getPolicyServerModule(this.fleetBundles);
     }
 
-    if ( this.latestStableVersion ) {
+    if ( this.latestChartVersion ) {
       if ( !this.image || this.image === DEFAULT_POLICY_SERVER.spec.image ) {
-        // If the image doesn't exist or it's the default 'latest' image, set to the latestStableVersion
-        this.image = this.latestStableVersion;
-      } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image && this.image !== this.latestStableVersion ) {
-        // If the image exists, and is not the default 'latest' image, and not the latestStableVersion,
+        // If the image doesn't exist or it's the default 'latest' image, set to the latestChartVersion
+        this.image = this.latestChartVersion;
+      } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image && this.image !== this.latestChartVersion ) {
+        // If the image exists, and is not the default 'latest' image, and not the latestChartVersion,
         // set the defaultImage radio to false
         this.defaultImage = false;
       }
@@ -102,7 +102,7 @@ export default {
   data() {
     return {
       defaultImage:        true,
-      latestStableVersion: null,
+      latestChartVersion:  null,
       isFleet:             false,
       name:                this.value.metadata.name,
       image:               this.value.spec.image,
@@ -126,8 +126,8 @@ export default {
     },
     defaultImage(neu, old) {
       if ( neu ) {
-        if ( this.latestStableVersion ) {
-          this.image = this.latestStableVersion;
+        if ( this.latestChartVersion ) {
+          this.image = this.latestChartVersion;
         } else {
           this.image = structuredClone(DEFAULT_POLICY_SERVER.spec.image);
         }
@@ -186,10 +186,10 @@ export default {
 
     showVersionBanner() {
       if ( this.isFleet ) {
-        return (this.isCreate && this.defaultImage && !this.latestStableVersion);
+        return (this.isCreate && this.defaultImage && !this.latestChartVersion);
       }
 
-      return (this.isCreate && this.defaultImage && !this.defaultsChart && !this.latestStableVersion);
+      return (this.isCreate && this.defaultImage && !this.defaultsChart && !this.latestChartVersion);
     }
   }
 };
