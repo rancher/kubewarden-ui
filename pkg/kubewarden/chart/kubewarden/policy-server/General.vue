@@ -61,13 +61,13 @@ export default {
     }
 
     if ( this.defaultsChart ) {
-      const defaultsStable = getLatestVersion(this.$store, this.defaultsChart.versions);
+      const defaultsVersion = getLatestVersion(this.$store, this.defaultsChart.versions);
 
       const chartInfo = await this.$store.dispatch('catalog/getVersionInfo', {
         repoType:    this.defaultsChart?.repoType,
         repoName:    this.defaultsChart?.repoName,
         chartName:   this.defaultsChart?.chartName,
-        versionName: defaultsStable?.version
+        versionName: defaultsVersion
       });
 
       if ( !isEmpty(chartInfo) ) {
