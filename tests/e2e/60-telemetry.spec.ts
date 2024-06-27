@@ -1,9 +1,14 @@
 import { test, expect } from './rancher/rancher-test'
-import { Chart, RancherAppsPage } from './rancher/rancher-apps.page'
+import { Chart, ChartRepo, RancherAppsPage } from './rancher/rancher-apps.page'
 import { TelemetryPage } from './pages/telemetry.page'
 
+// OpenTelemetry
+const otelRepo: ChartRepo = { name: 'open-telemetry', url: 'https://open-telemetry.github.io/opentelemetry-helm-charts' }
 const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator' }
-const jaegerChart: Chart = { title: 'jaeger-operator', name: 'jaeger-operator', namespace: 'jaeger', check: 'jaeger-operator', version: '2.53.0' }
+// Jaeger Tracing
+const jaegerRepo: ChartRepo = { name: 'jaegertracing', url: 'https://jaegertracing.github.io/helm-charts' }
+const jaegerChart: Chart = { title: 'jaeger-operator', name: 'jaeger-operator', namespace: 'jaeger', check: 'jaeger-operator' }
+// Monitoring
 const monitoringChart: Chart = { title: 'Monitoring', check: 'rancher-monitoring' }
 
 test.skip(process.env.MODE === 'fleet')
@@ -22,7 +27,7 @@ test('Install OpenTelemetry', async({ page, nav }) => {
     await expect(telPage.configBtn).toBeDisabled()
   }
   // Install OpenTelemetry
-  await apps.addRepository('open-telemetry', 'https://open-telemetry.github.io/opentelemetry-helm-charts')
+  await apps.addRepository(otelRepo)
   await apps.installChart(otelChart,
     { yamlPatch: (y) => { y.manager.collectorImage.repository = 'otel/opentelemetry-collector-contrib' } })
 
@@ -48,7 +53,7 @@ test.describe('Tracing', () => {
     await telPage.toBeIncomplete('jaeger')
     await expect(telPage.configBtn).toBeDisabled()
     // Install Jaeger
-    await apps.addRepository('jaegertracing', 'https://jaegertracing.github.io/helm-charts')
+    await apps.addRepository(jaegerRepo)
     await apps.installChart(jaegerChart, {
       yamlPatch: (y) => {
         y.jaeger.create = true
@@ -201,5 +206,5 @@ test.describe('Metrics', () => {
 test('Uninstall OpenTelemetry', async({ page }) => {
   const apps = new RancherAppsPage(page)
   await apps.deleteApp('opentelemetry-operator')
-  await apps.deleteRepository('open-telemetry')
+  await apps.deleteRepository(otelRepo)
 })
