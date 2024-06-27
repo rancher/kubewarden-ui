@@ -1,6 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import type { YAMLPatch } from '../components/rancher-ui'
+import { Shell } from '../components/kubectl-shell'
 import { step } from './rancher-test'
 import { BasePage } from './basepage'
 
@@ -23,6 +24,12 @@ export interface Chart {
     version?: string,
     namespace?: string,
     project?: string,
+}
+
+export const appColRepo: ChartRepo = {
+  name    : 'application-collection',
+  url     : 'oci://dp.apps.rancher.io/charts',
+  httpAuth: { username: '<user>', password: '<pass>' }
 }
 
 export class RancherAppsPage extends BasePage {
@@ -136,6 +143,31 @@ export class RancherAppsPage extends BasePage {
       if (version) {
         await expect(row.column('Chart')).toContainText(`:${version}`)
       }
+    }
+
+    @step
+    async installFromAppCollection(chart: Chart) {
+      const shell = new Shell(this.page)
+      const shellOpts = { inPlace: true, runner: 'rancher' } as const
+      const ns = chart.namespace || 'default'
+
+      // Configure authentification
+      await shell.open()
+      // Secret to pull images from app collection
+      if (ns !== 'default') await shell.run(`kubectl create ns ${ns}`, shellOpts)
+      await shell.run(`kubectl create secret docker-registry application-collection -n ${ns} --docker-server=dp.apps.rancher.io --docker-username=${appColRepo.httpAuth?.username} --docker-password=${appColRepo.httpAuth?.password}`, shellOpts)
+      // Login to app collection to access helm chart
+      await shell.run(`helm registry login ${appColRepo.url.split('://')[1]} -u ${appColRepo.httpAuth?.username} -p ${appColRepo.httpAuth?.password}`, shellOpts)
+
+      // Chart-specific setup
+      if (chart.name === 'jaeger-operator') {
+        await shell.run(`helm install ${chart.name} ${appColRepo.url}/jaeger-operator -n ${ns} --set jaeger.create=true --set rbac.clusterRole=true --set image.imagePullSecrets[0]=application-collection`, shellOpts)
+        // Workaround for jaeger issue https://github.com/jaegertracing/helm-charts/issues/581
+        await shell.run('kubectl get clusterrole jaeger-operator -o json | jq \'.rules[] |= (select(.apiGroups | index("networking.k8s.io")).resources += ["ingressclasses"])\' | kubectl apply -f -', shellOpts)
+        // Patch SA to use pull secret for jaeger creation (retry waits for SA creation)
+        await shell.retry(`kubectl patch serviceaccount jaeger-operator-jaeger -n ${ns} -p '{"imagePullSecrets": [{"name": "application-collection"}]}'`, shellOpts)
+      }
+      await shell.close()
     }
 
     @step

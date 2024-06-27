@@ -167,7 +167,7 @@ export class RancherUI {
     }
   }
 
-  static isPrime(): boolean {
+  static get isPrime(): boolean {
     if (!process.env.RANCHER_PRIME) throw new Error('RANCHER_PRIME not set')
     return process.env.RANCHER_PRIME === 'true'
   }
@@ -176,5 +176,9 @@ export class RancherUI {
     if (!process.env.RANCHER_VERSION) throw new Error('RANCHER_VERSION not set')
     if (!semver.validRange(query)) throw new Error(`Invalid range: ${query}`)
     return semver.satisfies(process.env.RANCHER_VERSION, query, { includePrerelease: true })
+  }
+
+  static get hasAppCollection(): boolean {
+    return this.isVersion('>=2.9') // && this.isPrime
   }
 }

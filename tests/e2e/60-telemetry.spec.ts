@@ -1,6 +1,7 @@
 import { test, expect } from './rancher/rancher-test'
 import { Chart, ChartRepo, RancherAppsPage } from './rancher/rancher-apps.page'
 import { TelemetryPage } from './pages/telemetry.page'
+import { RancherUI } from './components/rancher-ui'
 
 // OpenTelemetry
 const otelRepo: ChartRepo = { name: 'open-telemetry', url: 'https://open-telemetry.github.io/opentelemetry-helm-charts' }
@@ -48,18 +49,25 @@ test.describe('Tracing', () => {
     await nav.pserver('default', 'Tracing')
   })
 
-  test('Install Jaeger', async({ nav }) => {
+  test('Install Jaeger', async({ nav, shell }) => {
     // Jaeger is not installed
     await telPage.toBeIncomplete('jaeger')
     await expect(telPage.configBtn).toBeDisabled()
     // Install Jaeger
-    await apps.addRepository(jaegerRepo)
-    await apps.installChart(jaegerChart, {
-      yamlPatch: (y) => {
-        y.jaeger.create = true
-        y.rbac.clusterRole = true
-      }
-    })
+    if (RancherUI.hasAppCollection) {
+      await apps.installFromAppCollection(jaegerChart)
+    } else {
+      await apps.addRepository(jaegerRepo)
+      await apps.installChart(jaegerChart, {
+        yamlPatch: {
+          'jaeger.create'   : true,
+          'rbac.clusterRole': true,
+        }
+      })
+      // Workaround for https://github.com/jaegertracing/helm-charts/issues/581
+      await shell.run('kubectl get clusterrole jaeger-operator -o json | jq \'.rules[] |= (select(.apiGroups | index("networking.k8s.io")).resources += ["ingressclasses"])\' | kubectl apply -f -')
+    }
+
     // Jaeger is installed
     await nav.pserver('default', 'Tracing')
     await telPage.toBeComplete('jaeger')
@@ -96,7 +104,7 @@ test.describe('Tracing', () => {
     await expect(logline).toBeVisible()
   })
 
-  test('Uninstall tracing', async({ ui, nav }) => {
+  test('Uninstall tracing', async({ ui, nav, shell }) => {
     // Clean up
     await apps.updateApp('rancher-kubewarden-controller', {
       questions: async() => {
@@ -105,7 +113,11 @@ test.describe('Tracing', () => {
       }
     })
     await apps.deleteApp('jaeger-operator')
-    await apps.deleteRepository('jaegertracing')
+    await shell.run('kubectl delete ns jaeger')
+    if (!RancherUI.hasAppCollection) {
+      await apps.deleteRepository(jaegerRepo)
+    }
+
     // Check
     await nav.pserver('default', 'Tracing')
     await telPage.toBeIncomplete('config')
