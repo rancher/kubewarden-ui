@@ -102,6 +102,8 @@ export class Shell {
       }
 
       if (!options?.inPlace) await this.close()
+      else await this.cursor.press('Control+l')
+
       return statusCode
     }
 
