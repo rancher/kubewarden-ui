@@ -6,6 +6,7 @@ import { PolicyServersPage } from './pages/policyservers.page'
 import { apList, capList, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherFleetPage } from './rancher/rancher-fleet.page'
+import { RancherUI } from './components/rancher-ui'
 
 // source (yarn dev) | rc (add github repo) | released (just install)
 const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
@@ -52,9 +53,12 @@ test('Initial rancher setup', async({ page, ui, nav }) => {
 
 test('Install UI extension', async({ page, ui }) => {
   const extensions = new RancherExtensionsPage(page)
+  await extensions.goto()
 
   await test.step('Enable extension support', async() => {
-    await extensions.enable({ rancherRepo: ORIGIN === 'released' })
+    if (RancherUI.isVersion('<2.9')) {
+      await extensions.enable({ rancherRepo: ORIGIN === 'released' })
+    }
     // Wait for default list of extensions
     if (ORIGIN === 'released') {
       await ui.retry(async() => {

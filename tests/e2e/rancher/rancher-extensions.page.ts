@@ -22,7 +22,6 @@ export class RancherExtensionsPage extends BasePage {
       const rancherRepo = this.ui.checkbox('Rancher Extension')
       const partnersRepo = this.ui.checkbox('Partners Extension')
 
-      await this.goto()
       await expect(this.page.getByRole('heading', { name: 'Extension support is not enabled' })).toBeVisible()
 
       // Enable extensions
