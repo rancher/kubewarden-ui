@@ -176,12 +176,12 @@ export class Shell {
      * @param options.timeout time in seconds, guess short for delay * tries
      */
     @step
-    async retry(cmd: string, options?: { delay?: number, tries?: number, timeout?: number, runner?: Runner}) {
+    async retry(cmd: string, options?: { delay?: number, tries?: number, timeout?: number, runner?: Runner, inPlace?: boolean}) {
       const delay = options?.delay || (options?.timeout ? Math.sqrt(options.timeout) : 10)
       const tries = options?.tries || (options?.timeout ? options.timeout / delay : 5 * 6)
       const runner = options?.runner || 'nodejs'
 
-      if (runner === 'rancher') await this.open()
+      if (runner === 'rancher' && !options?.inPlace) await this.open()
       for (let i = 1; i < tries; i++) {
         // If command passed break retry loop
         if (await this.run(cmd, { status: NaN, inPlace: true, runner }) === 0) break
@@ -190,7 +190,7 @@ export class Shell {
         // Final try
         if (i === tries - 1) await this.run(cmd, { inPlace: true, runner })
       }
-      if (runner === 'rancher') await this.close()
+      if (runner === 'rancher' && !options?.inPlace) await this.close()
     }
 
     @step
