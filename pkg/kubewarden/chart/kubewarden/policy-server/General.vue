@@ -16,6 +16,7 @@ import { KUBEWARDEN_CHARTS } from '../../../types';
 import { DEFAULT_POLICY_SERVER } from '../../../models/policies.kubewarden.io.policyserver';
 import { getPolicyServerModule, isFleetDeployment } from '../../../modules/fleet';
 import { getLatestVersion } from '../../../plugins/kubewarden-class';
+import { findCompatibleDefaultsChart } from '../../../utils/chart';
 
 export default {
   props: {
@@ -58,44 +59,44 @@ export default {
         await this.$initializeFetchData(FLEET);
         await this.$store.dispatch('management/findAll', { type: FLEET.BUNDLE });
       }
-    }
 
-    if ( this.defaultsChart ) {
-      const defaultsVersion = getLatestVersion(this.$store, this.defaultsChart.versions);
+      if ( this.defaultsChart ) {
+        const compatibleVersion = findCompatibleDefaultsChart(this.controllerApp, this.defaultsChart);
 
-      const chartInfo = await this.$store.dispatch('catalog/getVersionInfo', {
-        repoType:    this.defaultsChart?.repoType,
-        repoName:    this.defaultsChart?.repoName,
-        chartName:   this.defaultsChart?.chartName,
-        versionName: defaultsVersion
-      });
+        const chartInfo = await this.$store.dispatch('catalog/getVersionInfo', {
+          repoType:    this.defaultsChart?.repoType,
+          repoName:    this.defaultsChart?.repoName,
+          chartName:   this.defaultsChart?.chartName,
+          versionName: compatibleVersion.version
+        });
 
-      if ( !isEmpty(chartInfo) ) {
-        const registry = chartInfo.values?.common?.cattle?.systemDefaultRegistry;
-        const psImage = chartInfo.values?.policyServer?.image?.repository;
-        const psTag = chartInfo.values?.policyServer?.image?.tag;
+        if ( !isEmpty(chartInfo) ) {
+          const registry = chartInfo.values?.common?.cattle?.systemDefaultRegistry;
+          const psImage = chartInfo.values?.policyServer?.image?.repository;
+          const psTag = chartInfo.values?.policyServer?.image?.tag;
 
-        if ( psImage && psTag ) {
-          this.latestChartVersion = `${ registry || 'ghcr.io' }/${ psImage }:${ psTag }`;
+          if ( psImage && psTag ) {
+            this.latestChartVersion = `${ registry || 'ghcr.io' }/${ psImage }:${ psTag }`;
+          }
         }
       }
-    }
 
-    if ( this.isFleet && !this.defaultsChart ) {
-      this.latestChartVersion = getPolicyServerModule(this.fleetBundles);
-    }
+      if ( this.isFleet && !this.defaultsChart ) {
+        this.latestChartVersion = getPolicyServerModule(this.fleetBundles);
+      }
 
-    if ( this.latestChartVersion ) {
-      if ( !this.image || this.image === DEFAULT_POLICY_SERVER.spec.image ) {
+      if ( this.latestChartVersion ) {
+        if ( !this.image || this.image === DEFAULT_POLICY_SERVER.spec.image ) {
         // If the image doesn't exist or it's the default 'latest' image, set to the latestChartVersion
-        this.image = this.latestChartVersion;
-      } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image && this.image !== this.latestChartVersion ) {
+          this.image = this.latestChartVersion;
+        } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image && this.image !== this.latestChartVersion ) {
         // If the image exists, and is not the default 'latest' image, and not the latestChartVersion,
         // set the defaultImage radio to false
+          this.defaultImage = false;
+        }
+      } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image ) {
         this.defaultImage = false;
       }
-    } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image ) {
-      this.defaultImage = false;
     }
   },
 
