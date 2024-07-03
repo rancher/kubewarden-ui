@@ -9,7 +9,12 @@ const commons = {
   computed:  { applyDarkModeBg: () => jest.fn() },
   mocks:     {
     $fetchState: { pending: false },
-    $store:      { getters: { 'prefs/theme': () => 'light' } },
+    $store:      {
+      getters: {
+        'prefs/theme': () => 'light',
+        'i18n/t':      jest.fn()
+      }
+    },
   },
 };
 

@@ -68,20 +68,18 @@ export default {
           v-if="packageValues"
           class="policy-info-content"
         >
-          <div class="policy-header mt-10">
-            <div class="policy-title">
-              <h3 class="policy-info-title">
-                {{ packageValues.display_name }}
-              </h3>
-            </div>
+          <div class="policy-header pb-10">
             <div class="slideIn__header__buttons">
-              <div
-                class="slideIn__header__button"
-                @click="hide()"
-              >
-                <i class="icon icon-x" />
-              </div>
+              <button class="btn btn-sm role-link" @click="hide">
+                {{ t('generic.close') }}
+              </button>
             </div>
+          </div>
+
+          <div class="policy-title mt-20">
+            <h2 class="policy-info-title">
+              {{ packageValues.display_name }}
+            </h2>
           </div>
 
           <ChartReadme class="mt-20" :version-info="packageValues" />
@@ -127,6 +125,7 @@ export default {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    box-shadow: -3px 0 5px rgba(0, 0, 0, 0.1);
 
     padding: 10px;
 
@@ -153,7 +152,6 @@ export default {
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      padding-bottom: 20px;
 
       .policy-title {
         flex: 1;
