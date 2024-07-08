@@ -95,6 +95,14 @@ for (const PolicyPage of pageTypes) {
       await expect(finishBtn).toBeEnabled()
     })
 
+    await test.step('Readme is visible', async() => {
+      await ui.button('Show Readme').click()
+      await expect(polPage.readme).toBeInViewport()
+      await expect(polPage.readme).toContainText(p.title)
+      await ui.button(/^Close/).click()
+      await expect(polPage.readme).not.toBeInViewport()
+    })
+
     await test.step('Policy specific fields A/CA', async() => {
       // Open page and wait for the form
       await polPage.open(p)

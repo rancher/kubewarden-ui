@@ -44,6 +44,7 @@ export abstract class BasePolicyPage extends BasePage {
     readonly namespace: Locator;
     readonly modeGroup: Locator;
     readonly auditGroup: Locator;
+    readonly readme: Locator;
 
     constructor(page: Page) {
       super(page)
@@ -53,6 +54,7 @@ export abstract class BasePolicyPage extends BasePage {
       this.namespace = this.ui.select('Namespace*')
       this.modeGroup = this.ui.radioGroup('Mode')
       this.auditGroup = this.ui.radioGroup('Background Audit')
+      this.readme = page.locator('div.policy-info-content')
     }
 
     cards = (options?: {name?: policyTitle, signed?: boolean, official?: boolean, aware?: boolean, mutation?: boolean }): Locator => {
@@ -123,13 +125,11 @@ export abstract class BasePolicyPage extends BasePage {
         await this.ui.button('Create Custom Policy').click()
       } else {
         await this.ui.tableRow(p.title).row.click()
-        // Go to policy tab, skip readme
-        await expect(this.page.getByTestId('kw-policy-create-readme')).toBeVisible()
-        await this.ui.button('Next').click()
       }
       // Check we are on policy creation page
-      await expect(this.page.getByRole('heading', { name: p.title })).toBeVisible()
-      await expect(this.page.getByRole('heading', { name: 'General' })).toBeVisible()
+      const wizard = this.page.getByTestId('kw-policy-create-wizard')
+      await expect(wizard.getByRole('heading', { name: p.title })).toBeVisible()
+      await expect(wizard.getByRole('heading', { name: 'General' })).toBeVisible()
     }
 
     async setValues(p: Policy) {
