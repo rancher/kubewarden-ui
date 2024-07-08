@@ -44,6 +44,7 @@
     "node": ">=16"
   },
   "resolutions": {
-    "**/webpack": "4"
+    "**/webpack": "4",
+    "glob": "7.2.3"
   }
 }
