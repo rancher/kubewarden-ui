@@ -14,7 +14,7 @@ import Loading from '@shell/components/Loading';
 import Markdown from '@shell/components/Markdown';
 
 import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPO } from '../../types';
-import { getLatestStableVersion } from '../../plugins/kubewarden-class';
+import { getLatestVersion } from '../../plugins/kubewarden-class';
 import { handleGrowl } from '../../utils/handle-growl';
 import { refreshCharts } from '../../utils/chart';
 
@@ -151,7 +151,7 @@ export default {
 
     shellEnabled() {
       return !!this.currentCluster?.links?.shell;
-    },
+    }
   },
 
   methods: {
@@ -218,14 +218,15 @@ export default {
       const {
         repoType, repoName, chartName, versions
       } = this.controllerChart;
-      const latestStableVersion = getLatestStableVersion(versions);
 
-      if ( latestStableVersion ) {
+      const latestChartVersion = getLatestVersion(this.$store, versions);
+
+      if ( latestChartVersion ) {
         const query = {
           [REPO_TYPE]: repoType,
           [REPO]:      repoName,
           [CHART]:     chartName,
-          [VERSION]:   latestStableVersion.version
+          [VERSION]:   latestChartVersion
         };
 
         this.$router.push({
@@ -285,7 +286,7 @@ export default {
 
       <!-- Non Air-Gapped -->
       <template v-else>
-        <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps">
+        <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps" data-testid="kw-install-wizard">
           <template #certmanager>
             <h2 class="mt-20 mb-10" data-testid="kw-cm-title">
               {{ t("kubewarden.dashboard.prerequisites.certManager.title") }}
@@ -346,7 +347,7 @@ export default {
                     <span class="mb-20">
                       {{ t('kubewarden.dashboard.appInstall.reload' ) }}
                     </span>
-                    <button class="ml-10 btn btn-sm role-primary" @click="reload()">
+                    <button data-testid="kw-app-install-reload" class="ml-10 btn btn-sm role-primary" @click="reload()">
                       {{ t('generic.reload') }}
                     </button>
                   </Banner>

@@ -32,7 +32,7 @@ export default {
   methods: {
     addRowClickListener() {
       this.$nextTick(() => {
-        const table = this.$refs.sortableTable.$el.querySelector('table');
+        const table = this.$refs.sortableTable?.$el?.querySelector('table');
 
         if ( table ) {
           this.removeRowClickListener();

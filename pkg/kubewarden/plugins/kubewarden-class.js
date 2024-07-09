@@ -6,6 +6,7 @@ import semver from 'semver';
 import SteveModel from '@shell/plugins/steve/steve-class';
 import { STATES, STATES_ENUM } from '@shell/plugins/dashboard-store/resource-class';
 import { MANAGEMENT, SERVICE } from '@shell/config/types';
+import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 import { isArray } from '@shell/utils/array';
 import { addParams } from '@shell/utils/url';
 
@@ -326,27 +327,11 @@ export function colorForTraceStatus(status) {
   return 'success';
 }
 
-export function getLatestStableVersion(versions) {
-  const allVersions = versions.map(v => v.version);
-  const stableVersions = versions.filter(v => !v.version.includes('rc'));
+export function getLatestVersion(store, versions) {
+  const showPreRelease = store.getters['prefs/get'](SHOW_PRE_RELEASE);
 
-  if ( isEmpty(stableVersions) && !isEmpty(allVersions) ) {
-    return semver.rsort(allVersions)[0];
-  }
+  const versionMap = versions?.map(v => v.version)
+    .filter(v => showPreRelease ? v : !semver.prerelease(v));
 
-  return stableVersions?.sort((a, b) => {
-    const versionA = a.version.split('.').map(Number);
-    const versionB = b.version.split('.').map(Number);
-
-    for ( let i = 0; i < Math.max(versionA.length, versionB.length); i++ ) {
-      if ( versionA[i] === undefined || versionA[i] < versionB[i] ) {
-        return 1;
-      }
-      if ( versionB[i] === undefined || versionA[i] > versionB[i] ) {
-        return -1;
-      }
-    }
-
-    return 0;
-  })[0];
+  return semver.rsort(versionMap)[0];
 }
