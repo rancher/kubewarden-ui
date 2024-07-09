@@ -292,7 +292,7 @@ kubewarden:
           label: Kind
           tooltip: Singular PascalCase name of the resource
     description:
-      showMore: Show More
+      showReadme: Show Readme
   policyServerConfig:
     securityContexts:
       containerConfig: Container configuration

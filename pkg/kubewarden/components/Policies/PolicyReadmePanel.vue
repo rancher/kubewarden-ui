@@ -71,7 +71,8 @@ export default {
           <div class="policy-header pb-10">
             <div class="slideIn__header__buttons">
               <button class="btn btn-sm role-link" @click="hide">
-                {{ t('generic.close') }}
+                <span>{{ t('generic.close') }}</span>
+                <i class="icon icon-chevron-right" />
               </button>
             </div>
           </div>
@@ -90,6 +91,10 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+::v-deep(.btn-sm) {
+  padding: 0 7px 0 0;
+}
+
 .policy-info-panel {
   position: fixed;
   top: 0;
@@ -165,6 +170,7 @@ export default {
 
       &__buttons {
         display: flex;
+        align-items: center;
       }
 
       &__button {
@@ -172,11 +178,12 @@ export default {
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 2px;
+
         > i {
           font-size: 20px;
           opacity: 0.5;
         }
+
         &:hover {
           background-color: var(--wm-closer-hover-bg);
         }

@@ -506,11 +506,11 @@ export default ({
         <div class="banner__title">
           <h2>{{ bannerTitle }}</h2>
           <template v-if="!customPolicy">
-            <p class="banner__short-description mb-10">
+            <p class="banner__short-description">
               {{ shortDescription }}
             </p>
-            <button class="btn btn-sm role-link" @click="showReadme">
-              {{ t('kubewarden.policyConfig.description.showMore') }}
+            <button class="btn btn-sm role-link banner__readme-button" @click="showReadme">
+              {{ t('kubewarden.policyConfig.description.showReadme') }}
             </button>
           </template>
         </div>
@@ -642,6 +642,10 @@ $color: var(--body-text) !important;
     margin-bottom: 10px;
     border-bottom: 1px solid var(--border);
     min-height: 60px;
+  }
+
+  &__readme-button {
+    padding: 0 7px 0 0;
   }
 }
 </style>
