@@ -22,6 +22,6 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "6:00"
+      time: "06:00"
       timezone: "Europe/Prague"
     labels: ["dependencies", "qa"]
