@@ -14,7 +14,6 @@ import { Banner } from '@components/Banner';
 
 import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
-import ChartReadme from '@shell/components/ChartReadme';
 import Wizard from '@shell/components/Wizard';
 
 import {
@@ -29,6 +28,7 @@ import { handleGrowl } from '../../utils/handle-growl';
 
 import { DATA_ANNOTATIONS } from '../../types/artifacthub';
 import PolicyTable from './PolicyTable';
+import PolicyReadmePanel from './PolicyReadmePanel';
 import Values from './Values';
 
 export default ({
@@ -50,9 +50,9 @@ export default ({
     AsyncButton,
     Banner,
     Loading,
-    ChartReadme,
     Wizard,
     PolicyTable,
+    PolicyReadmePanel,
     Values
   },
 
@@ -75,6 +75,7 @@ export default ({
     return {
       errors:            [],
       bannerTitle:       null,
+      shortDescription:  null,
       loadingPackages:   false,
       packages:          null,
       repository:        null,
@@ -100,20 +101,12 @@ export default ({
         showSteps: false,
         weight:    99
       },
-      stepReadme: {
-        hidden:    false,
-        name:      'readme',
-        label:     'Readme',
-        ready:     true,
-        showSteps: false,
-        weight:    98
-      },
       stepValues: {
         name:      'values',
         label:     'Values',
         ready:     true,
         showSteps: false,
-        weight:    97
+        weight:    98
       },
     };
   },
@@ -192,7 +185,6 @@ export default ({
 
       steps.push(
         this.stepPolicies,
-        this.stepReadme,
         this.stepValues
       );
 
@@ -402,6 +394,8 @@ export default ({
       if ( packageQuestions ) {
         set(this.chartValues, 'questions', packageQuestions);
       }
+
+      this.shortDescription = policyDetails?.description;
     },
 
     reset(event) {
@@ -410,6 +404,7 @@ export default ({
           const initialState = [
             'errors',
             'bannerTitle',
+            'shortDescription',
             'type',
             'typeModule',
             'version',
@@ -421,7 +416,7 @@ export default ({
           });
 
           this.stepPolicies.ready = false;
-          this.stepReadme.hidden = false;
+          this.stepValues.hidden = false;
 
           this.chartValues = {
             policy:    {},
@@ -437,10 +432,8 @@ export default ({
       this.type = type;
 
       if ( this.customPolicy ) {
-        this.stepReadme.hidden = true;
         this.$set(this, 'hasCustomPolicy', true);
       } else {
-        !!this.packageValues ? this.stepReadme.hidden = false : this.stepReadme.hidden = true;
         this.$set(this, 'hasCustomPolicy', false);
       }
 
@@ -449,6 +442,10 @@ export default ({
       this.$refs.wizard.next();
       this.bannerTitle = this.customPolicy ? 'Custom Policy' : type?.display_name;
       this.typeModule = this.chartValues?.policy?.spec.module;
+    },
+
+    showReadme() {
+      this.$refs.readmePanel.show();
     }
   }
 
@@ -505,22 +502,18 @@ export default ({
         />
       </template>
 
-      <template #readme>
-        <h2 class="banner-title">
-          {{ bannerTitle }}
-        </h2>
-        <ChartReadme
-          v-if="packageValues && packageValues.readme"
-          data-testid="kw-policy-create-readme"
-          :version-info="packageValues"
-          class="mb-20"
-        />
-      </template>
-
       <template #values>
-        <h2 class="banner-title">
-          {{ bannerTitle }}
-        </h2>
+        <div class="banner__title">
+          <h2>{{ bannerTitle }}</h2>
+          <template v-if="!customPolicy">
+            <p class="banner__short-description">
+              {{ shortDescription }}
+            </p>
+            <button class="btn btn-sm role-link banner__readme-button" @click="showReadme">
+              {{ t('kubewarden.policyConfig.description.showReadme') }}
+            </button>
+          </template>
+        </div>
         <Values
           :value="value"
           :chart-values="chartValues"
@@ -541,6 +534,13 @@ export default ({
         />
       </template>
     </Wizard>
+
+    <template v-if="packageValues && !customPolicy">
+      <PolicyReadmePanel
+        ref="readmePanel"
+        :package-values="packageValues"
+      />
+    </template>
   </div>
 </template>
 
@@ -633,12 +633,19 @@ $color: var(--body-text) !important;
 .wizard {
   position: relative;
   height: 100%;
+  z-index: 1;
 }
 
-.banner-title {
-  padding-top: 10px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-  min-height: 60px;
+.banner {
+  &__title {
+    padding-top: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    min-height: 60px;
+  }
+
+  &__readme-button {
+    padding: 0 7px 0 0;
+  }
 }
 </style>

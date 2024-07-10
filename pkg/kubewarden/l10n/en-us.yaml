@@ -231,6 +231,7 @@ kubewarden:
     module:
       label: Module
       tooltip: This is the WebAssembly module that holds the validation or mutation logic.
+      placeholder: ghcr.io/example/policies/custom-policy:v0.1.0
     mutating:
       label: Mutating
       tooltip: A mutating policy will rebuild the requests with definied values that are conformant with the policy definition.
@@ -290,6 +291,8 @@ kubewarden:
         kind:
           label: Kind
           tooltip: Singular PascalCase name of the resource
+    description:
+      showReadme: Show Readme
   policyServerConfig:
     securityContexts:
       containerConfig: Container configuration
