@@ -24,4 +24,4 @@ updates:
       day: "monday"
       time: "06:00"
       timezone: "Europe/Prague"
-    labels: ["dependencies", "qa"]
+    labels: ["dependencies", "area/qa"]
