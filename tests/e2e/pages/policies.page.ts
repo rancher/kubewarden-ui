@@ -21,7 +21,7 @@ export interface Policy {
     mode?: 'Monitor' | 'Protect'
     audit?: 'On' | 'Off'
     server?: string
-    module?: string
+    module?: string // Custom Policy specific
     namespace?: string // AdmissionPolicy specific
     ignoreRancherNS?: boolean // ClusterAdmissionAdmissionPolicy specific
     settings?(ui: RancherUI): Promise<void>

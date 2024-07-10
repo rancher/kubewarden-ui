@@ -21,10 +21,7 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     p.audit ??= 'On'
     p.server ??= 'default'
     p.namespace ??= 'default'
-    p.module ??= (
-      await polPage.open(p),
-      await polPage.module.inputValue()
-    )
+    p.module ??= ''
     const row = ui.tableRow(p.name)
 
     // Check overview page
@@ -42,7 +39,7 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     // Check config page
     await ui.button('Config').click()
     await expect(polPage.name).toHaveValue(p.name)
-    await expect(polPage.module).toHaveValue(p.module)
+    if (p.title === 'Custom Policy') await expect(polPage.module).toHaveValue(p.module)
     await expect(polPage.mode(p.mode)).toBeChecked()
     await expect(polPage.audit(p.audit)).toBeChecked()
     await expect(polPage.server).toContainText(p.server)
@@ -54,7 +51,7 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     await polPage.goto()
     await row.action('Edit Config')
     await expect(polPage.name).toBeDisabled()
-    await expect(polPage.module).toBeEnabled()
+    if (p.title === 'Custom Policy') await expect(polPage.module).toBeEnabled()
     await expect(polPage.modeGroup).toBeAllEnabled({ enabled: p.mode === 'Monitor' })
     await expect(polPage.auditGroup).toBeAllEnabled()
     await expect(polPage.server).toBeAllEnabled({ enabled: false })
@@ -86,12 +83,6 @@ for (const PolicyPage of pageTypes) {
       await expect(page.locator('div.error').getByText('Required value: name')).toBeVisible()
       await finishBtn.waitFor({ timeout: 10_000 }) // button name changes back Error -> Finish
       await polPage.setName('name')
-
-      // Try without module
-      await polPage.setModule('')
-      await expect(finishBtn).not.toBeEnabled()
-      await polPage.setModule('module')
-      await expect(finishBtn).toBeEnabled()
     })
 
     await test.step('Readme is visible', async() => {
@@ -125,10 +116,10 @@ for (const PolicyPage of pageTypes) {
     await polPage.delete(row)
   })
 
-  test(`Custom policy settings (${abbrName})`, async({ page, ui, shell }) => {
+  test(`Modified policy settings (${abbrName})`, async({ page, ui, shell }) => {
     const polPage = new PolicyPage(page)
     const ps: PolicyServer = { name: 'ps-custom' }
-    const p: Policy = { ...pMinimal, mode: 'Monitor', audit: 'Off', server: ps.name, module: 'ghcr.io/kubewarden/policies/pod-privileged:v0.2.6' }
+    const p: Policy = { ...pMinimal, mode: 'Monitor', audit: 'Off', server: ps.name }
 
     if (isAP(polPage)) p.namespace = 'ns-custom'
 
