@@ -17,20 +17,17 @@ const pMinimal: Policy = {
 async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
   await test.step(`Policy checks: ${p.name}`, async() => {
     // Check default values if unset
-    p.mode ??= 'Protect'
-    p.audit ??= 'On'
-    p.server ??= 'default'
-    p.namespace ??= 'default'
-    p.module ??= (
-      await polPage.open(p),
-      await polPage.module.inputValue()
-    )
+    const mode = p.mode ?? 'Protect'
+    const audit = p.audit ?? 'On'
+    const server = p.server ?? 'default'
+    const namespace = p.namespace ?? 'default'
+    const module = p.module ?? ''
     const row = ui.tableRow(p.name)
 
     // Check overview page
     await polPage.goto()
-    await expect(row.column('Mode')).toHaveText(p.mode)
-    await expect(row.column('Policy Server')).toHaveText(p.server)
+    await expect(row.column('Mode')).toHaveText(mode)
+    await expect(row.column('Policy Server')).toHaveText(server)
     test.info().annotations.push({ type: 'Feature', description: 'Policy title (module) should be visible' })
     test.info().annotations.push({ type: 'Feature', description: 'AdmissionPolicy namespace should be visible on overview page' })
 
@@ -42,20 +39,19 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     // Check config page
     await ui.button('Config').click()
     await expect(polPage.name).toHaveValue(p.name)
-    await expect(polPage.module).toHaveValue(p.module)
-    await expect(polPage.mode(p.mode)).toBeChecked()
-    await expect(polPage.audit(p.audit)).toBeChecked()
-    await expect(polPage.server).toContainText(p.server)
+    if (p.title === 'Custom Policy') await expect(polPage.module).toHaveValue(module)
+    await expect(polPage.mode(mode)).toBeChecked()
+    await expect(polPage.audit(audit)).toBeChecked()
+    await expect(polPage.server).toContainText(server)
     if (isAP(polPage)) {
-      // Workaround for https://github.com/rancher/kubewarden-ui/issues/672
-      if (MODE !== 'fleet') await expect(polPage.namespace).toContainText(p.namespace)
+      await expect(polPage.namespace).toContainText(namespace)
     }
 
     // Check edit config
     await polPage.goto()
     await row.action('Edit Config')
     await expect(polPage.name).toBeDisabled()
-    await expect(polPage.module).toBeEnabled()
+    if (p.title === 'Custom Policy') await expect(polPage.module).toBeEnabled()
     await expect(polPage.modeGroup).toBeAllEnabled({ enabled: p.mode === 'Monitor' })
     await expect(polPage.auditGroup).toBeAllEnabled()
     await expect(polPage.server).toBeAllEnabled({ enabled: false })
@@ -87,12 +83,14 @@ for (const PolicyPage of pageTypes) {
       await expect(page.locator('div.error').getByText('Required value: name')).toBeVisible()
       await finishBtn.waitFor({ timeout: 10_000 }) // button name changes back Error -> Finish
       await polPage.setName('name')
+    })
 
-      // Try without module
-      await polPage.setModule('')
-      await expect(finishBtn).not.toBeEnabled()
-      await polPage.setModule('module')
-      await expect(finishBtn).toBeEnabled()
+    await test.step('Readme is visible', async() => {
+      await ui.button('Show Readme').click()
+      await expect(polPage.readme).toBeInViewport()
+      await expect(polPage.readme).toContainText(p.title)
+      await ui.button(/^Close/).click()
+      await expect(polPage.readme).not.toBeInViewport()
     })
 
     await test.step('Policy specific fields A/CA', async() => {
@@ -118,10 +116,10 @@ for (const PolicyPage of pageTypes) {
     await polPage.delete(row)
   })
 
-  test(`Custom policy settings (${abbrName})`, async({ page, ui, shell }) => {
+  test(`Modified policy settings (${abbrName})`, async({ page, ui, shell }) => {
     const polPage = new PolicyPage(page)
     const ps: PolicyServer = { name: 'ps-custom' }
-    const p: Policy = { ...pMinimal, mode: 'Monitor', audit: 'Off', server: ps.name, module: 'ghcr.io/kubewarden/policies/pod-privileged:v0.2.6' }
+    const p: Policy = { ...pMinimal, mode: 'Monitor', audit: 'Off', server: ps.name }
 
     if (isAP(polPage)) p.namespace = 'ns-custom'
 

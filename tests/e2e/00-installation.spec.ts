@@ -22,7 +22,7 @@ const upMap: AppVersion[] = [
   { app: 'v1.11.0', controller: '2.0.10', crds: '1.4.6', defaults: '1.9.4' },
   { app: 'v1.12.0', controller: '2.0.11', crds: '1.5.0', defaults: '2.0.0' },
   { app: 'v1.13.0', controller: '2.1.0', crds: '1.5.1', defaults: '2.0.3' },
-  { app: 'v1.14.0', controller: '2.2.0', crds: '1.6.0', defaults: '2.1.0' },
+  { app: 'v1.14.0', controller: '2.2.1', crds: '1.6.0', defaults: '2.1.0' },
 ]
 
 test('Initial rancher setup', async({ page, ui, nav }) => {
