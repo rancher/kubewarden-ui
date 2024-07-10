@@ -17,17 +17,17 @@ const pMinimal: Policy = {
 async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
   await test.step(`Policy checks: ${p.name}`, async() => {
     // Check default values if unset
-    p.mode ??= 'Protect'
-    p.audit ??= 'On'
-    p.server ??= 'default'
-    p.namespace ??= 'default'
-    p.module ??= ''
+    const mode = p.mode ?? 'Protect'
+    const audit = p.audit ?? 'On'
+    const server = p.server ?? 'default'
+    const namespace = p.namespace ?? 'default'
+    const module = p.module ?? ''
     const row = ui.tableRow(p.name)
 
     // Check overview page
     await polPage.goto()
-    await expect(row.column('Mode')).toHaveText(p.mode)
-    await expect(row.column('Policy Server')).toHaveText(p.server)
+    await expect(row.column('Mode')).toHaveText(mode)
+    await expect(row.column('Policy Server')).toHaveText(server)
     test.info().annotations.push({ type: 'Feature', description: 'Policy title (module) should be visible' })
     test.info().annotations.push({ type: 'Feature', description: 'AdmissionPolicy namespace should be visible on overview page' })
 
@@ -39,12 +39,12 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     // Check config page
     await ui.button('Config').click()
     await expect(polPage.name).toHaveValue(p.name)
-    if (p.title === 'Custom Policy') await expect(polPage.module).toHaveValue(p.module)
-    await expect(polPage.mode(p.mode)).toBeChecked()
-    await expect(polPage.audit(p.audit)).toBeChecked()
-    await expect(polPage.server).toContainText(p.server)
+    if (p.title === 'Custom Policy') await expect(polPage.module).toHaveValue(module)
+    await expect(polPage.mode(mode)).toBeChecked()
+    await expect(polPage.audit(audit)).toBeChecked()
+    await expect(polPage.server).toContainText(server)
     if (isAP(polPage)) {
-      await expect(polPage.namespace).toContainText(p.namespace)
+      await expect(polPage.namespace).toContainText(namespace)
     }
 
     // Check edit config
