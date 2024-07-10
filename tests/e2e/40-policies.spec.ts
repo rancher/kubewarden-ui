@@ -47,8 +47,7 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     await expect(polPage.audit(p.audit)).toBeChecked()
     await expect(polPage.server).toContainText(p.server)
     if (isAP(polPage)) {
-      // Workaround for https://github.com/rancher/kubewarden-ui/issues/672
-      if (MODE !== 'fleet') await expect(polPage.namespace).toContainText(p.namespace)
+      await expect(polPage.namespace).toContainText(p.namespace)
     }
 
     // Check edit config
