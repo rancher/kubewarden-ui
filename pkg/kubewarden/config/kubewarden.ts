@@ -22,6 +22,7 @@ export function init($plugin: any, store: any) {
   product({
     inStore:             'cluster',
     inExplorer:          true,
+    ifHave:              'admin-user',
     icon:                'kubewarden',
     removeable:          false,
     showNamespaceFilter: true
