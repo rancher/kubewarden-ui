@@ -47,7 +47,9 @@ export default {
   },
 
   async fetch() {
-    await this.$store.dispatch('cluster/findAll', { type: KUBEWARDEN.POLICY_SERVER });
+    if ( this.$store.getters['cluster/canList'](KUBEWARDEN.POLICY_SERVER) ) {
+      await this.$store.dispatch('cluster/findAll', { type: KUBEWARDEN.POLICY_SERVER });
+    }
 
     if ( this.isCreate && !isEmpty(this.policy.spec) ) {
       set(this.policy.spec, 'mode', 'protect');

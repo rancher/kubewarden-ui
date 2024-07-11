@@ -159,65 +159,67 @@ export default {
       {{ question.label }}
     </h3>
     <div v-for="(val, vIndex) in value" :key="val + vIndex" class="seq__container mb-20">
-      <div
-        v-for="(q, index) in question.sequence_questions"
-        :key="index"
-      >
-        <template v-if="q.type.startsWith('sequence[') || (q.type.startsWith('map[') && q.subquestions)">
-          <div class="row question">
-            <div class="col span-12 mb-10">
-              <h4>{{ q.label }}</h4>
+      <template v-if="val">
+        <div
+          v-for="(q, index) in question.sequence_questions"
+          :key="index"
+        >
+          <template v-if="q.type.startsWith('sequence[') || (q.type.startsWith('map[') && q.subquestions)">
+            <div class="row question">
+              <div class="col span-12 mb-10">
+                <h4>{{ q.label }}</h4>
 
-              <!-- Sequence questions -->
-              <template v-if="q.type.startsWith('sequence[')">
-                <YamlEditor
-                  ref="yamleditor"
-                  :value="parseSequenceValues(val[q.variable], q)"
-                  class="yaml-editor"
-                  :editor-mode="isView ? 'VIEW_CODE' : 'EDIT_CODE'"
-                  @onInput="updateDeep(q, vIndex, $event)"
-                />
-              </template>
+                <!-- Sequence questions -->
+                <template v-if="q.type.startsWith('sequence[')">
+                  <YamlEditor
+                    ref="yamleditor"
+                    :value="parseSequenceValues(val[q.variable], q)"
+                    class="yaml-editor"
+                    :editor-mode="isView ? 'VIEW_CODE' : 'EDIT_CODE'"
+                    @onInput="updateDeep(q, vIndex, $event)"
+                  />
+                </template>
 
-              <!-- Subquestions -->
-              <template v-else-if="q.type.startsWith('map[') && q.subquestions">
-                <YamlEditor
-                  ref="yamleditor"
-                  :value="parseSequenceSubquestion(val, q)"
-                  class="yaml-editor"
-                  :editor-mode="isView ? 'VIEW_CODE' : 'EDIT_CODE'"
-                  @onInput="updateDeep(q, vIndex, $event)"
-                />
-              </template>
+                <!-- Subquestions -->
+                <template v-else-if="q.type.startsWith('map[') && q.subquestions">
+                  <YamlEditor
+                    ref="yamleditor"
+                    :value="parseSequenceSubquestion(val, q)"
+                    class="yaml-editor"
+                    :editor-mode="isView ? 'VIEW_CODE' : 'EDIT_CODE'"
+                    @onInput="updateDeep(q, vIndex, $event)"
+                  />
+                </template>
+              </div>
             </div>
-          </div>
-        </template>
+          </template>
 
-        <template v-else>
-          <div class="row question">
-            <div class="col span-12 mb-10">
-              <component
-                :is="componentForQuestion(q)"
-                in-store="cluster"
-                :question="q"
-                :value="get(value[vIndex], q.variable)"
-                @input="update(q.variable, vIndex, $event)"
-              />
+          <template v-else>
+            <div class="row question">
+              <div class="col span-12 mb-10">
+                <component
+                  :is="componentForQuestion(q)"
+                  in-store="cluster"
+                  :question="q"
+                  :value="get(value[vIndex], q.variable)"
+                  @input="update(q.variable, vIndex, $event)"
+                />
+              </div>
             </div>
-          </div>
-        </template>
-      </div>
+          </template>
+        </div>
 
-      <button
-        type="button"
-        :disabled="disabled"
-        class="btn role-link remove btn-sm"
-        @click="$emit('removeSeq', { question, vIndex })"
-      >
-        {{ t('generic.remove') }}
-      </button>
+        <button
+          type="button"
+          :disabled="disabled"
+          class="btn role-link remove btn-sm"
+          @click="$emit('removeSeq', { question, vIndex })"
+        >
+          {{ t('generic.remove') }}
+        </button>
 
-      <hr class="mb-20">
+        <hr class="mb-20">
+      </template>
     </div>
 
     <button

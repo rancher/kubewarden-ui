@@ -15,7 +15,6 @@ import { RadioGroup } from '@components/Form/Radio';
 import { KUBEWARDEN_CHARTS } from '../../../types';
 import { DEFAULT_POLICY_SERVER } from '../../../models/policies.kubewarden.io.policyserver';
 import { getPolicyServerModule, isFleetDeployment } from '../../../modules/fleet';
-import { getLatestVersion } from '../../../plugins/kubewarden-class';
 import { findCompatibleDefaultsChart } from '../../../utils/chart';
 
 export default {
@@ -43,59 +42,61 @@ export default {
   mixins: [ResourceFetch],
 
   async fetch() {
-    await this.$initializeFetchData(CATALOG);
-    await this.$fetchType(CATALOG.CLUSTER_REPO);
+    if ( this.$store.getters['cluster/canList'](CATALOG.APP) && this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO) ) {
+      await this.$initializeFetchData(CATALOG);
+      await this.$fetchType(CATALOG.CLUSTER_REPO);
 
-    if ( !this.$store.getters['kubewarden/controllerApp'] ) {
-      await this.$fetchType(CATALOG.APP);
-    }
-
-    await this.$store.dispatch('catalog/load');
-
-    if ( this.controllerApp ) {
-      this.isFleet = isFleetDeployment(this.controllerApp);
-
-      if ( this.isFleet ) {
-        await this.$initializeFetchData(FLEET);
-        await this.$store.dispatch('management/findAll', { type: FLEET.BUNDLE });
+      if ( !this.$store.getters['kubewarden/controllerApp'] ) {
+        await this.$fetchType(CATALOG.APP);
       }
 
-      if ( this.defaultsChart ) {
-        const compatibleVersion = findCompatibleDefaultsChart(this.controllerApp, this.defaultsChart);
+      await this.$store.dispatch('catalog/load');
 
-        const chartInfo = await this.$store.dispatch('catalog/getVersionInfo', {
-          repoType:    this.defaultsChart?.repoType,
-          repoName:    this.defaultsChart?.repoName,
-          chartName:   this.defaultsChart?.chartName,
-          versionName: compatibleVersion.version
-        });
+      if ( this.controllerApp ) {
+        this.isFleet = isFleetDeployment(this.controllerApp);
 
-        if ( !isEmpty(chartInfo) ) {
-          const registry = chartInfo.values?.common?.cattle?.systemDefaultRegistry;
-          const psImage = chartInfo.values?.policyServer?.image?.repository;
-          const psTag = chartInfo.values?.policyServer?.image?.tag;
+        if ( this.isFleet && this.$store.getters['management/all'](FLEET.BUNDLE) ) {
+          await this.$initializeFetchData(FLEET);
+          await this.$store.dispatch('management/findAll', { type: FLEET.BUNDLE });
+        }
 
-          if ( psImage && psTag ) {
-            this.latestChartVersion = `${ registry || 'ghcr.io' }/${ psImage }:${ psTag }`;
+        if ( this.defaultsChart ) {
+          const compatibleVersion = findCompatibleDefaultsChart(this.controllerApp, this.defaultsChart);
+
+          const chartInfo = await this.$store.dispatch('catalog/getVersionInfo', {
+            repoType:    this.defaultsChart?.repoType,
+            repoName:    this.defaultsChart?.repoName,
+            chartName:   this.defaultsChart?.chartName,
+            versionName: compatibleVersion.version
+          });
+
+          if ( !isEmpty(chartInfo) ) {
+            const registry = chartInfo.values?.common?.cattle?.systemDefaultRegistry;
+            const psImage = chartInfo.values?.policyServer?.image?.repository;
+            const psTag = chartInfo.values?.policyServer?.image?.tag;
+
+            if ( psImage && psTag ) {
+              this.latestChartVersion = `${ registry || 'ghcr.io' }/${ psImage }:${ psTag }`;
+            }
           }
         }
-      }
 
-      if ( this.isFleet && !this.defaultsChart ) {
-        this.latestChartVersion = getPolicyServerModule(this.fleetBundles);
-      }
+        if ( this.isFleet && !this.defaultsChart ) {
+          this.latestChartVersion = getPolicyServerModule(this.fleetBundles);
+        }
 
-      if ( this.latestChartVersion ) {
-        if ( !this.image || this.image === DEFAULT_POLICY_SERVER.spec.image ) {
-        // If the image doesn't exist or it's the default 'latest' image, set to the latestChartVersion
-          this.image = this.latestChartVersion;
-        } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image && this.image !== this.latestChartVersion ) {
-        // If the image exists, and is not the default 'latest' image, and not the latestChartVersion,
-        // set the defaultImage radio to false
+        if ( this.latestChartVersion ) {
+          if ( !this.image || this.image === DEFAULT_POLICY_SERVER.spec.image ) {
+            // If the image doesn't exist or it's the default 'latest' image, set to the latestChartVersion
+            this.image = this.latestChartVersion;
+          } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image && this.image !== this.latestChartVersion ) {
+            // If the image exists, and is not the default 'latest' image, and not the latestChartVersion,
+            // set the defaultImage radio to false
+            this.defaultImage = false;
+          }
+        } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image ) {
           this.defaultImage = false;
         }
-      } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image ) {
-        this.defaultImage = false;
       }
     }
   },
