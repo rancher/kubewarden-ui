@@ -167,18 +167,23 @@ export class RancherUI {
     }
   }
 
+  static requireEnv(name: string): string {
+    const value = process.env[name]
+    if (!value) throw new Error(`Environment variable ${name} not set`)
+    return value
+  }
+
   static get isPrime(): boolean {
-    if (!process.env.RANCHER_PRIME) throw new Error('RANCHER_PRIME not set')
-    return process.env.RANCHER_PRIME === 'true'
+    return this.requireEnv('RANCHER_PRIME') === 'true'
   }
 
   static isVersion(query: string|Range): boolean {
-    if (!process.env.RANCHER_VERSION) throw new Error('RANCHER_VERSION not set')
     if (!semver.validRange(query)) throw new Error(`Invalid range: ${query}`)
-    return semver.satisfies(process.env.RANCHER_VERSION, query, { includePrerelease: true })
+    return semver.satisfies(this.requireEnv('RANCHER_VERSION'), query, { includePrerelease: true })
   }
 
   static get hasAppCollection(): boolean {
-    return this.isVersion('>=2.9') // && this.isPrime
+    // OCI repository support was added in 2.9
+    return this.isPrime && this.isVersion('>=2.9')
   }
 }

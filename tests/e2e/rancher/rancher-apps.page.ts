@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
-import type { YAMLPatch } from '../components/rancher-ui'
+import { RancherUI, type YAMLPatch } from '../components/rancher-ui'
 import { Shell } from '../components/kubectl-shell'
 import { step } from './rancher-test'
 import { BasePage } from './basepage'
@@ -29,7 +29,13 @@ export interface Chart {
 export const appColRepo: ChartRepo = {
   name    : 'application-collection',
   url     : 'oci://dp.apps.rancher.io/charts',
-  httpAuth: { username: '<user>', password: '<pass>' }
+  httpAuth: (() => {
+    const auth = process.env.APP_COLLECTION_AUTH
+    if (auth) {
+      const [username, password] = auth.split(':')
+      return { username, password }
+    }
+  })()
 }
 
 export class RancherAppsPage extends BasePage {
