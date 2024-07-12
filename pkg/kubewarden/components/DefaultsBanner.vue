@@ -4,7 +4,6 @@ import debounce from 'lodash/debounce';
 
 import { CATALOG } from '@shell/config/types';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
-import { checkPermissions } from '@shell/utils/auth';
 
 import { Banner } from '@components/Banner';
 
@@ -25,7 +24,7 @@ export default {
   },
 
   async fetch() {
-    this.permissions = await checkPermissions({ app: { type: CATALOG.APP } }, this.$store.getters);
+    this.permissions = this.$store.getters['cluster/canList'](CATALOG.APP);
 
     if ( this.hasPermission ) {
       this.debouncedRefreshCharts = debounce((init = false) => {
