@@ -1,12 +1,11 @@
 <script>
-import { isAdminUser } from '@shell/store/type-map';
-import { checkPermissions } from '@shell/utils/auth';
-import { WORKLOAD_TYPES } from '@shell/config/types';
+import { CATALOG, WORKLOAD_TYPES } from '@shell/config/types';
 
 import { Banner } from '@components/Banner';
 
-import { KUBEWARDEN, PROJECT } from '../../../../types';
+import { KUBEWARDEN } from '../../../../types';
 import { isAirgap } from '../../../../utils/determine-airgap';
+import { isAdminUser } from '../../../../utils/permissions';
 
 import DashboardView from '../../../../components/Dashboard/DashboardView';
 import InstallView from '../../../../components/Dashboard/InstallView';
@@ -20,13 +19,19 @@ export default {
 
   async fetch() {
     this.isAdminUser = isAdminUser(this.$store.getters);
-    this.permissions = await checkPermissions({
+    const types = {
       policyServer:           { type: KUBEWARDEN.POLICY_SERVER },
       admissionPolicy:        { type: KUBEWARDEN.ADMISSION_POLICY },
       clusterAdmissionPolicy: { type: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
-      app:                    { type: PROJECT.APP },
+      app:                    { type: CATALOG.APP },
       deployment:             { type: WORKLOAD_TYPES.DEPLOYMENT }
-    }, this.$store.getters);
+    };
+
+    for ( const [key, value] of Object.entries(types) ) {
+      if ( this.$store.getters['cluster/canList'](value) ) {
+        this.permissions[key] = true;
+      }
+    }
 
     this.isAirgap = await isAirgap({ store: this.$store });
   },
@@ -38,6 +43,8 @@ export default {
         policyServer:           false,
         admissionPolicy:        false,
         clusterAdmissionPolicy: false,
+        app:                    false,
+        deployment:             false
       },
       isAirgap: null
     };
