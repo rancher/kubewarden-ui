@@ -24,23 +24,27 @@ export default {
   },
 
   async fetch() {
-    this.debouncedRefreshCharts = debounce((init = false) => {
-      refreshCharts({
-        store: this.$store, chartName: KUBEWARDEN_CHARTS.CONTROLLER, init
-      });
-    }, 500);
+    this.permissions = this.$store.getters['cluster/canList'](CATALOG.APP);
 
-    if ( !this.defaultsChart ) {
-      this.debouncedRefreshCharts(true);
-    }
+    if ( this.hasPermission ) {
+      this.debouncedRefreshCharts = debounce((init = false) => {
+        refreshCharts({
+          store: this.$store, chartName: KUBEWARDEN_CHARTS.CONTROLLER, init
+        });
+      }, 500);
 
-    if ( !this.controllerApp ) {
-      await fetchControllerApp(this.$store);
+      if ( !this.defaultsChart ) {
+        this.debouncedRefreshCharts(true);
+      }
+
+      if ( !this.controllerApp ) {
+        await fetchControllerApp(this.$store);
+      }
     }
   },
 
   data() {
-    return { debouncedRefreshCharts: null };
+    return { permissions: null, debouncedRefreshCharts: null };
   },
 
   computed: {
@@ -63,6 +67,14 @@ export default {
       }
 
       return null;
+    },
+
+    hasPermission() {
+      if ( !this.permissions ) {
+        return false;
+      }
+
+      return Object.values(this.permissions).every(value => value);
     },
 
     highestCompatibleDefaultsChart() {
@@ -162,7 +174,7 @@ export default {
 
 <template>
   <Banner
-    v-if="$fetchState.pending === false"
+    v-if="$fetchState.pending === false && hasPermission"
     data-testid="kw-defaults-banner"
     class="mb-20 mt-0"
     :color="colorMode"

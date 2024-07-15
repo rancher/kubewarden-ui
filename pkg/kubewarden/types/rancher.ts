@@ -46,3 +46,5 @@ export type Schema = {
   _id: string,
   _group: string,
 }
+
+export const PROJECT = { APP: 'project.cattle.io.app' };

@@ -24,7 +24,9 @@ export default class PolicyServerModel extends KubewardenModel {
   get allRelatedPolicies() {
     return async() => {
       const types = [KUBEWARDEN.ADMISSION_POLICY, KUBEWARDEN.CLUSTER_ADMISSION_POLICY];
-      const promises = types.map(type => this.$dispatch('cluster/findAll', { type, opt: { force: true } }, { root: true }));
+      const promises = types
+        .filter(type => this.$rootGetters['cluster/canList'](type))
+        .map(type => this.$dispatch('cluster/findAll', { type, opt: { force: true } }, { root: true }));
 
       try {
         const out = await Promise.all(promises);

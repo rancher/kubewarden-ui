@@ -1,5 +1,4 @@
 <script>
-import { mapGetters } from 'vuex';
 import { _CREATE, _VIEW } from '@shell/config/query-params';
 import { removeAt } from '@shell/utils/array';
 
@@ -29,7 +28,9 @@ export default {
   },
 
   async fetch() {
-    await this.$store.dispatch('cluster/findAll', { type: 'apigroup' });
+    if ( this.$store.getters['cluster/canList']('apigroup') ) {
+      await this.$store.dispatch('cluster/findAll', { type: 'apigroup' });
+    }
 
     this.contextAwareResources = [];
 

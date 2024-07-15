@@ -6,8 +6,6 @@ import KeyValue from '@shell/components/form/KeyValue';
 import MatchExpressions from '@shell/components/form/MatchExpressions';
 import InfoBox from '@shell/components/InfoBox';
 
-import { RANCHER_NS_MATCH_EXPRESSION } from '../../../../types';
-
 export default {
   props: {
     mode: {

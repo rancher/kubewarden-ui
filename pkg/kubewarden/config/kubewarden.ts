@@ -10,7 +10,7 @@ export function init($plugin: any, store: any) {
     basicType,
     weightType,
     virtualType,
-    headers,
+    headers
   } = $plugin.DSL(store, $plugin.name);
 
   const {

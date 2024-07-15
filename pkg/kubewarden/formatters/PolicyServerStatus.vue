@@ -1,6 +1,5 @@
 <script>
 import isEmpty from 'lodash/isEmpty';
-import { mapGetters } from 'vuex';
 
 import { WORKLOAD_TYPES } from '@shell/config/types';
 
@@ -18,7 +17,9 @@ export default {
   },
 
   async fetch() {
-    await this.$store.dispatch('cluster/findAll', { type: WORKLOAD_TYPES.DEPLOYMENT });
+    if ( this.$store.getters['cluster/canList'](WORKLOAD_TYPES.DEPLOYMENT) ) {
+      await this.$store.dispatch('cluster/findAll', { type: WORKLOAD_TYPES.DEPLOYMENT });
+    }
   },
 
   computed: {

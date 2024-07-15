@@ -28,7 +28,9 @@ export default {
   inject: ['chartType'],
 
   async fetch() {
-    await this.$store.dispatch('cluster/findAll', { type: 'apigroup' });
+    if ( this.$store.getters['cluster/canList']('apigroup') ) {
+      await this.$store.dispatch('cluster/findAll', { type: 'apigroup' });
+    }
 
     this.rules = [];
 

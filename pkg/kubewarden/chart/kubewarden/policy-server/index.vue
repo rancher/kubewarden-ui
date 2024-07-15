@@ -34,10 +34,15 @@ export default {
   mixins: [ResourceFetch],
 
   async fetch() {
-    const hash = [
-      this.$fetchType(CONFIG_MAP),
-      this.$fetchType(SERVICE_ACCOUNT)
-    ];
+    const hash = [];
+
+    if ( this.$store.getters['cluster/canList'](CONFIG_MAP) ) {
+      hash.push(this.$fetchList(CONFIG_MAP));
+    }
+
+    if ( this.$store.getters['cluster/canList'](SERVICE_ACCOUNT) ) {
+      hash.push(this.$fetchList(SERVICE_ACCOUNT));
+    }
 
     await allHash(hash);
   },

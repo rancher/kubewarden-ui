@@ -1,6 +1,4 @@
 <script>
-import { mapGetters } from 'vuex';
-
 import { CATALOG } from '@shell/config/types';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 
@@ -29,10 +27,13 @@ export default {
 
   async fetch() {
     await this.$store.dispatch('cluster/findAll', { type: this.resource });
-    await this.$store.dispatch('catalog/load');
 
-    if ( !this.hideBannerDefaults ) {
-      this.apps = await this.$store.dispatch('cluster/findAll', { type: CATALOG.APP });
+    if ( this.$store.getters['cluster/canList'](CATALOG.APP) ) {
+      await this.$store.dispatch('catalog/load');
+
+      if ( !this.hideBannerDefaults ) {
+        this.apps = await this.$store.dispatch('cluster/findAll', { type: CATALOG.APP });
+      }
     }
   },
 
@@ -41,7 +42,6 @@ export default {
   },
 
   computed: {
-
     defaultsApp() {
       return this.apps?.find((a) => {
         return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
