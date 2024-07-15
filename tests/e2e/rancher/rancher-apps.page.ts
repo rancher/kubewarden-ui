@@ -1,8 +1,21 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
-import type { YAMLPatch } from '../components/rancher-ui'
+import { RancherUI, type YAMLPatch } from '../components/rancher-ui'
+import { Shell } from '../components/kubectl-shell'
 import { step } from './rancher-test'
 import { BasePage } from './basepage'
+
+export interface ChartRepo {
+    // type: 'http'|'git'|'oci'
+    name: string
+    url: string
+    httpAuth?: {
+        username: string
+        password: string
+    }
+    // Git specific
+    branch?: string
+}
 
 export interface Chart {
     title: string, // Exact chart title displayed in Rancher
@@ -11,6 +24,18 @@ export interface Chart {
     version?: string,
     namespace?: string,
     project?: string,
+}
+
+export const appColRepo: ChartRepo = {
+  name    : 'application-collection',
+  url     : 'oci://dp.apps.rancher.io/charts',
+  httpAuth: (() => {
+    const auth = process.env.APP_COLLECTION_AUTH
+    if (auth) {
+      const [username, password] = auth.split(':')
+      return { username, password }
+    }
+  })()
 }
 
 export class RancherAppsPage extends BasePage {
@@ -48,35 +73,49 @@ export class RancherAppsPage extends BasePage {
      * @param url Git or http(s) url of the repository
      */
     @step
-    async addRepository(name: string, url: string) {
+    async addRepository(repo: ChartRepo) {
       await this.nav.explorer('Apps', 'Repositories')
       await this.ui.button('Create').click()
 
-      await this.ui.input('Name *').fill(name)
-      if (url.endsWith('.git')) {
+      await this.ui.input('Name *').fill(repo.name)
+      if (repo.url.endsWith('.git')) {
+        // Git repository
         await this.page.getByRole('radio', { name: 'Git repository' }).check()
-        await this.ui.input('Git Repo URL *').fill(url)
+        await this.ui.input('Git Repo URL *').fill(repo.url)
+      } else if (repo.url.startsWith('oci://')) {
+        // OCI repository
+        await this.page.getByRole('radio', { name: 'OCI repository' }).check()
+        await this.ui.input('OCI Repository Host URL *').fill(repo.url)
       } else {
+        // HTTP repository
         await this.page.getByRole('radio', { name: 'http(s) URL' }).check()
-        await this.ui.input('Index URL *').fill(url)
+        await this.ui.input('Index URL *').fill(repo.url)
       }
-      await this.ui.button('Create').click()
+      if (repo.httpAuth) {
+        // Auth takes a moment to load values
+        await expect(this.ui.select('Authentication')).toContainText('None')
+        await this.ui.selectOption('Authentication', 'Create a HTTP Basic Auth Secret')
+        await this.ui.input('Username').fill(repo.httpAuth.username)
+        await this.ui.input('Password').fill(repo.httpAuth.password)
+      }
 
+      await this.ui.button('Create').click()
       // Transitions: Active ?> In Progress ?> [Active|InProgress] - https://github.com/rancher/dashboard/issues/10079
-      const repo = await this.ui.tableRow(name).waitFor()
+      const repoRow = await this.ui.tableRow(repo.name).waitFor()
       // Wait out first Active state
       await this.page.waitForTimeout(1000)
       // Refresh for occasional freeze In Progress
-      await repo.action('Refresh')
+      await repoRow.action('Refresh')
       // Prevent matching Active before refresh is processed
       await this.page.waitForTimeout(1000)
-      await repo.toBeActive()
+      await repoRow.toBeActive()
     }
 
     @step
-    async deleteRepository(name: string) {
+    async deleteRepository(repo: string|ChartRepo) {
       await this.nav.explorer('Apps', 'Repositories')
-      await this.ui.tableRow(name).delete()
+      const repoName = typeof repo === 'string' ? repo : repo.name
+      await this.ui.tableRow(repoName).delete()
     }
 
     /**
@@ -110,6 +149,31 @@ export class RancherAppsPage extends BasePage {
       if (version) {
         await expect(row.column('Chart')).toContainText(`:${version}`)
       }
+    }
+
+    @step
+    async installFromAppCollection(chart: Chart) {
+      const shell = new Shell(this.page)
+      const shellOpts = { inPlace: true, runner: 'rancher' } as const
+      const ns = chart.namespace || 'default'
+
+      // Configure authentification
+      await shell.open()
+      // Secret to pull images from app collection
+      if (ns !== 'default') await shell.run(`kubectl create ns ${ns}`, shellOpts)
+      await shell.run(`kubectl create secret docker-registry application-collection -n ${ns} --docker-server=dp.apps.rancher.io --docker-username=${appColRepo.httpAuth?.username} --docker-password=${appColRepo.httpAuth?.password}`, shellOpts)
+      // Login to app collection to access helm chart
+      await shell.run(`helm registry login ${appColRepo.url.split('://')[1]} -u ${appColRepo.httpAuth?.username} -p ${appColRepo.httpAuth?.password}`, shellOpts)
+
+      // Chart-specific setup
+      if (chart.name === 'jaeger-operator') {
+        await shell.run(`helm install ${chart.name} ${appColRepo.url}/jaeger-operator -n ${ns} --set jaeger.create=true --set rbac.clusterRole=true --set image.imagePullSecrets[0]=application-collection`, shellOpts)
+        // Workaround for jaeger issue https://github.com/jaegertracing/helm-charts/issues/581
+        await shell.run('kubectl get clusterrole jaeger-operator -o json | jq \'.rules[] |= (select(.apiGroups | index("networking.k8s.io")).resources += ["ingressclasses"])\' | kubectl apply -f -', shellOpts)
+        // Patch SA to use pull secret for jaeger creation (retry waits for SA creation)
+        await shell.retry(`kubectl patch serviceaccount jaeger-operator-jaeger -n ${ns} -p '{"imagePullSecrets": [{"name": "application-collection"}]}'`, shellOpts)
+      }
+      await shell.close()
     }
 
     @step
