@@ -37,11 +37,11 @@ export default {
     const hash = [];
 
     if ( this.$store.getters['cluster/canList'](CONFIG_MAP) ) {
-      hash.push(this.$fetchList(CONFIG_MAP));
+      hash.push(this.$fetchType(CONFIG_MAP));
     }
 
     if ( this.$store.getters['cluster/canList'](SERVICE_ACCOUNT) ) {
-      hash.push(this.$fetchList(SERVICE_ACCOUNT));
+      hash.push(this.$fetchType(SERVICE_ACCOUNT));
     }
 
     await allHash(hash);
