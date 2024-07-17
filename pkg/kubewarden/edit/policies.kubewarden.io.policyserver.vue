@@ -5,13 +5,17 @@ import { _CREATE, _EDIT } from '@shell/config/query-params';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import CruResource from '@shell/components/CruResource';
+import Loading from '@shell/components/Loading';
 
 import { DEFAULT_POLICY_SERVER } from '../models/policies.kubewarden.io.policyserver';
+import { KUBEWARDEN } from '../types';
 
 import Values from '../components/PolicyServer/Values';
 
 export default {
-  components: { CruResource, Values },
+  components: {
+    CruResource, Loading, Values
+  },
 
   mixins: [CreateEditView],
 
@@ -30,6 +34,12 @@ export default {
       type:     Object,
       required: true
     },
+  },
+
+  async fetch() {
+    const schema = this.$store.getters[`cluster/schemaFor`](KUBEWARDEN.POLICY_SERVER);
+
+    await schema.fetchResourceFields();
   },
 
   data() {
@@ -75,7 +85,9 @@ export default {
 </script>
 
 <template>
+  <Loading v-if="$fetchState.pending" mode="relative" />
   <CruResource
+    v-else
     :resource="value"
     :mode="realMode"
     :can-yaml="false"
