@@ -28,14 +28,14 @@ on:
       k3s:
         description: Kubernetes version
         type: choice
-        default: 'v1.27.14-k3s1'
+        default: 'v1.28.11-k3s2'
         required: true
         options:
         - v1.26.15-k3s1
-        - v1.27.14-k3s1
-        - v1.28.10-k3s1
-        - v1.29.5-k3s1
-        - v1.30.1-k3s1
+        - v1.27.15-k3s2
+        - v1.28.11-k3s2
+        - v1.29.6-k3s2
+        - v1.30.2-k3s2
       mode:
         description: Installation mode
         type: choice
@@ -76,7 +76,7 @@ env:
   # Github -> Secrets and variables -> Actions -> New repository variable
   KUBEWARDEN: ${{ inputs.kubewarden || 'rc' }}
   K3D_VERSION: # 'v5.6.3' - optionally pin version
-  K3S_VERSION: ${{ inputs.k3s || 'v1.27.14-k3s1' }}
+  K3S_VERSION: ${{ inputs.k3s || 'v1.28.11-k3s2' }}
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
   # First value after the && must be truthy. Otherwise, the value after the || will always be returned
   TESTBASE: ${{ github.event_name != 'workflow_dispatch' && true || inputs.testbase }}
@@ -118,7 +118,7 @@ jobs:
     - name: Install playwright
       working-directory: tests
       run: |
-        yarn
+        yarn install
         yarn playwright install chromium  # --with-deps not supported on opensuse
 
 
@@ -167,7 +167,7 @@ jobs:
         done
 
         # Wait for cert-manager
-        kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml
+        kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.1/cert-manager.yaml
         kubectl wait --for=condition=Available deployment --timeout=2m -n cert-manager --all
 
         # Translate to sematic version
