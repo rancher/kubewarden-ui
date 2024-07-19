@@ -131,6 +131,8 @@ jobs:
           pull_request)
             KUBEWARDEN=source;;
           schedule)
+            # Rancher 2.7 chart requires kubeVersion: < 1.28.0-0
+            [[ "${{ matrix.rancher }}" == "2.7" ]] && echo K3S_VERSION="v1.27.15-k3s2" | tee -a $GITHUB_ENV
             KUBEWARDEN=released;;
           workflow_run)
             KUBEWARDEN=rc;;
