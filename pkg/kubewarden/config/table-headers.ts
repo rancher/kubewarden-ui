@@ -155,17 +155,6 @@ export const DASHBOARD_HEADERS = [
     isEnabled:   true,
     isLoaded:    true,
     icon:        'icon-question-mark',
-    cta:         createKubewardenRoute({ name: 'c-cluster-product-resource-create', params: { resource: KUBEWARDEN.POLICY_SERVER } }),
-    link:        createKubewardenRoute({ name: 'c-cluster-product-resource', params: { resource: KUBEWARDEN.POLICY_SERVER } }),
-    linkText:    'kubewarden.dashboard.headers.policyServer.linkText',
-    description: 'kubewarden.dashboard.headers.policyServer.description',
-    slotTitle:   'kubewarden.dashboard.headers.policyServer.slotTitle',
-    title:       'kubewarden.dashboard.headers.policyServer.title'
-  },
-  {
-    isEnabled:   true,
-    isLoaded:    true,
-    icon:        'icon-question-mark',
     cta:         createKubewardenRoute({ name: 'c-cluster-product-resource-create', params: { resource: KUBEWARDEN.ADMISSION_POLICY } }),
     link:        createKubewardenRoute({ name: 'c-cluster-product-resource', params: { resource: KUBEWARDEN.ADMISSION_POLICY } }),
     linkText:    'kubewarden.dashboard.headers.admissionPolicy.linkText',
@@ -183,7 +172,18 @@ export const DASHBOARD_HEADERS = [
     description: 'kubewarden.dashboard.headers.clusterAdmissionPolicy.description',
     slotTitle:   'kubewarden.dashboard.headers.clusterAdmissionPolicy.slotTitle',
     title:       'kubewarden.dashboard.headers.clusterAdmissionPolicy.title'
-  }
+  },
+  {
+    isEnabled:   true,
+    isLoaded:    true,
+    icon:        'icon-question-mark',
+    cta:         createKubewardenRoute({ name: 'c-cluster-product-resource-create', params: { resource: KUBEWARDEN.POLICY_SERVER } }),
+    link:        createKubewardenRoute({ name: 'c-cluster-product-resource', params: { resource: KUBEWARDEN.POLICY_SERVER } }),
+    linkText:    'kubewarden.dashboard.headers.policyServer.linkText',
+    description: 'kubewarden.dashboard.headers.policyServer.description',
+    slotTitle:   'kubewarden.dashboard.headers.policyServer.slotTitle',
+    title:       'kubewarden.dashboard.headers.policyServer.title'
+  },
 ];
 
 export const TRACE_HEADERS = [
