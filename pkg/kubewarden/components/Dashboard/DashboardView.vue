@@ -207,7 +207,7 @@ export default {
     },
 
     appVersionSatisfies() {
-      const satisfies = appVersionSatisfiesConstraint(this.$store, this.controllerAppVersion, this.defaultsAppVersion, '=');
+      const satisfies = appVersionSatisfiesConstraint(this.$store, this.controllerAppVersion, this.defaultsAppVersion, '<=');
 
       return satisfies || false;
     },
