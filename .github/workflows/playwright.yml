@@ -178,7 +178,6 @@ jobs:
 
         # Workaround for rancher 2.9 in alpha
         if [ "$KUBEWARDEN" == "source" ]; then
-          REPO=rancher-alpha
           RANCHER='~2.9-0'
         fi
 
