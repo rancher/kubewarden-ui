@@ -186,9 +186,19 @@ test.describe('Metrics', () => {
 
   test('Check metrics are visible', async({ page, nav }) => {
     await nav.pserver('default', 'Metrics')
-    await expect(page.frameLocator('iframe')
-      .getByLabel('Request accepted with no mutation percentage panel')
-      .locator('div:text-matches("[1-9][0-9.]+%")')).toBeVisible({ timeout: 7 * 60_000 })
+    for (const metric of [
+      /Request accepted with no mutation percentage/,
+      /Request rejection percentage/,
+      /Request mutation percentage/,
+      /Total accepted requests with no mutation/,
+      /Total mutated requests/,
+      /Total rejected requests/,
+      /Request count/,
+    ]) {
+      await expect(page.frameLocator('iframe')
+        .getByTestId(metric)
+        .getByText(/^[1-9][0-9.]*%?$/)).toBeVisible({ timeout: 7 * 60_000 })
+    }
   })
 
   test('Uninstall metrics', async({ ui, nav, shell }) => {
