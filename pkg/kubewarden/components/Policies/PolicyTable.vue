@@ -73,9 +73,9 @@ export default {
           return false; // Exclude pre-releases if showPreRelease is false
         }
 
-        if ( this.chartType === KUBEWARDEN.ADMISSION_POLICY ) {
-          return !isGlobalPolicy(artifactHubPackage, this.allSchemas);
-        }
+        // if ( this.chartType === KUBEWARDEN.ADMISSION_POLICY ) {
+        //   return !isGlobalPolicy(artifactHubPackage, this.allSchemas);
+        // }
 
         return true;
       });

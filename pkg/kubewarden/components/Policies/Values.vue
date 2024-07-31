@@ -14,6 +14,8 @@ import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
 
 import { KUBEWARDEN_CHARTS, VALUES_STATE, YAML_OPTIONS, RANCHER_NS_MATCH_EXPRESSION } from '../../types';
 
+import Basic from '../../chart/kubewarden/admission/Basic';
+
 export default {
   name: 'Values',
 
@@ -41,7 +43,7 @@ export default {
   },
 
   components: {
-    ButtonGroup, Loading, ResourceCancelModal, Tabbed, YamlEditor
+    Basic, ButtonGroup, Loading, ResourceCancelModal, Tabbed, YamlEditor
   },
 
   async fetch() {
@@ -179,6 +181,9 @@ export default {
         inactive-class="bg-disabled btn-sm"
         active-class="bg-primary btn-sm"
       />
+    </div>
+    <div v-if="showForm" class="basic__container">
+      <Basic v-model="chartValues" :mode="mode" />
     </div>
     <div class="scroll__container">
       <div class="scroll__content">

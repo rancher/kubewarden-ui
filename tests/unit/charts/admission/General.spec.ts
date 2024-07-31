@@ -6,45 +6,11 @@ import { describe, expect, it } from '@jest/globals';
 import { KUBEWARDEN } from '@kubewarden/types';
 import General from '@kubewarden/chart/kubewarden/admission/General.vue';
 
-import LabeledSelect from '@shell/components/form/LabeledSelect';
 import { RadioGroup } from '@components/Form/Radio';
 
 import { userGroupPolicy } from '@tests/unit/_templates_/policyConfig';
 
 describe('component: General', () => {
-  it('should display the PolicyServer options if available', () => {
-    const ps = [{ id: 'default' }, { id: 'custom-ps' }];
-
-    const wrapper = shallowMount(General as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      propsData: { targetNamespace: 'default', value: { policy: userGroupPolicy } },
-      provide:   { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
-      computed:  {
-        policyServers:       () => ps,
-        policyServerOptions: () => ['default', 'custom-ps'],
-        isGlobal:            () => true
-      },
-      mocks:     {
-        $fetchState: { pending: false },
-        $store:      {
-          getters: {
-            currentStore:           () => 'current_store',
-            'current_store/all':    jest.fn(),
-            'i18n/t':               jest.fn()
-          },
-        }
-      },
-      stubs: {
-        NameNsDescription: { template: '<span />' },
-        RadioGroup:        { template: '<span />' },
-        LabeledTooltip:    { template: '<span />' }
-      }
-    });
-    const input = wrapper.findComponent(LabeledSelect);
-
-    expect(input.props().value).toStrictEqual('default' as String);
-    expect(input.props().options).toStrictEqual(['default', 'custom-ps'] as String[]);
-  });
-
   it('monitor mode should be protect by default', async() => {
     const wrapper = shallowMount(General as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       propsData: { targetNamespace: 'default', value: { policy: userGroupPolicy } },
@@ -60,10 +26,7 @@ describe('component: General', () => {
           },
         }
       },
-      stubs: {
-        NameNsDescription: { template: '<span />' },
-        LabeledTooltip:    { template: '<span />' }
-      }
+      stubs: { LabeledTooltip: { template: '<span />' } }
     });
     const radio = wrapper.findAllComponents(RadioGroup).at(0);
 

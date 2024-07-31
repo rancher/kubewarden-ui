@@ -98,7 +98,7 @@ export default {
   <Loading v-if="$fetchState.pending" />
   <div v-else>
     <div class="content">
-      <div class="banner__title">
+      <div v-if="shortDescription || policyReadme" class="banner__title">
         <template v-if="shortDescription">
           <p class="banner__short-description">
             {{ shortDescription }}

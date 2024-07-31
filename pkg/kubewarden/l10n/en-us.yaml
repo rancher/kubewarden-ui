@@ -224,6 +224,11 @@ kubewarden:
     noService: The Metrics service is not currently active or is not installed correctly. Check the status of the Monitoring app.
 
   policyConfig:
+    basic:
+      namespacedRadio:
+        label: Policy Type
+        namespaced: Create Namespaced-Scoped Admission Policy
+        cluster: Create Cluster-Scoped Admission Policy
     tabs:
       general: General
       rules: Rules
