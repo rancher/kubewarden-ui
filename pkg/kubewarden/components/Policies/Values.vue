@@ -12,7 +12,9 @@ import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
 
-import { KUBEWARDEN_CHARTS, VALUES_STATE, YAML_OPTIONS, RANCHER_NS_MATCH_EXPRESSION } from '../../types';
+import {
+  KUBEWARDEN, KUBEWARDEN_KIND, KUBEWARDEN_CHARTS, VALUES_STATE, YAML_OPTIONS, RANCHER_NS_MATCH_EXPRESSION
+} from '../../types';
 
 import Basic from '../../chart/kubewarden/admission/Basic';
 
@@ -44,6 +46,15 @@ export default {
 
   components: {
     Basic, ButtonGroup, Loading, ResourceCancelModal, Tabbed, YamlEditor
+  },
+
+  provide() {
+    const values = this.chartValues?.policy ? this.chartValues.policy : this.chartValues || {};
+
+    const resourceKind = values?.kind;
+    const schemaType = resourceKind === KUBEWARDEN_KIND.ADMISSION_POLICY ? KUBEWARDEN.ADMISSION_POLICY : KUBEWARDEN.CLUSTER_ADMISSION_POLICY;
+
+    return { chartType: schemaType };
   },
 
   async fetch() {

@@ -25,7 +25,14 @@ export const KUBEWARDEN_LABELS = { POLICY_SERVER: 'kubewarden/policy-server' };
 export const KUBEWARDEN = {
   ADMISSION_POLICY:         'policies.kubewarden.io.admissionpolicy',
   CLUSTER_ADMISSION_POLICY: 'policies.kubewarden.io.clusteradmissionpolicy',
-  POLICY_SERVER:            'policies.kubewarden.io.policyserver'
+  POLICY_SERVER:            'policies.kubewarden.io.policyserver',
+  SPOOFED:                  { POLICY: 'policies.kubewarden.io.policy' }
+};
+
+export const KUBEWARDEN_KIND = {
+  ADMISSION_POLICY:         'AdmissionPolicy',
+  CLUSTER_ADMISSION_POLICY: 'ClusterAdmissionPolicy',
+  POLICY_SERVER:            'PolicyServer'
 };
 
 /* eslint-disable no-unused-vars */

@@ -6,7 +6,7 @@ import LabeledSelect from '@shell/components/form/LabeledSelect';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 
-import { KUBEWARDEN } from '../../../types';
+import { KUBEWARDEN, KUBEWARDEN_KIND } from '../../../types';
 import NamespaceNameInput from '../../../components/NamespaceNameInput';
 
 export default {
@@ -30,6 +30,10 @@ export default {
     RadioGroup
   },
 
+  created() {
+    console.log('### chartType: ', this.chartType);
+  },
+
   data() {
     let policy = null;
 
@@ -38,7 +42,6 @@ export default {
     } else {
       policy = this.value || {};
     }
-
     // fix for https://github.com/rancher/kubewarden-ui/issues/672
     // enforce `default` as namespace for creation of AP's
     if ( this.mode === _CREATE && this.chartType === KUBEWARDEN.ADMISSION_POLICY ) {
@@ -65,7 +68,21 @@ export default {
 
     namespaced(neu) {
       if ( !neu ) {
+        // ClusterAdmissionPolicy
+        this.$set(this.policy, 'kind', KUBEWARDEN_KIND.CLUSTER_ADMISSION_POLICY);
         this.$set(this.policy.metadata, 'namespace', undefined);
+        this.$set(
+          this.policy.spec,
+          'namespaceSelector',
+          {
+            matchExpressions: [],
+            matchLabels:      {}
+          }
+        );
+      } else {
+        // AdmissionPolicy
+        this.$set(this.policy, 'kind', KUBEWARDEN_KIND.ADMISSION_POLICY);
+        this.$set(this.policy.spec, 'namespaceSelector', undefined);
       }
     }
   },

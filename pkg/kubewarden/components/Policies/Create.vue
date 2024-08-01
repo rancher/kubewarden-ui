@@ -21,7 +21,8 @@ import {
   KUBEWARDEN_PRODUCT_NAME,
   VALUES_STATE,
   ARTIFACTHUB_PKG_ANNOTATION,
-  DEFAULT_POLICY
+  DEFAULT_POLICY,
+  KUBEWARDEN_KIND
 } from '../../types';
 import { removeEmptyAttrs } from '../../utils/object';
 import { handleGrowl } from '../../utils/handle-growl';
@@ -55,8 +56,6 @@ export default ({
     PolicyReadmePanel,
     Values
   },
-
-  inject: ['chartType'],
 
   mixins: [CreateEditView],
 
@@ -295,11 +294,17 @@ export default ({
           out = this.chartValues?.policy ? this.chartValues.policy : jsyaml.load(this.yamlValues);
         }
 
+        const resourceType = this.chartValues?.policy?.kind;
+        const schemaType = resourceType === KUBEWARDEN_KIND.ADMISSION_POLICY ? KUBEWARDEN.ADMISSION_POLICY : KUBEWARDEN.CLUSTER_ADMISSION_POLICY;
+
+        // Set policy type to be saved
+        this.$set(out, 'type', schemaType);
+
         removeEmptyAttrs(out); // Clean up empty values from questions
         merge(this.value, out);
 
         // If create new namespace option is selected, create the ns before saving the policy
-        if ( this.chartType === KUBEWARDEN.ADMISSION_POLICY && this.chartValues?.isNamespaceNew ) {
+        if ( schemaType === KUBEWARDEN.ADMISSION_POLICY && this.chartValues?.isNamespaceNew ) {
           await this.createNamespace(this.value?.metadata?.namespace);
         }
 

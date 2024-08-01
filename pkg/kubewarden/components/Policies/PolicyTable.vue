@@ -33,8 +33,6 @@ export default {
     }
   },
 
-  inject: ['chartType'],
-
   components: {
     Checkbox, LabeledSelect, LabeledInput, SortableTableWrapper
   },
@@ -72,10 +70,6 @@ export default {
         if ( !this.showPreRelease && isPreRelease ) {
           return false; // Exclude pre-releases if showPreRelease is false
         }
-
-        // if ( this.chartType === KUBEWARDEN.ADMISSION_POLICY ) {
-        //   return !isGlobalPolicy(artifactHubPackage, this.allSchemas);
-        // }
 
         return true;
       });
