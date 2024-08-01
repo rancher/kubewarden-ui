@@ -28,14 +28,14 @@ on:
       k3s:
         description: Kubernetes version
         type: choice
-        default: 'v1.28.11-k3s2'
+        default: 'v1.28.12-k3s1'
         required: true
         options:
         - v1.26.15-k3s1
-        - v1.27.15-k3s2
-        - v1.28.11-k3s2
-        - v1.29.6-k3s2
-        - v1.30.2-k3s2
+        - v1.27.16-k3s1
+        - v1.28.12-k3s1
+        - v1.29.7-k3s1
+        - v1.30.3-k3s1
       mode:
         description: Installation mode
         type: choice
@@ -76,7 +76,7 @@ env:
   # Github -> Secrets and variables -> Actions -> New repository variable
   KUBEWARDEN: ${{ inputs.kubewarden || 'rc' }}
   K3D_VERSION: # 'v5.6.3' - optionally pin version
-  K3S_VERSION: ${{ inputs.k3s || 'v1.28.11-k3s2' }}
+  K3S_VERSION: ${{ inputs.k3s || 'v1.28.12-k3s1' }}
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
   # First value after the && must be truthy. Otherwise, the value after the || will always be returned
   TESTBASE: ${{ github.event_name != 'workflow_dispatch' && true || inputs.testbase }}
@@ -131,15 +131,16 @@ jobs:
           pull_request)
             KUBEWARDEN=source;;
           schedule)
-            # Rancher 2.7 chart requires kubeVersion: < 1.28.0-0
-            [[ "${{ matrix.rancher }}" == "2.7" ]] && echo K3S_VERSION="v1.27.15-k3s2" | tee -a $GITHUB_ENV
             KUBEWARDEN=released;;
           workflow_run)
             KUBEWARDEN=rc;;
         esac
 
+        # Rancher 2.7 chart requires kubeVersion: < 1.28.0-0
+        [[ "${{ matrix.rancher }}" == *2.7* ]] && echo K3S_VERSION="v1.27.16-k3s1" | tee -a $GITHUB_ENV
+
         # KW extension is prime since 2.8.3
-        [[ "$KUBEWARDEN" == "source" ]] && REPO=rancher-latest || REPO=rancher-prime
+        [[ "${{ matrix.rancher }}" == *2.[78]* ]] && REPO=rancher-prime || REPO=rancher-latest
 
         # Print matrix
         echo "Event: ${{github.event_name}}"
@@ -175,11 +176,6 @@ jobs:
         # Translate to sematic version
         [ "$RANCHER" == "rc" ] && RANCHER='*-0'
         [ "$RANCHER" == "released" ] && RANCHER='*'
-
-        # Workaround for rancher 2.9 in alpha
-        if [ "$KUBEWARDEN" == "source" ]; then
-          RANCHER='~2.9-0'
-        fi
 
         # Rancher PSP is based on kubernetes version
         RANCHER_PSP=$(kubectl version -o json | jq -r '.serverVersion.minor <= "24"')
