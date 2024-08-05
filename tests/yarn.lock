@@ -348,10 +348,10 @@ playwright-core@1.44.1:
   resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.44.1.tgz#53ec975503b763af6fc1a7aa995f34bc09ff447c"
   integrity sha512-wh0JWtYTrhv1+OSsLPgFzGzt67Y7BE/ZS3jEqgGBlp2ppp1ZDj8c+9IARNW4dwf1poq5MgHreEM2KV/GuR4cFA==
 
-playwright-qase-reporter@^2.0.6:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/playwright-qase-reporter/-/playwright-qase-reporter-2.0.6.tgz#3155ac576b586a94eec6054b04cb7c3255bddde0"
-  integrity sha512-rEjdKaiGH2KRhSxv6W5Ve24W/iPaHjraVjYF4Yq7oc06dlCXJGGkZe1IfWGJd7uem1nz9HHRdYGBX3XbVBkb5A==
+playwright-qase-reporter@^2.0.9:
+  version "2.0.9"
+  resolved "https://registry.yarnpkg.com/playwright-qase-reporter/-/playwright-qase-reporter-2.0.9.tgz#637190098904935974ef3baf4582c13385cb49d5"
+  integrity sha512-CeySJ0DfsEOlojpOfhOdzuErq7UWQIQNGFMxRo2e8OibbZF3IkKigBL60ohmYMcBCxVaC3uygQTwnalDG1Ph4w==
   dependencies:
     chalk "^4.1.2"
     qase-javascript-commons "^2.0.8"
