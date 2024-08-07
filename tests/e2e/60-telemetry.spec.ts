@@ -49,7 +49,7 @@ test.describe('Tracing', () => {
     await nav.pserver('default', 'Tracing')
   })
 
-  test('Install Jaeger', async({ nav, shell }) => {
+  test('Install Jaeger', async({ nav }) => {
     // Jaeger is not installed
     await telPage.toBeIncomplete('jaeger')
     await expect(telPage.configBtn).toBeDisabled()
@@ -64,8 +64,6 @@ test.describe('Tracing', () => {
           'rbac.clusterRole': true,
         }
       })
-      // Workaround for https://github.com/jaegertracing/helm-charts/issues/581
-      await shell.run('kubectl get clusterrole jaeger-operator -o json | jq \'.rules[] |= (select(.apiGroups | index("networking.k8s.io")).resources += ["ingressclasses"])\' | kubectl apply -f -')
     }
 
     // Jaeger is installed
