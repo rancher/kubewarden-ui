@@ -88,15 +88,11 @@ test('Install UI extension', async({ page, ui }) => {
   })
 })
 
-test('Install Kubewarden', async({ page, ui, nav, context }) => {
+test('Install Kubewarden', async({ page, ui, nav }) => {
   test.skip(MODE === 'fleet')
 
-  // Required by cert-manager copy on click
-  // Setting clipboard-write on model is broken, probably playwright issue
-  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   const kwPage = new KubewardenPage(page)
   await kwPage.installKubewarden({ version: MODE === 'upgrade' ? upMap[0].controller : undefined })
-  await context.clearPermissions()
 
   // Check UI is active
   await nav.explorer('Kubewarden')
