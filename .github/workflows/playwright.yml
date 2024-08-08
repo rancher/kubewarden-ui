@@ -117,15 +117,6 @@ jobs:
     # Check out code and install requirements
     # Use local kuberlr to avoid version skew
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '16'
-    - name: Install playwright
-      working-directory: tests
-      run: |
-        yarn install
-        yarn playwright install chromium  # --with-deps not supported on opensuse
-
 
     # ==================================================================================================
     # Set up parameters and ENV
@@ -214,13 +205,28 @@ jobs:
     # ==================================================================================================
     # Setup playwright ENV and run tests
     # https://rancher.github.io/dashboard/testing/e2e-test#setup-for-local-tests
+    - uses: actions/setup-node@v4
+      if: env.KUBEWARDEN == 'source'
+      with:
+        node-version: '16'
+
     - name: Build Kubewarden extension
       if: env.KUBEWARDEN == 'source'
       run: |
         yarn install --ignore-engines
         VERSION=0.0.1 yarn build-pkg kubewarden
 
-    - name: Install & Execute tests
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install playwright
+      working-directory: tests
+      run: |
+        yarn install
+        yarn playwright install chromium  # --with-deps not supported on opensuse
+
+    - name: Execute tests
       timeout-minutes: 120
       working-directory: tests
       run: |
