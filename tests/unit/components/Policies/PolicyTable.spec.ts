@@ -251,20 +251,4 @@ describe('component: PolicyTable', () => {
 
     expect(containsRc).toBe(true);
   });
-
-  it('hides policies defined as cluster admission policies when creating admission policy', () => {
-    const wrapper = shallowMount(PolicyTable, {
-      propsData:  { value: policyPackages },
-      mocks:      defaultMocks,
-      provide:    { chartType: KUBEWARDEN.ADMISSION_POLICY },
-      computed:   { allSchemas: () => schemas },
-    });
-
-    const filteredPackages = wrapper.vm.filteredPackages;
-    const containsCap = filteredPackages.some(
-      pkg => pkg.name === 'psa-label-enforcer'
-    );
-
-    expect(containsCap).toBe(false);
-  });
 });

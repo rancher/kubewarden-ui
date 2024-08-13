@@ -12,7 +12,11 @@ import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
 
-import { KUBEWARDEN_CHARTS, VALUES_STATE, YAML_OPTIONS, RANCHER_NS_MATCH_EXPRESSION } from '../../types';
+import {
+  KUBEWARDEN, KUBEWARDEN_KIND, KUBEWARDEN_CHARTS, VALUES_STATE, YAML_OPTIONS, RANCHER_NS_MATCH_EXPRESSION
+} from '../../types';
+
+import Basic from '../../chart/kubewarden/admission/Basic';
 
 export default {
   name: 'Values',
@@ -41,7 +45,16 @@ export default {
   },
 
   components: {
-    ButtonGroup, Loading, ResourceCancelModal, Tabbed, YamlEditor
+    Basic, ButtonGroup, Loading, ResourceCancelModal, Tabbed, YamlEditor
+  },
+
+  provide() {
+    const values = this.chartValues?.policy ? this.chartValues.policy : this.chartValues || {};
+
+    const resourceKind = values?.kind;
+    const schemaType = resourceKind === KUBEWARDEN_KIND.ADMISSION_POLICY ? KUBEWARDEN.ADMISSION_POLICY : KUBEWARDEN.CLUSTER_ADMISSION_POLICY;
+
+    return { chartType: schemaType };
   },
 
   async fetch() {
@@ -179,6 +192,9 @@ export default {
         inactive-class="bg-disabled btn-sm"
         active-class="bg-primary btn-sm"
       />
+    </div>
+    <div v-if="showForm" class="basic__container">
+      <Basic v-model="chartValues" :mode="mode" />
     </div>
     <div class="scroll__container">
       <div class="scroll__content">
