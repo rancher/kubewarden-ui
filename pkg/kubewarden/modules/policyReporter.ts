@@ -47,7 +47,7 @@ export async function getReports(
       controllerApp = await fetchControllerApp(store);
     }
 
-    if ( schema && isValidAppVersion(controllerApp) ) {
+    if ( schema ) {
       try {
         const reports = await store.dispatch('cluster/findAll', { type: reportType }, { root: true });
 

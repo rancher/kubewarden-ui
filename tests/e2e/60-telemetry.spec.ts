@@ -49,7 +49,7 @@ test.describe('Tracing', () => {
     await nav.pserver('default', 'Tracing')
   })
 
-  test('Install Jaeger', async({ nav, shell }) => {
+  test('Install Jaeger', async({ nav }) => {
     // Jaeger is not installed
     await telPage.toBeIncomplete('jaeger')
     await expect(telPage.configBtn).toBeDisabled()
@@ -64,8 +64,6 @@ test.describe('Tracing', () => {
           'rbac.clusterRole': true,
         }
       })
-      // Workaround for https://github.com/jaegertracing/helm-charts/issues/581
-      await shell.run('kubectl get clusterrole jaeger-operator -o json | jq \'.rules[] |= (select(.apiGroups | index("networking.k8s.io")).resources += ["ingressclasses"])\' | kubectl apply -f -')
     }
 
     // Jaeger is installed
@@ -186,9 +184,25 @@ test.describe('Metrics', () => {
 
   test('Check metrics are visible', async({ page, nav }) => {
     await nav.pserver('default', 'Metrics')
-    await expect(page.frameLocator('iframe')
-      .getByLabel('Request accepted with no mutation percentage panel')
-      .locator('div:text-matches("[1-9][0-9.]+%")')).toBeVisible({ timeout: 7 * 60_000 })
+    const frame = page.frameLocator('iframe')
+    for (const metric of [
+      /Request accepted with no mutation percentage/,
+      /Request rejection percentage/,
+      /Request mutation percentage/,
+      /Total accepted requests with no mutation/,
+      /Total mutated requests/,
+      /Total rejected requests/,
+      /Request count/,
+    ]) {
+      // Skip some panels until bugfix is backported to Rancher <2.9 (1.6.4 release)
+      if (RancherUI.isVersion('<2.9') && metric.source.match(/Total accepted|rejected/)) continue
+
+      // byTestId for Rancher >2.9, byLabel for old versions
+      const panel = frame.getByTestId(metric).or(frame.getByLabel(metric))
+      // Accepted metrics should be >0, rejected could be 0
+      const number = metric.source.includes('accepted') ? /^[1-9][0-9.]*%?$/ : /^[0-9.]+%?$/
+      await expect(panel.getByText(number)).toBeVisible({ timeout: 7 * 60_000 })
+    }
   })
 
   test('Uninstall metrics', async({ ui, nav, shell }) => {

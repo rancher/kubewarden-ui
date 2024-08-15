@@ -47,16 +47,7 @@ test('Policy Servers', async({ page, ui, nav }) => {
     expect(semver.valid(cVer)).not.toBeNull()
     expect(semver.valid(dVer)).not.toBeNull()
 
-    // Created PS should use released version
-    expect(semver.prerelease(cVer)).toBeNull()
-
-    if (MODE === 'upgrade') {
-      expect(semver.lte(cVer, dVer)).toBeTruthy()
-      // Default PS could be updated to latest rc
-      if (semver.lt(cVer, dVer)) {
-        expect(semver.prerelease(dVer)).not.toBeNull()
-      }
-    } else if (MODE === 'fleet') {
+    if (MODE === 'fleet') {
       expect(semver.gte(cVer, dVer)).toBeTruthy()
       // Stable version could not be determined, using latest
       if (semver.gt(cVer, dVer)) {

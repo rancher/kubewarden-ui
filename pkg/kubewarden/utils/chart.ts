@@ -175,7 +175,7 @@ export function checkUpgradeAvailable(store: Store<any>, app: CatalogApp, chart:
  * @param highestVersion - The highest version found so far.
  * @returns string | null - The valid upgrade version or null if no valid upgrade is found.
  */
-function getValidUpgrade(currentVersion: string, upgradeVersion: string, highestVersion: string): string | null {
+export function getValidUpgrade(currentVersion: string, upgradeVersion: string, highestVersion: string): string | null {
   if ( !currentVersion || !upgradeVersion ) {
     return null;
   }

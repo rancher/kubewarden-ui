@@ -68,7 +68,7 @@ export default {
       color="error"
       class="mt-20 mb-20"
       data-testid="kw-unavailability-banner"
-      label-key="kubewarden.unavailability.banner"
+      :label="t('kubewarden.unavailability.banner', { type: t('kubewarden.unavailability.type.dashboard') })"
     />
   </div>
   <div v-else>

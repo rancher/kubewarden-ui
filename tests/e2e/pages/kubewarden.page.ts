@@ -74,10 +74,8 @@ export class KubewardenPage extends BasePage {
       // ==================================================================================================
       // Requirements Dialog
       const welcomeStep = this.page.getByText('Kubewarden is a policy engine for Kubernetes.')
-      const certStep = this.page.getByText('Install Cert-Manager Package')
       const addRepoStep = this.page.getByRole('heading', { name: 'Repository', exact: true })
       const appInstallStep = this.page.getByRole('heading', { name: 'Kubewarden App Install', exact: true })
-      const shellBtn = this.page.getByRole('button', { name: 'Open Kubectl Shell' })
       const installBtn = this.ui.button('Install Kubewarden')
       const addRepoBtn = this.ui.button('Add Kubewarden Repository')
       const failRepo = this.page.getByText('Unable to fetch Kubewarden Helm chart')
@@ -90,20 +88,6 @@ export class KubewardenPage extends BasePage {
 
       await expect(welcomeStep).toBeVisible()
       await installBtn.click()
-
-      // Cert-Manager
-      await certStep.or(addRepoBtn).waitFor()
-      if (await certStep.isVisible()) {
-        // Copy command by clicking and read it from clipboard
-        await this.page.locator('code.copy').click()
-        const copiedText = await this.page.evaluate(() => navigator.clipboard.readText())
-        expect(copiedText).toContain('kubectl')
-        // Run copied command in shell
-        await shellBtn.click()
-        const shell = new Shell(this.page)
-        await expect(shell.screen).toBeVisible()
-        await shell.run(copiedText as string)
-      }
 
       // Add repository screen
       await expect(addRepoStep).toBeVisible()

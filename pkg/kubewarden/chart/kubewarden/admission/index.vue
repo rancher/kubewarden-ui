@@ -40,7 +40,7 @@ export default {
   inject: ['chartType'],
 
   data() {
-    return { chartValues: null };
+    return { activeTab: null, chartValues: null };
   },
 
   created() {
@@ -104,6 +104,10 @@ export default {
   methods: {
     settingsChanged(event) {
       this.chartValues.policy.spec.settings = jsyaml.load(event);
+    },
+
+    setActiveTab(tab) {
+      this.activeTab = tab;
     }
   }
 };
@@ -122,10 +126,11 @@ export default {
     </Tab>
 
     <template v-if="showSettings">
-      <Tab name="settings" :label="t('kubewarden.policyConfig.tabs.settings')" :weight="98">
+      <Tab name="settings" :label="t('kubewarden.policyConfig.tabs.settings')" :weight="98" @active="() => setActiveTab('settings')">
         <Settings
           v-model="chartValues"
           data-testid="kw-policy-config-settings-tab"
+          :active-tab="activeTab"
           @updateSettings="settingsChanged($event)"
         />
       </Tab>

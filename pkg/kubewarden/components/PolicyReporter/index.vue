@@ -3,7 +3,7 @@ import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 import semver from 'semver';
 
-import { SERVICE, WORKLOAD_TYPES } from '@shell/config/types';
+import { CATALOG, SERVICE, WORKLOAD_TYPES } from '@shell/config/types';
 import { KUBERNETES } from '@shell/config/labels-annotations';
 import ResourceFetch from '@shell/mixins/resource-fetch';
 import ResourceManager from '@shell/mixins/resource-manager';
@@ -11,6 +11,7 @@ import ResourceManager from '@shell/mixins/resource-manager';
 import Loading from '@shell/components/Loading';
 import { Banner } from '@components/Banner';
 
+import { isAdminUser } from '../../utils/permissions';
 import { handleGrowl } from '../../utils/handle-growl';
 import { rootKubewardenRoute } from '../../utils/custom-routing';
 import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '../../types';
@@ -21,21 +22,46 @@ export default {
   mixins: [ResourceFetch, ResourceManager],
 
   async fetch() {
-    await this.$fetchType(WORKLOAD_TYPES.DEPLOYMENT);
-    await this.$fetchType(SERVICE);
+    this.isAdminUser = isAdminUser(this.$store.getters);
+    const types = {
+      policyServer:           { type: KUBEWARDEN.POLICY_SERVER },
+      admissionPolicy:        { type: KUBEWARDEN.ADMISSION_POLICY },
+      clusterAdmissionPolicy: { type: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
+      app:                    { type: CATALOG.APP },
+      deployment:             { type: WORKLOAD_TYPES.DEPLOYMENT }
+    };
 
-    this.secondaryResourceData = this.secondaryResourceDataConfig();
-    await this.resourceManagerFetchSecondaryResources(this.secondaryResourceData);
+    for ( const [key, value] of Object.entries(types) ) {
+      if ( this.$store.getters['cluster/canList'](value) ) {
+        this.permissions[key] = true;
+      }
+    }
+
+    if ( this.hasAvailability ) {
+      await this.$fetchType(WORKLOAD_TYPES.DEPLOYMENT);
+      await this.$fetchType(SERVICE);
+
+      this.secondaryResourceData = this.secondaryResourceDataConfig();
+      await this.resourceManagerFetchSecondaryResources(this.secondaryResourceData);
+    }
   },
 
   data() {
     return {
+      isAdminUser: false,
+      permissions: {
+        policyServer:           false,
+        admissionPolicy:        false,
+        clusterAdmissionPolicy: false,
+        app:                    false,
+        deployment:             false
+      },
+
       rootKubewardenRoute,
-      controller:               null,
-      reporterReportingService: null,
-      reporterUIService:        null,
-      reporterUrl:              null,
-      secondaryResourceData:    this.secondaryResourceDataConfig(),
+      reporterReportingService:   null,
+      reporterUIService:          null,
+      reporterUrl:                null,
+      secondaryResourceData:      this.secondaryResourceDataConfig(),
     };
   },
 
@@ -54,6 +80,10 @@ export default {
 
     controllerDeployments() {
       return this.allDeployments?.filter(deploy => deploy?.metadata?.labels?.[KUBERNETES.INSTANCE] === KUBEWARDEN_APPS.RANCHER_CONTROLLER);
+    },
+
+    hasAvailability() {
+      return this.isAdminUser || Object.values(this.permissions).every(value => value);
     },
 
     hasPolicyServerSchema() {
@@ -161,7 +191,15 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else>
-    <template v-if="!hasPolicyServerSchema">
+    <template v-if="!hasAvailability">
+      <Banner
+        color="error"
+        class="mt-20 mb-20"
+        data-testid="kw-unavailability-banner"
+        :label="t('kubewarden.unavailability.banner', { type: t('kubewarden.unavailability.type.policyReporter') })"
+      />
+    </template>
+    <template v-else-if="!hasPolicyServerSchema">
       <div>
         <h1 class="mb-20">
           {{ t('kubewarden.policyReporter.title') }}

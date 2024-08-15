@@ -1,7 +1,10 @@
 kubewarden:
   title: Kubewarden
   unavailability:
-    banner: 'You do not have access to the Kubewarden Dashboard. Please contact your administrator.'
+    banner: 'You do not have access to the {type}. Please contact your administrator.'
+    type:
+      dashboard: Kubewarden Dashboard
+      policyReporter: Policy Reporter
   generic:
     name: Name
   dashboard:

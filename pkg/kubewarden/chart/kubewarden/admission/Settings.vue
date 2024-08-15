@@ -6,6 +6,10 @@ import YamlEditor from '@shell/components/YamlEditor';
 
 export default {
   props: {
+    activeTab: {
+      type:    String,
+      default: null
+    },
     value: {
       type:     Object,
       required: true
@@ -22,10 +26,14 @@ export default {
     return { settingsYaml };
   },
 
-  mounted() {
-    this.$root.$on('routeChanged', () => {
-      this.$refs.yamleditor?.refresh();
-    });
+  watch: {
+    activeTab() {
+      if ( this.activeTab === 'settings' ) {
+        this.$nextTick(() => {
+          this.$refs.yamleditor.refresh();
+        });
+      }
+    }
   },
 
   computed: {
