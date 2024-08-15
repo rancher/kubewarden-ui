@@ -27,23 +27,23 @@ export default {
     :class="setLoading"
   >
     <div class="d-header">
-      <slot name="count" />
-      <div class="title">
-        <router-link :to="card.link">
-          <h1 class="link">
-            {{ t(card.title) }}
-          </h1>
-        </router-link>
-        <p v-clean-html="t(card.description)" class="mb-0" />
+      <div class="title-container">
+        <slot name="count" />
+        <div class="title">
+          <router-link :to="card.link">
+            <h1 class="link">
+              {{ t(card.title) }}
+            </h1>
+          </router-link>
+          <p v-clean-html="t(card.description)" class="mb-0" />
+        </div>
       </div>
+
+      <slot name="action" class="action" />
     </div>
 
     <div class="d-slot">
       <slot name="content" />
-    </div>
-
-    <div class="d-action">
-      <slot name="action" />
     </div>
   </div>
 </template>
@@ -65,6 +65,14 @@ export default {
   .d-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
+
+    .title-container {
+      display: flex;
+      align-items: center;
+      width: 55%;
+    }
 
     .title {
       display: flex;
@@ -84,6 +92,10 @@ export default {
     p {
       font-size: 10.5px;
       font-weight: 700;
+    }
+
+    .action {
+      width: 45%;
     }
   }
 
@@ -128,7 +140,7 @@ export default {
   }
 
   .d-action {
-    width: 100%;
+    width: auto;
   }
 }
 

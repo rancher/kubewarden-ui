@@ -1,31 +1,43 @@
 <script>
-import Bar from '@shell/components/graph/Bar';
+import Bar from '../Graph/Bar';
 
 export default {
-  props:      {
+  props: {
     events: {
       type:     Object,
-      required: true
-    }
+      required: true,
+    },
   },
 
   components: { Bar },
 
   computed: {
-    percentageBarValue() {
-      if ( !this.events.total ) {
-        return 0;
-      }
+    percentageValues() {
+      const { success, fail, error } = this.events.status;
+      const total = this.events.total || 1; // Prevent division by zero
 
-      return ( Math.round(this.events.status.success * 100 ) / this.events.total );
-    }
+      return [
+        Math.round((success / total) * 100),
+        Math.round((fail / total) * 100),
+        Math.round((error / total) * 100),
+      ];
+    },
   },
 
   methods: {
     formattedPercentage(type) {
-      return `${ Math.round(this.events.status[type] * 100) / this.events.total }%`;
-    }
-  }
+      const statusCount = this.events.status[type];
+      const totalCount = this.events.total;
+
+      if ( totalCount === 0 ) {
+        return '0%';
+      }
+
+      const percentage = Math.round((statusCount * 100) / totalCount);
+
+      return `${ percentage }%`;
+    },
+  },
 };
 </script>
 
@@ -43,12 +55,17 @@ export default {
         <span>Fail</span>
         <span class="percentage"><i>/&nbsp;</i>{{ formattedPercentage('fail') }}</span>
       </div>
+
+      <div class="numbers-stats error">
+        <span class="number">{{ events.status.error }}</span>
+        <span>Error</span>
+        <span class="percentage"><i>/&nbsp;</i>{{ formattedPercentage('error') }}</span>
+      </div>
     </div>
     <div class="mt-10">
       <Bar
-        :percentage="percentageBarValue"
-        primary-color="--success"
-        secondary-color="--error"
+        :percentages="percentageValues"
+        :colors="['--success', '--error', '--app-color4-accent']"
       />
     </div>
   </div>
@@ -76,6 +93,10 @@ export default {
         margin-right: 4px;
       }
     }
+  }
+
+  .numbers-stats.error .number {
+    color: var(--app-color4-accent);
   }
 }
 </style>
