@@ -48,6 +48,7 @@ kubewarden:
         title: Reports
         success: Success
         fail: Fail
+        error: Error
     appInstall:
       title: Kubewarden App Install
       description: This will take you to the app installation page for Kubewarden.

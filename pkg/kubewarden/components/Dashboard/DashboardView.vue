@@ -288,18 +288,23 @@ export default {
             status: {
               success: res?.status?.success + ( neu?.result === 'pass' ? 1 : 0 ),
               fail:    res?.status?.fail + ( neu?.result === 'fail' ? 1 : 0 ),
+              error:   res?.status?.error + ( neu?.result === 'error' ? 1 : 0 )
             },
             total: res?.total + 1
           };
         }, {
-          status: { success: 0, fail: 0 },
-          total:  0
+          status: {
+            success: 0, fail: 0, error: 0
+          },
+          total: 0
         });
       }
 
       return {
-        status: { success: 0, fail: 0 },
-        total:  0
+        status: {
+          success: 0, fail: 0, error: 0
+        },
+        total: 0
       };
     }
   }
@@ -322,6 +327,23 @@ export default {
             <span v-if="index === 0" class="count">{{ namespacedPolicies.length || 0 }}</span>
             <span v-if="index === 1" class="count">{{ globalPolicies.length || 0 }}</span>
             <span v-if="index === 2" class="count">{{ allPolicyServers.length || 0 }}</span>
+          </template>
+
+          <template #action>
+            <router-link
+              class="btn action"
+              :class="{
+                'role-primary': (index === 0 && namespacedPolicies.length < 1) ||
+                  (index === 1 && globalPolicies.length < 1) ||
+                  (index === 2 && allPolicyServers.length < 1),
+                'role-secondary': (index === 0 && namespacedPolicies.length >= 1) ||
+                  (index === 1 && globalPolicies.length >= 1) ||
+                  (index === 2 && allPolicyServers.length >= 1)
+              }"
+              :to="card.cta"
+            >
+              {{ t(card.linkText) }}
+            </router-link>
           </template>
 
           <template #content>
@@ -364,12 +386,6 @@ export default {
               />
             </span>
           </template>
-
-          <template #action>
-            <router-link class="btn role-secondary action" :to="card.cta">
-              {{ t(card.linkText) }}
-            </router-link>
-          </template>
         </Card>
       </div>
     </div>
@@ -383,7 +399,7 @@ export default {
 
   .get-started {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
     grid-gap: 20px;
 
     .card-container {
