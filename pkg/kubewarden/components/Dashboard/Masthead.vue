@@ -31,7 +31,7 @@ export default {
     ...mapGetters({ charts: 'catalog/charts' }),
 
     appVersionSatisfies() {
-      const satisfies = appVersionSatisfiesConstraint(this.$store, this.controllerAppVersion, this.defaultsAppVersion, '=');
+      const satisfies = appVersionSatisfiesConstraint(this.$store, this.controllerAppVersion, this.defaultsAppVersion, '<=');
 
       return satisfies || false;
     },
