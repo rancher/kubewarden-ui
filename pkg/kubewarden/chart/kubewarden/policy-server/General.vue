@@ -41,7 +41,9 @@ export default {
 
   mixins: [ResourceFetch],
 
-  async fetch() {
+  async fetch() {},
+
+  async mounted() {
     if ( this.$store.getters['cluster/canList'](CATALOG.APP) && this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO) ) {
       await this.$initializeFetchData(CATALOG);
       await this.$fetchType(CATALOG.CLUSTER_REPO);
@@ -167,7 +169,7 @@ export default {
     },
 
     defaultsChart() {
-      if ( this.kubewardenRepo ) {
+      if ( this.kubewardenRepo && !this.isFleet ) {
         return this.$store.getters['catalog/chart']({
           repoName:  this.kubewardenRepo.repoName,
           repoType:  this.kubewardenRepo.repoType,
