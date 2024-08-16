@@ -12,8 +12,8 @@ test('Brief check of landing pages', async({ page, ui, nav }) => {
 
     // Recommended policies stats
     await expect1m(page.getByText('Active 1 of 1 Pods / 100%')).toBeVisible()
-    await expect1m(page.getByText('Active 0 of 0 Namespaced Policies / 0%')).toBeVisible()
-    await expect1m(page.getByText('Active 6 of 6 Global Policies / 100%')).toBeVisible()
+    await expect1m(page.getByText('0 Namespace Policies')).toBeVisible()
+    await expect1m(page.getByText('6 Cluster Policies')).toBeVisible()
   })
 
   await test.step('Policy Servers Landing Page', async() => {
