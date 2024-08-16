@@ -22,37 +22,41 @@ test('Stats reflect resource changes', async({ page, nav }) => {
   const ps = { name: 'kw-policyserver' }
   const policy: Policy = { title: 'Pod Privileged Policy', name: 'kw-policy-privpod', server: ps.name }
 
+  // Get initial counts
   await nav.explorer('Kubewarden')
+  const psCount = await kwPage.getCount('Policy Servers').textContent() || 'Empty'
   const psStats = await kwPage.getStats('Policy Servers').textContent() || 'Empty'
-  const apStats = await kwPage.getStats('Admission Policies').textContent() || 'Empty'
-  const capStats = await kwPage.getStats('Cluster Admission Policies').textContent() || 'Empty'
+  const apCount = await kwPage.getCount('Namespaced Policies').textContent() || 'Empty'
+  const capCount = await kwPage.getCount('Cluster Policies').textContent() || 'Empty'
 
-  await test.step('Policy Server stats', async() => {
+  await test.step('Policy Server counter++', async() => {
     await kwPage.createPsBtn.click()
     await psPage.create(ps, { navigate: false })
     await nav.explorer('Kubewarden')
+    await expect(kwPage.getCount('Policy Servers')).toHaveText((+psCount + 1).toString())
     await expect2m(kwPage.getStats('Policy Servers').getByText(statsPlusOne(psStats))).toBeVisible()
   })
 
-  await test.step('Admission Policies stats', async() => {
+  await test.step('Namespaced Policy counter++', async() => {
     await kwPage.createApBtn.click()
     await apPage.create(policy, { navigate: false })
     await nav.explorer('Kubewarden')
-    await expect2m(kwPage.getStats('Admission Policies').getByText(statsPlusOne(apStats))).toBeVisible()
+    await expect(kwPage.getCount('Namespaced Policies')).toHaveText((+apCount + 1).toString())
   })
 
-  await test.step('Cluster Admission Policies stats', async() => {
+  await test.step('Cluster Policy counter++', async() => {
     await kwPage.createCapBtn.click()
     await capPage.create(policy, { navigate: false })
     await nav.explorer('Kubewarden')
-    await expect2m(kwPage.getStats('Cluster Admission Policies').getByText(statsPlusOne(capStats))).toBeVisible()
+    await expect(kwPage.getCount('Cluster Policies')).toHaveText((+capCount + 1).toString())
   })
 
   await test.step('Stats after deleting resources ', async() => {
     await psPage.delete(ps.name)
     await nav.explorer('Kubewarden')
+    await expect(kwPage.getCount('Namespaced Policies')).toHaveText(apCount)
+    await expect(kwPage.getCount('Cluster Policies')).toHaveText(capCount)
+    await expect(kwPage.getCount('Policy Servers')).toHaveText(psCount)
     await expect2m(kwPage.getStats('Policy Servers').getByText(psStats)).toBeVisible()
-    await expect2m(kwPage.getStats('Admission Policies').getByText(apStats)).toBeVisible()
-    await expect2m(kwPage.getStats('Cluster Admission Policies').getByText(capStats)).toBeVisible()
   })
 })

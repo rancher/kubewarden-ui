@@ -11,9 +11,9 @@ test('Brief check of landing pages', async({ page, ui, nav }) => {
     await expect(head.getByText(/App Version:\s+v[1-9][0-9.]+[0-9]/)).toBeVisible()
 
     // Recommended policies stats
+    await expect1m(page.getByText('0Namespaced Policies')).toBeVisible()
+    await expect1m(page.getByText('6Cluster Policies')).toBeVisible()
     await expect1m(page.getByText('Active1 of 1 Pods / 100%')).toBeVisible()
-    await expect1m(page.getByText('Active0 of 0 Namespaced Policies / 0%')).toBeVisible()
-    await expect1m(page.getByText('Active6 of 6 Global Policies / 100%')).toBeVisible()
   })
 
   await test.step('Policy Servers Landing Page', async() => {
