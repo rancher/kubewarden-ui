@@ -33,11 +33,7 @@ test('Policy Servers', async({ page, ui, nav }) => {
     const defaultImage = (await ui.tableRow('default').column('Image').textContent())?.trim().split(':') || []
     const createdImage = (await psRow.column('Image').textContent())?.trim().split(':') || []
     const [dImg, dVer] = [defaultImage[0], defaultImage[1]]
-    let [cImg, cVer] = [createdImage[0], createdImage[1]]
-    const latestVer = '99.0.0'
-
-    // Convert "latest" string to a valid version
-    if (MODE === 'fleet' && cVer === 'latest') cVer = latestVer
+    const [cImg, cVer] = [createdImage[0], createdImage[1]]
 
     // Validate URLs
     expect(cImg).toEqual(dImg)
@@ -47,15 +43,8 @@ test('Policy Servers', async({ page, ui, nav }) => {
     expect(semver.valid(cVer)).not.toBeNull()
     expect(semver.valid(dVer)).not.toBeNull()
 
-    if (MODE === 'fleet') {
-      expect(semver.gte(cVer, dVer)).toBeTruthy()
-      // Stable version could not be determined, using latest
-      if (semver.gt(cVer, dVer)) {
-        expect(semver.eq(cVer, latestVer)).toBeTruthy()
-      }
-    } else {
-      expect(semver.eq(cVer, dVer)).toBeTruthy()
-    }
+    // Validate version is equal to default
+    expect(semver.eq(cVer, dVer)).toBeTruthy()
   })
 
   await test.step('Check Details page', async() => {
