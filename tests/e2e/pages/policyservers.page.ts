@@ -55,6 +55,9 @@ export class PolicyServersPage extends BasePage {
         await this.goto()
         await this.ui.button('Create').click()
       }
+      // Page is ready when it loads default image
+      await expect(this.page.getByTestId('ps-config-image-inputs').getByText('Default Image')).toBeVisible()
+
       await this.setValues(ps)
       await this.ui.button('Create').click()
       // Get row and wait for Active state

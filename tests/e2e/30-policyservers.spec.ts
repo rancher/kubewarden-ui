@@ -4,7 +4,6 @@ import { PolicyServersPage, PolicyServer } from './pages/policyservers.page'
 import { Policy, AdmissionPoliciesPage, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 
 const expect3m = expect.configure({ timeout: 3 * 60_000 })
-const MODE = process.env.MODE
 
 test('Policy Servers', async({ page, ui, nav }) => {
   const server: PolicyServer = { name: 'test-policyserver' }
@@ -71,4 +70,18 @@ test('Policy Servers', async({ page, ui, nav }) => {
     await expect(page.locator('table.sortable-table')).toBeVisible()
     await expect(capRow.row).not.toBeVisible()
   })
+})
+
+test('Configure with custom values', async({ page, ui, nav }) => {
+  const psPage = new PolicyServersPage(page)
+  const ps = { name: 'test-policyserver', image: 'ghcr.io/kubewarden/policy-server:latest', replicas: 2 }
+  await psPage.create(ps, { wait: false })
+
+  await nav.pserver(ps.name)
+  await ui.button('Config').click()
+  await expect(ui.input('Name*')).toHaveValue(ps.name)
+  await expect(ui.input('Image URL')).toHaveValue(ps.image)
+  await expect(ui.input('Replicas*')).toHaveValue(ps.replicas.toString())
+
+  await psPage.delete(ps.name)
 })
