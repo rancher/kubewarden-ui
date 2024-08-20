@@ -121,10 +121,115 @@ describe('component: General', () => {
       stubs: { Banner: { template: '<span />' } }
     });
 
-    await wrapper.vm.$nextTick(); // Wait for the first DOM update
-    await wrapper.vm.$nextTick(); // Wait for another tick to ensure async operations are done
+    // Wait for the component to be mounted
+    await new Promise(resolve => setTimeout(resolve, 1));
 
     // Check that the latestChartVersion is set correctly
     expect((wrapper.vm as any).latestChartVersion).toBe(latestChartVersion);
+  });
+
+  it('hides image-row when isLoading is true', async() => {
+    const serviceAccounts = ['sa-1', 'sa-2', 'sa-3'];
+
+    const wrapper = shallowMount(General as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
+      propsData: { value: DEFAULT_POLICY_SERVER, serviceAccounts },
+      computed:  {
+        isCreate:      () => false,
+        defaultsChart: () => null
+      },
+      mocks:     {
+        $fetchState: { pending: true }, // Simulate a loading state
+        $store:      {
+          getters: {
+            'cluster/canList':            () => true,
+            'cluster/all':                jest.fn(),
+            'i18n/t':                     jest.fn(),
+            'management/byId':            jest.fn(),
+            'resource-fetch/refreshFlag': jest.fn()
+          },
+          dispatch: jest.fn()
+        }
+      },
+      stubs: { Banner: { template: '<span />' } }
+    });
+
+    // Simulate the isLoading being true
+    (wrapper.vm as any).isLoading = true;
+
+    await wrapper.vm.$nextTick();
+
+    const imageLoading = wrapper.find('[data-testid="ps-config-image-loading"]');
+
+    expect(imageLoading.exists()).toBe(false);
+  });
+
+  it('shows image-row when isLoading is false', async() => {
+    const serviceAccounts = ['sa-1', 'sa-2', 'sa-3'];
+
+    const wrapper = shallowMount(General as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
+      propsData: { value: DEFAULT_POLICY_SERVER, serviceAccounts },
+      computed:  {
+        isCreate:      () => false,
+        defaultsChart: () => null
+      },
+      mocks:     {
+        $fetchState: { pending: false }, // Simulate a non-loading state
+        $store:      {
+          getters: {
+            'cluster/canList':            () => true,
+            'cluster/all':                jest.fn(),
+            'i18n/t':                     jest.fn(),
+            'management/byId':            jest.fn(),
+            'resource-fetch/refreshFlag': jest.fn()
+          },
+          dispatch: jest.fn()
+        }
+      },
+      stubs: { Banner: { template: '<span />' } }
+    });
+
+    // Simulate the isLoading being false
+    (wrapper.vm as any).isLoading = false;
+
+    await wrapper.vm.$nextTick();
+
+    const imageInputs = wrapper.find('[data-testid="ps-config-image-inputs"]');
+
+    expect(imageInputs.exists()).toBe(true);
+  });
+
+  it('sets defaultImage to true when not isCreate and image matches latestChartVersion', async() => {
+    const serviceAccounts = ['sa-1', 'sa-2', 'sa-3'];
+    const latestChartVersion = 'ghcr.io/kubewarden/policy-server:v1.15.0';
+
+    const wrapper = shallowMount(General as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
+      propsData: { value: { ...DEFAULT_POLICY_SERVER, spec: { image: latestChartVersion } }, serviceAccounts },
+      computed:  {
+        isCreate:           () => false,
+        defaultsChart:      () => null,
+        latestChartVersion: () => latestChartVersion
+      },
+      mocks:     {
+        $fetchState: { pending: false },
+        $store:      {
+          getters: {
+            'cluster/canList':            () => true,
+            'cluster/all':                jest.fn(),
+            'management/all':             jest.fn(),
+            'i18n/t':                     jest.fn(),
+            'management/byId':            jest.fn(),
+            'resource-fetch/refreshFlag': jest.fn()
+          },
+          dispatch: jest.fn()
+        }
+      },
+      stubs: { Banner: { template: '<span />' } }
+    });
+
+    // Wait for the component to be mounted
+    await new Promise(resolve => setTimeout(resolve, 1));
+
+    // Check that defaultImage is set correctly
+    expect((wrapper.vm as any).defaultImage).toBe(true);
   });
 });
