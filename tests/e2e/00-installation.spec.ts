@@ -28,6 +28,11 @@ const upMap: AppVersion[] = [
   { app: 'v1.16.0', controller: '2.4.0', crds: '1.8.0', defaults: '2.3.0' },
 ]
 
+// Support for Rancher 2.9 was added in KW 1.13.0
+if (RancherUI.isVersion('>=2.9')) {
+  upMap.splice(0, upMap.findIndex(v => v.app === 'v1.13.0'))
+}
+
 test('Initial rancher setup', async({ page, ui, nav }) => {
   const rancher = new RancherCommonPage(page)
 
