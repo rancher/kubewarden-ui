@@ -1,5 +1,6 @@
 import {
-  V1SecurityContext, V1PodSecurityContext, V1ObjectMeta, V1EnvVar, V1LabelSelector, V1Condition
+  V1SecurityContext, V1PodSecurityContext, V1ObjectMeta, V1EnvVar, V1LabelSelector, V1Condition,
+  V1MatchCondition
 } from '@kubernetes/client-node';
 
 export const KUBEWARDEN_PRODUCT_NAME = 'kubewarden';
@@ -84,6 +85,7 @@ export interface Policy {
   metadata: V1ObjectMeta;
   spec: {
     backgroundAudit?: boolean;
+    matchConditions?: V1MatchCondition[];
     matchPolicy?: string;
     mode?: string;
     module: string;

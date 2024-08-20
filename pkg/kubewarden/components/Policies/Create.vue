@@ -630,6 +630,10 @@ $color: var(--body-text) !important;
   }
 }
 
+::v-deep .footer-error {
+  margin-top: 15px;
+}
+
 .wizard {
   position: relative;
   height: 100%;
