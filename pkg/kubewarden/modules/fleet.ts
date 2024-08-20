@@ -60,7 +60,7 @@ export function getPolicyServerModule(fleetBundles: FleetBundle[]): string | nul
   const fleetBundle = findFleetContent('PolicyServer', fleetBundles, 'kubewarden-crds');
 
   if ( fleetBundle ) {
-    const valuesYamlResource = fleetBundle.spec.resources.find(resource => resource.name === 'values.yaml');
+    const valuesYamlResource = fleetBundle.spec.resources.find(resource => resource.name.includes('values.yaml'));
 
     if ( valuesYamlResource ) {
       try {

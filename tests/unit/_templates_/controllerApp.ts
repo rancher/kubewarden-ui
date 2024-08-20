@@ -1,3 +1,4 @@
+import { FLEET } from '@shell/config/labels-annotations';
 import { CatalogApp } from '@kubewarden/types';
 
 export const mockControllerApp: CatalogApp = {
@@ -46,4 +47,21 @@ export const mockControllerApp: CatalogApp = {
     values:    {}
   },
   status: { summary: { state: 'deployed' } }
+};
+
+export const mockControllerAppWithFleet: CatalogApp = {
+  ...mockControllerApp,
+  spec: {
+    ...mockControllerApp.spec,
+    chart: {
+      ...mockControllerApp.spec.chart,
+      metadata: {
+        ...mockControllerApp.spec.chart.metadata,
+        annotations: {
+          ...mockControllerApp.spec.chart.metadata.annotations,
+          [FLEET.BUNDLE_ID]: 'fleet-default/kw-kubewarden-defaults'
+        }
+      }
+    }
+  }
 };
