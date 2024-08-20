@@ -15,28 +15,29 @@ const pMinimal: Policy = {
 }
 
 async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
-  await test.step(`Policy checks: ${p.name}`, async() => {
-    // Check default values if unset
-    const mode = p.mode ?? 'Protect'
-    const audit = p.audit ?? 'On'
-    const server = p.server ?? 'default'
-    const namespace = p.namespace ?? 'default'
-    const module = p.module ?? ''
-    const row = ui.tableRow(p.name)
+  // Check default values if unset
+  const mode = p.mode ?? 'Protect'
+  const audit = p.audit ?? 'On'
+  const server = p.server ?? 'default'
+  const namespace = p.namespace ?? 'default'
+  const module = p.module ?? ''
+  const row = ui.tableRow(p.name)
 
-    // Check overview page
+  await test.step(`Check overview page: ${p.name}`, async() => {
     await polPage.goto()
     await expect(row.column('Mode')).toHaveText(mode)
     await expect(row.column('Policy Server')).toHaveText(server)
     test.info().annotations.push({ type: 'Feature', description: 'Policy title (module) should be visible' })
     test.info().annotations.push({ type: 'Feature', description: 'AdmissionPolicy namespace should be visible on overview page' })
+  })
 
-    // Check details page
+  await test.step(`Check details page: ${p.name}`, async() => {
     await row.open()
     await expect(ui.page.getByText(new RegExp(`^\\s+${polPage.kind}:\\s+${p.name}`))).toBeVisible()
     await expect(ui.page.getByText('API Versions')).toBeVisible()
+  })
 
-    // Check config page
+  await test.step(`Check config page: ${p.name}`, async() => {
     await ui.button('Config').click()
     await expect(polPage.name).toHaveValue(p.name)
     if (p.title === 'Custom Policy') await expect(polPage.module).toHaveValue(module)
@@ -46,8 +47,9 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     if (isAP(polPage)) {
       await expect(polPage.namespace).toContainText(namespace)
     }
+  })
 
-    // Check edit config
+  await test.step(`Check edit config: ${p.name}`, async() => {
     await polPage.goto()
     await row.action('Edit Config')
     await expect(polPage.name).toBeDisabled()
@@ -58,10 +60,10 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     if (isAP(polPage)) {
       await expect(polPage.namespace).toBeAllEnabled({ enabled: false })
     }
-
-    // Check policy is active
-    await expect(ui.page.locator('div.primaryheader').locator('span.badge-state')).toHaveText('Active', { timeout: 2 * 60_000 })
   })
+
+  // Check policy is active
+  await expect(ui.page.locator('div.primaryheader').locator('span.badge-state')).toHaveText('Active', { timeout: 2 * 60_000 })
 }
 
 const pageTypes = [AdmissionPoliciesPage, ClusterAdmissionPoliciesPage]

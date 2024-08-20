@@ -19,13 +19,19 @@ expect(MODE).toMatch(/^(base|fleet|upgrade)$/)
 const upMap: AppVersion[] = [
   // { app: 'v1.8.0', controller: '2.0.0', crds: '1.4.2', defaults: '1.8.0' },
   // { app: 'v1.9.0', controller: '2.0.5', crds: '1.4.4', defaults: '1.9.2' },
-  { app: 'v1.10.0', controller: '2.0.8', crds: '1.4.5', defaults: '1.9.3' },
+  // { app: 'v1.10.0', controller: '2.0.8', crds: '1.4.5', defaults: '1.9.3' },
   { app: 'v1.11.0', controller: '2.0.10', crds: '1.4.6', defaults: '1.9.4' },
   { app: 'v1.12.0', controller: '2.0.11', crds: '1.5.0', defaults: '2.0.0' },
   { app: 'v1.13.0', controller: '2.1.0', crds: '1.5.1', defaults: '2.0.3' },
   { app: 'v1.14.0', controller: '2.2.1', crds: '1.6.0', defaults: '2.1.0' },
   { app: 'v1.15.0', controller: '2.3.1', crds: '1.7.0', defaults: '2.2.1' },
+  { app: 'v1.16.0', controller: '2.4.0', crds: '1.8.0', defaults: '2.3.0' },
 ]
+
+// Support for Rancher 2.9 was added in KW 1.13.0
+if (RancherUI.isVersion('>=2.9')) {
+  upMap.splice(0, upMap.findIndex(v => v.app === 'v1.13.0'))
+}
 
 test('Initial rancher setup', async({ page, ui, nav }) => {
   const rancher = new RancherCommonPage(page)
