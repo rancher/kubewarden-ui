@@ -10,6 +10,7 @@ const defaultMocks = {
   $fetchState: { pending: false },
   $store:      {
     getters: {
+      'cluster/canList':            jest.fn,
       'cluster/schemaFor':          jest.fn(),
       'i18n/t':                     jest.fn(),
       'management/byId':            () => 'local',
@@ -18,7 +19,19 @@ const defaultMocks = {
   }
 };
 
+const defaultData = {
+  isAdminUser: true,
+  permissions: {
+    policyServer:           true,
+    admissionPolicy:        true,
+    clusterAdmissionPolicy: true,
+    app:                    true,
+    deployment:             true
+  }
+};
+
 const defaultComputed = {
+  hasAvailablitity:             () => null,
   hasPolicyServerSchema:        () => null,
   hasClusterPolicyReportSchema: () => null,
   hasPolicyReportSchema:        () => null,
@@ -46,9 +59,23 @@ const kwVersions = {
 };
 
 describe('component: PolicyReporter', () => {
-  it('Should show Install Kubewarden button when uninstalled', () => {
+  it('Should show unavailable banner when no permissions', () => {
     const wrapper = shallowMount(PolicyReporter as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       mocks:    defaultMocks,
+      computed: defaultComputed,
+    });
+
+    const banner = wrapper.find('[data-testid="kw-unavailability-banner"]');
+
+    expect(banner.exists()).toBe(true);
+  });
+
+  it('Should show Install Kubewarden button when uninstalled', () => {
+    const wrapper = shallowMount(PolicyReporter as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
+      mocks: defaultMocks,
+      data() {
+        return defaultData;
+      },
       computed: defaultComputed,
       stubs:    { 'n-link': { template: '<span />' } }
     });
@@ -60,7 +87,10 @@ describe('component: PolicyReporter', () => {
 
   it('Should show incompatible banner with old version', () => {
     const wrapper = shallowMount(PolicyReporter as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      mocks:    defaultMocks,
+      mocks: defaultMocks,
+      data() {
+        return defaultData;
+      },
       computed: {
         ...defaultComputed,
         hasPolicyServerSchema: () => true,
@@ -79,7 +109,10 @@ describe('component: PolicyReporter', () => {
 
   it('Should show CRDs warning banner when not installed', () => {
     const wrapper = shallowMount(PolicyReporter as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      mocks:    defaultMocks,
+      mocks: defaultMocks,
+      data() {
+        return defaultData;
+      },
       computed: {
         ...defaultComputed,
         hasPolicyServerSchema: () => true,
@@ -95,7 +128,10 @@ describe('component: PolicyReporter', () => {
 
   it('Should show warning banner when main service is unavailable', () => {
     const wrapper = shallowMount(PolicyReporter as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
-      mocks:    defaultMocks,
+      mocks: defaultMocks,
+      data() {
+        return defaultData;
+      },
       computed: {
         ...defaultComputed,
         hasPolicyServerSchema: () => true,
@@ -113,7 +149,7 @@ describe('component: PolicyReporter', () => {
   it('Should show warning banner when UI service is unavailable', () => {
     const wrapper = shallowMount(PolicyReporter as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       data() {
-        return { reporterReportingService: true };
+        return { ...defaultData, reporterReportingService: true };
       },
       mocks:    defaultMocks,
       computed: {
@@ -136,6 +172,7 @@ describe('component: PolicyReporter', () => {
     const wrapper = shallowMount(PolicyReporter as unknown as ExtendedVue<Vue, {}, {}, {}, DefaultProps>, {
       data() {
         return {
+          ...defaultData,
           reporterReportingService: true,
           reporterUIService:        true,
           reporterUrl:              url
