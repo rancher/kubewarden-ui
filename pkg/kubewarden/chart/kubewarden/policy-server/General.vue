@@ -44,6 +44,8 @@ export default {
   async fetch() {},
 
   async mounted() {
+    this.isLoading = true;
+
     if ( this.$store.getters['cluster/canList'](CATALOG.APP) && this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO) ) {
       await this.$initializeFetchData(CATALOG);
       await this.$fetchType(CATALOG.CLUSTER_REPO);
@@ -87,24 +89,28 @@ export default {
           this.latestChartVersion = getPolicyServerModule(this.fleetBundles);
         }
 
-        if ( this.latestChartVersion ) {
-          if ( !this.image || this.image === DEFAULT_POLICY_SERVER.spec.image ) {
-            // If the image doesn't exist or it's the default 'latest' image, set to the latestChartVersion
-            this.image = this.latestChartVersion;
-          } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image && this.image !== this.latestChartVersion ) {
-            // If the image exists, and is not the default 'latest' image, and not the latestChartVersion,
-            // set the defaultImage radio to false
+        if ( !this.image || (this.isCreate && this.image === DEFAULT_POLICY_SERVER.spec.image) ) {
+          this.image = this.latestChartVersion || structuredClone(DEFAULT_POLICY_SERVER.spec.image);
+        } else if ( this.image !== this.latestChartVersion && this.image !== DEFAULT_POLICY_SERVER.spec.image ) {
+          this.defaultImage = false;
+        }
+
+        if ( !this.isCreate && this.image ) {
+          if ( this.image === this.latestChartVersion ) {
+            this.defaultImage = true;
+          } else {
             this.defaultImage = false;
           }
-        } else if ( this.image && this.image !== DEFAULT_POLICY_SERVER.spec.image ) {
-          this.defaultImage = false;
         }
       }
     }
+
+    this.isLoading = false;
   },
 
   data() {
     return {
+      isLoading:           false,
       defaultImage:        true,
       latestChartVersion:  null,
       isFleet:             false,
@@ -216,39 +222,46 @@ export default {
       </div>
     </div>
 
-    <div class="row">
-      <div v-if="showVersionBanner" class="col span-12">
-        <Banner
-          class="mb-20 mt-0"
-          color="warning"
-          :label="t('kubewarden.policyServerConfig.defaultImage.versionWarning')"
-        />
+    <div id="image-container">
+      <div v-if="isLoading" data-testid="ps-config-image-loading">
+        <i class="icon icon-lg icon-spinner icon-spin  mt-20" />
       </div>
-    </div>
+      <template v-else>
+        <div class="row">
+          <div v-if="showVersionBanner" class="col span-12">
+            <Banner
+              class="mb-20 mt-0"
+              color="warning"
+              :label="t('kubewarden.policyServerConfig.defaultImage.versionWarning')"
+            />
+          </div>
+        </div>
 
-    <div class="row">
-      <div class="col span-6">
-        <RadioGroup
-          v-model="defaultImage"
-          data-testid="ps-config-default-image-button"
-          name="defaultImage"
-          :options="[true, false]"
-          :mode="mode"
-          class="mb-10"
-          :label="t('kubewarden.policyServerConfig.defaultImage.label')"
-          :labels="['Yes', 'No']"
-          :tooltip="t('kubewarden.policyServerConfig.defaultImage.tooltip')"
-        />
-        <template v-if="!defaultImage">
-          <LabeledInput
-            v-model="image"
-            data-testid="ps-config-image-input"
-            :mode="mode"
-            :label="t('kubewarden.policyServerConfig.image.label')"
-            :tooltip="t('kubewarden.policyServerConfig.image.tooltip')"
-          />
-        </template>
-      </div>
+        <div class="row" data-testid="ps-config-image-inputs">
+          <div class="col span-6">
+            <RadioGroup
+              v-model="defaultImage"
+              data-testid="ps-config-default-image-button"
+              name="defaultImage"
+              :options="[true, false]"
+              :mode="mode"
+              class="mb-10"
+              :label="t('kubewarden.policyServerConfig.defaultImage.label')"
+              :labels="['Yes', 'No']"
+              :tooltip="t('kubewarden.policyServerConfig.defaultImage.tooltip')"
+            />
+            <template v-if="!defaultImage">
+              <LabeledInput
+                v-model="image"
+                data-testid="ps-config-image-input"
+                :mode="mode"
+                :label="t('kubewarden.policyServerConfig.image.label')"
+                :tooltip="t('kubewarden.policyServerConfig.image.tooltip')"
+              />
+            </template>
+          </div>
+        </div>
+      </template>
     </div>
 
     <div class="row">
