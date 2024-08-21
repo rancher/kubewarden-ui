@@ -116,7 +116,10 @@ export class Navigation {
     @step // Policy Servers
     async pserver(name?: string, tab?: 'Policies' | 'Metrics' | 'Tracing' | 'Conditions' | 'Recent Events' | 'Related Resources') {
       await this.explorer('Kubewarden', 'PolicyServers')
-      if (name) await this.ui.tableRow(name).open()
+      if (name) {
+        await this.ui.tableRow(name).open()
+        await expect(this.page.getByTestId('kw-ps-detail-status-title')).toBeVisible()
+      }
       if (tab) await this.ui.tab(tab).click()
     }
 
