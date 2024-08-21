@@ -4,7 +4,6 @@ import { PolicyServersPage, PolicyServer } from './pages/policyservers.page'
 import { Policy, AdmissionPoliciesPage, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 
 const expect3m = expect.configure({ timeout: 3 * 60_000 })
-const MODE = process.env.MODE
 
 test('Policy Servers', async({ page, ui, nav }) => {
   const server: PolicyServer = { name: 'test-policyserver' }
@@ -33,11 +32,7 @@ test('Policy Servers', async({ page, ui, nav }) => {
     const defaultImage = (await ui.tableRow('default').column('Image').textContent())?.trim().split(':') || []
     const createdImage = (await psRow.column('Image').textContent())?.trim().split(':') || []
     const [dImg, dVer] = [defaultImage[0], defaultImage[1]]
-    let [cImg, cVer] = [createdImage[0], createdImage[1]]
-    const latestVer = '99.0.0'
-
-    // Convert "latest" string to a valid version
-    if (MODE === 'fleet' && cVer === 'latest') cVer = latestVer
+    const [cImg, cVer] = [createdImage[0], createdImage[1]]
 
     // Validate URLs
     expect(cImg).toEqual(dImg)
@@ -47,24 +42,8 @@ test('Policy Servers', async({ page, ui, nav }) => {
     expect(semver.valid(cVer)).not.toBeNull()
     expect(semver.valid(dVer)).not.toBeNull()
 
-    // Created PS should use released version
-    expect(semver.prerelease(cVer)).toBeNull()
-
-    if (MODE === 'upgrade') {
-      expect(semver.lte(cVer, dVer)).toBeTruthy()
-      // Default PS could be updated to latest rc
-      if (semver.lt(cVer, dVer)) {
-        expect(semver.prerelease(dVer)).not.toBeNull()
-      }
-    } else if (MODE === 'fleet') {
-      expect(semver.gte(cVer, dVer)).toBeTruthy()
-      // Stable version could not be determined, using latest
-      if (semver.gt(cVer, dVer)) {
-        expect(semver.eq(cVer, latestVer)).toBeTruthy()
-      }
-    } else {
-      expect(semver.eq(cVer, dVer)).toBeTruthy()
-    }
+    // Validate version is equal to default
+    expect(semver.eq(cVer, dVer)).toBeTruthy()
   })
 
   await test.step('Check Details page', async() => {
@@ -91,4 +70,18 @@ test('Policy Servers', async({ page, ui, nav }) => {
     await expect(page.locator('table.sortable-table')).toBeVisible()
     await expect(capRow.row).not.toBeVisible()
   })
+})
+
+test('Configure with custom values', async({ page, ui, nav }) => {
+  const psPage = new PolicyServersPage(page)
+  const ps = { name: 'test-policyserver', image: 'ghcr.io/kubewarden/policy-server:latest', replicas: 2 }
+  await psPage.create(ps, { wait: false })
+
+  await nav.pserver(ps.name)
+  await ui.button('Config').click()
+  await expect(ui.input('Name*')).toHaveValue(ps.name)
+  await expect(ui.input('Image URL')).toHaveValue(ps.image)
+  await expect(ui.input('Replicas*')).toHaveValue(ps.replicas.toString())
+
+  await psPage.delete(ps.name)
 })

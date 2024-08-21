@@ -28,14 +28,14 @@ on:
       k3s:
         description: Kubernetes version
         type: choice
-        default: 'v1.27.14-k3s1'
+        default: 'v1.28.12-k3s1'
         required: true
         options:
         - v1.26.15-k3s1
-        - v1.27.14-k3s1
-        - v1.28.10-k3s1
-        - v1.29.5-k3s1
-        - v1.30.1-k3s1
+        - v1.27.16-k3s1
+        - v1.28.12-k3s1
+        - v1.29.7-k3s1
+        - v1.30.3-k3s1
       mode:
         description: Installation mode
         type: choice
@@ -76,7 +76,7 @@ env:
   # Github -> Secrets and variables -> Actions -> New repository variable
   KUBEWARDEN: ${{ inputs.kubewarden || 'rc' }}
   K3D_VERSION: # 'v5.6.3' - optionally pin version
-  K3S_VERSION: ${{ inputs.k3s || 'v1.27.14-k3s1' }}
+  K3S_VERSION: ${{ inputs.k3s || 'v1.28.12-k3s1' }}
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
   # First value after the && must be truthy. Otherwise, the value after the || will always be returned
   TESTBASE: ${{ github.event_name != 'workflow_dispatch' && true || inputs.testbase }}
@@ -93,12 +93,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.7", "2.8"]') || fromJSON(format('["{0}"]', inputs.rancher || 'released')) }}
+        rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.7", "2.8", "2.9"]') || fromJSON(format('["{0}"]', inputs.rancher || 'released')) }}
         mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["base", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'base')) }}
         exclude:
+          # Run full tests on 2.8 since it's latest prime version
           - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.7' }}
             mode: upgrade
           - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.7' }}
+            mode: fleet
+          - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.9' }}
+            mode: upgrade
+          - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.9' }}
             mode: fleet
 
 
@@ -118,7 +123,7 @@ jobs:
     - name: Install playwright
       working-directory: tests
       run: |
-        yarn
+        yarn install
         yarn playwright install chromium  # --with-deps not supported on opensuse
 
 
@@ -131,13 +136,17 @@ jobs:
           pull_request)
             KUBEWARDEN=source;;
           schedule)
-            KUBEWARDEN=released;;
+            # Rancher 2.9 is not prime = UI is not available from official charts
+            [[ "${{ matrix.rancher }}" == *2.9* ]] && KUBEWARDEN=rc || KUBEWARDEN=released;;
           workflow_run)
             KUBEWARDEN=rc;;
         esac
 
+        # Rancher 2.7 chart requires kubeVersion: < 1.28.0-0
+        [[ "${{ matrix.rancher }}" == *2.7* ]] && echo K3S_VERSION="v1.27.16-k3s1" | tee -a $GITHUB_ENV
+
         # KW extension is prime since 2.8.3
-        [[ "$KUBEWARDEN" == "source" ]] && REPO=rancher-latest || REPO=rancher-prime
+        [[ "${{ matrix.rancher }}" == *2.[78]* ]] && REPO=rancher-prime || REPO=rancher-latest
 
         # Print matrix
         echo "Event: ${{github.event_name}}"
@@ -167,7 +176,7 @@ jobs:
         done
 
         # Wait for cert-manager
-        kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml
+        kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.1/cert-manager.yaml
         kubectl wait --for=condition=Available deployment --timeout=2m -n cert-manager --all
 
         # Translate to sematic version
@@ -178,7 +187,9 @@ jobs:
         RANCHER_PSP=$(kubectl version -o json | jq -r '.serverVersion.minor <= "24"')
 
         helm repo add --force-update rancher-latest https://releases.rancher.com/server-charts/latest
+        helm repo add --force-update rancher-alpha https://releases.rancher.com/server-charts/alpha
         helm repo add --force-update rancher-prime https://charts.rancher.com/server-charts/prime
+
         helm search repo $REPO/rancher ${RANCHER:+--version "$RANCHER"}
         helm upgrade --install rancher $REPO/rancher --wait \
             --namespace cattle-system --create-namespace \
