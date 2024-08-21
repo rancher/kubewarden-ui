@@ -82,6 +82,7 @@ export default {
   <Create v-if="isCreate" :value="value" :mode="mode" />
   <CruResource
     v-else
+    :errors="errors"
     :resource="value"
     :mode="realMode"
     :can-yaml="false"
@@ -94,3 +95,9 @@ export default {
     />
   </CruResource>
 </template>
+
+<style lang="scss" scoped>
+::v-deep .cru__footer {
+  z-index: 1;
+}
+</style>

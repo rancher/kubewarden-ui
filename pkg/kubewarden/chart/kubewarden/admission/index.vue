@@ -109,6 +109,14 @@ export default {
 
     setActiveTab(tab) {
       this.activeTab = tab;
+    },
+
+    updateMatchConditions(matchConditions) {
+      if ( !this.chartValues.policy.spec ) {
+        this.$set(this.chartValues.policy, 'spec', {});
+      }
+
+      this.$set(this.chartValues.policy.spec, 'matchConditions', matchConditions);
     }
   }
 };
@@ -164,7 +172,7 @@ export default {
     </template>
 
     <Tab name="matchConditions" :label="t('kubewarden.policyConfig.tabs.matchConditions')" :weight="95" @active="setActiveTab('matchConditions')">
-      <MatchConditions v-model="chartValues" :active-tab="activeTab" :mode="mode" />
+      <MatchConditions v-model="chartValues" :active-tab="activeTab" :mode="mode" @update:matchConditions="updateMatchConditions" />
     </Tab>
 
     <Tab name="rules" :label="t('kubewarden.policyConfig.tabs.rules')" :weight="94">

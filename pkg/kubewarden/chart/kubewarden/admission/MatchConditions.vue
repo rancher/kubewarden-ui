@@ -97,16 +97,23 @@ export default {
   },
 
   methods: {
+    emitUpdate() {
+      this.$emit('update:matchConditions', this.matchConditions);
+    },
+
     addCondition() {
       this.matchConditions.push({ name: '', expression: '' });
+      this.emitUpdate();
     },
 
     removeCondition(index) {
       this.matchConditions.splice(index, 1);
+      this.emitUpdate();
     },
 
     handleInput(e, index) {
       this.$set(this.matchConditions[index], 'expression', e);
+      this.emitUpdate();
     }
   }
 };
@@ -141,7 +148,7 @@ export default {
           </button>
         </div>
 
-        <h4>Expression</h4>
+        <h4>{{ t('kubewarden.policyConfig.matchConditions.expression.label') }}</h4>
         <CodeMirror
           :ref="`cm-${ index }`"
           :value="condition.expression"
@@ -153,7 +160,13 @@ export default {
       </InfoBox>
     </div>
 
-    <button v-if="!isView" data-testid="kw-policy-match-condition-add" type="button" class="btn role-tertiary add" @click="addCondition">
+    <button
+      v-if="!isView"
+      data-testid="kw-policy-match-condition-add"
+      type="button"
+      class="btn role-tertiary add"
+      @click="addCondition"
+    >
       {{ t('kubewarden.policyConfig.matchConditions.add') }}
     </button>
   </div>
