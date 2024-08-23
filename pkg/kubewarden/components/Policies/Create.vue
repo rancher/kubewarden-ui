@@ -61,8 +61,6 @@ export default ({
   mixins: [CreateEditView],
 
   async fetch() {
-    this.errors = [];
-
     if ( this.hasArtifactHub ) {
       await this.getPackages();
     }
@@ -73,7 +71,6 @@ export default ({
 
   data() {
     return {
-      errors:            [],
       bannerTitle:       null,
       shortDescription:  null,
       loadingPackages:   false,
@@ -91,6 +88,7 @@ export default ({
 
       hasCustomPolicy: false,
       yamlOption:      VALUES_STATE.FORM,
+      finishAttempts:  0,
 
       // Steps
       stepPolicies: {
@@ -296,18 +294,43 @@ export default ({
         }
 
         removeEmptyAttrs(out); // Clean up empty values from questions
-        merge(this.value, out);
+
+        if ( this.finishAttempts > 0 ) {
+          // Remove keys that are not in the new spec
+          Object.keys(this.value.spec).forEach((key) => {
+            if ( !(key in out.spec) ) {
+              this.$delete(this.value.spec, key);
+            }
+          });
+
+          // Then, set or update the remaining keys
+          Object.keys(out.spec).forEach((key) => {
+            this.$set(this.value.spec, key, out.spec[key]);
+          });
+        } else {
+          merge(this.value, out);
+        }
 
         // If create new namespace option is selected, create the ns before saving the policy
         if ( this.chartType === KUBEWARDEN.ADMISSION_POLICY && this.chartValues?.isNamespaceNew ) {
           await this.createNamespace(this.value?.metadata?.namespace);
         }
 
-        await this.save(event);
+        await this.attemptSave(event);
       } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
-
         console.error('Error creating policy', e); // eslint-disable-line no-console
+      }
+    },
+
+    async attemptSave(event) {
+      await this.save(event);
+
+      // Check for errors set by the mixin
+      if ( this.errors && this.errors.length > 0 ) {
+        const error = new Error('Save operation failed');
+
+        this.finishAttempts++;
+        throw error; // Force an error to be caught in the finish method
       }
     },
 
@@ -628,6 +651,10 @@ $color: var(--body-text) !important;
     text-overflow: ellipsis;
     color: var(--input-label);
   }
+}
+
+::v-deep .footer-error {
+  margin-top: 15px;
 }
 
 .wizard {

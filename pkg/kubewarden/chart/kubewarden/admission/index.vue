@@ -16,6 +16,7 @@ import Rules from './Rules';
 import NamespaceSelector from './NamespaceSelector';
 import Settings from './Settings';
 import ContextAware from './ContextAware';
+import MatchConditions from './MatchConditions';
 
 export default {
   props: {
@@ -34,7 +35,7 @@ export default {
   },
 
   components: {
-    General, Questions, Rules, NamespaceSelector, Settings, ContextAware, Tab
+    General, Questions, Rules, NamespaceSelector, Settings, ContextAware, MatchConditions, Tab
   },
 
   inject: ['chartType'],
@@ -108,6 +109,14 @@ export default {
 
     setActiveTab(tab) {
       this.activeTab = tab;
+    },
+
+    updateMatchConditions(matchConditions) {
+      if ( !this.chartValues.policy.spec ) {
+        this.$set(this.chartValues.policy, 'spec', {});
+      }
+
+      this.$set(this.chartValues.policy.spec, 'matchConditions', matchConditions);
     }
   }
 };
@@ -162,7 +171,11 @@ export default {
       </Tab>
     </template>
 
-    <Tab name="rules" :label="t('kubewarden.policyConfig.tabs.rules')" :weight="95">
+    <Tab name="matchConditions" :label="t('kubewarden.policyConfig.tabs.matchConditions')" :weight="95" @active="setActiveTab('matchConditions')">
+      <MatchConditions v-model="chartValues" :active-tab="activeTab" :mode="mode" @update:matchConditions="updateMatchConditions" />
+    </Tab>
+
+    <Tab name="rules" :label="t('kubewarden.policyConfig.tabs.rules')" :weight="94">
       <Rules v-model="chartValues" data-testid="kw-policy-config-rules-tab" :mode="mode" />
     </Tab>
   </div>

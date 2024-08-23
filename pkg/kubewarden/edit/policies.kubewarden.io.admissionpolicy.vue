@@ -84,3 +84,9 @@ export default {
     />
   </CruResource>
 </template>
+
+<style lang="scss" scoped>
+::v-deep .cru__footer {
+  z-index: 1;
+}
+</style>

@@ -230,9 +230,19 @@ kubewarden:
       namespaceSelector: Namespace Selector
       settings: Settings
       contextAware: Context Aware Resources
+      matchConditions: Match Conditions
     serverSelect:
       label: Policy Server
       tooltip: The PolicyServer that will receive the requests to be validated.
+    matchConditions:
+      label: Match Conditions
+      add: Add Match Condition
+      remove: Remove Condition
+      description: Match Conditions use <a href="https://kubernetes.io/docs/reference/using-api/cel/" target="_blank" rel="noopener noreferrer nofollow">CEL expressions</a> to define fine-grained request filtering for policies, evaluating conditions before applying policy rules. This field only takes effect if the Kubernetes cluster has the <code>AdmissionWebhookMatchConditions</code> feature gate enabled.
+      name:
+        placeholder: e.g. exclude-resource
+      expression:
+        label: Expression
     module:
       label: Module
       tooltip: This is the WebAssembly module that holds the validation or mutation logic.

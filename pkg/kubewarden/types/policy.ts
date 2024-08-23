@@ -18,6 +18,7 @@ export const DEFAULT_POLICY: Policy = {
       resources:   [],
       operations:  []
     }],
+    matchConditions:   [],
     mutating:          false,
     namespaceSelector: {
       matchExpressions: [],
