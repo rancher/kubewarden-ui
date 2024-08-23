@@ -114,9 +114,17 @@ jobs:
     runs-on: self-hosted
     steps:
     # ==================================================================================================
-    # Check out code and install requirements
+    # Check out code
     # Use local kuberlr to avoid version skew
+
+    # Test from maintenance branch for Rancher < 2.9
+    - name: Find checkout branch ref
+      id: set-ref
+      run: echo "ref=$( [[ ${{matrix.rancher}} == 2.[78]* ]] && echo 'release-1.6' || echo '')" | tee -a $GITHUB_OUTPUT
+
     - uses: actions/checkout@v4
+      with:
+        ref: ${{ steps.set-ref.outputs.ref }}
 
     # ==================================================================================================
     # Set up parameters and ENV
