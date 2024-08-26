@@ -12,12 +12,12 @@ const jaegerChart: Chart = { title: 'jaeger-operator', name: 'jaeger-operator', 
 // Monitoring
 const monitoringChart: Chart = { title: 'Monitoring', check: 'rancher-monitoring' }
 
-test.skip(process.env.MODE === 'fleet')
-
 /**
  * Expect timeout has to be increased after telemetry installation on local cluster
  */
 test('Install OpenTelemetry', async({ page, nav }) => {
+  test.skip(process.env.MODE === 'fleet')
+
   const apps = new RancherAppsPage(page)
   const telPage = new TelemetryPage(page)
 
@@ -50,6 +50,8 @@ test.describe('Tracing', () => {
   })
 
   test('Install Jaeger', async({ nav }) => {
+    test.skip(process.env.MODE === 'fleet')
+
     // Jaeger is not installed
     await telPage.toBeIncomplete('jaeger')
     await expect(telPage.configBtn).toBeDisabled()
@@ -72,6 +74,8 @@ test.describe('Tracing', () => {
   })
 
   test('Enable tracing', async({ ui, shell }) => {
+    test.skip(process.env.MODE === 'fleet')
+
     await telPage.toBeIncomplete('config')
     await telPage.configBtn.click()
     await apps.updateApp('rancher-kubewarden-controller', {
@@ -103,6 +107,8 @@ test.describe('Tracing', () => {
   })
 
   test('Uninstall tracing', async({ ui, nav, shell }) => {
+    test.skip(process.env.MODE === 'fleet')
+
     // Clean up
     await apps.updateApp('rancher-kubewarden-controller', {
       questions: async() => {
@@ -125,6 +131,8 @@ test.describe('Tracing', () => {
 })
 
 test.describe('Metrics', () => {
+  test.skip(process.env.MODE === 'fleet')
+
   let apps: RancherAppsPage
   let telPage: TelemetryPage
 
@@ -230,6 +238,8 @@ test.describe('Metrics', () => {
 })
 
 test('Uninstall OpenTelemetry', async({ page }) => {
+  test.skip(process.env.MODE === 'fleet')
+
   const apps = new RancherAppsPage(page)
   await apps.deleteApp('opentelemetry-operator')
   await apps.deleteRepository(otelRepo)

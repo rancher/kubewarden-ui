@@ -15,6 +15,27 @@ helm:
       policyReporter: true
       cronJob:
         schedule: "*/1 * * * *" # every minute
+    telemetry:
+      # metrics:
+        # enabled: true
+        # port: 8080
+      tracing:
+        enabled: true
+        jaeger:
+          endpoint: jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317
+          tls:
+           insecure: true
+    auditScanner:
+      policyReporter: true
+
+diff:
+  comparePatches:
+  - apiVersion: opentelemetry.io/v1alpha1
+    kind: OpenTelemetryCollector
+    name: kubewarden
+    namespace: cattle-kubewarden-system
+    operations:
+    - {"op": "remove", "path": "/spec"}
 
 labels:
   app: rancher-kubewarden-controller
@@ -23,3 +44,9 @@ dependsOn:
   - selector:
       matchLabels:
         app: rancher-kubewarden-crds
+  - selector:
+      matchLabels:
+        name: opentelemetry
+  - selector:
+      matchLabels:
+        name: jaeger-operator
