@@ -28,7 +28,7 @@ on:
       k3s:
         description: Kubernetes version
         type: choice
-        default: 'v1.28.12-k3s1'
+        default: 'v1.30.3-k3s1'
         required: true
         options:
         - v1.26.15-k3s1
@@ -76,7 +76,7 @@ env:
   # Github -> Secrets and variables -> Actions -> New repository variable
   KUBEWARDEN: ${{ inputs.kubewarden || 'rc' }}
   K3D_VERSION: # 'v5.6.3' - optionally pin version
-  K3S_VERSION: ${{ inputs.k3s || 'v1.28.12-k3s1' }}
+  K3S_VERSION: ${{ inputs.k3s || 'v1.30.3-k3s1' }}
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
   # First value after the && must be truthy. Otherwise, the value after the || will always be returned
   TESTBASE: ${{ github.event_name != 'workflow_dispatch' && true || inputs.testbase }}
@@ -101,9 +101,9 @@ jobs:
             mode: upgrade
           - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.7' }}
             mode: fleet
-          - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.9' }}
+          - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.8' }}
             mode: upgrade
-          - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.9' }}
+          - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.8' }}
             mode: fleet
 
 
@@ -135,17 +135,19 @@ jobs:
           pull_request)
             KUBEWARDEN=source;;
           schedule)
-            # Rancher 2.9 is not prime = UI is not available from official charts
-            [[ "${{ matrix.rancher }}" == *2.9* ]] && KUBEWARDEN=rc || KUBEWARDEN=released;;
+            # Initial Rancher 2.10 is not prime = UI is not available from official charts
+            [[ "${{ matrix.rancher }}" == *2.10* ]] && KUBEWARDEN=rc || KUBEWARDEN=released;;
           workflow_run)
             KUBEWARDEN=rc;;
         esac
 
         # Rancher 2.7 chart requires kubeVersion: < 1.28.0-0
         [[ "${{ matrix.rancher }}" == *2.7* ]] && echo K3S_VERSION="v1.27.16-k3s1" | tee -a $GITHUB_ENV
+        # Rancher 2.8 chart requires kubeVersion: < 1.29.0-0
+        [[ "${{ matrix.rancher }}" == *2.8* ]] && echo K3S_VERSION="v1.28.12-k3s1" | tee -a $GITHUB_ENV
 
         # KW extension is prime since 2.8.3
-        [[ "${{ matrix.rancher }}" == *2.[78]* ]] && REPO=rancher-prime || REPO=rancher-latest
+        [[ "${{ matrix.rancher }}" == *2.[789]* ]] && REPO=rancher-prime || REPO=rancher-latest
 
         # Print matrix
         echo "Event: ${{github.event_name}}"
@@ -175,15 +177,12 @@ jobs:
         done
 
         # Wait for cert-manager
-        kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.1/cert-manager.yaml
+        kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.yaml
         kubectl wait --for=condition=Available deployment --timeout=2m -n cert-manager --all
 
         # Translate to sematic version
         [ "$RANCHER" == "rc" ] && RANCHER='*-0'
         [ "$RANCHER" == "released" ] && RANCHER='*'
-
-        # Rancher PSP is based on kubernetes version
-        RANCHER_PSP=$(kubectl version -o json | jq -r '.serverVersion.minor <= "24"')
 
         helm repo add --force-update rancher-latest https://releases.rancher.com/server-charts/latest
         helm repo add --force-update rancher-alpha https://releases.rancher.com/server-charts/alpha
@@ -194,7 +193,6 @@ jobs:
             --namespace cattle-system --create-namespace \
             --set hostname=$RANCHER_FQDN \
             --set bootstrapPassword=sa \
-            --set global.cattle.psp.enabled=$RANCHER_PSP \
             ${RANCHER:+--version "$RANCHER"}
 
         # Wait for rancher
