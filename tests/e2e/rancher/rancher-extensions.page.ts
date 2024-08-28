@@ -18,30 +18,45 @@ export class RancherExtensionsPage extends BasePage {
       await this.tabs.getByRole('tab', { name, exact: true }).click()
     }
 
-    async enable(options?: { rancherRepo?: boolean, partnersRepo?: boolean }) {
-      const rancherRepo = this.ui.checkbox('Rancher Extension')
+    async dotMenu(name: 'Manage Repositories' | 'Add Rancher Repositories' | 'Manage Extension Catalogs' | 'Developer Load') {
+      await this.page.getByTestId('extensions-page-menu').click()
+      await this.page.getByText(name).click()
+    }
+
+    // Handle extension repositories dialog
+    async selectRepos(options?: { rancher?: boolean, partners?: boolean }) {
+      const rancherRepo = this.ui.checkbox('Official Rancher Extension')
       const partnersRepo = this.ui.checkbox('Partners Extension')
 
+      if (options?.rancher !== undefined) await rancherRepo.setChecked(options.rancher)
+      if (options?.partners !== undefined) await partnersRepo.setChecked(options.partners)
+    }
+
+    // Extensions need to be enabled before 2.9
+    async enable(options?: { rancher?: boolean, partners?: boolean }) {
       await expect(this.page.getByRole('heading', { name: 'Extension support is not enabled' })).toBeVisible()
 
-      // Enable extensions
       await this.ui.button('Enable').click()
       await expect(this.page.getByRole('heading', { name: 'Enable Extension Support?' })).toBeVisible()
 
-      // Available only on Rancher Prime since 2.8.3
-      if (options?.rancherRepo !== undefined && await rancherRepo.isVisible()) {
-        await rancherRepo.setChecked(options.rancherRepo)
-      }
-      // New option in rancher 2.7.7, checked by default
-      if (options?.partnersRepo !== undefined) {
-        await partnersRepo.setChecked(options.partnersRepo)
-      }
-
-      // Confirm and wait for extensions to be enabled
+      // Select requested repositories
+      await this.selectRepos(options)
       await this.ui.button('OK').click()
+
+      // Wait for extensions to be visible
       await this.ui.retry(async() => {
         await expect(this.tabs).toBeVisible({ timeout: 60_000 })
       }, 'Extensions enabled but not visible')
+    }
+
+    // Repositories need to be added since 2.9
+    async addRancherRepos(options?: { rancher?: boolean, partners?: boolean }) {
+      await this.dotMenu('Add Rancher Repositories')
+      await expect(this.page.getByRole('heading', { name: 'Add Extensions repositories' })).toBeVisible()
+
+      // Select requested repositories
+      await this.selectRepos(options)
+      await this.ui.button('Add').click()
     }
 
     /**
@@ -87,8 +102,7 @@ export class RancherExtensionsPage extends BasePage {
      */
     async developerLoad(url: string) {
       // Open developer load dialog
-      await this.page.getByTestId('extensions-page-menu').click()
-      await this.page.getByText('Developer Load').click()
+      await this.dotMenu('Developer Load')
       await expect(this.page.getByRole('heading', { name: 'Developer Load Extension' })).toBeVisible()
 
       // Load extension
