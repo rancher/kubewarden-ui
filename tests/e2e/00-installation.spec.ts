@@ -64,10 +64,13 @@ test('Install UI extension', async({ page, ui }) => {
 
   await test.step('Enable extension support', async() => {
     if (RancherUI.isVersion('<2.9')) {
-      await extensions.enable({ rancherRepo: ORIGIN === 'released' })
+      await extensions.enable({ rancher: ORIGIN === 'released', partners: false })
     }
     // Wait for default list of extensions
     if (ORIGIN === 'released') {
+      if (RancherUI.isVersion('>=2.9')) {
+        await extensions.addRancherRepos({ rancher: true, partners: false })
+      }
       await ui.retry(async() => {
         await extensions.selectTab('All')
         await expect(page.locator('.plugin', { hasText: 'Kubewarden' })).toBeVisible()

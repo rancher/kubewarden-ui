@@ -193,6 +193,7 @@ jobs:
             --namespace cattle-system --create-namespace \
             --set hostname=$RANCHER_FQDN \
             --set bootstrapPassword=sa \
+            --set replicas=1 \
             ${RANCHER:+--version "$RANCHER"}
 
         # Wait for rancher
