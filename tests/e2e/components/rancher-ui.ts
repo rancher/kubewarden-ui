@@ -184,6 +184,6 @@ export class RancherUI {
 
   static get hasAppCollection(): boolean {
     // OCI repository support was added in 2.9
-    return this.isPrime && this.isVersion('>=2.9')
+    return this.isPrime && this.isVersion('>=2.9') && false
   }
 }
