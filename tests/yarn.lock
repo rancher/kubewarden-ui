@@ -348,13 +348,13 @@ playwright-core@1.46.1:
   resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.46.1.tgz#28f3ab35312135dda75b0c92a3e5c0e7edb9cc8b"
   integrity sha512-h9LqIQaAv+CYvWzsZ+h3RsrqCStkBHlgo6/TJlFst3cOTlLghBQlJwPOZKQJTKNaD3QIB7aAVQ+gfWbN3NXB7A==
 
-playwright-qase-reporter@^2.0.10:
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/playwright-qase-reporter/-/playwright-qase-reporter-2.0.10.tgz#7acb322a218cabfc90d54fa44f511137e98b76a3"
-  integrity sha512-gWeI7Jt0r2fWOfMTClPOANPTHrWCkxZb9Xj18UFtkir9FPyaSZv/b8iFf+g/8bPpbcCLgN3jqKb0glwIC7vvsw==
+playwright-qase-reporter@^2.0.12:
+  version "2.0.12"
+  resolved "https://registry.yarnpkg.com/playwright-qase-reporter/-/playwright-qase-reporter-2.0.12.tgz#9ac052dcc7657893bbcf50194750806defedb304"
+  integrity sha512-VTDRnPbF152H4pP73cv1N4RGwCJ6YcR6ZILMUPbVQns/PTrRVGOG/oZRoR8l+2TzT7rth1RDVGJ/bS1fUKaZrQ==
   dependencies:
     chalk "^4.1.2"
-    qase-javascript-commons "~2.1.1"
+    qase-javascript-commons "~2.2.0"
     uuid "^9.0.0"
 
 playwright@1.46.1:
@@ -376,10 +376,10 @@ punycode@^2.1.0:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-qase-javascript-commons@~2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/qase-javascript-commons/-/qase-javascript-commons-2.1.1.tgz#33b7bb4be2e3a05790dbfbfbf44f67c766052278"
-  integrity sha512-aB07f86mZw3xWZeei9FqG/d3nSfOkWkhiZx+UNP11qipIDfANeHSJcMMNDjJTpklI0AXx3JryCKUinT44fIDvA==
+qase-javascript-commons@~2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/qase-javascript-commons/-/qase-javascript-commons-2.2.0.tgz#5be6ea1971490f9e0f3adaf87ee7fcec21256eae"
+  integrity sha512-y2BWu/Gslo0nU/XyJaRa3ATVQrHBpnJ+VIZq9813AKX92EGecUee47xYAlnAkZAwqj8Hs67TrJC9uqSbeOilrA==
   dependencies:
     ajv "^8.12.0"
     chalk "^4.1.2"
@@ -390,14 +390,14 @@ qase-javascript-commons@~2.1.1:
     lodash.merge "^4.6.2"
     lodash.mergewith "^4.6.2"
     mime-types "^2.1.33"
-    qaseio "~2.2.0"
+    qaseio "~2.3.0"
     strip-ansi "^6.0.1"
     uuid "^9.0.0"
 
-qaseio@~2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/qaseio/-/qaseio-2.2.0.tgz#3f8c08fc98611b6907c4ca90fb78f9884e95eb1c"
-  integrity sha512-Nsk7Li4H0OspSBxCGVkWVB9rkl9PDd9qEUChFDBSPJhRBHORWCGXnXeJofgGW7qDCgLSgwGp4ctIkEe2GM7v9Q==
+qaseio@~2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/qaseio/-/qaseio-2.3.0.tgz#2eb7f2326c2f01a4e3242e9473d66e5302773430"
+  integrity sha512-qMOpSzLoWfgRNKgOfkJLcSliMvhZG8a+jzWrrP/co65YpVhUOffvIdtlgvUUoiNEgmEnx3HNyDPBOS0l19v6hw==
   dependencies:
     axios "^0.28.0"
     axios-retry "^3.5.0"
