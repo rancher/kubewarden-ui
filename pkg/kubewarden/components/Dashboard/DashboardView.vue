@@ -1,38 +1,35 @@
 <script>
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
-import { Banner } from '@components/Banner';
 
 import { CATALOG, POD, UI_PLUGIN } from '@shell/config/types';
-import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
-import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
-import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 import { allHash } from '@shell/utils/promise';
 
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 import Loading from '@shell/components/Loading';
-import { newPolicyReportCompatible } from '../../modules/policyReporter';
 
 import { DASHBOARD_HEADERS } from '../../config/table-headers';
-import {
-  KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_LABELS, KUBEWARDEN_PRODUCT_NAME
-} from '../../types';
-import { handleGrowl } from '../../utils/handle-growl';
-import { appVersionSatisfiesConstraint, checkUpgradeAvailable } from '../../utils/chart';
+import { KUBEWARDEN, KUBEWARDEN_LABELS, WG_POLICY_K8S } from '../../types';
 
-import DefaultsBanner from '../DefaultsBanner';
+import Masthead from './Masthead';
 import Card from './Card';
+import Modes from './Modes';
+import Events from './Events';
+import EventsGauge from './EventsGauge';
 
 export default {
   components: {
-    Banner, Card, ConsumptionGauge, DefaultsBanner, Loading
+    Card, Modes, Events, ConsumptionGauge, Loading, Masthead, EventsGauge
   },
 
   async fetch() {
     const hash = {};
     const types = [
+      WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE,
+      WG_POLICY_K8S.POLICY_REPORT.TYPE,
       KUBEWARDEN.ADMISSION_POLICY,
       KUBEWARDEN.CLUSTER_ADMISSION_POLICY,
+      KUBEWARDEN.POLICY_SERVER,
       POD,
       CATALOG.APP,
       CATALOG.CLUSTER_REPO,
@@ -64,54 +61,14 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentCluster']),
     ...mapGetters({ charts: 'catalog/charts' }),
-
-    allApps() {
-      return this.$store.getters['cluster/all'](CATALOG.APP);
-    },
 
     allPods() {
       return this.$store.getters['cluster/all'](POD);
     },
 
-    controllerApp() {
-      if ( this.allApps ) {
-        return this.allApps?.find((a) => {
-          return (
-            a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_CONTROLLER ||
-            a.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER
-          );
-        });
-      }
-
-      return null;
-    },
-
-    controllerChart() {
-      if ( !isEmpty(this.charts) ) {
-        return this.charts.find(chart => chart?.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
-      }
-
-      return null;
-    },
-
-    defaultsApp() {
-      if ( this.allApps ) {
-        return this.allApps?.find((a) => {
-          return a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
-        });
-      }
-
-      return false;
-    },
-
-    defaultsChart() {
-      if ( !isEmpty(this.charts) ) {
-        return this.charts.find(chart => chart?.chartName === KUBEWARDEN_CHARTS.DEFAULTS);
-      }
-
-      return null;
+    allPolicyServers() {
+      return this.$store.getters['cluster/all'](KUBEWARDEN.POLICY_SERVER);
     },
 
     policyServerPods() {
@@ -178,10 +135,6 @@ export default {
       return this.getPolicyGauges(this.globalPolicies);
     },
 
-    hideBannerDefaults() {
-      return this.$store.getters['kubewarden/hideBannerDefaults'] || !!this.defaultsApp;
-    },
-
     namespacedPolicies() {
       return this.$store.getters['cluster/all'](KUBEWARDEN.ADMISSION_POLICY);
     },
@@ -190,57 +143,63 @@ export default {
       return this.getPolicyGauges(this.namespacedPolicies);
     },
 
-    controllerAppVersion() {
-      return this.controllerApp?.spec?.chart?.metadata?.appVersion;
+    namespacedResultsGauges() {
+      return this.getPolicyResultGauges(this.admissionPolicyResults);
     },
 
-    defaultsAppVersion() {
-      return this.defaultsApp?.spec?.chart?.metadata?.appVersion;
+    clusterResultsGauges() {
+      return this.getPolicyResultGauges(this.clusterPolicyResults);
     },
 
-    controllerUpgradeAvailable() {
-      if ( this.controllerApp && this.controllerChart ) {
-        return checkUpgradeAvailable(this.$store, this.controllerApp, this.controllerChart);
-      }
-
-      return null;
-    },
-
-    appVersionSatisfies() {
-      const satisfies = appVersionSatisfiesConstraint(this.$store, this.controllerAppVersion, this.defaultsAppVersion, '<=');
-
-      return satisfies || false;
-    },
-
-    defaultsUpgradeAvailable() {
-      if ( !this.appVersionSatisfies ) {
-        return checkUpgradeAvailable(this.$store, this.defaultsApp, this.defaultsChart);
-      }
-
-      return null;
-    },
-
-    showPreRelease() {
-      return this.$store.getters['prefs/get'](SHOW_PRE_RELEASE);
-    },
-
-    kubewardenExtension() {
-      const extensionsInstalled = this.$store.getters['uiplugins/plugins'] || [];
-
-      return extensionsInstalled.find(ext => ext.id.includes(KUBEWARDEN_PRODUCT_NAME));
-    },
-
-    policyReportsCompatible() {
-      const uiPluginVersion = this.kubewardenExtension?.version;
-
-      if ( this.controllerAppVersion && uiPluginVersion) {
-        return newPolicyReportCompatible(this.controllerAppVersion, uiPluginVersion);
-      }
-
+    policyReports() {
       return {
-        oldPolicyReports: true,
-        newPolicyReports:  true
+        [WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE]: this.$store.getters['cluster/all'](WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE),
+        [WG_POLICY_K8S.POLICY_REPORT.TYPE]:         this.$store.getters['cluster/all'](WG_POLICY_K8S.POLICY_REPORT.TYPE)
       };
+    },
+
+    admissionPolicyResults() {
+      if ( !isEmpty(this.policyReports[WG_POLICY_K8S.POLICY_REPORT.TYPE]) ) {
+        let out = [];
+
+        this.policyReports[WG_POLICY_K8S.POLICY_REPORT.TYPE].filter((report) => {
+          const results = report?.results?.filter(result => result?.policy.includes('namespaced-'));
+
+          if ( !isEmpty(results) ) {
+            out = [...out, ...results];
+          }
+        });
+
+        return out;
+      }
+
+      return null;
+    },
+
+    clusterPolicyResults() {
+      if ( !isEmpty(this.policyReports) ) {
+        const pr = this.policyReports[WG_POLICY_K8S.POLICY_REPORT.TYPE];
+        const cpr = this.policyReports[WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE];
+        let out = [];
+
+        if ( !isEmpty(cpr) ) {
+          const results = cpr.flatMap(report => report?.results);
+
+          out = [...out, ...results];
+        }
+
+        if ( !isEmpty(pr) ) {
+          const results = pr.flatMap((report) => {
+            return report?.results?.filter(result => !result?.policy.includes('namespaced-'));
+          });
+
+          out = [...out, ...results];
+        }
+
+        return out;
+      }
+
+      return null;
     }
   },
 
@@ -278,34 +237,31 @@ export default {
       };
     },
 
-    getChartRoute(upgradeAvailable) {
-      if ( upgradeAvailable ) {
-        const {
-          repoType, repoName, name, version
-        } = upgradeAvailable;
-
-        if ( version ) {
-          const query = {
-            [REPO_TYPE]: repoType,
-            [REPO]:      repoName,
-            [CHART]:     name,
-            [VERSION]:   version
+    getPolicyResultGauges(type) {
+      if ( !isEmpty(type) ) {
+        return type?.reduce((res, neu) => {
+          return {
+            status: {
+              success: res?.status?.success + ( neu?.result === 'pass' ? 1 : 0 ),
+              fail:    res?.status?.fail + ( neu?.result === 'fail' ? 1 : 0 ),
+              error:   res?.status?.error + ( neu?.result === 'error' ? 1 : 0 )
+            },
+            total: res?.total + 1
           };
-
-          this.$router.push({
-            name:   'c-cluster-apps-charts-install',
-            params: { cluster: this.currentCluster?.id || '_' },
-            query,
-          });
-        } else {
-          const error = {
-            _statusText: this.t('kubewarden.dashboard.appInstall.versionError.title'),
-            message:     this.t('kubewarden.dashboard.appInstall.versionError.message')
-          };
-
-          handleGrowl({ error, store: this.$store });
-        }
+        }, {
+          status: {
+            success: 0, fail: 0, error: 0
+          },
+          total: 0
+        });
       }
+
+      return {
+        status: {
+          success: 0, fail: 0, error: 0
+        },
+        total: 0
+      };
     }
   }
 };
@@ -314,95 +270,7 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else class="dashboard">
-    <Banner
-      v-if="controllerApp && kubewardenExtension && !policyReportsCompatible.newPolicyReports"
-      :label="t('kubewarden.dashboard.policyReports.newPolicyReportsIncompatible', { version: kubewardenExtension?.version }, true)"
-      color="warning"
-      class="mb-40"
-      data-testid="kw-dashboard-pr-incompatible-banner-new-policy-structure"
-    />
-    <Banner
-      v-else-if="controllerApp && kubewardenExtension && !policyReportsCompatible.oldPolicyReports"
-      :label="t('kubewarden.dashboard.policyReports.oldPolicyReportsIncompatible', { version: controllerAppVersion }, true)"
-      color="warning"
-      class="mb-40"
-      data-testid="kw-dashboard-pr-incompatible-banner-old-policy-structure"
-    />
-    <div class="head">
-      <div class="head-title">
-        <h1 data-testid="kw-dashboard-title">
-          {{ t('kubewarden.dashboard.intro') }}
-        </h1>
-
-        <div v-if="controllerAppVersion && defaultsApp && !appVersionSatisfies">
-          <Banner
-            :label="t('kubewarden.dashboard.upgrade.appVersionUnsatisfied', { controllerAppVersion, defaultsAppVersion }, true)"
-            color="warning"
-            class="mb-20"
-            data-testid="kw-dashboard-upgrade-unsatisfied-banner"
-          />
-        </div>
-
-        <div v-if="controllerAppVersion" class="head-version-container">
-          <div class="head-version bg-primary mr-10">
-            {{ t('kubewarden.dashboard.upgrade.appVersion') }}: {{ controllerAppVersion }}
-          </div>
-          <!-- Controller upgrade -->
-          <div
-            v-if="controllerUpgradeAvailable && appVersionSatisfies"
-            data-testid="kw-app-controller-upgrade-button"
-            class="head-upgrade badge-state bg-warning hand mr-10"
-            :disabled="!controllerChart"
-            @click.prevent="getChartRoute(controllerUpgradeAvailable)"
-          >
-            <i class="icon icon-upload" />
-            <span>{{ t('kubewarden.dashboard.upgrade.appUpgrade') }}: {{ controllerUpgradeAvailable.appVersion }}</span>
-            <span class="p-0">-</span>
-            <span>{{ t('kubewarden.dashboard.upgrade.controllerChart') }}: {{ controllerUpgradeAvailable.version }}</span>
-          </div>
-          <!-- Defaults upgrade -->
-          <div
-            v-if="defaultsUpgradeAvailable"
-            data-testid="kw-app-defaults-upgrade-button"
-            class="head-upgrade badge-state bg-warning hand"
-            :disabled="!defaultsChart"
-            @click.prevent="getChartRoute(defaultsUpgradeAvailable)"
-          >
-            <i class="icon icon-upload" />
-            <span>{{ t('kubewarden.dashboard.upgrade.appUpgrade') }}: {{ defaultsUpgradeAvailable.appVersion }}</span>
-            <span class="p-0">-</span>
-            <span>{{ t('kubewarden.dashboard.upgrade.defaultsChart') }}: {{ defaultsUpgradeAvailable.version }}</span>
-          </div>
-        </div>
-      </div>
-
-      <p class="head-subheader">
-        {{ t('kubewarden.dashboard.blurb') }}
-      </p>
-
-      <p>
-        {{ t('kubewarden.dashboard.description') }}
-      </p>
-
-      <div class="head-links">
-        <a
-          href="https://kubewarden.io/"
-          target="_blank"
-          rel="noopener noreferrer nofollow"
-        >
-          {{ t('kubewarden.dashboard.getStarted') }}
-        </a>
-        <a
-          href="https://github.com/kubewarden/kubewarden-controller/issues"
-          target="_blank"
-          rel="noopener noreferrer nofollow"
-        >
-          {{ t('kubewarden.dashboard.issues') }}
-        </a>
-      </div>
-    </div>
-
-    <DefaultsBanner v-if="!hideBannerDefaults" />
+    <Masthead />
 
     <div class="get-started">
       <div
@@ -411,9 +279,43 @@ export default {
         class="card-container"
       >
         <Card v-if="card.isEnabled" :card="card">
-          <!-- Policy Server pods -->
-          <span v-if="index === 0">
-            <slot>
+          <template #count>
+            <span v-if="index === 0" class="count">{{ namespacedPolicies.length || 0 }}</span>
+            <span v-if="index === 1" class="count">{{ globalPolicies.length || 0 }}</span>
+            <span v-if="index === 2" class="count">{{ allPolicyServers.length || 0 }}</span>
+          </template>
+
+          <template #action>
+            <router-link
+              class="btn action"
+              :class="{
+                'role-primary': (index === 0 && namespacedPolicies.length < 1) ||
+                  (index === 1 && globalPolicies.length < 1) ||
+                  (index === 2 && allPolicyServers.length < 1),
+                'role-secondary': (index === 0 && namespacedPolicies.length >= 1) ||
+                  (index === 1 && globalPolicies.length >= 1) ||
+                  (index === 2 && allPolicyServers.length >= 1)
+              }"
+              :to="card.cta"
+            >
+              {{ t(card.linkText) }}
+            </router-link>
+          </template>
+
+          <template #content>
+            <span v-if="index === 0">
+              <Modes :gauges="namespacedGuages" />
+              <Events :gauges="namespacedResultsGauges" />
+              <EventsGauge data-testid="kw-dashboard-ap-gauge" resource-name="Active" :events="namespacedResultsGauges" :used-as-resource-name="true" />
+            </span>
+
+            <span v-if="index === 1">
+              <Modes :gauges="globalGuages" />
+              <Events :gauges="clusterResultsGauges" />
+              <EventsGauge data-testid="kw-dashboard-cap-gauge" resource-name="Active" :events="clusterResultsGauges" />
+            </span>
+
+            <span v-if="index === 2">
               <ConsumptionGauge
                 data-testid="kw-dashboard-ps-gauge"
                 resource-name="Active"
@@ -423,48 +325,8 @@ export default {
                 :used="policyServerCounts.status.running"
                 units="Pods"
               />
-            </slot>
-          </span>
-
-          <!-- Admission Policies -->
-          <span v-if="index === 1">
-            <slot>
-              <ConsumptionGauge
-                data-testid="kw-dashboard-ap-gauge"
-                resource-name="Active"
-                :color-stops="colorStops"
-                :capacity="namespacedGuages.total"
-                :used-as-resource-name="true"
-                :used="namespacedGuages.status.running"
-                units="Namespaced Policies"
-              />
-              <div class="mt-20">
-                <h4>{{ t('kubewarden.dashboard.headers.modes.title') }}</h4>
-                <span class="mr-20">{{ t('kubewarden.dashboard.headers.modes.protect') }}: {{ namespacedGuages.mode.protect }}</span>
-                <span>{{ t('kubewarden.dashboard.headers.modes.monitor') }}: {{ namespacedGuages.mode.monitor }}</span>
-              </div>
-            </slot>
-          </span>
-
-          <!-- Cluster Admission Policies -->
-          <span v-if="index === 2">
-            <slot>
-              <ConsumptionGauge
-                data-testid="kw-dashboard-cap-gauge"
-                resource-name="Active"
-                :color-stops="colorStops"
-                :capacity="globalGuages.total"
-                :used-as-resource-name="true"
-                :used="globalGuages.status.running"
-                units="Global Policies"
-              />
-              <div class="mt-20">
-                <h4>{{ t('kubewarden.dashboard.headers.modes.title') }}</h4>
-                <span class="mr-20">{{ t('kubewarden.dashboard.headers.modes.protect') }}: {{ globalGuages.mode.protect }}</span>
-                <span>{{ t('kubewarden.dashboard.headers.modes.monitor') }}: {{ globalGuages.mode.monitor }}</span>
-              </div>
-            </slot>
-          </span>
+            </span>
+          </template>
         </Card>
       </div>
     </div>
@@ -476,65 +338,31 @@ export default {
   display: flex;
   flex-direction: column;
 
-  .head {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-content: center;
-    gap: $space-m;
-    outline: 1px solid var(--border);
-    border-radius: var(--border-radius);
-    margin: 0 0 64px 0;
-    padding: $space-m;
-    gap: $space-m;
-
-    &-title {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-
-      h1 {
-        margin: 0;
-      }
-    }
-
-    &-version-container {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
-
-    &-upgrade {
-      display: flex;
-      align-items: center;
-    }
-
-    &-version, &-upgrade {
-      border-radius: var(--border-radius);
-      padding: 4px 8px;
-    }
-
-    &-subheader {
-      font-size: 1.2rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-
-    &-links {
-      display: flex;
-      gap: 10px;
-    }
-  }
-
   .get-started {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
     grid-gap: 20px;
 
     .card-container {
-      min-height: 420px;
       padding: 0;
     }
   }
+}
+
+.count {
+  font-size: 36px;
+  color: var(--text-color);
+  margin-right: 1rem;
+}
+
+.modes, .events {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.action {
+  justify-content: center;
+  width: 100%;
 }
 </style>

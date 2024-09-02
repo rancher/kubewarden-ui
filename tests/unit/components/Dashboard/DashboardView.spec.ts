@@ -1,14 +1,16 @@
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { describe, expect, it } from '@jest/globals';
 
-import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
+import ConsumptionGauge from '@shell/components/ConsumptionGauge';
+import Loading from '@shell/components/Loading';
 
 import DashboardView from '@kubewarden/components/Dashboard/DashboardView.vue';
-import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
-import ConsumptionGauge from '@shell/components/ConsumptionGauge';
-
-import DEFAULTS_APP from '@tests/unit/_templates_/defaultsApp';
-import { controllerCharts } from '@tests/unit/_templates_/controllerCharts';
+import Card from '@kubewarden/components/Dashboard/Card.vue';
+import Masthead from '@kubewarden/components/Dashboard/Masthead.vue';
+import Modes from '@kubewarden/components/Dashboard/Modes.vue';
+import Events from '@kubewarden/components/Dashboard/Events.vue';
+import EventsGauge from '@kubewarden/components/Dashboard/EventsGauge.vue';
+import { DASHBOARD_HEADERS } from '@kubewarden/config/table-headers';
 
 describe('component: DashboardView', () => {
   const commonMocks = {
@@ -16,47 +18,127 @@ describe('component: DashboardView', () => {
     $store:      {
       getters: {
         currentCluster:                  () => 'current_cluster',
-        'kubewarden/hideBannerDefaults': jest.fn(),
         'i18n/t':                        jest.fn(),
         'catalog/chart':                 jest.fn(),
         'catalog/charts':                jest.fn(),
         'cluster/all':                   jest.fn(),
-        'cluster/canList':               () => true,
+        'cluster/canList':               jest.fn(() => true),
         'prefs/get':                     jest.fn(),
       },
     },
   };
 
   const commonComputed = {
-    controllerApp:      () => null,
-    controllerChart:    () => null,
-    defaultsApp:        () => DEFAULTS_APP,
-    hideBannerDefaults: () => false,
     globalPolicies:     () => [],
     namespacedPolicies: () => [],
-    version:            () => '1.25',
-    upgradeAvailable:   () => null,
+    allPolicyServers:   () => [],
+    policyServerCounts: () => ({
+      status: {
+        running: 0, stopped: 0, pending: 0
+      },
+      total: 0
+    }),
   };
 
+  const commonStubs = { 'router-link': { template: '<span />' } };
+
   const createWrapper = (overrides) => {
-    return shallowMount(DashboardView, {
+    return mount(DashboardView, {
       mocks:    commonMocks,
       computed: commonComputed,
+      stubs:    commonStubs,
       ...overrides,
     });
   };
 
-  it('renders defaults banner when default app is not found', () => {
+  it('renders the Masthead component', () => {
+    const wrapper = createWrapper({});
+
+    expect(wrapper.findComponent(Masthead).exists()).toBe(true);
+  });
+
+  it('renders the Loading component when fetch state is pending', () => {
     const wrapper = createWrapper({
-      stubs: {
-        Card:             { template: '<span />' },
-        ConsumptionGauge: { template: '<span />' },
+      mocks: {
+        ...commonMocks,
+        $fetchState: { pending: true },
       },
     });
 
-    const banner = wrapper.findComponent(DefaultsBanner);
+    expect(wrapper.findComponent(Loading).exists()).toBe(true);
+  });
 
-    expect(banner.exists()).toBe(true);
+  it('renders the correct number of Card components based on DASHBOARD_HEADERS', () => {
+    const wrapper = createWrapper({});
+    const cardComponents = wrapper.findAllComponents(Card);
+
+    expect(cardComponents.length).toBe(DASHBOARD_HEADERS.length);
+  });
+
+  it('renders ConsumptionGauge component with correct props', () => {
+    const wrapper = createWrapper({
+      computed: {
+        globalPolicies:     () => [],
+        namespacedPolicies: () => [],
+        allPolicyServers:   () => [],
+        policyServerCounts: () => ({
+          status: {
+            running: 1, stopped: 0, pending: 0
+          },
+          total: 2
+        })
+      }
+    });
+
+    const gauge = wrapper.findComponent(ConsumptionGauge);
+
+    expect(gauge.exists()).toBe(true);
+    expect(gauge.props('capacity')).toBe(2);
+    expect(gauge.props('used')).toBe(1);
+    expect(gauge.props('colorStops')).toEqual({
+      25: '--error', 50: '--warning', 70: '--info'
+    });
+  });
+
+  it('correctly applies class names based on policy server counts', () => {
+    const wrapper = createWrapper({
+      computed: {
+        globalPolicies:     () => [],
+        namespacedPolicies: () => [],
+        allPolicyServers:   () => [{}, {}]
+      }
+    });
+
+    const btn = wrapper.find('.role-secondary');
+
+    expect(btn.exists()).toBe(true);
+  });
+
+  it('renders EventsGauge component when namespacedPolicies are present', () => {
+    const wrapper = createWrapper({
+      computed: {
+        globalPolicies:     () => [],
+        namespacedPolicies: () => [{}, {}],
+        allPolicyServers:   () => []
+      }
+    });
+
+    const eventsGauge = wrapper.findComponent(EventsGauge);
+
+    expect(eventsGauge.exists()).toBe(true);
+  });
+
+  it('renders Events and Modes components for namespaced policies', () => {
+    const wrapper = createWrapper({
+      computed: {
+        globalPolicies:     () => [],
+        namespacedPolicies: () => [{}, {}],
+        allPolicyServers:   () => []
+      }
+    });
+
+    expect(wrapper.findComponent(Events).exists()).toBe(true);
+    expect(wrapper.findComponent(Modes).exists()).toBe(true);
   });
 
   it('renders correct gauge info of policy servers', () => {
@@ -82,220 +164,55 @@ describe('component: DashboardView', () => {
     ];
 
     const wrapper = createWrapper({
-      computed: { policyServerPods: () => pods },
-      stubs:    { DefaultsBanner: { template: '<span />' } },
+      computed: {
+        globalPolicies:     () => [],
+        namespacedPolicies: () => [],
+        allPolicyServers:   () => [{}],
+        policyServerPods:   () => pods
+      },
+      stubs: { Masthead: { template: '<span />' } },
     });
 
-    const gauges = wrapper.findAllComponents(ConsumptionGauge);
+    const gauges = wrapper.findComponent(ConsumptionGauge);
 
-    expect(gauges.at(0).props().capacity).toStrictEqual(pods.length as Number);
-    expect(gauges.at(0).props().used).toStrictEqual(1 as Number);
+    expect(gauges.props().capacity).toStrictEqual(pods.length as Number);
+    expect(gauges.props().used).toStrictEqual(1 as Number);
   });
 
-  it('renders correct gauge info of admission policies', () => {
+  it('renders correct gauge info for admission policy events', () => {
     const policies = [
       {
-        status: {
-          policyStatus: 'active',
-          error:        false,
-        },
-        spec: { mode: 'protect' },
+        result: 'pass',
+        policy: 'namespaced-policy-1',
       },
       {
-        status: {
-          policyStatus: 'pending',
-          error:        false,
-        },
-        spec: { mode: 'protect' },
+        result: 'fail',
+        policy: 'namespaced-policy-2',
       },
       {
-        status: {
-          policyStatus: 'unschedulable',
-          error:        true,
-        },
-        spec: { mode: 'monitor' },
+        result: 'error',
+        policy: 'namespaced-policy-3',
       },
     ];
-
-    const wrapper = createWrapper({
-      computed: { namespacedPolicies: () => policies },
-      stubs:    { DefaultsBanner: { template: '<span />' } },
-    });
-
-    const gauges = wrapper.findAllComponents(ConsumptionGauge);
-
-    expect(gauges.at(1).props().capacity).toStrictEqual(
-      policies.length as Number
-    );
-    expect(gauges.at(1).props().used).toStrictEqual(1 as Number);
-  });
-
-  it('renders the Upgradable button when an upgrade is available', () => {
-    const oldControllerApp = { spec: { chart: { metadata: { version: '2.0.4', appVersion: 'v1.9.0' } } } };
+    const summary = {
+      status: {
+        error: 1, fail: 1, success: 1
+      },
+      total: 3
+    };
 
     const wrapper = createWrapper({
       computed: {
-        controllerApp:   () => oldControllerApp,
-        controllerChart: () => controllerCharts,
-        version:         () => 'v1.9.0',
-      },
-    });
-
-    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
-
-    expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.9.0 - %kubewarden.dashboard.upgrade.controllerChart%: 2.0.5'
-    );
-  });
-
-  it('calculates the correct chart for a supported MAJOR version upgrade', () => {
-    const oldControllerApp = { spec: { chart: { metadata: { version: '0.4.6', appVersion: 'v0.5.5' } } } };
-
-    const wrapper = createWrapper({
-      computed: {
-        controllerApp:   () => oldControllerApp,
-        controllerChart: () => controllerCharts,
-        version:         () => 'v0.5.5',
-      },
-    });
-
-    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
-
-    expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.0.0 - %kubewarden.dashboard.upgrade.controllerChart%: 1.0.0'
-
-    );
-  });
-
-  it('calculates the correct chart for a supported MINOR version upgrade', () => {
-    const oldControllerApp = { spec: { chart: { metadata: { version: '1.1.1', appVersion: 'v1.1.0' } } } };
-
-    const wrapper = createWrapper({
-      computed: {
-        controllerApp:   () => oldControllerApp,
-        controllerChart: () => controllerCharts,
-        version:         () => 'v1.1.0',
-      },
-    });
-
-    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
-
-    expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.1.1 - %kubewarden.dashboard.upgrade.controllerChart%: 1.2.3'
-    );
-  });
-
-  it('calculates the correct chart for a supported PATCH version upgrade', () => {
-    const oldControllerApp = { spec: { chart: { metadata: { version: '2.0.0', appVersion: 'v1.8.0' } } } };
-
-    const wrapper = createWrapper({
-      computed: {
-        controllerApp:   () => oldControllerApp,
-        controllerChart: () => controllerCharts,
-        version:         () => 'v1.8.0',
-      },
-    });
-
-    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
-
-    expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.9.0 - %kubewarden.dashboard.upgrade.controllerChart%: 2.0.5'
-    );
-    expect(wrapper.vm.controllerUpgradeAvailable).toBe(controllerCharts.versions[1]);
-  });
-
-  it('calculates the correct chart for multiple appVersions with chart PATCH available', () => {
-    const oldControllerApp = { spec: { chart: { metadata: { version: '1.6.0', appVersion: 'v1.7.0' } } } };
-
-    const wrapper = createWrapper({
-      computed: {
-        controllerApp:   () => oldControllerApp,
-        controllerChart: () => controllerCharts,
-        version:         () => 'v1.7.0',
-      },
-    });
-
-    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
-
-    expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.8.0 - %kubewarden.dashboard.upgrade.controllerChart%: 2.0.2'
-    );
-  });
-
-  it('calculates the correct chart for inconsistent appVersion semantics', () => {
-    const oldControllerApp = { spec: { chart: { metadata: { version: '1.4.0', appVersion: '1.5.0' } } } };
-
-    const wrapper = createWrapper({
-      computed: {
-        controllerApp:   () => oldControllerApp,
-        controllerChart: () => controllerCharts,
-        version:         () => '1.5.0',
-      },
-    });
-
-    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
-
-    expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.6.0 - %kubewarden.dashboard.upgrade.controllerChart%: 1.5.3'
-    );
-  });
-
-  it('calculates the correct chart for pre-release versions', () => {
-    const oldControllerApp = { spec: { chart: { metadata: { version: '2.0.5', appVersion: 'v1.9.0' } } } };
-
-    commonMocks.$store.getters['prefs/get'].mockImplementation((key) => {
-      if ( key === SHOW_PRE_RELEASE ) {
-        return true;
+        admissionPolicyResults: () => policies,
+        namespacedPolicies:     () => [],
+        globalPolicies:         () => [],
+        allPolicyServers:       () => [],
       }
-
-      return undefined;
     });
 
-    const wrapper = createWrapper({
-      computed: {
-        controllerApp:   () => oldControllerApp,
-        controllerChart: () => controllerCharts,
-        version:         () => 'v1.9.0',
-        showPreRelease:  () => true,
-      },
-    });
+    const gauges = wrapper.findAllComponents(EventsGauge);
 
-    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
-
-    expect(upgradeButton.exists()).toBe(true);
-    expect(upgradeButton.text()).toContain(
-      '%kubewarden.dashboard.upgrade.appUpgrade%: v1.10.0-rc1 - %kubewarden.dashboard.upgrade.controllerChart%: 2.0.6-rc1'
-    );
-  });
-
-  it('does not show pre-release upgrades when preference is false', () => {
-    const oldControllerApp = { spec: { chart: { metadata: { version: '2.0.5', appVersion: 'v1.9.0' } } } };
-
-    commonMocks.$store.getters['prefs/get'].mockImplementation((key) => {
-      if ( key === SHOW_PRE_RELEASE ) {
-        return false;
-      }
-
-      return undefined;
-    });
-
-    const wrapper = createWrapper({
-      computed: {
-        controllerApp:   () => oldControllerApp,
-        controllerChart: () => controllerCharts,
-        version:         () => 'v1.9.0',
-        showPreRelease:  () => false,
-      },
-    });
-
-    const upgradeButton = wrapper.find('[data-testid="kw-app-controller-upgrade-button"]');
-
-    expect(upgradeButton.exists()).toBe(false);
+    expect(gauges.at(0).exists()).toBe(true);
+    expect(gauges.at(0).props().events).toStrictEqual(summary);
   });
 });
