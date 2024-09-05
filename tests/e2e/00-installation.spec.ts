@@ -25,7 +25,7 @@ const upMap: AppVersion[] = [
   { app: 'v1.13.0', controller: '2.1.0', crds: '1.5.1', defaults: '2.0.3' },
   { app: 'v1.14.0', controller: '2.2.1', crds: '1.6.0', defaults: '2.1.0' },
   { app: 'v1.15.0', controller: '2.3.1', crds: '1.7.0', defaults: '2.2.1' },
-  { app: 'v1.16.0', controller: '2.4.0', crds: '1.8.0', defaults: '2.3.0' },
+  { app: 'v1.16.0', controller: '2.4.0', crds: '1.8.0', defaults: '2.3.1' },
 ]
 
 // Support for Rancher 2.9 was added in KW 1.13.0

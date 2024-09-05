@@ -120,7 +120,7 @@ jobs:
     # Test from maintenance branch for Rancher < 2.9
     - name: Find checkout branch ref
       id: set-ref
-      run: echo "ref=$( [[ ${{matrix.rancher}} == 2.[78]* ]] && echo 'release-1.6' || echo '')" | tee -a $GITHUB_OUTPUT
+      run: echo "ref=$( [[ "${{matrix.rancher}}" == 2.[78]* ]] && echo 'release-1.6' || echo '')" | tee -a $GITHUB_OUTPUT
 
     - uses: actions/checkout@v4
       with:
