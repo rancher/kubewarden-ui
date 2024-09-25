@@ -75,7 +75,8 @@ for (const PolicyPage of pageTypes) {
     const polPage = new PolicyPage(page)
     const p: Policy = { title: 'Pod Privileged Policy', name: '' }
 
-    await test.step('Missing required fields', async() => {
+    // Skip on 2.9.2+ because of https://github.com/rancher/kubewarden-ui/issues/898
+    RancherUI.isVersion('<2.9.2') && await test.step('Missing required fields', async() => {
       const finishBtn = ui.button('Finish')
       await polPage.open(p)
 
@@ -88,6 +89,7 @@ for (const PolicyPage of pageTypes) {
     })
 
     await test.step('Readme is visible', async() => {
+      await polPage.open(p)
       await ui.button('Show Readme').click()
       await expect(polPage.readme).toBeInViewport()
       await expect(polPage.readme).toContainText(p.title)

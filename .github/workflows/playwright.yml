@@ -28,14 +28,15 @@ on:
       k3s:
         description: Kubernetes version
         type: choice
-        default: 'v1.30.3-k3s1'
+        default: 'v1.30'
         required: true
         options:
-        - v1.26.15-k3s1
-        - v1.27.16-k3s1
-        - v1.28.12-k3s1
-        - v1.29.7-k3s1
-        - v1.30.3-k3s1
+        - v1.25
+        - v1.26
+        - v1.27
+        - v1.28
+        - v1.29
+        - v1.30
       mode:
         description: Installation mode
         type: choice
@@ -76,7 +77,7 @@ env:
   # Github -> Secrets and variables -> Actions -> New repository variable
   KUBEWARDEN: ${{ inputs.kubewarden || 'rc' }}
   K3D_VERSION: # 'v5.6.3' - optionally pin version
-  K3S_VERSION: ${{ inputs.k3s || 'v1.30.3-k3s1' }}
+  K3S_VERSION: ${{ inputs.k3s || 'v1.30' }}
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
   # First value after the && must be truthy. Otherwise, the value after the || will always be returned
   TESTBASE: ${{ github.event_name != 'workflow_dispatch' && true || inputs.testbase }}
@@ -142,17 +143,23 @@ jobs:
         esac
 
         # Rancher 2.7 chart requires kubeVersion: < 1.28.0-0
-        [[ "${{ matrix.rancher }}" == *2.7* ]] && echo K3S_VERSION="v1.27.16-k3s1" | tee -a $GITHUB_ENV
+        [[ "${{ matrix.rancher }}" == *2.7* ]] && K3S_VERSION="v1.27"
         # Rancher 2.8 chart requires kubeVersion: < 1.29.0-0
-        [[ "${{ matrix.rancher }}" == *2.8* ]] && echo K3S_VERSION="v1.28.12-k3s1" | tee -a $GITHUB_ENV
+        [[ "${{ matrix.rancher }}" == *2.8* ]] && K3S_VERSION="v1.28"
 
         # KW extension is prime since 2.8.3
         [[ "${{ matrix.rancher }}" == *2.[789]* ]] && REPO=rancher-prime || REPO=rancher-latest
+
+        # Complete partial K3S version from dockerhub v1.30 -> v1.30.5-k3s1
+        if [[ ! $K3S_VERSION =~ ^v[0-9.]+-k3s[0-9]$ ]]; then
+            K3S_VERSION=$(curl -L -s "https://registry.hub.docker.com/v2/repositories/rancher/k3s/tags?page_size=20&name=$K3S_VERSION" | jq -re 'first(.results[].name | select(test("^v[0-9.]+-k3s[0-9]$")))')
+        fi
 
         # Print matrix
         echo "Event: ${{github.event_name}}"
         echo "Mode: ${{matrix.mode}}"
         echo "Rancher: ${{matrix.rancher}}"
+        echo K3S_VERSION="$K3S_VERSION" | tee -a $GITHUB_ENV
         echo REPO="$REPO" | tee -a $GITHUB_ENV
         echo KUBEWARDEN="$KUBEWARDEN" | tee -a $GITHUB_ENV
         echo TESTBASE=$TESTBASE
@@ -176,9 +183,9 @@ jobs:
             [ $i -ne 20 ] && sleep 10 || { echo "Godot: pods not running"; exit 1; }
         done
 
-        # Wait for cert-manager
-        kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.yaml
-        kubectl wait --for=condition=Available deployment --timeout=2m -n cert-manager --all
+        # Install cert-manager
+        helm repo add jetstack https://charts.jetstack.io --force-update
+        helm upgrade -i --wait cert-manager jetstack/cert-manager -n cert-manager --create-namespace --set crds.enabled=true
 
         # Translate to sematic version
         [ "$RANCHER" == "rc" ] && RANCHER='*-0'
