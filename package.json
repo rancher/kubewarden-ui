@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.24.7",
-    "@babel/preset-typescript": "^7.24.7",
+    "@babel/preset-typescript": "^7.25.7",
     "@jest/globals": "^29.7.0",
     "@jest/types": "^29.6.3",
     "@types/lodash": "4.17.5",
