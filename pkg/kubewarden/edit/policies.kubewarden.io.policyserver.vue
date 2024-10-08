@@ -66,13 +66,20 @@ export default {
     handleValidationPassed(val) {
       this.validationPassed = val;
     },
+
     async finish(event) {
-      // here we cleanup the securityContexts "seccompProfile" property if there are no keys set on the object
-      ['pod', 'container'].forEach((type) => {
-        if (this.chartValues?.spec?.securityContexts?.[type]?.seccompProfile && !Object.keys(this.chartValues?.spec?.securityContexts?.[type]?.seccompProfile).length) {
-          delete this.chartValues?.spec?.securityContexts?.[type]?.seccompProfile;
-        }
-      });
+      // Clean up the securityContexts "seccompProfile" property if there are no keys set on the object
+      const securityContexts = this.chartValues?.spec?.securityContexts;
+
+      if (securityContexts) {
+        ['pod', 'container'].forEach((type) => {
+          const seccompProfile = securityContexts[type]?.seccompProfile;
+
+          if (seccompProfile && Object.keys(seccompProfile).length === 0) {
+            delete securityContexts[type].seccompProfile;
+          }
+        });
+      }
 
       try {
         await this.save(event);

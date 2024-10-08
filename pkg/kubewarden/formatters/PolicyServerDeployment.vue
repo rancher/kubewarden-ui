@@ -69,9 +69,9 @@ export default {
 </script>
 <template>
   <span class="deployment">
-    <n-link v-if="to" :to="to">
+    <router-link v-if="to" :to="to">
       {{ value }}
-    </n-link>
+    </router-link>
     <span v-else>{{ value }}</span>
     <i
       v-if="hasErrors"
@@ -92,14 +92,12 @@ export default {
     margin-left: 4px;
   }
 
-  ::v-deep {
-    .labeled-tooltip, .status-icon {
-      position: relative;
-      display: inline;
-      left: auto;
-      right: auto;
-      top: 2px;
-      bottom: auto;
-    }
+  :deep(.labeled-tooltip, .status-icon) {
+    position: relative;
+    display: inline;
+    left: auto;
+    right: auto;
+    top: 2px;
+    bottom: auto;
   }
 </style>

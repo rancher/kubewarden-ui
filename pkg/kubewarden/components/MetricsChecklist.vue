@@ -333,14 +333,14 @@ export default {
           <p>
             {{ t('kubewarden.monitoring.prerequisites.configMap.conflictingDashboardsBanner', { count: conflictingGrafanaDashboards.length }, true) }}
           </p>
-          <n-link
+          <router-link
             v-for="configMap of conflictingGrafanaDashboards"
             :key="configMap.metadata.name"
             :to="configMap.detailLocation"
             class="text-bold"
           >
             {{ configMap.metadata.name }}
-          </n-link>
+          </router-link>
         </div>
       </Banner>
 

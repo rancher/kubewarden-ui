@@ -67,7 +67,7 @@ export default {
     <div>
       <LabeledInput
         ref="authorityName"
-        v-model="chartValues.registryName"
+        v-model:value="chartValues.registryName"
         data-testid="ps-config-authority-name-input"
         type="multiline"
         :label="t('kubewarden.policyServerConfig.sourceAuthorities.endpoint')"
@@ -79,11 +79,11 @@ export default {
       />
 
       <template>
-        <template v-for="(cert, cIndex) in chartValues.certs">
-          <div :key="cIndex" class="sources__container__cert">
+        <template v-for="(cert, cIndex) in chartValues.certs" :key="cIndex">
+          <div class="sources__container__cert">
             <LabeledInput
               ref="authorityCert"
-              v-model="chartValues.certs[cIndex]"
+              v-model:value="chartValues.certs[cIndex]"
               :data-testid="`ps-config-authority-cert-input-${ cIndex }`"
               type="multiline"
               :label="t('kubewarden.policyServerConfig.sourceAuthorities.certificate.label')"

@@ -39,20 +39,17 @@ export default {
     value: {
       deep: true,
       handler(neu) {
-        const matchExpressions = neu?.matchExpressions || [];
-        const matchLabels = neu?.matchLabels || {};
-
-        this.$set(this, 'matchExpressions', matchExpressions);
-        this.$set(this, 'matchLabels', matchLabels);
+        this.matchExpressions = neu?.matchExpressions || [];
+        this.matchLabels = neu?.matchLabels || {};
       }
     },
     matchExpressions(neu) {
-      this.$set(this.namespaceSelector, 'matchExpressions', neu);
-      this.$emit('input', this.namespaceSelector);
+      this.namespaceSelector.matchExpressions = neu;
+      this.$emit('update:value', this.namespaceSelector);
     },
     matchLabels(neu) {
-      this.$set(this.namespaceSelector, 'matchLabels', neu);
-      this.$emit('input', this.namespaceSelector);
+      this.namespaceSelector.matchLabels = neu;
+      this.$emit('update:value', this.namespaceSelector);
     },
   }
 };
@@ -63,43 +60,43 @@ export default {
     <p class="col span-12 mb-20">
       {{ t('kubewarden.policyConfig.namespaceSelector.description') }}
     </p>
-    <template>
-      <InfoBox ref="infobox">
-        <div class="row mb-20">
-          <div class="col span-12">
-            <h4>
-              <t k="kubewarden.policyConfig.namespaceSelector.matchExpressions.label" />
-              <i
-                v-clean-tooltip="t('kubewarden.policyConfig.namespaceSelector.matchExpressions.tooltip')"
-                class="icon icon-info icon-lg"
-              />
-            </h4>
-            <span v-clean-tooltip="t('kubewarden.policyConfig.namespaceSelector.matchExpressions.tooltip')"></span>
-            <MatchExpressions
-              ref="matchexp"
-              v-model="matchExpressions"
-              :mode="mode"
-              :show-remove="false"
-              :type="POD"
+    <InfoBox ref="infobox">
+      <div class="row mb-20">
+        <div class="col span-12">
+          <h4>
+            <t k="kubewarden.policyConfig.namespaceSelector.matchExpressions.label" />
+            <i
+              v-clean-tooltip="t('kubewarden.policyConfig.namespaceSelector.matchExpressions.tooltip')"
+              class="icon icon-info icon-lg"
             />
-          </div>
-        </div>
-        <h4>
-          <t k="kubewarden.policyConfig.namespaceSelector.matchLabels.label" />
-          <i
-            v-clean-tooltip="t('kubewarden.policyConfig.namespaceSelector.matchLabels.tooltip')"
-            class="icon icon-info icon-lg"
+          </h4>
+          <span v-clean-tooltip="t('kubewarden.policyConfig.namespaceSelector.matchExpressions.tooltip')"></span>
+          <MatchExpressions
+            ref="matchexp"
+            v-model:value="matchExpressions"
+            :mode="mode"
+            :show-remove="false"
+            :type="POD"
+            @update:value="matchExpressions = $event"
           />
-        </h4>
-        <div class="row mb-20">
-          <div class="col span-12">
-            <KeyValue
-              v-model="matchLabels"
-              :mode="mode"
-            />
-          </div>
         </div>
-      </InfoBox>
-    </template>
+      </div>
+      <h4>
+        <t k="kubewarden.policyConfig.namespaceSelector.matchLabels.label" />
+        <i
+          v-clean-tooltip="t('kubewarden.policyConfig.namespaceSelector.matchLabels.tooltip')"
+          class="icon icon-info icon-lg"
+        />
+      </h4>
+      <div class="row mb-20">
+        <div class="col span-12">
+          <KeyValue
+            v-model:value="matchLabels"
+            :mode="mode"
+            @update:value="matchLabels = $event"
+          />
+        </div>
+      </div>
+    </InfoBox>
   </div>
 </template>

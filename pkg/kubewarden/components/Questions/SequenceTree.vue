@@ -202,7 +202,7 @@ export default {
                   in-store="cluster"
                   :question="q"
                   :value="get(value[vIndex], q.variable)"
-                  @input="update(q.variable, vIndex, $event)"
+                  @update:value="update(q.variable, vIndex, $event)"
                 />
               </div>
             </div>

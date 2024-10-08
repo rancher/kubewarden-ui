@@ -20,15 +20,11 @@ export default {
     },
     addLabel: {
       type: String,
-      default() {
-        return this.$store.getters['i18n/t']('generic.add');
-      },
+      default: 'Add',
     },
     removeLabel: {
       type: String,
-      default() {
-        return this.$store.getters['i18n/t']('generic.remove');
-      },
+      default: 'Remove',
     },
     inputLabel: {
       type:     Object,
@@ -56,11 +52,11 @@ export default {
         name:  '',
         value: '',
       });
-      this.$emit('input', this.value);
+      this.$emit('update:value', this.value);
     },
     handleRemoveRow(data) {
       this.value.splice(data.index, 1);
-      this.$emit('input', this.value);
+      this.$emit('update:value', this.value);
     },
     updateRow(index, key, value) {
       const currValue = Object.assign({}, this.value[index]);
@@ -68,7 +64,7 @@ export default {
       currValue[key] = value;
 
       this.value.splice(index, 1, currValue);
-      this.$emit('input', this.value);
+      this.$emit('update:value', this.value);
     }
   }
 };
@@ -82,30 +78,30 @@ export default {
       :add-allowed="true"
       :add-label="addLabel"
       :disabled="disabled"
-      :default-add-value="0"
+      :default-add-value="{ name: '', value: '' }"
       @add="handleAddRow"
       @remove="handleRemoveRow"
     >
       <template v-slot:columns="scope">
         <LabeledInput
-          v-model="scope.row.value.name"
+          v-model:value="scope.row.value.name"
           :data-testid="`ps-config-security-context-${configType}-sysctls-name-input`"
           :mode="mode"
           :disabled="disabled"
           :label="inputLabel.name"
           :placeholder="inputPlaceholderLabel.name"
           required
-          @input="updateRow(scope.i, 'name', $event)"
+          @update:value="updateRow(scope.i, 'name', $event)"
         />
         <LabeledInput
-          v-model="scope.row.value.value"
+          v-model:value="scope.row.value.value"
           :data-testid="`ps-config-security-context-${configType}-sysctls-value-input`"
           :mode="mode"
           :disabled="disabled"
           :label="inputLabel.value"
           :placeholder="inputPlaceholderLabel.value"
           required
-          @input="updateRow(scope.i, 'value', $event)"
+          @update:value="updateRow(scope.i, 'value', $event)"
         />
       </template>
     </ArrayList>
@@ -113,13 +109,12 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-::v-deep {
-  .box {
-    grid-template-columns: auto auto 75px;
-    grid-gap: 10px;
-  }
-  .unlabeled-select {
-      height: 61px;
-  }
+:deep(.box) {
+  grid-template-columns: auto auto 75px;
+  grid-gap: 10px;
+}
+
+:deep(.unlabeled-select) {
+  height: 61px;
 }
 </style>

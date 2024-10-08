@@ -7,6 +7,7 @@ import { allHash } from '@shell/utils/promise';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { mapPref, GROUP_RESOURCES } from '@shell/store/prefs';
 
+import { BadgeState } from '@components/BadgeState';
 import CountGauge from '@shell/components/CountGauge';
 import Loading from '@shell/components/Loading';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
@@ -22,7 +23,7 @@ export default {
   name: 'PolicyServer',
 
   components: {
-    CountGauge, Loading, MetricsTab, ResourceTabs, ResourceTable, Tab, TraceTable
+    BadgeState, CountGauge, Loading, MetricsTab, ResourceTabs, ResourceTable, Tab, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -171,7 +172,7 @@ export default {
       </div>
     </template>
 
-    <ResourceTabs v-model="value" :mode="mode">
+    <ResourceTabs :value="value" :mode="mode">
       <Tab name="related-policies" label="Policies" :weight="99">
         <template #default>
           <ResourceTable

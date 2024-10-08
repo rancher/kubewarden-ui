@@ -67,52 +67,52 @@ export default {
           {{ t('kubewarden.policyServerConfig.securityContexts.windowsOptions.title') }}
         </h4>
         <Checkbox
-          v-model="hostProcess"
+          v-model:value="hostProcess"
           :mode="mode"
           :disabled="disabled"
           :data-testid="`ps-config-security-context-${configType}-windowsOptions-hostProcess-input`"
           label-key="kubewarden.policyServerConfig.securityContexts.windowsOptions.hostProcess.label"
           :tooltip="t('kubewarden.policyServerConfig.securityContexts.windowsOptions.hostProcess.tooltip')"
-          @input="updateData($event, 'hostProcess')"
+          @update:value="updateData($event, 'hostProcess')"
         />
       </div>
     </div>
     <div class="row mb-10">
       <div class="col span-6">
         <LabeledInput
-          v-model="gmsaCredentialSpec"
+          v-model:value="gmsaCredentialSpec"
           :data-testid="`ps-config-security-context-${configType}-windowsOptions-gmsaCredentialSpec-input`"
           :mode="mode"
           :disabled="disabled"
           :label="t('kubewarden.policyServerConfig.securityContexts.windowsOptions.gmsaCredentialSpec.label')"
           :placeholder="t('kubewarden.policyServerConfig.securityContexts.windowsOptions.gmsaCredentialSpec.placeholder')"
-          @input="updateData($event)"
+          @update:value="updateData($event)"
         />
       </div>
     </div>
     <div class="row mb-10">
       <div class="col span-6">
         <LabeledInput
-          v-model="gmsaCredentialSpecName"
+          v-model:value="gmsaCredentialSpecName"
           :data-testid="`ps-config-security-context-${configType}-windowsOptions-gmsaCredentialSpecName-input`"
           :mode="mode"
           :disabled="disabled"
           :label="t('kubewarden.policyServerConfig.securityContexts.windowsOptions.gmsaCredentialSpecName.label')"
           :placeholder="t('kubewarden.policyServerConfig.securityContexts.windowsOptions.gmsaCredentialSpecName.placeholder')"
-          @input="updateData($event)"
+          @update:value="updateData($event)"
         />
       </div>
     </div>
     <div class="row mb-40">
       <div class="col span-6">
         <LabeledInput
-          v-model="runAsUserName"
+          v-model:value="runAsUserName"
           :data-testid="`ps-config-security-context-${configType}-windowsOptions-runAsUserName-input`"
           :mode="mode"
           :disabled="disabled"
           :label="t('kubewarden.policyServerConfig.securityContexts.windowsOptions.runAsUserName.label')"
           :placeholder="t('kubewarden.policyServerConfig.securityContexts.windowsOptions.runAsUserName.placeholder')"
-          @input="updateData($event)"
+          @update:value="updateData($event)"
         />
       </div>
     </div>

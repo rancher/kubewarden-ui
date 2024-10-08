@@ -74,7 +74,7 @@ export default {
         this.deleteAuthority(index);
       }
 
-      this.$set(this.value, [registryName], certs || []);
+      this.value[registryName] = certs || [];
       this.$emit('update', this.value);
     }
   },
@@ -87,8 +87,8 @@ export default {
       <h3 data-testid="ps-config-source-authorities-title">
         {{ t('kubewarden.policyServerConfig.sourceAuthorities.title') }}
       </h3>
-      <template v-for="(row, index) in rows">
-        <Authority ref="authority" :key="index" v-model="rows[index]" :mode="mode" @update="updateAuthority($event, index)">
+      <template v-for="(row, index) in rows" :key="index">
+        <Authority ref="authority" v-model:value="rows[index]" :mode="mode" @update="updateAuthority($event, index)">
           <template #remove>
             <button
               :data-testid="`ps-config-authority-remove-button-${ index }`"

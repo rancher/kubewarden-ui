@@ -85,12 +85,12 @@ export default {
     <div class="row mt-20">
       <div class="col span-12 mb-20">
         <Checkbox
-          v-model="allowPrivilegeEscalation"
+          v-model:value="allowPrivilegeEscalation"
           :mode="mode"
           data-testid="ps-config-security-context-container-allow-priv-escalation-input"
           label-key="kubewarden.policyServerConfig.securityContexts.allow-priv-escalation.label"
           :tooltip="t('kubewarden.policyServerConfig.securityContexts.allow-priv-escalation.tooltip')"
-          @input="updateData($event, 'allowPrivilegeEscalation')"
+          @update:value="updateData($event, 'allowPrivilegeEscalation')"
         />
       </div>
     </div>
@@ -98,13 +98,13 @@ export default {
     <div class="row">
       <div class="col span-12 mb-20">
         <Checkbox
-          v-model="privileged"
+          v-model:value="privileged"
           :mode="mode"
           :disabled="disabledByOsWindows"
           data-testid="ps-config-security-context-container-privileged-input"
           label-key="kubewarden.policyServerConfig.securityContexts.privileged.label"
           :tooltip="t('kubewarden.policyServerConfig.securityContexts.privileged.tooltip')"
-          @input="updateData($event, 'privileged')"
+          @update:value="updateData($event, 'privileged')"
         />
       </div>
     </div>
@@ -112,12 +112,12 @@ export default {
     <div class="row">
       <div class="col span-12 mb-20">
         <Checkbox
-          v-model="readOnlyRootFilesystem"
+          v-model:value="readOnlyRootFilesystem"
           :mode="mode"
           :disabled="disabledByOsWindows"
           data-testid="ps-config-security-context-container-readOnlyRootFilesystem-input"
           label-key="kubewarden.policyServerConfig.securityContexts.readOnlyRootFilesystem.label"
-          @input="updateData($event, 'readOnlyRootFilesystem')"
+          @update:value="updateData($event, 'readOnlyRootFilesystem')"
         />
       </div>
     </div>
@@ -125,11 +125,11 @@ export default {
     <div class="row">
       <div class="col span-12 mb-40">
         <Checkbox
-          v-model="runAsNonRoot"
+          v-model:value="runAsNonRoot"
           :mode="mode"
           data-testid="ps-config-security-context-container-runAsNonRoot-input"
           label-key="kubewarden.policyServerConfig.securityContexts.runAsNonRoot.label"
-          @input="updateData($event, 'runAsNonRoot')"
+          @update:value="updateData($event, 'runAsNonRoot')"
         />
       </div>
     </div>
@@ -148,13 +148,13 @@ export default {
           {{ t('kubewarden.policyServerConfig.securityContexts.procMount.label') }}
         </h4>
         <LabeledInput
-          v-model="procMount"
+          v-model:value="procMount"
           data-testid="ps-config-security-context-container-procMount-input"
           :mode="mode"
           :disabled="disabledByOsWindows"
           :label="t('kubewarden.policyServerConfig.securityContexts.procMount.label')"
           :placeholder="t('kubewarden.policyServerConfig.securityContexts.procMount.placeholder')"
-          @input="updateData($event, 'procMount')"
+          @update:value="updateData($event, 'procMount')"
         />
       </div>
     </div>
@@ -165,14 +165,14 @@ export default {
           {{ t('kubewarden.policyServerConfig.securityContexts.runAsGroup') }}
         </h4>
         <LabeledInput
-          v-model.number="runAsGroup"
+          v-model:value.number="runAsGroup"
           data-testid="ps-config-security-context-container-runAsGroup-input"
           type="number"
           min="0"
           :mode="mode"
           :disabled="disabledByOsWindows"
           :label="t('kubewarden.policyServerConfig.securityContexts.runAsGroup')"
-          @input="updateData($event, 'runAsGroup')"
+          @update:value="updateData($event, 'runAsGroup')"
         />
       </div>
     </div>
@@ -183,14 +183,14 @@ export default {
           {{ t('kubewarden.policyServerConfig.securityContexts.runAsUser') }}
         </h4>
         <LabeledInput
-          v-model.number="runAsUser"
+          v-model:value.number="runAsUser"
           data-testid="ps-config-security-context-container-runAsUser-input"
           type="number"
           min="0"
           :mode="mode"
           :disabled="disabledByOsWindows"
           :label="t('kubewarden.policyServerConfig.securityContexts.runAsUser')"
-          @input="updateData($event, 'runAsUser')"
+          @update:value="updateData($event, 'runAsUser')"
         />
       </div>
     </div>

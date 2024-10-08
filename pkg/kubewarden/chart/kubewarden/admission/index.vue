@@ -113,10 +113,10 @@ export default {
 
     updateMatchConditions(matchConditions) {
       if ( !this.chartValues.policy.spec ) {
-        this.$set(this.chartValues.policy, 'spec', {});
+        this.chartValues.policy.spec = {};
       }
 
-      this.$set(this.chartValues.policy.spec, 'matchConditions', matchConditions);
+      this.chartValues.policy.spec.matchConditions = matchConditions;
     }
   }
 };
@@ -126,7 +126,7 @@ export default {
   <div>
     <Tab name="general" :label="t('kubewarden.policyConfig.tabs.general')" :weight="99">
       <General
-        v-model="chartValues"
+        v-model:value="chartValues"
         data-testid="kw-policy-config-general-tab"
         :mode="mode"
         :target-namespace="targetNamespace"
@@ -137,7 +137,7 @@ export default {
     <template v-if="showSettings">
       <Tab name="settings" :label="t('kubewarden.policyConfig.tabs.settings')" :weight="98" @active="() => setActiveTab('settings')">
         <Settings
-          v-model="chartValues"
+          v-model:value="chartValues"
           data-testid="kw-policy-config-settings-tab"
           :active-tab="activeTab"
           @updateSettings="settingsChanged($event)"
@@ -149,7 +149,7 @@ export default {
     <template v-if="hasQuestions">
       <Tab name="Settings" label="Settings" :weight="98">
         <Questions
-          v-model="chartValues.policy.spec.settings"
+          v-model:value="chartValues.policy.spec.settings"
           data-testid="kw-policy-config-questions-tab"
           :mode="mode"
           :source="chartValues"
@@ -157,26 +157,26 @@ export default {
           :target-namespace="targetNamespace"
         />
       </Tab>
-    </template>
+    </template> 
 
     <template v-if="isGlobal">
       <Tab name="namespaceSelector" :label="t('kubewarden.policyConfig.tabs.namespaceSelector')" :weight="97">
-        <NamespaceSelector v-model="chartValues.policy.spec.namespaceSelector" data-testid="kw-policy-config-ns-selector-tab" :mode="mode" />
+        <NamespaceSelector v-model:value="chartValues.policy.spec.namespaceSelector" data-testid="kw-policy-config-ns-selector-tab" :mode="mode" />
       </Tab>
     </template>
 
     <template v-if="showContextAware">
       <Tab name="contextAware" :label="t('kubewarden.policyConfig.tabs.contextAware')" :weight="96">
-        <ContextAware v-model="chartValues" data-testid="kw-policy-config-context-tab" :mode="mode" />
+        <ContextAware v-model:value="chartValues" data-testid="kw-policy-config-context-tab" :mode="mode" />
       </Tab>
     </template>
 
     <Tab name="matchConditions" :label="t('kubewarden.policyConfig.tabs.matchConditions')" :weight="95" @active="setActiveTab('matchConditions')">
-      <MatchConditions v-model="chartValues" :active-tab="activeTab" :mode="mode" @update:matchConditions="updateMatchConditions" />
+      <MatchConditions v-model:value="chartValues" :active-tab="activeTab" :mode="mode" @update:matchConditions="updateMatchConditions" />
     </Tab>
 
     <Tab name="rules" :label="t('kubewarden.policyConfig.tabs.rules')" :weight="94">
-      <Rules v-model="chartValues" data-testid="kw-policy-config-rules-tab" :mode="mode" />
+      <Rules v-model:value="chartValues" data-testid="kw-policy-config-rules-tab" :mode="mode" />
     </Tab>
   </div>
 </template>

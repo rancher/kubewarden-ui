@@ -44,7 +44,7 @@ export default {
       this.errors = [];
 
       try {
-        this.$set(this.policy.spec, 'mode', 'protect');
+        this.policy.spec.mode = 'protect';
         await this.policy.save();
 
         btnCb(true);
@@ -77,7 +77,7 @@ export default {
         {{ t('kubewarden.policyConfig.mode.update.body') }}
       </p>
       <Checkbox
-        v-model="updateToProtect"
+        v-model:value="updateToProtect"
         :disabled="modeDisabled"
         :label="t('kubewarden.policyConfig.mode.update.checkbox')"
       />

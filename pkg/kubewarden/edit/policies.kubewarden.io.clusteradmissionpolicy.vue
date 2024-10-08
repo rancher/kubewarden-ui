@@ -97,7 +97,7 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-::v-deep .cru__footer {
+:deep(.cru__footer) {
   z-index: 1;
 }
 </style>

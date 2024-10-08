@@ -31,7 +31,7 @@ export default {
         :required="question.required"
         :value="value"
         :disabled="disabled"
-        @input="$emit('input', $event)"
+        @update:value="$emit('update:value', $event)"
       />
     </div>
     <div

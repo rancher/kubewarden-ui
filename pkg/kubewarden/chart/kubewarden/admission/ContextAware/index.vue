@@ -1,11 +1,11 @@
 <script>
 import { _CREATE, _VIEW } from '@shell/config/query-params';
 import { removeAt } from '@shell/utils/array';
+import { isEmpty } from '@shell/utils/object';
 
 import { Banner } from '@components/Banner';
 import Loading from '@shell/components/Loading';
 
-import { isEmpty } from '@shell/utils/object';
 import { KUBEWARDEN_APPS, ARTIFACTHUB_PKG_ANNOTATION } from '../../../../types';
 import Resource from './Resource';
 
@@ -101,7 +101,7 @@ export default {
     <div v-for="(resource, index) in contextAwareResources" :key="'filtered-resource-' + index">
       <Resource
         ref="lastResource"
-        v-model="contextAwareResources[index]"
+        v-model:value="contextAwareResources[index]"
         :data-testid="`kw-policy-config-context-resource-${ index }`"
         :disabled="disabledcontextAwareResources"
         :mode="mode"

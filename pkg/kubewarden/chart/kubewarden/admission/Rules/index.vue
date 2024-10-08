@@ -97,7 +97,7 @@ export default {
     <div v-for="(rule, index) in rules" :key="'filtered-rule-' + index">
       <Rule
         ref="lastRule"
-        v-model="rules[index]"
+        v-model:value="rules[index]"
         :data-testid="`kw-policy-rules-rule-${ index }`"
         :disabled="disabledRules"
         :mode="mode"

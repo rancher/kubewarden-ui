@@ -24,7 +24,7 @@ export default {
 
   methods: {
     update(val) {
-      this.$emit('input', val);
+      this.$emit('update:value', val);
     }
   }
 };
@@ -45,12 +45,12 @@ export default {
         <KeyValue
           v-if="showInput"
           :key="question.variable"
-          v-model="questionValue"
+          v-model:value="questionValue"
           :title="question.label"
           :mode="mode"
           :protip="false"
           :disabled="disabled"
-          @input="update"
+          @update:value="update"
         />
         <h3 v-else>
           {{ question.label }}
