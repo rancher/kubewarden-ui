@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "checkJs": false,
     "target": "esnext",
     "module": "esnext",
     "strict": true,
@@ -33,23 +34,8 @@
       "scripthost"
     ],
     "paths": {
-      "@shell/core/*": [
-        "../../node_modules/@rancher/shell/core/*"
-      ],
-      "@shell/config/*": [
-        "../../node_modules/@rancher/shell/config/*"
-      ],
-      "@shell/store/*": [
-        "../../node_modules/@rancher/shell/store/*"
-      ],
-      "@shell/components/*": [
-        "../../node_modules/@rancher/shell/components/*"
-      ],
-      "@shell/initialize/*": [
-        "../../node_modules/@rancher/shell/initialize/*"
-      ],
-      "@shell/models/*": [
-        "../../node_modules/@rancher/shell/models/*"
+      "@shell/*": [
+        "../../node_modules/@rancher/shell/*"
       ],
       "@components/*": [
         "./node_modules/@rancher/components/*"
@@ -63,11 +49,11 @@
     },
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.vue",
+    "./**/*.ts",
+    "./**/*.tsx",
+    "./**/*.vue",
     "../../node_modules/@rancher/shell/core/types.ts"
-  ],
+, "models/policies.kubewarden.io.policyserver.js", "models/policies.kubewarden.io.clusteradmissionpolicy.js", "models/policies.kubewarden.io.admissionpolicy.js", "components/Questions/Question.js"  ],
   "exclude": [
     "node_modules"
   ]

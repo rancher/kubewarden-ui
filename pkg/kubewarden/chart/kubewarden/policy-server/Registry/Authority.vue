@@ -1,6 +1,5 @@
 <script>
 import { _EDIT, _VIEW } from '@shell/config/query-params';
-import { removeAt } from '@shell/utils/array';
 
 import FileSelector, { createOnSelected } from '@shell/components/form/FileSelector';
 import { LabeledInput } from '@components/Form/LabeledInput';
@@ -52,7 +51,7 @@ export default {
     },
 
     removeCert(cIndex) {
-      removeAt(this.chartValues.certs, cIndex);
+      this.chartValues.certs.splice(cIndex, 1);
     },
 
     update() {

@@ -1,6 +1,5 @@
 <script>
 import { _CREATE, _VIEW } from '@shell/config/query-params';
-import { removeAt } from '@shell/utils/array';
 import { isEmpty } from '@shell/utils/object';
 
 import { Banner } from '@components/Banner';
@@ -81,7 +80,7 @@ export default {
     },
 
     removeResource(index) {
-      removeAt(this.contextAwareResources, index);
+      this.contextAwareResources.splice(index, 1);
     }
   }
 };

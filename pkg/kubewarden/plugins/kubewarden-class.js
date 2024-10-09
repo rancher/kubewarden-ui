@@ -7,7 +7,6 @@ import SteveModel from '@shell/plugins/steve/steve-class';
 import { STATES, STATES_ENUM } from '@shell/plugins/dashboard-store/resource-class';
 import { MANAGEMENT, SERVICE } from '@shell/config/types';
 import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
-import { isArray } from '@shell/utils/array';
 import { addParams } from '@shell/utils/url';
 
 import {
@@ -159,7 +158,7 @@ export default class KubewardenModel extends SteveModel {
     let traceArray = [];
 
     // If a policy is in monitor mode it will pass multiple trace objects
-    if (isArray(traces)) {
+    if (Array.isArray(traces)) {
       traceArray = [
         ...new Map(traces.map(trace => [trace['traceID'], trace])).values(),
       ];

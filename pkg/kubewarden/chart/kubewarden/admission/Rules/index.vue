@@ -1,7 +1,6 @@
 <script>
 import { _CREATE, _VIEW } from '@shell/config/query-params';
 import { SCHEMA } from '@shell/config/types';
-import { removeAt } from '@shell/utils/array';
 
 import Loading from '@shell/components/Loading';
 
@@ -85,7 +84,7 @@ export default {
     },
 
     removeRule(index) {
-      removeAt(this.rules, index);
+      this.rules.splice(index, 1);
     }
   }
 };
