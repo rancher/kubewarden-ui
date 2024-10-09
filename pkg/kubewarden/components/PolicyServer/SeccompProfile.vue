@@ -85,11 +85,11 @@ export default {
           {{ t('kubewarden.policyServerConfig.securityContexts.seccompProfile.title') }}
         </h4>
         <Checkbox
-          v-model="seccompProfileEnabled"
+          v-model:value="seccompProfileEnabled"
           :mode="mode"
           :data-testid="`ps-config-security-context-container-${configType}-seccompProfile-enabled-input`"
           label-key="kubewarden.policyServerConfig.securityContexts.seccompProfile.inputEnabledLabel"
-          @input="seccompProfileEnabled = $event"
+          @update:value="seccompProfileEnabled = $event"
         />
       </div>
     </div>
@@ -97,21 +97,21 @@ export default {
       <div class="row mb-10">
         <div class="col span-6">
           <LabeledInput
-            v-model="localhostProfile"
+            v-model:value="localhostProfile"
             :data-testid="`ps-config-security-context-container-${configType}-seccompProfile-localhostProfile-input`"
             :mode="mode"
             :disabled="disabled || isLocalhostProfileDisabled"
             :required="isLocalhostProfileRequired"
             :label="t('kubewarden.policyServerConfig.securityContexts.seccompProfile.localhostProfile.label')"
             :placeholder="t('kubewarden.policyServerConfig.securityContexts.seccompProfile.localhostProfile.placeholder')"
-            @input="updateData"
+            @update:value="updateData"
           />
         </div>
       </div>
       <div class="row">
         <div class="col span-6">
           <LabeledSelect
-            v-model="type"
+            v-model:value="type"
             :data-testid="`ps-config-security-context-container-${configType}-seccompProfile-type-input`"
             :mode="mode"
             :options="seccompProfileTypeOptions"

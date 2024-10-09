@@ -88,9 +88,9 @@ export default {
     <div class="mb-20">
       <h3>{{ t('namespace.resources') }}</h3>
     </div>
-    <ResourceTabs v-model="value" data-testid="kw-policy-detail-tabs" :mode="mode" :need-related="hasRelationships">
+    <ResourceTabs :value="value" data-testid="kw-policy-detail-tabs" :mode="mode" :need-related="hasRelationships">
       <Tab v-if="policyReadme" name="policy-readme" label="Readme" :weight="99">
-        <Markdown v-model="policyReadme" data-testid="kw-policy-detail-readme" />
+        <Markdown v-model:value="policyReadme" data-testid="kw-policy-detail-readme" />
       </Tab>
 
       <Tab v-if="hasRules" name="policy-rules" label="Rules" :weight="98">

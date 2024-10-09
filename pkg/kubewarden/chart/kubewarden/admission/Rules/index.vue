@@ -1,7 +1,6 @@
 <script>
 import { _CREATE, _VIEW } from '@shell/config/query-params';
 import { SCHEMA } from '@shell/config/types';
-import { removeAt } from '@shell/utils/array';
 
 import Loading from '@shell/components/Loading';
 
@@ -85,7 +84,7 @@ export default {
     },
 
     removeRule(index) {
-      removeAt(this.rules, index);
+      this.rules.splice(index, 1);
     }
   }
 };
@@ -97,7 +96,7 @@ export default {
     <div v-for="(rule, index) in rules" :key="'filtered-rule-' + index">
       <Rule
         ref="lastRule"
-        v-model="rules[index]"
+        v-model:value="rules[index]"
         :data-testid="`kw-policy-rules-rule-${ index }`"
         :disabled="disabledRules"
         :mode="mode"

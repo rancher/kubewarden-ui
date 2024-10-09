@@ -12,6 +12,8 @@ export default {
     }
   },
 
+  async fetch() {},
+
   computed: {
     canShow() {
       if ( !isEmpty(this.summary) ) {
@@ -91,26 +93,24 @@ export default {
 </script>
 
 <template>
-  <!-- <Loading v-if="$fetchState.pending" mode="relative" /> -->
+  <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-if="canShow" class="pr-summary">
-    <v-popover
+    <VDropdown
       class="text-center hand"
       placement="top"
       :open-group="value.id"
       trigger="click"
       offset="1"
     >
-      <template>
-        <div class="pr-summary__container">
-          <div v-for="obj in summaryParts" :key="`${obj.key}-badge`">
-            <div v-if="obj.value" class="badge" :class="{[obj.bgColor]: true}">
-              <span v-clean-tooltip="obj.label">{{ obj.value }}</span>
-            </div>
+      <div class="pr-summary__container">
+        <div v-for="obj in summaryParts" :key="`${obj.key}-badge`">
+          <div v-if="obj.value" class="badge" :class="{[obj.bgColor]: true}">
+            <span v-clean-tooltip="obj.label">{{ obj.value }}</span>
           </div>
         </div>
-      </template>
+      </div>
 
-      <template #popover>
+      <template #popper>
         <div class="pr-summary__content">
           <div>
             <div v-for="obj in summaryParts" :key="obj.key" class="counts">
@@ -124,7 +124,7 @@ export default {
           </div>
         </div>
       </template>
-    </v-popover>
+    </VDropdown>
   </div>
   <div v-else></div>
 </template>

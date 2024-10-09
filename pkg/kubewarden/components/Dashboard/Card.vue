@@ -27,18 +27,18 @@ export default {
     :class="setLoading"
   >
     <div class="d-header">
-      <n-link :to="card.link">
+      <router-link :to="card.link">
         <h1>
           {{ t(card.title) }}
         </h1>
-      </n-link>
+      </router-link>
     </div>
 
     <p v-clean-html="t(card.description)" />
 
-    <n-link class="btn role-secondary" :to="card.cta">
+    <router-link class="btn role-secondary" :to="card.cta">
       {{ t(card.linkText) }}
-    </n-link>
+    </router-link>
 
     <hr>
 

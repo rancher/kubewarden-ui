@@ -79,7 +79,7 @@ export default {
   methods: {
     clearKind() {
       if ( !isEmpty(this.value.kind) ) {
-        this.$set(this.value, 'kind', null);
+        this.value.kind = null;
       }
     },
 
@@ -113,7 +113,7 @@ export default {
   >
     <div class="col span-4">
       <LabeledSelect
-        v-model="value.apiVersion"
+        v-model:value="value.apiVersion"
         data-testid="kw-policy-context-resource-apiversion-select"
         :disabled="disabled"
         :clearable="false"
@@ -129,7 +129,7 @@ export default {
 
     <div class="col span-4">
       <LabeledSelect
-        v-model="value.kind"
+        v-model:value="value.kind"
         data-testid="kw-policy-context-resource-kind-select"
         :disabled="disabled"
         :clearable="false"

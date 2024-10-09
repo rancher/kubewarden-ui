@@ -27,7 +27,7 @@ export default {
   <div>
     <div class="row mb-20">
       <Checkbox
-        v-model="value['kubewarden-defaults'].recommendedPolicies.enabled"
+        v-model:value="value['kubewarden-defaults'].recommendedPolicies.enabled"
         label="Enable the Recommended Policies"
         tooltip="The chart allows the user to install some recommended policies to enforce some best practice security checks."
       />

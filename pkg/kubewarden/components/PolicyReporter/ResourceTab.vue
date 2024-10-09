@@ -154,102 +154,100 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-else class="pr-tab__container">
-    <template>
-      <SortableTable
-        :rows="reports"
-        :headers="tableHeaders"
-        :table-actions="false"
-        :row-actions="false"
-        key-field="uid"
-        :group-by="isNamespaceResource ? 'kind' : null"
-        :sub-expandable="true"
-        :sub-expand-column="true"
-        :sub-rows="true"
-        :paging="true"
-        :rows-per-page="25"
-        :extra-search-fields="['summary']"
-        default-sort-by="status"
+    <SortableTable
+      :rows="reports"
+      :headers="tableHeaders"
+      :table-actions="false"
+      :row-actions="false"
+      key-field="uid"
+      :group-by="isNamespaceResource ? 'kind' : null"
+      :sub-expandable="true"
+      :sub-expand-column="true"
+      :sub-rows="true"
+      :paging="true"
+      :rows-per-page="25"
+      :extra-search-fields="['summary']"
+      default-sort-by="status"
+    >
+      <template
+        v-if="isNamespaceResource"
+        #col:kind="{row}"
       >
-        <template
-          v-if="isNamespaceResource"
-          #col:kind="{row}"
-        >
-          <td>{{ getResourceValue(row, 'kind', true) }}</td>
-        </template>
-        <template
-          v-if="isNamespaceResource"
-          #col:name="{row}"
-        >
-          <td>
-            <template v-if="canGetResourceLink(row)">
-              <n-link :to="getResourceLink(row)">
-                <span>{{ getResourceValue(row, 'name', true) }}</span>
-              </n-link>
-            </template>
-            <template v-else>
+        <td>{{ getResourceValue(row, 'kind', true) }}</td>
+      </template>
+      <template
+        v-if="isNamespaceResource"
+        #col:name="{row}"
+      >
+        <td>
+          <template v-if="canGetResourceLink(row)">
+            <router-link :to="getResourceLink(row)">
               <span>{{ getResourceValue(row, 'name', true) }}</span>
-            </template>
-          </td>
-        </template>
+            </router-link>
+          </template>
+          <template v-else>
+            <span>{{ getResourceValue(row, 'name', true) }}</span>
+          </template>
+        </td>
+      </template>
 
-        <template #col:policy="{row}">
-          <td v-if="row.policy && row.policyName">
-            <template v-if="canGetKubewardenLinks">
-              <n-link :to="getPolicyLink(row)">
-                <span>{{ row.policyName }}</span>
-              </n-link>
-            </template>
-            <template v-else>
+      <template #col:policy="{row}">
+        <td v-if="row.policy && row.policyName">
+          <template v-if="canGetKubewardenLinks">
+            <router-link :to="getPolicyLink(row)">
               <span>{{ row.policyName }}</span>
-            </template>
-          </td>
-        </template>
-        <template #col:severity="{row}">
-          <td>
-            <BadgeState
-              :label="getResourceValue(row, 'severity')"
-              :color="severityColor(row)"
-            />
-          </td>
-        </template>
-        <template #col:status="{row}">
-          <td>
-            <BadgeState
-              :label="getResourceValue(row, 'result')"
-              :color="statusColor(row)"
-            />
-          </td>
-        </template>
+            </router-link>
+          </template>
+          <template v-else>
+            <span>{{ row.policyName }}</span>
+          </template>
+        </td>
+      </template>
+      <template #col:severity="{row}">
+        <td>
+          <BadgeState
+            :label="getResourceValue(row, 'severity')"
+            :color="severityColor(row)"
+          />
+        </td>
+      </template>
+      <template #col:status="{row}">
+        <td>
+          <BadgeState
+            :label="getResourceValue(row, 'result')"
+            :color="statusColor(row)"
+          />
+        </td>
+      </template>
 
-        <!-- Sub-rows -->
-        <template #sub-row="{row, fullColspan}">
-          <td :colspan="fullColspan" class="pr-tab__sub-row">
-            <Banner v-if="row.message" color="info" class="message">
-              <span class="text-muted">{{ t('kubewarden.policyReporter.headers.policyReportsTab.message.title') }}:</span>
-              <span>{{ row.message }}</span>
-            </Banner>
-            <div class="details">
-              <section class="col">
-                <div class="title">
-                  {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.mutating') }}
-                </div>
-                <span>
-                  {{ row.properties['mutating'] || '-' }}
-                </span>
-              </section>
-              <section class="col">
-                <div class="title">
-                  {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.validating') }}
-                </div>
-                <span>
-                  {{ row.properties['validating'] || '-' }}
-                </span>
-              </section>
-            </div>
-          </td>
-        </template>
-      </SortableTable>
-    </template>
+      <!-- Sub-rows -->
+      <template #sub-row="{row, fullColspan}">
+        <td :colspan="fullColspan" class="pr-tab__sub-row">
+          <Banner v-if="row.message" color="info" class="message">
+            <span class="text-muted">{{ t('kubewarden.policyReporter.headers.policyReportsTab.message.title') }}:</span>
+            <span>{{ row.message }}</span>
+          </Banner>
+          <div class="details">
+            <section class="col">
+              <div class="title">
+                {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.mutating') }}
+              </div>
+              <span>
+                {{ row.properties['mutating'] || '-' }}
+              </span>
+            </section>
+            <section class="col">
+              <div class="title">
+                {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.validating') }}
+              </div>
+              <span>
+                {{ row.properties['validating'] || '-' }}
+              </span>
+            </section>
+          </div>
+        </td>
+      </template>
+    </SortableTable>
   </div>
 </template>
 

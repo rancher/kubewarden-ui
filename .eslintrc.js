@@ -8,10 +8,8 @@ module.exports = {
   extends: [
     'standard',
     'eslint:recommended',
-    '@nuxtjs/eslint-config-typescript',
     'plugin:cypress/recommended'
   ],
-  // add your custom rules here
   rules: {
     'dot-notation':                   'off',
     'generator-star-spacing':         'off',

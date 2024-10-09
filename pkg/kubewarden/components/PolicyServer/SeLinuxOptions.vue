@@ -65,52 +65,52 @@ export default {
           {{ t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.title') }}
         </h4>
         <LabeledInput
-          v-model="level"
+          v-model:value="level"
           :data-testid="`ps-config-security-context-${configType}-seLinuxOptions-level-input`"
           :mode="mode"
           :disabled="disabled"
           :label="t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.level.label')"
           :placeholder="t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.level.placeholder')"
-          @input="updateData($event)"
+          @update:value="updateData($event)"
         />
       </div>
     </div>
     <div class="row mb-10">
       <div class="col span-6">
         <LabeledInput
-          v-model="role"
+          v-model:value="role"
           :data-testid="`ps-config-security-context-${configType}-seLinuxOptions-role-input`"
           :mode="mode"
           :disabled="disabled"
           :label="t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.role.label')"
           :placeholder="t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.role.placeholder')"
-          @input="updateData($event)"
+          @update:value="updateData($event)"
         />
       </div>
     </div>
     <div class="row mb-10">
       <div class="col span-6">
         <LabeledInput
-          v-model="type"
+          v-model:value="type"
           :data-testid="`ps-config-security-context-${configType}-seLinuxOptions-type-input`"
           :mode="mode"
           :disabled="disabled"
           :label="t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.type.label')"
           :placeholder="t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.type.placeholder')"
-          @input="updateData($event)"
+          @update:value="updateData($event)"
         />
       </div>
     </div>
     <div class="row mb-40">
       <div class="col span-6">
         <LabeledInput
-          v-model="user"
+          v-model:value="user"
           :data-testid="`ps-config-security-context-${configType}-seLinuxOptions-user-input`"
           :mode="mode"
           :disabled="disabled"
           :label="t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.user.label')"
           :placeholder="t('kubewarden.policyServerConfig.securityContexts.seLinuxOptions.user.placeholder')"
-          @input="updateData($event)"
+          @update:value="updateData($event)"
         />
       </div>
     </div>
