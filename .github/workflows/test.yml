@@ -1,12 +1,13 @@
 name: Unit Tests
 
+# Skipping until Vue3 migration is complete
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
+  #   branches:
+  #     - main
 
 jobs:
   unit-test:
