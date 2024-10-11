@@ -1,4 +1,4 @@
-[![E2E](https://github.com/kubewarden/ui/actions/workflows/playwright.yml/badge.svg)](https://github.com/kubewarden/ui/actions/workflows/playwright.yml)
+[![E2E](https://github.com/rancher/kubewarden-ui/actions/workflows/playwright.yml/badge.svg)](https://github.com/rancher/kubewarden-ui/actions/workflows/playwright.yml)
 
 # Kubewarden UI
 
