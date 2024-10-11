@@ -1,10 +1,6 @@
 import { importTypes } from '@rancher/auto-import';
-import {
-  IPlugin, TableColumnLocation, TabLocation, PanelLocation, OnNavToPackage
-} from '@shell/core/types';
-import {
-  NAMESPACE, POD, WORKLOAD_TYPES, INGRESS, SERVICE
-} from '@shell/config/types';
+import { TableColumnLocation, TabLocation, PanelLocation, OnNavToPackage } from '@shell/core/types';
+import { NAMESPACE, POD, WORKLOAD_TYPES, INGRESS, SERVICE } from '@shell/config/types';
 
 import kubewardenRoutes from './routes/kubewarden-routes';
 import kubewardenStore from './store/kubewarden';
@@ -20,7 +16,7 @@ const onEnter: OnNavToPackage = async(store: any) => {
 };
 
 // Init the package
-export default function($plugin: IPlugin, args: any) {
+export default function($plugin: any, args: any) {
   // Auto-import model, detail, edit from the folders
   importTypes($plugin);
 

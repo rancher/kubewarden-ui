@@ -53,7 +53,7 @@
     "./**/*.tsx",
     "./**/*.vue",
     "../../node_modules/@rancher/shell/core/types.ts"
-, "models/policies.kubewarden.io.policyserver.js", "models/policies.kubewarden.io.clusteradmissionpolicy.js", "models/policies.kubewarden.io.admissionpolicy.js", "components/Questions/Question.js"  ],
+  ],
   "exclude": [
     "node_modules"
   ]
