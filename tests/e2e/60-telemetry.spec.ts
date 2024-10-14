@@ -5,9 +5,7 @@ import { RancherUI } from './components/rancher-ui'
 
 // OpenTelemetry
 const otelRepo: ChartRepo = { name: 'open-telemetry', url: 'https://open-telemetry.github.io/opentelemetry-helm-charts' }
-// In 0.70.0 (opentelemetry-collector-contrib:109) Log is redirected to file in otc-container, which breaks "Everything is ready." check
-// Pin to <0.69.0 until https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/35474 is out
-const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator', version: '0.69.0' }
+const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator' }
 // Jaeger Tracing
 const jaegerRepo: ChartRepo = { name: 'jaegertracing', url: 'https://jaegertracing.github.io/helm-charts' }
 const jaegerChart: Chart = { title: 'jaeger-operator', name: 'jaeger-operator', namespace: 'jaeger', check: 'jaeger-operator' }
