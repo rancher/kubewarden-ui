@@ -88,7 +88,7 @@ export default {
 
   watch: {
     isNamespaceNew(neu) {
-      this.$set(this.value, 'isNamespaceNew', neu);
+      this.value.isNamespaceNew = neu;
     }
   },
 
@@ -188,7 +188,7 @@ export default {
       </div>
       <div class="col span-6">
         <LabeledSelect
-          v-model="policy.spec.policyServer"
+          v-model:value="policy.spec.policyServer"
           data-testid="kw-policy-general-ps-input"
           :value="value"
           :mode="mode"
@@ -203,7 +203,7 @@ export default {
       <div class="row mb-20">
         <div v-if="isCustom" class="col span-12">
           <LabeledInput
-            v-model="policy.spec.module"
+            v-model:value="policy.spec.module"
             data-testid="kw-policy-general-module-input"
             :mode="mode"
             :label="t('kubewarden.policyConfig.module.label')"
@@ -216,7 +216,7 @@ export default {
       <div class="row mb-20">
         <div class="col span-6">
           <RadioGroup
-            v-model="policy.spec.mode"
+            v-model:value="policy.spec.mode"
             data-testid="kw-policy-general-mode-input"
             name="mode"
             :disabled="modeDisabled"
@@ -235,7 +235,7 @@ export default {
         </div>
         <div class="col span-6">
           <RadioGroup
-            v-model="policy.spec.backgroundAudit"
+            v-model:value="policy.spec.backgroundAudit"
             data-testid="kw-policy-general-background-audit-input"
             name="mode"
             :options="[true, false]"

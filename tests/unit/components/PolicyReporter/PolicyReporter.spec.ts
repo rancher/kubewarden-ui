@@ -77,7 +77,7 @@ describe('component: PolicyReporter', () => {
         return defaultData;
       },
       computed: defaultComputed,
-      stubs:    { 'n-link': { template: '<span />' } }
+      stubs:    { 'router-link': { template: '<span />' } }
     });
 
     const banner = wrapper.find('[data-testid="kw-pr-noschema-banner"]');

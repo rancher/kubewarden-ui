@@ -16,15 +16,11 @@ export default {
     },
     addLabel: {
       type: String,
-      default() {
-        return this.$store.getters['i18n/t']('generic.add');
-      },
+      default: 'Add',
     },
     removeLabel: {
       type: String,
-      default() {
-        return this.$store.getters['i18n/t']('generic.remove');
-      },
+      default: 'Remove',
     },
     inputLabel: {
       type:    String,
@@ -45,11 +41,11 @@ export default {
   methods: {
     handleArrayListUpdate(data) {
       this.arrayListInteger = data;
-      this.$emit('input', this.arrayListInteger);
+      this.$emit('update:value', this.arrayListInteger);
     },
     updateRow(index, value) {
       this.arrayListInteger.splice(index, 1, parseInt(value));
-      this.$emit('input', this.arrayListInteger);
+      this.$emit('update:value', this.arrayListInteger);
     }
   }
 };
@@ -64,18 +60,18 @@ export default {
       :add-label="addLabel"
       :disabled="disabled"
       :default-add-value="0"
-      @input="handleArrayListUpdate"
+      @update:value="handleArrayListUpdate"
     >
       <template v-slot:columns="scope">
         <LabeledInput
-          v-model.number="scope.row.value"
+          v-model:value.number="scope.row.value"
           data-testid="array-list-integer-input"
           type="number"
           min="0"
           :mode="mode"
           :disabled="disabled"
           :label="inputLabel"
-          @input="updateRow(scope.i, $event)"
+          @update:value="updateRow(scope.i, $event)"
         />
       </template>
     </ArrayList>
@@ -83,7 +79,7 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-::v-deep .unlabeled-select {
+:deep(.unlabeled-select) {
     height: 61px;
 }
 </style>

@@ -94,8 +94,8 @@ export default {
     },
 
     resetFilter() {
-      this.$set(this, 'resources', null);
-      this.$set(this, 'mode', 'All');
+      this.resources = null;
+      this.mode = 'All';
     }
   }
 };
@@ -105,7 +105,7 @@ export default {
   <div>
     <div class="filter">
       <LabeledSelect
-        v-model="resources"
+        v-model:value="resources"
         :clearable="true"
         :taggable="true"
         :multiple="true"
@@ -114,7 +114,7 @@ export default {
         :options="resourceOptions"
       />
       <LabeledSelect
-        v-model="mode"
+        v-model:value="mode"
         :clearable="true"
         :searchable="false"
         :options="modeOptions"

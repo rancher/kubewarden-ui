@@ -281,7 +281,7 @@ export default {
         >
           <span data-testid="kw-install-ag-warning">{{ t('kubewarden.dashboard.prerequisites.airGapped.warning') }}</span>
         </Banner>
-        <Markdown v-model="docs.airgap" />
+        <Markdown v-model:value="docs.airgap" />
       </template>
 
       <!-- Non Air-Gapped -->

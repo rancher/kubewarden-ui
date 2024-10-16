@@ -63,14 +63,14 @@ export default {
     <div class="row mb-10">
       <div class="col span-6">
         <ArrayList
-          v-model="add"
+          v-model:value="add"
           :data-testid="`ps-config-security-context-${configType}-capabilities-add-input`"
           :disabled="disabled"
           :mode="mode"
           :add-allowed="true"
           :add-label="t('kubewarden.policyServerConfig.securityContexts.capabilities.addLabel')"
           :value-placeholder="t('kubewarden.policyServerConfig.securityContexts.capabilities.placeholder')"
-          @input="updateData"
+          @update:value="updateData"
         />
       </div>
     </div>
@@ -80,14 +80,14 @@ export default {
     <div class="row mb-40">
       <div class="col span-6">
         <ArrayList
-          v-model="drop"
+          v-model:value="drop"
           :data-testid="`ps-config-security-context-${configType}-capabilities-drop-input`"
           :disabled="disabled"
           :mode="mode"
           :add-allowed="true"
           :add-label="t('kubewarden.policyServerConfig.securityContexts.capabilities.addLabel')"
           :value-placeholder="t('kubewarden.policyServerConfig.securityContexts.capabilities.placeholder')"
-          @input="updateData"
+          @update:value="updateData"
         />
       </div>
     </div>
