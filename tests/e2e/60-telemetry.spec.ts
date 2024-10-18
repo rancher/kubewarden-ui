@@ -221,9 +221,7 @@ test.describe('Metrics', () => {
         await ui.checkbox('Enable Metrics').uncheck()
       }
     })
-    // Workaround for https://github.com/rancher/rancher/issues/45167
-    await shell.run('kubectl patch clusterrole -n cattle-monitoring-system rancher-monitoring-crd-manager --type json -p \'[{"op": "add", "path": "/rules/0/verbs/-", "value":"list"}]\'')
-
+    // Uninstall monitoring
     await apps.deleteApp('rancher-monitoring')
     await apps.deleteApp('rancher-monitoring-crd')
     await shell.run('kubectl delete cm -n cattle-dashboards kubewarden-dashboard-policy kubewarden-dashboard-policyserver')
