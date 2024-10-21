@@ -112,7 +112,7 @@ export default {
     },
 
     handleInput(e, index) {
-      this.$set(this.matchConditions[index], 'expression', e);
+      this.matchConditions[index].expression = e;
       this.emitUpdate();
     }
   }
@@ -127,7 +127,7 @@ export default {
       <InfoBox>
         <div class="condition__name-container">
           <LabeledInput
-            v-model="condition.name"
+            v-model:value="condition.name"
             class="mb-10 condition__name"
             :data-testid="`kw-policy-match-condition-name-input-${ index }`"
             :mode="mode"
@@ -173,7 +173,7 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-::v-deep code {
+:deep(code) {
   padding: 2px;
 }
 
@@ -181,7 +181,7 @@ export default {
   flex: 1;
 }
 
-::v-deep .code-mirror  {
+:deep(.code-mirror)  {
   position: relative;
 
   .CodeMirror {

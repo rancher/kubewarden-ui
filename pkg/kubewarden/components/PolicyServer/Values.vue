@@ -1,4 +1,5 @@
 <script>
+import { defineAsyncComponent } from 'vue';
 import merge from 'lodash/merge';
 import isEmpty from 'lodash/isEmpty';
 import jsyaml from 'js-yaml';
@@ -39,7 +40,7 @@ export default {
     ButtonGroup, Loading, ResourceCancelModal, Tabbed, YamlEditor
   },
 
-  async fetch() {
+  async created() {
     const valuesYaml = this.generateYaml();
 
     this.currentYamlValues = valuesYaml;
@@ -114,8 +115,8 @@ export default {
 
     async loadValuesComponent() {
       if ( this.value.haveComponent('kubewarden/policy-server') ) {
-        this.valuesComponent = this.value.importComponent('kubewarden/policy-server');
-        await this.valuesComponent();
+        const importFn = this.value.importComponent('kubewarden/policy-server');
+        this.valuesComponent = defineAsyncComponent(importFn);
 
         this.showValuesComponent = true;
       }
@@ -147,7 +148,7 @@ export default {
   <div v-else class="scroll__container">
     <div v-if="isCreate || isEdit" class="step__values__controls">
       <ButtonGroup
-        v-model="yamlOption"
+        v-model:value="yamlOption"
         data-testid="kw-policy-server-config-yaml-option"
         :options="YAML_OPTIONS"
         inactive-class="bg-disabled btn-sm"
@@ -164,7 +165,7 @@ export default {
         >
           <component
             :is="valuesComponent"
-            v-model="values"
+            v-model:value="values"
             :resource="value"
             :mode="mode"
             @validation-passed="handleValidationPassed"
@@ -174,7 +175,7 @@ export default {
       <template v-else-if="(isCreate || isEdit) && !showForm">
         <YamlEditor
           ref="yaml"
-          v-model="currentYamlValues"
+          v-model:value="currentYamlValues"
           data-testid="kw-policy-server-config-yaml-editor"
           class="step__values__content"
           :scrolling="true"
@@ -204,7 +205,7 @@ export default {
   $margin: 10px;
   $logo: 60px;
 
-  ::v-deep .step-container {
+  :deep(.step-container) {
     height: auto;
   }
 
@@ -238,7 +239,7 @@ export default {
       &__content {
         flex: 1;
 
-        ::v-deep .tab-container {
+        :deep(.tab-container) {
           overflow: auto;
         }
       }

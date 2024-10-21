@@ -27,7 +27,7 @@ describe('MetricChecklist.vue', () => {
       propsData: { conflictingGrafanaDashboards },
       computed:  { hasKubewardenDashboards: () => false },
       stubs:     {
-        'n-link': { template: '<span />' },
+        'router-link': { template: '<span />' },
         Banner:   { template: '<span />' },
       },
     });
@@ -40,7 +40,7 @@ describe('MetricChecklist.vue', () => {
       propsData: { conflictingGrafanaDashboards: [] },
       computed:  { hasKubewardenDashboards: () => false },
       stubs:     {
-        'n-link': { template: '<span />' },
+        'router-link': { template: '<span />' },
         Banner:   { template: '<span />' },
       },
     });
@@ -55,7 +55,7 @@ describe('MetricChecklist.vue', () => {
       propsData: { conflictingGrafanaDashboards },
       computed:  { hasKubewardenDashboards: () => true }, // Simulate presence of KubeWarden dashboards
       stubs:     {
-        'n-link': { template: '<span />' },
+        'router-link': { template: '<span />' },
         Banner:   { template: '<span />' },
       },
     });
@@ -71,7 +71,7 @@ describe('MetricChecklist.vue', () => {
         conflictingGrafanaDashboards: [],
       },
       stubs: {
-        'n-link': { template: '<span />' },
+        'router-link': { template: '<span />' },
         Banner:   { template: '<span />' },
       },
     });
@@ -87,7 +87,7 @@ describe('MetricChecklist.vue', () => {
         conflictingGrafanaDashboards: [],
       },
       stubs: {
-        'n-link': { template: '<span />' },
+        'router-link': { template: '<span />' },
         Banner:   { template: '<span />' },
       },
     });
@@ -103,7 +103,7 @@ describe('MetricChecklist.vue', () => {
         conflictingGrafanaDashboards: [{ metadata: { name: 'Dashboard1' } }],
       },
       stubs: {
-        'n-link': { template: '<span />' },
+        'router-link': { template: '<span />' },
         Banner:   { template: '<span />' },
       },
     });
@@ -119,7 +119,7 @@ describe('MetricChecklist.vue', () => {
         conflictingGrafanaDashboards: [],
       },
       stubs: {
-        'n-link': { template: '<span />' },
+        'router-link': { template: '<span />' },
         Banner:   { template: '<span />' },
       },
     });
@@ -138,7 +138,7 @@ describe('MetricChecklist.vue', () => {
       },
       computed: { hasKubewardenDashboards: () => true },
       stubs:    {
-        'n-link': { template: '<span />' },
+        'router-link': { template: '<span />' },
         Banner:   { template: '<span />' },
       },
     });

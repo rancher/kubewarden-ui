@@ -305,7 +305,7 @@ export default ({
 
           // Then, set or update the remaining keys
           Object.keys(out.spec).forEach((key) => {
-            this.$set(this.value.spec, key, out.spec[key]);
+            this.value.spec.key = out.spec[key];
           });
         } else {
           merge(this.value, out);
@@ -455,9 +455,9 @@ export default ({
       this.type = type;
 
       if ( this.customPolicy ) {
-        this.$set(this, 'hasCustomPolicy', true);
+        this.hasCustomPolicy = true;
       } else {
-        this.$set(this, 'hasCustomPolicy', false);
+        this.hasCustomPolicy = false;
       }
 
       this.policyQuestions();
@@ -506,7 +506,7 @@ export default ({
     <Wizard
       v-if="value && !loadingPackages"
       ref="wizard"
-      v-model="value"
+      :value="value"
       data-testid="kw-policy-create-wizard"
       :errors="errors"
       :steps="steps"
@@ -573,11 +573,11 @@ $height: 110px;
 $margin: 10px;
 $color: var(--body-text) !important;
 
-::v-deep .header {
+:deep(.header) {
   display: none;
 }
 
-::v-deep .controls-row {
+:deep(.controls-row) {
   position: sticky;
   width: auto;
 
@@ -586,11 +586,11 @@ $color: var(--body-text) !important;
   }
 }
 
-::v-deep .custom {
+:deep(.custom) {
   min-height: 110px;
 }
 
-::v-deep .subtype {
+:deep(.subtype) {
   height: $height;
   margin: $margin;
   position: relative;
@@ -606,7 +606,7 @@ $color: var(--body-text) !important;
     text-decoration: none !important;
   }
 
-  &__metadata {
+  .subtype__metadata {
     padding: $margin;
 
     &__label, &__description {
@@ -614,7 +614,7 @@ $color: var(--body-text) !important;
     }
   }
 
-  &__badge {
+  .subtype__badge {
     position: absolute;
     right: 0;
     top: 0;
@@ -633,7 +633,7 @@ $color: var(--body-text) !important;
     }
   }
 
-  &__label {
+  .subtype__label {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -641,7 +641,7 @@ $color: var(--body-text) !important;
     line-height: initial;
   }
 
-  &__description {
+  .subtype__description {
     margin-right: $margin;
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -653,7 +653,7 @@ $color: var(--body-text) !important;
   }
 }
 
-::v-deep .footer-error {
+:deep(.footer-error) {
   margin-top: 15px;
 }
 

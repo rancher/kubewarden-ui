@@ -95,7 +95,7 @@ export default {
 </script>
 
 <template>
-  <v-popover
+  <VDropdown
     v-if="show"
     class="text-center hand"
     placement="top"
@@ -103,13 +103,16 @@ export default {
     :trigger="show ? 'click' : 'manual'"
     offset="1"
   >
-    <ProgressBarMulti :values="colorParts" class="mb-5" />
-    <n-link v-if="linkTo" :to="linkTo">
-      {{ displayLabel }}
-    </n-link>
-    <span v-else>{{ displayLabel }}</span>
+    <div class="column-content">
+      <ProgressBarMulti :values="colorParts" class="mb-5" />
+      <router-link v-if="linkTo" :to="linkTo">
+        {{ displayLabel }}
+      </router-link>
+      <span v-else>{{ displayLabel }}</span>
+    </div>
+    
 
-    <template #popover>
+    <template #popper>
       <table v-if="show" class="fixed">
         <tbody>
           <tr v-for="obj in stateParts" :key="obj.key">
@@ -123,24 +126,14 @@ export default {
         </tbody>
       </table>
     </template>
-  </v-popover>
+  </VDropdown>
   <div v-else class="text-center text-muted">
     &mdash;
   </div>
 </template>
 
 <style lang="scss">
-  .col-scale {
-    position: relative;
-
-    .trigger {
-      width: 100%;
-    }
-  }
-
-  .scale {
-    margin: 0;
-    padding: 0;
-    line-height: initial;
-  }
+.column-content {
+  width: 100px;
+}
 </style>

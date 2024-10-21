@@ -300,16 +300,19 @@ export default {
         question, variable, index, event
       } = e;
 
-      const out = this.value[question.variable];
-      const deepProp = this.getProperty(this.value, question.variable);
+      const questionValue = this.value[question.variable];
+      const nestedValue = this.getProperty(this.value, question.variable);
 
-      if ( deepProp ) {
-        this.$set(deepProp[index], [variable], event);
+      if (nestedValue) {
+        nestedValue[index][variable] = event;
+      } else if (questionValue) {
+        questionValue[index][variable] = event;
       } else {
-        this.$set(out[index], [variable], event);
+        // Handle the case where both nestedValue and questionValue are undefined
+        console.warn(`Unable to update sequence for question variable: ${ question.variable }`);
       }
 
-      if ( this.emit ) {
+      if (this.emit) {
         this.$emit('updated');
       }
     },
@@ -321,7 +324,7 @@ export default {
       const valuesObj = jsyaml.load(valuesYaml);
 
       if ( valuesObj ) {
-        this.$set(this.value[rootQuestion][index], [deepQuestion], valuesObj[deepQuestion]);
+        this.value[rootQuestion][index][deepQuestion] = valuesObj[deepQuestion];
       }
     },
 
@@ -334,7 +337,7 @@ export default {
 
       if ( Array.isArray($event.default) ) {
         if ( !this.value[$event.variable] && !$event.variable.includes('.') ) {
-          this.$set(this.value, [$event.variable], []);
+          this.value[$event.variable] = [];
         }
         /*
           If the sequence is nested within a subquestion, the $event.variable will
@@ -354,7 +357,7 @@ export default {
             const prop = parts[1];
 
             if ( root ) {
-              this.$set(root, [prop], []);
+              root[prop] = [];
 
               return root[prop].push(out);
             }
@@ -384,7 +387,7 @@ export default {
     },
 
     resetSequence($event) {
-      this.$set(this.value, [$event.variable], $event.default);
+      this.value[$event.variable] = $event.default;
     },
 
     /** Remove properties from this.value that only appear when an Enum condition is met */
@@ -623,7 +626,7 @@ export default {
             :mode="mode"
             :disabled="disabled"
             :chart-name="chartName"
-            @input="update(q.variable, $event)"
+            @update:value="update(q.variable, $event)"
             @seqInput="updateSequence($event)"
             @seqInputDeep="updateSequenceDeep($event)"
             @addSeq="addSequence($event)"
@@ -658,7 +661,7 @@ export default {
             :value="get(value, q.variable)"
             :disabled="disabled"
             :chart-name="chartName"
-            @input="update(q.variable, $event)"
+            @update:value="update(q.variable, $event)"
             @seqInput="updateSequence($event)"
             @seqInputDeep="updateSequenceDeep($event)"
             @addSeq="addSequence($event)"

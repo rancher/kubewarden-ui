@@ -4,6 +4,7 @@ import { _CREATE } from '@shell/config/query-params';
 import Loading from '@shell/components/Loading';
 import { Checkbox } from '@components/Form/Checkbox';
 import { LabeledInput } from '@components/Form/LabeledInput';
+
 import SeLinuxOptions from '../../../../components/PolicyServer/SeLinuxOptions.vue';
 import SeccompProfile from '../../../../components/PolicyServer/SeccompProfile.vue';
 import WindowsOptions from '../../../../components/PolicyServer/WindowsOptions.vue';
@@ -94,11 +95,11 @@ export default {
     <div class="row">
       <div class="col span-12 mb-40">
         <Checkbox
-          v-model="runAsNonRoot"
+          v-model:value="runAsNonRoot"
           :mode="mode"
           data-testid="ps-config-security-context-pod-runAsNonRoot-input"
           label-key="kubewarden.policyServerConfig.securityContexts.runAsNonRoot.label"
-          @input="updateData($event, 'runAsNonRoot')"
+          @update:value="updateData($event, 'runAsNonRoot')"
         />
       </div>
     </div>
@@ -109,14 +110,14 @@ export default {
           {{ t('kubewarden.policyServerConfig.securityContexts.fsGroup.label') }}
         </h4>
         <LabeledInput
-          v-model.number="fsGroup"
+          v-model:value.number="fsGroup"
           data-testid="ps-config-security-context-pod-fsGroup-input"
           type="number"
           min="0"
           :mode="mode"
           :disabled="disabledByOsWindows"
           :label="t('kubewarden.policyServerConfig.securityContexts.fsGroup.label')"
-          @input="updateData($event, 'fsGroup')"
+          @update:value="updateData($event, 'fsGroup')"
         />
       </div>
     </div>
@@ -127,13 +128,13 @@ export default {
           {{ t('kubewarden.policyServerConfig.securityContexts.fsGroupChangePolicy.label') }}
         </h4>
         <LabeledInput
-          v-model="fsGroupChangePolicy"
+          v-model:value="fsGroupChangePolicy"
           data-testid="ps-config-security-context-pod-fsGroupChangePolicy-input"
           :mode="mode"
           :disabled="disabledByOsWindows"
           :label="t('kubewarden.policyServerConfig.securityContexts.fsGroupChangePolicy.label')"
           :placeholder="t('kubewarden.policyServerConfig.securityContexts.fsGroupChangePolicy.placeholder')"
-          @input="updateData($event, 'fsGroupChangePolicy')"
+          @update:value="updateData($event, 'fsGroupChangePolicy')"
         />
       </div>
     </div>
@@ -144,14 +145,14 @@ export default {
           {{ t('kubewarden.policyServerConfig.securityContexts.runAsGroup') }}
         </h4>
         <LabeledInput
-          v-model.number="runAsGroup"
+          v-model:value.number="runAsGroup"
           data-testid="ps-config-security-context-pod-runAsGroup-input"
           type="number"
           min="0"
           :mode="mode"
           :disabled="disabledByOsWindows"
           :label="t('kubewarden.policyServerConfig.securityContexts.runAsGroup')"
-          @input="updateData($event, 'runAsGroup')"
+          @update:value="updateData($event, 'runAsGroup')"
         />
       </div>
     </div>
@@ -162,14 +163,14 @@ export default {
           {{ t('kubewarden.policyServerConfig.securityContexts.runAsUser') }}
         </h4>
         <LabeledInput
-          v-model.number="runAsUser"
+          v-model:value.number="runAsUser"
           data-testid="ps-config-security-context-pod-runAsUser-input"
           type="number"
           min="0"
           :mode="mode"
           :disabled="disabledByOsWindows"
           :label="t('kubewarden.policyServerConfig.securityContexts.runAsUser')"
-          @input="updateData($event, 'runAsUser')"
+          @update:value="updateData($event, 'runAsUser')"
         />
       </div>
     </div>
@@ -202,7 +203,7 @@ export default {
           :input-label="t('kubewarden.policyServerConfig.securityContexts.supplementalGroups.label')"
           :mode="mode"
           :disabled="disabledByOsWindows"
-          @input="updateData($event, 'supplementalGroups')"
+          @update:value="updateData($event, 'supplementalGroups')"
         />
       </div>
     </div>
@@ -220,7 +221,7 @@ export default {
           :input-placeholder-label="sysctlsInputPlaceholderLabel"
           :mode="mode"
           :disabled="disabledByOsWindows"
-          @input="updateData($event, 'sysctls')"
+          @update:value="updateData($event, 'sysctls')"
         />
       </div>
     </div>
