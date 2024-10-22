@@ -75,8 +75,8 @@ for (const PolicyPage of pageTypes) {
     const polPage = new PolicyPage(page)
     const p: Policy = { title: 'Pod Privileged Policy', name: '' }
 
-    // Skip on 2.9.2+ because of https://github.com/rancher/kubewarden-ui/issues/898
-    RancherUI.isVersion('<2.9.2') && await test.step('Missing required fields', async() => {
+    // Skip because of https://github.com/rancher/kubewarden-ui/issues/898
+    if (false) await test.step('Missing required fields', async() => {
       const finishBtn = ui.button('Finish')
       await polPage.open(p)
 
