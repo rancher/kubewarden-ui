@@ -114,13 +114,22 @@ export abstract class BasePolicyPage extends BasePage {
       await this.ui.button('Add ArtifactHub To Whitelist').click()
     }
 
+    // ArtifactHub error: https://github.com/kubewarden/kubewarden-controller/issues/911#issuecomment-2426954817
+    async handleRateLimitError() {
+      await this.ui.retry(async()=> {
+        await expect(this.cards({official:true, signed:true}).first()).toBeVisible({ timeout: 80_000 })
+      }, 'Artifact Hub: 429 Too Many Requests')
+    }
+
     @step
     async open(p: Policy, options?: { navigate?: boolean }) {
       if (options?.navigate !== false) {
         await this.goto()
         await this.ui.button('Create').click()
       }
+
       // Open requested policy
+      await this.handleRateLimitError()
       if (p.title === 'Custom Policy') {
         await this.ui.button('Create Custom Policy').click()
       } else {
