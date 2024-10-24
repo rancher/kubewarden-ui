@@ -20,12 +20,13 @@ const upMap: AppVersion[] = [
   // { app: 'v1.8.0', controller: '2.0.0', crds: '1.4.2', defaults: '1.8.0' },
   // { app: 'v1.9.0', controller: '2.0.5', crds: '1.4.4', defaults: '1.9.2' },
   // { app: 'v1.10.0', controller: '2.0.8', crds: '1.4.5', defaults: '1.9.3' },
-  { app: 'v1.11.0', controller: '2.0.10', crds: '1.4.6', defaults: '1.9.4' },
+  // { app: 'v1.11.0', controller: '2.0.10', crds: '1.4.6', defaults: '1.9.4' },
   { app: 'v1.12.0', controller: '2.0.11', crds: '1.5.0', defaults: '2.0.0' },
   { app: 'v1.13.0', controller: '2.1.0', crds: '1.5.1', defaults: '2.0.3' },
   { app: 'v1.14.0', controller: '2.2.1', crds: '1.6.0', defaults: '2.1.0' },
   { app: 'v1.15.0', controller: '2.3.1', crds: '1.7.0', defaults: '2.2.1' },
-  { app: 'v1.16.0', controller: '2.4.0', crds: '1.8.0', defaults: '2.3.0' },
+  { app: 'v1.16.0', controller: '2.4.0', crds: '1.8.0', defaults: '2.3.1' },
+  { app: 'v1.17.0', controller: '3.0.1', crds: '1.9.0', defaults: '2.4.0' },
 ]
 
 test('Initial rancher setup', async({ page, ui, nav }) => {
@@ -157,11 +158,13 @@ test('Whitelist Artifact Hub', async({ page, ui, nav }) => {
     // CAP
     await nav.capolicy()
     await ui.button('Create').click()
+    await cap.handleRateLimitError()
     await expect(cap.cards()).toHaveCount(capCount)
     await expect(cap.cards({ signed: true, official: true })).toHaveCount(capCount)
     // AP
     await nav.apolicy()
     await ui.button('Create').click()
+    await cap.handleRateLimitError()
     await expect(cap.cards()).toHaveCount(apCount)
     await expect(cap.cards({ signed: true, official: true })).toHaveCount(apCount)
 
@@ -176,6 +179,7 @@ test('Whitelist Artifact Hub', async({ page, ui, nav }) => {
   await test.step('Check Unofficial policies', async() => {
     await nav.capolicy()
     await ui.button('Create').click()
+    await cap.handleRateLimitError()
     // Display User policies
     await ui.checkbox('Show only official Kubewarden policies').uncheck()
     await expect(cap.cards().nth(capCount + 1)).toBeVisible()
