@@ -1,4 +1,5 @@
 import jsyaml from 'js-yaml';
+import semver from 'semver';
 
 import { colorForState, stateBackground, stateDisplay } from '@shell/plugins/dashboard-store/resource-class';
 import { get } from '@shell/utils/object';
@@ -36,28 +37,34 @@ export default class PolicyModel extends KubewardenModel {
     const cluster = this.$rootGetters['currentCluster']?.id || '_';
     const helmChart = this.metadata?.labels?.['helm.sh/chart'] || '';
 
-    if (helmChart && helmChart.includes('-')) {
-      const arr = helmChart.split('-');
+    if (helmChart) {
+      const parts = helmChart.split('-');
 
-      if (arr[arr.length - 1].includes('rc')) {
-        version = `${ arr[arr.length - 2] }-${ arr[arr.length - 1] }`;
-      } else {
-        version = arr[arr.length - 1];
+      // Start checking from the end of the array to find a valid semver
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const potentialVersion = parts.slice(i).join('-');
+
+        if (semver.valid(potentialVersion)) {
+          version = potentialVersion;
+          break;
+        }
       }
+
+      const query = {
+        [REPO_TYPE]: 'cluster',
+        [REPO]:      'kubewarden-charts',
+        [CHART]:     'kubewarden-defaults',
+        [VERSION]:   version
+      };
+  
+      return {
+        name:   'c-cluster-apps-charts-install',
+        params: { cluster },
+        query,
+      };
     }
 
-    const query = {
-      [REPO_TYPE]: 'cluster',
-      [REPO]:      'kubewarden-charts',
-      [CHART]:     'kubewarden-defaults',
-      [VERSION]:   version
-    };
-
-    return {
-      name:   'c-cluster-apps-charts-install',
-      params: { cluster },
-      query,
-    };
+    return null;
   }
 
   get isKubewardenDefaultPolicy() {
