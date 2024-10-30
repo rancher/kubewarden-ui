@@ -29,6 +29,12 @@ export default class ClusterAdmissionPolicy extends PolicyModel {
   }
 
   editPolicySettings() {
-    this.currentRouter().push(this.kubewardenDefaultsRoute);
+    const route = this.kubewardenDefaultsRoute;
+
+    if (route) {
+      this.currentRouter().push(route);
+    } else {
+      console.error('Could not determine the route to the Kubewarden Defaults chart.');
+    }
   }
 }
