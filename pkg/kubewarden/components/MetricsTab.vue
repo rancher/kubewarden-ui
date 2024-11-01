@@ -16,7 +16,7 @@ import DashboardMetrics from '@shell/components/DashboardMetrics';
 import Loading from '@shell/components/Loading';
 import { Banner } from '@components/Banner';
 
-import { KUBEWARDEN, KUBEWARDEN_CHARTS, KubewardenDashboardLabels, KubewardenDashboards } from '../types';
+import { KUBEWARDEN, KUBEWARDEN_CHARTS, KUBEWARDEN_CONFIGMAPS, KubewardenDashboardLabels, KubewardenDashboards } from '../types';
 import { handleGrowl } from '../utils/handle-growl';
 import { refreshCharts } from '../utils/chart';
 import { grafanaProxy } from '../modules/grafana';
@@ -210,6 +210,36 @@ export default {
       return this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
     },
 
+
+    controllerCollectorCM() {
+      const controllerAppName = this.controllerApp?.spec?.chart?.metadata?.annotations?.['catalog.cattle.io/release-name'] || this.controllerApp?.metadata?.name;
+
+      return this.allConfigMaps.find(cm => (
+        cm?.metadata?.name === KUBEWARDEN_CONFIGMAPS.COLLECTOR &&
+        cm?.metadata.annotations?.['meta.helm.sh/release-name'] === controllerAppName
+      ));
+    },
+
+    collectorYaml() {
+      if (this.controllerCollectorCM) {
+        const data = this.controllerCollectorCM.data?.['collector.yaml'];
+
+        if (data) {
+          try {
+            return jsyaml.load(data);
+          } catch (e) {
+            console.error('Error parsing collector.yaml', e);
+
+            return null;
+          }
+        }
+
+        return null;
+      }
+
+      return null;
+    },
+
     grafanaService() {
       const monitoringServices = this.allServices?.filter(svc => svc?.metadata?.labels?.['app.kubernetes.io/instance'] === 'rancher-monitoring');
 
@@ -227,6 +257,10 @@ export default {
         controllerNs:       this.controllerApp?.metadata?.namespace,
         allServiceMonitors: this.allServiceMonitors
       });
+    },
+
+    metricsEnabled() {
+      return this.collectorYaml?.service?.pipelines?.metrics;
     },
 
     monitoringApp() {
@@ -275,10 +309,9 @@ export default {
     },
 
     showChecklist() {
-      const monitoringEnabled = this.controllerApp?.spec?.values?.telemetry?.metrics?.enabled;
       const grafanaDashboardsInstalled = !isEmpty(this.kubewardenGrafanaDashboards);
 
-      return !this.openTelSvc || !this.monitoringApp || !this.kubewardenServiceMonitor || !monitoringEnabled || !grafanaDashboardsInstalled;
+      return !this.openTelSvc || !this.monitoringApp || !this.kubewardenServiceMonitor || !this.metricsEnabled || !grafanaDashboardsInstalled;
     }
   },
 

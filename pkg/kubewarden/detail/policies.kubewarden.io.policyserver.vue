@@ -15,6 +15,7 @@ import ResourceTable from '@shell/components/ResourceTable';
 import Tab from '@shell/components/Tabbed/Tab';
 
 import { RELATED_HEADERS } from '../config/table-headers';
+import { KUBEWARDEN } from '../types';
 
 import MetricsTab from '../components/MetricsTab';
 import TraceTable from '../components/TraceTable';
@@ -32,10 +33,6 @@ export default {
     mode: {
       type:    String,
       default: _CREATE,
-    },
-    resource: {
-      type:    String,
-      default: null
     },
     value: {
       type:     Object,
@@ -62,9 +59,10 @@ export default {
   data() {
     return {
       RELATED_HEADERS,
-      policyGauges:         null,
-      relatedPolicies:      null,
-      reloadRequired:       false,
+      policyGauges:     null,
+      relatedPolicies:  null,
+      reloadRequired:   false,
+      resource:         KUBEWARDEN.POLICY_SERVER
     };
   },
 

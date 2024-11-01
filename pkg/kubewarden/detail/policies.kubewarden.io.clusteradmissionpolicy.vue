@@ -1,6 +1,8 @@
 <script>
 import { _CREATE } from '@shell/config/query-params';
 
+import { KUBEWARDEN } from '../types';
+
 import PolicyDetail from '../components/Policies/PolicyDetail';
 
 export default {
@@ -11,19 +13,19 @@ export default {
       type:    String,
       default: _CREATE,
     },
-
-    resource: {
-      type:    String,
-      default: null
-    },
-
     value: {
       type:     Object,
       required: true,
     },
   },
 
-  components: { PolicyDetail }
+  components: { PolicyDetail },
+
+  data() {
+    return {
+      resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY
+    }
+  }
 };
 </script>
 
