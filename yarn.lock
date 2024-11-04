@@ -3116,6 +3116,16 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
+"@jsep-plugin/assignment@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.npmjs.org/@jsep-plugin/assignment/-/assignment-1.2.1.tgz#07277bdd7862451a865d391e2142efba33f46c9b"
+  integrity sha512-gaHqbubTi29aZpVbBlECRpmdia+L5/lh2BwtIJTmtxdbecEyyX/ejAOg7eQDGNvGOUmPY7Z2Yxdy9ioyH/VJeA==
+
+"@jsep-plugin/regex@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/@jsep-plugin/regex/-/regex-1.0.3.tgz#3aeaa2e5fa45d89de116aeafbfa41c95935b7f6d"
+  integrity sha512-XfZgry4DwEZvSFtS/6Y+R48D7qJYJK6R9/yJFyUFHCIUMEEHuJ4X95TDgJp5QkmzfLYvapMPzskV5HpIDrREug==
+
 "@kubernetes/client-node@^0.20.0":
   version "0.20.0"
   resolved "https://registry.yarnpkg.com/@kubernetes/client-node/-/client-node-0.20.0.tgz#4447ae27fd6eef3d4830a5a039f3b84ffd5c5913"
@@ -3231,10 +3241,10 @@
   resolved "https://registry.yarnpkg.com/@rancher/icons/-/icons-2.0.29.tgz#6546d69768c706bebd66bfa73b36aef3d105987a"
   integrity sha512-qBBqfazS9y5VjV7fJDPNXmxd9AP/2uiE05mKFWP41kpbO+tEb62RnUBXCm14XLeScDZQcOuiAKVHMmvCFzF0BA==
 
-"@rancher/shell@3.0.0-rc.9":
-  version "3.0.0-rc.9"
-  resolved "https://registry.npmjs.org/@rancher/shell/-/shell-3.0.0-rc.9.tgz#25a76cc6e92c00f06123a9fdfadc8f47846e8f05"
-  integrity sha512-CvrIrAgEJJMCX+hVZaH2PC/hSYo6+mcm2+Vawk5UMwhIuo92VNjrPKWXNUQ7ys1iYWKoS0kj8+SoX4dtSeVDyw==
+"@rancher/shell@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/@rancher/shell/-/shell-3.0.0.tgz#2b82ba7695ab8a125c6a911648102ea8ab199101"
+  integrity sha512-FuFxLZQS0UFtGe3z42ISPNGd1+9nPmWnpWhhtGjkvJmsvMWSeNptGY/jGOSuyT5/NUdfzyp0wmnkp1WepsLGjw==
   dependencies:
     "@aws-sdk/client-ec2" "3.658.1"
     "@aws-sdk/client-eks" "3.1.0"
@@ -3283,7 +3293,7 @@
     dagre-d3 "0.6.4"
     dayjs "1.8.29"
     diff2html "3.4.24"
-    dompurify "2.4.5"
+    dompurify "2.5.4"
     element-matches "^0.1.2"
     eslint "7.32.0"
     eslint-config-standard "16.0.3"
@@ -3311,7 +3321,7 @@
     js-yaml "4.1.0"
     js-yaml-loader "1.2.2"
     jsdiff "1.1.1"
-    jsonpath-plus "6.0.1"
+    jsonpath-plus "10.0.0"
     jsrsasign "10.5.25"
     jszip "3.8.0"
     lodash "4.17.21"
@@ -7772,10 +7782,10 @@ domhandler@^4.0.0, domhandler@^4.2.0, domhandler@^4.3.1:
   dependencies:
     domelementtype "^2.2.0"
 
-dompurify@2.4.5:
-  version "2.4.5"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-2.4.5.tgz#0e89a27601f0bad978f9a924e7a05d5d2cccdd87"
-  integrity sha512-jggCCd+8Iqp4Tsz0nIvpcb22InKEBrGz5dw3EQJMs8HPJDsKbFIO3STYtAvCfDx26Muevn1MHVI0XxjgFfmiSA==
+dompurify@2.5.4:
+  version "2.5.4"
+  resolved "https://registry.npmjs.org/dompurify/-/dompurify-2.5.4.tgz#347e91070963b22db31c7c8d0ce9a0a2c3c08746"
+  integrity sha512-l5NNozANzaLPPe0XaAwvg3uZcHtDBnziX/HjsY1UcDj1MxTK8Dd0Kv096jyPK5HRzs/XM5IMj20dW8Fk+HnbUA==
 
 domutils@^2.5.2, domutils@^2.8.0:
   version "2.8.0"
@@ -11154,6 +11164,11 @@ jsdom@^20.0.0:
     ws "^8.11.0"
     xml-name-validator "^4.0.0"
 
+jsep@^1.3.9:
+  version "1.3.9"
+  resolved "https://registry.npmjs.org/jsep/-/jsep-1.3.9.tgz#8ce42df80ee9c1b39e52d0dd062a465342f35440"
+  integrity sha512-i1rBX5N7VPl0eYb6+mHNp52sEuaS2Wi8CDYx1X5sn9naevL78+265XJqy1qENEk7mRKwS06NHpUqiBwR7qeodw==
+
 jsesc@^2.5.1:
   version "2.5.2"
   resolved "https://registry.yarnpkg.com/jsesc/-/jsesc-2.5.2.tgz#80564d2e483dacf6e8ef209650a67df3f0c283a4"
@@ -11234,10 +11249,14 @@ jsonlint-mod@^1.7.6:
     chalk "^2.4.2"
     underscore "^1.9.1"
 
-jsonpath-plus@6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/jsonpath-plus/-/jsonpath-plus-6.0.1.tgz#9a3e16cedadfab07a3d8dc4e8cd5df4ed8f49c4d"
-  integrity sha512-EvGovdvau6FyLexFH2OeXfIITlgIbgZoAZe3usiySeaIDm5QS+A10DKNpaPBBqqRSZr2HN6HVNXxtwUAr2apEw==
+jsonpath-plus@10.0.0:
+  version "10.0.0"
+  resolved "https://registry.npmjs.org/jsonpath-plus/-/jsonpath-plus-10.0.0.tgz#7a747d47e20a27867dbbc80b57fd554788b91474"
+  integrity sha512-v7j76HGp/ibKlXYeZ7UrfCLSNDaBWuJMA0GaMjA4sZJtCtY89qgPyToDDcl2zdeHh4B5q/B3g2pQdW76fOg/dA==
+  dependencies:
+    "@jsep-plugin/assignment" "^1.2.1"
+    "@jsep-plugin/regex" "^1.0.3"
+    jsep "^1.3.9"
 
 jsonpath-plus@^7.2.0:
   version "7.2.0"
