@@ -29,10 +29,6 @@ export const KUBEWARDEN = {
   POLICY_SERVER:            'policies.kubewarden.io.policyserver'
 };
 
-export const KUBEWARDEN_CONFIGMAPS = {
-  COLLECTOR: 'kubewarden-collector',
-}
-
 /* eslint-disable no-unused-vars */
 export enum KUBEWARDEN_CRD {
   ADMISSION_POLICY = 'admissionpolicies.policies.kubewarden.io',

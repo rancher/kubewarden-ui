@@ -18,7 +18,7 @@ export default {
       type:    Object,
       default: null
     },
-    tracingEnabled: {
+    tracingConfiguration: {
       type:    Object,
       default: null
     },
@@ -51,6 +51,14 @@ export default {
 
     controllerLinkDisabled() {
       return !this.openTelSvc || !this.jaegerQuerySvc || !this.controllerApp || !this.controllerChart;
+    },
+
+    tracingEnabled() {
+      if ( this.tracingConfiguration ) {
+        return this.tracingConfiguration.enabled;
+      }
+
+      return null;
     }
   },
 

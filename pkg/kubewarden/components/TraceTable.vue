@@ -1,11 +1,10 @@
 <script>
 import { mapGetters } from 'vuex';
-import jsyaml from 'js-yaml';
 import isEmpty from 'lodash/isEmpty';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
-import { CATALOG, CONFIG_MAP, SERVICE } from '@shell/config/types';
+import { CATALOG, SERVICE } from '@shell/config/types';
 import { KUBERNETES } from '@shell/config/labels-annotations';
 import ResourceFetch from '@shell/mixins/resource-fetch';
 import { allHash } from '@shell/utils/promise';
@@ -16,7 +15,7 @@ import Loading from '@shell/components/Loading';
 import SortableTable from '@shell/components/SortableTable';
 
 import { TRACE_HEADERS } from '../config/table-headers';
-import { KUBEWARDEN, KUBEWARDEN_CHARTS, KUBEWARDEN_CONFIGMAPS, MODE_MAP, OPERATION_MAP } from '../types';
+import { KUBEWARDEN, KUBEWARDEN_CHARTS, MODE_MAP, OPERATION_MAP } from '../types';
 import { jaegerTraces } from '../modules/jaegerTracing';
 import { formatDuration } from '../utils/duration-format';
 
@@ -47,7 +46,7 @@ export default {
   mixins: [ResourceFetch],
 
   async fetch() {
-    const types = [CATALOG.APP, CATALOG.CLUSTER_REPO, SERVICE, CONFIG_MAP];
+    const types = [CATALOG.APP, CATALOG.CLUSTER_REPO, SERVICE];
     const hash = [];
 
     for ( const type of types ) {
@@ -95,10 +94,6 @@ export default {
       return this.$store.getters['cluster/all'](CATALOG.APP);
     },
 
-    allConfigMaps() {
-      return this.$store.getters['cluster/all'](CONFIG_MAP);
-    },
-
     allServices() {
       return this.$store.getters['cluster/all'](SERVICE);
     },
@@ -109,35 +104,6 @@ export default {
 
     controllerChart() {
       return this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
-    },
-
-    controllerCollectorCM() {
-      const controllerAppName = this.controllerApp?.spec?.chart?.metadata?.annotations?.['catalog.cattle.io/release-name'] || this.controllerApp?.metadata?.name;
-
-      return this.allConfigMaps.find(cm => (
-        cm?.metadata?.name === KUBEWARDEN_CONFIGMAPS.COLLECTOR &&
-        cm?.metadata.annotations?.['meta.helm.sh/release-name'] === controllerAppName
-      ));
-    },
-
-    collectorYaml() {
-      if (this.controllerCollectorCM) {
-        const data = this.controllerCollectorCM.data?.['collector.yaml'];
-
-        if (data) {
-          try {
-            return jsyaml.load(data);
-          } catch (e) {
-            console.error('Error parsing collector.yaml', e);
-
-            return null;
-          }
-        }
-
-        return null;
-      }
-
-      return null;
     },
 
     groupField() {
@@ -180,9 +146,20 @@ export default {
       return 20;
     },
 
-    // Determine if tracing is enabled by checking the presence of the traces pipeline
+    tracingConfiguration() {
+      if ( this.controllerApp ) {
+        return this.controllerApp?.spec?.values?.telemetry?.tracing;
+      }
+
+      return null;
+    },
+
     tracingEnabled() {
-      return this.collectorYaml?.service?.pipelines?.traces;
+      if ( this.tracingConfiguration ) {
+        return this.tracingConfiguration.enabled;
+      }
+
+      return null;
     },
 
     jaegerServices() {
@@ -222,7 +199,7 @@ export default {
     },
 
     showChecklist() {
-      return (!this.openTelSvc || !this.jaegerQuerySvc || !this.tracingEnabled);
+      return (!this.openTelSvc || !this.jaegerQuerySvc || !this.tracingConfiguration?.enabled);
     },
 
     showTable() {
@@ -271,7 +248,7 @@ export default {
       v-if="showChecklist"
       :controller-app="controllerApp"
       :controller-chart="controllerChart"
-      :tracing-enabled="tracingEnabled"
+      :tracing-configuration="tracingConfiguration"
       :jaeger-query-svc="jaegerQuerySvc"
       :open-tel-svc="openTelSvc"
     />
