@@ -6,9 +6,6 @@ import { controllerCharts } from '@tests/unit/_templates_/controllerCharts';
 
 import InstallView from '@kubewarden/components/Dashboard/InstallView.vue';
 
-// Mock @rancher/shell/utils/clipboard.js
-jest.mock('@rancher/shell/utils/clipboard', () => ({ writeText: jest.fn() }));
-
 describe('InstallView.vue', () => {
   const commonMocks = {
     $fetchState: { pending: false },
@@ -32,7 +29,6 @@ describe('InstallView.vue', () => {
 
   const commonComputed = {
     isAirgap:           () => false,
-    certService:        () => null,
     controllerChart:    () => null,
     kubewardenRepo:     () => null,
     shellEnabled:       () => false,
@@ -67,25 +63,9 @@ describe('InstallView.vue', () => {
     expect(wrapper.find('[data-testid="kw-install-wizard"]').exists()).toBe(true);
   });
 
-  it('renders cert-manager step when not installed', async() => {
-    const wrapper = createWrapper();
-
-    const installButton = wrapper.find('[data-testid="kw-initial-install-button"]');
-
-    installButton.trigger('click');
-
-    await wrapper.vm.$nextTick();
-
-    expect(wrapper.find('[data-testid="kw-cm-title"]').exists()).toBe(true);
-  });
-
   it('renders kubewarden repo step when not installed', async() => {
     const wrapper = createWrapper({
-      data() {
-        return { initStepIndex: 1 };
-      },
       computed: {
-        certService:      () => true,
         kubewardenRepo:   () => null,
       }
     });
@@ -105,7 +85,6 @@ describe('InstallView.vue', () => {
         return { initStepIndex: 1 };
       },
       computed: {
-        certService:      () => true,
         kubewardenRepo:   () => true,
         controllerChart:  () => null,
       }
@@ -126,7 +105,6 @@ describe('InstallView.vue', () => {
         return { initStepIndex: 1, reloadReady: true };
       },
       computed: {
-        certService:      () => true,
         kubewardenRepo:   () => true,
         controllerChart:  () => false,
       }
@@ -155,7 +133,6 @@ describe('InstallView.vue', () => {
         return { initStepIndex: 1 };
       },
       computed: {
-        certService:      () => true,
         kubewardenRepo:   () => true,
         controllerChart:  () => controllerCharts,
         showPreRelease:   () => false
@@ -208,7 +185,6 @@ describe('InstallView.vue', () => {
         return { initStepIndex: 1 };
       },
       computed: {
-        certService:      () => true,
         kubewardenRepo:   () => true,
         controllerChart:  () => controllerCharts,
         showPreRelease:   () => true

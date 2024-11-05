@@ -2,14 +2,12 @@
 import { mapGetters } from 'vuex';
 import debounce from 'lodash/debounce';
 
-import { CATALOG, SERVICE } from '@shell/config/types';
+import { CATALOG } from '@shell/config/types';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
-import { allHash } from '@shell/utils/promise';
 import ResourceFetch from '@shell/mixins/resource-fetch';
 
 import { Banner } from '@components/Banner';
 import AsyncButton from '@shell/components/AsyncButton';
-import CopyCode from '@shell/components/CopyCode';
 import Loading from '@shell/components/Loading';
 import Markdown from '@shell/components/Markdown';
 
@@ -31,7 +29,6 @@ export default {
   components: {
     AsyncButton,
     Banner,
-    CopyCode,
     InstallWizard,
     Loading,
     Markdown
@@ -49,18 +46,11 @@ export default {
     this.reloadReady = false;
 
     if ( !this.hasSchema ) {
-      const hash = [];
-      const listTypes = [SERVICE, CATALOG.CLUSTER_REPO];
+      if (this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO)) {
+        await this.$fetchType(CATALOG.CLUSTER_REPO);
+      }
 
-      listTypes.forEach((type) => {
-        if ( this.$store.getters['cluster/canList'](type) ) {
-          hash.push(this.$fetchType(type));
-        }
-      });
-
-      await allHash(hash);
-
-      if ( this.certService ) {
+      if (this.controllerChart) {
         this.initStepIndex = 1;
         this.installSteps[0].ready = true;
       }
@@ -74,8 +64,8 @@ export default {
   data() {
     const installSteps = [
       {
-        name:  'certmanager',
-        label: 'Cert-Manager',
+        name:  'repository',
+        label: 'Repository',
         ready: false,
       },
       {
@@ -106,7 +96,7 @@ export default {
   },
 
   watch: {
-    certService() {
+    controllerChart() {
       this.installSteps[0].ready = true;
 
       if ( this.isAirgap ) {
@@ -125,10 +115,6 @@ export default {
 
     isAirgap() {
       return this.$store.getters['kubewarden/airGapped'];
-    },
-
-    certService() {
-      return this.$store.getters['cluster/all'](SERVICE).find(s => s.metadata?.labels?.['app'] === 'cert-manager');
     },
 
     controllerChart() {
@@ -155,29 +141,6 @@ export default {
   },
 
   methods: {
-    async applyCertManager(btnCb) {
-      try {
-        // fetch cert-manager latest release and apply
-        const url = '/meta/proxy/github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml';
-        const res = await this.$store.dispatch('management/request', {
-          url,
-          headers:              { accept: 'application/yaml' },
-          redirectUnauthorized: false
-        }, { root: true });
-
-        const yaml = res?.data;
-
-        await this.currentCluster.doAction('apply', { yaml, defaultNamespace: 'cert-manager' });
-
-        btnCb(true);
-        this.installSteps[0].ready = true;
-        this.$refs.wizard.next();
-      } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
-        btnCb(false);
-      }
-    },
-
     async addRepository(btnCb) {
       try {
         const repoObj = await this.$store.dispatch('cluster/create', {
@@ -287,84 +250,50 @@ export default {
       <!-- Non Air-Gapped -->
       <template v-else>
         <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps" data-testid="kw-install-wizard">
-          <template #certmanager>
-            <h2 class="mt-20 mb-10" data-testid="kw-cm-title">
-              {{ t("kubewarden.dashboard.prerequisites.certManager.title") }}
+          <template #repository>
+            <h2 class="mt-20 mb-10" data-testid="kw-repo-title">
+              {{ t("kubewarden.dashboard.prerequisites.repository.title") }}
             </h2>
             <p class="mb-20">
-              {{ t("kubewarden.dashboard.prerequisites.certManager.description") }}
+              {{ t("kubewarden.dashboard.prerequisites.repository.description") }}
             </p>
 
-            <p v-clean-html="t('kubewarden.dashboard.prerequisites.certManager.manualStep', null, true)"></p>
-            <CopyCode class="m-10 p-10" data-testid="kw-cm-copy-code">
-              {{ t("kubewarden.dashboard.prerequisites.certManager.applyCommand") }}
-            </CopyCode>
-            <button
-              data-testid="kw-cm-open-shell"
-              :disabled="!shellEnabled"
-              type="button"
-              class="btn role-secondary"
-              @shortkey="currentCluster.openShell()"
-              @click="currentCluster.openShell()"
-            >
-              <i class="icon icon-terminal icon-lg" />{{ t("kubewarden.dashboard.prerequisites.certManager.openShell") }}
-            </button>
-
-            <slot>
-              <Banner
-                class="mb-20 mt-20"
-                color="info"
-                :label="t('kubewarden.dashboard.prerequisites.certManager.stepProgress')"
-              />
-            </slot>
+            <AsyncButton mode="kubewardenRepository" data-testid="kw-repo-add-button" @click="addRepository" />
           </template>
 
           <template #install>
-            <template v-if="!kubewardenRepo">
-              <h2 class="mt-20 mb-10" data-testid="kw-repo-title">
-                {{ t("kubewarden.dashboard.prerequisites.repository.title") }}
-              </h2>
-              <p class="mb-20">
-                {{ t("kubewarden.dashboard.prerequisites.repository.description") }}
-              </p>
+            <h2 class="mt-20 mb-10" data-testid="kw-app-install-title">
+              {{ t("kubewarden.dashboard.appInstall.title") }}
+            </h2>
+            <p class="mb-20">
+              {{ t("kubewarden.dashboard.appInstall.description") }}
+            </p>
 
-              <AsyncButton mode="kubewardenRepository" data-testid="kw-repo-add-button" @click="addRepository" />
-            </template>
+            <div class="chart-route">
+              <Loading v-if="!controllerChart && !reloadReady" mode="relative" class="mt-20" />
 
-            <template v-else>
-              <h2 class="mt-20 mb-10" data-testid="kw-app-install-title">
-                {{ t("kubewarden.dashboard.appInstall.title") }}
-              </h2>
-              <p class="mb-20">
-                {{ t("kubewarden.dashboard.appInstall.description") }}
-              </p>
-
-              <div class="chart-route">
-                <Loading v-if="!controllerChart && !reloadReady" mode="relative" class="mt-20" />
-
-                <template v-else-if="!controllerChart && reloadReady">
-                  <Banner color="warning">
-                    <span class="mb-20">
-                      {{ t('kubewarden.dashboard.appInstall.reload' ) }}
-                    </span>
-                    <button data-testid="kw-app-install-reload" class="ml-10 btn btn-sm role-primary" @click="reload()">
-                      {{ t('generic.reload') }}
-                    </button>
-                  </Banner>
-                </template>
-
-                <template v-else>
-                  <button
-                    data-testid="kw-app-install-button"
-                    class="btn role-primary mt-20"
-                    :disabled="!controllerChart"
-                    @click.prevent="chartRoute"
-                  >
-                    {{ t("kubewarden.dashboard.appInstall.button") }}
+              <template v-else-if="!controllerChart && reloadReady">
+                <Banner color="warning">
+                  <span class="mb-20">
+                    {{ t('kubewarden.dashboard.appInstall.reload' ) }}
+                  </span>
+                  <button data-testid="kw-app-install-reload" class="ml-10 btn btn-sm role-primary" @click="reload()">
+                    {{ t('generic.reload') }}
                   </button>
-                </template>
-              </div>
-            </template>
+                </Banner>
+              </template>
+
+              <template v-else>
+                <button
+                  data-testid="kw-app-install-button"
+                  class="btn role-primary mt-20"
+                  :disabled="!controllerChart"
+                  @click.prevent="chartRoute"
+                >
+                  {{ t("kubewarden.dashboard.appInstall.button") }}
+                </button>
+              </template>
+            </div>
           </template>
         </InstallWizard>
       </template>

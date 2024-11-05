@@ -196,6 +196,10 @@ export default {
       return this.allNamespaces?.find(ns => ns?.metadata?.name === 'cattle-dashboards');
     },
 
+    certService() {
+      return this.allServices?.find(s => s?.metadata?.labels?.['app'] === 'cert-manager');
+    },
+
     conflictingGrafanaDashboards() {
       return this.allConfigMaps?.filter((configMap) => {
         const name = configMap?.metadata?.name;
@@ -300,6 +304,7 @@ export default {
     <MetricsChecklist
       v-if="showChecklist"
       :cattle-dashboard-ns="cattleDashboardNs"
+      :cert-service="certService"
       :conflicting-grafana-dashboards="conflictingGrafanaDashboards"
       :controller-app="controllerApp"
       :controller-chart="controllerChart"
