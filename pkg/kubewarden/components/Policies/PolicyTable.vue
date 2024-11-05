@@ -276,7 +276,7 @@ export default {
     <div class="filter">
       <LabeledSelect
         v-if="attributeOptions.length"
-        v-model="attributes"
+        v-model:value="attributes"
         data-testid="kw-table-filter-source"
         :clearable="true"
         :taggable="true"
@@ -290,7 +290,7 @@ export default {
 
       <LabeledInput
         ref="searchQuery"
-        v-model="searchQuery"
+        v-model:value="searchQuery"
         data-testid="kw-table-filter-search"
         :mode="mode"
         class="input-sm filter__search"
@@ -313,7 +313,7 @@ export default {
 
     <div class="policy-table-actions">
       <Checkbox
-        v-model="showKubewardenOfficial"
+        v-model:value="showKubewardenOfficial"
         :label="t('kubewarden.utils.official.label')"
         data-testid="kw-table-filter-official"
       />
@@ -391,7 +391,7 @@ export default {
   }
 }
 
-::v-deep tr:hover {
+:deep(tr:hover) {
   cursor: pointer;
 }
 </style>

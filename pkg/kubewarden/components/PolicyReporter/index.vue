@@ -211,11 +211,11 @@ export default {
           data-testid="kw-pr-noschema-banner"
         />
         <div class="install-route">
-          <n-link :to="rootKubewardenRoute()">
+          <router-link :to="rootKubewardenRoute()">
             <button class="btn role-primary mt-20">
               {{ t('kubewarden.policyReporter.noSchema.link') }}
             </button>
-          </n-link>
+          </router-link>
         </div>
       </div>
     </template>

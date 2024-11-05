@@ -28,7 +28,7 @@ export default {
     SourceAuthorities
   },
 
-  fetch() {
+  created() {
     this.insecureSources = this.chartValues?.insecureSources || [];
     this.sourceAuthorities = this.chartValues?.sourceAuthorities || {};
   },
@@ -52,7 +52,7 @@ export default {
 
   methods: {
     update(prop) {
-      this.$set(this.chartValues, [prop], this[prop]);
+      this.chartValues[prop] = this[prop];
     }
   }
 };
@@ -69,24 +69,22 @@ export default {
       />
     </div>
 
-    <template>
-      <h3 class="mb-20">
-        {{ t('kubewarden.policyServerConfig.insecureSources.title') }}
-      </h3>
-      <div class="row">
-        <div class="col span-6">
-          <ArrayList
-            v-model="insecureSources"
-            data-testid="ps-config-insecure-sources-input"
-            :mode="mode"
-            :add-allowed="true"
-            :add-label="t('kubewarden.policyServerConfig.insecureSources.addLabel')"
-            :value-placeholder="t('kubewarden.policyServerConfig.insecureSources.placeholder')"
-            @input="update('insecureSources')"
-          />
-        </div>
+    <h3 class="mb-20">
+      {{ t('kubewarden.policyServerConfig.insecureSources.title') }}
+    </h3>
+    <div class="row">
+      <div class="col span-6">
+        <ArrayList
+          v-model:value="insecureSources"
+          data-testid="ps-config-insecure-sources-input"
+          :mode="mode"
+          :add-allowed="true"
+          :add-label="t('kubewarden.policyServerConfig.insecureSources.addLabel')"
+          :value-placeholder="t('kubewarden.policyServerConfig.insecureSources.placeholder')"
+          @update:value="update('insecureSources')"
+        />
       </div>
-    </template>
+    </div>
 
     <div class="spacer"></div>
 
@@ -95,7 +93,7 @@ export default {
         <div class="col span-12">
           <SourceAuthorities
             ref="sourceAuthorities"
-            v-model="sourceAuthorities"
+            v-model:value="sourceAuthorities"
             :mode="mode"
           />
         </div>

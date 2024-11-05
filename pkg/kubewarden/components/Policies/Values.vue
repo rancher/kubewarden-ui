@@ -1,4 +1,5 @@
 <script>
+import { defineAsyncComponent, toRaw } from 'vue';
 import isEmpty from 'lodash/isEmpty';
 
 import { _CREATE, _EDIT, _VIEW } from '@shell/config/query-params';
@@ -68,7 +69,7 @@ export default {
         chartName:     KUBEWARDEN_CHARTS.CONTROLLER,
       });
 
-      await this.loadValuesComponent();
+      this.loadValuesComponent();
     } catch (e) {
       console.warn(`Unable to fetch Version: ${ e }`); // eslint-disable-line no-console
     }
@@ -140,7 +141,10 @@ export default {
   methods: {
     generateYaml() {
       const schemas = this.$store.getters['cluster/all'](SCHEMA);
-      const cloned = this.chartValues?.policy ? structuredClone(this.chartValues.policy) : this.value;
+
+      // Use toRaw to get the raw object from the reactive proxy
+      const rawPolicy = toRaw(this.chartValues.policy);
+      const cloned = rawPolicy ? structuredClone(rawPolicy) : this.value;
 
       if ( this.yamlValues?.length ) {
         this.currentYamlValues = this.yamlValues;
@@ -149,11 +153,10 @@ export default {
       }
     },
 
-    async loadValuesComponent() {
+    loadValuesComponent() {
       if ( this.value?.haveComponent('kubewarden/admission') ) {
-        this.valuesComponent = this.value?.importComponent('kubewarden/admission');
-
-        await this.valuesComponent();
+        const importFn = this.value.importComponent('kubewarden/admission');
+        this.valuesComponent = defineAsyncComponent(importFn);
       }
     },
 
@@ -173,7 +176,7 @@ export default {
   <div v-else>
     <div v-if="isCreate || isEdit" class="step__values__controls">
       <ButtonGroup
-        v-model="yamlOption"
+        v-model:value="yamlOption"
         data-testid="kw-policy-config-yaml-option"
         :options="YAML_OPTIONS"
         inactive-class="bg-disabled btn-sm"
@@ -192,7 +195,7 @@ export default {
             <template v-if="valuesComponent">
               <component
                 :is="valuesComponent"
-                v-model="chartValues"
+                :value="chartValues"
                 :mode="mode"
                 :custom-policy="customPolicy"
               />
@@ -202,7 +205,7 @@ export default {
         <template v-else-if="(isCreate || isEdit) && !showForm">
           <YamlEditor
             ref="yaml"
-            v-model="currentYamlValues"
+            v-model:value="currentYamlValues"
             data-testid="kw-policy-config-yaml-editor"
             class="step__values__content"
             :scrolling="true"
@@ -248,7 +251,7 @@ export default {
       &__content {
         flex: 1;
 
-        ::v-deep .tab-container {
+        :deep(.tab-container) {
           overflow: auto;
         }
       }

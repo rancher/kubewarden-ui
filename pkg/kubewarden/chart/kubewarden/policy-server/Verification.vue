@@ -61,7 +61,7 @@ export default {
     <div class="row">
       <div class="col span-6">
         <LabeledSelect
-          v-model="vConfig"
+          v-model:value="vConfig"
           data-testid="ps-config-verification-select"
           :mode="mode"
           :label="t('kubewarden.policyServerConfig.verification.label')"

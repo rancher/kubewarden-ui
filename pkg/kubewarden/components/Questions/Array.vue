@@ -20,7 +20,7 @@ export default {
 
   methods: {
     update(val) {
-      this.$emit('input', val);
+      this.$emit('update:value', val);
     }
   }
 };
@@ -31,13 +31,13 @@ export default {
     <div class="col span-6">
       <ArrayList
         :key="question.variable"
-        v-model="array"
+        v-model:value="array"
         :title="question.label"
         :value-multiline="question.value_multiline"
         :mode="mode"
         :protip="false"
         :disabled="disabled"
-        @input="update"
+        @update:value="update"
       />
     </div>
     <div

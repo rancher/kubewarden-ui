@@ -61,7 +61,7 @@ export default {
   fetch() {
     if ( this.isCreate && isEmpty(this.value?.apiGroups) ) {
       if ( !Array.isArray(this.value.apiGroups) ) {
-        this.$set(this.value, 'apiGroups', []);
+        this.value.apiGroups = [];
       }
 
       this.value.apiGroups.push('*');
@@ -217,7 +217,7 @@ export default {
   >
     <div v-if="isGlobalRule">
       <LabeledSelect
-        v-model="value.scope"
+        v-model:value="value.scope"
         data-testid="kw-policy-rules-rule-scope-select"
         :disabled="disabled"
         :label="t('kubewarden.policyConfig.scope.label')"
@@ -230,7 +230,7 @@ export default {
 
     <div>
       <LabeledSelect
-        v-model="apiGroupValues"
+        v-model:value="apiGroupValues"
         data-testid="kw-policy-rules-rule-apigroup-select"
         :disabled="disabled"
         :label="t('kubewarden.policyConfig.apiGroups.label')"
@@ -245,7 +245,7 @@ export default {
 
     <div>
       <LabeledSelect
-        v-model="value.resources"
+        v-model:value="value.resources"
         data-testid="kw-policy-rules-rule-resources-select"
         :disabled="disabled"
         :label="t('kubewarden.policyConfig.resources.label')"
@@ -260,7 +260,7 @@ export default {
 
     <div>
       <LabeledSelect
-        v-model="value.apiVersions"
+        v-model:value="value.apiVersions"
         data-testid="kw-policy-rules-rule-apiversions-select"
         :disabled="disabled"
         :clearable="true"
@@ -277,7 +277,7 @@ export default {
 
     <div>
       <LabeledSelect
-        v-model="value.operations"
+        v-model:value="value.operations"
         data-testid="kw-policy-rules-rule-operations-select"
         :disabled="disabled"
         :label="t('kubewarden.policyConfig.operations.label')"

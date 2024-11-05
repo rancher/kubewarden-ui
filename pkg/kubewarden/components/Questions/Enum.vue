@@ -8,7 +8,7 @@ export default {
   methods:    {
     update($event) {
       this.$emit('enumUpdate', $event);
-      this.$emit('input', $event);
+      this.$emit('update:value', $event);
     }
   }
 };
@@ -25,7 +25,7 @@ export default {
         :required="question.required"
         :value="value"
         :disabled="disabled"
-        @input="update($event)"
+        @update:value="update($event)"
       />
     </div>
     <div

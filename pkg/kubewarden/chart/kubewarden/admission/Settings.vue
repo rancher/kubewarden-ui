@@ -48,7 +48,7 @@ export default {
   <div>
     <YamlEditor
       ref="yamleditor"
-      v-model="settingsYaml"
+      v-model:value="settingsYaml"
       data-testid="kw-policy-config-settings-yaml-editor"
       class="yaml-editor"
       initial-yaml-values="# Additional Settings YAML \n"

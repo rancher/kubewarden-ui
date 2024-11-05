@@ -10,9 +10,12 @@
     ],
     "esModuleInterop": true,
     "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "noEmit": true,
+    "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
       "~/*": [
@@ -41,12 +44,16 @@
       "@types/node",
       "@jest/types",
       "@rancher/components/types",
-      "kubewarden",
       "cypress",
       "rancher",
       "shell"
     ]
   },
+  "include": [
+    "./pkg/kubewarden/**/*.ts",
+    "./pkg/kubewarden/**/*.tsx",
+    "./pkg/kubewarden/**/*.vue",
+  ],
   "exclude": [
     "node_modules",
     "tests",

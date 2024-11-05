@@ -120,6 +120,10 @@ export default {
         handleGrowl({ error, store: this.$store });
       }
     }
+
+    if (this.controllerApp) {
+      await this.controllerApp.fetchValues(true)
+    }
   },
 
   data() {
@@ -275,7 +279,7 @@ export default {
     },
 
     showChecklist() {
-      const monitoringEnabled = this.controllerApp?.spec?.values?.telemetry?.metrics?.enabled;
+      const monitoringEnabled = this.controllerApp?.values?.telemetry?.metrics?.enabled;
       const grafanaDashboardsInstalled = !isEmpty(this.kubewardenGrafanaDashboards);
 
       return !this.openTelSvc || !this.monitoringApp || !this.kubewardenServiceMonitor || !monitoringEnabled || !grafanaDashboardsInstalled;

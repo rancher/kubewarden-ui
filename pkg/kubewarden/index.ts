@@ -1,26 +1,22 @@
 import { importTypes } from '@rancher/auto-import';
-import {
-  IPlugin, TableColumnLocation, TabLocation, PanelLocation, OnNavToPackage
-} from '@shell/core/types';
-import {
-  NAMESPACE, POD, WORKLOAD_TYPES, INGRESS, SERVICE
-} from '@shell/config/types';
+import { TableColumnLocation, TabLocation, PanelLocation, OnNavToPackage } from '@shell/core/types';
+import { NAMESPACE, POD, WORKLOAD_TYPES, INGRESS, SERVICE } from '@shell/config/types';
 
 import kubewardenRoutes from './routes/kubewarden-routes';
 import kubewardenStore from './store/kubewarden';
 import { getReports } from './modules/policyReporter';
 
 // fix missing directives on dashboard v2.7.2
-import '@shell/plugins/clean-tooltip-directive';
-import '@shell/plugins/clean-html-directive';
+// import '@shell/plugins/clean-tooltip-directive';
+// import '@shell/plugins/clean-html-directive';
 
-const onEnter: OnNavToPackage = async(store) => {
+const onEnter: OnNavToPackage = async(store: any) => {
   await getReports(store, false);
   await getReports(store, true);
 };
 
 // Init the package
-export default function($plugin: IPlugin, args: any) {
+export default function($plugin: any, args: any) {
   // Auto-import model, detail, edit from the folders
   importTypes($plugin);
 

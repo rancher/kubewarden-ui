@@ -108,10 +108,9 @@ export default {
       <template v-if="steps.length > 1">
         <div class="step-sequence">
           <ul class="steps" tabindex="0">
-            <template v-for="(step, idx) in steps">
+            <template v-for="(step, idx) in steps" :key="step.name + 'li'">
               <li
                 :id="step.name"
-                :key="step.name + 'li'"
                 :class="{
                   step: true,
                   active: step.name === activeStep.name,

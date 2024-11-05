@@ -7,6 +7,7 @@ import { allHash } from '@shell/utils/promise';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { mapPref, GROUP_RESOURCES } from '@shell/store/prefs';
 
+import { BadgeState } from '@components/BadgeState';
 import CountGauge from '@shell/components/CountGauge';
 import Loading from '@shell/components/Loading';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
@@ -14,6 +15,7 @@ import ResourceTable from '@shell/components/ResourceTable';
 import Tab from '@shell/components/Tabbed/Tab';
 
 import { RELATED_HEADERS } from '../config/table-headers';
+import { KUBEWARDEN } from '../types';
 
 import MetricsTab from '../components/MetricsTab';
 import TraceTable from '../components/TraceTable';
@@ -22,7 +24,7 @@ export default {
   name: 'PolicyServer',
 
   components: {
-    CountGauge, Loading, MetricsTab, ResourceTabs, ResourceTable, Tab, TraceTable
+    BadgeState, CountGauge, Loading, MetricsTab, ResourceTabs, ResourceTable, Tab, TraceTable
   },
 
   mixins: [CreateEditView],
@@ -31,10 +33,6 @@ export default {
     mode: {
       type:    String,
       default: _CREATE,
-    },
-    resource: {
-      type:    String,
-      default: null
     },
     value: {
       type:     Object,
@@ -64,6 +62,7 @@ export default {
       policyGauges:         null,
       relatedPolicies:      null,
       reloadRequired:       false,
+      resource:             KUBEWARDEN.POLICY_SERVER
     };
   },
 
@@ -171,7 +170,7 @@ export default {
       </div>
     </template>
 
-    <ResourceTabs v-model="value" :mode="mode">
+    <ResourceTabs :value="value" :mode="mode">
       <Tab name="related-policies" label="Policies" :weight="99">
         <template #default>
           <ResourceTable
