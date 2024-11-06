@@ -81,6 +81,10 @@ export class Navigation {
     async explorer<T extends ExpGroup>(groupName: T, childName?: ExpItemMap[T]) {
       if (this.isblank()) await this.cluster()
       await this.sideNavHandler(groupName, childName)
+      // Wait for child page before next step
+      if (groupName == 'Kubewarden' && childName && childName != 'Policy Reporter') {
+        await expect(this.page.getByRole('heading', { name: childName })).toBeVisible()
+      }
     }
 
     // Wrapper for page.goto using default cluster
@@ -118,7 +122,7 @@ export class Navigation {
       await this.explorer('Kubewarden', 'PolicyServers')
       if (name) {
         await this.ui.tableRow(name).open()
-        await expect(this.page.getByTestId('kw-ps-detail-status-title')).toBeVisible()
+        await expect(this.page.getByRole('heading', { name: `PolicyServer: ${name}` })).toBeVisible()
       }
       if (tab) await this.ui.tab(tab).click()
     }

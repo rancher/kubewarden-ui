@@ -78,6 +78,7 @@ test.describe('Tracing', () => {
 
     await telPage.toBeIncomplete('config')
     await telPage.configBtn.click()
+    const now = new Date().toISOString()
     await apps.updateApp('rancher-kubewarden-controller', {
       navigate : false,
       questions: async() => {
@@ -88,7 +89,6 @@ test.describe('Tracing', () => {
       }
     })
     // Wait until kubewarden controller restarts policyserver
-    const now = new Date().toISOString()
     await shell.retry(`kubectl logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container --since-time ${now} | grep -F "Everything is ready."`)
   })
 
