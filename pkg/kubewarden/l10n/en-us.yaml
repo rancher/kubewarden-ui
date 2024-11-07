@@ -30,23 +30,24 @@ kubewarden:
     headers:
       policyServer:
         title: Policy Servers
-        description: Kubewarden uses Policy Servers to receive requests to be validated. It does that by executing Kubewarden's policies.
+        description: Policy Servers validate requests
         linkText: Create Policy Server
-        slotTitle: Policy Server Pods
       admissionPolicy:
-        title: Admission Policies
-        description: An Admission Policy is a namespace-wide resource. The policy will process only the requests that are targeting the Namespace where the Admission Policy is defined.
-        linkText: Create Admission Policy
-        slotTitle: Policies
+        title: Namespaced Policies
+        description: Namespace-wide policy validation
+        linkText: Create Namespaced Policy
       clusterAdmissionPolicy:
-        title: Cluster Admission Policies
-        description: The Cluster Admission Policy resource is the core of the Kubewarden stack. This resource defines how policies evaluate requests.
-        linkText: Create Cluster Admission Policy
-        slotTitle: Policies
+        title: Cluster Policies
+        description: Cluster-wide policy validation
+        linkText: Create Cluster Policy
       modes:
-        title: Policy Modes
+        title: Modes
         monitor: Monitor
         protect: Protect
+      reports:
+        title: Reports
+        success: Success
+        fail: Fail
     appInstall:
       title: Kubewarden App Install
       description: This will take you to the app installation page for Kubewarden.
