@@ -102,10 +102,6 @@ export default {
       return this.$store.getters['cluster/all'](SERVICE);
     },
 
-    certService() {
-      return this.allServices?.find(s => s?.metadata?.labels?.['app'] === 'cert-manager');
-    },
-
     controllerApp() {
       return this.allApps?.find(app => app?.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER);
     },
@@ -254,7 +250,6 @@ export default {
   <div v-else>
     <TraceChecklist
       v-if="showChecklist"
-      :cert-service="certService"
       :controller-app="controllerApp"
       :controller-chart="controllerChart"
       :tracing-configuration="tracingConfiguration"

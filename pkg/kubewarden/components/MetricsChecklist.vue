@@ -21,10 +21,6 @@ export default {
       type:    Object,
       default: null
     },
-    certService: {
-      type: Object,
-      default: null
-    },
     conflictingGrafanaDashboards: {
       type:    Array,
       default: null
@@ -273,11 +269,6 @@ export default {
       :label="t('kubewarden.monitoring.prerequisites.warning')"
     />
     <div class="mt-20 mb-20">
-      <div class="checklist__step mt-20 mb-20" data-testid="kw-tracing-checklist-step-cert-manager">
-        <i class="icon mr-10" :class="badgeIcon(certService)" />
-        <p v-clean-html="t('kubewarden.tracing.certService', {}, true)" />
-      </div>
-
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-open-tel">
         <i class="icon mr-10" :class="badgeIcon(openTelSvc)" />
         <p v-clean-html="t('kubewarden.tracing.openTelemetry', {}, true)" />
