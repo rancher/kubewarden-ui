@@ -217,7 +217,7 @@ export default {
           :disabled="!isCreate"
           :label="t('nameNsDescription.name.label')"
           :placeholder="t('nameNsDescription.name.placeholder')"
-          required
+          :required="true"
         />
       </div>
     </div>
