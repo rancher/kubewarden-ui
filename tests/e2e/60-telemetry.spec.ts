@@ -3,6 +3,9 @@ import { Chart, ChartRepo, RancherAppsPage } from './rancher/rancher-apps.page'
 import { TelemetryPage } from './pages/telemetry.page'
 import { RancherUI } from './components/rancher-ui'
 
+// Cert-Manager
+const cmanRepo: ChartRepo = { name: 'jetstack', url: 'https://charts.jetstack.io' }
+const cmanChart: Chart = { title: 'cert-manager', name: 'cert-manager', namespace: 'cert-manager', check: 'cert-manager' }
 // OpenTelemetry
 const otelRepo: ChartRepo = { name: 'open-telemetry', url: 'https://open-telemetry.github.io/opentelemetry-helm-charts' }
 const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator' }
@@ -27,6 +30,13 @@ test('Install OpenTelemetry', async({ page, nav }) => {
     await telPage.toBeIncomplete('otel')
     await expect(telPage.configBtn).toBeDisabled()
   }
+
+  // Install Cert-Manager on imported clusters
+  if (nav.testCluster.name !== 'local') {
+    await apps.addRepository(cmanRepo)
+    await apps.installChart(cmanChart, { yamlPatch: (y) => { y.crds.enabled = true } })
+  }
+
   // Install OpenTelemetry
   await apps.addRepository(otelRepo)
   await apps.installChart(otelChart,
@@ -235,10 +245,14 @@ test.describe('Metrics', () => {
   })
 })
 
-test('Uninstall OpenTelemetry', async({ page }) => {
+test('Uninstall OpenTelemetry', async({ page, nav }) => {
   test.skip(process.env.MODE === 'fleet')
 
   const apps = new RancherAppsPage(page)
   await apps.deleteApp('opentelemetry-operator')
   await apps.deleteRepository(otelRepo)
+  if (nav.testCluster.name !== 'local') {
+    await apps.deleteApp('cert-manager')
+    await apps.deleteRepository(cmanRepo)
+  }
 })
