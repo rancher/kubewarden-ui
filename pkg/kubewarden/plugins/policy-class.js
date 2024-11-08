@@ -77,15 +77,19 @@ export default class PolicyModel extends KubewardenModel {
   }
 
   get isDeployedWithFleet() {
-    return this.metadata?.annotations?.[WORKSPACE_ANNOTATION];
+    return this.metadata?.annotations?.[WORKSPACE_ANNOTATION] && !this.metadata?.annotations?.['objectset.rio.cattle.io/applied'];
+  }
+
+  get isApplied() {
+    return this.metadata?.annotations?.['objectset.rio.cattle.io/applied'];
   }
 
   get source() {
-    if ( this.isKubewardenDefaultPolicy && !this.isDeployedWithFleet ) {
+    if (this.isKubewardenDefaultPolicy && !this.isDeployedWithFleet && !this.isApplied) {
       return 'kubewarden-defaults';
     }
 
-    if ( this.isDeployedWithFleet ) {
+    if (this.isDeployedWithFleet && !this.isApplied) {
       return 'fleet';
     }
 
@@ -93,7 +97,7 @@ export default class PolicyModel extends KubewardenModel {
     // so that we can fetch the questions info from there
     // that only happens for template based CAP's
     // https://github.com/rancher/kubewarden-ui/issues/682
-    if ( this.metadata?.annotations?.['artifacthub/pkg'] ) {
+    if (this.metadata?.annotations?.['artifacthub/pkg']) {
       return 'template';
     }
 
