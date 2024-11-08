@@ -146,6 +146,7 @@ export default ({
 
         const requiredRules = ['apiVersions', 'operations', 'resources'];
         const acceptedRules = this.acceptedValues(rules, requiredRules);
+        const acceptedName = this.chartValues.policy.metadata.name;
 
         const requiredQuestions = this.chartValues?.questions?.questions?.map((q) => {
           if ( q.required ) {
@@ -154,7 +155,7 @@ export default ({
         }).filter(Boolean);
         const acceptedQuestions = this.acceptedValues(settings, requiredQuestions);
 
-        if ( !isEmpty(acceptedRules) && (isEmpty(requiredQuestions) || !isEmpty(acceptedQuestions)) ) {
+        if ( !!acceptedName && !isEmpty(acceptedRules) && (isEmpty(requiredQuestions) || !isEmpty(acceptedQuestions)) ) {
           return true;
         }
       }

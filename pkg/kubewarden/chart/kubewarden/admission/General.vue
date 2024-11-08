@@ -181,6 +181,7 @@ export default {
           :description-hidden="true"
           :namespaced="!isGlobal"
           :namespace-new-allowed="true"
+          :required="true"
           name-key="metadata.name"
           namespace-key="metadata.namespace"
           @isNamespaceNew="isNamespaceNew = $event"

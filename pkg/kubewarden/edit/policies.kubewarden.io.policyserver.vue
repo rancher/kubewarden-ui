@@ -59,14 +59,14 @@ export default {
   computed: {
     isCreate() {
       return this.realMode === _CREATE;
+    },
+
+    validationPassed() {
+      return !!this.chartValues?.metadata?.name;
     }
   },
 
   methods: {
-    handleValidationPassed(val) {
-      this.validationPassed = val;
-    },
-
     async finish(event) {
       // Clean up the securityContexts "seccompProfile" property if there are no keys set on the object
       const securityContexts = this.chartValues?.spec?.securityContexts;
@@ -108,7 +108,6 @@ export default {
       :value="value"
       :chart-values="chartValues"
       :mode="mode"
-      @validation-passed="handleValidationPassed"
     />
   </CruResource>
 </template>
