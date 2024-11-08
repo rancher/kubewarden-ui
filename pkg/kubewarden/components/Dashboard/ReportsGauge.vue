@@ -21,7 +21,7 @@ export default {
     },
 
     secondaryColor() {
-      return this.reports?.total === 0 ? '--default-text' : '--error';
+      return this.reports?.total === 0 ? '--border' : '--error';
     }
   },
 
