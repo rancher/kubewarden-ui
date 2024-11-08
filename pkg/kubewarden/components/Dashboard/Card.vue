@@ -27,24 +27,23 @@ export default {
     :class="setLoading"
   >
     <div class="d-header">
-      <router-link :to="card.link">
-        <h1>
-          {{ t(card.title) }}
-        </h1>
-      </router-link>
+      <div class="title-container">
+        <slot name="count" />
+        <div class="title">
+          <router-link :to="card.link">
+            <h1 class="link">
+              {{ t(card.title) }}
+            </h1>
+          </router-link>
+          <p v-clean-html="t(card.description)" class="mb-0" />
+        </div>
+      </div>
+
+      <slot name="action" class="action" />
     </div>
 
-    <p v-clean-html="t(card.description)" />
-
-    <router-link class="btn role-secondary" :to="card.cta">
-      {{ t(card.linkText) }}
-    </router-link>
-
-    <hr>
-
     <div class="d-slot">
-      <h2>{{ t(card.slotTitle) }}</h2>
-      <slot />
+      <slot name="content" />
     </div>
   </div>
 </template>
@@ -54,7 +53,9 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: space-between;
   height: 100%;
+  width: 100%;
   padding: $space-m;
   grid-auto-rows: 1fr;
   gap: $space-m;
@@ -65,15 +66,38 @@ export default {
   .d-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
+
+    .title-container {
+      display: flex;
+      align-items: center;
+      width: 55%;
+    }
+
+    .title {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
 
     h1 {
       margin: 0;
-      font-size: 18px;
+      color: var(--link);
     }
-  }
 
-  p {
-    min-height: 48px;
+    h1:hover {
+      color: var(--body-text);
+    }
+
+    p {
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+
+    .action {
+      width: 45%;
+    }
   }
 
   .d-slot {
@@ -115,7 +139,12 @@ export default {
       }
     }
   }
+
+  .d-action {
+    width: auto;
+  }
 }
+
 .loading {
   min-height: 325px;
   overflow: hidden;
