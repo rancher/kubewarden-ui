@@ -56,7 +56,7 @@ export default {
 
   data() {
     const colorStops = {
-      25: '--error', 50: '--warning', 70: '--info'
+      25: '--error', 50: '--warning', 70: '--success'
     };
 
     return {
