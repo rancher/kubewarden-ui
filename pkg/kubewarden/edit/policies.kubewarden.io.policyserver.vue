@@ -82,8 +82,7 @@ export default {
       }
 
       try {
-        // await this.save(event);
-        console.log('# woudl save', event);
+        await this.save(event);
       } catch (e) {
         this.errors.push(e);
       }
