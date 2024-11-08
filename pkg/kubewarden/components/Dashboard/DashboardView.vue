@@ -352,7 +352,6 @@ export default {
               <template v-if="showReports">
                 <Reports :gauges="namespacedResultsGauges" :show-reporter-link="showReporterLink" />
                 <ReportsGauge
-                  v-if="namespacedResultsGauges?.total !== 0"
                   data-testid="kw-dashboard-ap-gauge"
                   resource-name="Active"
                   :reports="namespacedResultsGauges"
@@ -366,7 +365,6 @@ export default {
               <template v-if="showReports">
                 <Reports :gauges="clusterResultsGauges" :show-reporter-link="showReporterLink" />
                 <ReportsGauge
-                  v-if="clusterResultsGauges?.total !== 0"
                   data-testid="kw-dashboard-cap-gauge"
                   resource-name="Active"
                   :reports="clusterResultsGauges"

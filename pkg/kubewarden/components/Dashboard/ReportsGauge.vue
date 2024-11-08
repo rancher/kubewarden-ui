@@ -18,12 +18,16 @@ export default {
       }
 
       return (Math.round(this.reports?.status.success * 100) / this.reports.total).toFixed(0);
+    },
+
+    secondaryColor() {
+      return this.reports?.total === 0 ? '--default-text' : '--error';
     }
   },
 
   methods: {
     formattedPercentage(type) {
-      return `${ (Math.round(this.reports?.status[type] * 100) / this.reports.total).toFixed(0) }%`;
+      return `${ ((Math.round(this.reports?.status[type] * 100) / this.reports.total) || 0).toFixed(0) }%`;
     }
   }
 };
@@ -48,7 +52,7 @@ export default {
       <Bar
         :percentage="percentageBarValue"
         primary-color="--success"
-        secondary-color="--error"
+        :secondary-color="secondaryColor"
       />
     </div>
   </div>
