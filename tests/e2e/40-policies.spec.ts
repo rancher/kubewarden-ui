@@ -75,17 +75,14 @@ for (const PolicyPage of pageTypes) {
     const polPage = new PolicyPage(page)
     const p: Policy = { title: 'Pod Privileged Policy', name: '' }
 
-    // Skip because of https://github.com/rancher/kubewarden-ui/issues/898
-    if (false) await test.step('Missing required fields', async() => {
+    await test.step('Missing required fields', async() => {
       const finishBtn = ui.button('Finish')
       await polPage.open(p)
-
-      // Create without name
-      await polPage.setName('')
-      await finishBtn.click()
-      await expect(page.locator('div.error').getByText('Required value: name')).toBeVisible()
-      await finishBtn.waitFor({ timeout: 10_000 }) // button name changes back Error -> Finish
+      // Missing name
+      await expect(polPage.name).toHaveValue('')
+      await expect(finishBtn).toBeDisabled()
       await polPage.setName('name')
+      await expect(finishBtn).toBeEnabled()
     })
 
     await test.step('Readme is visible', async() => {
@@ -97,7 +94,7 @@ for (const PolicyPage of pageTypes) {
       await expect(polPage.readme).not.toBeInViewport()
     })
 
-    await test.step('Policy specific fields A/CA', async() => {
+    await test.step('Policy specific fields AP/CAP', async() => {
       // Open page and wait for the form
       await polPage.open(p)
       await expect(polPage.name).toBeVisible()
