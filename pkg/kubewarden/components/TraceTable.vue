@@ -107,7 +107,7 @@ export default {
     },
 
     controllerChart() {
-      return this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
+      return this.charts?.find(chart => chart?.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
     },
 
     groupField() {

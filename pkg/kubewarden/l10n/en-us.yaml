@@ -171,10 +171,12 @@ kubewarden:
       label: Prerequisites
       description: There are a few resources which need to be installed for tracing to work correctly with the Kubewarden Controller.
       warning: The deployments of these resources can take a few minutes to become active.
+    certService: |
+      <a href="https://github.com/cert-manager/cert-manager" target="_blank" rel="noopener noreferrer nofollow" >Cert-Manager</a> must be installed inside the cluster, follow the <a href="https://docs.kubewarden.io/next/howtos/telemetry/opentelemetry-qs#install-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to setup cert-manager.
     installOpenTelemetry: |
       Click the button below  or run the <code>kubectl</code> command to install the latest version of OpenTelemetry.
     openTelemetry: |
-      The <a href="https://github.com/open-telemetry/opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Operator</a> must be installed, follow the <a href="https://docs.kubewarden.io/next/howtos/telemetry/opentelemetry-qs" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to setup the OpenTelemetry Operator.
+      The <a href="https://github.com/open-telemetry/opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Operator</a> must be installed, follow the <a href="https://docs.kubewarden.io/next/howtos/telemetry/opentelemetry-qs#install-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to setup the OpenTelemetry Operator.
     jaeger: |
       The <a href="https://github.com/jaegertracing/jaeger-operator" target="_blank" rel="noopener noreferrer nofollow">Jaeger Operator and Instance</a> must be installed, follow the <a href="https://docs.kubewarden.io/next/howtos/telemetry/tracing-qs" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to setup tracing for your policies.
     noRelatedPolicies: No related policies found.
