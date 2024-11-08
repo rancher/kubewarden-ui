@@ -4,7 +4,7 @@ import { BasePage } from '../rancher/basepage'
 import { Shell } from '../components/kubectl-shell'
 import { step } from '../rancher/rancher-test'
 
-type Pane = 'Policy Servers' | 'Admission Policies' | 'Cluster Admission Policies'
+type Pane = 'Policy Servers' | 'Namespaced Policies' | 'Cluster Policies'
 
 export interface AppVersion {
   app: string
@@ -25,8 +25,8 @@ export class KubewardenPage extends BasePage {
     constructor(page: Page) {
       super(page)
       this.createPsBtn = this.ui.button('Create Policy Server')
-      this.createApBtn = this.ui.button('Create Admission Policy')
-      this.createCapBtn = this.ui.button('Create Cluster Admission Policy')
+      this.createApBtn = this.ui.button('Create Namespaced Policy')
+      this.createCapBtn = this.ui.button('Create Cluster Policy')
 
       const head = this.page.locator('div.head')
       this.currentApp = head.locator('div.head-version')
@@ -44,6 +44,10 @@ export class KubewardenPage extends BasePage {
       return this.page.locator('div.card-container').filter({
         has: this.page.getByRole('heading', { name, exact: true })
       })
+    }
+
+    getCount(pane: Pane) {
+      return this.getPane(pane).locator('span.count')
     }
 
     getStats(pane: Pane) {
