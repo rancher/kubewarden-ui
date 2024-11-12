@@ -66,13 +66,11 @@ export class RancherExtensionsPage extends BasePage {
      */
     getExtension(name: string) {
       // Filter plugins by name
-      const nameRegex = new RegExp(`^\\s+${name}\\s+$`, 'i')
-      const plugin = this.page.locator('.plugin')
-        .filter({ has: this.page.locator('.plugin-name').getByText(nameRegex) })
+      return this.page.locator('.plugin')
+        .filter({ has: this.page.locator('.plugin-name').getByText(name, {exact: true}) })
 
       // Can't filter by repository in case of duplicit plugins - there is race condition in rancher, does not work as expected yet
       // plugin = plugin.filter({ has: this.page.locator(`xpath=//img[contains(@src, "clusterrepos/${repository}")]`) })
-      return plugin
     }
 
     /**
