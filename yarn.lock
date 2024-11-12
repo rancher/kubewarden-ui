@@ -4168,10 +4168,10 @@
   resolved "https://registry.npmjs.org/@rancher/icons/-/icons-2.0.29.tgz#6546d69768c706bebd66bfa73b36aef3d105987a"
   integrity sha512-qBBqfazS9y5VjV7fJDPNXmxd9AP/2uiE05mKFWP41kpbO+tEb62RnUBXCm14XLeScDZQcOuiAKVHMmvCFzF0BA==
 
-"@rancher/shell@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.npmjs.org/@rancher/shell/-/shell-2.0.1.tgz#46784a9e955616d2a078ba59bd7cdc474bcba4f6"
-  integrity sha512-HsArDxj9cdgqGJIYzK4oDLUlGnsuQXSG8Fb56dABecFuetD03JTlflGvafDGQ+PuUbEOKgRG+n7u//XGPaHuYg==
+"@rancher/shell@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.npmjs.org/@rancher/shell/-/shell-2.0.2.tgz#cb68eb89aefce5f9556520e830cc3a3ee70c33db"
+  integrity sha512-2jA7NfRHQpRGe/GP4JEQy0MoUM5ugdbKRSglVl1s03ZtbghTh0WqFjq8aKPXPYbpXQgnQKSxvJdR/u4EnGiRxQ==
   dependencies:
     "@aws-sdk/client-ec2" "3.1.0"
     "@aws-sdk/client-eks" "3.1.0"
