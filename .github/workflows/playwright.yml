@@ -97,7 +97,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.8", "2.9", "2.10"]') || fromJSON(format('["{0}"]', inputs.rancher || 'released')) }}
+        rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.8", "2.9", "2.10-0"]') || fromJSON(format('["{0}"]', inputs.rancher || 'released')) }}
         mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["base", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'base')) }}
         exclude:
           # Run full tests on 2.9 since it's latest prime version
@@ -105,9 +105,9 @@ jobs:
             mode: upgrade
           - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.8' }}
             mode: fleet
-          - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.10' }}
+          - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.10-0' }}
             mode: upgrade
-          - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.10' }}
+          - rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && '2.10-0' }}
             mode: fleet
 
 
