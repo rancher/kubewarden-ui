@@ -74,6 +74,10 @@ export default {
 
       this.specificValidations = await jaegerTraces(options);
     }
+
+    if (this.controllerApp) {
+      await this.controllerApp.fetchValues(true)
+    }
   },
 
   data() {
@@ -148,7 +152,7 @@ export default {
 
     tracingConfiguration() {
       if ( this.controllerApp ) {
-        return this.controllerApp?.spec?.values?.telemetry?.tracing;
+        return this.controllerApp?.values?.telemetry?.tracing;
       }
 
       return null;
