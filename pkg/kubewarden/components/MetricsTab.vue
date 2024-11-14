@@ -148,6 +148,12 @@ export default {
           this.metricsService = await dashboardExists('v2', this.$store, this.currentCluster?.id, this.metricsProxy);
         }
       }
+    },
+
+    async controllerApp() {
+      if (this.controllerApp) {
+        await this.controllerApp.fetchValues(true);
+      }
     }
   },
 
@@ -275,7 +281,7 @@ export default {
     },
 
     showChecklist() {
-      const monitoringEnabled = this.controllerApp?.spec?.values?.telemetry?.metrics?.enabled;
+      const monitoringEnabled = this.controllerApp?.values?.telemetry?.metrics?.enabled;
       const grafanaDashboardsInstalled = !isEmpty(this.kubewardenGrafanaDashboards);
 
       return !this.openTelSvc || !this.monitoringApp || !this.kubewardenServiceMonitor || !monitoringEnabled || !grafanaDashboardsInstalled;

@@ -86,6 +86,14 @@ export default {
     };
   },
 
+  watch: {
+    async controllerApp() {
+      if (this.controllerApp) {
+        await this.controllerApp.fetchValues(true);
+      }
+    }
+  },
+
   computed: {
     ...mapGetters(['currentCluster']),
     ...mapGetters({ charts: 'catalog/charts', refreshingCharts: 'kubewarden/refreshingCharts' }),
@@ -148,7 +156,7 @@ export default {
 
     tracingConfiguration() {
       if ( this.controllerApp ) {
-        return this.controllerApp?.spec?.values?.telemetry?.tracing;
+        return this.controllerApp?.values?.telemetry?.tracing;
       }
 
       return null;

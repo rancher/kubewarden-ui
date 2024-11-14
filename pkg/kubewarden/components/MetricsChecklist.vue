@@ -70,7 +70,7 @@ export default {
     ...mapGetters({ t: 'i18n/t' }),
 
     controllerMetricsConfig() {
-      if ( this.controllerApp ) {
+      if (this.controllerApp) {
         return this.controllerApp.spec?.values?.telemetry?.metrics;
       }
 
