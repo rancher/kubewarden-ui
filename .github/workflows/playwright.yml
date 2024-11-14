@@ -159,7 +159,7 @@ jobs:
         [[ "${{ matrix.rancher }}" == *2.9* ]] && K3S_VERSION="v1.30"
 
         # KW extension is prime since 2.8.3
-        [[ "${{ matrix.rancher }}" == *2.[789]* ]] && REPO=rancher-prime || REPO=rancher-alpha
+        [[ "${{ matrix.rancher }}" == *2.[789]* ]] && REPO=rancher-prime || REPO=rancher-latest
 
         # Complete partial K3S version from dockerhub v1.30 -> v1.30.5-k3s1
         if [[ ! $K3S_VERSION =~ ^v[0-9.]+-k3s[0-9]$ ]]; then
