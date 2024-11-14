@@ -74,10 +74,6 @@ export default {
 
       this.specificValidations = await jaegerTraces(options);
     }
-
-    if (this.controllerApp) {
-      await this.controllerApp.fetchValues(true)
-    }
   },
 
   data() {
@@ -88,6 +84,14 @@ export default {
 
       specificValidations: null
     };
+  },
+
+  watch: {
+    async controllerApp() {
+      if (this.controllerApp) {
+        await this.controllerApp.fetchValues(true);
+      }
+    }
   },
 
   computed: {

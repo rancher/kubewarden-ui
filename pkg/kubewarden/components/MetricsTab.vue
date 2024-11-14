@@ -120,10 +120,6 @@ export default {
         handleGrowl({ error, store: this.$store });
       }
     }
-
-    if (this.controllerApp) {
-      await this.controllerApp.fetchValues(true)
-    }
   },
 
   data() {
@@ -151,6 +147,12 @@ export default {
         if ( this.metricsProxy ) {
           this.metricsService = await dashboardExists('v2', this.$store, this.currentCluster?.id, this.metricsProxy);
         }
+      }
+    },
+
+    async controllerApp() {
+      if (this.controllerApp) {
+        await this.controllerApp.fetchValues(true);
       }
     }
   },
