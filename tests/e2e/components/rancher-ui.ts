@@ -178,8 +178,10 @@ export class RancherUI {
   }
 
   static isVersion(query: string|Range): boolean {
+    // Convert v2.10-6e85a811efd6b831c3d49a7336a6d4b3e96c1a93-head -> v2.10.0-head
+    const version = this.requireEnv('RANCHER_VERSION').replace(/-[a-f0-9]{40}/, '.0')
     if (!semver.validRange(query)) throw new Error(`Invalid range: ${query}`)
-    return semver.satisfies(this.requireEnv('RANCHER_VERSION'), query, { includePrerelease: true })
+    return semver.satisfies(version, query, { includePrerelease: true })
   }
 
   static get hasAppCollection(): boolean {
