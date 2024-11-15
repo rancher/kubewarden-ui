@@ -143,20 +143,20 @@ jobs:
             ;;
           schedule)
             # Rancher 2.10 is not prime = UI is not available from official charts
-            [[ "${{ matrix.rancher }}" == *2.10* ]] && KUBEWARDEN=rc || KUBEWARDEN=released;;
+            [[ "$RANCHER" == *2.10* ]] && KUBEWARDEN=rc || KUBEWARDEN=released;;
           workflow_run)
             KUBEWARDEN=rc;;
         esac
 
         # Rancher 2.7 chart requires kubeVersion: < 1.28.0-0
-        [[ "${{ matrix.rancher }}" == *2.7* ]] && K3S_VERSION="v1.27"
+        [[ "$RANCHER" == *2.7* ]] && K3S_VERSION="v1.27"
         # Rancher 2.8 chart requires kubeVersion: < 1.29.0-0
-        [[ "${{ matrix.rancher }}" == *2.8* ]] && K3S_VERSION="v1.28"
+        [[ "$RANCHER" == *2.8* ]] && K3S_VERSION="v1.28"
         # Rancher 2.9 chart requires kubeVersion: < 1.31.0-0
-        [[ "${{ matrix.rancher }}" == *2.9* ]] && K3S_VERSION="v1.30"
+        [[ "$RANCHER" == *2.9* ]] && K3S_VERSION="v1.30"
 
         # KW extension is prime since 2.8.3
-        [[ "${{ matrix.rancher }}" == *2.[789]* ]] && REPO=rancher-prime || REPO=rancher-latest
+        [[ "$RANCHER" == *2.[789]* ]] && REPO=rancher-prime || REPO=rancher-latest
 
         # Complete partial K3S version from dockerhub v1.30 -> v1.30.5-k3s1
         if [[ ! $K3S_VERSION =~ ^v[0-9.]+-k3s[0-9]$ ]]; then
