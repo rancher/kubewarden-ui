@@ -140,6 +140,7 @@ jobs:
             # Override RANCHER for maintenance PRs
             [[ "${{ github.event.pull_request.base.ref }}" == "release-1.6" ]] && RANCHER="2.8"
             [[ "${{ github.event.pull_request.base.ref }}" == "release-2.1" ]] && RANCHER="2.9"
+            ;;
           schedule)
             # Rancher 2.10 is not prime = UI is not available from official charts
             [[ "${{ matrix.rancher }}" == *2.10* ]] && KUBEWARDEN=rc || KUBEWARDEN=released;;
