@@ -100,7 +100,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.8", "2.9", "2.10-0"]') || fromJSON(format('["{0}"]', inputs.rancher || 'released')) }}
+        rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.8", "2.9", "2.10"]') || fromJSON(format('["{0}"]', inputs.rancher || 'released')) }}
         mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["base", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'base')) }}
         exclude:
           # Run all modes on 2.9 since it's latest prime version
@@ -108,15 +108,15 @@ jobs:
             mode: upgrade
           - rancher: ${{ github.event_name == 'schedule' && '2.8' }}
             mode: fleet
-          - rancher: ${{ github.event_name == 'schedule' && '2.10-0' }}
+          - rancher: ${{ github.event_name == 'schedule' && '2.10' }}
             mode: upgrade
-          - rancher: ${{ github.event_name == 'schedule' && '2.10-0' }}
+          - rancher: ${{ github.event_name == 'schedule' && '2.10' }}
             mode: fleet
           # Exclude unrelated Rancher versions from release jobs # head_branch = tag (kubewarden-2.1.0-rc.1)
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && '2.9' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && '2.10-0' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && '2.10' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && '2.8' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && '2.10-0' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && '2.10' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && '2.8' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && '2.9' }}
 
