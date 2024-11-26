@@ -17,17 +17,22 @@ expect(MODE).toMatch(/^(base|fleet|upgrade)$/)
 
 // Known Kubewarden versions for upgrade test, start at [0]
 const upMap: AppVersion[] = [
-  // { app: 'v1.8.0', controller: '2.0.0', crds: '1.4.2', defaults: '1.8.0' },
-  // { app: 'v1.9.0', controller: '2.0.5', crds: '1.4.4', defaults: '1.9.2' },
-  // { app: 'v1.10.0', controller: '2.0.8', crds: '1.4.5', defaults: '1.9.3' },
-  // { app: 'v1.11.0', controller: '2.0.10', crds: '1.4.6', defaults: '1.9.4' },
+  { app: 'v1.11.0', controller: '2.0.10', crds: '1.4.6', defaults: '1.9.4' },
   { app: 'v1.12.0', controller: '2.0.11', crds: '1.5.0', defaults: '2.0.0' },
   { app: 'v1.13.0', controller: '2.1.0', crds: '1.5.1', defaults: '2.0.3' },
   { app: 'v1.14.0', controller: '2.2.1', crds: '1.6.0', defaults: '2.1.0' },
   { app: 'v1.15.0', controller: '2.3.1', crds: '1.7.0', defaults: '2.2.1' },
   { app: 'v1.16.0', controller: '2.4.0', crds: '1.8.0', defaults: '2.3.1' },
   { app: 'v1.17.0', controller: '3.0.1', crds: '1.9.0', defaults: '2.4.0' },
-]
+  { app: 'v1.18.0', controller: '3.1.0', crds: '1.10.0', defaults: '2.5.0' },
+].splice(-3) // Limit upgrade path to last 5 versions
+
+// Support for Rancher 2.9 was added in KW 1.13.0
+if (RancherUI.isVersion('>=2.9')) {
+  upMap.splice(0, upMap.findIndex(v => v.app === 'v1.13.0'))
+} else if (RancherUI.isVersion('>=2.10')) {
+  upMap.splice(0, upMap.findIndex(v => v.app === 'v1.18.0'))
+}
 
 test('Initial rancher setup', async({ page, ui, nav }) => {
   const rancher = new RancherCommonPage(page)
@@ -116,7 +121,7 @@ test('Install Kubewarden', async({ page, ui, nav }) => {
     await expect(page).toHaveURL(/.*\/apps\/charts\/install.*chart=kubewarden-defaults/)
 
     // Handle PolicyServer Installer Dialog
-    await psPage.installDefault({ version: MODE === 'upgrade' ? upMap[0].defaults : undefined, recommended: true, mode: 'monitor' })
+    await psPage.installDefault({ recommended: true, mode: 'monitor' })
   })
 })
 
@@ -197,6 +202,12 @@ test('Upgrade Kubewarden', async({ page, nav }) => {
 
   const kwPage = new KubewardenPage(page)
   const apps = new RancherAppsPage(page)
+
+  // Check we installed old versions
+  await nav.explorer('Apps', 'Installed Apps')
+  for (const chart of ['controller', 'crds', 'defaults']) {
+    await apps.checkChart(`rancher-kubewarden-${chart}`, upMap[0][chart])
+  }
 
   // Keep track of last upgraded version
   let last: AppVersion = upMap[upMap.length - 1]
