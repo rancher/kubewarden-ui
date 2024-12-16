@@ -29,6 +29,18 @@ export default {
     openTelSvc: {
       type:    Object,
       default: null
+    },
+    outdatedTelemetrySpec: {
+      type:    Boolean,
+      default: false
+    },
+    unsupportedTelemetrySpec: {
+      type:    Boolean,
+      default: false
+    },
+    incompleteTelemetrySpec: {
+      type:    Boolean,
+      default: false
     }
   },
 
@@ -115,6 +127,26 @@ export default {
         <i class="icon mr-10" :class="badgeIcon(jaegerQuerySvc)" />
         <p v-clean-html="t('kubewarden.tracing.jaeger', {}, true)" p />
       </div>
+
+      <!-- Telemetry banners -->
+      <div>
+        <Banner
+          v-if="outdatedTelemetrySpec"
+          color="error"
+          :label="t('kubewarden.tracing.prerequisites.outdated')"
+        />
+        <Banner
+          v-if="unsupportedTelemetrySpec"
+          color="error"
+          :label="t('kubewarden.tracing.prerequisites.unsupported')"
+        />
+        <Banner
+          v-if="incompleteTelemetrySpec"
+          color="error"
+          :label="t('kubewarden.tracing.prerequisites.incomplete')"
+        />
+      </div>
+
       <div class="checklist__step mb-20" data-testid="kw-tracing-checklist-step-config">
         <i class="icon mr-10" :class="badgeIcon(tracingEnabled)" />
         <div class="checklist__config">
