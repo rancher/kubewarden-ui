@@ -41,6 +41,10 @@ export default {
       type:    Array,
       default: null
     },
+    metricsConfiguration: {
+      type:    Object,
+      default: null
+    },
     monitoringApp: {
       type:    Object,
       default: null
@@ -60,6 +64,14 @@ export default {
     policyServerObj: {
       type:    Object,
       default: null
+    },
+    outdatedTelemetrySpec: {
+      type:    Boolean,
+      default: false
+    },
+    unsupportedTelemetrySpec: {
+      type:    Boolean,
+      default: false
     }
   },
 
@@ -68,14 +80,6 @@ export default {
   computed: {
     ...mapGetters(['currentCluster']),
     ...mapGetters({ t: 'i18n/t' }),
-
-    controllerMetricsConfig() {
-      if (this.controllerApp) {
-        return this.controllerApp.spec?.values?.telemetry?.metrics;
-      }
-
-      return null;
-    },
 
     controllerLinkDisabled() {
       return (!this.openTelSvc || !this.monitoringApp || !this.hasKubewardenDashboards || !this.controllerChart || !this.controllerApp);
@@ -114,14 +118,6 @@ export default {
 
     hasKubewardenDashboards() {
       return !isEmpty(this.kubewardenDashboards);
-    },
-
-    metricsEnabled() {
-      if ( this.controllerMetricsConfig ) {
-        return this.controllerMetricsConfig.enabled;
-      }
-
-      return null;
     },
 
     monitoringChartLink() {
@@ -344,12 +340,26 @@ export default {
         </div>
       </Banner>
 
+      <!-- Telemetry banners -->
+      <div>
+        <Banner
+          v-if="outdatedTelemetrySpec"
+          color="error"
+          :label="t('kubewarden.monitoring.prerequisites.outdated')"
+        />
+        <Banner
+          v-if="unsupportedTelemetrySpec"
+          color="error"
+          :label="t('kubewarden.monitoring.prerequisites.unsupported')"
+        />
+      </div>
+
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-controller-config">
-        <i class="icon mr-10" :class="badgeIcon(metricsEnabled)" />
+        <i class="icon mr-10" :class="badgeIcon(metricsConfiguration)" />
         <div class="checklist__config">
           <p v-clean-html="t('kubewarden.monitoring.prerequisites.controllerConfig.label', {}, true)" p />
           <button
-            v-if="!metricsEnabled"
+            v-if="!metricsConfiguration"
             v-clean-tooltip="controllerLinkTooltip"
             data-testid="kw-monitoring-checklist-step-config-button"
             class="btn role-primary ml-10"

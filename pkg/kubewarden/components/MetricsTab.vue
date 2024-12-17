@@ -2,6 +2,7 @@
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 import debounce from 'lodash/debounce';
+import semver from 'semver';
 
 import {
   CATALOG, CONFIG_MAP, MONITORING, NAMESPACE, SERVICE
@@ -135,7 +136,9 @@ export default {
       [SERVICE]:                   null,
       metricsProxy:                null,
       metricsService:              null,
-      debouncedRefreshCharts:      null
+      debouncedRefreshCharts:      null,
+      outdatedTelemetrySpec:       false,
+      unsupportedTelemetrySpec:    false,
     };
   },
 
@@ -235,6 +238,49 @@ export default {
       });
     },
 
+    metricsConfiguration() {
+      if (!this.controllerApp) {
+        console.log('# 0')
+        return null;
+      }
+
+      const version = this.controllerApp?.spec?.chart?.metadata?.version;
+      const telemetry = this.controllerApp?.values?.telemetry;
+
+      if (semver.gte(version, '4.0.0-0')) {
+        // In version 4+, telemetry.metrics should be boolean or undefined (treated as false).
+        // sidecar.metrics is only meaningful if telemetry.metrics === true.
+        const metricsIsUndefinedOrBoolean = telemetry?.metrics === undefined || typeof telemetry?.metrics === 'boolean';
+        
+        // Check for unsupported 'custom' mode
+        if (telemetry?.mode === 'custom') {
+          this.unsupportedTelemetrySpec = true;
+
+          return null;
+        }
+
+        // If metrics is not undefined or boolean, it's outdated
+        if (!metricsIsUndefinedOrBoolean) {
+          this.outdatedTelemetrySpec = true;
+
+          return null;
+        }
+
+        // If telemetry.metrics is undefined or false, treat it as false.
+        // sidecar config is irrelevant in that case, and not considered outdated.
+        if (telemetry?.metrics !== true) {
+          // metrics is off, no sidecar config needed
+          return null;
+        }
+
+        // If we get here, telemetry.metrics === true and portIsDefined === true
+        return telemetry?.metrics;
+      } else {
+        // Old schema: just return telemetry.metrics.enabled
+        return telemetry?.metrics?.enabled;
+      }
+    },
+
     monitoringApp() {
       return this.allApps?.find(app => app?.spec?.chart?.metadata?.name === 'rancher-monitoring');
     },
@@ -281,10 +327,9 @@ export default {
     },
 
     showChecklist() {
-      const monitoringEnabled = this.controllerApp?.values?.telemetry?.metrics?.enabled;
       const grafanaDashboardsInstalled = !isEmpty(this.kubewardenGrafanaDashboards);
 
-      return !this.openTelSvc || !this.monitoringApp || !this.kubewardenServiceMonitor || !monitoringEnabled || !grafanaDashboardsInstalled;
+      return !this.openTelSvc || !this.monitoringApp || !this.kubewardenServiceMonitor || !this.metricsConfiguration || !grafanaDashboardsInstalled;
     }
   },
 
@@ -307,11 +352,14 @@ export default {
       :controller-chart="controllerChart"
       :kubewarden-service-monitor="kubewardenServiceMonitor"
       :kubewarden-dashboards="kubewardenGrafanaDashboards"
+      :metrics-configuration="metricsConfiguration"
       :monitoring-app="monitoringApp"
       :monitoring-chart="monitoringChart"
       :open-tel-svc="openTelSvc"
       :policy-obj="policyObj"
       :policy-server-obj="policyServerObj"
+      :outdated-telemetry-spec="outdatedTelemetrySpec"
+      :unsupported-telemetry-spec="unsupportedTelemetrySpec"
       @updateServiceMonitors="updateServiceMonitors"
     />
 
