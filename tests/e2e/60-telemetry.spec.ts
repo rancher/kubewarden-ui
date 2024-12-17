@@ -81,7 +81,7 @@ test.describe('Tracing', () => {
     await apps.updateApp('rancher-kubewarden-controller', {
       navigate : false,
       questions: async() => {
-        await ui.tab('Telemetry').click()
+        await ui.tab(/^(Open)?Telemetry/).click()
         await ui.checkbox('Enable Tracing').check()
         await ui.input('Jaeger endpoint configuration').fill('jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317')
         await ui.checkbox('Jaeger endpoint insecure TLS configuration').check()
@@ -112,7 +112,7 @@ test.describe('Tracing', () => {
     // Clean up
     await apps.updateApp('rancher-kubewarden-controller', {
       questions: async() => {
-        await ui.tab('Telemetry').click()
+        await ui.tab(/^(Open)?Telemetry/).click()
         await ui.checkbox('Enable Tracing').uncheck()
       }
     })
@@ -181,7 +181,7 @@ test.describe('Metrics', () => {
     await apps.updateApp('rancher-kubewarden-controller', {
       navigate : false,
       questions: async() => {
-        await ui.tab('Telemetry').click()
+        await ui.tab(/^(Open)?Telemetry/).click()
         await ui.checkbox('Enable Metrics').check()
       }
     })
@@ -217,7 +217,7 @@ test.describe('Metrics', () => {
     // Disable metrics
     await apps.updateApp('rancher-kubewarden-controller', {
       questions: async() => {
-        await ui.tab('Telemetry').click()
+        await ui.tab(/^(Open)?Telemetry/).click()
         await ui.checkbox('Enable Metrics').uncheck()
       }
     })
