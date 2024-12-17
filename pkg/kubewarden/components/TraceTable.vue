@@ -173,8 +173,8 @@ export default {
         const tracingIsUndefinedOrBoolean = telemetry?.tracing === undefined || typeof telemetry?.tracing === 'boolean';
         const endpointIsDefined = !!telemetry?.sidecar?.tracing?.jaeger?.endpoint;
         
-        // Check for unsupported 'custom' section
-        if (telemetry?.custom) {
+        // Check for unsupported 'custom' mode
+        if (telemetry?.mode === 'custom') {
           this.unsupportedTelemetrySpec = true;
 
           return null;
