@@ -1,6 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
+import semver from 'semver';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -86,7 +87,10 @@ export default {
       TRACE_HEADERS,
       OPERATION_MAP,
 
-      specificValidations: null
+      specificValidations: null,
+      outdatedTelemetrySpec: false,
+      unsupportedTelemetrySpec: false,
+      incompleteTelemetrySpec: false
     };
   },
 
@@ -151,19 +155,54 @@ export default {
     },
 
     tracingConfiguration() {
-      if ( this.controllerApp ) {
-        return this.controllerApp?.values?.telemetry?.tracing;
+      if (!this.controllerApp) {
+        return null;
       }
 
-      return null;
-    },
+      const version = this.controllerApp?.spec?.chart?.metadata?.version;
+      const telemetry = this.controllerApp?.values?.telemetry;
 
-    tracingEnabled() {
-      if ( this.tracingConfiguration ) {
-        return this.tracingConfiguration.enabled;
+      if (semver.gte(version, '4.0.0-0')) {
+        // In version 4+, telemetry.tracing should be boolean or undefined (treated as false).
+        // sidecar.tracing is only meaningful if telemetry.tracing === true.
+
+        const tracingIsUndefinedOrBoolean = telemetry?.tracing === undefined || typeof telemetry?.tracing === 'boolean';
+        const endpointIsDefined = !!telemetry?.sidecar?.tracing?.jaeger?.endpoint;
+        
+        // Check for unsupported 'custom' mode
+        if (telemetry?.mode === 'custom') {
+          this.unsupportedTelemetrySpec = true;
+
+          return null;
+        }
+
+        // If tracing is not undefined or boolean, it's outdated
+        if (!tracingIsUndefinedOrBoolean) {
+          this.outdatedTelemetrySpec = true;
+
+          return null;
+        }
+
+        // If telemetry.tracing is true, ensure sidecar.tracing is defined
+        if (telemetry?.tracing === true && !endpointIsDefined) {
+          this.incompleteTelemetrySpec = true;
+
+          return null;
+        }
+
+        // If telemetry.tracing is undefined or false, treat it as false.
+        // sidecar config is irrelevant in that case, and not considered outdated.
+        if (telemetry?.tracing !== true) {
+          // tracing is off, no sidecar config needed
+          return null;
+        }
+
+        // If we get here, telemetry.tracing === true and endpointIsDefined === true
+        return telemetry?.sidecar?.tracing;
+      } else {
+        // Old schema: just return telemetry.tracing.enabled
+        return telemetry?.tracing?.enabled;
       }
-
-      return null;
     },
 
     jaegerServices() {
@@ -203,7 +242,7 @@ export default {
     },
 
     showChecklist() {
-      return (!this.openTelSvc || !this.jaegerQuerySvc || !this.tracingConfiguration?.enabled);
+      return (!this.openTelSvc || !this.jaegerQuerySvc || !this.tracingConfiguration);
     },
 
     showTable() {
@@ -255,6 +294,9 @@ export default {
       :tracing-configuration="tracingConfiguration"
       :jaeger-query-svc="jaegerQuerySvc"
       :open-tel-svc="openTelSvc"
+      :outdated-telemetry-spec="outdatedTelemetrySpec"
+      :unsupported-telemetry-spec="unsupportedTelemetrySpec"
+      :incomplete-telemetry-spec="incompleteTelemetrySpec"
     />
 
     <Banner

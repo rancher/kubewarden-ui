@@ -173,6 +173,9 @@ kubewarden:
       label: Prerequisites
       description: There are a few resources which need to be installed for tracing to work correctly with the Kubewarden Controller.
       warning: The deployments of these resources can take a few minutes to become active.
+      outdated: The tracing configuration is outdated, please update the configuration.
+      unsupported: The custom tracing configuration is unsupported, please update the configuration to use the sidecar.
+      incomplete: The tracing configuration is incomplete, please update the configuration.
     certService: |
       <a href="https://github.com/cert-manager/cert-manager" target="_blank" rel="noopener noreferrer nofollow" >Cert-Manager</a> must be installed inside the cluster, follow the <a href="https://docs.kubewarden.io/next/howtos/telemetry/opentelemetry-qs#install-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to setup cert-manager.
     installOpenTelemetry: |
@@ -186,7 +189,7 @@ kubewarden:
     noTraces: No tracing data exists for this policy.
     config:
       label: |
-        Tracing must be <a href="https://docs.kubewarden.io/next/howtos/ui-extension/tracing#update-rancher-kubewarden-controller-with-jaeger-endpoint" target="_blank" rel="noopener noreferrer nofollow">configured</a> with a Jaeger endpoint in the "Telemetry" tab of the Kubewarden Controller chart settings.
+        Tracing must be <a href="https://docs.kubewarden.io/next/howtos/ui-extension/tracing#update-rancher-kubewarden-controller-with-jaeger-endpoint" target="_blank" rel="noopener noreferrer nofollow">enabled and configured</a> with a Jaeger endpoint in the "Telemetry" tab of the Kubewarden Controller chart settings.
       link: Update Config
   monitoring:
     notInstalled: |
@@ -196,6 +199,9 @@ kubewarden:
       label: Prerequisites
       description: There are a few resources which need to be installed and configured correctly for monitoring to be available.
       warning: The deployments of these resources can take a few minutes to become active.
+      outdated: The metrics configuration is outdated, please update the configuration.
+      unsupported: The custom metrics configuration is unsupported, please update the configuration to use the sidecar.
+      incomplete: The metrics configuration is incomplete, please update the configuration.
       tooltips:
         prerequisites: The prerequisite steps have not been completed.
         appNotInstalled: The { app } app is not yet installed.
