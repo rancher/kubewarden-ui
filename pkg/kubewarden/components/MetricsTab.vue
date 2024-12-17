@@ -252,8 +252,8 @@ export default {
         // sidecar.metrics is only meaningful if telemetry.metrics === true.
         const metricsIsUndefinedOrBoolean = telemetry?.metrics === undefined || typeof telemetry?.metrics === 'boolean';
         
-        // Check for unsupported 'custom' section
-        if (telemetry?.custom) {
+        // Check for unsupported 'custom' mode
+        if (telemetry?.mode === 'custom') {
           this.unsupportedTelemetrySpec = true;
 
           return null;
