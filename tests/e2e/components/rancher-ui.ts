@@ -44,7 +44,7 @@ export class RancherUI {
   }
 
   // Tab
-  tab(name: string) {
+  tab(name: string|RegExp) {
     return this.page.getByRole('tab', { name, exact: true })
   }
 
