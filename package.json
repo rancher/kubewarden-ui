@@ -17,7 +17,7 @@
   "dependencies": {
     "@kubernetes/client-node": "^1.0.0",
     "@rancher/components": "^0.3.0-alpha.1",
-    "@rancher/shell": "3.0.0"
+    "@rancher/shell": "3.0.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.24.7",
