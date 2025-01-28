@@ -49,23 +49,7 @@ export default {
     YamlEditor
   },
 
-  async fetch() {
-    if (isEmpty(this.chartValues.questions) && !!this.chartValues?.policy?.spec?.settings) {
-      try {
-        const pkg = await this.value.artifactHubPackageVersion();
-
-        if (pkg && !pkg.error) {
-          const packageQuestions = this.value.parsePackageMetadata(pkg?.data?.['kubewarden/questions-ui']);
-
-          if (packageQuestions) {
-            set(this.chartValues, 'questions', packageQuestions);
-          }
-        }
-      } catch (e) {
-        console.warn(`Unable to fetch chart questions: ${ e }`);
-      }
-    }
-
+  async mounted() {
     try {
       this.version = this.$store.getters['catalog/version']({
         repoType:      'cluster',
@@ -79,6 +63,17 @@ export default {
     }
 
     this.generateYaml();
+
+    // by default, every clusterAdmissionPolicy created will ignore Rancher system namespaces
+    // so that policies in PROTECT mode don't crash the system
+    // needs to be in this component because MatchExpression component is not automatically updated
+    if (this.mode === _CREATE && this.chartValues?.policy?.kind === 'ClusterAdmissionPolicy') {
+      if (!this.chartValues?.policy?.spec?.namespaceSelector) {
+        this.chartValues.policy.spec.namespaceSelector = {};
+      }
+
+      this.chartValues.policy.spec.namespaceSelector.matchExpressions = [RANCHER_NS_MATCH_EXPRESSION];
+    }
   },
 
   data() {
@@ -91,19 +86,6 @@ export default {
       preYamlOption:       VALUES_STATE.FORM,
       yamlOption:          VALUES_STATE.FORM
     };
-  },
-
-  mounted() {
-    // by default, every clusterAdmissionPolicy created will ignore Rancher system namespaces
-    // so that policies in PROTECT mode don't crash the system
-    // needs to be in this component because MatchExpression component is not automatically updated
-    if (this.mode === _CREATE && this.chartValues?.policy?.kind === 'ClusterAdmissionPolicy') {
-      if (!this.chartValues?.policy?.spec?.namespaceSelector) {
-        this.chartValues.policy.spec.namespaceSelector = {};
-      }
-
-      this.chartValues.policy.spec.namespaceSelector.matchExpressions = [RANCHER_NS_MATCH_EXPRESSION];
-    }
   },
 
   watch: {
