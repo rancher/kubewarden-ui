@@ -1,24 +1,19 @@
-<script>
+<script setup lang="ts">
+import { ref } from 'vue';
 import { KUBEWARDEN_PRODUCT_NAME } from '../types';
 
-export default {
-  props: {
-    row: {
-      type:     Object,
-      required: true
-    }
-  },
+const props = defineProps<{
+  row: {
+    repository: {
+      organization_name: string;
+    };
+    signed: boolean;
+    signatures: string[];
+  };
+}>();
 
-  computed: {
-    isOfficial() {
-      return this.row?.repository?.organization_name?.toLowerCase() === KUBEWARDEN_PRODUCT_NAME;
-    },
-
-    subtypeSignature() {
-      return this.row?.signatures?.[0] || 'unknown';
-    }
-  }
-};
+const isOfficial = ref(props.row?.repository?.organization_name?.toLowerCase() === KUBEWARDEN_PRODUCT_NAME);
+const subtypeSignature = ref(props.row?.signatures?.[0] || 'unknown');
 </script>
 
 <template>

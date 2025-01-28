@@ -45,23 +45,7 @@ export default {
     ButtonGroup, Loading, ResourceCancelModal, Tabbed, YamlEditor
   },
 
-  async fetch() {
-    if ( isEmpty(this.chartValues.questions) && !!this.chartValues?.policy?.spec?.settings ) {
-      try {
-        const pkg = await this.value.artifactHubPackageVersion();
-
-        if ( pkg && !pkg.error ) {
-          const packageQuestions = this.value.parsePackageMetadata(pkg?.data?.['kubewarden/questions-ui']);
-
-          if ( packageQuestions ) {
-            set(this.chartValues, 'questions', packageQuestions);
-          }
-        }
-      } catch (e) {
-        console.warn(`Unable to fetch chart questions: ${ e }`); // eslint-disable-line no-console
-      }
-    }
-
+  async mounted() {
     try {
       this.version = this.$store.getters['catalog/version']({
         repoType:      'cluster',
@@ -75,6 +59,17 @@ export default {
     }
 
     this.generateYaml();
+
+    // by default, every clusterAdmissionPolicy created will ignore Rancher system namespaces
+    // so that policies in PROTECT mode don't crash the system
+    // needs to be in this component because MatchExpression component is not automatically updated
+    if (this.mode === _CREATE && this.chartValues?.policy?.kind === 'ClusterAdmissionPolicy') {
+      if (!this.chartValues?.policy?.spec?.namespaceSelector) {
+        this.chartValues.policy.spec.namespaceSelector = {};
+      }
+
+      this.chartValues.policy.spec.namespaceSelector.matchExpressions = [RANCHER_NS_MATCH_EXPRESSION];
+    }
   },
 
   data() {
@@ -89,19 +84,6 @@ export default {
     };
   },
 
-  mounted() {
-    // by default, every clusterAdmissionPolicy created will ignore Rancher system namespaces
-    // so that policies in PROTECT mode don't crash the system
-    // needs to be in this component because MatchExpression component is not automatically updated
-    if (this.mode === _CREATE && this.chartValues?.policy?.kind === 'ClusterAdmissionPolicy') {
-      if (!this.chartValues?.policy?.spec?.namespaceSelector) {
-        this.chartValues.policy.spec.namespaceSelector = {};
-      }
-
-      this.chartValues.policy.spec.namespaceSelector.matchExpressions = [RANCHER_NS_MATCH_EXPRESSION];
-    }
-  },
-
   watch: {
     yamlOption(neu, old) {
       switch (neu) {
@@ -111,7 +93,7 @@ export default {
 
         break;
       case VALUES_STATE.YAML:
-        if ( old === VALUES_STATE.FORM ) {
+        if (old === VALUES_STATE.FORM) {
           this.currentYamlValues = saferDump(this.chartValues.policy);
           this.updateYamlValues();
         }
@@ -146,7 +128,7 @@ export default {
       const rawPolicy = toRaw(this.chartValues.policy);
       const cloned = rawPolicy ? structuredClone(rawPolicy) : this.value;
 
-      if ( this.yamlValues?.length ) {
+      if (this.yamlValues?.length) {
         this.currentYamlValues = this.yamlValues;
       } else {
         this.currentYamlValues = createYaml(schemas, this.value?.type, cloned);
@@ -154,7 +136,7 @@ export default {
     },
 
     loadValuesComponent() {
-      if ( this.value?.haveComponent('kubewarden/admission') ) {
+      if (this.value?.haveComponent('kubewarden/admission')) {
         const importFn = this.value.importComponent('kubewarden/admission');
         this.valuesComponent = defineAsyncComponent(importFn);
       }

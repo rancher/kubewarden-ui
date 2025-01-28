@@ -289,6 +289,7 @@ export default {
     componentForQuestion,
 
     update(variable, $event) {
+      console.log('## questions update variable: ', variable, '  || event: ', $event);
       set(this.value, variable, $event);
       if (this.emit) {
         this.$emit('updated');
