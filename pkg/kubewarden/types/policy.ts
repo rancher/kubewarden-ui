@@ -1,6 +1,54 @@
 import { V1LabelSelectorRequirement } from '@kubernetes/client-node';
 import { Policy } from './kubewarden';
 
+export interface PolicyChart {
+  name: string;
+  home: string;
+  version: string;
+  description: string;
+  keywords: string[];
+  icon: string;
+  apiVersion: string;
+  appVersion: string;
+  annotations: {
+    'catalog.cattle.io/certified': string;
+    'catalog.cattle.io/hidden': string;
+    'catalog.cattle.io/os': string;
+    'catalog.cattle.io/permits-os': string;
+    'catalog.cattle.io/type': string;
+    'catalog.cattle.io/ui-component': string;
+    'kubewarden/contextAwareResources': string;
+    'kubewarden/displayName': string;
+    'kubewarden/mutation': string;
+    'kubewarden/resources': string;
+    'kubewarden/hidden-ui': string;
+  };
+  kubeVersion: string;
+  type: string;
+  urls: string[];
+  created: string;
+  digest: string;
+  key: string;
+  repoType: string;
+  repoName: string;
+  official?: boolean;
+}
+
+export interface PolicyDetail {
+  readme: string;
+  values: {
+    metadata?: {
+      name: string;
+    }
+    clusterScoped: boolean;
+    spec: Policy['spec'];
+  };
+  questions: {
+    questions: [];
+  };
+  chart: PolicyChart;
+}
+
 export const DEFAULT_POLICY: Policy = {
   apiVersion: '',
   kind:       '',
