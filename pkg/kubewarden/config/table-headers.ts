@@ -301,32 +301,26 @@ export const POLICY_TABLE_HEADERS = [
   {
     name:     'name',
     labelKey: 'tableHeaders.name',
-    value:    'display_name',
-    sort:     'name',
+    value:    'row',
+    getValue: (row: any) => row,
+    formatter: 'PolicyTableDisplayName',
     width:    300
   },
   {
     name:      'resource',
     labelKey:  'kubewarden.policyTable.headers.resource',
-    value:     'data',
-    getValue:  (row: any) => row.data,
+    value:     'annotations',
+    getValue:  (row: any) => row.annotations,
     formatter: 'PolicyTableResources',
     width:     150
   },
   {
     name:      'features',
     labelKey:  'kubewarden.policyTable.headers.features',
-    value:     'data',
-    getValue:  (row: any) => row.data,
+    value:     'annotations',
+    getValue:  (row: any) => row.annotations,
     formatter: 'PolicyTableFeatures',
     width:     150
 
-  },
-  {
-    name:      '',
-    label:     '',
-    value:     'row',
-    formatter: 'PolicyTableBadges',
-    width:     40
   }
 ];
