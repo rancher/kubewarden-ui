@@ -342,7 +342,6 @@ export default ({
 
     /** Extract policy questions from the policy chart's details */
     async policyQuestions() {
-      console.log('## policyQuestions ##');
       const defaultPolicy = structuredClone(DEFAULT_POLICY);
 
       if (this.customPolicy) {
