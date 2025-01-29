@@ -37,8 +37,8 @@ const store = useStore();
 const route = useRoute();
 const t = store.getters['i18n/t'];
 
-const category = ref<string>(route.query[CATEGORY] as string || '');
-const searchQuery = ref<string>(route.query[SEARCH_QUERY] as string || '');
+const category = ref<string>(route.query?.[CATEGORY] as string || '');
+const searchQuery = ref<string>(route.query?.[SEARCH_QUERY] as string || '');
 const attributes = ref<string[]>([t('kubewarden.utils.attributes.optionLabels.all')]);
 const showKubewardenOfficial = ref<boolean>(true);
 
