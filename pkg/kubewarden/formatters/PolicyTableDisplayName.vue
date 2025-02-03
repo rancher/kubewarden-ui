@@ -10,9 +10,9 @@ const isOfficial = computed<boolean>((): boolean => props.row?.official || false
 </script>
 
 <template>
-  <div v-if="displayName" class="badge">
+  <div v-if="displayName" class="name-badge">
     {{ displayName }}
-    <span v-if="isOfficial" class="badge__icon">
+    <span v-if="isOfficial" class="name-badge__icon">
       <img
         v-clean-tooltip="t('kubewarden.policies.official')"
         src="../assets/icon-kubewarden.svg"
@@ -24,7 +24,7 @@ const isOfficial = computed<boolean>((): boolean => props.row?.official || false
 </template>
 
 <style lang="scss" scoped>
-.badge {
+.name-badge {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
