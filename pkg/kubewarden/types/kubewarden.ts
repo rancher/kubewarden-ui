@@ -1,5 +1,10 @@
 import {
-  V1SecurityContext, V1PodSecurityContext, V1ObjectMeta, V1EnvVar, V1LabelSelector, V1Condition,
+  V1SecurityContext,
+  V1PodSecurityContext,
+  V1ObjectMeta,
+  V1EnvVar,
+  V1LabelSelector,
+  V1Condition,
   V1MatchCondition
 } from '@kubernetes/client-node';
 
@@ -24,6 +29,12 @@ export const KUBEWARDEN_APPS = {
 };
 
 export const KUBEWARDEN_LABELS = { POLICY_SERVER: 'kubewarden/policy-server' };
+
+export const KUBEWARDEN_ANNOTATIONS = {
+  CHART_KEY:     'kubewarden.io/chart-key',
+  CHART_NAME:    'kubewarden.io/chart-name',
+  CHART_VERSION: 'kubewarden.io/chart-version',
+}
 
 export const KUBEWARDEN = {
   ADMISSION_POLICY:         'policies.kubewarden.io.admissionpolicy',
