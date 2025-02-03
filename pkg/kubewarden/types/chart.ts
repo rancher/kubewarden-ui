@@ -33,11 +33,21 @@ export interface Version {
   repoName?: string,
 }
 
+export interface VersionInfo {
+  readme: string;
+  values: any;
+  questions: {
+    questions: [];
+  };
+  chart: Chart;
+}
+  
 export interface Chart {
   key: string,
   type: string,
   id: string,
   certified?: string,
+  description?: string,
   sideLabel?: null,
   repoType: string,
   repoName: string,
