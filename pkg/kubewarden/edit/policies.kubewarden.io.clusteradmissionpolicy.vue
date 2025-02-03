@@ -52,6 +52,10 @@ export default {
 
     isClone() {
       return this.realMode === _CLONE;
+    },
+
+    schema() {
+      return this.$store.getters['cluster/schemaFor'](this.value.type);
     }
   },
 
@@ -61,6 +65,7 @@ export default {
         removeEmptyAttrs(this.value);
 
         // remove metadata that identifies a CAP as a default policy, so that we can edit it later on the UI
+        // https://github.com/rancher/kubewarden-ui/issues/682
         if (
           this.isClone &&
           this.value.isKubewardenDefaultPolicy &&
@@ -69,8 +74,7 @@ export default {
           delete this.value?.metadata?.labels?.['app.kubernetes.io/name'];
         }
 
-        await this.save(event);
-        this.$emit('input', this.value); // Emit the updated value to the parent
+        await this.save(event, (this.schema?.linkFor('collection') || ''));
       } catch (e) {
         handleGrowl({
           error: e,
