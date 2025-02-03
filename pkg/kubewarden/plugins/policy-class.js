@@ -6,7 +6,7 @@ import { get } from '@shell/utils/object';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { KUBERNETES, WORKSPACE_ANNOTATION } from '@shell/config/labels-annotations';
 
-import { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '../types';
+import { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION, KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '../types';
 import KubewardenModel, { colorForStatus } from './kubewarden-class';
 
 export default class PolicyModel extends KubewardenModel {
@@ -90,18 +90,14 @@ export default class PolicyModel extends KubewardenModel {
     }
 
     if (this.isDeployedWithFleet && !this.isApplied) {
-      return 'fleet';
+      return 'Fleet';
     }
 
-    // right now we are adding 'artifacthub/pkg' anontation
-    // so that we can fetch the questions info from there
-    // that only happens for template based CAP's
-    // https://github.com/rancher/kubewarden-ui/issues/682
-    if (this.metadata?.annotations?.['artifacthub/pkg']) {
-      return 'template';
+    if (this.metadata?.annotations && KUBEWARDEN_ANNOTATIONS.some(key => this.metadata.annotations[key])) {
+      return 'Policy Chart';
     }
 
-    return 'custom';
+    return 'Custom';
   }
 
   get stateDisplay() {

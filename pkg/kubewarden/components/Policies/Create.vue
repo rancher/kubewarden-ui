@@ -354,6 +354,12 @@ export default ({
         this.yamlValues = saferDump(finalPolicy);
 
         return;
+      } else {
+        // Add chart metadata annotations for fetching chart details/questions later
+        this.value.metadata.annotations = this.value.metadata.annotations || {};
+        this.value.metadata.annotations[KUBEWARDEN_ANNOTATIONS.CHART_KEY] = this.selectedPolicyChart.key;
+        this.value.metadata.annotations[KUBEWARDEN_ANNOTATIONS.CHART_NAME] = this.selectedPolicyChart.name;
+        this.value.metadata.annotations[KUBEWARDEN_ANNOTATIONS.CHART_VERSION] = this.selectedPolicyChart.version;
       }
 
       this.selectedPolicyDetails = await this.$store.dispatch('catalog/getVersionInfo', {
@@ -366,7 +372,7 @@ export default ({
       const policyQuestions = this.selectedPolicyDetails?.questions;
       const policyValues = toRaw(this.selectedPolicyDetails?.values);
 
-      defaultPolicy.spec.module   = `${ policyValues.spec.module.repository }@${ policyValues.spec.module.tag }`;
+      defaultPolicy.spec.module   = `${ policyValues.spec.module.repository }:${ policyValues.spec.module.tag }`;
       defaultPolicy.spec.mode     = policyValues.spec.mode;
       defaultPolicy.spec.mutating = policyValues.spec.mutating;
       defaultPolicy.spec.rules    = policyValues.spec.rules;
