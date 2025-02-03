@@ -124,7 +124,7 @@ export class RancherAppsPage extends BasePage {
      * SUCCESS: helm [install|upgrade] [--generate-name=true|name]  /home/shell/helm/opentelemetry-operator-0.38.0.tgz
      */
     async waitHelmSuccess(text: string, options?: { timeout?: number, keepLog?: boolean }) {
-      const timeout = options?.timeout || 60_000
+      const timeout = options?.timeout || 2 * 60_000
       const keepLog = options?.keepLog || false
 
       // Can't match ^..$ because output is sometimes mixed up

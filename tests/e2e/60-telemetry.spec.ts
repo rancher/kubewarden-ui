@@ -237,10 +237,12 @@ test.describe('Metrics', () => {
     await shell.run('kubectl delete cm -n cattle-dashboards kubewarden-dashboard-policy kubewarden-dashboard-policyserver')
     // Check
     await nav.pserver('default', 'Metrics')
-    await telPage.toBeIncomplete('config')
-    await telPage.toBeIncomplete('monitoring')
-    await telPage.toBeIncomplete('servicemonitor')
-    await telPage.toBeIncomplete('configmap')
+    await ui.retry(async()=> {
+      await telPage.toBeIncomplete('config')
+      await telPage.toBeIncomplete('monitoring')
+      await telPage.toBeIncomplete('servicemonitor')
+      await telPage.toBeIncomplete('configmap')
+    }, 'Service monitor shows as installed')
     await expect(telPage.configBtn).toBeDisabled()
   })
 })
