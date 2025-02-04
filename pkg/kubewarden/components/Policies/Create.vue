@@ -20,6 +20,7 @@ import Wizard from '@shell/components/Wizard';
 
 import {
   KUBEWARDEN,
+  KUBEWARDEN_ANNOTATIONS,
   KUBEWARDEN_PRODUCT_NAME,
   KUBEWARDEN_REPO,
   KUBEWARDEN_CHARTS_REPO,

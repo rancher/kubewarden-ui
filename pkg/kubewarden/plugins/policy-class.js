@@ -93,7 +93,7 @@ export default class PolicyModel extends KubewardenModel {
       return 'Fleet';
     }
 
-    if (this.metadata?.annotations && KUBEWARDEN_ANNOTATIONS.some(key => this.metadata.annotations[key])) {
+    if (this.metadata?.annotations && Object.values(KUBEWARDEN_ANNOTATIONS).some(key => this.metadata.annotations[key])) {
       return 'Policy Chart';
     }
 
