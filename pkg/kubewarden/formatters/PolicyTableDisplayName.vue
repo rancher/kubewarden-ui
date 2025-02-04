@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import { PolicyChart } from '@kubewarden/types';
+import { PolicyChart } from '../types';
 
 const props = defineProps<{ row: PolicyChart }>();
 
