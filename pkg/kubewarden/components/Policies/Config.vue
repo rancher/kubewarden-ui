@@ -9,7 +9,7 @@ import { set } from '@shell/utils/object';
 
 import Loading from '@shell/components/Loading.vue';
 
-import { Chart, Version, VersionInfo, KUBEWARDEN_ANNOTATIONS } from '@kubewarden/types';
+import { Chart, Version, VersionInfo, KUBEWARDEN_ANNOTATIONS } from '../../types';
 import Values from './Values.vue';
 import PolicyReadmePanel from './PolicyReadmePanel.vue';
 

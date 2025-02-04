@@ -4,7 +4,7 @@ import { useStore } from 'vuex';
 
 import ChartReadme from '@shell/components/ChartReadme';
 
-import { PolicyDetail } from '@kubewarden/types';
+import { PolicyDetail } from '../../types';
 
 const props = defineProps<{ policyChartDetails: PolicyDetail }>();
 

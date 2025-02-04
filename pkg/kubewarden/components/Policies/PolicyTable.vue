@@ -15,7 +15,7 @@ import { LabeledInput } from '@components/Form/LabeledInput';
 import { Checkbox } from '@components/Form/Checkbox';
 import SortableTableWrapper from '../SortableTableWrapper';
 
-import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME, PolicyChart } from '../../types';
+import { KUBEWARDEN, PolicyChart } from '../../types';
 import { POLICY_TABLE_HEADERS } from '../../config/table-headers';
 import { resourcesFromAnnotation, isGlobalPolicy } from '../../modules/policyChart';
 
