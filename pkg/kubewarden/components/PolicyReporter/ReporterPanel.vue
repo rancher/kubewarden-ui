@@ -13,11 +13,11 @@ export default {
     const resourceType = this.$route.params.resource;
 
     // Fetch cluster level reports if no specific resource is specified
-    if ( isClusterLevel ) {
+    if (isClusterLevel) {
       await getReports(this.$store, true);
     }
     // Fetch normal policy reports if a specific resource type is specified or always fetch on projectsnamespaces page
-    if ( resourceType || this.$route.path.includes('projectsnamespaces') ) {
+    if (resourceType || this.$route.path.includes('projectsnamespaces')) {
       await getReports(this.$store, false, resourceType);
     }
   }

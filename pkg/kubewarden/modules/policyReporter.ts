@@ -1,21 +1,18 @@
+import { toRaw } from 'vue';
 import { Store } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 import semver from 'semver';
 import { randomStr } from '@shell/utils/string';
 import { NAMESPACE } from '@shell/config/types';
 import {
-  KUBEWARDEN, CatalogApp, Severity, Result, PolicyReport, ClusterPolicyReport, PolicyReportResult, PolicyReportSummary, WG_POLICY_K8S
+  KUBEWARDEN, Severity, Result, PolicyReport, ClusterPolicyReport, PolicyReportResult, PolicyReportSummary, WG_POLICY_K8S
 } from '../types';
 import * as coreTypes from '../core/core-resources';
 import { createKubewardenRoute } from '../utils/custom-routing';
 import { splitGroupKind, isResourceNamespaced } from './core';
 import { fetchControllerApp } from './kubewardenController';
 
-function isValidAppVersion(controllerApp?: CatalogApp): boolean {
-  return !!controllerApp &&
-         !!controllerApp.spec?.chart?.metadata?.appVersion &&
-         semver.gte(controllerApp.spec.chart.metadata.appVersion, '1.10.100');
-}
+const CHUNK_SIZE = 100;
 
 /**
  * Fetches either PolicyReports or ClusterPolicyReports based on version compatibility and dispatches update actions.
@@ -31,40 +28,74 @@ export async function getReports(
   let outReports: Array<PolicyReport | ClusterPolicyReport> = [];
   const reportTypes = [];
 
-  if ( isClusterLevel ) {
+  if (isClusterLevel) {
     reportTypes.push(WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
   }
 
-  if ( resourceType || !isClusterLevel ) {
+  if (resourceType || !isClusterLevel) {
     reportTypes.push(WG_POLICY_K8S.POLICY_REPORT.TYPE);
   }
 
-  for ( const reportType of reportTypes ) {
+  for (const reportType of reportTypes) {
     const schema = store.getters['cluster/schemaFor'](reportType);
-    let controllerApp: CatalogApp | undefined = store.getters['kubewarden/controllerApp'];
 
-    if ( !controllerApp ) {
-      controllerApp = await fetchControllerApp(store);
-    }
-
-    if ( schema ) {
+    if (schema) {
       try {
-        const reports = await store.dispatch('cluster/findAll', { type: reportType }, { root: true });
+        let reports = toRaw(store.getters['cluster/all'](reportType));
 
-        if ( !isEmpty(reports) ) {
-          const updateAction = reportType === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE ? 'kubewarden/updateClusterPolicyReports' : 'kubewarden/updatePolicyReports';
+        if (isEmpty(reports)) {
+          reports = toRaw(await store.dispatch('cluster/findAll', { type: reportType }, { root: true }));
+        }
 
-          reports.forEach((report: PolicyReport | ClusterPolicyReport) => store.dispatch(updateAction, report));
+        if (!isEmpty(reports)) {
+          const updateAction = reportType === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE 
+            ? 'kubewarden/updateClusterPolicyReports' 
+            : 'kubewarden/updatePolicyReports';
 
+          // Process reports in chunks asynchronously
+          await processReportsInBatches(store, reports, updateAction);
+          
           outReports = outReports.concat(reports);
         }
       } catch (e) {
-        console.warn(`Error fetching ${ reportType }: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Error fetching ${reportType}: ${e}`);
       }
     }
   }
 
   return outReports;
+}
+
+/**
+ * Processes reports in batches to prevent UI blocking
+ */
+async function processReportsInBatches(
+  store: Store<any>,
+  reports: Array<PolicyReport | ClusterPolicyReport>,
+  action: string
+): Promise<void> {
+  const totalReports = reports.length;
+  
+  return new Promise((resolve) => {
+    let index = 0;
+
+    const processBatch = () => {
+      const batch = reports.slice(index, index + CHUNK_SIZE);
+      index += CHUNK_SIZE;
+
+      if (batch.length > 0) {
+        store.dispatch(action, batch);
+      }
+
+      if (index < totalReports) {
+        setTimeout(processBatch, 0);
+      } else {
+        resolve();
+      }
+    };
+
+    processBatch();
+  });
 }
 
 /**
@@ -200,10 +231,10 @@ function getFilteredArrayOfReportResults(
  * @param resource
  * @returns `PolicyReport | PolicyReportResult[] | null | void`
  */
-export async function getFilteredReports(store: Store<any>, resource: any): Promise<PolicyReport[] | PolicyReportResult[] | null | void> {
+export async function getFilteredReports(store: Store<any>, resource: any): Promise<PolicyReport[] | PolicyReportResult[] | void> {
   const schema = store.getters['cluster/schemaFor'](resource?.type);
 
-  if ( schema ) {
+  if (schema) {
     try {
       // Determine if we need to fetch cluster level reports or resource-specific reports
       const isClusterLevel = resource?.type === NAMESPACE || !isResourceNamespaced(resource);
@@ -212,7 +243,7 @@ export async function getFilteredReports(store: Store<any>, resource: any): Prom
       // Fetch the appropriate reports based on the resource context
       const reports = await getReports(store, isClusterLevel, resourceType);
 
-      if ( reports && !isEmpty(reports) ) {
+      if (reports && !isEmpty(reports) ) {
         // Filter and return the applicable report results
         return getFilteredArrayOfReportResults(reports, resource, isClusterLevel);
       }
@@ -221,7 +252,7 @@ export async function getFilteredReports(store: Store<any>, resource: any): Prom
     }
   }
 
-  return null;
+  return [];
 }
 
 /**

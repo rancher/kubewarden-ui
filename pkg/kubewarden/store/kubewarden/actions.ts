@@ -21,11 +21,11 @@ export default {
   },
 
   // Policy and Cluster Policy Reports
-  updatePolicyReports({ commit }: any, updatedReport: PolicyReport) {
-    commit('updateReports', { reportArrayKey: 'policyReports', updatedReport });
+  updatePolicyReports({ commit }: any, updatedReports: PolicyReport[]) {
+    commit('updateReportsBatch', { reportArrayKey: 'policyReports', updatedReports });
   },
-  updateClusterPolicyReports({ commit }: any, updatedReport: ClusterPolicyReport) {
-    commit('updateReports', { reportArrayKey: 'clusterPolicyReports', updatedReport });
+  updateClusterPolicyReports({ commit }: any, updatedReports: ClusterPolicyReport[]) {
+    commit('updateReportsBatch', { reportArrayKey: 'clusterPolicyReports', updatedReports });
   },
 
   // Policy traces

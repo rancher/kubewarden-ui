@@ -1,158 +1,175 @@
-<script>
+<script setup lang="ts">
+import { ref, reactive, computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute, RouteLocationRaw } from 'vue-router';
 import isEmpty from 'lodash/isEmpty';
+
 import { NAMESPACE } from '@shell/config/query-params';
 import { allHash } from '@shell/utils/promise';
-import ResourceFetch from '@shell/mixins/resource-fetch';
 
 import { BadgeState } from '@components/BadgeState';
 import { Banner } from '@components/Banner';
 import Loading from '@shell/components/Loading';
 import SortableTable from '@shell/components/SortableTable';
 
-import { KUBEWARDEN } from '../../types';
+import { KUBEWARDEN, PolicyReport, PolicyReportResult } from '../../types';
 import { POLICY_REPORTER_HEADERS } from '../../config/table-headers';
 import {
-  getFilteredReports, getLinkForPolicy, getLinkForResource, colorForResult, colorForSeverity
+  getFilteredReports,
+  getLinkForPolicy,
+  getLinkForResource,
+  colorForResult,
+  colorForSeverity
 } from '../../modules/policyReporter';
 import { splitGroupKind } from '../../modules/core';
 import * as coreTypes from '../../core/core-resources';
 
-export default {
-  props: {
-    resource: {
-      type:     Object,
-      required: true
-    }
-  },
+const store = useStore();
+const route = useRoute();
+const t = store.getters['i18n/t'];
 
-  components: {
-    BadgeState, Banner, Loading, SortableTable
-  },
+const reports = ref<(PolicyReport | PolicyReportResult)[]>([]);
+const resource = ref<any>(null);
+const canGetKubewardenLinks = ref(false);
 
-  mixins: [ResourceFetch],
+const resourceHeaders = POLICY_REPORTER_HEADERS.RESOURCE;
+const namespaceHeaders = POLICY_REPORTER_HEADERS.NAMESPACE;
 
-  async fetch() {
-    const fetchedReports = await getFilteredReports(this.$store, this.resource);
+const fetchState = reactive({
+  pending: true
+});
 
-    this.reports = fetchedReports || [];
+function determineResource() {
+  if (route?.params?.resource && route?.params?.id) {
+    const id = route.params.namespace ? `${ route.params.namespace }/${ route.params.id }` : route.params.id;
+    resource.value = store.getters['cluster/byId'](route.params.resource, id);
+  }
+}
 
-    if ( !isEmpty(this.reports) ) {
+async function fetchReports() {
+  if (resource.value) {
+    const fetchedReports  = await getFilteredReports(store, resource.value) ?? [];
+    
+    if (!isEmpty(fetchedReports)) {
       const hash = [
-        this.$fetchType(KUBEWARDEN.ADMISSION_POLICY),
-        this.$fetchType(KUBEWARDEN.CLUSTER_ADMISSION_POLICY)
+        store.dispatch('cluster/findAll', { type: KUBEWARDEN.ADMISSION_POLICY }),
+        store.dispatch('cluster/findAll', { type: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }),
       ];
 
       await allHash(hash);
     }
-  },
+    
+    // Assign the value *after* all async calls to avoid triggering unnecessary reactivity
+    reports.value = [...fetchedReports];
+  }
+  
+  fetchState.pending = false;
+}
 
-  data() {
-    return {
-      colorForResult,
-      reports:          [],
-      resourceHeaders:  POLICY_REPORTER_HEADERS.RESOURCE,
-      namespaceHeaders: POLICY_REPORTER_HEADERS.NAMESPACE
-    };
-  },
 
-  computed: {
-    canGetKubewardenLinks() {
-      const capSchema = this.$store.getters['cluster/schemaFor'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
-      const apSchema = this.$store.getters['cluster/schemaFor'](KUBEWARDEN.ADMISSION_POLICY);
+onMounted(() => {
+  determineResource();
+  fetchReports();
 
-      if ( capSchema || apSchema ) {
-        return true;
-      }
+  const capSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
+  const apSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.ADMISSION_POLICY);
+  
+  canGetKubewardenLinks.value = !!(capSchema || apSchema);
+});
 
-      return false;
-    },
+const isNamespaceResource = computed(() => resource.value?.type === NAMESPACE);
+const tableHeaders = computed(() =>
+  isNamespaceResource.value ? namespaceHeaders : resourceHeaders
+);
 
-    hasNamespace() {
-      return this.resource?.metadata?.namespace;
-    },
+function canGetResourceLink(row: PolicyReport | PolicyReportResult): boolean {
+  const outResource = row.scope;
 
-    hasReports() {
-      return !isEmpty(this.reports);
-    },
+  if (resource.value?.type === NAMESPACE && outResource?.kind?.toLowerCase() === NAMESPACE) {
+    return false;
+  }
 
-    isNamespaceResource() {
-      return this.resource?.type === NAMESPACE;
-    },
+  if (outResource) {
+    const isCore = Object.values(coreTypes).find(
+      (type: any) => outResource.kind === type.attributes.kind
+    );
 
-    tableHeaders() {
-      return this.isNamespaceResource ? this.namespaceHeaders : this.resourceHeaders;
+    if (isCore) {
+      return store.getters['cluster/schemaFor'](outResource.kind?.toLowerCase());
     }
-  },
 
-  methods: {
-    canGetResourceLink(row) {
-      const outResource = row.scope;
+    const groupType = splitGroupKind(outResource);
 
-      if ( this.resource?.type === NAMESPACE && outResource.kind?.toLowerCase() === NAMESPACE ) {
-        return null;
-      }
-
-      if ( outResource ) {
-        const isCore = Object.values(coreTypes).find(type => outResource.kind === type.attributes.kind);
-
-        if ( isCore ) {
-          return this.$store.getters['cluster/schemaFor'](outResource.kind?.toLowerCase());
-        }
-
-        const groupType = splitGroupKind(outResource);
-
-        if ( groupType ) {
-          return this.$store.getters['cluster/schemaFor'](groupType);
-        }
-      }
-
-      return null;
-    },
-
-    getResourceValue(row, val, needScope = false) {
-      if ( this.isNamespaceResource && needScope ) {
-        return row.scope?.[val] || '-';
-      }
-
-      if ( !isEmpty(row) ) {
-        return row[val] || '-';
-      }
-
-      return '-';
-    },
-
-    getPolicyLink(row) {
-      return getLinkForPolicy(this.$store, row);
-    },
-
-    getResourceLink(row) {
-      return getLinkForResource(row);
-    },
-
-    severityColor(row) {
-      if ( row.result ) {
-        return colorForSeverity(row.severity);
-      }
-
-      return 'bg-muted';
-    },
-
-    statusColor(row) {
-      if ( row.result ) {
-        const color = colorForResult(row.result);
-        const bgColor = color.includes('sizzle') ? color.concat('-bg') : color.replace(/text-/, 'bg-');
-
-        return bgColor;
-      }
-
-      return 'bg-muted';
+    if (groupType) {
+      return store.getters['cluster/schemaFor'](groupType);
     }
   }
-};
+
+  return false;
+}
+
+function getResourceValue(row: PolicyReport | PolicyReportResult, val: string, needScope = false): string {
+  if (isNamespaceResource.value && needScope) {
+    if (row.scope && val in row.scope) {
+      const value = row.scope[val as keyof typeof row.scope];
+
+      return typeof value === 'string' ? value : '-';
+    }
+
+    return '-';
+  }
+
+  if (!isEmpty(row)) {
+    if (val in row) {
+      const value = row[val as keyof (PolicyReport | PolicyReportResult)];
+
+      return typeof value === 'string' ? value : '-';
+    }
+  }
+
+  return '-';
+}
+
+
+
+function getPolicyLink(row: PolicyReportResult): RouteLocationRaw | undefined {
+  const link = getLinkForPolicy(store, row);
+
+  if (link) {
+    return link;
+  }
+}
+
+function getResourceLink(row: PolicyReport): RouteLocationRaw | undefined {
+  const link = getLinkForResource(row);
+
+  if (link) {
+    return link;
+  }
+}
+
+function severityColor(row: PolicyReportResult) {
+  if (row.result && row.severity) {
+    return colorForSeverity(row.severity);
+  }
+
+  return 'bg-muted';
+}
+
+function statusColor(row: PolicyReportResult) {
+  if (row.result) {
+    const color = colorForResult(row.result);
+    const bgColor = color.includes('sizzle')
+      ? `${color}-bg`
+      : color.replace(/text-/, 'bg-');
+    return bgColor;
+  }
+  return 'bg-muted';
+}
 </script>
 
 <template>
-  <Loading v-if="$fetchState.pending" mode="relative" />
+  <Loading v-if="fetchState.pending" mode="relative" />
   <div v-else class="pr-tab__container">
     <SortableTable
       :rows="reports"
@@ -169,19 +186,14 @@ export default {
       :extra-search-fields="['summary']"
       default-sort-by="status"
     >
-      <template
-        v-if="isNamespaceResource"
-        #col:kind="{row}"
-      >
+      <!-- When the resource is a Namespace, show the kind and name using the row’s scope -->
+      <template v-if="isNamespaceResource" #col:kind="{ row }">
         <td>{{ getResourceValue(row, 'kind', true) }}</td>
       </template>
-      <template
-        v-if="isNamespaceResource"
-        #col:name="{row}"
-      >
+      <template v-if="isNamespaceResource" #col:name="{ row }">
         <td>
           <template v-if="canGetResourceLink(row)">
-            <router-link :to="getResourceLink(row)">
+            <router-link :to="getResourceLink(row)!">
               <span>{{ getResourceValue(row, 'name', true) }}</span>
             </router-link>
           </template>
@@ -191,10 +203,10 @@ export default {
         </td>
       </template>
 
-      <template #col:policy="{row}">
+      <template #col:policy="{ row }">
         <td v-if="row.policy && row.policyName">
           <template v-if="canGetKubewardenLinks">
-            <router-link :to="getPolicyLink(row)">
+            <router-link :to="getPolicyLink(row)!">
               <span>{{ row.policyName }}</span>
             </router-link>
           </template>
@@ -203,7 +215,7 @@ export default {
           </template>
         </td>
       </template>
-      <template #col:severity="{row}">
+      <template #col:severity="{ row }">
         <td>
           <BadgeState
             :label="getResourceValue(row, 'severity')"
@@ -211,7 +223,7 @@ export default {
           />
         </td>
       </template>
-      <template #col:status="{row}">
+      <template #col:status="{ row }">
         <td>
           <BadgeState
             :label="getResourceValue(row, 'result')"
@@ -221,10 +233,12 @@ export default {
       </template>
 
       <!-- Sub-rows -->
-      <template #sub-row="{row, fullColspan}">
+      <template #sub-row="{ row, fullColspan }">
         <td :colspan="fullColspan" class="pr-tab__sub-row">
           <Banner v-if="row.message" color="info" class="message">
-            <span class="text-muted">{{ t('kubewarden.policyReporter.headers.policyReportsTab.message.title') }}:</span>
+            <span class="text-muted">
+              {{ t('kubewarden.policyReporter.headers.policyReportsTab.message.title') }}:
+            </span>
             <span>{{ row.message }}</span>
           </Banner>
           <div class="details">
@@ -232,17 +246,13 @@ export default {
               <div class="title">
                 {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.mutating') }}
               </div>
-              <span>
-                {{ row.properties['mutating'] || '-' }}
-              </span>
+              <span>{{ row.properties['mutating'] || '-' }}</span>
             </section>
             <section class="col">
               <div class="title">
                 {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.validating') }}
               </div>
-              <span>
-                {{ row.properties['validating'] || '-' }}
-              </span>
+              <span>{{ row.properties['validating'] || '-' }}</span>
             </section>
           </div>
         </td>

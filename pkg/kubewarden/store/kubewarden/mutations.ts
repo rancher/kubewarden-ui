@@ -98,6 +98,26 @@ export default {
     }
   },
 
+  updateReportsBatch<T extends PolicyReport | ClusterPolicyReport>(
+    state: StateConfig,
+    { reportArrayKey, updatedReports }: { reportArrayKey: ReportKeys, updatedReports: T[] }
+  ): void {
+    const reportArray = state[reportArrayKey] as Array<T>;
+    
+    updatedReports.forEach((updatedReport) => {
+      const existingIndex = reportArray.findIndex(report => report.id === updatedReport.id);
+      
+      if (existingIndex > -1) {
+        // Update existing report properties to preserve reactivity
+        const existingReport = reportArray[existingIndex];
+        existingReport.results = updatedReport.results;
+        existingReport.summary = updatedReport.summary;
+      } else {
+        reportArray.push(updatedReport);
+      }
+    });
+  },
+
   /**
    * Searches and then removes a report by id from the store
    * @param state
