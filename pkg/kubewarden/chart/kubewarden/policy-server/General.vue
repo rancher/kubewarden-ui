@@ -1,10 +1,27 @@
-<script>
-import { mapGetters } from 'vuex';
-import isEmpty from 'lodash/isEmpty';
+<script setup lang="ts">
+import {
+  ref, computed, onMounted, watch, watchEffect
+} from 'vue';
+import { useStore } from 'vuex';
+import { V1ServiceAccount } from '@kubernetes/client-node';
 
-import ResourceFetch from '@shell/mixins/resource-fetch';
 import { CATALOG, FLEET } from '@shell/config/types';
 import { _CREATE } from '@shell/config/query-params';
+
+import {
+  PolicyServer,
+  CatalogApp,
+  ClusterRepo,
+  Chart,
+  FleetBundle,
+  KUBEWARDEN_REPO,
+  KUBEWARDEN_CHARTS_REPO,
+  KUBEWARDEN_CHARTS_REPO_GIT,
+  KUBEWARDEN_CHARTS,
+} from '../../../types';
+import { findCompatibleDefaultsChart } from '../../../utils/chart';
+import { getPolicyServerModule, isFleetDeployment } from '../../../modules/fleet';
+import { DEFAULT_POLICY_SERVER } from '../../../models/policies.kubewarden.io.policyserver';
 
 import Loading from '@shell/components/Loading';
 import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
@@ -12,213 +29,150 @@ import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 
-import { KUBEWARDEN_CHARTS, KUBEWARDEN_APPS } from '@kubewarden/types';
-import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
-import { getPolicyServerModule, isFleetDeployment } from '@kubewarden/modules/fleet';
-import { findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
+const props = defineProps<{
+  mode?: string;
+  value: PolicyServer;
+  serviceAccounts: V1ServiceAccount[];
+}>();
 
-export default {
-  props: {
-    mode: {
-      type:    String,
-      default: _CREATE
-    },
+const store = useStore();
+const t = store.getters['i18n/t'];
 
-    value: {
-      type:     Object,
-      required: true
-    },
+const isLoading = ref(false);
+const defaultImage = ref(true);
+const latestChartVersion = ref<string | null>(null);
+const isFleet = ref(false);
+const name = ref(props.value?.metadata?.name);
+const image = ref(props.value?.spec?.image);
+const serviceAccountName = ref(props.value?.spec?.serviceAccountName);
+const replicas = ref(props.value?.spec?.replicas);
+const kubewardenRepo = ref<ClusterRepo | null>(null);
+const defaultsChart = ref<Chart | null>(null);
 
-    serviceAccounts: {
-      type:     Array,
-      required: true
-    }
-  },
+const isCreate = computed(() => props.mode === _CREATE);
+const allApps = computed<CatalogApp[]>(() => store.getters['cluster/all'](CATALOG.APP));
+const allRepos = computed<ClusterRepo[]>(() => store.getters['cluster/all'](CATALOG.CLUSTER_REPO));
+const controllerApp = computed<CatalogApp>(() => store.getters['kubewarden/controllerApp']);
+const fleetBundles = computed<FleetBundle[]>(() => store.getters['management/all'](FLEET.BUNDLE));
 
-  components: {
-    Banner,
-    LabeledInput,
-    Loading,
-    RadioGroup,
-    ServiceNameSelect
-  },
+const showVersionBanner = computed(() => {
+  if (isFleet.value) {
+    return isCreate.value && defaultImage.value && !latestChartVersion.value;
+  }
 
-  mixins: [ResourceFetch],
+  return isCreate.value && defaultImage.value && !defaultsChart?.value && !latestChartVersion.value;
+});
 
-  async fetch() {},
+async function fetchData() {
+  isLoading.value = true;
 
-  async mounted() {
-    this.isLoading = true;
+  if (
+    store.getters['cluster/canList'](CATALOG.APP) &&
+    store.getters['cluster/canList'](CATALOG.CLUSTER_REPO)
+  ) {
+    await Promise.all([
+      store.dispatch('catalog/load'),
+      store.dispatch('cluster/findAll', { type: CATALOG.CLUSTER_REPO }),
+      !store.getters['kubewarden/controllerApp'] && store.dispatch('cluster/findAll', { type: CATALOG.APP })
+    ]);
 
-    if (this.$store.getters['cluster/canList'](CATALOG.APP) && this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO)) {
-      await this.$initializeFetchData(CATALOG);
-      await this.$fetchType(CATALOG.CLUSTER_REPO);
+    if (controllerApp.value) {
+      isFleet.value = isFleetDeployment(controllerApp.value);
 
-      if (!this.$store.getters['kubewarden/controllerApp']) {
-        await this.$fetchType(CATALOG.APP);
+      if (isFleet.value && store.getters['management/all'](FLEET.BUNDLE)) {
+        await store.dispatch('management/findAll', { type: FLEET.BUNDLE });
       }
 
-      await this.$store.dispatch('catalog/load');
+      if (defaultsChart?.value) {
+        const compatibleVersion = findCompatibleDefaultsChart(controllerApp.value, defaultsChart.value);
 
-      if (this.controllerApp) {
-        this.isFleet = isFleetDeployment(this.controllerApp);
-
-        if (this.isFleet && this.$store.getters['management/all'](FLEET.BUNDLE)) {
-          await this.$initializeFetchData(FLEET);
-          await this.$store.dispatch('management/findAll', { type: FLEET.BUNDLE });
-        }
-
-        if (this.defaultsChart) {
-          const compatibleVersion = findCompatibleDefaultsChart(this.controllerApp, this.defaultsChart);
-
-          if (!compatibleVersion) {
-            this.isLoading = false;
-
-            return;
-          }
-
-          const chartInfo = await this.$store.dispatch('catalog/getVersionInfo', {
-            repoType:    this.defaultsChart?.repoType,
-            repoName:    this.defaultsChart?.repoName,
-            chartName:   this.defaultsChart?.chartName,
-            versionName: compatibleVersion?.version
+        if (compatibleVersion) {
+          const chartInfo = await store.dispatch('catalog/getVersionInfo', {
+            repoType:    defaultsChart.value.repoType,
+            repoName:    defaultsChart.value.repoName,
+            chartName:   defaultsChart.value.chartName,
+            versionName: compatibleVersion.version,
           });
 
-          if (!isEmpty(chartInfo)) {
-            const registry = chartInfo.values?.common?.cattle?.systemDefaultRegistry;
+          if (chartInfo) {
+            const registry = chartInfo.values?.common?.cattle?.systemDefaultRegistry || 'ghcr.io';
             const psImage = chartInfo.values?.policyServer?.image?.repository;
             const psTag = chartInfo.values?.policyServer?.image?.tag;
 
             if (psImage && psTag) {
-              this.latestChartVersion = `${ registry || 'ghcr.io' }/${ psImage }:${ psTag }`;
+              latestChartVersion.value = `${ registry }/${ psImage }:${ psTag }`;
             }
           }
-        }
-
-        if (this.isFleet && !this.defaultsChart) {
-          this.latestChartVersion = getPolicyServerModule(this.fleetBundles);
-        }
-
-        if (!this.image || (this.isCreate && this.image === DEFAULT_POLICY_SERVER.spec.image)) {
-          this.image = this.latestChartVersion || structuredClone(DEFAULT_POLICY_SERVER.spec.image);
-        } else if (this.image !== this.latestChartVersion && this.image !== DEFAULT_POLICY_SERVER.spec.image) {
-          this.defaultImage = false;
-        }
-
-        if (!this.isCreate && this.image) {
-          if (this.image === this.latestChartVersion) {
-            this.defaultImage = true;
-          } else {
-            this.defaultImage = false;
-          }
-        }
-      }
-    }
-
-    this.isLoading = false;
-  },
-
-  data() {
-    return {
-      isLoading:           false,
-      defaultImage:        true,
-      latestChartVersion:  null,
-      isFleet:             false,
-      name:                this.value.metadata.name,
-      image:               this.value.spec.image,
-      serviceAccountName:  this.value.spec.serviceAccountName,
-      replicas:            this.value.spec.replicas
-    };
-  },
-
-  watch: {
-    name(neu) {
-      this.$emit('update-general', 'name', neu);
-    },
-    image(neu) {
-      this.$emit('update-general', 'image', neu);
-    },
-    serviceAccountName(neu) {
-      this.$emit('update-general', 'serviceAccountName', neu);
-    },
-    replicas(neu) {
-      this.$emit('update-general', 'replicas', neu);
-    },
-    defaultImage(neu) {
-      if (neu) {
-        if (this.latestChartVersion) {
-          this.image = this.latestChartVersion;
         } else {
-          this.image = structuredClone(DEFAULT_POLICY_SERVER.spec.image);
+          console.warn('No compatible version found for the default chart');
         }
       }
-    }
-  },
 
-  computed: {
-    ...mapGetters({ charts: 'catalog/charts' }),
-
-    allApps() {
-      return this.$store.getters['cluster/all'](CATALOG.APP);
-    },
-
-    controllerApp() {
-      const storedApp = this.$store.getters['kubewarden/controllerApp'];
-
-      if (!storedApp) {
-        const controller = this.allApps?.find((a) => (
-          a?.spec?.chart?.metadata?.name === (KUBEWARDEN_CHARTS.CONTROLLER || KUBEWARDEN_APPS.RANCHER_CONTROLLER)
-        ));
-
-        if (controller) {
-          this.$store.dispatch('kubewarden/updateControllerApp', controller);
-
-          return controller;
-        }
-
-        return null;
+      if (isFleet.value && !defaultsChart?.value) {
+        latestChartVersion.value = getPolicyServerModule(fleetBundles.value);
       }
 
-      return storedApp;
-    },
-
-    isCreate() {
-      return this.mode === _CREATE;
-    },
-
-    defaultsChart() {
-      if (this.kubewardenRepo && !this.isFleet) {
-        return this.$store.getters['catalog/chart']({
-          repoName:  this.kubewardenRepo.repoName,
-          repoType:  this.kubewardenRepo.repoType,
-          chartName: KUBEWARDEN_CHARTS.DEFAULTS
-        });
+      if (!image.value || (isCreate.value && image.value === DEFAULT_POLICY_SERVER.spec.image)) {
+        image.value = latestChartVersion.value || DEFAULT_POLICY_SERVER.spec.image;
+      } else if (image.value !== latestChartVersion.value && image.value !== DEFAULT_POLICY_SERVER.spec.image) {
+        defaultImage.value = false;
       }
 
-      return null;
-    },
-
-    fleetBundles() {
-      return this.$store.getters['management/all'](FLEET.BUNDLE);
-    },
-
-    kubewardenRepo() {
-      return this.charts?.find((chart) => chart.chartName === KUBEWARDEN_CHARTS.DEFAULTS);
-    },
-
-    showVersionBanner() {
-      if (this.isFleet) {
-        return (this.isCreate && this.defaultImage && !this.latestChartVersion);
+      if (!isCreate.value && image.value) {
+        defaultImage.value = image.value === latestChartVersion.value;
       }
-
-      return (this.isCreate && this.defaultImage && !this.defaultsChart && !this.latestChartVersion);
     }
   }
-};
+
+  isLoading.value = false;
+}
+
+onMounted(fetchData);
+
+watch([defaultImage, latestChartVersion], ([defaultImg, latest]) => {
+  if (defaultImg) {
+    image.value = latest || DEFAULT_POLICY_SERVER.spec.image;
+  }
+});
+
+watchEffect(() => {
+  if (allRepos.value.length) {
+    const OFFICIAL_REPOS = [
+      KUBEWARDEN_REPO,
+      KUBEWARDEN_CHARTS_REPO,
+      KUBEWARDEN_CHARTS_REPO_GIT
+    ];
+
+    kubewardenRepo.value = allRepos.value.find((r) => r.spec?.url && OFFICIAL_REPOS.includes(r.spec?.url)) || null;
+  }
+});
+
+watchEffect(() => {
+  if (kubewardenRepo.value && !isFleet.value) {
+    defaultsChart.value = store.getters['catalog/chart']({
+      repoName:  kubewardenRepo.value.metadata?.name,
+      repoType:  'cluster',
+      chartName: KUBEWARDEN_CHARTS.DEFAULTS,
+    });
+  }
+}
+);
+
+watchEffect(() => {
+  if (!controllerApp.value && allApps.value.length) {
+    const controller = allApps.value.find(
+      (a) => a.spec?.chart?.metadata?.name === 'kubewarden-controller'
+    );
+
+    if (controller) {
+      store.dispatch('kubewarden/updateControllerApp', controller);
+    }
+  }
+});
 </script>
 
 <template>
-  <Loading v-if="$fetchState.pending" />
+  <Loading v-if="isLoading" />
   <div v-else>
     <div class="row mt-10">
       <div class="col span-6 mb-20">
@@ -235,45 +189,40 @@ export default {
     </div>
 
     <div id="image-container">
-      <div v-if="isLoading" data-testid="ps-config-image-loading">
-        <i class="icon icon-lg icon-spinner icon-spin  mt-20" />
+      <div class="row">
+        <div v-if="showVersionBanner" class="col span-12">
+          <Banner
+            class="mb-20 mt-0"
+            color="warning"
+            :label="t('kubewarden.policyServerConfig.defaultImage.versionWarning')"
+          />
+        </div>
       </div>
-      <template v-else>
-        <div class="row">
-          <div v-if="showVersionBanner" class="col span-12">
-            <Banner
-              class="mb-20 mt-0"
-              color="warning"
-              :label="t('kubewarden.policyServerConfig.defaultImage.versionWarning')"
-            />
-          </div>
-        </div>
 
-        <div class="row" data-testid="ps-config-image-inputs">
-          <div class="col span-6">
-            <RadioGroup
-              v-model:value="defaultImage"
-              data-testid="ps-config-default-image-button"
-              name="defaultImage"
-              :options="[true, false]"
+      <div class="row" data-testid="ps-config-image-inputs">
+        <div class="col span-6">
+          <RadioGroup
+            v-model:value="defaultImage"
+            data-testid="ps-config-default-image-button"
+            name="defaultImage"
+            :options="[true, false]"
+            :mode="mode"
+            class="mb-10"
+            :label="t('kubewarden.policyServerConfig.defaultImage.label')"
+            :labels="['Yes', 'No']"
+            :tooltip="t('kubewarden.policyServerConfig.defaultImage.tooltip')"
+          />
+          <template v-if="!defaultImage">
+            <LabeledInput
+              v-model:value="image"
+              data-testid="ps-config-image-input"
               :mode="mode"
-              class="mb-10"
-              :label="t('kubewarden.policyServerConfig.defaultImage.label')"
-              :labels="['Yes', 'No']"
-              :tooltip="t('kubewarden.policyServerConfig.defaultImage.tooltip')"
+              :label="t('kubewarden.policyServerConfig.image.label')"
+              :tooltip="t('kubewarden.policyServerConfig.image.tooltip')"
             />
-            <template v-if="!defaultImage">
-              <LabeledInput
-                v-model:value="image"
-                data-testid="ps-config-image-input"
-                :mode="mode"
-                :label="t('kubewarden.policyServerConfig.image.label')"
-                :tooltip="t('kubewarden.policyServerConfig.image.tooltip')"
-              />
-            </template>
-          </div>
+          </template>
         </div>
-      </template>
+      </div>
     </div>
 
     <div class="row">
@@ -291,7 +240,6 @@ export default {
         />
       </div>
     </div>
-
     <div class="spacer"></div>
 
     <div class="row">
