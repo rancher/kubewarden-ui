@@ -10,7 +10,6 @@ import {
 import * as coreTypes from '../core/core-resources';
 import { createKubewardenRoute } from '../utils/custom-routing';
 import { splitGroupKind, isResourceNamespaced } from './core';
-import { fetchControllerApp } from './kubewardenController';
 
 const CHUNK_SIZE = 100;
 
@@ -20,12 +19,11 @@ const CHUNK_SIZE = 100;
  * @param isClusterLevel
  * @returns `PolicyReport[] | ClusterPolicyReport[] | void`
  */
-export async function getReports(
+export async function getReports<T extends PolicyReport | ClusterPolicyReport>(
   store: Store<any>,
   isClusterLevel: boolean = false,
   resourceType?: string
-): Promise<Array<PolicyReport | ClusterPolicyReport> | void> {
-  let outReports: Array<PolicyReport | ClusterPolicyReport> = [];
+): Promise<T[] | void> {
   const reportTypes = [];
 
   if (isClusterLevel) {
@@ -36,34 +34,39 @@ export async function getReports(
     reportTypes.push(WG_POLICY_K8S.POLICY_REPORT.TYPE);
   }
 
-  for (const reportType of reportTypes) {
+  const fetchPromises = reportTypes.map(async (reportType) => {
     const schema = store.getters['cluster/schemaFor'](reportType);
 
-    if (schema) {
-      try {
-        let reports = toRaw(store.getters['cluster/all'](reportType));
+    if (!schema) {
+      return [];
+    };
 
-        if (isEmpty(reports)) {
-          reports = toRaw(await store.dispatch('cluster/findAll', { type: reportType }, { root: true }));
-        }
+    try {
+      let reports = toRaw(store.getters['cluster/all'](reportType));
 
-        if (!isEmpty(reports)) {
-          const updateAction = reportType === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE 
-            ? 'kubewarden/updateClusterPolicyReports' 
+      if (isEmpty(reports)) {
+        reports = toRaw(await store.dispatch('cluster/findAll', { type: reportType }, { root: true }));
+      }
+
+      if (!isEmpty(reports)) {
+        const updateAction = reportType === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE
+            ? 'kubewarden/updateClusterPolicyReports'
             : 'kubewarden/updatePolicyReports';
 
-          // Process reports in chunks asynchronously
-          await processReportsInBatches(store, reports, updateAction);
-          
-          outReports = outReports.concat(reports);
-        }
-      } catch (e) {
-        console.warn(`Error fetching ${reportType}: ${e}`);
+        await processReportsInBatches(store, reports, updateAction);
       }
-    }
-  }
 
-  return outReports;
+      return reports;
+    } catch (e) {
+      console.warn(`Error fetching ${reportType}: ${e}`);
+
+      return [];
+    }
+  });
+
+  const results = await Promise.all(fetchPromises);
+
+  return results.flat();
 }
 
 /**
@@ -84,11 +87,21 @@ async function processReportsInBatches(
       index += CHUNK_SIZE;
 
       if (batch.length > 0) {
-        store.dispatch(action, batch);
+        try {
+          store.dispatch(action, batch);
+        } catch (error) {
+          console.error(`Failed to dispatch ${ action }:`, error);
+        }
       }
 
       if (index < totalReports) {
-        setTimeout(processBatch, 0);
+        if ('requestIdleCallback' in window) {
+          // requestIdleCallback() ensures work is done when the browser is idle
+          requestIdleCallback(processBatch);
+        } else {
+          // defers execution, but does not account for UI responsiveness.
+          setTimeout(processBatch, 0);
+        }
       } else {
         resolve();
       }
@@ -119,29 +132,29 @@ export function getFilteredSummary(
   };
   const reportTypes: string[] = [];
 
-  if ( isClusterLevel || resource?.type === NAMESPACE ) {
+  if (isClusterLevel || resource?.type === NAMESPACE) {
     reportTypes.push(WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
   }
 
-  if ( isResourceNamespaced(resource) || resource?.type === NAMESPACE ) {
+  if (isResourceNamespaced(resource) || resource?.type === NAMESPACE) {
     reportTypes.push(WG_POLICY_K8S.POLICY_REPORT.TYPE);
   }
 
-  for ( const report of reportTypes ) {
+  for (const report of reportTypes) {
     const storeKey = report === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE ? 'clusterPolicyReports' : 'policyReports';
     const reports = store.getters[`kubewarden/${ storeKey }`];
 
-    if ( !isEmpty(reports) ) {
+    if (!isEmpty(reports)) {
       const filtered: PolicyReportResult[] = getFilteredArrayOfReportResults(reports, resource, report === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
 
-      if ( !isEmpty(filtered) ) {
-        filtered.forEach((r: PolicyReportResult) => {
-          const resultVal = r.result;
-
-          if ( resultVal ) {
-            (outSummary as any)[resultVal]++;
-          }
-        });
+      if (!isEmpty(filtered)) {
+        filtered.reduce((summary, r) => {
+          if (r.result) {
+            summary[r.result] = (summary[r.result] || 0) + 1;
+          };          
+          
+          return summary;
+        }, outSummary);
       }
     }
   }
@@ -155,74 +168,42 @@ export function getFilteredSummary(
  * @param resource
  * @returns `PolicyReportResult[]`
  */
-function getFilteredArrayOfReportResults(
-  reports: Array<PolicyReport | ClusterPolicyReport>,
+function getFilteredArrayOfReportResults<T extends PolicyReport | ClusterPolicyReport>(
+  reports: T[],
   resource: any,
   isClusterLevel?: boolean
 ): PolicyReportResult[] {
-  let outReports: Array<PolicyReport | ClusterPolicyReport> = [];
-
-  // Filter out reports based on 'app.kubernetes.io/managed-by' label
-  reports = reports.filter(report => report.metadata?.labels?.['app.kubernetes.io/managed-by'] === 'kubewarden');
-
-  if ( resource?.type === NAMESPACE ) {
-    if ( isClusterLevel ) {
-      // Include both PolicyReports and ClusterPolicyReports for Namespace when isClusterLevel is true
-      outReports = reports.filter((report) => {
-        if (report.scope) {
-          return (
-            report.scope.name === resource.name ||
-            (('namespace' in report.scope) && report.scope.namespace === resource.name)
-          );
-        }
-      });
-    } else {
-      // Filter PolicyReports for namespace scope
-      outReports = reports.filter((report) => {
-        if ( report.scope ) {
-          return 'namespace' in report.scope && report.scope.namespace === resource?.name;
-        }
-      });
+  const filteredReports = reports.filter((report) => {
+    if (report.metadata?.labels?.["app.kubernetes.io/managed-by"] !== "kubewarden") return false;
+    
+    if (resource?.type === NAMESPACE) {
+      if (isClusterLevel) {
+        return report.scope?.name === resource.name || (report?.scope && 'namespace' in report.scope && report.scope.namespace === resource?.name);
+      }
+  
+      return (report?.scope && 'namespace' in report.scope && report.scope.namespace === resource?.name);
     }
-  } else {
-    outReports = reports;
-  }
+    return true;
+  });
 
   const outResults: PolicyReportResult[] = [];
 
-  // Find the report that is scoped to the resource name
-  if ( resource?.type === 'namespace' ) {
-    outReports.forEach((report: any) => {
-      report.results?.forEach((result: any) => {
+  filteredReports.forEach((report) => {
+    const reportScopeName = report.scope?.name
+
+    if (resource?.type === "namespace" || reportScopeName === resource.metadata.name) {
+      report.results?.forEach((result) => {
         outResults.push({
           ...result,
-          scope:      report.scope,
-          kind:       report.kind,
-          policyName: result.properties?.['policy-name'],
+          scope: report.scope,
+          kind: report.kind,
+          policyName: result.properties?.["policy-name"],
         });
       });
-    });
-  } else {
-    outReports.forEach((report: any) => {
-      if ( report.scope?.name === resource.metadata.name ) {
-        report.results?.forEach((result: any) => {
-          outResults.push({
-            ...result,
-            policyName: result.properties?.['policy-name'],
-          });
-        });
-      }
-    });
-  }
+    }
+  });
 
-  if ( !isEmpty(outResults) ) {
-    // Assign uid for SortableTable sub-row
-    outResults?.forEach((report: any) => {
-      Object.assign(report, { uid: randomStr() });
-    });
-  }
-
-  return outResults;
+  return outResults.map((report) => ({ ...report, uid: randomStr() }));
 }
 
 /**

@@ -46,6 +46,7 @@ export interface PolicyReportSummary {
 
 export interface PolicyReportResult {
   category?: string;
+  kind?: string;
   message?: string;
   policy: string;
   policyName?: string;

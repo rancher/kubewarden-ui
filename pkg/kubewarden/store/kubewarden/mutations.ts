@@ -103,17 +103,21 @@ export default {
     { reportArrayKey, updatedReports }: { reportArrayKey: ReportKeys, updatedReports: T[] }
   ): void {
     const reportArray = state[reportArrayKey] as Array<T>;
+
+    // Convert array to a Map for O(1) lookups
+    const reportMap = new Map(reportArray.map(report => [report.id, report]));
+
     
     updatedReports.forEach((updatedReport) => {
-      const existingIndex = reportArray.findIndex(report => report.id === updatedReport.id);
-      
-      if (existingIndex > -1) {
-        // Update existing report properties to preserve reactivity
-        const existingReport = reportArray[existingIndex];
-        existingReport.results = updatedReport.results;
-        existingReport.summary = updatedReport.summary;
+      if (reportMap.has(updatedReport.id)) {
+        // Directly update the object reference
+        Object.assign(reportMap.get(updatedReport.id)!, {
+          results: updatedReport.results,
+          summary: updatedReport.summary,
+        });
       } else {
         reportArray.push(updatedReport);
+        reportMap.set(updatedReport.id, updatedReport); // Keep map in sync
       }
     });
   },
