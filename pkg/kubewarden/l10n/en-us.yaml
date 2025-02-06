@@ -143,6 +143,8 @@ kubewarden:
       resource: Resource Type
       features: Features
   policies:
+    noPolicyRepo: No policy repository found. Please add a policy repository to view policies.
+    noOfficialPolicies: No official policies found. Please add the Kubewarden repository to view official policies.
     noArtifactHub: Official Kubewarden policies are hosted on <a href="https://artifacthub.io/packages/search?kind=13" target="_blank" rel="noopener noreferrer nofollow">ArtifactHub</a>, in order to show these you will need to add `artifacthub.io` to the whitelist-domain setting.
     noRules: There are no rules configured for this policy.
     namespaceWarning: This policy is targeting Rancher specific namespaces which will cause catastrophic failures with your Rancher deployment.
