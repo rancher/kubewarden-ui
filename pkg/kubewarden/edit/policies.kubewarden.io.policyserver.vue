@@ -4,9 +4,9 @@ import merge from 'lodash/merge';
 import { _CREATE, _EDIT } from '@shell/config/query-params';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
+import { Banner } from '@components/Banner';
 import CruResource from '@shell/components/CruResource';
 import Loading from '@shell/components/Loading';
-import { Banner } from '@components/Banner';
 
 import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
 import { KUBEWARDEN } from '@kubewarden/types';
