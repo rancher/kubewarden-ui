@@ -10,7 +10,7 @@ import { CatalogApp, FleetBundle } from '../types';
  * @param app `CatalogApp`
  * @returns Boolean
  */
-export function isFleetDeployment(app: CatalogApp): Boolean {
+export function isFleetDeployment(app: CatalogApp): boolean {
   if ( app ) {
     return !!app.spec?.chart?.metadata?.annotations?.[FLEET.BUNDLE_ID];
   }
