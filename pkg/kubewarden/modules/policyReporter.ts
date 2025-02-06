@@ -11,12 +11,20 @@ import * as coreTypes from '../core/core-resources';
 import { createKubewardenRoute } from '../utils/custom-routing';
 import { splitGroupKind, isResourceNamespaced } from './core';
 
+interface CacheEntry<T> {
+  promise: Promise<T>;
+  timestamp: number;
+}
+
+const reportCache = new Map<string, CacheEntry<any>>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const CHUNK_SIZE = 100;
 
 /**
  * Fetches either PolicyReports or ClusterPolicyReports based on version compatibility and dispatches update actions.
  * @param store
  * @param isClusterLevel
+ * @param resourceType
  * @returns `PolicyReport[] | ClusterPolicyReport[] | void`
  */
 export async function getReports<T extends PolicyReport | ClusterPolicyReport>(
@@ -24,7 +32,8 @@ export async function getReports<T extends PolicyReport | ClusterPolicyReport>(
   isClusterLevel: boolean = false,
   resourceType?: string
 ): Promise<T[] | void> {
-  const reportTypes = [];
+  const now = Date.now();
+  const reportTypes: string[] = [];
 
   if (isClusterLevel) {
     reportTypes.push(WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
@@ -34,38 +43,45 @@ export async function getReports<T extends PolicyReport | ClusterPolicyReport>(
     reportTypes.push(WG_POLICY_K8S.POLICY_REPORT.TYPE);
   }
 
-  const fetchPromises = reportTypes.map(async (reportType) => {
-    const schema = store.getters['cluster/schemaFor'](reportType);
+  // Map over the report types to get (or create) the promise for each
+  const fetchPromises = reportTypes.map((reportType) => {
+    const cachedEntry = reportCache.get(reportType);
 
-    if (!schema) {
-      return [];
-    };
+    if (cachedEntry && now - cachedEntry.timestamp < CACHE_TTL) {
+      return cachedEntry.promise;
+    }
 
-    try {
+    const promise = (async () => {
+      const schema = store.getters['cluster/schemaFor'](reportType);
+      if (!schema) {
+        return [];
+      }
+  
       let reports = toRaw(store.getters['cluster/all'](reportType));
-
+  
       if (isEmpty(reports)) {
         reports = toRaw(await store.dispatch('cluster/findAll', { type: reportType }, { root: true }));
       }
-
+  
       if (!isEmpty(reports)) {
+        // Cache the reports right away so subsequent calls don’t trigger a new fetch
+        // (even though the store will eventually be updated asynchronously).
         const updateAction = reportType === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE
-            ? 'kubewarden/updateClusterPolicyReports'
-            : 'kubewarden/updatePolicyReports';
-
+          ? 'kubewarden/updateClusterPolicyReports'
+          : 'kubewarden/updatePolicyReports';
+  
         await processReportsInBatches(store, reports, updateAction);
       }
-
+  
       return reports;
-    } catch (e) {
-      console.warn(`Error fetching ${reportType}: ${e}`);
-
-      return [];
-    }
+    })();
+  
+    // Save the pending promise in the cache.
+    reportCache.set(reportType, { promise, timestamp: now });
+    return promise;
   });
 
   const results = await Promise.all(fetchPromises);
-
   return results.flat();
 }
 
@@ -118,11 +134,11 @@ async function processReportsInBatches(
  * @param isClusterLevel Flag to determine if the summary should include cluster level reports.
  * @returns `PolicyReportSummary`.
  */
-export function getFilteredSummary(
+export async function getFilteredSummary(
   store: Store<any>,
   resource: any,
   isClusterLevel: boolean = false
-): PolicyReportSummary {
+): Promise<PolicyReportSummary> {
   const outSummary: PolicyReportSummary = {
     pass:  0,
     fail:  0,
@@ -141,11 +157,12 @@ export function getFilteredSummary(
   }
 
   for (const report of reportTypes) {
-    const storeKey = report === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE ? 'clusterPolicyReports' : 'policyReports';
+    const isClusterLevelReport = report === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE;
+    const storeKey = isClusterLevelReport ? 'clusterPolicyReports' : 'policyReports';
     const reports = store.getters[`kubewarden/${ storeKey }`];
 
     if (!isEmpty(reports)) {
-      const filtered: PolicyReportResult[] = getFilteredArrayOfReportResults(reports, resource, report === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
+      const filtered: PolicyReportResult[] = getFilteredArrayOfReportResults(reports, resource, isClusterLevelReport);
 
       if (!isEmpty(filtered)) {
         filtered.reduce((summary, r) => {
@@ -156,6 +173,8 @@ export function getFilteredSummary(
           return summary;
         }, outSummary);
       }
+    } else {
+      await getReports(store, isClusterLevelReport, resource?.type);
     }
   }
 

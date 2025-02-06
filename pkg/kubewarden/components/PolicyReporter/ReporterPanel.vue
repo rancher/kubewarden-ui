@@ -25,7 +25,7 @@ onMounted(
       await getReports<ClusterPolicyReport>(store, true);
     }
     // Fetch normal policy reports if a specific resource type is specified or always fetch on projectsnamespaces page
-    if (resourceType || route.path.includes('projectsnamespaces')) {
+    if (resourceType || route?.path?.includes('projectsnamespaces')) {
       await getReports<PolicyReport>(store, false, resourceType);
     }
   }

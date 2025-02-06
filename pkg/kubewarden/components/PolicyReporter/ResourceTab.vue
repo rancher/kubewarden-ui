@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, watch, nextTick, getCurrentInstance } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute, RouteLocationRaw } from 'vue-router';
+import { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
 import isEmpty from 'lodash/isEmpty';
 
 import { NAMESPACE } from '@shell/config/query-params';
-import { allHash } from '@shell/utils/promise';
 
 import { BadgeState } from '@components/BadgeState';
 import { Banner } from '@components/Banner';
@@ -15,6 +14,7 @@ import SortableTable from '@shell/components/SortableTable';
 import { KUBEWARDEN, PolicyReport, PolicyReportResult } from '../../types';
 import { POLICY_REPORTER_HEADERS } from '../../config/table-headers';
 import {
+  getReports,
   getFilteredReports,
   getLinkForPolicy,
   getLinkForResource,
@@ -25,7 +25,8 @@ import { splitGroupKind } from '../../modules/core';
 import * as coreTypes from '../../core/core-resources';
 
 const store = useStore();
-const route = useRoute();
+let route: RouteLocationNormalizedLoaded | null = null;
+
 const t = store.getters['i18n/t'];
 
 const reports = ref<(PolicyReport | PolicyReportResult)[]>([]);
@@ -41,22 +42,21 @@ const fetchState = reactive({
 
 function determineResource() {
   if (route?.params?.resource && route?.params?.id) {
-    const id = route.params.namespace ? `${ route.params.namespace }/${ route.params.id }` : route.params.id;
-    resource.value = store.getters['cluster/byId'](route.params.resource, id);
+    const id = route?.params.namespace ? `${ route?.params.namespace }/${ route?.params.id }` : route?.params.id;
+    resource.value = store.getters['cluster/byId'](route?.params.resource, id);
   }
 }
 
 async function fetchReports() {
   if (resource.value) {
+    fetchState.pending = true;
     const fetchedReports  = await getFilteredReports(store, resource.value) ?? [];
     
     if (!isEmpty(fetchedReports)) {
-      const hash = [
-        store.dispatch('cluster/findAll', { type: KUBEWARDEN.ADMISSION_POLICY }),
-        store.dispatch('cluster/findAll', { type: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }),
-      ];
+      const isClusterLevel = !route?.params?.resource || route?.path?.includes('projectsnamespaces');
+      const resourceType = route?.params?.resource as string | undefined;
 
-      await allHash(hash);
+      await getReports(store, isClusterLevel, resourceType);
     }
     
     // Assign the value *after* all async calls to avoid triggering unnecessary reactivity
@@ -67,15 +67,47 @@ async function fetchReports() {
 }
 
 
-onMounted(() => {
+onMounted(async () => {
+  // Ensure Vue Router is initialized before accessing `useRoute()`
+  if (!route) {
+    const instance = getCurrentInstance();
+
+    if (instance?.proxy?.$route) {
+      route = instance.proxy.$route;
+    } else {
+      return;
+    }
+  }
+
   determineResource();
-  fetchReports();
+
+  await nextTick();
+  await fetchReports();
 
   const capSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
   const apSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.ADMISSION_POLICY);
   
   canGetKubewardenLinks.value = !!(capSchema || apSchema);
 });
+
+watch(
+  () => route?.fullPath,
+  async (newPath: string | undefined) => {
+    if (!newPath) {
+      return;
+    };
+
+    if (!route?.params || Object.keys(route.params).length === 0) {
+      return;
+    }
+
+    await nextTick();
+
+    determineResource();
+    await fetchReports();
+  },
+  { immediate: true }
+);
 
 const isNamespaceResource = computed(() => resource.value?.type === NAMESPACE);
 const tableHeaders = computed(() =>
@@ -129,8 +161,6 @@ function getResourceValue(row: PolicyReport | PolicyReportResult, val: string, n
 
   return '-';
 }
-
-
 
 function getPolicyLink(row: PolicyReportResult): RouteLocationRaw | undefined {
   const link = getLinkForPolicy(store, row);

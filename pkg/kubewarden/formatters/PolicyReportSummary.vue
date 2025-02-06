@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useAttrs } from 'vue';
+import { computed, ref, watchEffect, useAttrs } from 'vue';
 import { useStore } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 
@@ -18,7 +18,31 @@ interface ValueType {
 const props = defineProps<{ value?: ValueType }>()
 const store = useStore();
 
-const summary = computed<PolicyReportSummary>(() => getFilteredSummary(store, props.value));
+const summary = ref<PolicyReportSummary>({
+  pass:  0,
+  fail:  0,
+  warn:  0,
+  error: 0,
+  skip:  0
+});
+
+let fetching = false;
+
+watchEffect(async () => {
+  if (fetching) {
+    return;
+  };
+
+  fetching = true;
+
+  try {
+    summary.value = await getFilteredSummary(store, props.value);
+  } catch (error) {
+    console.error('Error fetching summary:', error);
+  } finally {
+    fetching = false;
+  }
+});
 
 // Determine if there’s anything to show by checking for non-empty summary counts
 const canShow = computed(() => {
@@ -33,7 +57,6 @@ const canShow = computed(() => {
   return false;
 });
 
-// A helper function to sort the policy summary entries
 function policySummarySort(color: string, display: string): string {
   const SORT_ORDER: Record<string, number> = {
     fail: 1,
