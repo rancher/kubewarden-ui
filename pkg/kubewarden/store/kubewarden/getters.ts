@@ -6,7 +6,8 @@ import { StateConfig } from './index';
 export default {
   airGapped:               (state: StateConfig): Boolean => state.airGapped,
   hideBannerDefaults:      (state: StateConfig): Boolean => state.hideBannerDefaults,
-  hideBannerArtifactHub:   (state: StateConfig): Boolean => state.hideBannerArtifactHub,
+  hideBannerOfficialRepo:  (state: StateConfig): Boolean => state.hideBannerOfficialRepo,
+  hideBannerPolicyRepo:    (state: StateConfig): Boolean => state.hideBannerPolicyRepo,
   hideBannerAirgapPolicy:  (state: StateConfig): Boolean => state.hideBannerAirgapPolicy,
   controllerApp:           (state: StateConfig): CatalogApp | null => state.controllerApp,
   kubewardenCrds:          (state: StateConfig): CustomResourceDefinition[] => state.kubewardenCrds,

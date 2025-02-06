@@ -184,6 +184,16 @@ export default ({
       return false;
     },
 
+    hideOfficialRepoBanner() {
+      return !!this.officialKubewardenRepo || this.$store.getters['kubewarden/hideBannerOfficialRepo'];
+    },
+
+    hideRepoBanner() {
+      return !this.hideOfficialRepoBanner ||
+             (this.policiesCharts.length ||
+             this.$store.getters['kubewarden/hideBannerPolicyRepo']);
+    },
+
     hideAirgapBanner() {
       return !this.isAirgap || this.$store.getters['kubewarden/hideBannerAirgapPolicy'];
     },
@@ -212,9 +222,39 @@ export default ({
         return out;
       });
     },
+
+    officialKubewardenRepo() {
+      return this.repos.find(repo => repo.spec?.url && this.OFFICIAL_REPOS.includes(repo.spec.url));
+    }
   },
 
   methods: {
+    async addRepository(btnCb) {
+      try {
+        const repoObj = await this.$store.dispatch('cluster/create', {
+          type:     CATALOG.CLUSTER_REPO,
+          metadata: { name: 'kubewarden-policy-charts' },
+          spec:     { url: KUBEWARDEN_REPO },
+        });
+
+        try {
+          await repoObj.save();
+        } catch (e) {
+          handleGrowl({ error: e, store: this.$store });
+          btnCb(false);
+
+          return;
+        }
+
+        if (!this.officialKubewardenRepo) {
+          await this.$store.dispatch('catalog/refresh');
+        }
+      } catch (e) {
+        handleGrowl({ error: e, store: this.$store });
+        btnCb(false);
+      }
+    },
+
     /** Determine values which need to be required from supplied property and keys */
     acceptedValues(requiredProp, requiredKeys) {
       if ( isEmpty(requiredKeys) ) {
@@ -454,6 +494,31 @@ export default ({
 <template>
   <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-else>
+    <template v-if="!hideOfficialRepoBanner">
+      <Banner
+        data-testid="kw-policy-add-official-repo-banner"
+        class="type-banner mb-20 mt-0"
+        color="warning"
+        :closable="true"
+        @close="closeBanner('updateHideBannerOfficialRepo')"
+      >
+        <div>
+          <p class="mb-10">{{ t('kubewarden.policies.noOfficialPolicies') }}</p>
+          <AsyncButton mode="kubewardenRepository" @click="addRepository" />
+        </div>
+      </Banner>
+    </template>
+    <template v-if="!hideRepoBanner">
+      <Banner
+        data-testid="kw-policy-add-repo-banner"
+        class="type-banner mb-20 mt-0"
+        color="warning"
+        :closable="true"
+        @close="closeBanner('updateHideBannerPolicyRepo')"
+      >
+        <p>{{ t('kubewarden.policies.noPolicyRepo') }}</p>
+      </Banner>
+    </template>
     <template v-if="!hideAirgapBanner">
       <Banner
         data-testid="kw-policy-create-ag-banner"
