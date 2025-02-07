@@ -65,6 +65,7 @@ export default ({
   mixins: [CreateEditView],
 
   async created() {
+    this.isLoading = true;
     const isReposLoaded = this.$store.getters['catalog/repos']?.length > 0;
 
     if (!isReposLoaded && this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO)) {
@@ -79,6 +80,8 @@ export default ({
 
     this.value.apiVersion = `${ this.schema?.attributes?.group }.${ this.schema?.attributes?.version }`;
     this.value.kind = this.schema?.attributes?.kind;
+
+    this.isLoading = false;
   },
 
   data() {
@@ -91,6 +94,7 @@ export default ({
     return {
       OFFICIAL_REPOS,
 
+      isLoading:              false,
       bannerTitle:            null,
       shortDescription:       null,
       loadingPackages:        false,
@@ -492,7 +496,7 @@ export default ({
 </script>
 
 <template>
-  <Loading v-if="$fetchState.pending" mode="relative" />
+  <Loading v-if="isLoading" mode="relative" />
   <div v-else>
     <template v-if="!hideOfficialRepoBanner">
       <Banner
