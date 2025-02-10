@@ -74,6 +74,7 @@ test.describe('Tracing', () => {
         yamlPatch: {
           'jaeger.create'   : true,
           'rbac.clusterRole': true,
+          'image.imagePullSecrets': ["regcred"]
         }
       })
     }
