@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect, useAttrs } from 'vue';
+import { computed, useAttrs } from 'vue';
 import { useStore } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 
 import { sortBy } from '@shell/utils/sort';
 
 import { Result, PolicyReportSummary } from '../types';
-import { colorForResult, getFilteredSummary } from '../modules/policyReporter';
+import { colorForResult } from '../modules/policyReporter';
 
 const attrs = useAttrs();
 
@@ -15,41 +15,21 @@ interface ValueType {
   [key: string]: any;
 }
 
-const props = defineProps<{ value?: ValueType }>()
+const props = defineProps<{ value?: ValueType }>();
 const store = useStore();
 
-const summary = ref<PolicyReportSummary>({
-  pass:  0,
-  fail:  0,
-  warn:  0,
-  error: 0,
-  skip:  0
-});
+const summary = computed<PolicyReportSummary>(() => {
+  const resourceId = props.value?.id;
 
-let fetching = false;
-
-watchEffect(async () => {
-  if (fetching) {
-    return;
-  };
-
-  fetching = true;
-
-  try {
-    summary.value = await getFilteredSummary(store, props.value);
-  } catch (error) {
-    console.error('Error fetching summary:', error);
-  } finally {
-    fetching = false;
-  }
+  return store.getters['kubewarden/summaryByResourceId'](resourceId);
 });
 
 // Determine if there’s anything to show by checking for non-empty summary counts
 const canShow = computed(() => {
-  if (!isEmpty(summary.value)) {
-    const counts = Object.values(summary.value)
-      .map((value) => value as number)
-      .filter(Boolean);
+  const s = summary.value;
+
+  if (!isEmpty(s)) {
+    const counts = Object.values(s).filter(Boolean);
 
     return counts.length > 0;
   }
@@ -59,12 +39,12 @@ const canShow = computed(() => {
 
 function policySummarySort(color: string, display: string): string {
   const SORT_ORDER: Record<string, number> = {
-    fail: 1,
-    pass: 2,
-    error: 3,
+    fail:    1,
+    pass:    2,
+    error:   3,
     warning: 4,
-    skip: 5,
-    other: 6
+    skip:    5,
+    other:   6
   };
 
   color = color.replace(/^(text|bg|sizzle)-/, '');
@@ -79,12 +59,8 @@ const summaryParts = computed(() => {
   for (const [result, value] of Object.entries(summary.value) as [Result, number][]) {
     const textColor = colorForResult(result);
 
-    const replacedTextColor = textColor.includes('sizzle')
-      ? textColor
-      : textColor.replace(/text-/, 'bg-');
-    const bgColor = textColor.includes('sizzle')
-      ? textColor.concat('-bg')
-      : textColor.replace(/text-/, 'bg-');
+    const replacedTextColor = textColor.includes('sizzle') ? textColor : textColor.replace(/text-/, 'bg-');
+    const bgColor = textColor.includes('sizzle') ? textColor.concat('-bg') : textColor.replace(/text-/, 'bg-');
 
     const key = `${ textColor }/${ result }`;
 
@@ -95,30 +71,23 @@ const summaryParts = computed(() => {
       bgColor,
       textColor,
       value,
-      sort: policySummarySort(textColor, result)
+      sort:  policySummarySort(textColor, result)
     };
   }
 
   return sortBy(Object.values(out), 'sort:desc', 'desc').reverse();
 });
-
-const summaryPartsStatic = computed(() => {
-  return JSON.parse(JSON.stringify(summaryParts.value)); // Create a static copy
-});
 </script>
+
 <template>
-  <!-- Wrap the entire template in one root element and forward non-prop attributes -->
   <div v-bind="attrs">
-    <div v-if="canShow" class="pr-summary">
-      <VDropdown
-        class="text-center hand"
-        placement="top"
-        :open-group="props?.value?.id"
-        trigger="click"
-        offset="1"
-      >
+    <div v-if="!summary" data-testid="resource-tab-loading">
+      <i class="icon icon-lg icon-spinner icon-spin" />
+    </div>
+    <div v-else-if="canShow" class="pr-summary">
+      <VDropdown class="text-center hand" placement="top" :open-group="props?.value?.id" trigger="click" offset="1">
         <div class="pr-summary__container">
-          <div v-for="obj in summaryPartsStatic" :key="`${ obj.key }-badge`">
+          <div v-for="obj in summaryParts" :key="`${obj.key}-badge`">
             <div v-if="obj.value" class="badge" :class="{ [obj.bgColor]: true }">
               <span v-clean-tooltip="obj.label">{{ obj.value }}</span>
             </div>
@@ -128,7 +97,7 @@ const summaryPartsStatic = computed(() => {
         <template #popper>
           <div class="pr-summary__content">
             <div>
-              <div v-for="obj in summaryPartsStatic" :key="obj.key" class="counts">
+              <div v-for="obj in summaryParts" :key="obj.key" class="counts">
                 <span class="text-left pr-20" :class="{ [obj.textColor]: true }">
                   {{ obj.label }}
                 </span>
@@ -141,7 +110,7 @@ const summaryPartsStatic = computed(() => {
         </template>
       </VDropdown>
     </div>
-    <div v-else></div>
+    <div v-else>-</div>
   </div>
 </template>
 
@@ -176,7 +145,7 @@ $error: #614ea2;
     z-index: 14;
     width: $width;
 
-    & > div {
+    &>div {
       padding: 10px;
     }
 

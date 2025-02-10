@@ -41,12 +41,12 @@ export function resourcesFromAnnotation(artifactHubPackages: ArtifactHubPackage[
  * Checks the resources within a ArtifactHub package's `kubewarden/resources` annotation to determine if
  * the policy is targeting non-namespaced resources. Needed to gate CAP from AP grid.
  * @param artifactHubPackage `schemas`
- * @returns Boolean
+ * @returns boolean
  */
-export function isGlobalPolicy(artifactHubPackage: ArtifactHubPackage, schemas: any): Boolean {
+export function isGlobalPolicy(artifactHubPackage: ArtifactHubPackage, schemas: any): boolean {
   if ( artifactHubPackage ) {
     const resources: string[] | undefined = artifactHubPackage.data?.['kubewarden/resources']?.split(',');
-    let targetsNonNamespaced: Boolean = false;
+    let targetsNonNamespaced: boolean = false;
 
     if ( resources ) {
       for ( const resource of resources ) {

@@ -18,6 +18,14 @@ export interface Resource {
   uid: string;
 }
 
+export interface Scope {
+  apiVersion: string;
+  kind: string;
+  name: string;
+  namespace?: string;
+  uid?: string;
+}
+
 /* eslint-disable no-unused-vars */
 export enum Severity {
   INFO = 'info',
@@ -62,13 +70,7 @@ export interface PolicyReportResult {
   resources?: Resource[];
   result?: Result;
   rule?: string;
-  scope?: {
-    apiVersion: string;
-    kind: string;
-    name: string;
-    namespace?: string;
-    uid?: string;
-  },
+  scope?: Scope;
   scored?: boolean;
   severity?: Severity;
   source?: string;
@@ -85,23 +87,12 @@ export interface PolicyReport {
   links?: Links;
   metadata: V1ObjectMeta;
   results?: Array<PolicyReportResult>
-  scope?: {
-    apiVersion: string;
-    kind: string;
-    name: string;
-    namespace?: string;
-    uid?: string;
-  }
+  scope?: Scope
   summary?: PolicyReportSummary
   type: string;
   uid: string;
 }
 
 export interface ClusterPolicyReport extends PolicyReport {
-  scope: {
-    apiVersion: string;
-    kind: string;
-    name: string;
-    uid: string;
-  }
+  scope: Scope;
 }

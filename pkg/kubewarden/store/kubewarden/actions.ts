@@ -1,31 +1,44 @@
 import {
-  CatalogApp, CustomResourceDefinition, PolicyReport, ClusterPolicyReport, PolicyTraceConfig, PolicyTrace
+  CatalogApp, CustomResourceDefinition, PolicyReport, ClusterPolicyReport, PolicyTraceConfig, PolicyTrace, PolicyReportSummary
 } from '../../types';
+import { generateSummaryMap } from '../../modules/policyReporter';
 
 export default {
-  updateAirGapped({ commit }: any, val: Boolean) {
+  updateAirGapped({ commit }: any, val: boolean) {
     commit('updateAirGapped', val);
   },
 
   // Defaults banner
-  updateHideBannerDefaults({ commit }: any, val: Boolean) {
+  updateHideBannerDefaults({ commit }: any, val: boolean) {
     commit('updateHideBannerDefaults', val);
   },
 
   // ArtifactHub banner
-  updateHideBannerArtifactHub({ commit }: any, val: Boolean) {
+  updateHideBannerArtifactHub({ commit }: any, val: boolean) {
     commit('updateHideBannerArtifactHub', val);
   },
-  updateHideBannerAirgapPolicy({ commit }: any, val: Boolean) {
+  updateHideBannerAirgapPolicy({ commit }: any, val: boolean) {
     commit('updateHideBannerAirgapPolicy', val);
   },
 
   // Policy and Cluster Policy Reports
   updatePolicyReports({ commit }: any, updatedReports: PolicyReport[]) {
-    commit('updateReportsBatch', { reportArrayKey: 'policyReports', updatedReports });
+    commit('updateReportsBatch', {
+      reportArrayKey: 'policyReports',
+      updatedReports
+    });
   },
   updateClusterPolicyReports({ commit }: any, updatedReports: ClusterPolicyReport[]) {
-    commit('updateReportsBatch', { reportArrayKey: 'clusterPolicyReports', updatedReports });
+    commit('updateReportsBatch', {
+      reportArrayKey: 'clusterPolicyReports',
+      updatedReports
+    });
+  },
+
+  async regenerateSummaryMap({ state, commit }: any) {
+    const newSummary: Record<string, PolicyReportSummary> = generateSummaryMap(state);
+
+    commit('setSummaryMap', newSummary);
   },
 
   // Policy traces
@@ -37,7 +50,7 @@ export default {
   },
 
   // Charts
-  updateRefreshingCharts({ commit }: any, val: Boolean) {
+  updateRefreshingCharts({ commit }: any, val: boolean) {
     commit('updateRefreshingCharts', val);
   },
 

@@ -2,7 +2,6 @@ import { toRaw } from 'vue';
 import { Store } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 import semver from 'semver';
-import { randomStr } from '@shell/utils/string';
 import { NAMESPACE } from '@shell/config/types';
 import {
   KUBEWARDEN, Severity, Result, PolicyReport, ClusterPolicyReport, PolicyReportResult, PolicyReportSummary, WG_POLICY_K8S
@@ -18,7 +17,7 @@ interface CacheEntry<T> {
 
 const reportCache = new Map<string, CacheEntry<any>>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-const CHUNK_SIZE = 100;
+const CHUNK_SIZE = 1000;
 
 /**
  * Fetches either PolicyReports or ClusterPolicyReports based on version compatibility and dispatches update actions.
@@ -51,37 +50,44 @@ export async function getReports<T extends PolicyReport | ClusterPolicyReport>(
       return cachedEntry.promise;
     }
 
-    const promise = (async () => {
+    const promise = (async() => {
       const schema = store.getters['cluster/schemaFor'](reportType);
+
       if (!schema) {
         return [];
       }
-  
+
       let reports = toRaw(store.getters['cluster/all'](reportType));
-  
+
       if (isEmpty(reports)) {
         reports = toRaw(await store.dispatch('cluster/findAll', { type: reportType }, { root: true }));
       }
-  
+
       if (!isEmpty(reports)) {
         // Cache the reports right away so subsequent calls don’t trigger a new fetch
         // (even though the store will eventually be updated asynchronously).
-        const updateAction = reportType === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE
-          ? 'kubewarden/updateClusterPolicyReports'
-          : 'kubewarden/updatePolicyReports';
-  
+        const updateAction = reportType === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE ? 'kubewarden/updateClusterPolicyReports' : 'kubewarden/updatePolicyReports';
+
         await processReportsInBatches(store, reports, updateAction);
       }
-  
+
       return reports;
     })();
-  
+
     // Save the pending promise in the cache.
-    reportCache.set(reportType, { promise, timestamp: now });
+    reportCache.set(reportType, {
+      promise,
+      timestamp: now
+    });
+
     return promise;
   });
 
   const results = await Promise.all(fetchPromises);
+
+  // Now that all chunked updates are done, regenerate the summary map *once*
+  await store.dispatch('kubewarden/regenerateSummaryMap');
+
   return results.flat();
 }
 
@@ -94,12 +100,13 @@ async function processReportsInBatches(
   action: string
 ): Promise<void> {
   const totalReports = reports.length;
-  
+
   return new Promise((resolve) => {
     let index = 0;
 
     const processBatch = () => {
       const batch = reports.slice(index, index + CHUNK_SIZE);
+
       index += CHUNK_SIZE;
 
       if (batch.length > 0) {
@@ -128,101 +135,55 @@ async function processReportsInBatches(
 }
 
 /**
- * Retrieves a filtered summary for both PolicyReports and ClusterPolicyReports.
- * @param store The store containing the reports.
- * @param resource The resource for which the summary is generated.
- * @param isClusterLevel Flag to determine if the summary should include cluster level reports.
- * @returns `PolicyReportSummary`.
+ * Generates a map of { [resourceId]: PolicyReportSummary } for all PolicyReports
+ * and ClusterPolicyReports currently in the store.
  */
-export async function getFilteredSummary(
-  store: Store<any>,
-  resource: any,
-  isClusterLevel: boolean = false
-): Promise<PolicyReportSummary> {
-  const outSummary: PolicyReportSummary = {
-    pass:  0,
-    fail:  0,
-    warn:  0,
-    error: 0,
-    skip:  0
-  };
-  const reportTypes: string[] = [];
+export function generateSummaryMap(storeState: any): Record<string, PolicyReportSummary> {
+  const summaryMap: Record<string, PolicyReportSummary> = {};
 
-  if (isClusterLevel || resource?.type === NAMESPACE) {
-    reportTypes.push(WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
-  }
+  function processReport(report: PolicyReport | ClusterPolicyReport) {
+    // Skip non-Kubewarden managed
+    if (report.metadata?.labels?.['app.kubernetes.io/managed-by'] !== 'kubewarden') {
+      return;
+    }
 
-  if (isResourceNamespaced(resource) || resource?.type === NAMESPACE) {
-    reportTypes.push(WG_POLICY_K8S.POLICY_REPORT.TYPE);
-  }
+    // Determine resource ID
+    let resourceId: string | undefined;
 
-  for (const report of reportTypes) {
-    const isClusterLevelReport = report === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE;
-    const storeKey = isClusterLevelReport ? 'clusterPolicyReports' : 'policyReports';
-    const reports = store.getters[`kubewarden/${ storeKey }`];
+    if (report.scope) {
+      resourceId = report.scope.namespace ? `${ report.scope.namespace }/${ report.scope.name }` : report.scope.name;
+    }
 
-    if (!isEmpty(reports)) {
-      const filtered: PolicyReportResult[] = getFilteredArrayOfReportResults(reports, resource, isClusterLevelReport);
+    if (!resourceId) {
+      return;
+    }
 
-      if (!isEmpty(filtered)) {
-        filtered.reduce((summary, r) => {
-          if (r.result) {
-            summary[r.result] = (summary[r.result] || 0) + 1;
-          };          
-          
-          return summary;
-        }, outSummary);
+    if (!summaryMap[resourceId]) {
+      summaryMap[resourceId] = {
+        pass:  0,
+        fail:  0,
+        warn:  0,
+        error: 0,
+        skip:  0
+      };
+    }
+
+    report.results?.forEach((r) => {
+      const key = r.result?.toLowerCase() as keyof PolicyReportSummary;
+
+      if (key && summaryMap[resourceId][key] !== undefined) {
+        summaryMap[resourceId][key]! += 1;
       }
-    } else {
-      await getReports(store, isClusterLevelReport, resource?.type);
-    }
+    });
   }
 
-  return outSummary;
-}
+  // Process clusterPolicyReports
+  storeState.clusterPolicyReports.forEach(processReport);
 
-/**
- * Helper function to filter report results based on resource type and managed-by labels
- * @param reports
- * @param resource
- * @returns `PolicyReportResult[]`
- */
-function getFilteredArrayOfReportResults<T extends PolicyReport | ClusterPolicyReport>(
-  reports: T[],
-  resource: any,
-  isClusterLevel?: boolean
-): PolicyReportResult[] {
-  const filteredReports = reports.filter((report) => {
-    if (report.metadata?.labels?.["app.kubernetes.io/managed-by"] !== "kubewarden") return false;
-    
-    if (resource?.type === NAMESPACE) {
-      if (isClusterLevel) {
-        return report.scope?.name === resource.name || (report?.scope && 'namespace' in report.scope && report.scope.namespace === resource?.name);
-      }
-  
-      return (report?.scope && 'namespace' in report.scope && report.scope.namespace === resource?.name);
-    }
-    return true;
-  });
+  // Process policyReports
+  storeState.policyReports.forEach(processReport);
 
-  const outResults: PolicyReportResult[] = [];
-
-  filteredReports.forEach((report) => {
-    const reportScopeName = report.scope?.name
-
-    if (resource?.type === "namespace" || reportScopeName === resource.metadata.name) {
-      report.results?.forEach((result) => {
-        outResults.push({
-          ...result,
-          scope: report.scope,
-          kind: report.kind,
-          policyName: result.properties?.["policy-name"],
-        });
-      });
-    }
-  });
-
-  return outResults.map((report) => ({ ...report, uid: randomStr() }));
+  return summaryMap;
 }
 
 /**
@@ -231,7 +192,7 @@ function getFilteredArrayOfReportResults<T extends PolicyReport | ClusterPolicyR
  * @param resource
  * @returns `PolicyReport | PolicyReportResult[] | null | void`
  */
-export async function getFilteredReports(store: Store<any>, resource: any): Promise<PolicyReport[] | PolicyReportResult[] | void> {
+export async function getFilteredReport(store: Store<any>, resource: any): Promise<PolicyReport | ClusterPolicyReport | null> {
   const schema = store.getters['cluster/schemaFor'](resource?.type);
 
   if (schema) {
@@ -244,15 +205,17 @@ export async function getFilteredReports(store: Store<any>, resource: any): Prom
       const reports = await getReports(store, isClusterLevel, resourceType);
 
       if (reports && !isEmpty(reports) ) {
-        // Filter and return the applicable report results
-        return getFilteredArrayOfReportResults(reports, resource, isClusterLevel);
+        // Filter and return the applicable report
+        const filteredReport = store.getters['kubewarden/reportByResourceId'](resource.id) || null;
+
+        return filteredReport;
       }
     } catch (e) {
-      console.warn(`Error fetching PolicyReports: ${ e }`); // eslint-disable-line no-console
+      console.warn(`Error fetching PolicyReports: ${ e }`);
     }
   }
 
-  return [];
+  return null;
 }
 
 /**
@@ -261,25 +224,31 @@ export async function getFilteredReports(store: Store<any>, resource: any): Prom
  * @param report: `PolicyReportResult`
  * @returns `createKubewardenRoute` | Will return a route to either a ClusterAdmissionPolicy or AdmissionPolicy
  */
-export function getLinkForPolicy(store: Store<any>, report: PolicyReportResult): Object | void {
+export function getLinkForPolicy(store: Store<any>, report: PolicyReportResult): object | void {
   if ( report?.policy ) {
     const apSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.ADMISSION_POLICY);
     const capSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
     const policyType: string = report.properties?.['policy-namespace'] ? KUBEWARDEN.ADMISSION_POLICY : KUBEWARDEN.CLUSTER_ADMISSION_POLICY;
+    const policyName = report.properties?.['policy-name'];
 
-    if ( policyType === KUBEWARDEN.ADMISSION_POLICY && apSchema ) {
+    if (policyType === KUBEWARDEN.ADMISSION_POLICY && apSchema) {
       return createKubewardenRoute({
         name:   'c-cluster-product-resource-namespace-id',
         params: {
-          resource: policyType, id: report?.policyName, namespace: report.properties?.['policy-namespace']
+          resource:  policyType,
+          id:        policyName,
+          namespace: report.properties?.['policy-namespace']
         }
       });
     }
 
-    if ( policyType === KUBEWARDEN.CLUSTER_ADMISSION_POLICY && capSchema ) {
+    if (policyType === KUBEWARDEN.CLUSTER_ADMISSION_POLICY && capSchema) {
       return createKubewardenRoute({
         name:   'c-cluster-product-resource-id',
-        params: { resource: policyType, id: report?.policyName }
+        params: {
+          resource: policyType,
+          id:       policyName
+        }
       });
     }
   }
@@ -293,12 +262,12 @@ export function getLinkForPolicy(store: Store<any>, report: PolicyReportResult):
  * @param report: `PolicyReport
  * @returns `Route | void`
  */
-export function getLinkForResource(report: PolicyReport): Object | void {
+export function getLinkForResource(report: PolicyReport): object | void {
   if ( !isEmpty(report.scope) ) {
     const resource = report.scope;
 
     if ( resource ) {
-      const isCore = Object.values(coreTypes).find(type => resource.kind === type.attributes.kind);
+      const isCore = Object.values(coreTypes).find((type) => resource.kind === type.attributes.kind);
       let resourceType;
 
       if ( isCore ) {
@@ -312,14 +281,19 @@ export function getLinkForResource(report: PolicyReport): Object | void {
           return {
             name:   'c-cluster-product-resource-namespace-id',
             params: {
-              resource: resourceType, id: resource.name, namespace: resource.namespace
+              resource:  resourceType,
+              id:        resource.name,
+              namespace: resource.namespace
             }
           };
         }
 
         return {
           name:   'c-cluster-product-resource-id',
-          params: { resource: resourceType, id: resource.name }
+          params: {
+            resource: resourceType,
+            id:       resource.name
+          }
         };
       }
     }
@@ -378,7 +352,7 @@ export function colorForSeverity(severity: Severity): string {
  * @param string
  * @returns Object
  */
-export function newPolicyReportCompatible(controllerAppVersion: string, uiPluginVersion: string): Object | void {
+export function newPolicyReportCompatible(controllerAppVersion: string, uiPluginVersion: string): object | void {
   if (semver.gte(uiPluginVersion, '1.4.0')) {
     return {
       oldPolicyReports: semver.gt(controllerAppVersion, '1.10.100'),
