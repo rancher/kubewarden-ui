@@ -12,7 +12,7 @@ import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 
-import { KUBEWARDEN_CHARTS } from '../../../types';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_APPS } from '../../../types';
 import { DEFAULT_POLICY_SERVER } from '../../../models/policies.kubewarden.io.policyserver';
 import { getPolicyServerModule, isFleetDeployment } from '../../../modules/fleet';
 import { findCompatibleDefaultsChart } from '../../../utils/chart';
@@ -155,10 +155,12 @@ export default {
     controllerApp() {
       const storedApp = this.$store.getters['kubewarden/controllerApp'];
 
-      if ( !storedApp ) {
-        const controller = this.allApps?.find(a => a?.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER);
+      if (!storedApp) {
+        const controller = this.allApps?.find(a => (
+          a?.spec?.chart?.metadata?.name === (KUBEWARDEN_CHARTS.CONTROLLER || KUBEWARDEN_APPS.RANCHER_CONTROLLER)
+        ));
 
-        if ( controller ) {
+        if (controller) {
           this.$store.dispatch('kubewarden/updateControllerApp', controller);
 
           return controller;

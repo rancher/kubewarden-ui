@@ -155,8 +155,14 @@ export const DASHBOARD_HEADERS = [
     isEnabled:   true,
     isLoaded:    true,
     icon:        'icon-question-mark',
-    cta:         createKubewardenRoute({ name: 'c-cluster-product-resource-create', params: { resource: KUBEWARDEN.ADMISSION_POLICY } }),
-    link:        createKubewardenRoute({ name: 'c-cluster-product-resource', params: { resource: KUBEWARDEN.ADMISSION_POLICY } }),
+    cta:         createKubewardenRoute({
+      name:   'c-cluster-product-resource-create',
+      params: { resource: KUBEWARDEN.ADMISSION_POLICY }
+    }),
+    link:        createKubewardenRoute({
+      name:   'c-cluster-product-resource',
+      params: { resource: KUBEWARDEN.ADMISSION_POLICY }
+    }),
     linkText:    'kubewarden.dashboard.headers.admissionPolicy.linkText',
     description: 'kubewarden.dashboard.headers.admissionPolicy.description',
     slotTitle:   'kubewarden.dashboard.headers.admissionPolicy.slotTitle',
@@ -166,8 +172,14 @@ export const DASHBOARD_HEADERS = [
     isEnabled:   true,
     isLoaded:    true,
     icon:        'icon-question-mark',
-    cta:         createKubewardenRoute({ name: 'c-cluster-product-resource-create', params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY } }),
-    link:        createKubewardenRoute({ name: 'c-cluster-product-resource', params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY } }),
+    cta:         createKubewardenRoute({
+      name:   'c-cluster-product-resource-create',
+      params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }
+    }),
+    link:        createKubewardenRoute({
+      name:   'c-cluster-product-resource',
+      params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }
+    }),
     linkText:    'kubewarden.dashboard.headers.clusterAdmissionPolicy.linkText',
     description: 'kubewarden.dashboard.headers.clusterAdmissionPolicy.description',
     slotTitle:   'kubewarden.dashboard.headers.clusterAdmissionPolicy.slotTitle',
@@ -177,8 +189,14 @@ export const DASHBOARD_HEADERS = [
     isEnabled:   true,
     isLoaded:    true,
     icon:        'icon-question-mark',
-    cta:         createKubewardenRoute({ name: 'c-cluster-product-resource-create', params: { resource: KUBEWARDEN.POLICY_SERVER } }),
-    link:        createKubewardenRoute({ name: 'c-cluster-product-resource', params: { resource: KUBEWARDEN.POLICY_SERVER } }),
+    cta:         createKubewardenRoute({
+      name:   'c-cluster-product-resource-create',
+      params: { resource: KUBEWARDEN.POLICY_SERVER }
+    }),
+    link:        createKubewardenRoute({
+      name:   'c-cluster-product-resource',
+      params: { resource: KUBEWARDEN.POLICY_SERVER }
+    }),
     linkText:    'kubewarden.dashboard.headers.policyServer.linkText',
     description: 'kubewarden.dashboard.headers.policyServer.description',
     slotTitle:   'kubewarden.dashboard.headers.policyServer.slotTitle',
@@ -258,60 +276,26 @@ export const RULE_HEADERS = [
   },
 ];
 
-export const POLICY_REPORTER_HEADERS = {
-  RESOURCE: [
-    {
-      name:     'policy',
-      labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.policy.label',
-      value:    'policy',
-      sort:     'policy'
-    },
-    {
-      name:     'severity',
-      labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.severity.label',
-      value:    'severity',
-      sort:     'severity'
-    },
-    {
-      name:     'status',
-      labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.status.label',
-      value:    'status',
-      sort:     'result'
-    },
-  ],
-  NAMESPACE: [
-    {
-      name:     'kind',
-      labelKey: 'tableHeaders.subType',
-      value:    'kind',
-      sort:     'kind'
-    },
-    {
-      name:     'name',
-      labelKey: 'tableHeaders.name',
-      value:    'name',
-      sort:     'name'
-    },
-    {
-      name:     'policy',
-      labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.policy.label',
-      value:    'policy',
-      sort:     'policy'
-    },
-    {
-      name:     'severity',
-      labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.severity.label',
-      value:    'severity',
-      sort:     'severity'
-    },
-    {
-      name:     'status',
-      labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.status.label',
-      value:    'status',
-      sort:     'result'
-    }
-  ]
-};
+export const POLICY_REPORTER_HEADERS = [
+  {
+    name:     'policy',
+    labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.policy.label',
+    value:    'policy',
+    sort:     'policy'
+  },
+  {
+    name:     'severity',
+    labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.severity.label',
+    value:    'severity',
+    sort:     'severity'
+  },
+  {
+    name:     'status',
+    labelKey: 'kubewarden.policyReporter.headers.policyReportsTab.status.label',
+    value:    'status',
+    sort:     'result'
+  }
+];
 
 export const POLICY_TABLE_HEADERS = [
   {

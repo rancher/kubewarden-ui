@@ -31,15 +31,16 @@ export default {
       deployment:             { type: WORKLOAD_TYPES.DEPLOYMENT }
     };
 
-    for ( const [key, value] of Object.entries(types) ) {
-      if ( this.$store.getters['cluster/canList'](value) ) {
+    for (const [key, value] of Object.entries(types)) {
+      if (this.$store.getters['cluster/canList'](value)) {
         this.permissions[key] = true;
       }
     }
 
-    if ( this.hasAvailability ) {
+    if (this.hasAvailability) {
       await this.$fetchType(WORKLOAD_TYPES.DEPLOYMENT);
       await this.$fetchType(SERVICE);
+      await this.$fetchType(CATALOG.APP);
 
       this.secondaryResourceData = this.secondaryResourceDataConfig();
       await this.resourceManagerFetchSecondaryResources(this.secondaryResourceData);
@@ -74,12 +75,18 @@ export default {
   computed: {
     ...mapGetters(['currentCluster']),
 
+    allApps() {
+      return this.$store.getters['cluster/all'](CATALOG.APP);
+    },
+
     allDeployments() {
       return this.$store.getters['cluster/all'](WORKLOAD_TYPES.DEPLOYMENT);
     },
 
     controllerDeployments() {
-      return this.allDeployments?.filter(deploy => deploy?.metadata?.labels?.[KUBERNETES.INSTANCE] === KUBEWARDEN_APPS.RANCHER_CONTROLLER);
+      return this.allDeployments?.filter(deploy => (
+        deploy?.metadata?.labels?.[KUBERNETES.INSTANCE] === KUBEWARDEN_APPS.RANCHER_CONTROLLER
+      ));
     },
 
     hasAvailability() {
@@ -110,17 +117,37 @@ export default {
       return this.reporterDeployment?.metadata?.state?.name;
     },
 
+    controllerApp() {
+      const storedApp = this.$store.getters['kubewarden/controllerApp'];
+
+      if (!storedApp) {
+        const controller = this.allApps?.find(a => (
+          a?.spec?.chart?.metadata?.name === (KUBEWARDEN_CHARTS.CONTROLLER || KUBEWARDEN_APPS.RANCHER_CONTROLLER)
+        ));
+
+        if (controller) {
+          this.$store.dispatch('kubewarden/updateControllerApp', controller);
+
+          return controller;
+        }
+
+        return null;
+      }
+
+      return storedApp;
+    },
+
     controllerNamespace() {
-      if ( !isEmpty(this.controller) ) {
-        return this.controller?.metadata?.namespace;
+      if (!isEmpty(this.controllerApp)) {
+        return this.controllerApp?.metadata?.namespace;
       }
 
       return null;
     },
 
     controllerVersion() {
-      if ( !isEmpty(this.controller) ) {
-        return this.controller?.metadata?.labels?.['app.kubernetes.io/version'];
+      if (!isEmpty(this.controllerApp)) {
+        return this.controllerApp?.spec?.chart?.metadata?.appVersion;
       }
 
       return null;
@@ -138,18 +165,8 @@ export default {
   methods: {
     secondaryResourceDataConfig() {
       return {
-        namespace: this.controller?.metadata?.namespace,
+        namespace: this.controllerApp?.metadata?.namespace,
         data:      {
-          [WORKLOAD_TYPES.DEPLOYMENT]: {
-            applyTo: [
-              {
-                var:         'controller',
-                parsingFunc: (data) => {
-                  return data.find(deploy => deploy?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === KUBEWARDEN_CHARTS.CONTROLLER);
-                }
-              }
-            ]
-          },
           [SERVICE]: {
             applyTo: [{ var: 'services' },
               {
@@ -190,7 +207,7 @@ export default {
 
 <template>
   <Loading v-if="$fetchState.pending" />
-  <div v-else>
+  <div>
     <template v-if="!hasAvailability">
       <Banner
         color="error"

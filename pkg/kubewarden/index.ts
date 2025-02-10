@@ -6,10 +6,6 @@ import kubewardenRoutes from './routes/kubewarden-routes';
 import kubewardenStore from './store/kubewarden';
 import { getReports } from './modules/policyReporter';
 
-// fix missing directives on dashboard v2.7.2
-// import '@shell/plugins/clean-tooltip-directive';
-// import '@shell/plugins/clean-html-directive';
-
 const onEnter: OnNavToPackage = async(store: any) => {
   await getReports(store, false);
   await getReports(store, true);

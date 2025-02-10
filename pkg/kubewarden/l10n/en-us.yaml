@@ -479,11 +479,12 @@ kubewarden:
           label: Summary
         message:
           title: Message
+        category: Category
         properties:
-          policy-uid: policy-uid
+          policy-uid: Policy UID
           version: policy-resource-version
-          mutating: mutating
-          validating: validating
+          mutating: Mutating
+          validating: Validating
 
 asyncButton:
   artifactHub:
