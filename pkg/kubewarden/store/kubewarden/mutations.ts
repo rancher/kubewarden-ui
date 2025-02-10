@@ -6,16 +6,19 @@ import { StateConfig } from './index';
 type ReportKeys = 'policyReports' | 'clusterPolicyReports';
 
 export default {
-  updateAirGapped(state: StateConfig, val: Boolean) {
+  updateAirGapped(state: StateConfig, val: boolean) {
     state.airGapped = val;
   },
-  updateHideBannerDefaults(state: StateConfig, val: Boolean) {
+  updateHideBannerDefaults(state: StateConfig, val: boolean) {
     state.hideBannerDefaults = val;
   },
-  updateHideBannerArtifactHub(state: StateConfig, val: Boolean) {
-    state.hideBannerArtifactHub = val;
+  updateHideBannerOfficialRepo(state: StateConfig, val: boolean) {
+    state.hideBannerOfficialRepo = val;
   },
-  updateHideBannerAirgapPolicy(state: StateConfig, val: Boolean) {
+  updateHideBannerPolicyRepo(state: StateConfig, val: boolean) {
+    state.hideBannerPolicyRepo = val;
+  },
+  updateHideBannerAirgapPolicy(state: StateConfig, val: boolean) {
     state.hideBannerAirgapPolicy = val;
   },
 
@@ -150,7 +153,7 @@ export default {
     }
   },
 
-  updateRefreshingCharts(state: StateConfig, val: Boolean) {
+  updateRefreshingCharts(state: StateConfig, val: boolean) {
     state.refreshingCharts = val;
   }
 };

@@ -51,6 +51,7 @@
   },
   "include": [
     "./pkg/kubewarden/**/*.ts",
+    "./pkg/kubewarden/**/*.d.ts",
     "./pkg/kubewarden/**/*.tsx",
     "./pkg/kubewarden/**/*.vue",
   ],

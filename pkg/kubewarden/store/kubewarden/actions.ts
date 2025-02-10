@@ -3,20 +3,27 @@ import {
 } from '../../types';
 
 export default {
-  updateAirGapped({ commit }: any, val: Boolean) {
+  updateAirGapped({ commit }: any, val: boolean) {
     commit('updateAirGapped', val);
   },
 
   // Defaults banner
-  updateHideBannerDefaults({ commit }: any, val: Boolean) {
+  updateHideBannerDefaults({ commit }: any, val: boolean) {
     commit('updateHideBannerDefaults', val);
   },
 
-  // ArtifactHub banner
-  updateHideBannerArtifactHub({ commit }: any, val: Boolean) {
-    commit('updateHideBannerArtifactHub', val);
+  // Official Repo banner
+  updateHideBannerOfficialRepo({ commit }: any, val: boolean) {
+    commit('updateHideBannerOfficialRepo', val);
   },
-  updateHideBannerAirgapPolicy({ commit }: any, val: Boolean) {
+
+  // Policy Repo banner
+  updateHideBannerPolicyRepo({ commit }: any, val: boolean) {
+    commit('updateHideBannerPolicyRepo', val);
+  },
+
+  // Airgap Policy banner
+  updateHideBannerAirgapPolicy({ commit }: any, val: boolean) {
     commit('updateHideBannerAirgapPolicy', val);
   },
 
@@ -37,7 +44,7 @@ export default {
   },
 
   // Charts
-  updateRefreshingCharts({ commit }: any, val: Boolean) {
+  updateRefreshingCharts({ commit }: any, val: boolean) {
     commit('updateRefreshingCharts', val);
   },
 

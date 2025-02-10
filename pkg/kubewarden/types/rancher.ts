@@ -45,6 +45,7 @@ export type Schema = {
   },
   _id: string,
   _group: string,
+  linkFor: (id: string) => string,
 }
 
 export const PROJECT = { APP: 'project.cattle.io.app' };

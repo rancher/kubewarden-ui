@@ -1,5 +1,10 @@
 import {
-  V1SecurityContext, V1PodSecurityContext, V1ObjectMeta, V1EnvVar, V1LabelSelector, V1Condition,
+  V1SecurityContext,
+  V1PodSecurityContext,
+  V1ObjectMeta,
+  V1EnvVar,
+  V1LabelSelector,
+  V1Condition,
   V1MatchCondition
 } from '@kubernetes/client-node';
 
@@ -10,6 +15,8 @@ export const CHART_NAME = 'rancher-kubewarden';
 
 export const KUBEWARDEN_DASHBOARD = 'dashboard';
 export const KUBEWARDEN_REPO = 'https://charts.kubewarden.io';
+export const KUBEWARDEN_CHARTS_REPO = 'https://github.com/kubewarden/helm-charts';
+export const KUBEWARDEN_CHARTS_REPO_GIT = 'https://github.com/kubewarden/helm-charts.git';
 
 export const KUBEWARDEN_CHARTS = {
   CONTROLLER:       'kubewarden-controller',
@@ -22,6 +29,12 @@ export const KUBEWARDEN_APPS = {
 };
 
 export const KUBEWARDEN_LABELS = { POLICY_SERVER: 'kubewarden/policy-server' };
+
+export const KUBEWARDEN_ANNOTATIONS = {
+  CHART_KEY:     'kubewarden.io/chart-key',
+  CHART_NAME:    'kubewarden.io/chart-name',
+  CHART_VERSION: 'kubewarden.io/chart-version',
+}
 
 export const KUBEWARDEN = {
   ADMISSION_POLICY:         'policies.kubewarden.io.admissionpolicy',

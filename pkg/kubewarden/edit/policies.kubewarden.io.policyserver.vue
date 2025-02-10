@@ -45,8 +45,7 @@ export default {
   data() {
     return {
       errors:           [],
-      chartValues:      this.value,
-      validationPassed: true,
+      chartValues:      this.value
     };
   },
 

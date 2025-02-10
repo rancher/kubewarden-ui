@@ -1,32 +1,30 @@
-<script>
-export default {
-  props: {
-    value: {
-      type:     Object,
-      required: true
-    }
-  },
+<script setup lang="ts">
+import { computed } from 'vue';
 
-  computed: {
-    features() {
-      const featuresList = [];
-
-      if ( this.value?.['kubewarden/mutation'] === 'true' ) {
-        featuresList.push('Mutation');
-      }
-
-      if ( this.value?.['kubewarden/contextAwareResources'] ) {
-        featuresList.push('Context Aware');
-      }
-
-      return featuresList.length ? featuresList.join(', ') : undefined;
-    }
+const props = defineProps({
+  value: {
+    type:     Object,
+    required: true
   }
-};
+});
+
+const features = computed<string | undefined>((): string | undefined => {
+  const featuresList = [];
+
+  if (props.value?.['kubewarden/mutation'] === 'true') {
+    featuresList.push('Mutation');
+  }
+
+  if (props.value?.['kubewarden/contextAwareResources']) {
+    featuresList.push('Context Aware');
+  }
+
+  return featuresList.length ? featuresList.join(', ') : undefined;
+});
 </script>
 
 <template>
-  <div>
+  <div v-if="features">
     {{ features }}
   </div>
 </template>

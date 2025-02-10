@@ -15,17 +15,18 @@ import mutations from './mutations';
 import actions from './actions';
 
 export interface StateConfig {
-  airGapped: Boolean;
+  airGapped: boolean;
   fleetRepos: FleetGitRepo[];
-  hideBannerDefaults: Boolean;
-  hideBannerArtifactHub: Boolean;
-  hideBannerAirgapPolicy: Boolean;
+  hideBannerDefaults: boolean;
+  hideBannerPolicyRepo: boolean;
+  hideBannerOfficialRepo: boolean;
+  hideBannerAirgapPolicy: boolean;
   controllerApp: CatalogApp | null;
   kubewardenCrds: CustomResourceDefinition[];
   policyReports: PolicyReport[];
   clusterPolicyReports: ClusterPolicyReport[];
   policyTraces: PolicyTraceConfig[];
-  refreshingCharts: Boolean;
+  refreshingCharts: boolean;
 }
 
 const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
@@ -35,7 +36,8 @@ const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
         airGapped:              config.airGapped,
         fleetRepos:             config.fleetRepos,
         hideBannerDefaults:     config.hideBannerDefaults,
-        hideBannerArtifactHub:  config.hideBannerArtifactHub,
+        hideBannerOfficialRepo: config.hideBannerOfficialRepo,
+        hideBannerPolicyRepo:   config.hideBannerPolicyRepo,
         hideBannerAirgapPolicy: config.hideBannerAirgapPolicy,
         controllerApp:          config.controllerApp,
         kubewardenCrds:         config.kubewardenCrds,
@@ -59,7 +61,8 @@ export default {
     airGapped:              false,
     fleetRepos:             [],
     hideBannerDefaults:     false,
-    hideBannerArtifactHub:  false,
+    hideBannerOfficialRepo: false,
+    hideBannerPolicyRepo:   false,
     hideBannerAirgapPolicy: false,
     controllerApp:          null,
     kubewardenCrds:         [],
