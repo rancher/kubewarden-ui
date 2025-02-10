@@ -122,7 +122,7 @@ export class Navigation {
       await this.explorer('Kubewarden', 'PolicyServers')
       if (name) {
         await this.ui.tableRow(name).open()
-        await expect(this.page.getByRole('heading', { name: `PolicyServer: ${name}` })).toBeVisible()
+        await expect(this.page.getByRole('heading', { name: new RegExp(`PolicyServer:? ${name}`) })).toBeVisible()
       }
       if (tab) await this.ui.tab(tab).click()
     }
