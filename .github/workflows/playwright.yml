@@ -203,6 +203,15 @@ jobs:
         TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG k3d-install
         k3d cluster create ${{ env.K3D_CLUSTER_NAME }} --agents 1 --image rancher/k3s:${{ env.K3S_VERSION }}
 
+        # 429 Too Many Requests - You have reached your pull rate limit
+        if [ -n "${{secrets.DOCKER_USERNAME}}" ]; then
+          kubectl create secret docker-registry regcred --docker-server=https://index.docker.io/v1/ --docker-username=${{ secrets.DOCKER_USERNAME }} --docker-password="${{ secrets.DOCKER_PASSWORD }}"
+          kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "regcred"}]}'
+
+          kubectl create ns jaeger
+          kubectl create secret docker-registry regcred --docker-server=https://index.docker.io/v1/ --docker-username=${{ secrets.DOCKER_USERNAME }} --docker-password="${{ secrets.DOCKER_PASSWORD }}" -n jaeger
+        fi
+
     - name: Install Rancher
       run: |
         RANCHER_FQDN=$(k3d cluster list ${{ env.K3D_CLUSTER_NAME }} -o json | jq -r '[.[].nodes[] | select(.role == "server").IP.IP] | first').nip.io
