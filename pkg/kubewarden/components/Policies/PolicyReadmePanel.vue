@@ -1,16 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useStore } from 'vuex';
 
 import ChartReadme from '@shell/components/ChartReadme';
 
-import { PolicyDetail } from '../../types';
+import { PolicyDetail, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '../../types';
 
 const props = defineProps<{ policyChartDetails: PolicyDetail }>();
 
 const store = useStore();
 const showSlideIn = ref(false);
 const t = store.getters['i18n/t'];
+
+const displayName = computed<string>(() => {
+  const { annotations } = props.policyChartDetails.chart;
+  let name = props.policyChartDetails.chart.name;
+
+  if (annotations) {
+    name =
+      annotations[KUBEWARDEN_POLICY_ANNOTATIONS.DISPLAY_NAME] ??
+      annotations[LEGACY_POLICY_ANNOTATIONS.DISPLAY_NAME] ??
+      name;
+  }
+
+  return name;
+});
 
 const show = () => {
   showSlideIn.value = true;
@@ -58,7 +72,7 @@ defineExpose({
 
           <div class="policy-title mt-20">
             <h2 class="policy-info-title">
-              {{ policyChartDetails.chart.annotations?.['kubewarden/displayName'] || policyChartDetails.chart.name }}
+              {{ displayName }}
             </h2>
           </div>
 

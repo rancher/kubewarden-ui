@@ -1,11 +1,25 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import { PolicyChart } from '../types';
+import { PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '../types';
 
 const props = defineProps<{ row: PolicyChart }>();
 
-const displayName = computed<string>((): string => props.row?.annotations?.['kubewarden/displayName'] || props.row?.name);
+// const displayName = computed<string>((): string => props.row?.annotations?.['kubewarden/displayName'] || props.row?.name);
+
+const displayName = computed<string>(() => {
+  const { annotations } = props.row;
+  let name = props?.row?.name;
+
+  if (annotations) {
+    name =
+      annotations[KUBEWARDEN_POLICY_ANNOTATIONS.DISPLAY_NAME] ??
+      annotations[LEGACY_POLICY_ANNOTATIONS.DISPLAY_NAME] ??
+      name;
+  }
+
+  return name;
+});
 const isOfficial = computed<boolean>((): boolean => props.row?.official || false);
 </script>
 

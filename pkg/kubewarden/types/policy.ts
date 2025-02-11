@@ -11,17 +11,7 @@ export interface PolicyChart {
   apiVersion: string;
   appVersion: string;
   annotations: {
-    'catalog.cattle.io/certified': string;
-    'catalog.cattle.io/hidden': string;
-    'catalog.cattle.io/os': string;
-    'catalog.cattle.io/permits-os': string;
-    'catalog.cattle.io/type': string;
-    'catalog.cattle.io/ui-component': string;
-    'kubewarden/contextAwareResources': string;
-    'kubewarden/displayName': string;
-    'kubewarden/mutation': string;
-    'kubewarden/resources': string;
-    'kubewarden/hidden-ui': string;
+    [key: string]: string | undefined;
   };
   kubeVersion: string;
   type: string;
@@ -75,8 +65,6 @@ export const DEFAULT_POLICY: Policy = {
     settings: {}
   }
 };
-
-export const ARTIFACTHUB_ENDPOINT = 'artifacthub.io/api/v1';
 
 export const ARTIFACTHUB_PKG_ANNOTATION = 'artifacthub/pkg';
 
@@ -152,3 +140,20 @@ export const YAML_OPTIONS = [
     value:    VALUES_STATE.YAML,
   }
 ];
+
+
+export const KUBEWARDEN_POLICY_ANNOTATIONS = {
+  CONTEXT_AWARE_RESOURCES:  'kubewarden/contextAwareResources',
+  DISPLAY_NAME:             'kubewarden/displayName',
+  MUTATION:                 'kubewarden/mutation',
+  RESOURCES:                'kubewarden/resources',
+  HIDDEN_UI:                'kubewarden/hidden-ui',
+  KEYWORDS:                 'kubewarden/keywords',
+};
+
+export const LEGACY_POLICY_ANNOTATIONS = {
+  DISPLAY_NAME:             'io.artifacthub.displayName',
+  KEYWORDS:                 'io.artifacthub.keywords',
+  RESOURCES:                'io.artifacthub.resources',
+};
+
