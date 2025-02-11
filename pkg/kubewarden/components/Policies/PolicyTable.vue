@@ -15,9 +15,13 @@ import { LabeledInput } from '@components/Form/LabeledInput';
 import { Checkbox } from '@components/Form/Checkbox';
 import SortableTableWrapper from '../SortableTableWrapper';
 
-import { KUBEWARDEN, PolicyChart } from '../../types';
+import { KUBEWARDEN, PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '../../types';
 import { POLICY_TABLE_HEADERS } from '../../config/table-headers';
 import { resourcesFromAnnotation, isGlobalPolicy } from '../../modules/policyChart';
+
+type KubewardenKey = keyof typeof KUBEWARDEN_POLICY_ANNOTATIONS;
+type LegacyKey = keyof typeof LEGACY_POLICY_ANNOTATIONS;
+type AnnotationKey = KubewardenKey | LegacyKey;
 
 interface Props {
   mode: string;
@@ -92,46 +96,76 @@ const filteredCharts = computed(() => {
  * Derived from `filteredCharts` - applies search queries, attribute filters, etc.
  */
 const filteredPolicies = computed(() => {
-  const out = filteredCharts.value.filter((policy) => {
-    // Filter official vs. non-official
-    if (showKubewardenOfficial.value && !policy.official) {
+  const showPre = showPreRelease.value;
+  const search = searchQuery.value;
+  const showOfficial = showKubewardenOfficial.value;
+
+  // Pre-split search tokens
+  const searchTokens = (search || '')
+    .split(/\s*[, ]\s*/)
+    .map(x => ensureRegex(x, false))
+    .filter(x => x); // remove empty
+
+  return props.charts.filter((chart) => {
+    // Filter out cluster-level Admission Policies
+    if (chartType === KUBEWARDEN.ADMISSION_POLICY && isGlobalPolicy(chart, allSchemas.value)) {
       return false;
     }
 
-    // Search query filtering
-    if (searchQuery.value) {
-      const searchTokens = searchQuery.value
-        .split(/\s*[, ]\s*/)
-        .map(x => ensureRegex(x, false));
+    // Filter out pre-release if the user doesn't want them
+    const isPre = isPrerelease(chart);
 
-      const matchesSearch = searchTokens.every((token) => (
-        policy.annotations?.['kubewarden/displayName']?.match(token)
-        || (policy.description && policy.description.match(token))
-        || policy.keywords?.some((keyword: string) => keyword.match(token))
-      ));
+    if (!showPre && isPre) {
+      return false;
+    }
+
+    // Filter official vs. non-official
+    if (showOfficial && !chart.official) {
+      return false;
+    }
+
+    // Search tokens
+    if (searchTokens.length) {
+      const displayName = coalescedDisplayName(chart);
+      const keywords    = coalescedKeywords(chart);
+      const desc        = chart.description || '';
+
+      const matchesSearch = searchTokens.every((token) =>
+        (displayName && displayName.match(token)) ||
+        (desc && desc.match(token)) ||
+        keywords.some(k => k.match(token))
+      );
 
       if (!matchesSearch) {
         return false;
       }
     }
 
-    // Attribute filtering
+    // Attribute filtering (features & resources)
     if (attributes.value.length) {
+      // If user selected "All," pass immediately
       if (attributes.value.includes(t('kubewarden.utils.attributes.optionLabels.all'))) {
-        // "All" means show all policies
         return true;
       }
 
       const matchesAttributes = attributes.value.some((attribute) => {
+        // Is it a feature (Mutation, Context Aware)?
         const isFeature = featureOptions.value.includes(attribute);
 
         if (isFeature) {
-          const normalized = (attribute === 'Mutation') ? 'mutation' : 'contextAwareResources';
-          return policy?.annotations?.[`kubewarden/${ normalized }`];
-        }
+          if (attribute === 'Mutation') {
+            return isMutation(chart);
+          } else if (attribute === 'Context Aware') {
+            return isContextAware(chart);
+          }
 
-        // Otherwise check resource matches
-        return policy?.annotations?.['kubewarden/resources']?.includes(attribute);
+          return false;
+        } else {
+          // Otherwise treat it as a resource filter
+          const resources = coalescedResources(chart);
+
+          return resources?.includes(attribute);
+        }
       });
 
       if (!matchesAttributes) {
@@ -140,10 +174,7 @@ const filteredPolicies = computed(() => {
     }
 
     return true;
-  });
-
-  // Sort by 'name'
-  return sortBy(out, ['name'], false);
+  }).sort((a, b) => a.name.localeCompare(b.name));
 });
 
 /**
@@ -224,6 +255,41 @@ function refresh() {
   attributes.value = [t('kubewarden.utils.attributes.optionLabels.all')];
   searchQuery.value = '';
 }
+
+/**
+ * Helper to unify new & legacy policy annotations for a given annotation name
+ */
+ function getAnnotation(policy: PolicyChart, key: AnnotationKey): string | undefined {
+  return policy.annotations?.[KUBEWARDEN_POLICY_ANNOTATIONS[key as KubewardenKey]] ??
+         policy.annotations?.[LEGACY_POLICY_ANNOTATIONS[key as LegacyKey]];
+}
+
+function coalescedDisplayName(policy: PolicyChart) {
+  return getAnnotation(policy, 'DISPLAY_NAME') || policy.name;
+}
+
+function coalescedKeywords(policy: PolicyChart): string[] {
+  const fromAnnotation = getAnnotation(policy, 'KEYWORDS') || '';
+  const arrayFromAnnotation = fromAnnotation ? fromAnnotation.split(',') : [];
+  
+  return [
+    ...(policy.keywords || []),
+    ...arrayFromAnnotation
+  ].filter(Boolean);
+}
+
+function coalescedResources(policy: PolicyChart) {
+  return getAnnotation(policy, 'RESOURCES');
+}
+
+function isMutation(chart: PolicyChart): boolean {
+  return chart.annotations?.[KUBEWARDEN_POLICY_ANNOTATIONS.MUTATION] === 'true';
+}
+
+function isContextAware(chart: PolicyChart): boolean {
+  return chart.annotations?.[KUBEWARDEN_POLICY_ANNOTATIONS.CONTEXT_AWARE_RESOURCES] === 'true';
+}
+
 </script>
 
 <template>

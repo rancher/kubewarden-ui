@@ -52,7 +52,7 @@ export const POLICY_SERVER_STATE = {
 
 export const RELATED_POLICY_SUMMARY = {
   name:      'summary',
-  label:     'Policies',
+  label:     'Policy Status',
   value:     'allRelatedPolicies.length',
   sort:      false,
   search:    false,

@@ -54,9 +54,9 @@ async function loadFromAnnotations(chartKey: string, chartName: string, chartVer
     version = chart?.versions?.find((v: any) => v.version === chartVersion);
   } else {
     // Fallback: find chart by filtering
-    const kwCharts = toRaw(store.getters['catalog/charts'].filter((c: Chart) => c.chartType === 'kubewarden-policy'));
-    chart = kwCharts.find((c: any) => c.chartName === chartName);
-    version = chart?.versions?.find((v: any) => v.version === chartVersion);
+    const charts = store.getters['catalog/charts'] as Chart[];
+    chart = charts.find((c) => c.chartType === 'kubewarden-policy' && c.chartName === chartName);
+    version = chart?.versions?.find((v: Version) => v.version === chartVersion);
   }
 
   if (version) {
@@ -103,8 +103,8 @@ async function loadFromModule() {
 
         return {
           versionInfo: rawVersionInfo,
-          matches: rawVersionInfo.values?.spec?.module?.repository === repo &&
-                   rawVersionInfo.values?.spec?.module?.tag === tag
+          matches: rawVersionInfo.values?.module?.repository === repo &&
+                   rawVersionInfo.values?.module?.tag === tag
         };
       } catch (e) {
         console.warn('Error loading version:', e);
