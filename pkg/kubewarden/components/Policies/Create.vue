@@ -11,6 +11,7 @@ import { CATALOG, NAMESPACE } from '@shell/config/types';
 import { _CREATE } from '@shell/config/query-params';
 import { saferDump } from '@shell/utils/create-yaml';
 import { set } from '@shell/utils/object';
+import { randomStr, CHARSET } from '@shell/utils/string';
 
 import { Banner } from '@components/Banner';
 
@@ -25,11 +26,13 @@ import {
   KUBEWARDEN_REPO,
   KUBEWARDEN_CHARTS_REPO,
   KUBEWARDEN_CHARTS_REPO_GIT,
+  KUBEWARDEN_CHARTS_REPO_NAME,
   VALUES_STATE,
-  DEFAULT_POLICY
-} from '@kubewarden/types';
-import { removeEmptyAttrs } from '@kubewarden/utils/object';
-import { handleGrowl } from '@kubewarden/utils/handle-growl';
+  DEFAULT_POLICY,
+  KUBEWARDEN_POLICY_ANNOTATIONS
+} from '../../types';
+import { removeEmptyAttrs } from '../../utils/object';
+import { handleGrowl } from '../../utils/handle-growl';
 
 import PolicyTable from './PolicyTable';
 import PolicyReadmePanel from './PolicyReadmePanel';
@@ -232,8 +235,24 @@ export default ({
       });
     },
 
+    reposByName() {
+      return this.repos.reduce((acc, repo) => {
+        acc[repo.metadata.name] = repo;
+
+        return acc;
+      }, {});
+    },
+
+    reposByUrl() {
+      return this.repos.reduce((acc, repo) => {
+        acc[repo.spec.url] = repo;
+
+        return acc;
+      }, {});
+    },
+
     officialKubewardenRepo() {
-      return this.repos.find(repo => repo.spec?.url && this.OFFICIAL_REPOS.includes(repo.spec.url));
+      return this.reposByUrl[KUBEWARDEN_REPO];
     }
   },
 
@@ -242,14 +261,17 @@ export default ({
       try {
         const repoObj = await this.$store.dispatch('cluster/create', {
           type:     CATALOG.CLUSTER_REPO,
-          metadata: { name: 'kubewarden-policy-charts' },
+          metadata: { name: this.repoName },
           spec:     { url: KUBEWARDEN_REPO },
         });
 
         try {
           await repoObj.save();
         } catch (e) {
-          handleGrowl({ error: e, store: this.$store });
+          handleGrowl({
+            error: e,
+            store: this.$store
+          });
           btnCb(false);
 
           return;
@@ -259,7 +281,10 @@ export default ({
           await this.$store.dispatch('catalog/refresh');
         }
       } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
+        handleGrowl({
+          error: e,
+          store: this.$store
+        });
         btnCb(false);
       }
     },
@@ -422,7 +447,14 @@ export default ({
       const policyQuestions = this.selectedPolicyDetails?.questions;
       const policyValues = toRaw(this.selectedPolicyDetails?.values);
 
-      defaultPolicy.spec.module   = `${ policyValues.spec.module.repository }:${ policyValues.spec.module.tag }`;
+      const registry = policyValues.global.cattle.systemDefaultRegistry;
+      let policyModule = `${ policyValues.module.repository }:${ policyValues.module.tag }`;
+
+      if (registry) {
+        policyModule = `${ registry }/${ policyModule }`;
+      }
+
+      defaultPolicy.spec.module   = policyModule;
       defaultPolicy.spec.mode     = policyValues.spec.mode;
       defaultPolicy.spec.mutating = policyValues.spec.mutating;
       defaultPolicy.spec.rules    = policyValues.spec.rules;
@@ -493,7 +525,9 @@ export default ({
       await this.policyQuestions();
       this.stepPolicies.ready = true;
       this.$refs.wizard.next();
-      this.bannerTitle = this.customPolicy ? 'Custom Policy' : (policy?.annotations?.['kubewarden/displayName'] || policy?.name);
+      this.bannerTitle = this.customPolicy ? 'Custom Policy' : (
+        policy?.annotations?.[KUBEWARDEN_POLICY_ANNOTATIONS.DISPLAY_NAME] || policy?.name
+      );
     },
 
     showReadme() {

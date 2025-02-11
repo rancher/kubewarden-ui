@@ -23,7 +23,7 @@ kubewarden:
       appUpgrade: App Upgrade
       controllerChart: Controller
       defaultsChart: Defaults
-      appVersionUnsatisfied: "The app version of the Kubewarden Defaults ({defaultsAppVersion}) chart does not match the app version of the Kubewarden Controller chart ({controllerAppVersion}). This chart will need to be updated to match the app version of the Kubewarden Controller chart."
+      appVersionUnsatisfied: 'The app version of the Kubewarden Defaults ({defaultsAppVersion}) chart does not match the app version of the Kubewarden Controller chart ({controllerAppVersion}). This chart will need to be updated to match the app version of the Kubewarden Controller chart.'
     policyReports:
       oldPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Kubewarden App. Please update to version v1.11.0 or newer.'
       newPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Kubewarden extension. Please update to version 1.4.0 or newer.'
@@ -144,11 +144,11 @@ kubewarden:
       features: Features
   policies:
     noPolicyRepo: No policy repository found. Please add a policy repository to view policies.
-    noOfficialPolicies: No official policies found. Please add the Kubewarden repository to view official policies.
+    noOfficialPolicies: No official policies found. Please add the repository to view official policies.
     noArtifactHub: Official Kubewarden policies are hosted on <a href="https://artifacthub.io/packages/search?kind=13" target="_blank" rel="noopener noreferrer nofollow">ArtifactHub</a>, in order to show these you will need to add `artifacthub.io` to the whitelist-domain setting.
     noRules: There are no rules configured for this policy.
     namespaceWarning: This policy is targeting Rancher specific namespaces which will cause catastrophic failures with your Rancher deployment.
-    official: Official Kubewarden Policy
+    official: Official Rancher Policy
     airgap:
       banner: 'An air-gapped installation is detected, you will be unable to use the policies listed within the ArtifactHub catalog. You are still able to deploy a custom policy by referencing a WebAssembly module that is accessible to this cluster.'
   utils:
@@ -166,7 +166,7 @@ kubewarden:
     search: Filter
     resetFilter: Reset Filter
     official:
-      label: Show only official Kubewarden policies
+      label: Show only official Rancher policies
     custom:
       create: Create Custom Policy
   tracing:
