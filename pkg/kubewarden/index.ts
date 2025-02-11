@@ -1,18 +1,14 @@
 import { importTypes } from '@rancher/auto-import';
-import { TableColumnLocation, TabLocation, PanelLocation, OnNavToPackage } from '@shell/core/types';
-import { NAMESPACE, POD, WORKLOAD_TYPES, INGRESS, SERVICE } from '@shell/config/types';
+import { TableColumnLocation, TabLocation, PanelLocation } from '@shell/core/types';
+import {
+  NAMESPACE, POD, WORKLOAD_TYPES, INGRESS, SERVICE
+} from '@shell/config/types';
 
 import kubewardenRoutes from './routes/kubewarden-routes';
 import kubewardenStore from './store/kubewarden';
-import { getReports } from './modules/policyReporter';
-
-const onEnter: OnNavToPackage = async(store: any) => {
-  await getReports(store, false);
-  await getReports(store, true);
-};
 
 // Init the package
-export default function($plugin: any, args: any) {
+export default function($plugin: any) {
   // Auto-import model, detail, edit from the folders
   importTypes($plugin);
 
@@ -28,13 +24,15 @@ export default function($plugin: any, args: any) {
   // Routes
   $plugin.addRoutes(kubewardenRoutes);
 
-  // Add hooks to Vue navigation world
-  $plugin.addNavHooks(onEnter);
-
   /** Panels */
   $plugin.addPanel(
     PanelLocation.RESOURCE_LIST,
-    { path: [{ urlPath: 'explorer/projectsnamespaces', endsWith: true }] },
+    {
+      path: [{
+        urlPath:  'explorer/projectsnamespaces',
+        endsWith: true
+      }]
+    },
     { component: () => import('./components/PolicyReporter/ReporterPanel.vue') }
   );
 
@@ -59,7 +57,12 @@ export default function($plugin: any, args: any) {
   // Policy Reports for Project Namespaces
   $plugin.addTableColumn(
     TableColumnLocation.RESOURCE,
-    { path: [{ urlPath: 'explorer/projectsnamespaces', endsWith: true }] },
+    {
+      path: [{
+        urlPath:  'explorer/projectsnamespaces',
+        endsWith: true
+      }]
+    },
     {
       name:      'policy-reports',
       labelKey:  'kubewarden.policyReporter.headers.policyReports.label',

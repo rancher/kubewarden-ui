@@ -1,3 +1,4 @@
+import globals from "globals";
 import pluginVue from 'eslint-plugin-vue';
 import vueTsEslintConfig from '@vue/eslint-config-typescript';
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting';
@@ -18,8 +19,15 @@ export default [
   skipFormatting,
 
   {
+    languageOptions: {
+      globals: {
+          ...globals.browser,
+          ...globals.node
+      }
+    },
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any':    'off',
+      '@typescript-eslint/no-require-imports': 'off',
 
       'vue/no-multiple-template-root':  'off',
       'dot-notation':                   'off',
