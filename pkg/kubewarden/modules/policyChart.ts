@@ -1,4 +1,4 @@
-import { PolicyChart } from '../types';
+import { PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '../types';
 
 /**
  * Extracts resource kinds from a list of policy charts with the `kubewarden/resources` annotation.
@@ -9,7 +9,8 @@ export function resourcesFromAnnotation(policyChart: PolicyChart[]): string[] | 
   const out: string[] = [];
 
   const resources = policyChart?.flatMap((policyChart) => {
-    const annotation = policyChart?.annotations?.['kubewarden/resources'];
+    const annotation = policyChart?.annotations?.[KUBEWARDEN_POLICY_ANNOTATIONS.RESOURCES] ??
+                       policyChart?.annotations?.[LEGACY_POLICY_ANNOTATIONS.RESOURCES];
 
     if (annotation) {
       return annotation;
