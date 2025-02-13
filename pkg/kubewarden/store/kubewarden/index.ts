@@ -23,6 +23,7 @@ export interface StateConfig {
   hideBannerAirgapPolicy: boolean;
   controllerApp: CatalogApp | null;
   kubewardenCrds: CustomResourceDefinition[];
+  loadingReports: boolean;
   policyReports: PolicyReport[];
   clusterPolicyReports: ClusterPolicyReport[];
   reportMap: Record<string, PolicyReport | ClusterPolicyReport>;
@@ -42,6 +43,7 @@ const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
         hideBannerAirgapPolicy: config.hideBannerAirgapPolicy,
         controllerApp:          config.controllerApp,
         kubewardenCrds:         config.kubewardenCrds,
+        loadingReports:         config.loadingReports,
         policyReports:          config.policyReports,
         clusterPolicyReports:   config.clusterPolicyReports,
         reportMap:              config.reportMap,
@@ -68,6 +70,7 @@ export default {
     hideBannerAirgapPolicy: false,
     controllerApp:          null,
     kubewardenCrds:         [],
+    loadingReports:         false,
     policyReports:          [],
     clusterPolicyReports:   [],
     reportMap:              {},

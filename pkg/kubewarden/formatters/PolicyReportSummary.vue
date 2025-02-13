@@ -18,6 +18,8 @@ interface ValueType {
 const props = defineProps<{ value?: ValueType }>();
 const store = useStore();
 
+const loadingReports = computed(() => store.getters['kubewarden/loadingReports']);
+
 const summary = computed<PolicyReportSummary>(() => {
   const resourceId = props.value?.id;
 
@@ -81,7 +83,7 @@ const summaryParts = computed(() => {
 
 <template>
   <div v-bind="attrs">
-    <div v-if="!summary" data-testid="resource-tab-loading">
+    <div v-if="loadingReports" data-testid="resource-tab-loading">
       <i class="icon icon-lg icon-spinner icon-spin" />
     </div>
     <div v-else-if="canShow" class="pr-summary">

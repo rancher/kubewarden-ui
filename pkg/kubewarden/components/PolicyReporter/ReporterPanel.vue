@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, getCurrentInstance, watch, nextTick } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
+import { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
 
 import { ClusterPolicyReport, PolicyReport } from '../../types';
 import { getReports } from '../../modules/policyReporter';
-
-const store = useStore();
-const route = useRoute();
 
 /**
  * Invisible panel to fetch PolicyReports for ResourceList
@@ -15,9 +12,13 @@ const route = useRoute();
  * the list we can fetch once at the top of the page and
  * store the reports.
  */
-onMounted(async() => {
-  const isClusterLevel =
-    !route?.params?.resource || route?.path?.includes('projectsnamespaces');
+
+const store = useStore();
+
+let route: RouteLocationNormalizedLoaded | null = null;
+
+async function fetchPolicies() {
+  const isClusterLevel = !route?.params?.resource || route?.path?.includes('projectsnamespaces');
   const resourceType = route?.params?.resource as string | undefined;
 
   // Fetch cluster level reports if no specific resource is specified
@@ -28,6 +29,24 @@ onMounted(async() => {
   if (resourceType || route?.path?.includes('projectsnamespaces')) {
     await getReports<PolicyReport>(store, false, resourceType);
   }
+}
+
+onMounted(async() => {
+  store.commit('kubewarden/updateLoadingReports', true);
+  if (!route) {
+    const instance = getCurrentInstance();
+
+    if (instance?.proxy?.$route) {
+      route = instance.proxy.$route;
+    } else {
+      return;
+    }
+  }
+
+  await nextTick();
+  await fetchPolicies();
+
+  store.commit('kubewarden/updateLoadingReports', false);
 });
 </script>
 

@@ -123,25 +123,6 @@ onMounted(async() => {
 
   canGetKubewardenLinks.value = !!(capSchema || apSchema);
 });
-
-watch(
-  () => route?.fullPath,
-  async(newPath: string | undefined) => {
-    if (!newPath) {
-      return;
-    };
-
-    if (!route?.params || Object.keys(route.params).length === 0) {
-      return;
-    }
-
-    await nextTick();
-
-    determineResource();
-    await fetchReports();
-  },
-  { immediate: true }
-);
 </script>
 
 <template>

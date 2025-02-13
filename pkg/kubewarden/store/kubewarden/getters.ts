@@ -10,6 +10,7 @@ export default {
   hideBannerAirgapPolicy: (state: StateConfig): boolean => state.hideBannerAirgapPolicy,
   controllerApp:          (state: StateConfig): CatalogApp | null => state.controllerApp,
   kubewardenCrds:         (state: StateConfig): CustomResourceDefinition[] => state.kubewardenCrds,
+  loadingReports:         (state: StateConfig): boolean => state.loadingReports,
   policyReports:          (state: StateConfig): PolicyReport[] => state.policyReports,
   clusterPolicyReports:   (state: StateConfig): ClusterPolicyReport[] => state.clusterPolicyReports,
   policyTraces:           (state: StateConfig): PolicyTraceConfig[] => state.policyTraces,

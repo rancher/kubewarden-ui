@@ -22,6 +22,10 @@ export default {
   },
 
   // Policy and Cluster Policy Reports
+  updateLoadingReports({ commit }: any, val: boolean) {
+    commit('updateLoadingReports', val);
+  },
+
   updatePolicyReports({ commit }: any, updatedReports: PolicyReport[]) {
     commit('updateReportsBatch', {
       reportArrayKey: 'policyReports',

@@ -78,6 +78,15 @@ export default {
   },
 
   /**
+   * Updates loading state of Policy Reports
+   * @param state
+   * @param val `boolean`
+   */
+  updateLoadingReports(state: StateConfig, val: boolean) {
+    state.loadingReports = val;
+  },
+
+  /**
    * Updates/Adds Policy Reports to state
    * @param state
    * @param updatedReports `PolicyReport[] | ClusterPolicyReport[]`
