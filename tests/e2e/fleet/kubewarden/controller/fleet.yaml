@@ -16,15 +16,17 @@ helm:
       cronJob:
         schedule: "*/1 * * * *" # every minute
     telemetry:
-      # metrics:
-        # enabled: true
-        # port: 8080
-      tracing:
-        enabled: true
-        jaeger:
-          endpoint: jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317
-          tls:
-           insecure: true
+      mode: sidecar
+      tracing: true
+      sidecar:
+        # metrics:
+          # enabled: true
+          # port: 8080
+        tracing:
+          jaeger:
+            endpoint: "jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317"
+            tls:
+              insecure: true
     auditScanner:
       policyReporter: true
 
