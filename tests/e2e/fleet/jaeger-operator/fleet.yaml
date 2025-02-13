@@ -10,8 +10,6 @@ helm:
       clusterRole: true
     jaeger:
       create: true
-    image:
-      imagePullSecrets: ["regcred"]
 
 labels:
   name: jaeger-operator
