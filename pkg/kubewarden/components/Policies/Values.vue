@@ -32,6 +32,7 @@ interface Props {
   customPolicy: boolean;
   value: Record<string, any>;
   yamlValues: string;
+  errorFetchingPolicy: boolean;
 }
 
 const props = defineProps<Props>();
@@ -159,6 +160,7 @@ onMounted(async () => {
                 :value="chartValues"
                 :mode="mode"
                 :custom-policy="customPolicy"
+                :error-fetching-policy="errorFetchingPolicy"
               />
             </template>
           </Tabbed>

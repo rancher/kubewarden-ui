@@ -34,6 +34,9 @@ export interface ClusterRepo {
   spec: {
     forceUpdate?: string;
     url?: string;
+    gitRepo?: string;
+    gitBranch?: string;
+    insecurePlainHttp?: boolean;
   },
   status?: {
     conditions: [
