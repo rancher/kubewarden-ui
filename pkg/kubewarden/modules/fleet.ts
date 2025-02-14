@@ -2,7 +2,7 @@ import isEmpty from 'lodash/isEmpty';
 import jsyaml from 'js-yaml';
 
 import { FLEET } from '@shell/config/labels-annotations';
-import { CatalogApp, FleetBundle } from '@kubewarden/types';
+import { CatalogApp, FleetBundle } from '../types';
 
 /**
  * Determines if an App contains the annotation for a Fleet Bundle: 'fleet.cattle.io/bundle-id'
@@ -10,7 +10,7 @@ import { CatalogApp, FleetBundle } from '@kubewarden/types';
  * @param app `CatalogApp`
  * @returns Boolean
  */
-export function isFleetDeployment(app: CatalogApp): Boolean {
+export function isFleetDeployment(app: CatalogApp): boolean {
   if ( app ) {
     return !!app.spec?.chart?.metadata?.annotations?.[FLEET.BUNDLE_ID];
   }

@@ -24,6 +24,10 @@ export default {
       type:    Boolean,
       default: false
     },
+    errorFetchingPolicy: {
+      type:    Boolean,
+      default: false
+    },
     mode: {
       type:    String,
       default: _CREATE
@@ -31,7 +35,7 @@ export default {
     value: {
       type:     Object,
       required: true
-    }
+    },
   },
 
   components: {
@@ -45,7 +49,7 @@ export default {
   },
 
   created() {
-    if ( this.value ) {
+    if (this.value) {
       this.chartValues = this.value;
     }
   },
@@ -80,11 +84,15 @@ export default {
     },
 
     showSettings() {
-      if ( this.isCreate && this.isCustom ) {
+      if (this.isCreate && this.isCustom) {
         return true;
       }
 
-      if ( this.hasSettings && !this.hasQuestions ) {
+      if (this.hasSettings && !this.hasQuestions) {
+        return true;
+      }
+
+      if (this.errorFetchingPolicy) {
         return true;
       }
 
@@ -92,9 +100,7 @@ export default {
     },
 
     targetNamespace() {
-      if ( this.forceNamespace ) {
-        return this.forceNamespace;
-      } else if ( this.value?.metadata?.namespace ) {
+      if (this.value?.metadata?.namespace) {
         return this.value.metadata.namespace;
       }
 
@@ -157,7 +163,7 @@ export default {
           :target-namespace="targetNamespace"
         />
       </Tab>
-    </template> 
+    </template>
 
     <template v-if="isGlobal">
       <Tab name="namespaceSelector" :label="t('kubewarden.policyConfig.tabs.namespaceSelector')" :weight="97">

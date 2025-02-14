@@ -13,7 +13,6 @@ import {
   KUBEWARDEN,
   RANCHER_NAMESPACES,
   RANCHER_NS_MATCH_EXPRESSION,
-  ARTIFACTHUB_ENDPOINT,
   VALIDATION_KEYS
 } from '../types';
 
@@ -42,60 +41,6 @@ export default class KubewardenModel extends SteveModel {
     }
 
     return null;
-  }
-
-  get whitelistSetting() {
-    return this.$rootGetters['management/all'](MANAGEMENT.SETTING).find(
-      s => s.id === 'whitelist-domain'
-    );
-  }
-
-  /*
-    Fetches all of the packages from the kubewarden org
-  */
-  get artifactHubRepo() {
-    return async() => {
-      let url = '/meta/proxy/';
-      const packages = 'packages/search';
-      const params = {
-        kind:               13, // Kind for Kubewarden policies
-        limit:              50 // limit to 50, default is 20
-      };
-
-      url += `${ ARTIFACTHUB_ENDPOINT }/${ packages }`;
-      url = addParams(url, params);
-
-      return await this.$dispatch(
-        'management/request',
-        { url, redirectUnauthorized: false },
-        { root: true }
-      );
-    };
-  }
-
-  /*
-    Necessary for retrieving detailed package info
-  */
-  get artifactHubPackage() {
-    return (pkg) => {
-      try {
-        const url = `/meta/proxy/${ ARTIFACTHUB_ENDPOINT }/packages/kubewarden/${ pkg.repository.name }/${ pkg.name }`;
-
-        return this.$dispatch(
-          'management/request',
-          { url, redirectUnauthorized: false },
-          { root: true }
-        );
-      } catch (e) {
-        console.warn(`Error fetching pkg: ${ e }`); // eslint-disable-line no-console
-      }
-    };
-  }
-
-  get artifactHubWhitelist() {
-    const whitelistValue = this.whitelistSetting?.value?.split(',');
-
-    return whitelistValue.includes('artifacthub.io');
   }
 
   get certManagerService() {
@@ -224,51 +169,14 @@ export default class KubewardenModel extends SteveModel {
       { root: true }
     );
   }
-
-  updateWhitelist(url, remove) {
-    const whitelist = this.whitelistSetting;
-    const whitelistValue = whitelist?.value.split(',');
-
-    if (remove && whitelistValue.includes(url)) {
-      const out = whitelistValue.filter(domain => domain !== url);
-
-      whitelist.value = out.join();
-
-      try {
-        return whitelist.save();
-      } catch (e) {
-        const error = e?.data || e;
-
-        this.$dispatch('growl/error', {
-          title:   error._statusText,
-          message: error.message,
-          timeout: 5000,
-        }, { root: true });
-      }
-    }
-
-    if (!whitelistValue.includes(url)) {
-      whitelistValue.push(url);
-
-      whitelist.value = whitelistValue.join();
-
-      try {
-        return whitelist.save();
-      } catch (e) {
-        const error = e?.data || e;
-
-        this.$dispatch('growl/error', {
-          title:   error._statusText,
-          message: error.message,
-          timeout: 5000,
-        }, { root: true });
-      }
-    }
-  }
 }
 
 export function colorForStatus(status) {
-  const lowStatus = status.toLowerCase();
+  const lowStatus = status?.toLowerCase();
+
+  if (!lowStatus || lowStatus === 'unknown') {
+    return 'text-disabled';
+  }
 
   switch (lowStatus) {
   case 'unschedulable':
@@ -286,6 +194,10 @@ export function colorForStatus(status) {
 
 export function colorForPolicyServerState(state) {
   for (const key of Object.keys(STATES_ENUM)) {
+    if (typeof state === 'undefined') {
+      return STATES['unknown'].color;
+    }
+
     if (state === STATES_ENUM[key]) {
       return STATES[STATES_ENUM[key]].color;
     }
