@@ -345,7 +345,7 @@ export default ({
     },
 
     packageDetails(pkg) {
-      return this.packageDetailsByKey(pkg.package_id);
+      return this.packageDetailsByKey(pkg?.package_id);
     },
 
     /** Extract policy questions from ArtifactHub package if available */
