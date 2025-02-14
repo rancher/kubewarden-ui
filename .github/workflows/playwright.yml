@@ -178,11 +178,9 @@ jobs:
     - name: "Create kubernetes cluster"
       run: |
         TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG k3d-install
-        k3d cluster create ${{ env.K3D_CLUSTER_NAME }} --agents 1 --image rancher/k3s:${{ env.K3S_VERSION }}
 
-    - name: Install Rancher
-      run: |
-        RANCHER_FQDN=$(k3d cluster list ${{ env.K3D_CLUSTER_NAME }} -o json | jq -r '[.[].nodes[] | select(.role == "server").IP.IP] | first').nip.io
+        # Registry config with docker auth https://k3d.io/v5.4.7/faq/faq/#dockerhub-pull-rate-limit
+        k3d cluster create ${{ env.K3D_CLUSTER_NAME }} --agents 1 --image rancher/k3s:${{ env.K3S_VERSION }} --registry-config <(echo "${{secrets.K3D_REGISTRY_CONFIG}}")
 
         # Wait for kube-system
         for i in {1..20}; do
@@ -190,6 +188,10 @@ jobs:
             grep -vE '([0-9]+)/\1 +Running' <<< $output || break
             [ $i -ne 20 ] && sleep 10 || { echo "Godot: pods not running"; exit 1; }
         done
+
+    - name: Install Rancher
+      run: |
+        RANCHER_FQDN=$(k3d cluster list ${{ env.K3D_CLUSTER_NAME }} -o json | jq -r '[.[].nodes[] | select(.role == "server").IP.IP] | first').nip.io
 
         # Install cert-manager
         helm repo add jetstack https://charts.jetstack.io --force-update
