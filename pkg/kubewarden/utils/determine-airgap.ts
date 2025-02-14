@@ -27,26 +27,27 @@ export async function isAirgap(context: AirgapConfig): Promise<boolean> {
         redirectUnauthorized: false,
       });
 
-      if ( res._status !== 200 ) {
-        store.dispatch('kubewarden/updateAirGapped', true);
+      const status = res?._status
 
-        return true;
+      if (status === 200 || status === 302) {
+        store.dispatch('kubewarden/updateAirGapped', false);
+
+        return false;
       }
 
-      store.dispatch('kubewarden/updateAirGapped', false);
+      store.dispatch('kubewarden/updateAirGapped', true);
 
-      return false;
+      return true;
     }
   } catch (e) {
-    if ( !store.getters['kubewarden/airGapped'] ) {
-      console.log('Unable to determine management.cattle.io.settings/whitelist-domain value.', e);
-      store.dispatch('kubewarden/updateAirGapped', true);
+      console.log('Unable to determine management.cattle.io.settings/whitelist-domain value.', e); // eslint-disable-line no-console
+      store.dispatch('kubewarden/updateAirGapped', false);
     }
 
-    return true;
+    return false;
   }
 
-  store.dispatch('kubewarden/updateAirGapped', true);
+  store.dispatch('kubewarden/updateAirGapped', false);
 
-  return true;
+  return false;
 }

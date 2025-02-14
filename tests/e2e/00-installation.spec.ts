@@ -74,7 +74,7 @@ test('Install UI extension', async({ page, ui }) => {
       }
       await ui.retry(async() => {
         await extensions.selectTab('All')
-        await expect(page.locator('.plugin', { hasText: 'Kubewarden' })).toBeVisible()
+        await expect(page.locator('.plugin', { hasText: 'Kubewarden' })).toBeVisible({timeout: 30_000})
       }, 'Not showing kubewarden extension')
     }
   })

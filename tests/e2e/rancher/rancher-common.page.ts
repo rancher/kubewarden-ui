@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test'
 import { BasePage } from './basepage'
+import { RancherUI } from '../components/rancher-ui'
 
 export class RancherCommonPage extends BasePage {
   goto(): Promise<void> {
@@ -8,7 +9,7 @@ export class RancherCommonPage extends BasePage {
 
   async isLoggedIn() {
     const password = this.ui.input('Password')
-    const userMenu = this.page.locator('div.user-menu')
+    const userMenu = this.page.getByTestId('nav_header_showUserMenu')
     await userMenu.or(password).waitFor()
     return await userMenu.isVisible()
   }
@@ -18,11 +19,11 @@ export class RancherCommonPage extends BasePage {
     await this.ui.input('Password').fill(password)
     await this.ui.button('Log in with Local User').click()
     // End user agreement
-    await this.ui.checkbox('Allow collection of anonymous statistics').uncheck()
+    if (RancherUI.isVersion('<2.11')) await this.ui.checkbox('Allow collection of anonymous statistics').uncheck()
     await this.ui.checkbox('End User License Agreement').check()
     await this.ui.button('Continue').click()
     // User menu should be visible
-    await expect(this.page.locator('div.user-menu')).toBeVisible()
+    await expect(this.page.getByTestId('nav_header_showUserMenu')).toBeVisible()
   }
 
   /**
