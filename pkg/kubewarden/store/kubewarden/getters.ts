@@ -1,5 +1,11 @@
 import {
-  CatalogApp, CustomResourceDefinition, PolicyReport, ClusterPolicyReport, PolicyTraceConfig, PolicyReportSummary
+  CatalogApp,
+  CustomResourceDefinition,
+  PolicyReport,
+  ClusterPolicyReport,
+  PolicyTraceConfig,
+  PolicyReportSummary,
+  ArtifactHubPackageDetails
 } from '@kubewarden/types';
 import { StateConfig } from './index';
 
@@ -15,6 +21,10 @@ export default {
   clusterPolicyReports:   (state: StateConfig): ClusterPolicyReport[] => state.clusterPolicyReports,
   policyTraces:           (state: StateConfig): PolicyTraceConfig[] => state.policyTraces,
   refreshingCharts:       (state: StateConfig): boolean => state.refreshingCharts,
+  packages:               (state: StateConfig): any[] => state.packages,
+  loadingPackages:        (state: StateConfig): boolean => state.loadingPackages,
+  packageDetailsByKey:    (state: StateConfig) => (key: string): ArtifactHubPackageDetails => state.packageDetails[key],
+
 
   reportByResourceId:     (state: StateConfig) => (resourceId: string): PolicyReport | ClusterPolicyReport => {
     return state.reportMap[resourceId];

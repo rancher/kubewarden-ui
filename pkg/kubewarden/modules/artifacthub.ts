@@ -1,11 +1,11 @@
-import { ArtifactHubPackage } from '@kubewarden/types';
+import { ArtifactHubPackageDetails } from '@kubewarden/types';
 
 /**
  * Extracts resource kinds from a list of ArtifactHub packages with the `kubewarden/resources` annotation.
  * @param artifactHubPackages
  * @returns `string[]` | Resource kinds
  */
-export function resourcesFromAnnotation(artifactHubPackages: ArtifactHubPackage[]): string[] | void {
+export function resourcesFromAnnotation(artifactHubPackages: ArtifactHubPackageDetails[]): string[] | void {
   const out: string[] = [];
 
   const resources = artifactHubPackages?.flatMap((artifactHubPackage) => {
@@ -43,7 +43,7 @@ export function resourcesFromAnnotation(artifactHubPackages: ArtifactHubPackage[
  * @param artifactHubPackage `schemas`
  * @returns boolean
  */
-export function isGlobalPolicy(artifactHubPackage: ArtifactHubPackage, schemas: any): boolean {
+export function isGlobalPolicy(artifactHubPackage: ArtifactHubPackageDetails, schemas: any): boolean {
   if (artifactHubPackage) {
     const resources: string[] | undefined = artifactHubPackage.data?.['kubewarden/resources']?.split(',');
     let targetsNonNamespaced: boolean = false;

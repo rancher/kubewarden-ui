@@ -1,5 +1,13 @@
 import {
-  CatalogApp, ClusterPolicyReport, CustomResourceDefinition, PolicyReport, PolicyTrace, PolicyTraceConfig, PolicyReportSummary
+  ArtifactHubPackageDetails,
+  ArtifactHubPackage,
+  CatalogApp,
+  ClusterPolicyReport,
+  CustomResourceDefinition,
+  PolicyReport,
+  PolicyTrace,
+  PolicyTraceConfig,
+  PolicyReportSummary
 } from '@kubewarden/types';
 import { StateConfig } from './index';
 
@@ -191,5 +199,23 @@ export default {
 
   updateRefreshingCharts(state: StateConfig, val: boolean) {
     state.refreshingCharts = val;
-  }
+  },
+
+  updatePackages(state: StateConfig, packages: ArtifactHubPackage[]) {
+    state.packages = packages;
+  },
+
+  updatePackageDetails(state: StateConfig, payload: Record<string, ArtifactHubPackageDetails>) {
+    for (const key in payload) {
+      state.packageDetails[key] = payload[key];
+    }
+  },
+
+  updateLoadingPackages(state: StateConfig, value: boolean) {
+    state.loadingPackages = value;
+  },
+
+  updatePackageCacheTime(state: StateConfig, time: number) {
+    state.packageCacheTime = time;
+  },
 };
