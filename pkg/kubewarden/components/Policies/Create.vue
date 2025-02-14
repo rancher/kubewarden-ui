@@ -107,6 +107,7 @@ export default ({
       selectedPolicyDetails:  null,
       typeModule:             null,
       version:                null,
+      errorFetchingPolicy:    false,
 
       chartValues: {
         policy:    {},
@@ -245,14 +246,25 @@ export default ({
 
     reposByUrl() {
       return this.repos.reduce((acc, repo) => {
-        acc[repo.spec.url] = repo;
+        // For OCI or plain https/http repos, use spec.url. For Git repos, use spec.gitRepo.
+        const repoUrl = repo.spec.url || repo.spec.gitRepo;
+
+        if (repoUrl) {
+          acc[repoUrl] = repo;
+        }
 
         return acc;
       }, {});
     },
 
     officialKubewardenRepo() {
-      return this.reposByUrl[KUBEWARDEN_REPO];
+      for (const repoUrl of this.OFFICIAL_REPOS) {
+        if (this.reposByUrl[repoUrl]) {
+          return this.reposByUrl[repoUrl];
+        }
+      }
+
+      return null;
     }
   },
 
@@ -437,42 +449,55 @@ export default ({
         this.value.metadata.annotations[KUBEWARDEN_ANNOTATIONS.CHART_VERSION] = this.selectedPolicyChart.version;
       }
 
-      this.selectedPolicyDetails = await this.$store.dispatch('catalog/getVersionInfo', {
-        repoType:     this.selectedPolicyChart.repoType,
-        repoName:     this.selectedPolicyChart.repoName,
-        chartName:    this.selectedPolicyChart.name,
-        versionName:  this.selectedPolicyChart.version
-      });
+      try {
+        this.selectedPolicyDetails = await this.$store.dispatch('catalog/getVersionInfo', {
+          repoType:     this.selectedPolicyChart.repoType,
+          repoName:     this.selectedPolicyChart.repoName,
+          chartName:    this.selectedPolicyChart.name,
+          versionName:  this.selectedPolicyChart.version
+        });
 
-      const policyQuestions = this.selectedPolicyDetails?.questions;
-      const policyValues = toRaw(this.selectedPolicyDetails?.values);
+        const policyQuestions = this.selectedPolicyDetails?.questions;
+        const policyValues = toRaw(this.selectedPolicyDetails?.values);
 
-      const registry = policyValues.global.cattle.systemDefaultRegistry;
-      let policyModule = `${ policyValues.module.repository }:${ policyValues.module.tag }`;
+        const registry = policyValues.global?.cattle?.systemDefaultRegistry;
+        let policyModule = `${ policyValues?.module?.repository }:${ policyValues?.module?.tag }`;
 
-      if (registry) {
-        policyModule = `${ registry }/${ policyModule }`;
+        if (registry) {
+          policyModule = `${ registry }/${ policyModule }`;
+        }
+
+        defaultPolicy.spec.module   = policyModule;
+        defaultPolicy.spec.mode     = policyValues?.spec?.mode;
+        defaultPolicy.spec.mutating = policyValues?.spec?.mutating;
+        defaultPolicy.spec.rules    = policyValues?.spec?.rules;
+
+        defaultPolicy.spec.settings = {
+          ...defaultPolicy.spec.settings,
+          ...policyValues?.spec?.settings
+        };
+
+        set(this.chartValues, 'policy', defaultPolicy);
+
+        this.yamlValues = saferDump(this.chartValues.policy);
+
+        if (policyQuestions) {
+          set(this.chartValues, 'questions', policyQuestions);
+        }
+
+        this.shortDescription = this.selectedPolicyChart?.description;
+      } catch (e) {
+        console.warn('Error fetching policy questions. Using default policy scaffold. Details:', e);
+
+        this.errorFetchingPolicy = true;
+
+        this.bannerTitle = 'Policy Details Unavailable';
+        this.shortDescription = `There was an issue retrieving the policy details. The default configuration will be used. (Error: ${ e.message || 'Unknown error' })`;
+
+        // Fallback: use the default policy scaffold without additional questions
+        set(this.chartValues, 'policy', defaultPolicy);
+        this.yamlValues = saferDump(defaultPolicy);
       }
-
-      defaultPolicy.spec.module   = policyModule;
-      defaultPolicy.spec.mode     = policyValues.spec.mode;
-      defaultPolicy.spec.mutating = policyValues.spec.mutating;
-      defaultPolicy.spec.rules    = policyValues.spec.rules;
-
-      defaultPolicy.spec.settings = {
-        ...defaultPolicy.spec.settings,
-        ...policyValues.spec.settings
-      };
-
-      set(this.chartValues, 'policy', defaultPolicy);
-
-      this.yamlValues = saferDump(this.chartValues.policy);
-
-      if (policyQuestions) {
-        set(this.chartValues, 'questions', policyQuestions);
-      }
-
-      this.shortDescription = this.selectedPolicyChart?.description;
     },
 
     reset(event) {
@@ -606,9 +631,14 @@ export default ({
             <p class="banner__short-description">
               {{ shortDescription }}
             </p>
-            <button class="btn btn-sm role-link banner__readme-button" @click="showReadme">
+            <button
+              v-if="selectedPolicyDetails"
+              class="btn btn-sm role-link banner__readme-button"
+              @click="showReadme"
+            >
               {{ t('kubewarden.policyConfig.description.showReadme') }}
             </button>
+            <div v-else class="mb-4"></div>
           </template>
         </div>
         <Values
@@ -617,6 +647,7 @@ export default ({
           :yaml-values="yamlValues"
           :mode="mode"
           :custom-policy="customPolicy"
+          :error-fetching-policy="errorFetchingPolicy"
           @editor="$event => yamlOption = $event"
           @updateYamlValues="$event => yamlValues = $event"
         />
@@ -632,7 +663,7 @@ export default ({
       </template>
     </Wizard>
 
-    <template v-if="selectedPolicyDetails && !customPolicy">
+    <template v-if="selectedPolicyDetails && !customPolicy && !errorFetchingPolicy">
       <PolicyReadmePanel
         ref="readmePanel"
         :policy-chart-details="selectedPolicyDetails"
