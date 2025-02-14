@@ -41,9 +41,13 @@ export class Navigation {
     async userNav(to: 'Preferences' | 'Account & API Keys' | 'Log Out') {
       if (this.isblank()) await this.page.goto('/')
 
+      const menuItem = RancherUI.isVersion('<=2.10')
+        ? this.page.getByTestId('user-menu-dropdown').getByRole('link', { name: to, exact: true })
+        : this.page.getByLabel('User Menu').getByRole('menuitem', { name: to, exact: true })
+
       await this.ui.retry(async() => {
-        await this.page.locator('div.user-image').click()
-        await this.page.getByTestId('user-menu-dropdown').getByRole('link', { name: to, exact: true }).click({ timeout: 2000 })
+        await this.page.getByTestId('nav_header_showUserMenu').click()
+        await menuItem.click({ timeout: 2000 })
       }, 'User menu occasionally does not open', { reload: false })
     }
 
