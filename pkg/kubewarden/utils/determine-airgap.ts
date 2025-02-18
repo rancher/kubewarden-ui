@@ -40,6 +40,7 @@ export async function isAirgap(context: AirgapConfig): Promise<boolean> {
       return true;
     }
   } catch (e) {
+    if (!store.getters['kubewarden/airGapped']) {
       console.log('Unable to determine management.cattle.io.settings/whitelist-domain value.', e); // eslint-disable-line no-console
       store.dispatch('kubewarden/updateAirGapped', false);
     }
