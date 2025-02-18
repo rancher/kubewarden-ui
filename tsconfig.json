@@ -3,11 +3,7 @@
     "target": "ES2018",
     "module": "ESNext",
     "moduleResolution": "Node",
-    "lib": [
-      "ESNext",
-      "ESNext.AsyncIterable",
-      "DOM"
-    ],
+    "lib": ["ESNext", "ESNext.AsyncIterable", "DOM"],
     "esModuleInterop": true,
     "allowJs": true,
     "checkJs": false,
@@ -18,21 +14,12 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": [
-        "./*"
-      ],
-      "@/*": [
-        "./*"
-      ],
-      "@shell/*": [
-        "./node_modules/@rancher/shell/*"
-      ],
-      "@components/*": [
-        "./node_modules/@rancher/components/*"
-      ],
-      "@kubewarden/*": [
-        "./pkg/kubewarden/*"
-      ]
+      "~/*": ["./*"],
+      "@/*": ["./*"],
+      "@shell/*": ["./node_modules/@rancher/shell/*"],
+      "@components/*": ["./node_modules/@rancher/components/*"],
+      "@kubewarden/*": ["./pkg/kubewarden/*"],
+      "@tests/*": ["./tests/*"]
     },
     "typeRoots": [
       "./node_modules",
@@ -44,6 +31,7 @@
       "@types/node",
       "@jest/types",
       "@rancher/components/types",
+      "jest",
       "cypress",
       "rancher",
       "shell"
@@ -53,10 +41,8 @@
     "./pkg/kubewarden/**/*.ts",
     "./pkg/kubewarden/**/*.tsx",
     "./pkg/kubewarden/**/*.vue",
+    "./tests/**/*.ts",
+    "./tests/**/*.tsx"
   ],
-  "exclude": [
-    "node_modules",
-    "tests",
-    "jest.config.js"
-  ]
+  "exclude": ["node_modules", "tests", "jest.config.js"]
 }
