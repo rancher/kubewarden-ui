@@ -9,6 +9,7 @@ export const CHART_NAME = 'rancher-kubewarden';
 
 export const KUBEWARDEN_DASHBOARD = 'dashboard';
 export const KUBEWARDEN_REPO = 'https://charts.kubewarden.io';
+export const REGO_POLICIES_REPO = 'https://github.com/kubewarden/rego-policies-library';
 
 export const KUBEWARDEN_CHARTS = {
   CONTROLLER:       'kubewarden-controller',

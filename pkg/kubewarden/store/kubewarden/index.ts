@@ -7,7 +7,9 @@ import {
   FleetGitRepo,
   PolicyReport,
   PolicyTraceConfig,
-  ClusterPolicyReport
+  ClusterPolicyReport,
+  ArtifactHubPackage,
+  ArtifactHubPackageDetails,
 } from '../../types';
 
 import getters from './getters';
@@ -26,6 +28,10 @@ export interface StateConfig {
   clusterPolicyReports: ClusterPolicyReport[];
   policyTraces: PolicyTraceConfig[];
   refreshingCharts: Boolean;
+  packages: ArtifactHubPackage[];
+  packageDetails: Record<string, ArtifactHubPackageDetails>
+  loadingPackages: boolean;
+  packageCacheTime: number;
 }
 
 const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
@@ -42,7 +48,11 @@ const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
         policyReports:          config.policyReports,
         clusterPolicyReports:   config.clusterPolicyReports,
         policyTraces:           config.policyTraces,
-        refreshingCharts:       config.refreshingCharts
+        refreshingCharts:       config.refreshingCharts,
+        packages:               config.packages,
+        packageDetails:         config.packageDetails,
+        loadingPackages:        config.loadingPackages,
+        packageCacheTime:       config.packageCacheTime,
       };
     },
 
@@ -66,7 +76,11 @@ export default {
     policyReports:          [],
     clusterPolicyReports:   [],
     policyTraces:           [],
-    refreshingCharts:       false
+    refreshingCharts:       false,
+    packages:               [],
+    packageDetails:         {},
+    loadingPackages:        false,
+    packageCacheTime:       0,
   }),
   config
 };
