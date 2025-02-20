@@ -1,12 +1,10 @@
 import { test, expect } from './rancher/rancher-test'
 import { Policy, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { PolicyReporterPage } from './pages/policyreporter.page'
-import { RancherUI } from './components/rancher-ui'
 
 const testNs = 'audit-unsafe-ns'
 const testPod = 'audit-pod-privileged'
 const policyLabels = 'audit-safelabels'
-const policyPrivpod = 'no-privileged-pod' // recommended policy
 
 const expect2m = expect.configure({ timeout: 2 * 60_000 })
 
@@ -73,17 +71,15 @@ test('Check reports on resources details page', async({ ui, nav }) => {
   // Check Compliance tab on pod details
   await failrow.open()
   await ui.tab('Compliance').click()
-  await expect(ui.tableRow({ Policy: policyPrivpod }).column('Status')).toHaveText('fail')
+  await expect(ui.tableRow({ Policy: 'no-privileged-pod' }).column('Status')).toHaveText('fail')
+  await expect(ui.tableRow({ Policy: 'drop-capabilities' }).column('Status')).toHaveText('pass')
 
   // Check namespace
   await nav.explorer('Cluster', 'Projects/Namespaces')
-  // https://github.com/rancher/kubewarden-ui/issues/720
-  if (RancherUI.isVersion('>=2.8')) {
-    await expect(ui.tableRow(testNs).column('Compliance').locator('div.bg-error')).toHaveText('2')
-  }
+  await expect(ui.tableRow(testNs).column('Compliance').locator('div.bg-error')).toHaveText('1')
   await ui.tableRow(testNs).open()
   await ui.tab('Compliance').click()
-  await expect(ui.tableRow({ Name: testPod, Policy: policyPrivpod }).column('Status')).toHaveText('fail')
+  await expect(ui.tableRow({ Policy: policyLabels }).column('Status')).toHaveText('fail')
 })
 
 test('Cleanup & check results are gone', async({ page, ui, nav, shell }) => {
