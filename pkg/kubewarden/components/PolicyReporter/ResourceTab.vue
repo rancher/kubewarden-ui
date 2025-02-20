@@ -101,6 +101,12 @@ function statusColor(row: PolicyReportResult) {
   return 'bg-muted';
 }
 
+function formattedDisplayName(displayName: string): string {
+  return displayName
+    .replace(/^clusterwide-/, "") // Remove 'clusterwide-' prefix
+    .replace(/^namespaced-[^-]+-/, ""); // Remove 'namespaced-<namespace>-' prefix
+};
+
 onMounted(async() => {
   // Ensure Vue Router is initialized before accessing `useRoute()`
   if (!route) {
@@ -148,11 +154,11 @@ onMounted(async() => {
         <td v-if="row.policy">
           <template v-if="canGetKubewardenLinks">
             <router-link :to="getPolicyLink(row)!">
-              <span>{{ row.policy }}</span>
+              <span>{{ formattedDisplayName(row.policy) }}</span>
             </router-link>
           </template>
           <template v-else>
-            <span>{{ row.policy }}</span>
+            <span>{{ formattedDisplayName(row.policy) }}</span>
           </template>
         </td>
       </template>
