@@ -35,13 +35,23 @@ export default {
   },
 
   components: {
-    General, Questions, Rules, NamespaceSelector, Settings, ContextAware, MatchConditions, Tab
+    General,
+    Questions,
+    Rules,
+    NamespaceSelector,
+    Settings,
+    ContextAware,
+    MatchConditions,
+    Tab
   },
 
   inject: ['chartType'],
 
   data() {
-    return { activeTab: null, chartValues: null };
+    return {
+      activeTab:   null,
+      chartValues: null
+    };
   },
 
   created() {
@@ -92,9 +102,7 @@ export default {
     },
 
     targetNamespace() {
-      if ( this.forceNamespace ) {
-        return this.forceNamespace;
-      } else if ( this.value?.metadata?.namespace ) {
+      if (this.value?.metadata?.namespace) {
         return this.value.metadata.namespace;
       }
 
@@ -157,7 +165,7 @@ export default {
           :target-namespace="targetNamespace"
         />
       </Tab>
-    </template> 
+    </template>
 
     <template v-if="isGlobal">
       <Tab name="namespaceSelector" :label="t('kubewarden.policyConfig.tabs.namespaceSelector')" :weight="97">

@@ -22,7 +22,10 @@ export default {
     }
   },
 
-  components: { Loading, Rule },
+  components: {
+    Loading,
+    Rule
+  },
 
   inject: ['chartType'],
 

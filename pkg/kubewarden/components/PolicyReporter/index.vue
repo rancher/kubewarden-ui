@@ -17,7 +17,10 @@ import { rootKubewardenRoute } from '../../utils/custom-routing';
 import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '../../types';
 
 export default {
-  components: { Banner, Loading },
+  components: {
+    Banner,
+    Loading
+  },
 
   mixins: [ResourceFetch, ResourceManager],
 
@@ -90,7 +93,7 @@ export default {
     },
 
     hasAvailability() {
-      return this.isAdminUser || Object.values(this.permissions).every(value => value);
+      return this.isAdminUser || Object.values(this.permissions).every((value) => value);
     },
 
     hasPolicyServerSchema() {
@@ -157,7 +160,7 @@ export default {
     },
 
     canShowReporter() {
-      if ( !this.controllerVersion ) {
+      if (!this.controllerVersion) {
         return false;
       }
 
@@ -175,7 +178,7 @@ export default {
               {
                 var:         'reporterReportingService',
                 parsingFunc: (data) => {
-                  return data.find(service => service?.metadata?.labels?.['app.kubernetes.io/component'] === 'reporting');
+                  return data.find((service) => service?.metadata?.labels?.['app.kubernetes.io/component'] === 'reporting');
                 }
               },
               {
@@ -194,14 +197,17 @@ export default {
       try {
         const service = this.reporterUIService;
 
-        if ( service ) {
+        if (service) {
           const base = `/k8s/clusters/${ this.currentCluster.id }/api/v1/namespaces/${ service.metadata?.namespace }/services/`;
           const proxy = `http:${ service.metadata?.name }:${ service.spec?.ports?.[0].port }/proxy`;
 
           return base + proxy;
         }
       } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
+        handleGrowl({
+          error: e,
+          store: this.$store
+        });
       }
     }
   }

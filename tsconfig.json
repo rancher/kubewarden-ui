@@ -29,7 +29,7 @@
     ],
     "types": [
       "@types/node",
-      "@jest/types",
+      "@types/jest",
       "@rancher/components/types",
       "jest",
       "cypress",

@@ -22,26 +22,38 @@ export default {
   },
 
   components: {
-    CodeMirror, InfoBox, LabeledInput
+    CodeMirror,
+    InfoBox,
+    LabeledInput
   },
 
   data() {
     const matchConditions = this.value?.policy?.spec?.matchConditions || [];
 
-    return { matchConditions };
+    return {
+      matchConditions,
+      cmInstances: null
+    };
+  },
+
+  mounted() {
+    // Collect existing CodeMirror refs into cmInstances.
+    Object.keys(this.$refs).forEach((key) => {
+      if (key.startsWith('cm-')) {
+        this.cmInstances[key] = this.$refs[key];
+      }
+    });
   },
 
   watch: {
     activeTab() {
-      if ( this.activeTab === 'matchConditions' ) {
+      if (this.activeTab === 'matchConditions') {
         this.$nextTick(() => {
-          Object.keys(this.$refs).forEach((refKey) => {
-            if ( refKey.startsWith('cm-') ) {
-              const cmInstance = this.$refs[refKey][0];
+          Object.keys(this.cmInstances).forEach((refKey) => {
+            const cmInstance = this.cmInstances[refKey][0];
 
-              if ( cmInstance && typeof cmInstance.refresh === 'function' ) {
-                cmInstance.refresh();
-              }
+            if (cmInstance && typeof cmInstance.refresh === 'function') {
+              cmInstance.refresh();
             }
           });
         });
@@ -102,7 +114,10 @@ export default {
     },
 
     addCondition() {
-      this.matchConditions.push({ name: '', expression: '' });
+      this.matchConditions.push({
+        name:       '',
+        expression: ''
+      });
       this.emitUpdate();
     },
 
