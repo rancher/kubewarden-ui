@@ -19,12 +19,15 @@ import DefaultsBanner from '../DefaultsBanner';
 export default {
   props: {
     controllerApp: {
-      type: Object,
+      type:    Object,
       default: null
     }
   },
 
-  components: { Banner, DefaultsBanner },
+  components: {
+    Banner,
+    DefaultsBanner
+  },
 
   computed: {
     ...mapGetters(['currentCluster']),
@@ -46,7 +49,7 @@ export default {
 
     controllerChart() {
       if (!isEmpty(this.charts)) {
-        return this.charts.find(chart => chart?.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
+        return this.charts.find((chart) => chart?.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
       }
 
       return null;
@@ -76,7 +79,7 @@ export default {
 
     defaultsChart() {
       if (!isEmpty(this.charts)) {
-        return this.charts.find(chart => chart?.chartName === KUBEWARDEN_CHARTS.DEFAULTS);
+        return this.charts.find((chart) => chart?.chartName === KUBEWARDEN_CHARTS.DEFAULTS);
       }
 
       return null;
@@ -97,7 +100,7 @@ export default {
     kubewardenExtension() {
       const extensionsInstalled = this.$store.getters['uiplugins/plugins'] || [];
 
-      return extensionsInstalled.find(ext => ext.id.includes(KUBEWARDEN_PRODUCT_NAME));
+      return extensionsInstalled.find((ext) => ext.id.includes(KUBEWARDEN_PRODUCT_NAME));
     },
 
     policyReportsCompatible() {
@@ -140,7 +143,10 @@ export default {
             message:     this.t('kubewarden.dashboard.appInstall.versionError.message')
           };
 
-          handleGrowl({ error, store: this.$store });
+          handleGrowl({
+            error,
+            store: this.$store
+          });
         }
       }
     }

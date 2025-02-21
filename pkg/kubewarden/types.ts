@@ -1,6 +1,7 @@
 export * from './types/artifacthub';
 export * from './types/core';
 export * from './types/catalog.cattle.io.app';
+export * from './types/catalog.cattle.io.clusterrepo';
 export * from './types/chart';
 export * from './types/fleet';
 export * from './types/grafana';

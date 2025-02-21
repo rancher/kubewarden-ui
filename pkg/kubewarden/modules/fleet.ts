@@ -8,9 +8,9 @@ import { CatalogApp, FleetBundle } from '@kubewarden/types';
  * Determines if an App contains the annotation for a Fleet Bundle: 'fleet.cattle.io/bundle-id'
  *
  * @param app `CatalogApp`
- * @returns Boolean
+ * @returns boolean
  */
-export function isFleetDeployment(app: CatalogApp): Boolean {
+export function isFleetDeployment(app: CatalogApp): boolean {
   if ( app ) {
     return !!app.spec?.chart?.metadata?.annotations?.[FLEET.BUNDLE_ID];
   }
@@ -36,7 +36,7 @@ export function findFleetContent(context: string, fleetBundles: FleetBundle[], s
       }
 
       // Process the bundle for the context
-      const matchingResource = bundle?.spec?.resources?.find(resource => resource.content.includes(`kind: ${ context }`));
+      const matchingResource = bundle?.spec?.resources?.find((resource) => resource.content.includes(`kind: ${ context }`));
 
       if ( matchingResource ) {
         return bundle;
@@ -60,7 +60,7 @@ export function getPolicyServerModule(fleetBundles: FleetBundle[]): string | nul
   const fleetBundle = findFleetContent('PolicyServer', fleetBundles, 'kubewarden-crds');
 
   if ( fleetBundle ) {
-    const valuesYamlResource = fleetBundle.spec.resources.find(resource => resource.name.includes('values.yaml'));
+    const valuesYamlResource = fleetBundle.spec.resources.find((resource) => resource.name.includes('values.yaml'));
 
     if ( valuesYamlResource ) {
       try {
@@ -74,7 +74,7 @@ export function getPolicyServerModule(fleetBundles: FleetBundle[]): string | nul
           return `${ systemDefaultRegistry }/${ repository }:${ tag }`;
         }
       } catch (e) {
-        console.warn('Error parsing YAML:', e); // eslint-disable-line no-console
+        console.warn('Error parsing YAML:', e);
       }
     }
   }

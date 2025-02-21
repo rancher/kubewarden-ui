@@ -25,7 +25,7 @@ export default {
 
   computed: {
     activeStepIndex() {
-      return this.steps.findIndex(s => s.name === this.activeStep.name);
+      return this.steps.findIndex((s) => s.name === this.activeStep.name);
     }
   },
 
@@ -55,7 +55,7 @@ export default {
         return false;
       }
 
-      const idx = this.steps.findIndex(s => s.name === step.name);
+      const idx = this.steps.findIndex((s) => s.name === step.name);
 
       if ( idx === 0 ) {
         return false;

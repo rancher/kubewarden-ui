@@ -19,7 +19,9 @@ export default {
   },
 
   components: {
-    KeyValue, MatchExpressions, InfoBox
+    KeyValue,
+    MatchExpressions,
+    InfoBox
   },
 
   data() {

@@ -19,7 +19,7 @@ export interface CatalogApp {
     labels?: {[key: string]: string},
     name: string,
     namespace: string,
-    state: State,
+    state?: State,
   },
   spec: {
     chart: {

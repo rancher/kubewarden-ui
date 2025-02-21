@@ -10,7 +10,9 @@ import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 import Loading from '@shell/components/Loading';
 
 import { DASHBOARD_HEADERS } from '../../config/table-headers';
-import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_LABELS, WG_POLICY_K8S } from '../../types';
+import {
+  KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_LABELS, WG_POLICY_K8S
+} from '../../types';
 
 import Masthead from './Masthead';
 import Card from './Card';
@@ -20,7 +22,13 @@ import ReportsGauge from './ReportsGauge';
 
 export default {
   components: {
-    Card, Modes, Reports, ConsumptionGauge, Loading, Masthead, ReportsGauge
+    Card,
+    Modes,
+    Reports,
+    ConsumptionGauge,
+    Loading,
+    Masthead,
+    ReportsGauge
   },
 
   async fetch() {
@@ -56,7 +64,9 @@ export default {
 
   data() {
     const colorStops = {
-      25: '--error', 50: '--warning', 70: '--success'
+      25: '--error',
+      50: '--warning',
+      70: '--success'
     };
 
     return {
@@ -95,7 +105,7 @@ export default {
 
     policyServerPods() {
       if (this.$store.getters['cluster/canList'](POD)) {
-        const pods = this.allPods?.filter(pod => pod?.metadata?.labels?.[KUBEWARDEN_LABELS.POLICY_SERVER]);
+        const pods = this.allPods?.filter((pod) => pod?.metadata?.labels?.[KUBEWARDEN_LABELS.POLICY_SERVER]);
 
         if (!isEmpty(pods)) {
           return Object.values(pods).flat();
@@ -118,7 +128,7 @@ export default {
 
           // If the container state is terminated, remove it from the available counts
           if (!isEmpty(neuContainerStatues)) {
-            const filtered = neuContainerStatues.filter(status => status?.state['terminated']);
+            const filtered = neuContainerStatues.filter((status) => status?.state['terminated']);
 
             if (!isEmpty(filtered)) {
               terminated = true;
@@ -135,7 +145,9 @@ export default {
           };
         }, {
           status: {
-            running: 0, stopped: 0, pending: 0
+            running: 0,
+            stopped: 0,
+            pending: 0
           },
           total: 0
         });
@@ -143,7 +155,9 @@ export default {
 
       return {
         status: {
-          running: 0, stopped: 0, pending: 0
+          running: 0,
+          stopped: 0,
+          pending: 0
         },
         total: 0
       };
@@ -185,7 +199,7 @@ export default {
         let out = [];
 
         this.policyReports[WG_POLICY_K8S.POLICY_REPORT.TYPE].filter((report) => {
-          const results = report?.results?.filter(result => result?.policy.includes('namespaced-'));
+          const results = report?.results?.filter((result) => result?.policy.includes('namespaced-'));
 
           if (!isEmpty(results)) {
             out = [...out, ...results];
@@ -205,14 +219,14 @@ export default {
         let out = [];
 
         if (!isEmpty(cpr)) {
-          const results = cpr.flatMap(report => report?.results);
+          const results = cpr.flatMap((report) => report?.results);
 
           out = [...out, ...results];
         }
 
         if (!isEmpty(pr)) {
           const results = pr.flatMap((report) => {
-            return report?.results?.filter(result => !result?.policy.includes('namespaced-'));
+            return report?.results?.filter((result) => !result?.policy.includes('namespaced-'));
           });
 
           out = [...out, ...results];
@@ -265,19 +279,29 @@ export default {
           };
         }, {
           status: {
-            running: 0, stopped: 0, pending: 0
+            running: 0,
+            stopped: 0,
+            pending: 0
           },
-          mode:   { protect: 0, monitor: 0 },
-          total:  0
+          mode:   {
+            protect: 0,
+            monitor: 0
+          },
+          total: 0
         });
       }
 
       return {
         status: {
-          running: 0, stopped: 0, pending: 0
+          running: 0,
+          stopped: 0,
+          pending: 0
         },
-        mode:   { protect: 0, monitor: 0 },
-        total:  0
+        mode:   {
+          protect: 0,
+          monitor: 0
+        },
+        total: 0
       };
     },
 
@@ -294,7 +318,9 @@ export default {
           };
         }, {
           status: {
-            success: 0, fail: 0, error: 0
+            success: 0,
+            fail:    0,
+            error:   0
           },
           total: 0
         });
@@ -302,7 +328,9 @@ export default {
 
       return {
         status: {
-          success: 0, fail: 0, error: 0
+          success: 0,
+          fail:    0,
+          error:   0
         },
         total: 0
       };

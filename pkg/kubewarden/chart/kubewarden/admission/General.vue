@@ -150,7 +150,7 @@ export default {
       if ( this.policyServers?.length > 0 ) {
         const out = [];
 
-        this.policyServers.map(p => out.push(p.id));
+        this.policyServers.map((p) => out.push(p.id));
 
         return out;
       }

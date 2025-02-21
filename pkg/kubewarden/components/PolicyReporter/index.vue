@@ -17,7 +17,10 @@ import { rootKubewardenRoute } from '../../utils/custom-routing';
 import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '../../types';
 
 export default {
-  components: { Banner, Loading },
+  components: {
+    Banner,
+    Loading
+  },
 
   mixins: [ResourceFetch, ResourceManager],
 
@@ -31,13 +34,13 @@ export default {
       deployment:             { type: WORKLOAD_TYPES.DEPLOYMENT }
     };
 
-    for ( const [key, value] of Object.entries(types) ) {
-      if ( this.$store.getters['cluster/canList'](value) ) {
+    for (const [key, value] of Object.entries(types)) {
+      if (this.$store.getters['cluster/canList'](value)) {
         this.permissions[key] = true;
       }
     }
 
-    if ( this.hasAvailability ) {
+    if (this.hasAvailability) {
       await this.$fetchType(WORKLOAD_TYPES.DEPLOYMENT);
       await this.$fetchType(SERVICE);
 
@@ -79,11 +82,11 @@ export default {
     },
 
     controllerDeployments() {
-      return this.allDeployments?.filter(deploy => deploy?.metadata?.labels?.[KUBERNETES.INSTANCE] === KUBEWARDEN_APPS.RANCHER_CONTROLLER);
+      return this.allDeployments?.filter((deploy) => deploy?.metadata?.labels?.[KUBERNETES.INSTANCE] === KUBEWARDEN_APPS.RANCHER_CONTROLLER);
     },
 
     hasAvailability() {
-      return this.isAdminUser || Object.values(this.permissions).every(value => value);
+      return this.isAdminUser || Object.values(this.permissions).every((value) => value);
     },
 
     hasPolicyServerSchema() {
@@ -103,7 +106,7 @@ export default {
     },
 
     reporterDeployment() {
-      return this.controllerDeployments?.find(deploy => deploy?.metadata?.labels?.['app.kubernetes.io/component'] === 'ui');
+      return this.controllerDeployments?.find((deploy) => deploy?.metadata?.labels?.['app.kubernetes.io/component'] === 'ui');
     },
 
     reporterDeploymentState() {
@@ -111,7 +114,7 @@ export default {
     },
 
     controllerNamespace() {
-      if ( !isEmpty(this.controller) ) {
+      if (!isEmpty(this.controller)) {
         return this.controller?.metadata?.namespace;
       }
 
@@ -119,7 +122,7 @@ export default {
     },
 
     controllerVersion() {
-      if ( !isEmpty(this.controller) ) {
+      if (!isEmpty(this.controller)) {
         return this.controller?.metadata?.labels?.['app.kubernetes.io/version'];
       }
 
@@ -127,7 +130,7 @@ export default {
     },
 
     canShowReporter() {
-      if ( !this.controllerVersion ) {
+      if (!this.controllerVersion) {
         return false;
       }
 
@@ -145,7 +148,7 @@ export default {
               {
                 var:         'controller',
                 parsingFunc: (data) => {
-                  return data.find(deploy => deploy?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === KUBEWARDEN_CHARTS.CONTROLLER);
+                  return data.find((deploy) => deploy?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === KUBEWARDEN_CHARTS.CONTROLLER);
                 }
               }
             ]
@@ -155,13 +158,13 @@ export default {
               {
                 var:         'reporterReportingService',
                 parsingFunc: (data) => {
-                  return data.find(service => service?.metadata?.labels?.['app.kubernetes.io/component'] === 'reporting');
+                  return data.find((service) => service?.metadata?.labels?.['app.kubernetes.io/component'] === 'reporting');
                 }
               },
               {
                 var:         'reporterUIService',
                 parsingFunc: (data) => {
-                  return data.find(service => service?.metadata?.labels?.['app.kubernetes.io/name'] === 'ui');
+                  return data.find((service) => service?.metadata?.labels?.['app.kubernetes.io/name'] === 'ui');
                 }
               }
             ]
@@ -174,14 +177,17 @@ export default {
       try {
         const service = this.reporterUIService;
 
-        if ( service ) {
+        if (service) {
           const base = `/k8s/clusters/${ this.currentCluster.id }/api/v1/namespaces/${ service.metadata?.namespace }/services/`;
           const proxy = `http:${ service.metadata?.name }:${ service.spec?.ports?.[0].port }/proxy`;
 
           return base + proxy;
         }
       } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
+        handleGrowl({
+          error: e,
+          store: this.$store
+        });
       }
     }
   }

@@ -39,7 +39,9 @@ export default {
   async fetch() {
     this.debouncedRefreshCharts = debounce((init = false) => {
       refreshCharts({
-        store: this.$store, chartName: KUBEWARDEN_CHARTS.DEFAULTS, init
+        store:     this.$store,
+        chartName: KUBEWARDEN_CHARTS.DEFAULTS,
+        init
       });
     }, 500);
 
@@ -110,12 +112,23 @@ export default {
   computed: {
     ...mapGetters(['currentCluster']),
     ...mapGetters({
-      charts: 'catalog/charts', repos: 'catalog/repos', t: 'i18n/t'
+      charts: 'catalog/charts',
+      repos:  'catalog/repos',
+      t:      'i18n/t'
     }),
 
     isAirgap() {
       return this.$store.getters['kubewarden/airGapped'];
     },
+
+    /**
+     * [!IMPORTANT]
+     * TODO:
+     * THIS IS BROKEN
+     * When installing, if you add the repo and leave the page
+     * then come back, the controllerChart will be null, but so will
+     * the kubewardenRepo. This is because the repo is not saved to the store?
+     */
 
     controllerChart() {
       if ( this.kubewardenRepo ) {
@@ -130,9 +143,9 @@ export default {
     },
 
     kubewardenRepo() {
-      const chart = this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
+      const chart = this.charts?.find((chart) => chart.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
 
-      return this.repos?.find(repo => repo.id === chart?.repoName);
+      return this.repos?.find((repo) => repo.id === chart?.repoName);
     },
 
     shellEnabled() {
@@ -152,7 +165,10 @@ export default {
         try {
           await repoObj.save();
         } catch (e) {
-          handleGrowl({ error: e, store: this.$store });
+          handleGrowl({
+            error: e,
+            store: this.$store
+          });
           btnCb(false);
 
           return;
@@ -162,7 +178,10 @@ export default {
           this.debouncedRefreshCharts();
         }
       } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
+        handleGrowl({
+          error: e,
+          store: this.$store
+        });
         btnCb(false);
       }
     },
@@ -172,7 +191,10 @@ export default {
         try {
           this.debouncedRefreshCharts();
         } catch (e) {
-          handleGrowl({ error: e, store: this.$store });
+          handleGrowl({
+            error: e,
+            store: this.$store
+          });
 
           return;
         }
@@ -203,7 +225,10 @@ export default {
           message:     this.t('kubewarden.dashboard.appInstall.versionError.message')
         };
 
-        handleGrowl({ error, store: this.$store });
+        handleGrowl({
+          error,
+          store: this.$store
+        });
       }
     },
 
