@@ -103,7 +103,10 @@ export default {
     },
 
     reporterDeployment() {
-      return this.controllerDeployments?.find(deploy => deploy?.metadata?.labels?.['app.kubernetes.io/component'] === 'ui');
+      // Policy Reporter UI labels: ui (kubewarden < v1.22.0), policy-reporter-ui (kubewarden >= v1.22.0)
+      return this.controllerDeployments?.find(deploy =>
+        ['ui', 'policy-reporter-ui'].includes(deploy?.metadata?.labels?.['app.kubernetes.io/name'])
+      );
     },
 
     reporterDeploymentState() {
@@ -161,7 +164,7 @@ export default {
               {
                 var:         'reporterUIService',
                 parsingFunc: (data) => {
-                  return data.find(service => service?.metadata?.labels?.['app.kubernetes.io/name'] === 'ui');
+                  return data.find(service => ['policy-reporter-ui', 'ui'].includes(service?.metadata?.labels?.['app.kubernetes.io/name']));
                 }
               }
             ]
