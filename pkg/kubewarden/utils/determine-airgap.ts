@@ -9,9 +9,9 @@ interface AirgapConfig {
  * Preforms a dispatch request on the first index within the
  * `management.cattle.io.settings/whitelist-domain` setting.
  * @param context - The store context
- * @returns Boolean - Will return `true` if request does not have a response status of `200`
+ * @returns boolean - Will return `true` if request does not have a response status of `200`
  */
-export async function isAirgap(context: AirgapConfig): Promise<Boolean> {
+export async function isAirgap(context: AirgapConfig): Promise<boolean> {
   const { store } = context;
 
   try {
@@ -40,7 +40,7 @@ export async function isAirgap(context: AirgapConfig): Promise<Boolean> {
       return true;
     }
   } catch (e) {
-    if ( !store.getters['kubewarden/airGapped'] ) {
+    if (!store.getters['kubewarden/airGapped']) {
       console.log('Unable to determine management.cattle.io.settings/whitelist-domain value.', e); // eslint-disable-line no-console
       store.dispatch('kubewarden/updateAirGapped', false);
     }

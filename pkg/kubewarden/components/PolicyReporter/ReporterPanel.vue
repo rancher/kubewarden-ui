@@ -1,4 +1,9 @@
-<script>
+<script setup lang="ts">
+import { onMounted, getCurrentInstance, watch, nextTick } from 'vue';
+import { useStore } from 'vuex';
+import { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
+
+import { ClusterPolicyReport, PolicyReport } from '../../types';
 import { getReports } from '../../modules/policyReporter';
 
 /**
@@ -7,26 +12,46 @@ import { getReports } from '../../modules/policyReporter';
  * the list we can fetch once at the top of the page and
  * store the reports.
  */
-export default {
-  async fetch() {
-    const isClusterLevel = !this.$route.params.resource;
-    const resourceType = this.$route.params.resource;
 
-    // Fetch cluster level reports if no specific resource is specified
-    if ( isClusterLevel ) {
-      await getReports(this.$store, true);
-    }
-    // Fetch normal policy reports if a specific resource type is specified or always fetch on projectsnamespaces page
-    if ( resourceType || this.$route.path.includes('projectsnamespaces') ) {
-      await getReports(this.$store, false, resourceType);
+const store = useStore();
+
+let route: RouteLocationNormalizedLoaded | null = null;
+
+async function fetchPolicies() {
+  const isClusterLevel = !route?.params?.resource || route?.path?.includes('projectsnamespaces');
+  const resourceType = route?.params?.resource as string | undefined;
+
+  // Fetch cluster level reports if no specific resource is specified
+  if (isClusterLevel) {
+    await getReports<ClusterPolicyReport>(store, true);
+  }
+  // Fetch normal policy reports if a specific resource type is specified or always fetch on projectsnamespaces page
+  if (resourceType || route?.path?.includes('projectsnamespaces')) {
+    await getReports<PolicyReport>(store, false, resourceType);
+  }
+}
+
+onMounted(async() => {
+  store.commit('kubewarden/updateLoadingReports', true);
+  if (!route) {
+    const instance = getCurrentInstance();
+
+    if (instance?.proxy?.$route) {
+      route = instance.proxy.$route;
+    } else {
+      return;
     }
   }
-};
+
+  await nextTick();
+  await fetchPolicies();
+
+  store.commit('kubewarden/updateLoadingReports', false);
+});
 </script>
 
 <template>
-  <div class="reporter-panel">
-  </div>
+  <div class="reporter-panel"></div>
 </template>
 
 <style lang="scss" scoped>

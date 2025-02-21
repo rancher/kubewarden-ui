@@ -7,7 +7,8 @@ import {
   FleetGitRepo,
   PolicyReport,
   PolicyTraceConfig,
-  ClusterPolicyReport
+  ClusterPolicyReport,
+  PolicyReportSummary,
 } from '../../types';
 
 import getters from './getters';
@@ -15,17 +16,20 @@ import mutations from './mutations';
 import actions from './actions';
 
 export interface StateConfig {
-  airGapped: Boolean;
+  airGapped: boolean;
   fleetRepos: FleetGitRepo[];
-  hideBannerDefaults: Boolean;
-  hideBannerArtifactHub: Boolean;
-  hideBannerAirgapPolicy: Boolean;
+  hideBannerDefaults: boolean;
+  hideBannerArtifactHub: boolean;
+  hideBannerAirgapPolicy: boolean;
   controllerApp: CatalogApp | null;
   kubewardenCrds: CustomResourceDefinition[];
+  loadingReports: boolean;
   policyReports: PolicyReport[];
   clusterPolicyReports: ClusterPolicyReport[];
+  reportMap: Record<string, PolicyReport | ClusterPolicyReport>;
+  summaryMap: Record<string, PolicyReportSummary>;
   policyTraces: PolicyTraceConfig[];
-  refreshingCharts: Boolean;
+  refreshingCharts: boolean;
 }
 
 const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
@@ -39,8 +43,11 @@ const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
         hideBannerAirgapPolicy: config.hideBannerAirgapPolicy,
         controllerApp:          config.controllerApp,
         kubewardenCrds:         config.kubewardenCrds,
+        loadingReports:         config.loadingReports,
         policyReports:          config.policyReports,
         clusterPolicyReports:   config.clusterPolicyReports,
+        reportMap:              config.reportMap,
+        summaryMap:             config.summaryMap,
         policyTraces:           config.policyTraces,
         refreshingCharts:       config.refreshingCharts
       };
@@ -63,8 +70,11 @@ export default {
     hideBannerAirgapPolicy: false,
     controllerApp:          null,
     kubewardenCrds:         [],
+    loadingReports:         false,
     policyReports:          [],
     clusterPolicyReports:   [],
+    reportMap:              {},
+    summaryMap:             {},
     policyTraces:           [],
     refreshingCharts:       false
   }),

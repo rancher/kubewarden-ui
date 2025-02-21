@@ -1,166 +1,147 @@
-<script>
+<script setup lang="ts">
+import {
+  ref, reactive, computed, onMounted, watch, nextTick, getCurrentInstance
+} from 'vue';
+import { useStore } from 'vuex';
+import { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
 import isEmpty from 'lodash/isEmpty';
+
 import { NAMESPACE } from '@shell/config/query-params';
-import { allHash } from '@shell/utils/promise';
-import ResourceFetch from '@shell/mixins/resource-fetch';
 
 import { BadgeState } from '@components/BadgeState';
 import { Banner } from '@components/Banner';
-import Loading from '@shell/components/Loading';
 import SortableTable from '@shell/components/SortableTable';
 
-import { KUBEWARDEN } from '../../types';
+import { KUBEWARDEN, PolicyReport, PolicyReportResult, ClusterPolicyReport } from '../../types';
 import { POLICY_REPORTER_HEADERS } from '../../config/table-headers';
 import {
-  getFilteredReports, getLinkForPolicy, getLinkForResource, colorForResult, colorForSeverity
+  getFilteredReport,
+  getLinkForPolicy,
+  colorForResult,
+  colorForSeverity
 } from '../../modules/policyReporter';
-import { splitGroupKind } from '../../modules/core';
-import * as coreTypes from '../../core/core-resources';
 
-export default {
-  props: {
-    resource: {
-      type:     Object,
-      required: true
+const store = useStore();
+let route: RouteLocationNormalizedLoaded | null = null;
+
+const t = store.getters['i18n/t'];
+
+const report = ref<PolicyReport | ClusterPolicyReport | null>(null);
+const resource = ref<any>(null);
+const canGetKubewardenLinks = ref(false);
+const headers = ref(POLICY_REPORTER_HEADERS);
+
+const fetchState = reactive({ pending: true });
+
+const isNamespaceResource = computed(() => resource.value?.type === NAMESPACE);
+
+function determineResource() {
+  if (route?.params?.resource && route?.params?.id) {
+    const id = route?.params.namespace ? `${ route?.params.namespace }/${ route?.params.id }` : route?.params.id;
+
+    resource.value = store.getters['cluster/byId'](route?.params.resource, id);
+  }
+}
+
+async function fetchReports() {
+  if (resource.value) {
+    fetchState.pending = true;
+    report.value  = await getFilteredReport(store, resource.value);
+  }
+
+  fetchState.pending = false;
+}
+
+function getResourceValue(row: PolicyReportResult, val: string, needScope = false): string {
+  if (isNamespaceResource.value && needScope) {
+    if (row.scope && val in row.scope) {
+      const value = row.scope[val as keyof typeof row.scope];
+
+      return typeof value === 'string' ? value : '-';
     }
-  },
 
-  components: {
-    BadgeState, Banner, Loading, SortableTable
-  },
+    return '-';
+  }
 
-  mixins: [ResourceFetch],
+  if (!isEmpty(row)) {
+    if (val in row) {
+      const value = row[val as keyof (PolicyReportResult)];
 
-  async fetch() {
-    const fetchedReports = await getFilteredReports(this.$store, this.resource);
-
-    this.reports = fetchedReports || [];
-
-    if ( !isEmpty(this.reports) ) {
-      const hash = [
-        this.$fetchType(KUBEWARDEN.ADMISSION_POLICY),
-        this.$fetchType(KUBEWARDEN.CLUSTER_ADMISSION_POLICY)
-      ];
-
-      await allHash(hash);
-    }
-  },
-
-  data() {
-    return {
-      colorForResult,
-      reports:          [],
-      resourceHeaders:  POLICY_REPORTER_HEADERS.RESOURCE,
-      namespaceHeaders: POLICY_REPORTER_HEADERS.NAMESPACE
-    };
-  },
-
-  computed: {
-    canGetKubewardenLinks() {
-      const capSchema = this.$store.getters['cluster/schemaFor'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
-      const apSchema = this.$store.getters['cluster/schemaFor'](KUBEWARDEN.ADMISSION_POLICY);
-
-      if ( capSchema || apSchema ) {
-        return true;
-      }
-
-      return false;
-    },
-
-    hasNamespace() {
-      return this.resource?.metadata?.namespace;
-    },
-
-    hasReports() {
-      return !isEmpty(this.reports);
-    },
-
-    isNamespaceResource() {
-      return this.resource?.type === NAMESPACE;
-    },
-
-    tableHeaders() {
-      return this.isNamespaceResource ? this.namespaceHeaders : this.resourceHeaders;
-    }
-  },
-
-  methods: {
-    canGetResourceLink(row) {
-      const outResource = row.scope;
-
-      if ( this.resource?.type === NAMESPACE && outResource.kind?.toLowerCase() === NAMESPACE ) {
-        return null;
-      }
-
-      if ( outResource ) {
-        const isCore = Object.values(coreTypes).find(type => outResource.kind === type.attributes.kind);
-
-        if ( isCore ) {
-          return this.$store.getters['cluster/schemaFor'](outResource.kind?.toLowerCase());
-        }
-
-        const groupType = splitGroupKind(outResource);
-
-        if ( groupType ) {
-          return this.$store.getters['cluster/schemaFor'](groupType);
-        }
-      }
-
-      return null;
-    },
-
-    getResourceValue(row, val, needScope = false) {
-      if ( this.isNamespaceResource && needScope ) {
-        return row.scope?.[val] || '-';
-      }
-
-      if ( !isEmpty(row) ) {
-        return row[val] || '-';
-      }
-
-      return '-';
-    },
-
-    getPolicyLink(row) {
-      return getLinkForPolicy(this.$store, row);
-    },
-
-    getResourceLink(row) {
-      return getLinkForResource(row);
-    },
-
-    severityColor(row) {
-      if ( row.result ) {
-        return colorForSeverity(row.severity);
-      }
-
-      return 'bg-muted';
-    },
-
-    statusColor(row) {
-      if ( row.result ) {
-        const color = colorForResult(row.result);
-        const bgColor = color.includes('sizzle') ? color.concat('-bg') : color.replace(/text-/, 'bg-');
-
-        return bgColor;
-      }
-
-      return 'bg-muted';
+      return typeof value === 'string' ? value : '-';
     }
   }
+
+  return '-';
+}
+
+function getPolicyLink(row: PolicyReportResult): RouteLocationRaw | undefined {
+  const link = getLinkForPolicy(store, row);
+
+  if (link) {
+    return link;
+  }
+}
+
+function severityColor(row: PolicyReportResult) {
+  if (row.result && row.severity) {
+    return colorForSeverity(row.severity);
+  }
+
+  return 'bg-muted';
+}
+
+function statusColor(row: PolicyReportResult) {
+  if (row.result) {
+    const color = colorForResult(row.result);
+    const bgColor = color.includes('sizzle') ? `${ color }-bg` : color.replace(/text-/, 'bg-');
+
+    return bgColor;
+  }
+
+  return 'bg-muted';
+}
+
+function formattedDisplayName(displayName: string): string {
+  return displayName
+    .replace(/^clusterwide-/, "") // Remove 'clusterwide-' prefix
+    .replace(/^namespaced-[^-]+-/, ""); // Remove 'namespaced-<namespace>-' prefix
 };
+
+onMounted(async() => {
+  // Ensure Vue Router is initialized before accessing `useRoute()`
+  if (!route) {
+    const instance = getCurrentInstance();
+
+    if (instance?.proxy?.$route) {
+      route = instance.proxy.$route;
+    } else {
+      return;
+    }
+  }
+
+  determineResource();
+
+  await nextTick();
+  await fetchReports();
+
+  const capSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
+  const apSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.ADMISSION_POLICY);
+
+  canGetKubewardenLinks.value = !!(capSchema || apSchema);
+});
 </script>
 
 <template>
-  <Loading v-if="$fetchState.pending" mode="relative" />
+  <div v-if="fetchState.pending" data-testid="resource-tab-loading" class="pr-tab__loading">
+    <i class="icon icon-lg icon-spinner icon-spin  m-20" />
+  </div>
   <div v-else class="pr-tab__container">
     <SortableTable
-      :rows="reports"
-      :headers="tableHeaders"
+      :rows="report?.results"
+      :headers="headers"
       :table-actions="false"
       :row-actions="false"
-      key-field="uid"
-      :group-by="isNamespaceResource ? 'kind' : null"
+      key-field="policy"
       :sub-expandable="true"
       :sub-expand-column="true"
       :sub-rows="true"
@@ -169,41 +150,19 @@ export default {
       :extra-search-fields="['summary']"
       default-sort-by="status"
     >
-      <template
-        v-if="isNamespaceResource"
-        #col:kind="{row}"
-      >
-        <td>{{ getResourceValue(row, 'kind', true) }}</td>
-      </template>
-      <template
-        v-if="isNamespaceResource"
-        #col:name="{row}"
-      >
-        <td>
-          <template v-if="canGetResourceLink(row)">
-            <router-link :to="getResourceLink(row)">
-              <span>{{ getResourceValue(row, 'name', true) }}</span>
-            </router-link>
-          </template>
-          <template v-else>
-            <span>{{ getResourceValue(row, 'name', true) }}</span>
-          </template>
-        </td>
-      </template>
-
-      <template #col:policy="{row}">
-        <td v-if="row.policy && row.policyName">
+      <template #col:policy="{ row }">
+        <td v-if="row.policy">
           <template v-if="canGetKubewardenLinks">
-            <router-link :to="getPolicyLink(row)">
-              <span>{{ row.policyName }}</span>
+            <router-link :to="getPolicyLink(row)!">
+              <span>{{ formattedDisplayName(row.policy) }}</span>
             </router-link>
           </template>
           <template v-else>
-            <span>{{ row.policyName }}</span>
+            <span>{{ formattedDisplayName(row.policy) }}</span>
           </template>
         </td>
       </template>
-      <template #col:severity="{row}">
+      <template #col:severity="{ row }">
         <td>
           <BadgeState
             :label="getResourceValue(row, 'severity')"
@@ -211,7 +170,7 @@ export default {
           />
         </td>
       </template>
-      <template #col:status="{row}">
+      <template #col:status="{ row }">
         <td>
           <BadgeState
             :label="getResourceValue(row, 'result')"
@@ -221,28 +180,32 @@ export default {
       </template>
 
       <!-- Sub-rows -->
-      <template #sub-row="{row, fullColspan}">
+      <template #sub-row="{ row, fullColspan }">
         <td :colspan="fullColspan" class="pr-tab__sub-row">
           <Banner v-if="row.message" color="info" class="message">
-            <span class="text-muted">{{ t('kubewarden.policyReporter.headers.policyReportsTab.message.title') }}:</span>
+            <span class="text-muted">
+              {{ t('kubewarden.policyReporter.headers.policyReportsTab.message.title') }}:
+            </span>
             <span>{{ row.message }}</span>
           </Banner>
           <div class="details">
             <section class="col">
               <div class="title">
+                {{ t('kubewarden.policyReporter.headers.policyReportsTab.category') }}
+              </div>
+              <span>{{ row.category || '-' }}</span>
+            </section>
+            <section class="col">
+              <div class="title">
                 {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.mutating') }}
               </div>
-              <span>
-                {{ row.properties['mutating'] || '-' }}
-              </span>
+              <span>{{ row.properties['mutating'] || '-' }}</span>
             </section>
             <section class="col">
               <div class="title">
                 {{ t('kubewarden.policyReporter.headers.policyReportsTab.properties.validating') }}
               </div>
-              <span>
-                {{ row.properties['validating'] || '-' }}
-              </span>
+              <span>{{ row.properties['validating'] || '-' }}</span>
             </section>
           </div>
         </td>
@@ -256,6 +219,11 @@ $error: #614EA2;
 
 // Need to override the default colors for these classes
 .pr-tab {
+  &__loading {
+    display: flex;
+    justify-content: center;
+  }
+
   &__container {
     .sizzle-warning-bg {
       background-color: $error;

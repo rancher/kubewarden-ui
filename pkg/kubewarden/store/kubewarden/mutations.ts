@@ -1,21 +1,21 @@
 import {
-  CatalogApp, ClusterPolicyReport, CustomResourceDefinition, PolicyReport, PolicyTrace, PolicyTraceConfig
+  CatalogApp, ClusterPolicyReport, CustomResourceDefinition, PolicyReport, PolicyTrace, PolicyTraceConfig, PolicyReportSummary
 } from '../../types';
 import { StateConfig } from './index';
 
 type ReportKeys = 'policyReports' | 'clusterPolicyReports';
 
 export default {
-  updateAirGapped(state: StateConfig, val: Boolean) {
+  updateAirGapped(state: StateConfig, val: boolean) {
     state.airGapped = val;
   },
-  updateHideBannerDefaults(state: StateConfig, val: Boolean) {
+  updateHideBannerDefaults(state: StateConfig, val: boolean) {
     state.hideBannerDefaults = val;
   },
-  updateHideBannerArtifactHub(state: StateConfig, val: Boolean) {
+  updateHideBannerArtifactHub(state: StateConfig, val: boolean) {
     state.hideBannerArtifactHub = val;
   },
-  updateHideBannerAirgapPolicy(state: StateConfig, val: Boolean) {
+  updateHideBannerAirgapPolicy(state: StateConfig, val: boolean) {
     state.hideBannerAirgapPolicy = val;
   },
 
@@ -53,7 +53,7 @@ export default {
    * @param crd `CustomResourceDefinition`
    */
   updateKubewardenCrds(state: StateConfig, crd: CustomResourceDefinition) {
-    const existingCrd = state.kubewardenCrds.find(c => c?.metadata?.name === crd?.metadata?.name);
+    const existingCrd = state.kubewardenCrds.find((c) => c?.metadata?.name === crd?.metadata?.name);
 
     if ( existingCrd ) {
       existingCrd.metadata = crd.metadata;
@@ -70,7 +70,7 @@ export default {
    * @param crd `CustomResourceDefinition`
    */
   removeKubewardenCrds(state: StateConfig, crd: CustomResourceDefinition) {
-    const idx = state.kubewardenCrds.findIndex(c => c?.metadata?.name === crd?.metadata?.name);
+    const idx = state.kubewardenCrds.findIndex((c) => c?.metadata?.name === crd?.metadata?.name);
 
     if ( idx !== -1 ) {
       state.kubewardenCrds.splice(idx, 1);
@@ -78,24 +78,63 @@ export default {
   },
 
   /**
- * Updates/Adds a policy or cluster policy report to the store.
- * @param state - The current state object.
- * @param reportArrayKey - The key to the report array in the state to update (e.g., 'policyReports' or 'clusterPolicyReports').
- * @param updatedReport - The report object to update or add.
- */
-  updateReports<T extends PolicyReport | ClusterPolicyReport>(
+   * Updates loading state of Policy Reports
+   * @param state
+   * @param val `boolean`
+   */
+  updateLoadingReports(state: StateConfig, val: boolean) {
+    state.loadingReports = val;
+  },
+
+  /**
+   * Updates/Adds Policy Reports to state
+   * @param state
+   * @param updatedReports `PolicyReport[] | ClusterPolicyReport[]`
+   */
+  updateReportsBatch<T extends PolicyReport | ClusterPolicyReport>(
     state: StateConfig,
-    { reportArrayKey, updatedReport }: { reportArrayKey: ReportKeys, updatedReport: T }
+    { reportArrayKey, updatedReports }: { reportArrayKey: ReportKeys, updatedReports: T[] }
   ): void {
     const reportArray = state[reportArrayKey] as Array<T>;
-    const existingReport = reportArray.find(report => report.id === updatedReport.id);
 
-    if ( existingReport ) {
-      existingReport.results = updatedReport.results;
-      existingReport.summary = updatedReport.summary;
-    } else {
-      reportArray.push(updatedReport);
-    }
+    // Convert array to a Map for O(1) lookups
+    const reportMap = new Map(reportArray.map((report) => {
+      const resourceId = report.scope?.namespace ? `${ report.scope.namespace }/${ report.scope.name }` : report.scope?.name || report.id;
+
+      return [resourceId, report];
+    }));
+
+    updatedReports.forEach((updatedReport) => {
+      const updatedId = updatedReport.scope?.namespace ? `${ updatedReport.scope.namespace }/${ updatedReport.scope.name }` : updatedReport.scope?.name || updatedReport.id;
+
+      if (reportMap.has(updatedId)) {
+        // Directly update the object reference
+        Object.assign(reportMap.get(updatedId)!, {
+          results: updatedReport.results,
+          summary: updatedReport.summary,
+        });
+      } else {
+        reportArray.push(updatedReport);
+        reportMap.set(updatedId, updatedReport); // Keep map in sync
+      }
+    });
+
+    state.reportMap = {
+      ...state.reportMap,
+      ...Object.fromEntries(reportMap)
+    };
+  },
+
+  /**
+   * Updates/Adds Policy Report summaries to state
+   * @param state
+   * @param newSummary `Record<string, PolicyReportSummary>`
+   */
+  setSummaryMap(state: StateConfig, newSummary: Record<string, PolicyReportSummary>) {
+    state.summaryMap = {
+      ...state.summaryMap,
+      ...newSummary
+    };
   },
 
   /**
@@ -103,8 +142,8 @@ export default {
    * @param state
    * @param reportId
    */
-  removePolicyReportById(state: StateConfig, reportId: String) {
-    const idx = state.policyReports.findIndex(report => report.id === reportId);
+  removePolicyReportById(state: StateConfig, reportId: string) {
+    const idx = state.policyReports.findIndex((report) => report.id === reportId);
 
     if ( idx !== -1 ) {
       state.policyReports.splice(idx, 1);
@@ -150,7 +189,7 @@ export default {
     }
   },
 
-  updateRefreshingCharts(state: StateConfig, val: Boolean) {
+  updateRefreshingCharts(state: StateConfig, val: boolean) {
     state.refreshingCharts = val;
   }
 };
