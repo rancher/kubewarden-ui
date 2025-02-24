@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://kubewarden-2.1.4/./assets/airgap-installation.md"],"names":["module","exports"],"mappings":"oLAAAA,EAAOC,QAAU,IAA0B","file":"kubewarden-2.1.4.umd.min.airgap-docs.js","sourcesContent":["module.exports = __webpack_public_path__ + \"assets/airgap-installation.md\";"],"sourceRoot":""}
