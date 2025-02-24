@@ -18,13 +18,6 @@ import { splitGroupKind } from '../../modules/core';
 import * as coreTypes from '../../core/core-resources';
 
 export default {
-  props: {
-    resource: {
-      type:     Object,
-      required: true
-    }
-  },
-
   components: {
     BadgeState, Banner, Loading, SortableTable
   },
@@ -32,6 +25,7 @@ export default {
   mixins: [ResourceFetch],
 
   async fetch() {
+    this.determineResource();
     const fetchedReports = await getFilteredReports(this.$store, this.resource);
 
     this.reports = fetchedReports || [];
@@ -50,6 +44,7 @@ export default {
     return {
       colorForResult,
       reports:          [],
+      resource:         null,
       resourceHeaders:  POLICY_REPORTER_HEADERS.RESOURCE,
       namespaceHeaders: POLICY_REPORTER_HEADERS.NAMESPACE
     };
@@ -107,6 +102,16 @@ export default {
       }
 
       return null;
+    },
+
+    determineResource() {
+      const route = this.$route;
+
+      if (route?.params?.resource && route?.params?.id) {
+        const id = route?.params.namespace ? `${ route?.params.namespace }/${ route?.params.id }` : route?.params.id;
+
+        this.resource = this.$store.getters['cluster/byId'](route?.params.resource, id);
+      }
     },
 
     getResourceValue(row, val, needScope = false) {
