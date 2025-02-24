@@ -6,8 +6,6 @@ const testNs = 'audit-unsafe-ns'
 const testPod = 'audit-pod-privileged'
 const policyLabels = 'audit-safelabels'
 
-const expect2m = expect.configure({ timeout: 2 * 60_000 })
-
 /**
  * Prerequisities:
  *  - Audit scanner is enabled and set to run every minute during controller installation.
@@ -53,12 +51,12 @@ test('New resources should be reported', async({ ui, page, nav, shell }) => {
   await reporter.runJob()
   await nav.explorer('Kubewarden', 'Policy Reporter')
   await reporter.selectTab('Dashboard')
-  await expect2m(reporter.failCpBanner).toHaveText('1')
-  await expect2m(reporter.failNsBanner).toContainText(testNs)
-  await reporter.selectTab('Policy Reports')
-  await expect(reporter.failNsTable.getByRole('cell', { name: testPod, exact: true })).toBeVisible()
-  await reporter.selectTab('ClusterPolicy Reports')
-  await expect(reporter.failCpTable.getByRole('cell', { name: testNs, exact: true })).toBeVisible()
+  await expect(reporter.getCard('fail')).toHaveText('1', { timeout: 2 * 60_000 })
+  await expect(reporter.getChip(testNs, 'fail')).toHaveText('1')
+
+  await reporter.selectTab('Kubewarden')
+  await expect(reporter.getChip(`clusterwide-${policyLabels}`, 'fail')).toHaveText('1')
+  await expect(reporter.getChip('clusterwide-no-privileged-pod', 'fail')).toHaveText('1')
 })
 
 test('Check reports on resources details page', async({ ui, nav }) => {
@@ -86,14 +84,12 @@ test('Cleanup & check results are gone', async({ page, ui, nav, shell }) => {
   const reporter = new PolicyReporterPage(page)
 
   await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
+  await ui.tableRow(policyLabels).delete()
   await shell.runBatch(
     `kubectl delete ns ${testNs}`,
     'kubectl delete cpolr,polr -A --all'
   )
-  await ui.tableRow(policyLabels).delete()
 
   await nav.explorer('Kubewarden', 'Policy Reporter')
-  await reporter.selectTab('Dashboard')
-  await expect2m(reporter.failCpBanner).toHaveText('0')
-  await expect2m(reporter.failNsBanner).not.toContainText(testNs)
+  await expect(reporter.frame.getByText('No resources for the selected kinds found')).toBeVisible()
 })
