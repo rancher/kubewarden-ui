@@ -3573,10 +3573,10 @@
   resolved "https://registry.yarnpkg.com/@rancher/icons/-/icons-2.0.29.tgz#6546d69768c706bebd66bfa73b36aef3d105987a"
   integrity sha512-qBBqfazS9y5VjV7fJDPNXmxd9AP/2uiE05mKFWP41kpbO+tEb62RnUBXCm14XLeScDZQcOuiAKVHMmvCFzF0BA==
 
-"@rancher/shell@3.0.2-rc.4":
-  version "3.0.2-rc.4"
-  resolved "https://registry.npmjs.org/@rancher/shell/-/shell-3.0.2-rc.4.tgz#384a97d54888572a7cb1fdb46e58c20123210b02"
-  integrity sha512-5lQdsqBrPS9JU/V1//Q42VzVFr83C8dEfE8WB03YS4iPhXLmHDEKDzZKKDedCz+8skI+l0PcLJ8Oy+4y9lfjKg==
+"@rancher/shell@3.0.2-rc.5":
+  version "3.0.2-rc.5"
+  resolved "https://registry.yarnpkg.com/@rancher/shell/-/shell-3.0.2-rc.5.tgz#721a5697c89c3339846f0be9acbbb545cd7ac20e"
+  integrity sha512-oOh/HlMS562OU+UWE35t1b5fLVW0cZD/bq67g7Uos/jMzEZEV7AWtbFzByyhJmo3hSipVMBoWyws4JQKhmqjcA==
   dependencies:
     "@aws-sdk/client-ec2" "3.658.1"
     "@aws-sdk/client-eks" "3.1.0"
@@ -6985,15 +6985,10 @@ core-js-compat@^3.38.0, core-js-compat@^3.40.0, core-js-compat@^3.8.3:
   dependencies:
     browserslist "^4.24.3"
 
-core-js@3.40.0:
+core-js@3.40.0, core-js@^3.8.3:
   version "3.40.0"
   resolved "https://registry.npmjs.org/core-js/-/core-js-3.40.0.tgz#2773f6b06877d8eda102fc42f828176437062476"
   integrity sha512-7vsMc/Lty6AGnn7uFpYT56QesI5D2Y/UkgKounk87OP9Z2H9Z8kj6jzcSGAxFmUtDOS0ntK6lbQz+Nsa0Jj6mQ==
-
-core-js@^3.8.3:
-  version "3.38.1"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.38.1.tgz#aa375b79a286a670388a1a363363d53677c0383e"
-  integrity sha512-OP35aUorbU3Zvlx7pjsFdu1rGNnD4pgw/CWoYzRY3t2EzoVT7shKHY1dlAy3f41cGIO7ZDPQimhGFTlEYkG/Hw==
 
 core-util-is@1.0.2:
   version "1.0.2"
