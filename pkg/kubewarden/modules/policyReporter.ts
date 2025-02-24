@@ -19,6 +19,10 @@ const reportCache = new Map<string, CacheEntry<any>>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const CHUNK_SIZE = 1000;
 
+export function __clearReportCache() {
+  reportCache.clear();
+}
+
 /**
  * Fetches either PolicyReports or ClusterPolicyReports based on version compatibility and dispatches update actions.
  * @param store

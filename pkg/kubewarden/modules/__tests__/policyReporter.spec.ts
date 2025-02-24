@@ -1,3 +1,5 @@
+import { Store } from 'vuex';
+
 import * as policyReporterModule from '@kubewarden/modules/policyReporter';
 import { KUBEWARDEN } from '@kubewarden/types';
 import { mockPolicyReport, mockClusterPolicyReport } from '@tests/unit/mocks/policyReports';
@@ -5,109 +7,165 @@ import { mockControllerApp } from '@tests/unit/mocks/controllerApp';
 
 jest.mock('lodash/isEmpty', () => ({
   __esModule: true,
-  default:    jest.fn().mockImplementation((data) => data.length === 0),
+  default: jest.fn().mockImplementation((data) => {
+    if (Array.isArray(data)) {
+      return data.length === 0;
+    }
+    return Object.keys(data || {}).length === 0;
+  }),
 }));
 
-jest.mock('@shell/utils/string', () => ({ randomStr: jest.fn().mockReturnValue('randomString') }));
+jest.mock('@shell/utils/string', () => ({
+  randomStr: jest.fn().mockReturnValue('randomString')
+}));
 
-const mockStore: any = {
+// Create a mock store that now includes additional getters used by the module
+const mockStore = {
   getters: {
-    'cluster/schemaFor':               jest.fn(),
-    'kubewarden/policyReports':        [mockPolicyReport],
+    'cluster/schemaFor': jest.fn(),
+    'cluster/all': jest.fn(),
+    'kubewarden/reportByResourceId': jest.fn(),
+    'kubewarden/policyReports': [mockPolicyReport],
     'kubewarden/clusterPolicyReports': [mockClusterPolicyReport],
-    'kubewarden/controllerApp':        mockControllerApp
+    'kubewarden/controllerApp': mockControllerApp
   },
-  dispatch: jest.fn(),
-};
+  dispatch: jest.fn()
+}  as unknown as Store<any>;
 
 beforeEach(() => {
   jest.clearAllMocks();
+
+  // Clear the report cache so each test runs fresh.
+  policyReporterModule.__clearReportCache();
+
+  // Return a dummy schema for any type
   mockStore.getters['cluster/schemaFor'].mockReturnValue(true);
+
+  // Assume no reports are cached by default so that findAll is triggered
+  mockStore.getters['cluster/all'].mockReturnValue([]);
+
+  // Default: no report is found by resource ID
+  mockStore.getters['kubewarden/reportByResourceId'].mockReturnValue(null);
+
+  // Polyfill requestIdleCallback for test environment if missing
+  global.requestIdleCallback = (cb) => setTimeout(cb, 0);
 });
 
 describe('getReports', () => {
-  it('should fetch and dispatch cluster policy reports when cluster level is true', async() => {
-    // Setting up the store to return a cluster policy report
-    mockStore.dispatch.mockResolvedValue([mockClusterPolicyReport]);
+  it('should fetch and dispatch cluster policy reports when cluster level is true', async () => {
+    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockClusterPolicyReport]);
+
     const reports = await policyReporterModule.getReports(mockStore, true);
 
     expect(reports).toEqual([mockClusterPolicyReport]);
-    expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/updateClusterPolicyReports', mockClusterPolicyReport);
+    expect(mockStore.dispatch).toHaveBeenCalledWith(
+      'kubewarden/updateClusterPolicyReports',
+      [mockClusterPolicyReport]
+    );
+    expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/regenerateSummaryMap');
   });
 
-  it('should fetch and dispatch policy reports when cluster level is false', async() => {
-    // Setting up the store to return a regular policy report
-    mockStore.dispatch.mockResolvedValue([mockPolicyReport]);
+  it('should fetch and dispatch policy reports when cluster level is false', async () => {
+    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockPolicyReport]);
+
     const reports = await policyReporterModule.getReports(mockStore, false);
 
     expect(reports).toEqual([mockPolicyReport]);
-    expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/updatePolicyReports', mockPolicyReport);
+    expect(mockStore.dispatch).toHaveBeenCalledWith(
+      'kubewarden/updatePolicyReports',
+      [mockPolicyReport]
+    );
+    expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/regenerateSummaryMap');
   });
 
-  it('should fetch and dispatch policy reports when cluster level is false and resourceType is specified', async() => {
-    // Setting up the store to return a regular policy report
-    mockStore.dispatch.mockResolvedValue([mockPolicyReport]);
-    const reports = await policyReporterModule.getReports(mockStore, false, 'test.resource');
+  it('should fetch and dispatch policy reports when cluster level is false and resourceType is specified', async () => {
+    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockPolicyReport]);
+
+    const reports = await policyReporterModule.getReports(mockStore, false, mockPolicyReport.scope.kind);
 
     expect(reports).toEqual([mockPolicyReport]);
-    expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/updatePolicyReports', mockPolicyReport);
+    expect(mockStore.dispatch).toHaveBeenCalledWith(
+      'kubewarden/updatePolicyReports',
+      [mockPolicyReport]
+    );
+    expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/regenerateSummaryMap');
   });
 });
 
-describe('getFilteredSummary', () => {
+describe('generateSummaryMap', () => {
   it('should correctly summarize policy report results', () => {
-    const resource = {
-      type:     'pod',
+    // Create a mock report that meets the criteria:
+    // - It is managed by kubewarden.
+    // - It has a scope with namespace and name.
+    // - It includes one result marked as FAIL.
+    const mockReport = {
       metadata: {
-        name:      'mock-pod',
-        namespace: 'default',
-        uid:       'mock-pod-uid'
-      }
+        labels: {
+          'app.kubernetes.io/managed-by': 'kubewarden'
+        }
+      },
+      scope: {
+        name: 'resource1',
+        namespace: 'default'
+      },
+      results: [
+        { result: 'FAIL' }
+      ]
     };
-    const summary = policyReporterModule.getFilteredSummary(mockStore, resource);
+
+    const storeState = {
+      clusterPolicyReports: [mockReport],
+      policyReports: []
+    };
+
+    const summary = policyReporterModule.generateSummaryMap(storeState);
 
     expect(summary).toEqual({
-      pass:  0,
-      fail:  1,
-      warn:  0,
-      error: 0,
-      skip:  0,
+      'default/resource1': {
+        pass:  0,
+        fail:  1,
+        warn:  0,
+        error: 0,
+        skip:  0
+      }
     });
   });
 });
 
 describe('getLinkForPolicy', () => {
   it('should return a route for a given policy report result', () => {
-    mockStore.getters['cluster/schemaFor'].mockImplementation((type: string) => {
-      return type === KUBEWARDEN.CLUSTER_ADMISSION_POLICY || type === KUBEWARDEN.ADMISSION_POLICY;
-    });
+    // Ensure the schema getter returns true for both types.
+    mockStore.getters['cluster/schemaFor'].mockImplementation((type: string) =>
+      type === KUBEWARDEN.CLUSTER_ADMISSION_POLICY || type === KUBEWARDEN.ADMISSION_POLICY
+    );
 
+    // For a cluster-level policy report (no namespace provided in properties)
     const report1 = {
-      policy:     'clusterwide-example-policy',
-      policyName: 'example-policy'
+      policy: 'clusterwide-example-policy',
+      properties: { 'policy-name': 'example-policy' }
     };
-    const route1 = policyReporterModule.getLinkForPolicy(mockStore, report1);
 
+    const route1 = policyReporterModule.getLinkForPolicy(mockStore, report1);
     expect(route1).toMatchObject({
-      name:   expect.any(String),
+      name: 'c-cluster-product-resource-id',
       params: expect.objectContaining({
-        id:       'example-policy',
-        resource: 'policies.kubewarden.io.clusteradmissionpolicy'
+        id: 'example-policy',
+        resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY
       })
     });
 
+    // For a namespaced policy report
     const report2 = {
-      policy:     'namespaced-something-example-policy',
-      policyName: 'example-policy',
-      properties: { 'policy-namespace': 'something' }
+      policy: 'namespaced-something-example-policy',
+      properties: { 'policy-name': 'example-policy', 'policy-namespace': 'something' }
     };
-    const route2 = policyReporterModule.getLinkForPolicy(mockStore, report2);
 
+    const route2 = policyReporterModule.getLinkForPolicy(mockStore, report2);
     expect(route2).toMatchObject({
-      name:   expect.any(String),
+      name: 'c-cluster-product-resource-namespace-id',
       params: expect.objectContaining({
-        id:        'example-policy',
-        resource:  'policies.kubewarden.io.admissionpolicy',
+        id: 'example-policy',
+        resource: KUBEWARDEN.ADMISSION_POLICY,
         namespace: 'something'
       })
     });
@@ -120,15 +178,16 @@ describe('newPolicyReportCompatible', () => {
 
     expect(result).toStrictEqual({
       oldPolicyReports: false,
-      newPolicyReports:  true
+      newPolicyReports: true
     });
   });
+
   it('should be incompatible with NEW data structure for a controller app version >= 1.11.0 && UI plugin version >= 1.3.6', () => {
     const result = policyReporterModule.newPolicyReportCompatible('1.11.0', '1.3.6');
 
     expect(result).toStrictEqual({
       oldPolicyReports: true,
-      newPolicyReports:  false
+      newPolicyReports: false
     });
   });
 });
