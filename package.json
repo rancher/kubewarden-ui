@@ -25,7 +25,7 @@
     "vuex": "4.1.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.26.8",
+    "@babel/preset-env": "^7.26.9",
     "@babel/preset-typescript": "^7.24.7",
     "@jest/globals": "^29.7.0",
     "@jest/types": "^29.6.3",
