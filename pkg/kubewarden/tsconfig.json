@@ -26,7 +26,8 @@
       "@shell/*": ["../../node_modules/@rancher/shell/*"],
       "@components/*": ["./node_modules/@rancher/components/*"],
       "@/*": ["../../*"],
-      "@kubewarden/*": ["./*"]
+      "@kubewarden/*": ["./*"],
+      "@tests/*": ["./tests/*"]
     }
   },
   "include": [
@@ -35,5 +36,5 @@
     "./**/*.vue",
     "../../node_modules/@rancher/shell/core/types.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"]
 }

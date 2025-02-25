@@ -1,6 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
 
-
 import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
 import General from '@kubewarden/chart/kubewarden/policy-server/General.vue';
 import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver.js';

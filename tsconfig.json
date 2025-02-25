@@ -37,12 +37,6 @@
       "shell"
     ]
   },
-  "include": [
-    "./pkg/kubewarden/**/*.ts",
-    "./pkg/kubewarden/**/*.tsx",
-    "./pkg/kubewarden/**/*.vue",
-    "./tests/**/*.ts",
-    "./tests/**/*.tsx"
-  ],
-  "exclude": ["node_modules", "tests", "jest.config.js"]
+  "include": ["./pkg/kubewarden/**/*.ts", "./pkg/kubewarden/**/*.tsx", "./pkg/kubewarden/**/*.vue"],
+  "exclude": ["node_modules", "tests", "**/*.spec.ts", "**/*.test.ts", "jest.*.ts"]
 }
