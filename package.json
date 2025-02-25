@@ -10,8 +10,7 @@
     "dev": "NODE_ENV=dev ./node_modules/.bin/vue-cli-service serve",
     "build": "./node_modules/.bin/vue-cli-service build",
     "clean": "./node_modules/@rancher/shell/scripts/clean",
-    "test": "jest --watch",
-    "test:ci": "export TS_JEST_DISABLE_VER_CHECKER=true && jest --collectCoverage",
+    "test:ci": "jest --collectCoverage",
     "test:unit": "jest --watch",
     "lint": "eslint .",
     "format": "eslint . --fix"

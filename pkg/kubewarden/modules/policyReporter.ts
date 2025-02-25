@@ -208,7 +208,7 @@ export async function getFilteredReport(store: Store<any>, resource: any): Promi
       // Fetch the appropriate reports based on the resource context
       const reports = await getReports(store, isClusterLevel, resourceType);
 
-      if (reports && !isEmpty(reports) ) {
+      if (reports && !isEmpty(reports)) {
         // Filter and return the applicable report
         const filteredReport = store.getters['kubewarden/reportByResourceId'](resource.id) || null;
 
@@ -229,7 +229,7 @@ export async function getFilteredReport(store: Store<any>, resource: any): Promi
  * @returns `createKubewardenRoute` | Will return a route to either a ClusterAdmissionPolicy or AdmissionPolicy
  */
 export function getLinkForPolicy(store: Store<any>, report: PolicyReportResult): object | void {
-  if ( report?.policy ) {
+  if (report?.policy) {
     const apSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.ADMISSION_POLICY);
     const capSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
     const policyType: string = report.properties?.['policy-namespace'] ? KUBEWARDEN.ADMISSION_POLICY : KUBEWARDEN.CLUSTER_ADMISSION_POLICY;
@@ -267,21 +267,21 @@ export function getLinkForPolicy(store: Store<any>, report: PolicyReportResult):
  * @returns `Route | void`
  */
 export function getLinkForResource(report: PolicyReport): object | void {
-  if ( !isEmpty(report.scope) ) {
+  if (!isEmpty(report.scope)) {
     const resource = report.scope;
 
-    if ( resource ) {
+    if (resource) {
       const isCore = Object.values(coreTypes).find((type) => resource.kind === type.attributes.kind);
       let resourceType;
 
-      if ( isCore ) {
+      if (isCore) {
         resourceType = resource.kind.toLowerCase();
       } else {
         resourceType = splitGroupKind(resource);
       }
 
-      if ( resourceType ) {
-        if ( resource.namespace ) {
+      if (resourceType) {
+        if (resource.namespace) {
           return {
             name:   'c-cluster-product-resource-namespace-id',
             params: {

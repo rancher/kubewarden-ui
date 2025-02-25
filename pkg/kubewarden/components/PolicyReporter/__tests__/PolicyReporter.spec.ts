@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils';
 import PolicyReporter from '@kubewarden/components/PolicyReporter/index.vue';
 
 import mockControllerDeployment from '@/tests/unit/mocks/controllerDeployment';
+import { mockControllerApp } from '@/tests/unit/mocks/controllerApp';
 import { KUBEWARDEN, WG_POLICY_K8S } from '@kubewarden/types';
 
 // Create a mock for the 'cluster/schemaFor' getter that returns different values based on the input.
@@ -28,6 +29,7 @@ const commonMocks = {
       'cluster/all':                () => [mockControllerDeployment],
       'cluster/canList':            jest.fn,
       'cluster/schemaFor':          clusterSchemaFor,
+      'kubewarden/controllerApp':   mockControllerApp,
       'i18n/t':                     jest.fn(),
       'management/byId':            () => 'local',
       'resource-fetch/refreshFlag': jest.fn()
@@ -113,16 +115,22 @@ describe('component: PolicyReporter', () => {
   });
 
   it('Should show incompatible banner with old version', () => {
-    const mockCloneWithOldVersion = { ...mockControllerDeployment };
+    const mockCloneAppWithOldVersion = { ...mockControllerApp };
 
-    mockCloneWithOldVersion.metadata!.labels!['app.kubernetes.io/version'] = kwVersions.old;
+    mockCloneAppWithOldVersion.spec.chart.metadata.appVersion = kwVersions.old;
 
     const wrapper = createWrapper({
-      data() {
-        return {
-          ...commonData,
-          controller: mockControllerDeployment
-        };
+      global: {
+        mocks: {
+          ...commonMocks,
+          $store: {
+            getters: {
+              ...commonMocks.$store.getters,
+              'kubewarden/controllerApp': mockCloneAppWithOldVersion
+            }
+          }
+        },
+        stubs: commonStubs
       }
     });
 
@@ -135,18 +143,13 @@ describe('component: PolicyReporter', () => {
   });
 
   it('Should show CRDs warning banner when not installed', () => {
-    const mockCloneWithOldVersion = { ...mockControllerDeployment };
+    // Re-clone the controller app with a new version.
+    const mockCloneAppWithNewVersion = { ...mockControllerApp };
 
-    mockCloneWithOldVersion.metadata!.labels!['app.kubernetes.io/version'] = kwVersions.new;
+    mockCloneAppWithNewVersion.spec.chart.metadata.appVersion = kwVersions.new;
 
     // Mock the 'cluster/schemaFor' getter to return false for WG_POLICY_K8S resources.
     const wrapper = createWrapper({
-      data() {
-        return {
-          ...commonData,
-          controller: mockControllerDeployment
-        };
-      },
       global: {
         mocks: {
           ...commonMocks,
@@ -159,7 +162,8 @@ describe('component: PolicyReporter', () => {
                 }
 
                 return true;
-              })
+              }),
+              'kubewarden/controllerApp': mockCloneAppWithNewVersion
             }
           }
         },

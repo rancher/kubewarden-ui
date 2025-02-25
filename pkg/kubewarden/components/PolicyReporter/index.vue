@@ -87,7 +87,7 @@ export default {
     },
 
     controllerDeployments() {
-      return this.allDeployments?.filter(deploy => (
+      return this.allDeployments?.filter((deploy) => (
         deploy?.metadata?.labels?.[KUBERNETES.INSTANCE] === KUBEWARDEN_APPS.RANCHER_CONTROLLER
       ));
     },
@@ -114,9 +114,7 @@ export default {
 
     reporterDeployment() {
       // Policy Reporter UI labels: ui (kubewarden < v1.22.0), policy-reporter-ui (kubewarden >= v1.22.0)
-      return this.controllerDeployments?.find(deploy =>
-        ['ui', 'policy-reporter-ui'].includes(deploy?.metadata?.labels?.['app.kubernetes.io/name'])
-      );
+      return this.controllerDeployments?.find((deploy) => ['ui', 'policy-reporter-ui'].includes(deploy?.metadata?.labels?.['app.kubernetes.io/name']));
     },
 
     reporterDeploymentState() {
@@ -127,7 +125,7 @@ export default {
       const storedApp = this.$store.getters['kubewarden/controllerApp'];
 
       if (!storedApp) {
-        const controller = this.allApps?.find(a => (
+        const controller = this.allApps?.find((a) => (
           a?.spec?.chart?.metadata?.name === (KUBEWARDEN_CHARTS.CONTROLLER || KUBEWARDEN_APPS.RANCHER_CONTROLLER)
         ));
 
@@ -184,7 +182,7 @@ export default {
               {
                 var:         'reporterUIService',
                 parsingFunc: (data) => {
-                  return data.find(service => ['policy-reporter-ui', 'ui'].includes(service?.metadata?.labels?.['app.kubernetes.io/name']));
+                  return data.find((service) => ['policy-reporter-ui', 'ui'].includes(service?.metadata?.labels?.['app.kubernetes.io/name']));
                 }
               }
             ]
