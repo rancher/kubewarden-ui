@@ -157,7 +157,11 @@ export class KubewardenPage extends BasePage {
         await expect(apps.stepTitle).toContainText(`${from?.controller || ''} > ${to?.controller || ''}`)
       }
       await apps.updateApp('rancher-kubewarden-controller', { navigate: false, timeout: 4 * 60_000 })
-      await shell.waitPods()
+      // 4.1.0 Error: error while loading policies from "/config/policies.yml": data did not match any variant of untagged enum PolicyOrPolicyGroup
+      // 4.2.0 Probe port change from https to http
+      if (!to?.controller?.startsWith('4.1') && !to?.controller?.startsWith('4.2')) {
+        await shell.waitPods()
+      }
 
       // Defaults upgrade
       await this.nav.kubewarden()
