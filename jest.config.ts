@@ -17,7 +17,6 @@ const config: Config.InitialOptions = {
     '@tests/(.*)':      '<rootDir>/tests/$1',
   },
   transform: {
-    '^.+\\.js$':   '<rootDir>/node_modules/babel-jest',
     '.*\\.(vue)$': '<rootDir>/node_modules/@vue/vue3-jest',
     '^.+\\.tsx?$': ['ts-jest', { isolatedModules: true }],
     '^.+\\.svg$':  '<rootDir>/tests/unit/config/svgTransform.ts' // to mock `*.svg` files
