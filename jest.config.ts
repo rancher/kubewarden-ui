@@ -17,7 +17,8 @@ const config: Config.InitialOptions = {
     '@tests/(.*)':      '<rootDir>/tests/$1',
   },
   transform: {
-    '.*\\.(vue)$': '<rootDir>/node_modules/@vue/vue3-jest',
+    '^.+\\.js$':   '<rootDir>/node_modules/babel-jest',
+    '.*\\.vue$':   '<rootDir>/node_modules/@vue/vue3-jest',
     '^.+\\.tsx?$': ['ts-jest', { isolatedModules: true }],
     '^.+\\.svg$':  '<rootDir>/tests/unit/config/svgTransform.ts' // to mock `*.svg` files
   },
@@ -31,6 +32,7 @@ const config: Config.InitialOptions = {
   ],
   coverageDirectory: '<rootDir>/coverage/unit',
   coverageReporters: ['json', 'text-summary'],
+  coverageProvider:  'v8',
   preset:            'ts-jest',
 };
 
