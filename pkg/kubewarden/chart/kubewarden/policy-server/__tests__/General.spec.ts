@@ -1,21 +1,33 @@
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
+import flushPromises from 'flush-promises';
 
-import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
 import General from '@kubewarden/chart/kubewarden/policy-server/General.vue';
-import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver.js';
+import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
+import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
 
 import { fleetBundles as bundles } from '@tests/unit/mocks/fleetBundles';
 import { mockControllerAppWithFleet } from '@tests/unit/mocks/controllerApp';
 
-interface FleetModule {
-  getPolicyServerModule: (fleetBundles: any[]) => string | null; // eslint-disable-line no-unused-vars
-  isFleetDeployment: (app: any) => boolean; // eslint-disable-line no-unused-vars
-  findFleetContent: (context: string, fleetBundles: any[], skipChart?: string) => any | null; // eslint-disable-line no-unused-vars
+interface StoreOverrides {
+  apps?: any[];
+  fleetBundles?: any[];
+  controllerApp?: any;
+  defaultsChart?: any;
 }
 
-// Properly type the actual fleet module in our jest.mock.
+interface WrapperOptions {
+  storeOverrides?: StoreOverrides;
+  props?: Record<string, any>;
+  global?: {
+    mocks?: Record<string, any>;
+    stubs?: Record<string, any>;
+  };
+}
+
+// Update the fleet module mock to match the new import path.
 jest.mock('@kubewarden/modules/fleet', () => {
-  const actual = jest.requireActual('@kubewarden/modules/fleet') as FleetModule;
+  const actual = jest.requireActual('@kubewarden/modules/fleet');
 
   return {
     getPolicyServerModule: actual.getPolicyServerModule,
@@ -24,74 +36,76 @@ jest.mock('@kubewarden/modules/fleet', () => {
   };
 });
 
-jest.mock('@shell/mixins/resource-fetch', () => ({
-  methods: {
-    __getCountForResource: jest.fn().mockReturnValue(0),
-    $initializeFetchData:  jest.fn(),
-    $fetchType:            jest.fn()
-  }
-}));
+// Create a fake store that mimics the getters and dispatch used in General.vue.
+function createFakeStore(overrides: StoreOverrides = {}) {
+  return {
+    getters: {
+      'cluster/canList': () => true,
+      // For simplicity, we assume that if the component asks for apps it returns an empty array.
+      'cluster/all':     (type) => {
+        if (type === 'app') {
+          return overrides.apps || [];
+        }
 
-// Common defaults for mounting the component.
+        return [];
+      },
+      'i18n/t':                     () => (key) => key,
+      'management/byId':            jest.fn(),
+      'resource-fetch/refreshFlag': jest.fn(),
+      'management/all':             (type) => {
+        if (type === 'fleet.cattle.io.bundle') {
+          return overrides.fleetBundles || [];
+        }
+
+        return [];
+      },
+      'kubewarden/controllerApp': overrides.controllerApp || null,
+      'catalog/chart':            jest.fn(() => overrides.defaultsChart || null)
+    },
+    dispatch: jest.fn(() => Promise.resolve())
+  };
+}
+
 const defaultMountOptions = {
   props: {
     value:           DEFAULT_POLICY_SERVER,
+    // For the new component, serviceAccounts are passed as a prop.
     serviceAccounts: ['sa-1', 'sa-2', 'sa-3']
-  },
-  computed: {
-    isCreate:          () => false,
-    defaultsChart:     () => null,
-    showVersionBanner: () => false
+    // Note: not passing mode means isCreate (computed as mode === _CREATE) will be false.
   },
   global: {
-    mocks: {
-      $fetchState: { pending: false },
-      $store:      {
-        getters: {
-          'cluster/canList':            () => true,
-          'cluster/all':                jest.fn(),
-          'i18n/t':                     jest.fn(),
-          'management/byId':            jest.fn(),
-          'resource-fetch/refreshFlag': jest.fn(),
-          'management/all':             jest.fn(),
-        },
-        dispatch: jest.fn()
-      }
-    },
     stubs: {
-      LabeledInput:      { template: '<span />' },
-      RadioGroup:        { template: '<span />' },
-      Banner:            { template: '<span />' },
+      // Loading:           { template: '<div data-testid="loading" />' },
       ServiceNameSelect: {
         template: '<div />',
-        props:    ['value', 'options']
+        props:    ['modelValue', 'options']
       },
+      Banner:         { template: '<span />' },
+      LabeledInput:   { template: '<span />' },
+      LabeledTooltip: { template: '<span />' },
+      RadioGroup:     { template: '<span />' }
     }
   }
 };
 
-// A helper that deep-merges overrides into the default options.
-function createWrapper(overrides: any = {}) {
-  return shallowMount(General, {
+function createWrapper(options: WrapperOptions = {}) {
+  const store = createFakeStore(options.storeOverrides || {});
+  const mountOptions = {
     props: {
       ...defaultMountOptions.props,
-      ...(overrides.props || {})
-    },
-    computed: {
-      ...defaultMountOptions.computed,
-      ...(overrides.computed || {})
+      ...(options.props || {})
     },
     global: {
-      mocks: {
-        ...defaultMountOptions.global.mocks,
-        ...(overrides.global?.mocks || {})
-      },
-      stubs: {
+      provide: { store },
+      mocks:   { ...(options.global?.mocks || {}) },
+      stubs:   {
         ...defaultMountOptions.global.stubs,
-        ...(overrides.global?.stubs || {})
+        ...(options.global?.stubs || {})
       }
     }
-  });
+  };
+
+  return mount(General, mountOptions);
 }
 
 describe('component: General', () => {
@@ -99,11 +113,10 @@ describe('component: General', () => {
     const wrapper = createWrapper();
     const selector = wrapper.findComponent(ServiceNameSelect);
 
-    expect(selector.props().options).toStrictEqual(['sa-1', 'sa-2', 'sa-3']);
+    expect(selector.props('options')).toStrictEqual(['sa-1', 'sa-2', 'sa-3']);
   });
 
   it('displays correct service account when existing', async() => {
-    // override the value with an existing service account name.
     const policyServer = {
       ...DEFAULT_POLICY_SERVER,
       spec: { serviceAccountName: 'sa-2' }
@@ -112,62 +125,60 @@ describe('component: General', () => {
     const wrapper = createWrapper({ props: { value: policyServer } });
     const selector = wrapper.findComponent(ServiceNameSelect);
 
-    await wrapper.vm.$nextTick();
+    await nextTick();
 
-    expect(selector.props().value).toStrictEqual('sa-2');
+    expect(selector.props('value')).toStrictEqual('sa-2');
   });
 
   it('extracts latestChartVersion when isFleet is true', async() => {
-    const latestChartVersion = 'ghcr.io/kubewarden/policy-server:v1.15.0';
+    const expectedVersion = 'ghcr.io/kubewarden/policy-server:v1.15.0';
+
+    // Override the fake store to simulate a fleet deployment.
     const wrapper = createWrapper({
-      computed: {
-        fleetBundles:  () => bundles,
-        controllerApp: () => mockControllerAppWithFleet
+      storeOverrides: {
+        controllerApp: mockControllerAppWithFleet,
+        fleetBundles:  bundles
       }
     });
 
-    // Wait a tick for the component to mount and update.
-    await new Promise((resolve) => setTimeout(resolve, 1));
+    // Wait for fetchData (called onMounted) and any subsequent promise resolution.
+    await flushPromises();
 
-    expect((wrapper.vm as any).latestChartVersion).toBe(latestChartVersion);
+    expect(wrapper.vm.latestChartVersion).toBe(expectedVersion);
   });
 
-  it('hides image-row when isLoading is true', async() => {
-    const wrapper = createWrapper({ global: { mocks: { $fetchState: { pending: true } } } });
+  it('hides main content when isLoading is true', async() => {
+    const wrapper = createWrapper();
 
-    // Set the isLoading flag.
-    (wrapper.vm as any).isLoading = true;
-    await wrapper.vm.$nextTick();
+    wrapper.vm.isLoading = true;
+    await nextTick();
 
-    const imageLoading = wrapper.find('[data-testid="ps-config-image-loading"]');
-
-    expect(imageLoading.exists()).toBe(false);
+    expect(wrapper.find('[data-testid="ps-general-loading"').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ps-config-image-inputs"]').exists()).toBe(false);
   });
 
   it('shows image-row when isLoading is false', async() => {
     const wrapper = createWrapper();
 
-    (wrapper.vm as any).isLoading = false;
-    await wrapper.vm.$nextTick();
+    wrapper.vm.isLoading = false;
+    await nextTick();
 
-    const imageInputs = wrapper.find('[data-testid="ps-config-image-inputs"]');
-
-    expect(imageInputs.exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ps-config-image-inputs"]').exists()).toBe(true);
   });
 
   it('sets defaultImage to true when not isCreate and image matches latestChartVersion', async() => {
-    const latestChartVersion = 'ghcr.io/kubewarden/policy-server:v1.15.0';
-    const wrapper = createWrapper({
-      props: {
-        value: {
-          ...DEFAULT_POLICY_SERVER,
-          spec: { image: latestChartVersion }
-        }
-      },
-    });
+    const expectedVersion = 'ghcr.io/kubewarden/policy-server:v1.15.0';
+    const policyServer = {
+      ...DEFAULT_POLICY_SERVER,
+      spec: { image: expectedVersion }
+    };
 
-    await new Promise((resolve) => setTimeout(resolve, 1));
+    const wrapper = createWrapper({ props: { value: policyServer } });
 
-    expect((wrapper.vm as any).defaultImage).toBe(true);
+    // Simulate that fetchData (onMounted) has set latestChartVersion to the expected value.
+    wrapper.vm.latestChartVersion = expectedVersion;
+    await nextTick();
+
+    expect(wrapper.vm.defaultImage).toBe(true);
   });
 });
