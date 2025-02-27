@@ -11,7 +11,7 @@ import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 
-import { KUBEWARDEN, KUBEWARDEN_APPS } from '../../../types';
+import { KUBEWARDEN, KUBEWARDEN_APPS } from '@kubewarden/types';
 
 export default {
   name: 'General',
@@ -47,15 +47,15 @@ export default {
   },
 
   async fetch() {
-    if ( this.$store.getters['cluster/canList'](KUBEWARDEN.POLICY_SERVER) ) {
+    if (this.$store.getters['cluster/canList'](KUBEWARDEN.POLICY_SERVER)) {
       await this.$store.dispatch('cluster/findAll', { type: KUBEWARDEN.POLICY_SERVER });
     }
 
-    if ( this.isCreate && !isEmpty(this.policy.spec) ) {
+    if (this.isCreate && !isEmpty(this.policy.spec)) {
       set(this.policy.spec, 'mode', 'protect');
     }
 
-    if ( this.isCreate && !isEmpty(this.policyServers) ) {
+    if (this.isCreate && !isEmpty(this.policyServers)) {
       const defaultPolicyServer = this.policyServers.find((ps) => {
         return ps.metadata.annotations?.['meta.helm.sh/release-name'] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
       });
@@ -67,7 +67,7 @@ export default {
   data() {
     let policy = null;
 
-    if ( this.value?.policy ) {
+    if (this.value?.policy) {
       policy = this.value.policy;
     } else {
       policy = this.value || {};
@@ -75,7 +75,7 @@ export default {
 
     // fix for https://github.com/rancher/kubewarden-ui/issues/672
     // enforce `default` as namespace for creation of AP's
-    if ( this.mode === _CREATE && this.chartType === KUBEWARDEN.ADMISSION_POLICY ) {
+    if (this.mode === _CREATE && this.chartType === KUBEWARDEN.ADMISSION_POLICY) {
       set(policy.metadata, 'namespace', 'default');
     }
 
@@ -93,7 +93,7 @@ export default {
   },
 
   created() {
-    if ( this.policyMode ) {
+    if (this.policyMode) {
       this.initialPolicyMode = this.policyMode;
     }
   },
@@ -106,12 +106,12 @@ export default {
 
       const children = wrapper?.querySelectorAll('.row.mb-20 > .col.span-3');
 
-      if ( this.isGlobal ) {
-        if ( children?.length === 1 ) {
+      if (this.isGlobal) {
+        if (children?.length === 1) {
           children[0].classList.remove('span-3');
           children[0].classList.add('span-12');
         }
-      } else if ( children?.length === 2 ) {
+      } else if (children?.length === 2) {
         children[0].classList.remove('span-3');
         children[0].classList.add('span-4');
         children[1].classList.remove('span-3');
@@ -131,7 +131,7 @@ export default {
 
     modeDisabled() {
       // Kubewarden doesn't allow switching a policy from 'protect' to 'monitor'
-      if ( !this.isCreate ) {
+      if (!this.isCreate) {
         return this.initialPolicyMode === 'protect';
       }
 
@@ -147,7 +147,7 @@ export default {
     },
 
     policyServerOptions() {
-      if ( this.policyServers?.length > 0 ) {
+      if (this.policyServers?.length > 0) {
         const out = [];
 
         this.policyServers.map((p) => out.push(p.id));
@@ -159,7 +159,7 @@ export default {
     },
 
     showModeBanner() {
-      if ( !this.isCreate && ( this.initialPolicyMode === 'monitor' && this.policyMode === 'protect' ) ) {
+      if (!this.isCreate && (this.initialPolicyMode === 'monitor' && this.policyMode === 'protect')) {
         return true;
       }
 

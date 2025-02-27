@@ -5,8 +5,8 @@ import isEmpty from 'lodash/isEmpty';
 
 import { sortBy } from '@shell/utils/sort';
 
-import { Result, PolicyReportSummary } from '../types';
-import { colorForResult } from '../modules/policyReporter';
+import { Result, PolicyReportSummary } from '@kubewarden/types';
+import { colorForResult } from '@kubewarden/modules/policyReporter';
 
 const attrs = useAttrs();
 

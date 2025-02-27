@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import { WORKLOAD_TYPES } from '@shell/config/types';
 
 import { BadgeState } from '@components/BadgeState';
-import { colorForPolicyServerState } from '../plugins/kubewarden-class';
+import { colorForPolicyServerState } from '@kubewarden/plugins/kubewarden-class';
 
 export default {
   components: { BadgeState },
@@ -17,7 +17,7 @@ export default {
   },
 
   async fetch() {
-    if ( this.$store.getters['cluster/canList'](WORKLOAD_TYPES.DEPLOYMENT) ) {
+    if (this.$store.getters['cluster/canList'](WORKLOAD_TYPES.DEPLOYMENT)) {
       await this.$store.dispatch('cluster/findAll', { type: WORKLOAD_TYPES.DEPLOYMENT });
     }
   },
@@ -29,8 +29,8 @@ export default {
     },
 
     deployment() {
-      if ( !isEmpty(this.allDeployments) ) {
-        return this.allDeployments.find(d => d.spec.template.metadata.labels['kubewarden/policy-server'] === this.value);
+      if (!isEmpty(this.allDeployments)) {
+        return this.allDeployments.find((d) => d.spec.template.metadata.labels['kubewarden/policy-server'] === this.value);
       }
 
       return null;
@@ -41,7 +41,7 @@ export default {
     },
 
     stateDisplay() {
-      if ( !isEmpty(this.deployment) ) {
+      if (!isEmpty(this.deployment)) {
         return this.deployment.metadata?.state?.name;
       }
 

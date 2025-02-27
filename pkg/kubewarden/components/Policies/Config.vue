@@ -7,7 +7,7 @@ import { set } from '@shell/utils/object';
 
 import Loading from '@shell/components/Loading';
 
-import { ARTIFACTHUB_PKG_ANNOTATION, DATA_ANNOTATIONS, DEFAULT_POLICY } from '../../types';
+import { ARTIFACTHUB_PKG_ANNOTATION, DATA_ANNOTATIONS, DEFAULT_POLICY } from '@kubewarden/types';
 
 import Values from './Values.vue';
 import PolicyReadmePanel from './PolicyReadmePanel';
@@ -27,7 +27,9 @@ export default {
   },
 
   components: {
-    Loading, Values, PolicyReadmePanel
+    Loading,
+    Values,
+    PolicyReadmePanel
   },
 
   async fetch() {},
@@ -38,22 +40,22 @@ export default {
       questions: null
     };
 
-    if ( this.value?.metadata?.annotations?.[ARTIFACTHUB_PKG_ANNOTATION] ) {
+    if (this.value?.metadata?.annotations?.[ARTIFACTHUB_PKG_ANNOTATION]) {
       try {
         const ahPackage = await this.value.artifactHubPackageVersion();
 
-        if ( ahPackage && !ahPackage.error ) {
+        if (ahPackage && !ahPackage.error) {
           this.artifactHubPackage = ahPackage;
 
-          if ( ahPackage.description ) {
+          if (ahPackage.description) {
             this.shortDescription = ahPackage.description;
           }
 
-          if ( ahPackage.readme ) {
+          if (ahPackage.readme) {
             this.policyReadme = JSON.parse(JSON.stringify(ahPackage.readme));
           }
 
-          if ( ahPackage.data?.[DATA_ANNOTATIONS.QUESTIONS] ) {
+          if (ahPackage.data?.[DATA_ANNOTATIONS.QUESTIONS]) {
             const defaultPolicy = structuredClone(DEFAULT_POLICY);
 
             const merged = merge(defaultPolicy.spec.settings, this.chartValues.policy?.spec?.settings);
@@ -62,13 +64,13 @@ export default {
 
             this.policyQuestions = this.value.parsePackageMetadata(ahPackage.data[DATA_ANNOTATIONS.QUESTIONS]);
 
-            if ( this.policyQuestions ) {
+            if (this.policyQuestions) {
               set(this.chartValues, 'questions', this.policyQuestions);
             }
           }
         }
       } catch (e) {
-        console.warn(`Unable to fetch artifacthub package: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Unable to fetch artifacthub package: ${ e }`);
       }
     }
 

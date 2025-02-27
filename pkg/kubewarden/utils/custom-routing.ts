@@ -1,4 +1,4 @@
-import { KUBEWARDEN_PRODUCT_NAME } from '../types';
+import { KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
 
 interface KubewardenRouteConfig {
   name?: string;
@@ -13,7 +13,10 @@ interface KubewardenRouteConfig {
 export const rootKubewardenRoute = (): KubewardenRouteConfig => ({
   name:   `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }`,
   params: { product: KUBEWARDEN_PRODUCT_NAME },
-  meta:   { pkg: KUBEWARDEN_PRODUCT_NAME, product: KUBEWARDEN_PRODUCT_NAME }
+  meta:   {
+    pkg:     KUBEWARDEN_PRODUCT_NAME,
+    product: KUBEWARDEN_PRODUCT_NAME
+  }
 });
 
 export const createKubewardenRoute = (config?: KubewardenRouteConfig) => {
@@ -21,7 +24,13 @@ export const createKubewardenRoute = (config?: KubewardenRouteConfig) => {
 
   return {
     name:   name || `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource`,
-    params: { ...rootKubewardenRoute().params, ...params },
-    meta:   { ...rootKubewardenRoute().meta, ...meta }
+    params: {
+      ...rootKubewardenRoute().params,
+      ...params
+    },
+    meta:   {
+      ...rootKubewardenRoute().meta,
+      ...meta
+    }
   };
 };

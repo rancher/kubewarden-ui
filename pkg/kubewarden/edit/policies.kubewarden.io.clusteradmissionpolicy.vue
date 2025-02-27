@@ -4,11 +4,11 @@ import { _CREATE, _EDIT, _CLONE } from '@shell/config/query-params';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import CruResource from '@shell/components/CruResource';
-import { removeEmptyAttrs } from '../utils/object';
-import { handleGrowl } from '../utils/handle-growl';
+import { removeEmptyAttrs } from '@kubewarden/utils/object';
+import { handleGrowl } from '@kubewarden/utils/handle-growl';
 
-import Config from '../components/Policies/Config';
-import Create from '../components/Policies/Create';
+import Config from '@kubewarden/components/Policies/Config';
+import Create from '@kubewarden/components/Policies/Create';
 
 export default {
   name: 'ClusterAdmissionPolicy',
@@ -31,13 +31,18 @@ export default {
   },
 
   components: {
-    CruResource, Config, Create
+    CruResource,
+    Config,
+    Create
   },
 
   mixins: [CreateEditView],
 
   provide() {
-    return { chartType: this.value.type, realMode: this.realMode };
+    return {
+      chartType: this.value.type,
+      realMode:  this.realMode
+    };
   },
 
   computed: {
@@ -63,7 +68,10 @@ export default {
 
         await this.save(event);
       } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
+        handleGrowl({
+          error: e,
+          store: this.$store
+        });
       }
     },
     // this updates the "value" obj for CAP's

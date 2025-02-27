@@ -11,12 +11,12 @@ import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
 import Markdown from '@shell/components/Markdown';
 
-import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPO } from '../../types';
-import { getLatestVersion } from '../../plugins/kubewarden-class';
-import { handleGrowl } from '../../utils/handle-growl';
-import { refreshCharts } from '../../utils/chart';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPO } from '@kubewarden/types';
+import { getLatestVersion } from '@kubewarden/plugins/kubewarden-class';
+import { handleGrowl } from '@kubewarden/utils/handle-growl';
+import { refreshCharts } from '@kubewarden/utils/chart';
 
-import InstallWizard from '../InstallWizard';
+import InstallWizard from '@kubewarden/components/InstallWizard';
 
 export default {
   props: {
@@ -47,7 +47,7 @@ export default {
 
     this.reloadReady = false;
 
-    if ( !this.hasSchema ) {
+    if (!this.hasSchema) {
       if (this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO)) {
         await this.$fetchType(CATALOG.CLUSTER_REPO);
       }
@@ -57,7 +57,7 @@ export default {
         this.installSteps[0].ready = true;
       }
 
-      if ( !this.kubewardenRepo || !this.controllerChart ) {
+      if (!this.kubewardenRepo || !this.controllerChart) {
         this.debouncedRefreshCharts(true);
       }
     }
@@ -88,10 +88,10 @@ export default {
   },
 
   async mounted() {
-    if ( this.isAirgap ) {
+    if (this.isAirgap) {
       const docs = (await import(/* webpackChunkName: "airgap-docs" */ '../../assets/airgap-installation.md'));
 
-      if ( docs ) {
+      if (docs) {
         this.docs.airgap = docs.body;
       }
     }
@@ -101,7 +101,7 @@ export default {
     controllerChart() {
       this.installSteps[0].ready = true;
 
-      if ( this.isAirgap ) {
+      if (this.isAirgap) {
         this.debouncedRefreshCharts();
       }
 
@@ -131,7 +131,7 @@ export default {
      */
 
     controllerChart() {
-      if ( this.kubewardenRepo ) {
+      if (this.kubewardenRepo) {
         return this.$store.getters['catalog/chart']({
           repoName:  this.kubewardenRepo.id,
           repoType:  'cluster',
@@ -174,7 +174,7 @@ export default {
           return;
         }
 
-        if ( !this.controllerChart ) {
+        if (!this.controllerChart) {
           this.debouncedRefreshCharts();
         }
       } catch (e) {
@@ -187,7 +187,7 @@ export default {
     },
 
     chartRoute() {
-      if ( !this.controllerChart ) {
+      if (!this.controllerChart) {
         try {
           this.debouncedRefreshCharts();
         } catch (e) {
@@ -206,7 +206,7 @@ export default {
 
       const latestChartVersion = getLatestVersion(this.$store, versions);
 
-      if ( latestChartVersion ) {
+      if (latestChartVersion) {
         const query = {
           [REPO_TYPE]: repoType,
           [REPO]:      repoName,

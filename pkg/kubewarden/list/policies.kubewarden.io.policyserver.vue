@@ -5,13 +5,15 @@ import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations
 import Loading from '@shell/components/Loading';
 import ResourceTable from '@shell/components/ResourceTable';
 
-import { KUBEWARDEN_APPS } from '../types';
+import { KUBEWARDEN_APPS } from '@kubewarden/types';
 
-import DefaultsBanner from '../components/DefaultsBanner';
+import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
 
 export default {
   components: {
-    DefaultsBanner, Loading, ResourceTable
+    DefaultsBanner,
+    Loading,
+    ResourceTable
   },
 
   props: {
@@ -28,10 +30,10 @@ export default {
   async fetch() {
     await this.$store.dispatch('cluster/findAll', { type: this.resource });
 
-    if ( this.$store.getters['cluster/canList'](CATALOG.APP) ) {
+    if (this.$store.getters['cluster/canList'](CATALOG.APP)) {
       await this.$store.dispatch('catalog/load');
 
-      if ( !this.hideBannerDefaults ) {
+      if (!this.hideBannerDefaults) {
         this.apps = await this.$store.dispatch('cluster/findAll', { type: CATALOG.APP });
       }
     }

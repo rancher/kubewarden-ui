@@ -13,7 +13,7 @@ import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
 
-import { KUBEWARDEN_CHARTS, VALUES_STATE, YAML_OPTIONS, RANCHER_NS_MATCH_EXPRESSION } from '../../types';
+import { KUBEWARDEN_CHARTS, VALUES_STATE, YAML_OPTIONS, RANCHER_NS_MATCH_EXPRESSION } from '@kubewarden/types';
 
 export default {
   name: 'Values',
@@ -42,23 +42,27 @@ export default {
   },
 
   components: {
-    ButtonGroup, Loading, ResourceCancelModal, Tabbed, YamlEditor
+    ButtonGroup,
+    Loading,
+    ResourceCancelModal,
+    Tabbed,
+    YamlEditor
   },
 
   async fetch() {
-    if ( isEmpty(this.chartValues.questions) && !!this.chartValues?.policy?.spec?.settings ) {
+    if (isEmpty(this.chartValues.questions) && !!this.chartValues?.policy?.spec?.settings) {
       try {
         const pkg = await this.value.artifactHubPackageVersion();
 
-        if ( pkg && !pkg.error ) {
+        if (pkg && !pkg.error) {
           const packageQuestions = this.value.parsePackageMetadata(pkg?.data?.['kubewarden/questions-ui']);
 
-          if ( packageQuestions ) {
+          if (packageQuestions) {
             set(this.chartValues, 'questions', packageQuestions);
           }
         }
       } catch (e) {
-        console.warn(`Unable to fetch chart questions: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Unable to fetch chart questions: ${ e }`);
       }
     }
 
@@ -71,7 +75,7 @@ export default {
 
       this.loadValuesComponent();
     } catch (e) {
-      console.warn(`Unable to fetch Version: ${ e }`); // eslint-disable-line no-console
+      console.warn(`Unable to fetch Version: ${ e }`);
     }
 
     this.generateYaml();
@@ -111,7 +115,7 @@ export default {
 
         break;
       case VALUES_STATE.YAML:
-        if ( old === VALUES_STATE.FORM ) {
+        if (old === VALUES_STATE.FORM) {
           this.currentYamlValues = saferDump(this.chartValues.policy);
           this.updateYamlValues();
         }
@@ -146,7 +150,7 @@ export default {
       const rawPolicy = toRaw(this.chartValues.policy);
       const cloned = rawPolicy ? structuredClone(rawPolicy) : this.value;
 
-      if ( this.yamlValues?.length ) {
+      if (this.yamlValues?.length) {
         this.currentYamlValues = this.yamlValues;
       } else {
         this.currentYamlValues = createYaml(schemas, this.value?.type, cloned);
@@ -154,8 +158,9 @@ export default {
     },
 
     loadValuesComponent() {
-      if ( this.value?.haveComponent('kubewarden/admission') ) {
+      if (this.value?.haveComponent('kubewarden/admission')) {
         const importFn = this.value.importComponent('kubewarden/admission');
+
         this.valuesComponent = defineAsyncComponent(importFn);
       }
     },

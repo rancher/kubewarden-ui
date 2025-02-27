@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  ref, reactive, computed, onMounted, watch, nextTick, getCurrentInstance
+  ref, reactive, computed, onMounted, nextTick, getCurrentInstance
 } from 'vue';
 import { useStore } from 'vuex';
 import { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
@@ -12,14 +12,14 @@ import { BadgeState } from '@components/BadgeState';
 import { Banner } from '@components/Banner';
 import SortableTable from '@shell/components/SortableTable';
 
-import { KUBEWARDEN, PolicyReport, PolicyReportResult, ClusterPolicyReport } from '../../types';
-import { POLICY_REPORTER_HEADERS } from '../../config/table-headers';
+import { KUBEWARDEN, PolicyReport, PolicyReportResult, ClusterPolicyReport } from '@kubewarden/types';
+import { POLICY_REPORTER_HEADERS } from '@kubewarden/config/table-headers';
 import {
   getFilteredReport,
   getLinkForPolicy,
   colorForResult,
   colorForSeverity
-} from '../../modules/policyReporter';
+} from '@kubewarden/modules/policyReporter';
 
 const store = useStore();
 let route: RouteLocationNormalizedLoaded | null = null;
@@ -103,8 +103,8 @@ function statusColor(row: PolicyReportResult) {
 
 function formattedDisplayName(displayName: string): string {
   return displayName
-    .replace(/^clusterwide-/, "") // Remove 'clusterwide-' prefix
-    .replace(/^namespaced-[^-]+-/, ""); // Remove 'namespaced-<namespace>-' prefix
+    .replace(/^clusterwide-/, '') // Remove 'clusterwide-' prefix
+    .replace(/^namespaced-[^-]+-/, ''); // Remove 'namespaced-<namespace>-' prefix
 };
 
 onMounted(async() => {

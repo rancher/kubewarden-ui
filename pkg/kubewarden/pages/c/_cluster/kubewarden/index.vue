@@ -3,18 +3,20 @@ import { CATALOG, WORKLOAD_TYPES } from '@shell/config/types';
 
 import { Banner } from '@components/Banner';
 
-import { KUBEWARDEN } from '../../../../types';
-import { isAirgap } from '../../../../utils/determine-airgap';
-import { isAdminUser } from '../../../../utils/permissions';
+import { KUBEWARDEN } from '@kubewarden/types';
+import { isAirgap } from '@kubewarden/utils/determine-airgap';
+import { isAdminUser } from '@kubewarden/utils/permissions';
 
-import DashboardView from '../../../../components/Dashboard/DashboardView';
-import InstallView from '../../../../components/Dashboard/InstallView';
+import DashboardView from '@kubewarden/components/Dashboard/DashboardView';
+import InstallView from '@kubewarden/components/Dashboard/InstallView';
 
 export default {
   name: 'Dashboard',
 
   components: {
-    Banner, DashboardView, InstallView
+    Banner,
+    DashboardView,
+    InstallView
   },
 
   async fetch() {
@@ -27,8 +29,8 @@ export default {
       deployment:             { type: WORKLOAD_TYPES.DEPLOYMENT }
     };
 
-    for ( const [key, value] of Object.entries(types) ) {
-      if ( this.$store.getters['cluster/canList'](value) ) {
+    for (const [key, value] of Object.entries(types)) {
+      if (this.$store.getters['cluster/canList'](value)) {
         this.permissions[key] = true;
       }
     }
@@ -52,7 +54,7 @@ export default {
 
   computed: {
     hasAvailability() {
-      return this.isAdminUser || Object.values(this.permissions).every(value => value);
+      return this.isAdminUser || Object.values(this.permissions).every((value) => value);
     },
 
     hasSchema() {

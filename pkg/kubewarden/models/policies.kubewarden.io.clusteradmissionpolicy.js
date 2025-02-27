@@ -1,4 +1,4 @@
-import PolicyModel from '../plugins/policy-class';
+import PolicyModel from '@kubewarden/plugins/policy-class';
 
 export default class ClusterAdmissionPolicy extends PolicyModel {
   get _availableActions() {
@@ -6,10 +6,10 @@ export default class ClusterAdmissionPolicy extends PolicyModel {
 
     // Remove edit actions for KW default policies and fleet policies
     // https://github.com/rancher/kubewarden-ui/issues/682
-    if ( this.isKubewardenDefaultPolicy && !this.isDeployedWithFleet) {
+    if (this.isKubewardenDefaultPolicy && !this.isDeployedWithFleet) {
       const editActions = ['goToEdit', 'goToEditYaml'];
 
-      actions = actions.filter(action => !editActions.includes(action.action));
+      actions = actions.filter((action) => !editActions.includes(action.action));
 
       // Add Edit Policy Settings action
       const defaultPolicySettings = {

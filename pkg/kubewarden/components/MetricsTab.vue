@@ -17,12 +17,12 @@ import DashboardMetrics from '@shell/components/DashboardMetrics';
 import Loading from '@shell/components/Loading';
 import { Banner } from '@components/Banner';
 
-import { KUBEWARDEN, KUBEWARDEN_CHARTS, KubewardenDashboardLabels, KubewardenDashboards } from '../types';
-import { handleGrowl } from '../utils/handle-growl';
-import { refreshCharts } from '../utils/chart';
-import { grafanaProxy } from '../modules/grafana';
-import { findServiceMonitor } from '../modules/metricsConfig';
-import { jaegerPolicyName } from '../modules/jaegerTracing';
+import { KUBEWARDEN, KUBEWARDEN_CHARTS, KubewardenDashboardLabels, KubewardenDashboards } from '@kubewarden/types';
+import { handleGrowl } from '@kubewarden/utils/handle-growl';
+import { refreshCharts } from '@kubewarden/utils/chart';
+import { grafanaProxy } from '@kubewarden/modules/grafana';
+import { findServiceMonitor } from '@kubewarden/modules/metricsConfig';
+import { jaegerPolicyName } from '@kubewarden/modules/jaegerTracing';
 
 import MetricsChecklist from './MetricsChecklist';
 
@@ -47,7 +47,10 @@ export default {
   },
 
   components: {
-    Banner, DashboardMetrics, Loading, MetricsChecklist
+    Banner,
+    DashboardMetrics,
+    Loading,
+    MetricsChecklist
   },
 
   mixins: [ResourceFetch],
@@ -55,7 +58,9 @@ export default {
   async fetch() {
     this.debouncedRefreshCharts = debounce((init = false) => {
       refreshCharts({
-        store: this.$store, chartName: 'rancher-monitoring', init
+        store:     this.$store,
+        chartName: 'rancher-monitoring',
+        init
       });
     }, 500);
 
@@ -92,24 +97,27 @@ export default {
     const hash = [];
 
     // Check if the resources are already stored with their respective getters before fetching
-    for ( const resource of resourceMap ) {
-      if ( isEmpty(resource.property) && this.$store.getters['cluster/canList'](resource.name) ) {
+    for (const resource of resourceMap) {
+      if (isEmpty(resource.property) && this.$store.getters['cluster/canList'](resource.name)) {
         hash.push(this.$fetchType(resource.name));
       }
     }
 
     await allHash(hash);
 
-    if ( this.showChecklist && !this.monitoringChart ) {
+    if (this.showChecklist && !this.monitoringChart) {
       this.debouncedRefreshCharts(true);
     }
 
     // If monitoring is installed look for the dashboard based on the METRICS_TYPE
-    if ( this.monitoringStatus.installed ) {
+    if (this.monitoringStatus.installed) {
       try {
-        this.metricsProxy = await grafanaProxy({ store: this.$store, type: this.METRICS_TYPE });
+        this.metricsProxy = await grafanaProxy({
+          store: this.$store,
+          type:  this.METRICS_TYPE
+        });
 
-        if ( this.metricsProxy ) {
+        if (this.metricsProxy) {
           this.metricsService = await dashboardExists('v2', this.$store, this.currentCluster?.id, this.metricsProxy);
         }
       } catch (e) {
@@ -118,12 +126,15 @@ export default {
           message:     `Error fetching Grafana Service: ${ e }`
         };
 
-        handleGrowl({ error, store: this.$store });
+        handleGrowl({
+          error,
+          store: this.$store
+        });
       }
     }
 
     if (this.controllerApp) {
-      await this.controllerApp.fetchValues(true)
+      await this.controllerApp.fetchValues(true);
     }
   },
 
@@ -148,10 +159,13 @@ export default {
 
   watch: {
     async grafanaService() {
-      if ( !this.metricsProxy ) {
-        this.metricsProxy = await grafanaProxy({ store: this.$store, type: this.METRICS_TYPE });
+      if (!this.metricsProxy) {
+        this.metricsProxy = await grafanaProxy({
+          store: this.$store,
+          type:  this.METRICS_TYPE
+        });
 
-        if ( this.metricsProxy ) {
+        if (this.metricsProxy) {
           this.metricsService = await dashboardExists('v2', this.$store, this.currentCluster?.id, this.metricsProxy);
         }
       }
@@ -196,35 +210,35 @@ export default {
     },
 
     cattleDashboardNs() {
-      return this.allNamespaces?.find(ns => ns?.metadata?.name === 'cattle-dashboards');
+      return this.allNamespaces?.find((ns) => ns?.metadata?.name === 'cattle-dashboards');
     },
 
     conflictingGrafanaDashboards() {
       return this.allConfigMaps?.filter((configMap) => {
         const name = configMap?.metadata?.name;
 
-        if ( name ) {
+        if (name) {
           return name === KubewardenDashboards.POLICY_SERVER || name === KubewardenDashboards.POLICY;
         }
       });
     },
 
     controllerApp() {
-      return this.allApps?.find(app => app?.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER);
+      return this.allApps?.find((app) => app?.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER);
     },
 
     controllerChart() {
-      return this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
+      return this.charts?.find((chart) => chart.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
     },
 
     grafanaService() {
-      const monitoringServices = this.allServices?.filter(svc => svc?.metadata?.labels?.['app.kubernetes.io/instance'] === 'rancher-monitoring');
+      const monitoringServices = this.allServices?.filter((svc) => svc?.metadata?.labels?.['app.kubernetes.io/instance'] === 'rancher-monitoring');
 
-      return monitoringServices?.find(svc => svc?.metadata?.labels?.['app.kubernetes.io/name'] === 'grafana');
+      return monitoringServices?.find((svc) => svc?.metadata?.labels?.['app.kubernetes.io/name'] === 'grafana');
     },
 
     kubewardenGrafanaDashboards() {
-      return this.allConfigMaps?.filter(configMap => configMap?.metadata?.labels?.[KubewardenDashboardLabels.DASHBOARD]);
+      return this.allConfigMaps?.filter((configMap) => configMap?.metadata?.labels?.[KubewardenDashboardLabels.DASHBOARD]);
     },
 
     kubewardenServiceMonitor() {
@@ -238,7 +252,8 @@ export default {
 
     metricsConfiguration() {
       if (!this.controllerApp) {
-        console.log('# 0')
+        console.log('# 0');
+
         return null;
       }
 
@@ -249,7 +264,7 @@ export default {
         // In version 4+, telemetry.metrics should be boolean or undefined (treated as false).
         // sidecar.metrics is only meaningful if telemetry.metrics === true.
         const metricsIsUndefinedOrBoolean = telemetry?.metrics === undefined || typeof telemetry?.metrics === 'boolean';
-        
+
         // Check for unsupported 'custom' mode
         if (telemetry?.mode === 'custom') {
           this.unsupportedTelemetrySpec = true;
@@ -280,28 +295,28 @@ export default {
     },
 
     monitoringApp() {
-      return this.allApps?.find(app => app?.spec?.chart?.metadata?.name === 'rancher-monitoring');
+      return this.allApps?.find((app) => app?.spec?.chart?.metadata?.name === 'rancher-monitoring');
     },
 
     monitoringChart() {
-      return this.charts?.find(chart => chart.chartName === 'rancher-monitoring');
+      return this.charts?.find((chart) => chart.chartName === 'rancher-monitoring');
     },
 
     openTelemetryServices() {
-      if ( this.allServices ) {
-        return this.allServices.filter(svc => svc?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === 'opentelemetry-operator');
+      if (this.allServices) {
+        return this.allServices.filter((svc) => svc?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === 'opentelemetry-operator');
       }
 
       return null;
     },
 
     openTelSvc() {
-      if ( !isEmpty(this.openTelemetryServices) ) {
+      if (!isEmpty(this.openTelemetryServices)) {
         return this.openTelemetryServices.find((svc) => {
           const ports = svc?.spec?.ports;
 
-          if ( ports.length ) {
-            return ports.find(p => p.port === 8080);
+          if (ports.length) {
+            return ports.find((p) => p.port === 8080);
           }
         });
       }
@@ -310,12 +325,12 @@ export default {
     },
 
     policyServerSvcs() {
-      if ( !isEmpty(this.allPolicyServers) ) {
-        const policyServerNames = this.allPolicyServers.map(ps => ps?.metadata?.name);
+      if (!isEmpty(this.allPolicyServers)) {
+        const policyServerNames = this.allPolicyServers.map((ps) => ps?.metadata?.name);
         const out = [];
 
-        for ( const ps of policyServerNames ) {
-          out.push(this.allServices?.find(svc => svc?.metadata?.labels?.app === `kubewarden-policy-server-${ ps }`));
+        for (const ps of policyServerNames) {
+          out.push(this.allServices?.find((svc) => svc?.metadata?.labels?.app === `kubewarden-policy-server-${ ps }`));
         }
 
         return out;

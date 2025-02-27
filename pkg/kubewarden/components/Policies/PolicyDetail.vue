@@ -10,17 +10,22 @@ import Markdown from '@shell/components/Markdown';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
 import Tab from '@shell/components/Tabbed/Tab';
 
-import { ARTIFACTHUB_PKG_ANNOTATION } from '../../types';
+import { ARTIFACTHUB_PKG_ANNOTATION } from '@kubewarden/types';
 
-import MetricsTab from '../MetricsTab';
-import RulesTable from '../RulesTable';
-import TraceTable from '../TraceTable';
+import MetricsTab from '@kubewarden/components/MetricsTab';
+import RulesTable from '@kubewarden/components/RulesTable';
+import TraceTable from '@kubewarden/components/TraceTable';
 
 export default {
   name: 'PolicyDetail',
 
   components: {
-    Markdown, MetricsTab, ResourceTabs, RulesTable, Tab, TraceTable
+    Markdown,
+    MetricsTab,
+    ResourceTabs,
+    RulesTable,
+    Tab,
+    TraceTable
   },
 
   mixins: [CreateEditView],
@@ -43,15 +48,15 @@ export default {
   },
 
   async mounted() {
-    if ( this.value?.metadata?.annotations?.[ARTIFACTHUB_PKG_ANNOTATION] ) {
+    if (this.value?.metadata?.annotations?.[ARTIFACTHUB_PKG_ANNOTATION]) {
       try {
         const artifactHubPackage = await this.value.artifactHubPackageVersion();
 
-        if ( artifactHubPackage && !artifactHubPackage.error && artifactHubPackage.readme ) {
+        if (artifactHubPackage && !artifactHubPackage.error && artifactHubPackage.readme) {
           this.policyReadme = JSON.parse(JSON.stringify(artifactHubPackage.readme));
         }
       } catch (e) {
-        console.warn(`Unable to fetch artifacthub package: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Unable to fetch artifacthub package: ${ e }`);
       }
     }
   },

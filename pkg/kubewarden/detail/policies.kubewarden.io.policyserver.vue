@@ -14,17 +14,24 @@ import ResourceTabs from '@shell/components/form/ResourceTabs';
 import ResourceTable from '@shell/components/ResourceTable';
 import Tab from '@shell/components/Tabbed/Tab';
 
-import { RELATED_HEADERS } from '../config/table-headers';
-import { KUBEWARDEN } from '../types';
+import { RELATED_HEADERS } from '@kubewarden/config/table-headers';
+import { KUBEWARDEN } from '@kubewarden/types';
 
-import MetricsTab from '../components/MetricsTab';
-import TraceTable from '../components/TraceTable';
+import MetricsTab from '@kubewarden/components/MetricsTab';
+import TraceTable from '@kubewarden/components/TraceTable';
 
 export default {
   name: 'PolicyServer',
 
   components: {
-    BadgeState, CountGauge, Loading, MetricsTab, ResourceTabs, ResourceTable, Tab, TraceTable
+    BadgeState,
+    CountGauge,
+    Loading,
+    MetricsTab,
+    ResourceTabs,
+    ResourceTable,
+    Tab,
+    TraceTable
   },
 
   mixins: [CreateEditView],
@@ -47,7 +54,7 @@ export default {
     });
 
     const assignIfNotEmpty = (prop, value) => {
-      if ( !isEmpty(value) ) {
+      if (!isEmpty(value)) {
         this[prop] = value;
       }
     };
@@ -72,9 +79,9 @@ export default {
     _group: mapPref(GROUP_RESOURCES),
 
     filteredTraces() {
-      if ( !isEmpty(this.policyTraces) ) {
+      if (!isEmpty(this.policyTraces)) {
         return this.policyTraces.filter((policyTraceObj) => {
-          if ( this.currentCluster?.id === policyTraceObj.cluster ) {
+          if (this.currentCluster?.id === policyTraceObj.cluster) {
             return policyTraceObj;
           }
         });
@@ -94,7 +101,7 @@ export default {
     },
 
     relatedPoliciesTotal() {
-      if ( isEmpty(this.relatedPolicies) ) {
+      if (isEmpty(this.relatedPolicies)) {
         return 0;
       }
 
@@ -102,7 +109,7 @@ export default {
     },
 
     tracesGauges() {
-      if ( !this.emptyTraces ) {
+      if (!this.emptyTraces) {
         return this.value.tracesGauges(this.filteredTraces);
       }
 
@@ -110,8 +117,8 @@ export default {
     },
 
     traceGaugeTotals() {
-      if ( !this.emptyTraces ) {
-        return this.filteredTraces?.flatMap(policyTraceObj => policyTraceObj.traces).length;
+      if (!this.emptyTraces) {
+        return this.filteredTraces?.flatMap((policyTraceObj) => policyTraceObj.traces).length;
       }
 
       return 0;

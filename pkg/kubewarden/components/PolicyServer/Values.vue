@@ -14,7 +14,7 @@ import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
 
-import { VALUES_STATE, YAML_OPTIONS } from '../../types';
+import { VALUES_STATE, YAML_OPTIONS } from '@kubewarden/types';
 
 export default {
   name: 'Values',
@@ -37,7 +37,11 @@ export default {
   },
 
   components: {
-    ButtonGroup, Loading, ResourceCancelModal, Tabbed, YamlEditor
+    ButtonGroup,
+    Loading,
+    ResourceCancelModal,
+    Tabbed,
+    YamlEditor
   },
 
   async created() {
@@ -49,7 +53,7 @@ export default {
     try {
       await this.loadValuesComponent();
     } catch (e) {
-      console.error(`Error loading values component: ${ e }`); // eslint-disable-line no-console
+      console.error(`Error loading values component: ${ e }`);
     }
   },
 
@@ -76,7 +80,7 @@ export default {
         this.showForm = true;
         break;
       case VALUES_STATE.YAML:
-        if ( old === VALUES_STATE.FORM ) {
+        if (old === VALUES_STATE.FORM) {
           this.currentYamlValues = this.generateYaml();
           this.updateYamlValues();
         }
@@ -107,15 +111,16 @@ export default {
       const yaml = createYaml(schemas, this.value?.type, this.chartValues);
 
       const lines = yaml.split('\n');
-      const filteredLines = lines.filter(line => !line.includes('Error loading schema for array'));
+      const filteredLines = lines.filter((line) => !line.includes('Error loading schema for array'));
       const modifiedYAML = filteredLines.join('\n');
 
       return modifiedYAML;
     },
 
     async loadValuesComponent() {
-      if ( this.value.haveComponent('kubewarden/policy-server') ) {
+      if (this.value.haveComponent('kubewarden/policy-server')) {
         const importFn = this.value.importComponent('kubewarden/policy-server');
+
         this.valuesComponent = defineAsyncComponent(importFn);
 
         this.showValuesComponent = true;
@@ -127,10 +132,10 @@ export default {
     },
 
     updateYamlValues() {
-      if ( !isEmpty(this.currentYamlValues) ) {
+      if (!isEmpty(this.currentYamlValues)) {
         const parsed = jsyaml.load(this.currentYamlValues);
 
-        if ( parsed ) {
+        if (parsed) {
           merge(this.chartValues, parsed);
         }
       }

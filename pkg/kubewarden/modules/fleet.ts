@@ -11,7 +11,7 @@ import { CatalogApp, FleetBundle } from '@kubewarden/types';
  * @returns boolean
  */
 export function isFleetDeployment(app: CatalogApp): boolean {
-  if ( app ) {
+  if (app) {
     return !!app.spec?.chart?.metadata?.annotations?.[FLEET.BUNDLE_ID];
   }
 
@@ -29,16 +29,16 @@ export function isFleetDeployment(app: CatalogApp): boolean {
  * @returns The first matching `FleetBundle` if found, or `null` if no match is found.
  */
 export function findFleetContent(context: string, fleetBundles: FleetBundle[], skipChart?: string): FleetBundle | null {
-  if ( !isEmpty(fleetBundles) ) {
-    for ( const bundle of fleetBundles ) {
-      if ( skipChart && bundle?.spec?.helm?.chart === skipChart ) {
+  if (!isEmpty(fleetBundles)) {
+    for (const bundle of fleetBundles) {
+      if (skipChart && bundle?.spec?.helm?.chart === skipChart) {
         continue; // Skip this bundle
       }
 
       // Process the bundle for the context
       const matchingResource = bundle?.spec?.resources?.find((resource) => resource.content.includes(`kind: ${ context }`));
 
-      if ( matchingResource ) {
+      if (matchingResource) {
         return bundle;
       }
     }
@@ -59,10 +59,10 @@ export function findFleetContent(context: string, fleetBundles: FleetBundle[], s
 export function getPolicyServerModule(fleetBundles: FleetBundle[]): string | null {
   const fleetBundle = findFleetContent('PolicyServer', fleetBundles, 'kubewarden-crds');
 
-  if ( fleetBundle ) {
+  if (fleetBundle) {
     const valuesYamlResource = fleetBundle.spec.resources.find((resource) => resource.name.includes('values.yaml'));
 
-    if ( valuesYamlResource ) {
+    if (valuesYamlResource) {
       try {
         const valuesYaml = jsyaml.load(valuesYamlResource.content) as any;
 
@@ -70,7 +70,7 @@ export function getPolicyServerModule(fleetBundles: FleetBundle[]): string | nul
         const repository = valuesYaml?.policyServer?.image?.repository;
         const tag = valuesYaml?.policyServer?.image?.tag;
 
-        if ( systemDefaultRegistry && repository && tag ) {
+        if (systemDefaultRegistry && repository && tag) {
           return `${ systemDefaultRegistry }/${ repository }:${ tag }`;
         }
       } catch (e) {

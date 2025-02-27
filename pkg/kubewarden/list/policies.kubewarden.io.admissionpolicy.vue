@@ -2,11 +2,13 @@
 import { Banner } from '@components/Banner';
 import Loading from '@shell/components/Loading';
 
-import PolicyList from '../components/Policies/PolicyList';
+import PolicyList from '@kubewarden/components/Policies/PolicyList';
 
 export default {
   components: {
-    Banner, Loading, PolicyList
+    Banner,
+    Loading,
+    PolicyList
   },
 
   props: {

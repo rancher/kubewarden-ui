@@ -2,7 +2,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import { SCHEMA } from '@shell/config/types';
 
-import { ApiGroup, Schema } from '../types';
+import { ApiGroup, Schema } from '@kubewarden/types';
 
 /**
  * To find the `type` of a resource that does not have the `group` listed, this
@@ -14,7 +14,7 @@ export function splitGroupKind(resource: any): string | void {
   const loweredKind = resource?.kind?.toLowerCase();
   const group = resource?.apiVersion?.split('/')[0];
 
-  if ( loweredKind && group ) {
+  if (loweredKind && group) {
     return `${ group }.${ loweredKind }`;
   }
 }
@@ -28,12 +28,12 @@ export function splitGroupKind(resource: any): string | void {
 export function schemasForGroup(store: any, group: ApiGroup | string): Schema[] {
   const schemas: Schema[] = store?.getters['cluster/all'](SCHEMA) || [];
 
-  if ( isEmpty(schemas) || isEmpty(group) ) {
+  if (isEmpty(schemas) || isEmpty(group)) {
     return [];
   }
 
   return schemas.filter((schema) => {
-    if ( typeof group === 'string' ) {
+    if (typeof group === 'string') {
       return schema._group === group;
     }
 
@@ -50,16 +50,16 @@ export function schemasForGroup(store: any, group: ApiGroup | string): Schema[] 
 export function namespacedGroups(store: any, apiGroups: ApiGroup[]): ApiGroup[] | void {
   const schemas: Schema[] = store?.getters['cluster/all'](SCHEMA);
 
-  if ( isEmpty(schemas) || isEmpty(apiGroups) ) {
+  if (isEmpty(schemas) || isEmpty(apiGroups)) {
     return;
   }
 
   return apiGroups.reduce((filteredGroups: ApiGroup[], group: ApiGroup) => {
     const filteredSchemas: Schema[] = schemasForGroup(store, group);
 
-    const out = filteredSchemas?.some(schema => !(schema?.attributes?.namespaced === false || undefined));
+    const out = filteredSchemas?.some((schema) => !(schema?.attributes?.namespaced === false || undefined));
 
-    if ( out || group.id === 'core' ) {
+    if (out || group.id === 'core') {
       filteredGroups.push(group);
     }
 
@@ -73,7 +73,7 @@ export function namespacedGroups(store: any, apiGroups: ApiGroup[]): ApiGroup[] 
  * @returns `Schema[] | void`
  */
 export function namespacedSchemas(schemas: Schema[]): Schema[] | void {
-  return schemas?.filter(schema => !(schema?.attributes?.namespaced === false || undefined));
+  return schemas?.filter((schema) => !(schema?.attributes?.namespaced === false || undefined));
 }
 
 /**

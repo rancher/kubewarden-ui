@@ -1,5 +1,5 @@
 <script>
-import { KUBEWARDEN_PRODUCT_NAME, POLICY_REPORTER_PRODUCT } from '../../types';
+import { KUBEWARDEN_PRODUCT_NAME, POLICY_REPORTER_PRODUCT } from '@kubewarden/types';
 
 export default {
   props: {
@@ -16,11 +16,9 @@ export default {
     const reporterLink = {
       name:   `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-${ POLICY_REPORTER_PRODUCT }`,
       params: { product: KUBEWARDEN_PRODUCT_NAME }
-    }
-
-    return {
-      reporterLink
     };
+
+    return { reporterLink };
   }
 };
 </script>

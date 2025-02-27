@@ -1,7 +1,7 @@
 <script>
 import { BadgeState } from '@components/BadgeState';
 
-import { MODE_MAP } from '../types';
+import { MODE_MAP } from '@kubewarden/types';
 
 export default {
   components: { BadgeState },

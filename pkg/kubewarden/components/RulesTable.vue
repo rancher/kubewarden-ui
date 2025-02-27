@@ -2,7 +2,7 @@
 import { Banner } from '@components/Banner';
 import SortableTable from '@shell/components/SortableTable';
 
-import { RULE_HEADERS } from '../config/table-headers';
+import { RULE_HEADERS } from '@kubewarden/config/table-headers';
 
 export default {
   props: {
@@ -12,7 +12,10 @@ export default {
     }
   },
 
-  components: { Banner, SortableTable },
+  components: {
+    Banner,
+    SortableTable
+  },
 
   data() {
     return { RULE_HEADERS };

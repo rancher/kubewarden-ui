@@ -6,7 +6,10 @@ import LabeledSelect from '@shell/components/form/LabeledSelect';
 import ResourceTable from '@shell/components/ResourceTable';
 
 export default {
-  components: { LabeledSelect, ResourceTable },
+  components: {
+    LabeledSelect,
+    ResourceTable
+  },
 
   props: {
     resource: {
@@ -40,20 +43,20 @@ export default {
     },
 
     filteredRows() {
-      const rows = ( this.rows || [] );
+      const rows = (this.rows || []);
 
       const out = rows.filter((row) => {
         const flatRules = flattenDeep(row.spec.rules);
-        const flatResources = flatRules.flatMap(r => r.resources);
+        const flatResources = flatRules.flatMap((r) => r.resources);
         const rowMode = row.spec.mode;
 
-        if ( this.mode && this.mode !== 'All' && this.mode !== rowMode ) {
+        if (this.mode && this.mode !== 'All' && this.mode !== rowMode) {
           return false;
         }
 
-        if ( this.resources ) {
-          for ( const selected of this.resources ) {
-            if ( !flatResources.includes(selected) ) {
+        if (this.resources) {
+          for (const selected of this.resources) {
+            if (!flatResources.includes(selected)) {
               return false;
             }
           }
@@ -66,7 +69,7 @@ export default {
     },
 
     modeOptions() {
-      const out = this.rows?.map(row => row.spec?.mode) || [];
+      const out = this.rows?.map((row) => row.spec?.mode) || [];
 
       out.unshift('All');
 
@@ -83,7 +86,7 @@ export default {
       const flattened = this.rows?.flatMap((row) => {
         const flatRules = flattenDeep(row.spec?.rules);
 
-        return flatRules.flatMap(r => r[option]);
+        return flatRules.flatMap((r) => r[option]);
       });
 
       return [...new Set(flattened)] || [];

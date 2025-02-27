@@ -1,14 +1,14 @@
 export interface GrowlConfig {
   error: {
     data?: {
-      _statusText: String,
-      message: String
+      _statusText: string,
+      message: string
     }
-    _statusText: String,
-    message: String
+    _statusText: string,
+    message: string
   },
   store?: any,
-  type?: String
+  type?: string
 }
 
 export function handleGrowl(config: GrowlConfig): void {

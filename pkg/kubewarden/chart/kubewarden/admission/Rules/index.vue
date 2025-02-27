@@ -5,8 +5,8 @@ import { SCHEMA } from '@shell/config/types';
 import Loading from '@shell/components/Loading';
 
 import Rule from './Rule';
-import { KUBEWARDEN, KUBEWARDEN_APPS, ARTIFACTHUB_PKG_ANNOTATION } from '~/pkg/kubewarden/types';
-import { namespacedGroups, namespacedSchemas } from '~/pkg/kubewarden/modules/core';
+import { KUBEWARDEN, KUBEWARDEN_APPS, ARTIFACTHUB_PKG_ANNOTATION } from '@kubewarden/types';
+import { namespacedGroups, namespacedSchemas } from '@kubewarden/modules/core';
 
 export default {
   name: 'Rules',
@@ -30,13 +30,13 @@ export default {
   inject: ['chartType'],
 
   async fetch() {
-    if ( this.$store.getters['cluster/canList']('apigroup') ) {
+    if (this.$store.getters['cluster/canList']('apigroup')) {
       await this.$store.dispatch('cluster/findAll', { type: 'apigroup' });
     }
 
     this.rules = [];
 
-    if ( !!this.value?.policy ) {
+    if (!!this.value?.policy) {
       this.rules = this.value.policy?.spec?.rules;
     }
   },
@@ -61,7 +61,7 @@ export default {
     },
 
     namespacedGroups() {
-      if ( this.chartType === KUBEWARDEN.ADMISSION_POLICY ) {
+      if (this.chartType === KUBEWARDEN.ADMISSION_POLICY) {
         return namespacedGroups(this.$store, this.apiGroups);
       }
 
@@ -69,7 +69,7 @@ export default {
     },
 
     namespacedSchemas() {
-      if ( this.chartType === KUBEWARDEN.ADMISSION_POLICY ) {
+      if (this.chartType === KUBEWARDEN.ADMISSION_POLICY) {
         return namespacedSchemas(this.schemas);
       }
 

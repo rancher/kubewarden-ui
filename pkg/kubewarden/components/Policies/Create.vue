@@ -22,11 +22,11 @@ import {
   VALUES_STATE,
   ARTIFACTHUB_PKG_ANNOTATION,
   DEFAULT_POLICY
-} from '../../types';
-import { removeEmptyAttrs } from '../../utils/object';
-import { handleGrowl } from '../../utils/handle-growl';
+} from '@kubewarden/types';
+import { removeEmptyAttrs } from '@kubewarden/utils/object';
+import { handleGrowl } from '@kubewarden/utils/handle-growl';
 
-import { DATA_ANNOTATIONS } from '../../types/artifacthub';
+import { DATA_ANNOTATIONS } from '@kubewarden/types/artifacthub';
 import PolicyTable from './PolicyTable';
 import PolicyReadmePanel from './PolicyReadmePanel';
 import Values from './Values';
@@ -61,7 +61,7 @@ export default ({
   mixins: [CreateEditView],
 
   async fetch() {
-    if ( this.hasArtifactHub ) {
+    if (this.hasArtifactHub) {
       await this.getPackages();
     }
 
@@ -128,7 +128,7 @@ export default ({
 
     /** Allow create if either editing in yaml view or module and required rules/settings have been met */
     canFinish() {
-      if ( this.yamlOption === VALUES_STATE.YAML ) {
+      if (this.yamlOption === VALUES_STATE.YAML) {
         return true;
       }
 
@@ -141,7 +141,7 @@ export default ({
 
     /** Determines if the required rules/settings are set, if not the resource can not be created */
     hasRequired() {
-      if ( !isEmpty(this.chartValues?.policy) && this.chartValues.policy.spec ) {
+      if (!isEmpty(this.chartValues?.policy) && this.chartValues.policy.spec) {
         const { rules, settings } = this.chartValues.policy.spec;
 
         const requiredRules = ['apiVersions', 'operations', 'resources'];
@@ -149,13 +149,13 @@ export default ({
         const acceptedName = this.chartValues.policy.metadata.name;
 
         const requiredQuestions = this.chartValues?.questions?.questions?.map((q) => {
-          if ( q.required ) {
+          if (q.required) {
             return q.variable;
           }
         }).filter(Boolean);
         const acceptedQuestions = this.acceptedValues(settings, requiredQuestions);
 
-        if ( !!acceptedName && !isEmpty(acceptedRules) && (isEmpty(requiredQuestions) || !isEmpty(acceptedQuestions)) ) {
+        if (!!acceptedName && !isEmpty(acceptedRules) && (isEmpty(requiredQuestions) || !isEmpty(acceptedQuestions))) {
           return true;
         }
       }
@@ -172,8 +172,8 @@ export default ({
     },
 
     packageValues() {
-      if ( this.type?.repository?.url ) {
-        return this.packages?.find(p => p.repository?.url === this.type.repository.url);
+      if (this.type?.repository?.url) {
+        return this.packages?.find((p) => p.repository?.url === this.type.repository.url);
       }
 
       return null;
@@ -194,14 +194,14 @@ export default ({
   methods: {
     /** Determine values which need to be required from supplied property and keys */
     acceptedValues(requiredProp, requiredKeys) {
-      if ( isEmpty(requiredKeys) ) {
+      if (isEmpty(requiredKeys)) {
         return null;
       }
 
       let accepted;
 
-      if ( Array.isArray(requiredProp) ) {
-        accepted = requiredProp.find(prop => this.checkProperties(prop, requiredKeys));
+      if (Array.isArray(requiredProp)) {
+        accepted = requiredProp.find((prop) => this.checkProperties(prop, requiredKeys));
       } else {
         accepted = this.checkProperties(requiredProp, requiredKeys);
       }
@@ -213,13 +213,13 @@ export default ({
     checkProperties(requiredProp, requiredKeys) {
       const match = [];
 
-      if ( !isEmpty(requiredKeys) ) {
-        for ( const key of requiredKeys.values() ) {
-          if ( !isEmpty(requiredProp[key]) ) {
+      if (!isEmpty(requiredKeys)) {
+        for (const key of requiredKeys.values()) {
+          if (!isEmpty(requiredProp[key])) {
             match.push(key);
           }
         }
-        if ( requiredKeys && isEqual(match, requiredKeys) ) {
+        if (requiredKeys && isEqual(match, requiredKeys)) {
           return requiredProp;
         }
       }
@@ -230,7 +230,7 @@ export default ({
     async closeBanner(banner, retry = 0) {
       const res = await this.$store.dispatch(`kubewarden/${ banner }`, true);
 
-      if ( retry === 0 && res?.type === 'error' && res?.status === 500 ) {
+      if (retry === 0 && res?.type === 'error' && res?.status === 500) {
         await this.close(retry + 1);
       }
     },
@@ -243,9 +243,9 @@ export default ({
         disableOpenApiValidation: false
       };
 
-      const existing = allNamespaces?.find(n => n?.metadata?.name === ns);
+      const existing = allNamespaces?.find((n) => n?.metadata?.name === ns);
 
-      if ( !existing ) {
+      if (!existing) {
         const nsResource = await this.$store.dispatch('cluster/create', nsTemplate);
 
         try {
@@ -266,7 +266,10 @@ export default ({
         btnCb(true);
         this.loadingPackages = false;
       } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
+        handleGrowl({
+          error: e,
+          store: this.$store
+        });
 
         btnCb(false);
         this.loadingPackages = false;
@@ -288,7 +291,7 @@ export default ({
       try {
         let out;
 
-        if ( this.yamlOption === VALUES_STATE.YAML ) {
+        if (this.yamlOption === VALUES_STATE.YAML) {
           out = jsyaml.load(this.yamlValues);
         } else {
           out = this.chartValues?.policy ? this.chartValues.policy : jsyaml.load(this.yamlValues);
@@ -296,10 +299,10 @@ export default ({
 
         removeEmptyAttrs(out); // Clean up empty values from questions
 
-        if ( this.finishAttempts > 0 ) {
+        if (this.finishAttempts > 0) {
           // Remove keys that are not in the new spec
           Object.keys(this.value.spec).forEach((key) => {
-            if ( !(key in out.spec) ) {
+            if (!(key in out.spec)) {
               this.$delete(this.value.spec, key);
             }
           });
@@ -313,13 +316,13 @@ export default ({
         }
 
         // If create new namespace option is selected, create the ns before saving the policy
-        if ( this.chartType === KUBEWARDEN.ADMISSION_POLICY && this.chartValues?.isNamespaceNew ) {
+        if (this.chartType === KUBEWARDEN.ADMISSION_POLICY && this.chartValues?.isNamespaceNew) {
           await this.createNamespace(this.value?.metadata?.namespace);
         }
 
         await this.attemptSave(event);
       } catch (e) {
-        console.error('Error creating policy', e); // eslint-disable-line no-console
+        console.error('Error creating policy', e);
       }
     },
 
@@ -327,7 +330,7 @@ export default ({
       await this.save(event);
 
       // Check for errors set by the mixin
-      if ( this.errors && this.errors.length > 0 ) {
+      if (this.errors && this.errors.length > 0) {
         const error = new Error('Save operation failed');
 
         this.finishAttempts++;
@@ -339,17 +342,20 @@ export default ({
     async getPackages() {
       this.repository = await this.value.artifactHubRepo();
 
-      if ( this.repository && this.repository.packages.length > 0 ) {
-        const promises = this.repository.packages.map(pkg => this.packageDetails(pkg));
+      if (this.repository && this.repository.packages.length > 0) {
+        const promises = this.repository.packages.map((pkg) => this.packageDetails(pkg));
 
         try {
           const packages = await Promise.all(promises);
 
-          this.packages = packages.filter(pkg => pkg?.data?.['kubewarden/hidden-ui'] !== 'true');
+          this.packages = packages.filter((pkg) => pkg?.data?.['kubewarden/hidden-ui'] !== 'true');
         } catch (e) {
-          handleGrowl({ error: e, store: this.$store });
+          handleGrowl({
+            error: e,
+            store: this.$store
+          });
 
-          console.warn(`Error fetching packages`, e); // eslint-disable-line no-console
+          console.warn(`Error fetching packages`, e);
         }
       }
     },
@@ -364,7 +370,7 @@ export default ({
     policyQuestions() {
       const defaultPolicy = structuredClone(DEFAULT_POLICY);
 
-      if ( this.customPolicy ) {
+      if (this.customPolicy) {
         // Add contextAwareResources to custom policy spec
         const updatedCustomPolicy = { spec: { contextAwareResources: [] } };
 
@@ -375,14 +381,14 @@ export default ({
         return;
       }
 
-      const policyDetails = this.packages.find(pkg => pkg.repository?.url === this.type?.repository?.url);
+      const policyDetails = this.packages.find((pkg) => pkg.repository?.url === this.type?.repository?.url);
       const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.[DATA_ANNOTATIONS.QUESTIONS]);
       const packageAnnotation = `${ policyDetails?.repository?.name }/${ policyDetails?.name }/${ policyDetails?.version }`;
       /** Return spec from package if annotation exists */
       const parseAnnotation = (annotation, obj) => {
         const spec = this.value.parsePackageMetadata(policyDetails?.data?.[annotation]);
 
-        if ( spec?.[obj] !== undefined ) {
+        if (spec?.[obj] !== undefined) {
           return spec[obj];
         }
 
@@ -391,7 +397,7 @@ export default ({
 
       /** Return value of annotation if it exists */
       const determineAnnotation = (annotation) => {
-        if ( policyDetails?.data?.[annotation] !== undefined ) {
+        if (policyDetails?.data?.[annotation] !== undefined) {
           return JSON.parse(policyDetails.data[annotation]);
         }
 
@@ -415,7 +421,7 @@ export default ({
 
       this.yamlValues = saferDump(defaultPolicy);
 
-      if ( packageQuestions ) {
+      if (packageQuestions) {
         set(this.chartValues, 'questions', packageQuestions);
       }
 
@@ -424,7 +430,7 @@ export default ({
 
     reset(event) {
       this.$nextTick(() => {
-        if ( event.step?.name === this.stepPolicies.name ) {
+        if (event.step?.name === this.stepPolicies.name) {
           const initialState = [
             'errors',
             'bannerTitle',
@@ -455,7 +461,7 @@ export default ({
     selectType(type) {
       this.type = type;
 
-      if ( this.customPolicy ) {
+      if (this.customPolicy) {
         this.hasCustomPolicy = true;
       } else {
         this.hasCustomPolicy = false;

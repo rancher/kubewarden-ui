@@ -1,7 +1,7 @@
-import { rootKubewardenRoute } from '../utils/custom-routing';
+import { rootKubewardenRoute } from '@kubewarden/utils/custom-routing';
 import {
   KUBEWARDEN, KUBEWARDEN_DASHBOARD, POLICY_REPORTER_PRODUCT, KUBEWARDEN_PRODUCT_NAME, WG_POLICY_K8S
-} from '../types';
+} from '@kubewarden/types';
 import { POLICY_SERVER_HEADERS, POLICY_HEADERS } from './table-headers';
 
 export function init($plugin: any, store: any) {

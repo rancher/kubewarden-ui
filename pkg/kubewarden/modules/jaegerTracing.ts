@@ -2,8 +2,8 @@ import isEmpty from 'lodash/isEmpty';
 
 import {
   KUBEWARDEN, JaegerConfig, PolicyTrace, PolicyTraceConfig, Tag
-} from '../types';
-import { proxyUrl } from '../utils/service';
+} from '@kubewarden/types';
+import { proxyUrl } from '@kubewarden/utils/service';
 
 /** TODO: Update the `any` types throughout this file */
 
@@ -23,15 +23,15 @@ export async function jaegerTraces(config: JaegerConfig): Promise<PolicyTraceCon
 
     const promises = [];
 
-    if ( !isEmpty(relatedPolicies) ) {
+    if (!isEmpty(relatedPolicies)) {
       relatedPolicies?.forEach((p: any) => {
         const hash = jaegerTraceRequest(store, proxy, p, time);
 
-        if ( hash ) {
+        if (hash) {
           promises.push(hash);
         }
       });
-    } else if ( policy ) {
+    } else if (policy) {
       promises.push(jaegerTraceRequest(store, proxy, policy, time));
     } else {
       throw new Error('Policy is undefined');
@@ -39,11 +39,11 @@ export async function jaegerTraces(config: JaegerConfig): Promise<PolicyTraceCon
 
     let res = await Promise.all(promises);
 
-    res = res.flatMap(o => o?.data);
+    res = res.flatMap((o) => o?.data);
 
     return scaffoldPolicyTrace(store, res, resource, relatedPolicies, policy);
   } catch (e) {
-    console.warn(`Error fetching Jaeger traces: ${ e }`); // eslint-disable-line no-console
+    console.warn(`Error fetching Jaeger traces: ${ e }`);
   }
 
   return null;
@@ -96,7 +96,7 @@ function scaffoldPolicyTrace(store: any, traces: any, resource: any, relatedPoli
       const validationSpan = trace.spans.find((span: any) => span.operationName === 'validation');
       const matchedTag = validationSpan?.tags?.find((tag: any) => tag?.key === 'policy_id' && tag?.value === policyName);
 
-      if ( matchedTag ) {
+      if (matchedTag) {
         const convertedTags = convertTagsToObject(validationSpan.tags);
 
         out = {
@@ -115,7 +115,7 @@ function scaffoldPolicyTrace(store: any, traces: any, resource: any, relatedPoli
         };
       }
 
-      if ( !isEmpty(out) ) {
+      if (!isEmpty(out)) {
         acc.push(out);
         store.dispatch('kubewarden/updatePolicyTraces', {
           policyName:   p.metadata.name,
@@ -128,11 +128,11 @@ function scaffoldPolicyTrace(store: any, traces: any, resource: any, relatedPoli
     }, []);
   }
 
-  if ( resource === KUBEWARDEN.POLICY_SERVER ) {
-    for ( const relatedPolicy of relatedPolicies ) {
+  if (resource === KUBEWARDEN.POLICY_SERVER) {
+    for (const relatedPolicy of relatedPolicies) {
       const relatedTraces = filterTraces(relatedPolicy);
 
-      if ( !isEmpty(relatedTraces) ) {
+      if (!isEmpty(relatedTraces)) {
         out.push({
           policyName: relatedPolicy.metadata.name,
           cluster:    currentCluster?.id,
@@ -143,7 +143,7 @@ function scaffoldPolicyTrace(store: any, traces: any, resource: any, relatedPoli
   } else {
     const relatedTraces = filterTraces(policy);
 
-    if ( !isEmpty(relatedTraces) ) {
+    if (!isEmpty(relatedTraces)) {
       out.push({
         policyName: policy.metadata.name,
         cluster:    currentCluster?.id,

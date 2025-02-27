@@ -5,9 +5,9 @@ import semver from 'semver';
 import { NAMESPACE } from '@shell/config/types';
 import {
   KUBEWARDEN, Severity, Result, PolicyReport, ClusterPolicyReport, PolicyReportResult, PolicyReportSummary, WG_POLICY_K8S
-} from '../types';
-import * as coreTypes from '../core/core-resources';
-import { createKubewardenRoute } from '../utils/custom-routing';
+} from '@kubewarden/types';
+import * as coreTypes from '@kubewarden/core/core-resources';
+import { createKubewardenRoute } from '@kubewarden/utils/custom-routing';
 import { splitGroupKind, isResourceNamespaced } from './core';
 
 interface CacheEntry<T> {

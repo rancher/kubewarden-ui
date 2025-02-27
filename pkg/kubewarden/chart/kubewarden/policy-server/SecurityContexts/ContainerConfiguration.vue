@@ -4,10 +4,10 @@ import { _CREATE } from '@shell/config/query-params';
 import Loading from '@shell/components/Loading';
 import { Checkbox } from '@components/Form/Checkbox';
 import { LabeledInput } from '@components/Form/LabeledInput';
-import SeLinuxOptions from '../../../../components/PolicyServer/SeLinuxOptions.vue';
-import SeccompProfile from '../../../../components/PolicyServer/SeccompProfile.vue';
-import Capabilities from '../../../../components/PolicyServer/Capabilities.vue';
-import WindowsOptions from '../../../../components/PolicyServer/WindowsOptions.vue';
+import SeLinuxOptions from '@kubewarden/components/PolicyServer/SeLinuxOptions.vue';
+import SeccompProfile from '@kubewarden/components/PolicyServer/SeccompProfile.vue';
+import Capabilities from '@kubewarden/components/PolicyServer/Capabilities.vue';
+import WindowsOptions from '@kubewarden/components/PolicyServer/WindowsOptions.vue';
 
 export default {
   props: {
