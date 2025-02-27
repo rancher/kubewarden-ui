@@ -1,10 +1,22 @@
+const path = require('path');
 const webpack = require('webpack');
 const vendorConfigFactory = require('./.shell/pkg/vue.config');
 
 module.exports = () => {
-  const vendorConfig = typeof vendorConfigFactory === 'function' ? vendorConfigFactory(__dirname) : vendorConfigFactory;
+  const vendorConfig =
+    typeof vendorConfigFactory === 'function' ? vendorConfigFactory(__dirname) : vendorConfigFactory;
 
-  // Create an override for __tests__ directories
+  // Wrap the vendor configureWebpack if it exists.
+  const vendorConfigureWebpack = vendorConfig.configureWebpack;
+  const customConfigureWebpack = (config) => {
+    if (typeof vendorConfigureWebpack === 'function') {
+      vendorConfigureWebpack(config);
+    }
+    // Add the @kubewarden alias to point to the pkg/kubewarden directory.
+    config.resolve.alias['@kubewarden'] = path.resolve(__dirname);
+  };
+
+  // Create an override for __tests__ directories.
   const kwChainWebpack = (config) => {
     config.plugin('ignore-tests')
       .use(webpack.IgnorePlugin, [{ resourceRegExp: /[\\/]__tests__[\\/]/ }]);
@@ -14,10 +26,12 @@ module.exports = () => {
     if (typeof vendorConfig.chainWebpack === 'function') {
       vendorConfig.chainWebpack(config);
     }
-
     kwChainWebpack(config);
   };
 
-  // Merge kw config with the vendor config.
-  return Object.assign({}, vendorConfig, { chainWebpack: mergedChainWebpack });
+  // Merge our custom chainWebpack and configureWebpack with the vendor config.
+  return Object.assign({}, vendorConfig, {
+    chainWebpack:     mergedChainWebpack,
+    configureWebpack: customConfigureWebpack,
+  });
 };
