@@ -172,7 +172,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <Loading v-if="isLoading" />
+  <Loading v-if="isLoading" data-testid="ps-general-loading" />
   <div v-else>
     <div class="row mt-10">
       <div class="col span-6 mb-20">
