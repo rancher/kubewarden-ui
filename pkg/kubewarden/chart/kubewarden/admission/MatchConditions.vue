@@ -71,7 +71,7 @@ export default {
 
       const gutters = [];
 
-      if ( !readOnly ) {
+      if (!readOnly) {
         gutters.push('CodeMirror-lint-markers');
       }
 
@@ -86,12 +86,12 @@ export default {
         styleActiveLine: true,
         tabSize:         2,
         indentWithTabs:  false,
-        cursorBlinkRate: ( readOnly ? -1 : 530 ),
+        cursorBlinkRate: (readOnly ? -1 : 530),
         extraKeys:       {
           'Ctrl-Space': 'autocomplete',
 
           Tab: (cm) => {
-            if ( cm.somethingSelected() ) {
+            if (cm.somethingSelected()) {
               cm.indentSelection('add');
 
               return;

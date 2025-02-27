@@ -14,7 +14,7 @@ const authorityObj = {
 const row = () => {
   let out = {};
 
-  for ( const [key, value] of Object.entries(authorityObj) ) {
+  for (const [key, value] of Object.entries(authorityObj)) {
     out = {
       registryName: key,
       certs:        value

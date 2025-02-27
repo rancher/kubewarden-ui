@@ -42,7 +42,7 @@ export default {
     },
 
     showInput() {
-      if ( this.question?.hide_input ) {
+      if (this.question?.hide_input) {
         return false;
       }
 
@@ -70,11 +70,11 @@ export default {
   created() {
     let def = this.question.default;
 
-    if ( this.question.type === 'boolean' && typeof def === 'string' ) {
+    if (this.question.type === 'boolean' && typeof def === 'string') {
       def = def === 'true';
     }
 
-    if ( this.value === undefined && def !== undefined ) {
+    if (this.value === undefined && def !== undefined) {
       this.$emit('update:value', def);
     }
   },

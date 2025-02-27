@@ -8,7 +8,7 @@ export enum DATA_ANNOTATIONS {
 }
 /* eslint-enable no-unused-vars */
 
-/* eslint-disable camelcase */
+
 export interface ArtifactHubPackage {
   package_id: string;
   name: string;
@@ -91,4 +91,4 @@ export interface ArtifactHubPackage {
   };
   production_organizations_count?: number;
 }
-/* eslint-enable camelcase */
+

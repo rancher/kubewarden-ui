@@ -14,10 +14,10 @@ export default {
   },
 
   fetch() {
-    if ( this.value ) {
-      const resourceToShow = this.value.flatMap(r => r[this.col.name]);
+    if (this.value) {
+      const resourceToShow = this.value.flatMap((r) => r[this.col.name]);
 
-      if ( resourceToShow ) {
+      if (resourceToShow) {
         this.resourceToShow = [...new Set(resourceToShow)];
       }
     }
@@ -29,12 +29,12 @@ export default {
 
   computed: {
     resourceLabels() {
-      if ( this.resourceToShow.length > 1 ) {
+      if (this.resourceToShow.length > 1) {
         const out = [];
         const last = this.resourceToShow[this.resourceToShow.length - 1];
 
         this.resourceToShow.forEach((resource) => {
-          if ( resource === last ) {
+          if (resource === last) {
             out.push(resource);
           } else {
             out.push(`${ resource }, `);

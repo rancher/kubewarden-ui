@@ -24,7 +24,10 @@ export default {
     }
   },
 
-  components: { Banner, LabeledSelect },
+  components: {
+    Banner,
+    LabeledSelect
+  },
 
   data() {
     return { vConfig: this.value.verificationConfig };
@@ -38,8 +41,8 @@ export default {
 
   computed: {
     options() {
-      if ( !isEmpty(this.configMaps) ) {
-        return this.configMaps.map(config => config.id);
+      if (!isEmpty(this.configMaps)) {
+        return this.configMaps.map((config) => config.id);
       }
 
       return [];

@@ -36,10 +36,16 @@ export default {
 
   methods: {
     updateContainerConfig(val) {
-      this.$emit('update-security-contexts', { type: 'container', data: val });
+      this.$emit('update-security-contexts', {
+        type: 'container',
+        data: val
+      });
     },
     updatePodConfig(val) {
-      this.$emit('update-security-contexts', { type: 'pod', data: val });
+      this.$emit('update-security-contexts', {
+        type: 'pod',
+        data: val
+      });
     },
   },
 

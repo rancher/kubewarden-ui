@@ -267,14 +267,14 @@ export default {
 
         // Check for unsupported 'custom' mode
         if (telemetry?.mode === 'custom') {
-          this.unsupportedTelemetrySpec = true;
+          this.handleMetricsChecklist('unsupportedTelemetrySpec', true);
 
           return null;
         }
 
         // If metrics is not undefined or boolean, it's outdated
         if (!metricsIsUndefinedOrBoolean) {
-          this.outdatedTelemetrySpec = true;
+          this.handleMetricsChecklist('outdatedTelemetrySpec', true);
 
           return null;
         }
@@ -349,6 +349,10 @@ export default {
   methods: {
     async updateServiceMonitors() {
       await this.$fetchType(MONITORING.SERVICEMONITOR);
+    },
+
+    handleMetricsChecklist(prop, val) {
+      this[prop] = val;
     }
   }
 };

@@ -93,7 +93,7 @@ export interface CustomResourceDefinition {
         served?: boolean,
         storage?: boolean,
         subresources?: {
-          status: {}
+          status: object
         }
       }
     ]

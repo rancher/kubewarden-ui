@@ -18,7 +18,7 @@ export async function isAirgap(context: AirgapConfig): Promise<boolean> {
     await store.dispatch('management/findAll', { type: MANAGEMENT.SETTING });
     const whitelist = await store.getters['management/byId'](MANAGEMENT.SETTING, 'whitelist-domain');
 
-    if ( !isEmpty(whitelist) && whitelist.value?.length > 0 ) {
+    if (!isEmpty(whitelist) && whitelist.value?.length > 0) {
       const whitelistedDomain = whitelist.value.split(',')[0];
 
       const res = await store.dispatch('management/request', {
@@ -27,7 +27,7 @@ export async function isAirgap(context: AirgapConfig): Promise<boolean> {
         redirectUnauthorized: false,
       });
 
-      const status = res?._status
+      const status = res?._status;
 
       if (status === 200 || status === 302) {
         store.dispatch('kubewarden/updateAirGapped', false);
@@ -41,7 +41,7 @@ export async function isAirgap(context: AirgapConfig): Promise<boolean> {
     }
   } catch (e) {
     if (!store.getters['kubewarden/airGapped']) {
-      console.log('Unable to determine management.cattle.io.settings/whitelist-domain value.', e); // eslint-disable-line no-console
+      console.log('Unable to determine management.cattle.io.settings/whitelist-domain value.', e);
       store.dispatch('kubewarden/updateAirGapped', false);
     }
 

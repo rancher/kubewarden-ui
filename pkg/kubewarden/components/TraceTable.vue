@@ -178,21 +178,21 @@ export default {
 
         // Check for unsupported 'custom' mode
         if (telemetry?.mode === 'custom') {
-          this.unsupportedTelemetrySpec = true;
+          this.handleTracingChecklist('unsupportedTelemetrySpec', true);
 
           return null;
         }
 
         // If tracing is not undefined or boolean, it's outdated
         if (!tracingIsUndefinedOrBoolean) {
-          this.outdatedTelemetrySpec = true;
+          this.handleTracingChecklist('outdatedTelemetrySpec', true);
 
           return null;
         }
 
         // If telemetry.tracing is true, ensure sidecar.tracing is defined
         if (telemetry?.tracing === true && !endpointIsDefined) {
-          this.incompleteTelemetrySpec = true;
+          this.handleTracingChecklist('incompleteTelemetrySpec', true);
 
           return null;
         }
@@ -286,6 +286,10 @@ export default {
 
     duration(duration) {
       return formatDuration(duration);
+    },
+
+    handleTracingChecklist(prop, val) {
+      this[prop] = val;
     }
   }
 };

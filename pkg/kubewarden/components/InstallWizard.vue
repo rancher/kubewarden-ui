@@ -31,17 +31,17 @@ export default {
 
   methods: {
     goToStep(number, fromNav) {
-      if ( number < 1 ) {
+      if (number < 1) {
         return;
       }
 
-      if ( number === 1 && fromNav ) {
+      if (number === 1 && fromNav) {
         return;
       }
 
       const selected = this.steps[number - 1];
 
-      if ( !selected || (!this.isAvailable(selected) && number !== 1) ) {
+      if (!selected || (!this.isAvailable(selected) && number !== 1)) {
         return;
       }
 
@@ -51,18 +51,18 @@ export default {
     },
 
     isAvailable(step) {
-      if ( !step ) {
+      if (!step) {
         return false;
       }
 
       const idx = this.steps.findIndex((s) => s.name === step.name);
 
-      if ( idx === 0 ) {
+      if (idx === 0) {
         return false;
       }
 
-      for ( let i = 0; i < idx; i++ ) {
-        if ( this.steps[i].ready === false ) {
+      for (let i = 0; i < idx; i++) {
+        if (this.steps[i].ready === false) {
           return false;
         }
       }

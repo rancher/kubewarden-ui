@@ -71,11 +71,17 @@ export default {
         if (this.defaultsChart) {
           const compatibleVersion = findCompatibleDefaultsChart(this.controllerApp, this.defaultsChart);
 
+          if (!compatibleVersion) {
+            this.isLoading = false;
+
+            return;
+          }
+
           const chartInfo = await this.$store.dispatch('catalog/getVersionInfo', {
             repoType:    this.defaultsChart?.repoType,
             repoName:    this.defaultsChart?.repoName,
             chartName:   this.defaultsChart?.chartName,
-            versionName: compatibleVersion.version
+            versionName: compatibleVersion?.version
           });
 
           if (!isEmpty(chartInfo)) {

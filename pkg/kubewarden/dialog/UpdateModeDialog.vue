@@ -13,7 +13,9 @@ export default {
   },
 
   components: {
-    AsyncButton, Banner, Checkbox
+    AsyncButton,
+    Banner,
+    Checkbox
   },
 
   data() {
@@ -64,13 +66,11 @@ export default {
     :show-highlight-border="false"
   >
     <h4
-      slot="title"
       class="text-default-text mb-10"
     >
       {{ t('kubewarden.policyConfig.mode.update.title') }}
     </h4>
     <div
-      slot="body"
       class="pl-10 pr-10 mb-20 dialog-body"
     >
       <p class="mb-20">
@@ -90,7 +90,6 @@ export default {
       />
     </div>
     <div
-      slot="actions"
       class="buttons mt-10"
     >
       <div class="right">

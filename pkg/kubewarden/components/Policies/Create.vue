@@ -363,7 +363,9 @@ export default ({
     async packageDetails(pkg) {
       try {
         return await this.value.artifactHubPackage(pkg);
-      } catch (e) {}
+      } catch (e) {
+        console.warn(`Error fetching package details`, e);
+      }
     },
 
     /** Extract policy questions from ArtifactHub package if available */

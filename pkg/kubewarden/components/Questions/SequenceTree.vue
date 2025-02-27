@@ -41,13 +41,13 @@ const knownTypes = {
 function componentForQuestion(q) {
   const type = (q.type || '').toLowerCase();
 
-  if ( knownTypes[type] ) {
+  if (knownTypes[type]) {
     return type;
-  } else if ( type.startsWith('array[') ) { // This only really works for array[string|multiline], but close enough for now.
+  } else if (type.startsWith('array[')) { // This only really works for array[string|multiline], but close enough for now.
     return ArrayType;
-  } else if ( type.startsWith('map[') ) { // Same, only works with map[string|multiline]
+  } else if (type.startsWith('map[')) { // Same, only works with map[string|multiline]
     return MapType;
-  } else if ( type.startsWith('reference[') ) { // Same, only works with map[string|multiline]
+  } else if (type.startsWith('reference[')) { // Same, only works with map[string|multiline]
     return ReferenceType;
   }
 
@@ -70,7 +70,10 @@ export default {
     }
   },
 
-  components: { ...knownTypes, YamlEditor },
+  components: {
+    ...knownTypes,
+    YamlEditor
+  },
 
   data() {
     return { sequenceValuesYaml: '' };
@@ -116,7 +119,7 @@ export default {
     },
 
     parseSequenceValues(val, question) {
-      if ( val && val.length ) {
+      if (val && val.length) {
         return saferDump(val);
       }
 
@@ -133,7 +136,7 @@ export default {
       const out = {};
       const obj = rootValue[question.variable];
 
-      if ( !isEmpty(obj) ) {
+      if (!isEmpty(obj)) {
         return saferDump({ [question.variable]: obj });
       }
 
