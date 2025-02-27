@@ -36,7 +36,11 @@ export default {
   },
 
   components: {
-    Banner, LabeledInput, Loading, RadioGroup, ServiceNameSelect
+    Banner,
+    LabeledInput,
+    Loading,
+    RadioGroup,
+    ServiceNameSelect
   },
 
   mixins: [ResourceFetch],
@@ -134,7 +138,7 @@ export default {
     replicas(neu) {
       this.$emit('update-general', 'replicas', neu);
     },
-    defaultImage(neu, old) {
+    defaultImage(neu) {
       if ( neu ) {
         if ( this.latestChartVersion ) {
           this.image = this.latestChartVersion;
@@ -193,7 +197,7 @@ export default {
     },
 
     kubewardenRepo() {
-      return this.charts?.find(chart => chart.chartName === KUBEWARDEN_CHARTS.DEFAULTS);
+      return this.charts?.find((chart) => chart.chartName === KUBEWARDEN_CHARTS.DEFAULTS);
     },
 
     showVersionBanner() {

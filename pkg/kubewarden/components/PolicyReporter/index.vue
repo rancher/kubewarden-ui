@@ -17,7 +17,10 @@ import { rootKubewardenRoute } from '../../utils/custom-routing';
 import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '../../types';
 
 export default {
-  components: { Banner, Loading },
+  components: {
+    Banner,
+    Loading
+  },
 
   mixins: [ResourceFetch, ResourceManager],
 
@@ -84,13 +87,13 @@ export default {
     },
 
     controllerDeployments() {
-      return this.allDeployments?.filter(deploy => (
+      return this.allDeployments?.filter((deploy) => (
         deploy?.metadata?.labels?.[KUBERNETES.INSTANCE] === KUBEWARDEN_APPS.RANCHER_CONTROLLER
       ));
     },
 
     hasAvailability() {
-      return this.isAdminUser || Object.values(this.permissions).every(value => value);
+      return this.isAdminUser || Object.values(this.permissions).every((value) => value);
     },
 
     hasPolicyServerSchema() {
@@ -111,9 +114,7 @@ export default {
 
     reporterDeployment() {
       // Policy Reporter UI labels: ui (kubewarden < v1.22.0), policy-reporter-ui (kubewarden >= v1.22.0)
-      return this.controllerDeployments?.find(deploy =>
-        ['ui', 'policy-reporter-ui'].includes(deploy?.metadata?.labels?.['app.kubernetes.io/name'])
-      );
+      return this.controllerDeployments?.find((deploy) => ['ui', 'policy-reporter-ui'].includes(deploy?.metadata?.labels?.['app.kubernetes.io/name']));
     },
 
     reporterDeploymentState() {
@@ -124,7 +125,7 @@ export default {
       const storedApp = this.$store.getters['kubewarden/controllerApp'];
 
       if (!storedApp) {
-        const controller = this.allApps?.find(a => (
+        const controller = this.allApps?.find((a) => (
           a?.spec?.chart?.metadata?.name === (KUBEWARDEN_CHARTS.CONTROLLER || KUBEWARDEN_APPS.RANCHER_CONTROLLER)
         ));
 
@@ -157,7 +158,7 @@ export default {
     },
 
     canShowReporter() {
-      if ( !this.controllerVersion ) {
+      if (!this.controllerVersion) {
         return false;
       }
 
@@ -175,13 +176,13 @@ export default {
               {
                 var:         'reporterReportingService',
                 parsingFunc: (data) => {
-                  return data.find(service => service?.metadata?.labels?.['app.kubernetes.io/component'] === 'reporting');
+                  return data.find((service) => service?.metadata?.labels?.['app.kubernetes.io/component'] === 'reporting');
                 }
               },
               {
                 var:         'reporterUIService',
                 parsingFunc: (data) => {
-                  return data.find(service => ['policy-reporter-ui', 'ui'].includes(service?.metadata?.labels?.['app.kubernetes.io/name']));
+                  return data.find((service) => ['policy-reporter-ui', 'ui'].includes(service?.metadata?.labels?.['app.kubernetes.io/name']));
                 }
               }
             ]
@@ -194,14 +195,17 @@ export default {
       try {
         const service = this.reporterUIService;
 
-        if ( service ) {
+        if (service) {
           const base = `/k8s/clusters/${ this.currentCluster.id }/api/v1/namespaces/${ service.metadata?.namespace }/services/`;
           const proxy = `http:${ service.metadata?.name }:${ service.spec?.ports?.[0].port }/proxy`;
 
           return base + proxy;
         }
       } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
+        handleGrowl({
+          error: e,
+          store: this.$store
+        });
       }
     }
   }

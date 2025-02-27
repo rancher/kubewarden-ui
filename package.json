@@ -10,48 +10,43 @@
     "dev": "NODE_ENV=dev ./node_modules/.bin/vue-cli-service serve",
     "build": "./node_modules/.bin/vue-cli-service build",
     "clean": "./node_modules/@rancher/shell/scripts/clean",
-    "test": "export TS_JEST_DISABLE_VER_CHECKER=true && jest --watch",
-    "test:ci": "export TS_JEST_DISABLE_VER_CHECKER=true && jest --collectCoverage",
-    "test:unit": "vue-cli-service test:unit",
+    "test:ci": "jest --collectCoverage",
+    "test:unit": "jest --watch",
     "lint": "eslint .",
     "format": "eslint . --fix"
   },
   "dependencies": {
     "@kubernetes/client-node": "^1.0.0",
     "@rancher/components": "^0.3.0-alpha.1",
-    "@rancher/shell": "3.0.2-rc.5",
-    "vue": "3.5.13",
-    "vue-router": "4.5.0",
-    "vuex": "4.1.0"
+    "@rancher/shell": "^3.0.2-rc.5",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.26.8",
-    "@babel/preset-typescript": "^7.24.7",
-    "@jest/globals": "^29.7.0",
-    "@jest/types": "^29.6.3",
+    "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.15",
     "@types/node": "~20.10.0",
     "@types/semver": "7.5.4",
-    "@vue/cli-plugin-typescript": "~5.0.0",
+    "@vue/cli-plugin-typescript": "^5.0.8",
     "@vue/cli-plugin-unit-jest": "^5.0.8",
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.4.0",
-    "@vue/vue2-jest": "^29.2.6",
-    "babel-jest": "^29.7.0",
+    "@vue/test-utils": "^2.4.6",
+    "@vue/vue3-jest": "^29.2.6",
     "eslint": "^9.21.0",
+    "eslint-plugin-jest": "^28.11.0",
     "eslint-plugin-vue": "^9.32.0",
     "file-loader": "^6.2.0",
-    "globals": "^15.14.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "sass-loader": "12.6.0",
     "ts-jest": "^29.2.6",
+    "ts-node": "^10.9.2",
     "typescript": "5.7.3",
     "url-loader": "^4.1.1"
   },
   "engines": {
     "node": ">=20"
-  },
-  "resolutions": {
-    "@types/node": "~20.10.0"
   }
 }

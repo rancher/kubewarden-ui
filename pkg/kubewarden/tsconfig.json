@@ -20,33 +20,15 @@
       "./core",
       "./types"
     ],
-    "types": [
-      "@types/node",
-      "@types/lodash",
-      "rancher",
-      "shell",
-      "core"
-    ],
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ],
+    "types": ["@types/node", "@types/lodash", "@types/jest", "jest", "rancher", "shell", "core"],
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "paths": {
-      "@shell/*": [
-        "../../node_modules/@rancher/shell/*"
-      ],
-      "@components/*": [
-        "./node_modules/@rancher/components/*"
-      ],
-      "@/*": [
-        "../../*"
-      ],
-      "@kubewarden/*": [
-        "./*"
-      ]
-    },
+      "@shell/*": ["../../node_modules/@rancher/shell/*"],
+      "@components/*": ["./node_modules/@rancher/components/*"],
+      "@/*": ["../../*"],
+      "@kubewarden/*": ["./*"],
+      "@tests/*": ["./tests/*"]
+    }
   },
   "include": [
     "./**/*.ts",
@@ -54,7 +36,5 @@
     "./**/*.vue",
     "../../node_modules/@rancher/shell/core/types.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"]
 }

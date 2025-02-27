@@ -114,7 +114,7 @@ export function appVersionSatisfiesConstraint(
  * @param chart - The chart object containing version information.
  * @returns Version | null - The highest available upgrade version or null if no upgrade is available.
  */
-export function checkUpgradeAvailable(store: Store<any>, app: CatalogApp, chart: Chart): Version | null {
+export function checkUpgradeAvailable(store: Store<any>, app: CatalogApp | null, chart: Chart | null): Version | null {
   if ( app && chart ) {
     const installedAppVersion = app.spec?.chart?.metadata?.appVersion;
     const installedChartVersion = app.spec?.chart?.metadata?.version;
@@ -233,8 +233,8 @@ export function getValidUpgrade(currentVersion: string, upgradeVersion: string, 
  * @returns Version | null - The matching kubewarden-defaults chart version or null if no matching version is found.
  */
 export function findCompatibleDefaultsChart(
-  controllerApp: CatalogApp,
-  defaultsChart: Chart
+  controllerApp: CatalogApp | null,
+  defaultsChart: Chart | null
 ): Version | null {
   if ( controllerApp && defaultsChart ) {
     const controllerAppVersion = controllerApp.spec?.chart?.metadata?.appVersion;

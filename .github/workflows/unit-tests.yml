@@ -1,0 +1,51 @@
+name: Unit Tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 21 * * *'
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  unit-test:
+    if: github.repository_owner == 'rancher'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Nodejs and npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup yarn
+        run: npm install -g yarn
+
+      - name: Setup Nodejs with yarn caching
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Run tests
+        run: |
+          yarn test:ci
+          mkdir -p coverage-artifacts/coverage/unit
+          cp coverage/unit/coverage-final.json coverage-artifacts/coverage/coverage-unit.json
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{github.run_number}}-${{github.run_attempt}}-coverage
+          path: coverage-artifacts/**/*

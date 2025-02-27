@@ -1,4 +1,5 @@
-import globals from "globals";
+import globals from 'globals';
+import jest from 'eslint-plugin-jest';
 import pluginVue from 'eslint-plugin-vue';
 import vueTsEslintConfig from '@vue/eslint-config-typescript';
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting';
@@ -6,12 +7,12 @@ import skipFormatting from '@vue/eslint-config-prettier/skip-formatting';
 export default [
   {
     name:  'app/files-to-lint',
-    files: ['**/*.{ts,mts,tsx,vue}'],
+    files: ['**/*.{js,ts,mts,tsx,vue}', '**/*.spec.js', '**/*.test.js'],
   },
 
   {
     name:    'app/files-to-ignore',
-    ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/node_modules/**', 'yarn.lock', '**/tests/**'],
+    ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/node_modules/**', 'yarn.lock', '**/tests/e2e/**'],
   },
 
   ...pluginVue.configs['flat/essential'],
@@ -21,11 +22,12 @@ export default [
   {
     languageOptions: {
       globals: {
-          ...globals.browser,
-          ...globals.node
+        ...Object.fromEntries(Object.entries(globals.browser).map(([key, value]) => [key.trim(), value])),
+        ...Object.fromEntries(Object.entries(globals.node).map(([key, value]) => [key.trim(), value])),
+        ...jest.environments.globals.globals
       }
     },
-    rules: {
+    rules:   {
       '@typescript-eslint/no-explicit-any':    'off',
       '@typescript-eslint/no-require-imports': 'off',
 
@@ -43,6 +45,7 @@ export default [
       'vue/no-v-html':                  'off',
       'vue/multi-word-component-names': 'off',
 
+      'space-in-parens':                   'warn',
       'array-bracket-spacing':             'warn',
       'arrow-parens':                      'warn',
       'arrow-spacing':                     ['warn', {
