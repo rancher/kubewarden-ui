@@ -202,7 +202,7 @@ jobs:
       run: |
         TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG k3d-install
 
-        # Registry config with docker auth https://k3d.io/v5.4.7/faq/faq/#dockerhub-pull-rate-limit
+        # Registry config with docker auth https://k3d.io/v5.8.2/faq/faq/#dockerhub-pull-rate-limit
         k3d cluster create ${{ env.K3D_CLUSTER_NAME }} --agents 1 --image rancher/k3s:${{ env.K3S_VERSION }} --registry-config <(echo "${{secrets.K3D_REGISTRY_CONFIG}}")
 
         # Wait for kube-system
