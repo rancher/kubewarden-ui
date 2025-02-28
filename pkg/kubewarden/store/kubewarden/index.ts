@@ -19,7 +19,8 @@ export interface StateConfig {
   airGapped: boolean;
   fleetRepos: FleetGitRepo[];
   hideBannerDefaults: boolean;
-  hideBannerArtifactHub: boolean;
+  hideBannerPolicyRepo: boolean;
+  hideBannerOfficialRepo: boolean;
   hideBannerAirgapPolicy: boolean;
   controllerApp: CatalogApp | null;
   kubewardenCrds: CustomResourceDefinition[];
@@ -39,7 +40,8 @@ const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
         airGapped:              config.airGapped,
         fleetRepos:             config.fleetRepos,
         hideBannerDefaults:     config.hideBannerDefaults,
-        hideBannerArtifactHub:  config.hideBannerArtifactHub,
+        hideBannerOfficialRepo: config.hideBannerOfficialRepo,
+        hideBannerPolicyRepo:   config.hideBannerPolicyRepo,
         hideBannerAirgapPolicy: config.hideBannerAirgapPolicy,
         controllerApp:          config.controllerApp,
         kubewardenCrds:         config.kubewardenCrds,
@@ -66,7 +68,8 @@ export default {
     airGapped:              false,
     fleetRepos:             [],
     hideBannerDefaults:     false,
-    hideBannerArtifactHub:  false,
+    hideBannerOfficialRepo: false,
+    hideBannerPolicyRepo:   false,
     hideBannerAirgapPolicy: false,
     controllerApp:          null,
     kubewardenCrds:         [],

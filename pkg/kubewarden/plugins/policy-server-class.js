@@ -64,7 +64,14 @@ export default class PolicyServerModel extends KubewardenModel {
       relatedPolicies?.map((policy) => {
         const { stateDisplay } = policy;
 
-        out[stateDisplay].count++;
+        if (!out[stateDisplay]) {
+          out[stateDisplay] = {
+            color: colorForStatus(stateDisplay).replace('text-', ''),
+            count: 0
+          };
+        } else {
+          out[stateDisplay].count++;
+        }
       });
 
       return out;

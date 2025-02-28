@@ -13,10 +13,17 @@ export default {
     commit('updateHideBannerDefaults', val);
   },
 
-  // ArtifactHub banner
-  updateHideBannerArtifactHub({ commit }: any, val: boolean) {
-    commit('updateHideBannerArtifactHub', val);
+  // Official Repo banner
+  updateHideBannerOfficialRepo({ commit }: any, val: boolean) {
+    commit('updateHideBannerOfficialRepo', val);
   },
+
+  // Policy Repo banner
+  updateHideBannerPolicyRepo({ commit }: any, val: boolean) {
+    commit('updateHideBannerPolicyRepo', val);
+  },
+
+  // Airgap Policy banner
   updateHideBannerAirgapPolicy({ commit }: any, val: boolean) {
     commit('updateHideBannerAirgapPolicy', val);
   },

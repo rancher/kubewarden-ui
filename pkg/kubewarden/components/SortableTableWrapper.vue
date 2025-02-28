@@ -1,58 +1,69 @@
-<script>
+<script setup lang="ts">
+import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+
 import SortableTable from '@shell/components/SortableTable';
 
-export default {
-  props:      {
-    rows:          { type: Array, required: true },
-    headers:       { type: Array, required: true },
-    tableActions:  { type: Boolean, default: false },
-    rowActions:    { type: Boolean, default: false },
-    keyField:      { type: String, required: true },
-    defaultSortBy: { type: String, default: '' },
-    paging:        { type: Boolean, default: false },
-    search:        { type: Boolean, default: false }
-  },
+interface Listener {
+  row: HTMLElement;
+  listener: EventListener;
+}
 
-  components: { SortableTable },
+interface Props {
+  rows: Array<any>;
+  headers: Array<any>;
+  tableActions?: boolean;
+  rowActions?: boolean;
+  keyField: string;
+  defaultSortBy?: string;
+  paging?: boolean;
+  search?: boolean;
+}
 
-  data() {
-    return { listeners: [] };
-  },
+defineProps<Props>();
 
-  watch: {
-    rows() {
-      this.addRowClickListener();
-    }
-  },
+const emit = defineEmits(['selectRow']);
 
-  mounted() {
-    this.addRowClickListener();
-  },
+const sortableTable = ref();
+const listeners = ref<Listener[]>([]);
 
-  methods: {
-    addRowClickListener() {
-      this.$nextTick(() => {
-        const table = this.$refs.sortableTable?.$el?.querySelector('table');
+const addRowClickListener = () => {
+  nextTick(() => {
+    const table = sortableTable.value?.$el?.querySelector('table') as HTMLElement;
 
-        if ( table ) {
-          this.removeRowClickListener();
+    if (table) {
+      removeRowClickListener();
 
-          table.querySelectorAll('tbody tr').forEach((row, index) => {
-            const listener = () => this.$emit('selectRow', this.rows[index]);
+      table.querySelectorAll('tbody tr').forEach((row, index) => {
+        const listener = () => {
+          const rowsProp = (sortableTable.value?.$props as Props).rows || [];
+          emit('selectRow', rowsProp[index]);
+        };
 
-            row?.addEventListener('click', listener);
-            this.listeners.push({ row, listener });
-          });
-        }
+        row.addEventListener('click', listener);
+        listeners.value.push({ row: row as HTMLElement, listener });
       });
-    },
-
-    removeRowClickListener() {
-      this.listeners?.forEach(({ row, listener }) => row?.removeEventListener('click', listener));
-      this.listeners = [];
     }
-  }
+  });
 };
+
+const removeRowClickListener = () => {
+  listeners.value.forEach(({ row, listener }) => {
+    row.removeEventListener('click', listener);
+  });
+  listeners.value = [];
+};
+
+watch(() => sortableTable.value?.$props.rows, () => {
+  addRowClickListener();
+});
+
+onMounted(() => {
+  addRowClickListener();
+});
+
+onBeforeUnmount(() => {
+  removeRowClickListener();
+});
 </script>
 
 <template>

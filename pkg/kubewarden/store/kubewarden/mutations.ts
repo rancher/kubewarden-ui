@@ -12,8 +12,11 @@ export default {
   updateHideBannerDefaults(state: StateConfig, val: boolean) {
     state.hideBannerDefaults = val;
   },
-  updateHideBannerArtifactHub(state: StateConfig, val: boolean) {
-    state.hideBannerArtifactHub = val;
+  updateHideBannerOfficialRepo(state: StateConfig, val: boolean) {
+    state.hideBannerOfficialRepo = val;
+  },
+  updateHideBannerPolicyRepo(state: StateConfig, val: boolean) {
+    state.hideBannerPolicyRepo = val;
   },
   updateHideBannerAirgapPolicy(state: StateConfig, val: boolean) {
     state.hideBannerAirgapPolicy = val;

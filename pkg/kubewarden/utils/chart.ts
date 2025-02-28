@@ -227,7 +227,6 @@ export function getValidUpgrade(currentVersion: string, upgradeVersion: string, 
 /**
  * Finds the kubewarden-defaults chart that has an appVersion matching the appVersion of the installed kubewarden-controller chart.
  *
- * @param store - The Vuex store instance.
  * @param controllerApp - The installed kubewarden-controller application object.
  * @param defaultsChart - The kubewarden-defaults chart object containing version information.
  * @returns Version | null - The matching kubewarden-defaults chart version or null if no matching version is found.
@@ -236,22 +235,15 @@ export function findCompatibleDefaultsChart(
   controllerApp: CatalogApp | null,
   defaultsChart: Chart | null
 ): Version | null {
-  if ( controllerApp && defaultsChart ) {
-    const controllerAppVersion = controllerApp.spec?.chart?.metadata?.appVersion;
-    const defaultsChartVersions = defaultsChart.versions;
+  const controllerAppVersion = controllerApp?.spec?.chart?.metadata?.appVersion;
+  const versions = defaultsChart?.versions;
 
-    if ( controllerAppVersion ) {
-      // Filter the defaultsChart versions to find a matching appVersion
-      const matchingDefaults = defaultsChartVersions?.filter(v => v.appVersion === controllerAppVersion);
-
-      if ( matchingDefaults && matchingDefaults.length > 0 ) {
-        // Sort the matching versions and return the highest one
-        const highestMatchingDefaults = matchingDefaults.sort((a, b) => semver.rcompare(a.version, b.version))[0];
-
-        return highestMatchingDefaults;
-      }
-    }
+  if (!controllerAppVersion || !Array.isArray(versions) || versions.length === 0) {
+    return null;
   }
 
-  return null;
+  versions.sort((a, b) => semver.rcompare(a.version, b.version));
+
+  // Find the first matching appVersion
+  return versions.find(v => v.appVersion === controllerAppVersion) || null;
 }

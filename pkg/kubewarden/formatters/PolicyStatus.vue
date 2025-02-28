@@ -1,50 +1,38 @@
-<script>
+<script setup lang="ts">
+import { onUnmounted, ref, watch } from 'vue';
+
 import { BadgeState } from '@components/BadgeState';
 
 import { colorForStatus } from '../plugins/kubewarden-class';
 
-export default {
-  components: { BadgeState },
+const props = defineProps<{
+  value: string;
+}>();
 
-  props:      {
-    value: {
-      type:     String,
-      default: ''
-    }
-  },
+const stateDisplay = ref('');
+const stateBackground = ref('');
 
-  data() {
-    return {
-      stateDisplay:    '',
-      stateBackground: ''
-    };
-  },
-
-  watch: {
-    value: {
-      handler() {
-        const color = colorForStatus(this.value);
-
-        this.stateDisplay = this.value;
-        this.stateBackground = color.replace('text-', 'bg-');
-      },
-
-      immediate: true
-    }
-  },
-
-  methods: {
-    capitalizeMessage(m) {
-      return m?.charAt(0).toUpperCase() + m?.slice(1);
-    },
-  }
+const capitalizeMessage = (m: string) => {
+  return m?.charAt(0).toUpperCase() + m?.slice(1);
 };
+
+watch(() => props.value, () => {
+  const color = colorForStatus(props.value) || 'text-info';
+
+  stateDisplay.value = props.value || 'unknown';
+  stateBackground.value = color.replace('text-', 'bg-');
+
+}, { immediate: true });
+
+onUnmounted(() => {
+  stateDisplay.value = '';
+  stateBackground.value = '';
+});
 </script>
 
 <template>
   <div>
     <BadgeState
-      v-if="value"
       :color="stateBackground"
       :label="capitalizeMessage(stateDisplay)"
     />
