@@ -40,13 +40,9 @@ export default {
 
   provide() {
     return {
-      chartType: this.localValue.type,
+      chartType: this.value.type,
       realMode:  this.realMode
     };
-  },
-
-  data() {
-    return { localValue: { ...this.value } };
   },
 
   computed: {
@@ -62,19 +58,19 @@ export default {
   methods: {
     async finish(event) {
       try {
-        removeEmptyAttrs(this.localValue);
+        removeEmptyAttrs(this.value);
 
         // remove metadata that identifies a CAP as a default policy, so that we can edit it later on the UI
         if (
           this.isClone &&
-          this.localValue.isKubewardenDefaultPolicy &&
-          this.localValue?.metadata?.labels?.['app.kubernetes.io/name'] === 'kubewarden-defaults'
+          this.value.isKubewardenDefaultPolicy &&
+          this.value?.metadata?.labels?.['app.kubernetes.io/name'] === 'kubewarden-defaults'
         ) {
-          delete this.localValue?.metadata?.labels?.['app.kubernetes.io/name'];
+          delete this.value?.metadata?.labels?.['app.kubernetes.io/name'];
         }
 
         await this.save(event);
-        this.$emit('input', this.localValue); // Emit the updated value to the parent
+        this.$emit('input', this.value); // Emit the updated value to the parent
       } catch (e) {
         handleGrowl({
           error: e,
@@ -83,15 +79,15 @@ export default {
       }
     },
 
-    // this updates the "localValue" obj for CAP's
+    // this updates the "value" obj for CAP's
     // with the updated values that came from the "edit YAML" scenario
     updateYamlValuesFromEdit(val) {
       const parsed = jsyaml.load(val);
 
       removeEmptyAttrs(parsed);
 
-      this.localValue = { ...parsed }; // Assign a new object to avoid prop mutation
-      this.$emit('input', this.localValue); // Emit changes
+      this.value = { ...parsed }; // Assign a new object to avoid prop mutation
+      this.$emit('input', this.value); // Emit changes
     }
   }
 };
@@ -100,17 +96,17 @@ export default {
 
 
 <template>
-  <Create v-if="isCreate" :value="localValue" :mode="mode" />
+  <Create v-if="isCreate" :value="value" :mode="mode" />
   <CruResource
     v-else
     :errors="errors"
-    :resource="localValue"
+    :resource="value"
     :mode="realMode"
     :can-yaml="false"
     @finish="finish"
   >
     <Config
-      :value="localValue"
+      :value="value"
       :mode="realMode"
       @updateYamlValues="updateYamlValuesFromEdit"
     />
