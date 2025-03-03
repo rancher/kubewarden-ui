@@ -12,6 +12,27 @@ entries:
       catalog.cattle.io/ui-component: plugins
       catalog.cattle.io/ui-extensions-version: '>= 3.0.0 < 4.0.0'
     apiVersion: v2
+    appVersion: 3.1.1-rc.1
+    created: "2025-03-03T19:50:29.704687453Z"
+    description: Kubewarden extension for Rancher Manager
+    digest: 818f4bfc8365a6ff47449f2301467bbd584108a685c913c78b6ac597cb4ccc48
+    icon: https://raw.githubusercontent.com/kubewarden/ui/main/pkg/kubewarden/assets/icon-kubewarden.svg
+    name: kubewarden
+    type: application
+    urls:
+    - assets/kubewarden/kubewarden-3.1.1-rc.1.tgz
+    version: 3.1.1-rc.1
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/kube-version: '>= v1.16.0-0'
+      catalog.cattle.io/namespace: cattle-ui-plugin-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/permits-os: linux, windows
+      catalog.cattle.io/rancher-version: '>= 2.10.0-0'
+      catalog.cattle.io/scope: management
+      catalog.cattle.io/ui-component: plugins
+      catalog.cattle.io/ui-extensions-version: '>= 3.0.0 < 4.0.0'
+    apiVersion: v2
     appVersion: 3.1.0
     created: "2025-02-25T11:15:06.075738493Z"
     description: Kubewarden extension for Rancher Manager
@@ -2259,4 +2280,4 @@ entries:
     urls:
     - assets/kubewarden/kubewarden-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-25T13:48:44.120654383Z"
+generated: "2025-03-03T19:50:29.703701354Z"
