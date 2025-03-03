@@ -1,5 +1,7 @@
 name: Playwright Tests
 
+run-name: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || '' }}
+
 on:
   workflow_dispatch:
     inputs:
@@ -74,10 +76,10 @@ on:
       - completed
 
   schedule:
-    - cron: "0 21 * * *"
+    - cron: "1 21 * * *"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.workflow_run.head_branch || github.ref }}
   cancel-in-progress: true
 
 env:
