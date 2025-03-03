@@ -13,7 +13,7 @@ export default {
     }
   },
 
-  fetch() {
+  created() {
     if (this.value) {
       const resourceToShow = this.value.flatMap((r) => r[this.col.name]);
 
@@ -29,7 +29,7 @@ export default {
 
   computed: {
     resourceLabels() {
-      if (this.resourceToShow.length > 1) {
+      if (this.resourceToShow?.length > 1) {
         const out = [];
         const last = this.resourceToShow[this.resourceToShow.length - 1];
 

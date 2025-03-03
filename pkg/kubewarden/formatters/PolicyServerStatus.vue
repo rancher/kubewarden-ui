@@ -16,7 +16,7 @@ export default {
     }
   },
 
-  async fetch() {
+  async created() {
     if (this.$store.getters['cluster/canList'](WORKLOAD_TYPES.DEPLOYMENT)) {
       await this.$store.dispatch('cluster/findAll', { type: WORKLOAD_TYPES.DEPLOYMENT });
     }
