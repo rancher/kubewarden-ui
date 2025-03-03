@@ -11,11 +11,11 @@ import LabeledSelect from '@shell/components/form/LabeledSelect';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { Checkbox } from '@components/Form/Checkbox';
 
-import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME } from '../../types';
-import { POLICY_TABLE_HEADERS } from '../../config/table-headers';
-import { resourcesFromAnnotation, isGlobalPolicy } from '../../modules/artifacthub';
+import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
+import { POLICY_TABLE_HEADERS } from '@kubewarden/config/table-headers';
+import { resourcesFromAnnotation, isGlobalPolicy } from '@kubewarden/modules/artifacthub';
 
-import SortableTableWrapper from '../SortableTableWrapper';
+import SortableTableWrapper from '@kubewarden/components/SortableTableWrapper';
 
 export default {
   props: {
@@ -36,7 +36,10 @@ export default {
   inject: ['chartType'],
 
   components: {
-    Checkbox, LabeledSelect, LabeledInput, SortableTableWrapper
+    Checkbox,
+    LabeledSelect,
+    LabeledInput,
+    SortableTableWrapper
   },
 
   fetch() {
@@ -69,11 +72,11 @@ export default {
         // Determine if the package is a pre-release
         const isPreRelease = this.isPrerelease(artifactHubPackage);
 
-        if ( !this.showPreRelease && isPreRelease ) {
+        if (!this.showPreRelease && isPreRelease) {
           return false; // Exclude pre-releases if showPreRelease is false
         }
 
-        if ( this.chartType === KUBEWARDEN.ADMISSION_POLICY ) {
+        if (this.chartType === KUBEWARDEN.ADMISSION_POLICY) {
           return !isGlobalPolicy(artifactHubPackage, this.allSchemas);
         }
 
@@ -88,35 +91,35 @@ export default {
 
       const out = subtypes.filter((subtype) => {
         // Show official only when showKubewardenOfficial is true
-        if ( this.showKubewardenOfficial && !this.isOfficial(subtype) ) {
+        if (this.showKubewardenOfficial && !this.isOfficial(subtype)) {
           return false;
         }
 
         // Search query filtering
-        if ( this.searchQuery ) {
-          const searchTokens = this.searchQuery.split(/\s*[, ]\s*/).map(x => ensureRegex(x, false));
+        if (this.searchQuery) {
+          const searchTokens = this.searchQuery.split(/\s*[, ]\s*/).map((x) => ensureRegex(x, false));
 
-          const matchesSearch = searchTokens.every(token => (
+          const matchesSearch = searchTokens.every((token) => (
             subtype.display_name?.match(token) ||
-            ( subtype.description && subtype.description.match(token) ) ||
-            subtype.keywords?.some(keyword => keyword.match(token))
+            (subtype.description && subtype.description.match(token)) ||
+            subtype.keywords?.some((keyword) => keyword.match(token))
           ));
 
-          if ( !matchesSearch ) {
+          if (!matchesSearch) {
             return false;
           }
         }
 
         // Attribute filtering
-        if ( this.attributes.length ) {
-          if ( this.attributes.includes(this.t('kubewarden.utils.attributes.optionLabels.all')) ) {
+        if (this.attributes.length) {
+          if (this.attributes.includes(this.t('kubewarden.utils.attributes.optionLabels.all'))) {
             return true;
           }
 
           const matchesAttributes = this.attributes.some((attribute) => {
             const isFeature = this.featureOptions.includes(attribute);
 
-            if ( isFeature ) {
+            if (isFeature) {
               const normalizedAttribute = attribute === 'Mutation' ? 'mutation' : 'contextAwareResources';
 
               return subtype.data?.[`kubewarden/${ normalizedAttribute }`];
@@ -126,7 +129,7 @@ export default {
           }
           );
 
-          if ( !matchesAttributes ) {
+          if (!matchesAttributes) {
             return false;
           }
         }
@@ -140,24 +143,27 @@ export default {
     attributeOptions() {
       const out = [];
 
-      if ( this.resourceOptions.length ) {
+      if (this.resourceOptions.length) {
         out.push({
           kind:  'group',
           label: this.t('kubewarden.utils.attributes.optionLabels.resource'),
         }, ...this.resourceOptions);
       }
 
-      if ( this.featureOptions.length ) {
+      if (this.featureOptions.length) {
         out.push({
           kind:  'group',
           label: this.t('kubewarden.utils.attributes.optionLabels.features'),
         }, ...this.featureOptions);
       }
 
-      if ( out.length ) {
+      if (out.length) {
         out.unshift(
           this.t('kubewarden.utils.attributes.optionLabels.all'),
-          { kind: 'divider', label: 'divider' }
+          {
+            kind:  'divider',
+            label: 'divider'
+          }
         );
       }
 
@@ -167,17 +173,17 @@ export default {
     featureOptions() {
       const featuresList = [];
 
-      for ( const subtype of this.filteredPackages ) {
-        if ( subtype?.data?.['kubewarden/mutation'] === 'true' ) {
+      for (const subtype of this.filteredPackages) {
+        if (subtype?.data?.['kubewarden/mutation'] === 'true') {
           featuresList.push('Mutation');
         }
 
-        if ( subtype?.data?.['kubewarden/contextAwareResources'] ) {
+        if (subtype?.data?.['kubewarden/contextAwareResources']) {
           featuresList.push('Context Aware');
         }
       }
 
-      if ( !featuresList || featuresList.length === 0 ) {
+      if (!featuresList || featuresList.length === 0) {
         return [];
       }
 
@@ -186,12 +192,12 @@ export default {
 
     keywordOptions() {
       const flattened = this.filteredPackages?.flatMap((subtype) => {
-        if ( subtype?.keywords && subtype.keywords.length ) {
+        if (subtype?.keywords && subtype.keywords.length) {
           return subtype.keywords;
         }
       });
 
-      if ( !flattened || flattened?.length === 0 ) {
+      if (!flattened || flattened?.length === 0) {
         return [];
       }
 
@@ -205,7 +211,7 @@ export default {
         return name || null;
       });
 
-      if ( !flattened || flattened.length === 0 ) {
+      if (!flattened || flattened.length === 0) {
         return [];
       }
 
@@ -223,7 +229,7 @@ export default {
 
   methods: {
     hasAnnotation(subtype, annotation) {
-      if ( subtype.data?.[annotation] && subtype.data?.[annotation] !== 'false' ) {
+      if (subtype.data?.[annotation] && subtype.data?.[annotation] !== 'false') {
         return true;
       }
 
@@ -237,7 +243,7 @@ export default {
        * Custom condition for Deprecated API Versions policy as these versions
        * have specific k8s versions attached (e.g. `v0.1.12-k8sv1.29.0`).
        */
-      if ( parsed && artifactHubPackage.name === 'deprecated-api-versions' ) {
+      if (parsed && artifactHubPackage.name === 'deprecated-api-versions') {
         return !!parsed.includes('rc');
       }
 
@@ -257,14 +263,14 @@ export default {
     handleAttributeSelect(selected) {
       const allOption = this.t('kubewarden.utils.attributes.optionLabels.all');
 
-      if ( selected.includes(allOption) ) {
-        if ( selected.length === 1 || selected.indexOf(allOption) !== 0 ) {
+      if (selected.includes(allOption)) {
+        if (selected.length === 1 || selected.indexOf(allOption) !== 0) {
           this.attributes = [allOption];
         } else {
-          this.attributes = selected.filter(attr => attr !== allOption);
+          this.attributes = selected.filter((attr) => attr !== allOption);
         }
       } else {
-        this.attributes = selected.filter(attr => attr !== allOption);
+        this.attributes = selected.filter((attr) => attr !== allOption);
       }
     }
   }

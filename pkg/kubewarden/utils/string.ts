@@ -7,7 +7,7 @@ export function extractPortNumber(inputString: any): number | null | void {
   const portPattern = /:(\d+)$/;
   const match = inputString.match(portPattern);
 
-  if ( match && match[1] ) {
+  if (match && match[1]) {
     return parseInt(match[1], 10);
   } else {
     return null;

@@ -19,22 +19,34 @@ const ONE_DAY = 24 * ONE_HOUR;
 
 const UNIT_STEPS: { unit: string; microseconds: number; ofPrevious: number }[] = [
   {
-    unit: 'd', microseconds: ONE_DAY, ofPrevious: 24
+    unit:         'd',
+    microseconds: ONE_DAY,
+    ofPrevious:   24
   },
   {
-    unit: 'h', microseconds: ONE_HOUR, ofPrevious: 60
+    unit:         'h',
+    microseconds: ONE_HOUR,
+    ofPrevious:   60
   },
   {
-    unit: 'm', microseconds: ONE_MINUTE, ofPrevious: 60
+    unit:         'm',
+    microseconds: ONE_MINUTE,
+    ofPrevious:   60
   },
   {
-    unit: 's', microseconds: ONE_SECOND, ofPrevious: 1000
+    unit:         's',
+    microseconds: ONE_SECOND,
+    ofPrevious:   1000
   },
   {
-    unit: 'ms', microseconds: ONE_MILLISECOND, ofPrevious: 1000
+    unit:         'ms',
+    microseconds: ONE_MILLISECOND,
+    ofPrevious:   1000
   },
   {
-    unit: 'μs', microseconds: 1, ofPrevious: 1000
+    unit:         'μs',
+    microseconds: 1,
+    ofPrevious:   1000
   },
 ];
 

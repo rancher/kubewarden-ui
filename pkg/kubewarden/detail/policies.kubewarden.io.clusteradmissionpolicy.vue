@@ -1,9 +1,9 @@
 <script>
 import { _CREATE } from '@shell/config/query-params';
 
-import { KUBEWARDEN } from '../types';
+import { KUBEWARDEN } from '@kubewarden/types';
 
-import PolicyDetail from '../components/Policies/PolicyDetail';
+import PolicyDetail from '@kubewarden/components/Policies/PolicyDetail';
 
 export default {
   name: 'ClusterAdmissionPolicy',
@@ -22,9 +22,7 @@ export default {
   components: { PolicyDetail },
 
   data() {
-    return {
-      resource: KUBEWARDEN.ADMISSION_POLICY
-    }
+    return { resource: KUBEWARDEN.ADMISSION_POLICY };
   }
 };
 </script>

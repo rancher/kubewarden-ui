@@ -16,9 +16,9 @@ export default {
   computed: {
     sliceStyles() {
       let accumulatedPercentage = 0;
-      const allZero = this.percentages.every(percentage => percentage === 0);
+      const allZero = this.percentages.every((percentage) => percentage === 0);
 
-      if ( allZero ) {
+      if (allZero) {
         return [
           {
             width:           '100%',

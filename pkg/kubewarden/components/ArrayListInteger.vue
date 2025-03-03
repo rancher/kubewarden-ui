@@ -4,7 +4,10 @@ import { LabeledInput } from '@components/Form/LabeledInput';
 import ArrayList from '@shell/components/form/ArrayList';
 
 export default {
-  components: { ArrayList, LabeledInput },
+  components: {
+    ArrayList,
+    LabeledInput
+  },
   props:      {
     mode: {
       type:    String,
@@ -15,11 +18,11 @@ export default {
       default:  () => []
     },
     addLabel: {
-      type: String,
+      type:    String,
       default: 'Add',
     },
     removeLabel: {
-      type: String,
+      type:    String,
       default: 'Remove',
     },
     inputLabel: {

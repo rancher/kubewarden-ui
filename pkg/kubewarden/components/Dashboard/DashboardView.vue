@@ -9,10 +9,10 @@ import { allHash } from '@shell/utils/promise';
 import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 import Loading from '@shell/components/Loading';
 
-import { DASHBOARD_HEADERS } from '../../config/table-headers';
+import { DASHBOARD_HEADERS } from '@kubewarden/config/table-headers';
 import {
   KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_LABELS, WG_POLICY_K8S
-} from '../../types';
+} from '@kubewarden/types';
 
 import Masthead from './Masthead';
 import Card from './Card';
@@ -137,9 +137,9 @@ export default {
 
           return {
             status: {
-              running:       ps?.status?.running + ( neu?.metadata?.state?.name === 'running' && !terminated ? 1 : 0 ),
-              stopped:       ps?.status?.stopped + ( neu?.metadata?.state?.error ? 1 : 0 ),
-              pending:       ps?.status?.transitioning + ( neu?.metadata?.state?.transitioning ? 1 : 0 )
+              running:       ps?.status?.running + (neu?.metadata?.state?.name === 'running' && !terminated ? 1 : 0),
+              stopped:       ps?.status?.stopped + (neu?.metadata?.state?.error ? 1 : 0),
+              pending:       ps?.status?.transitioning + (neu?.metadata?.state?.transitioning ? 1 : 0)
             },
             total: terminated ? ps?.total || 0 : ps?.total + 1
           };
@@ -267,13 +267,13 @@ export default {
         return type?.reduce((policy, neu) => {
           return {
             status: {
-              running: policy?.status?.running + ( neu?.status?.policyStatus === 'active' ? 1 : 0 ),
-              stopped: policy?.status?.stopped + ( neu?.status?.error ? 1 : 0 ),
-              pending: policy?.status?.pending + ( neu?.status?.policyStatus === 'pending' ? 1 : 0 ),
+              running: policy?.status?.running + (neu?.status?.policyStatus === 'active' ? 1 : 0),
+              stopped: policy?.status?.stopped + (neu?.status?.error ? 1 : 0),
+              pending: policy?.status?.pending + (neu?.status?.policyStatus === 'pending' ? 1 : 0),
             },
             mode: {
-              protect: policy?.mode?.protect + ( neu?.spec?.mode === 'protect' ? 1 : 0 ),
-              monitor: policy?.mode?.monitor + ( neu?.spec?.mode === 'monitor' ? 1 : 0 )
+              protect: policy?.mode?.protect + (neu?.spec?.mode === 'protect' ? 1 : 0),
+              monitor: policy?.mode?.monitor + (neu?.spec?.mode === 'monitor' ? 1 : 0)
             },
             total: policy?.total + 1
           };
@@ -310,9 +310,9 @@ export default {
         return type?.reduce((res, neu) => {
           return {
             status: {
-              success: res?.status?.success + ( neu?.result === 'pass' ? 1 : 0 ),
-              fail:    res?.status?.fail + ( neu?.result === 'fail' ? 1 : 0 ),
-              error:   res?.status?.error + ( neu?.result === 'error' ? 1 : 0 )
+              success: res?.status?.success + (neu?.result === 'pass' ? 1 : 0),
+              fail:    res?.status?.fail + (neu?.result === 'fail' ? 1 : 0),
+              error:   res?.status?.error + (neu?.result === 'error' ? 1 : 0)
             },
             total: res?.total + 1
           };

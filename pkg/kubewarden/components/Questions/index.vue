@@ -1,4 +1,5 @@
 <script>
+/* eslint vue/no-mutating-props: off */
 import Jexl from 'jexl';
 import jsyaml from 'js-yaml';
 import Tab from '@shell/components/Tabbed/Tab';
@@ -42,15 +43,15 @@ export const knownTypes = {
 export function componentForQuestion(q) {
   const type = (q.type || '').toLowerCase();
 
-  if ( knownTypes[type] ) {
+  if (knownTypes[type]) {
     return type;
-  } else if ( type.startsWith('array[') ) { // This only really works for array[string|multiline], but close enough for now.
+  } else if (type.startsWith('array[')) { // This only really works for array[string|multiline], but close enough for now.
     return ArrayType;
-  } else if ( type.startsWith('map[') ) { // Same, only works with map[string|multiline]
+  } else if (type.startsWith('map[')) { // Same, only works with map[string|multiline]
     return MapType;
-  } else if ( type.startsWith('reference[') ) { // Same, only works with map[string|multiline]
+  } else if (type.startsWith('reference[')) { // Same, only works with map[string|multiline]
     return ReferenceType;
-  } else if ( type.startsWith('sequence[') ) {
+  } else if (type.startsWith('sequence[')) {
     return SequenceType;
   }
 
@@ -61,7 +62,7 @@ export function schemaToQuestions(fields) {
   const keys = Object.keys(fields);
   const out = [];
 
-  for ( const k of keys ) {
+  for (const k of keys) {
     out.push({
       variable: k,
       label:    k,
@@ -75,23 +76,23 @@ export function schemaToQuestions(fields) {
 function migrate(expr) {
   let out;
 
-  if ( expr.includes('||') ) {
-    out = expr.split('||').map(x => migrate(x)).join(' || ');
-  } else if ( expr.includes('&&') ) {
-    out = expr.split('&&').map(x => migrate(x)).join(' && ');
+  if (expr.includes('||')) {
+    out = expr.split('||').map((x) => migrate(x)).join(' || ');
+  } else if (expr.includes('&&')) {
+    out = expr.split('&&').map((x) => migrate(x)).join(' && ');
   } else {
     const parts = expr.match(/^(.*)(!?=)(.*)$/);
 
-    if ( parts ) {
+    if (parts) {
       const key = parts[1].trim();
       const op = parts[2].trim() === '!=' ? '!=' : '==';
       const val = parts[3].trim();
 
-      if ( val === 'true' || val === 'false' || val === 'null' ) {
+      if (val === 'true' || val === 'false' || val === 'null') {
         out = `${ key } ${ op } ${ val }`;
-      } else if ( val === '' ) {
+      } else if (val === '') {
         // Existing charts expect `foo=` with `{foo: null}` to be true.
-        if ( op === '!=' ) {
+        if (op === '!=') {
           out = `!!${ key }`;
         } else {
           out = `!${ key }`;
@@ -106,7 +107,7 @@ function migrate(expr) {
 
         out = expr;
       } catch (e) {
-        console.error('Error migrating expression:', expr); // eslint-disable-line no-console
+        console.error('Error migrating expression:', expr, e);
 
         out = 'true';
       }
@@ -117,7 +118,10 @@ function migrate(expr) {
 }
 
 export default {
-  components: { Tab, ...knownTypes },
+  components: {
+    Tab,
+    ...knownTypes
+  },
 
   props: {
     mode: {
@@ -173,11 +177,11 @@ export default {
 
   computed: {
     allQuestions() {
-      if ( this.source.questions?.questions ) {
+      if (this.source.questions?.questions) {
         return this.source.questions.questions;
-      } else if ( this.source.type === 'schema' && this.source.resourceFields ) {
+      } else if (this.source.type === 'schema' && this.source.resourceFields) {
         return schemaToQuestions(this.source.resourceFields);
-      } else if ( typeof this.source === 'object' ) {
+      } else if (typeof this.source === 'object') {
         return schemaToQuestions(this.source);
       } else {
         return [];
@@ -186,17 +190,17 @@ export default {
 
     shownQuestions() {
       const values = this.value;
-      const vm = this;
+      const vm = this; // eslint-disable-line
 
-      if ( this.valueGeneration < 0 ) {
+      if (this.valueGeneration < 0) {
         // Pointless condition to get this to depend on generation and recompute
         return;
       }
 
       const out = [];
 
-      for ( const q of this.allQuestions ) {
-        if ( this.ignoreVariables.includes(q.variable) ) {
+      for (const q of this.allQuestions) {
+        if (this.ignoreVariables.includes(q.variable)) {
           continue;
         }
 
@@ -206,7 +210,7 @@ export default {
       return out;
 
       function addQuestion(q, depth = 1, parentGroup) {
-        if ( !vm.shouldShow(q, values) ) {
+        if (!vm.shouldShow(q, values)) {
           return;
         }
 
@@ -215,8 +219,8 @@ export default {
 
         out.push(q);
 
-        if ( q.subquestions?.length && vm.shouldShowSub(q, values) ) {
-          for ( const sub of q.subquestions ) {
+        if (q.subquestions?.length && vm.shouldShowSub(q, values)) {
+          for (const sub of q.subquestions) {
             addQuestion(sub, depth + 1, q.group);
           }
         }
@@ -232,9 +236,9 @@ export default {
       const defaultGroup = 'Questions';
       let weight = this.shownQuestions.length;
 
-      for ( const q of this.shownQuestions ) {
-        if ( q.type?.startsWith('map[') && q.group === undefined ) {
-          const subWithGroup = q.subquestions.find(sub => sub.group);
+      for (const q of this.shownQuestions) {
+        if (q.type?.startsWith('map[') && q.group === undefined) {
+          const subWithGroup = q.subquestions.find((sub) => sub.group);
 
           q.group = subWithGroup.group;
         }
@@ -244,7 +248,7 @@ export default {
         const normalized = group.trim().toLowerCase();
         const name = this.$store.getters['i18n/withFallback'](`charts.${ this.chartName }.group.${ camelCase(group) }`, null, group);
 
-        if ( !map[normalized] ) {
+        if (!map[normalized]) {
           map[normalized] = {
             name,
             questions: [],
@@ -261,11 +265,11 @@ export default {
     },
 
     asTabs() {
-      if ( this.tabbed === false || this.tabbed === 'never' ) {
+      if (this.tabbed === false || this.tabbed === 'never') {
         return false;
       }
 
-      if ( this.tabbed === 'multiple' ) {
+      if (this.tabbed === 'multiple') {
         return this.groups.length > 1;
       }
 
@@ -323,7 +327,7 @@ export default {
       } = event;
       const valuesObj = jsyaml.load(valuesYaml);
 
-      if ( valuesObj ) {
+      if (valuesObj) {
         this.value[rootQuestion][index][deepQuestion] = valuesObj[deepQuestion];
       }
     },
@@ -331,32 +335,32 @@ export default {
     addSequence($event) {
       const out = {};
 
-      for ( const value of Object.values($event.sequence_questions) ) {
+      for (const value of Object.values($event.sequence_questions)) {
         Object.assign(out, { [value.variable]: value.default });
       }
 
-      if ( Array.isArray($event.default) ) {
-        if ( !this.value[$event.variable] && !$event.variable.includes('.') ) {
+      if (Array.isArray($event.default)) {
+        if (!this.value[$event.variable] && !$event.variable.includes('.')) {
           this.value[$event.variable] = [];
         }
         /*
           If the sequence is nested within a subquestion, the $event.variable will
           be a dot notation representation.
         */
-        if ( $event.variable.includes('.') ) {
+        if ($event.variable.includes('.')) {
           const deepProp = this.getProperty(this.value, $event.variable);
           const shouldAssign = $event.type === 'sequence[';
 
-          if ( deepProp ) {
+          if (deepProp) {
             return deepProp.push(out);
           }
 
-          if ( shouldAssign ) {
+          if (shouldAssign) {
             const parts = $event.variable.split('.');
             const root = this.value[parts[0]];
             const prop = parts[1];
 
-            if ( root ) {
+            if (root) {
               root[prop] = [];
 
               return root[prop].push(out);
@@ -367,7 +371,7 @@ export default {
         this.value[$event.variable].push(out);
       }
 
-      if ( this.emit ) {
+      if (this.emit) {
         this.$emit('updated');
       }
     },
@@ -375,13 +379,13 @@ export default {
     removeSequence($event) {
       const deepProp = this.getProperty(this.value, $event.question.variable);
 
-      if ( deepProp ) {
+      if (deepProp) {
         deepProp.splice($event.vIndex, 1);
       } else {
         this.value?.[$event.question.variable].splice($event.vIndex, 1);
       }
 
-      if ( this.emit ) {
+      if (this.emit) {
         this.$emit('updated');
       }
     },
@@ -397,15 +401,15 @@ export default {
       let match;
 
       // Find the matching question related to the Enum
-      for ( const q of this.allQuestions ) {
-        if ( question.variable.includes(q.variable) ) {
+      for (const q of this.allQuestions) {
+        if (question.variable.includes(q.variable)) {
           match = q;
         }
       }
 
       // Remove the properties from this.value
-      if ( match && match.type.startsWith('map[') ) {
-        const subProperties = match.subquestions.map(sub => sub.variable);
+      if (match && match.type.startsWith('map[')) {
+        const subProperties = match.subquestions.map((sub) => sub.variable);
 
         this.removeProperties(values, subProperties);
       }
@@ -417,8 +421,8 @@ export default {
         const keys = propertyName.split('.');
         let obj = values;
 
-        for ( let i = 0; i < keys.length - 1; i++ ) {
-          if ( keys[i] in obj ) {
+        for (let i = 0; i < keys.length - 1; i++) {
+          if (keys[i] in obj) {
             obj = obj[keys[i]];
           } else {
             return; // Property does not exist, no need to continue
@@ -448,14 +452,14 @@ export default {
 
         return out;
       } catch (err) {
-        console.error('Error evaluating expression:', expr, values); // eslint-disable-line no-console
+        console.error('Error evaluating expression:', expr, values, err);
 
         return true;
       }
     },
 
     evaluate(question, allQuestions) {
-      if ( !question.show_if ) {
+      if (!question.show_if) {
         return true;
       }
       const and = question.show_if.split('&&');
@@ -463,17 +467,17 @@ export default {
 
       let result;
 
-      if ( get(or, 'length') > 1 ) {
-        result = or.some(showIf => this.calExpression(showIf, allQuestions));
+      if (get(or, 'length') > 1) {
+        result = or.some((showIf) => this.calExpression(showIf, allQuestions));
       } else {
-        result = and.every(showIf => this.calExpression(showIf, allQuestions));
+        result = and.every((showIf) => this.calExpression(showIf, allQuestions));
       }
 
       return result;
     },
 
     calExpression(showIf, allQuestions) {
-      if ( showIf.includes('!=')) {
+      if (showIf.includes('!=')) {
         return this.isNotEqual(showIf, allQuestions);
       } else {
         return this.isEqual(showIf, allQuestions);
@@ -484,7 +488,7 @@ export default {
       showIf = showIf.trim();
       const variables = this.getVariables(showIf, '=');
 
-      if ( variables ) {
+      if (variables) {
         const left = this.stringifyAnswer(this.getAnswer(variables.left, allQuestions));
         const right = this.stringifyAnswer(variables.right);
 
@@ -498,7 +502,7 @@ export default {
       showIf = showIf.trim();
       const variables = this.getVariables(showIf, '!=');
 
-      if ( variables ) {
+      if (variables) {
         const left = this.stringifyAnswer(this.getAnswer(variables.left, allQuestions));
         const right = this.stringifyAnswer(variables.right);
 
@@ -512,10 +516,10 @@ export default {
       const parts = prop.split('.');
       let value = root;
 
-      for ( const part of parts ) {
+      for (const part of parts) {
         value = value[part];
 
-        if ( value === undefined ) {
+        if (value === undefined) {
           return;
         }
       }
@@ -524,10 +528,10 @@ export default {
     },
 
     getVariables(showIf, operator) {
-      if ( showIf.includes(operator)) {
+      if (showIf.includes(operator)) {
         const array = showIf.split(operator);
 
-        if ( array.length === 2 ) {
+        if (array.length === 2) {
           return {
             left:  array[0],
             right: array[1]
@@ -541,9 +545,9 @@ export default {
     },
 
     getAnswer(variable, questions) {
-      const found = questions.find(q => q.variable === variable);
+      const found = questions.find((q) => q.variable === variable);
 
-      if ( found ) {
+      if (found) {
         // Equivalent to finding question.answer in Ember
         return get(this.value, found.variable);
       } else {
@@ -552,9 +556,9 @@ export default {
     },
 
     stringifyAnswer(answer) {
-      if ( answer === undefined || answer === null ) {
+      if (answer === undefined || answer === null) {
         return '';
-      } else if ( typeof answer === 'string' ) {
+      } else if (typeof answer === 'string') {
         return answer;
       } else {
         return `${ answer }`;
@@ -564,11 +568,11 @@ export default {
     shouldShow(q, values) {
       let expr = q.if;
 
-      if ( expr === undefined && q.show_if !== undefined ) {
+      if (expr === undefined && q.show_if !== undefined) {
         expr = migrate(q.show_if);
       }
 
-      if ( expr ) {
+      if (expr) {
         const shown = !!this.evalExpr(expr, values, q, this.allQuestions);
 
         return shown;
@@ -579,20 +583,20 @@ export default {
 
     shouldShowSub(q, values) {
       // Sigh, both singular and plural are used in the wild...
-      let expr = ( q.subquestions_if === undefined ? q.subquestion_if : q.subquestions_if);
-      const old = ( q.show_subquestions_if === undefined ? q.show_subquestion_if : q.show_subquestions_if);
+      let expr = (q.subquestions_if === undefined ? q.subquestion_if : q.subquestions_if);
+      const old = (q.show_subquestions_if === undefined ? q.show_subquestion_if : q.show_subquestions_if);
 
-      if ( !expr && old !== undefined ) {
-        if ( old === false || old === 'false' ) {
+      if (!expr && old !== undefined) {
+        if (old === false || old === 'false') {
           expr = `!${ q.variable }`;
-        } else if ( old === true || old === 'true' ) {
+        } else if (old === true || old === 'true') {
           expr = `!!${ q.variable }`;
         } else {
           expr = `${ q.variable } == "${ old }"`;
         }
       }
 
-      if ( expr ) {
+      if (expr) {
         return this.evalExpr(expr, values, q, this.allQuestions);
       }
 

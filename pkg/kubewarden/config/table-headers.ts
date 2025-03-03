@@ -1,7 +1,7 @@
 import { NAME as NAME_HEADER } from '@shell/config/table-headers';
 
-import { createKubewardenRoute } from '../utils/custom-routing';
-import { KUBEWARDEN } from '../types';
+import { createKubewardenRoute } from '@kubewarden/utils/custom-routing';
+import { KUBEWARDEN } from '@kubewarden/types';
 
 export const ADMISSION_POLICY_STATE = {
   name:      'policyStatus',

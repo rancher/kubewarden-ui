@@ -7,14 +7,16 @@ import CreateEditView from '@shell/mixins/create-edit-view';
 import CruResource from '@shell/components/CruResource';
 import Loading from '@shell/components/Loading';
 
-import { DEFAULT_POLICY_SERVER } from '../models/policies.kubewarden.io.policyserver';
-import { KUBEWARDEN } from '../types';
+import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
+import { KUBEWARDEN } from '@kubewarden/types';
 
-import Values from '../components/PolicyServer/Values';
+import Values from '@kubewarden/components/PolicyServer/Values';
 
 export default {
   components: {
-    CruResource, Loading, Values
+    CruResource,
+    Loading,
+    Values
   },
 
   mixins: [CreateEditView],
@@ -46,12 +48,11 @@ export default {
     return {
       errors:           [],
       chartValues:      this.value,
-      validationPassed: true,
     };
   },
 
   created() {
-    if ( this.isCreate ) {
+    if (this.isCreate) {
       merge(this.chartValues, structuredClone(DEFAULT_POLICY_SERVER));
     }
   },

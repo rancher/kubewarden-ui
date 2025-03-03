@@ -28,7 +28,7 @@ export default {
 
   watch: {
     activeTab() {
-      if ( this.activeTab === 'settings' ) {
+      if (this.activeTab === 'settings') {
         this.$nextTick(() => {
           this.$refs.yamleditor.refresh();
         });

@@ -4,11 +4,11 @@ import { _CREATE, _EDIT, _CLONE } from '@shell/config/query-params';
 import CreateEditView from '@shell/mixins/create-edit-view';
 
 import CruResource from '@shell/components/CruResource';
-import { removeEmptyAttrs } from '../utils/object';
-import { handleGrowl } from '../utils/handle-growl';
+import { removeEmptyAttrs } from '@kubewarden/utils/object';
+import { handleGrowl } from '@kubewarden/utils/handle-growl';
 
-import Config from '../components/Policies/Config';
-import Create from '../components/Policies/Create';
+import Config from '@kubewarden/components/Policies/Config';
+import Create from '@kubewarden/components/Policies/Create';
 
 export default {
   name: 'ClusterAdmissionPolicy',
@@ -31,13 +31,18 @@ export default {
   },
 
   components: {
-    CruResource, Config, Create
+    CruResource,
+    Config,
+    Create
   },
 
   mixins: [CreateEditView],
 
   provide() {
-    return { chartType: this.value.type, realMode: this.realMode };
+    return {
+      chartType: this.value.type,
+      realMode:  this.realMode
+    };
   },
 
   computed: {
@@ -56,27 +61,39 @@ export default {
         removeEmptyAttrs(this.value);
 
         // remove metadata that identifies a CAP as a default policy, so that we can edit it later on the UI
-        // https://github.com/rancher/kubewarden-ui/issues/682
-        if (this.isClone && this.value.isKubewardenDefaultPolicy && this.value?.metadata?.labels?.['app.kubernetes.io/name'] === 'kubewarden-defaults') {
+        if (
+          this.isClone &&
+          this.value.isKubewardenDefaultPolicy &&
+          this.value?.metadata?.labels?.['app.kubernetes.io/name'] === 'kubewarden-defaults'
+        ) {
           delete this.value?.metadata?.labels?.['app.kubernetes.io/name'];
         }
 
         await this.save(event);
+        this.$emit('input', this.value); // Emit the updated value to the parent
       } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
+        handleGrowl({
+          error: e,
+          store: this.$store
+        });
       }
     },
+
     // this updates the "value" obj for CAP's
     // with the updated values that came from the "edit YAML" scenario
     updateYamlValuesFromEdit(val) {
       const parsed = jsyaml.load(val);
 
       removeEmptyAttrs(parsed);
-      Object.assign(this.value, parsed);
+
+      this.value = { ...parsed }; // Assign a new object to avoid prop mutation
+      this.$emit('input', this.value); // Emit changes
     }
   }
 };
 </script>
+
+
 
 <template>
   <Create v-if="isCreate" :value="value" :mode="mode" />

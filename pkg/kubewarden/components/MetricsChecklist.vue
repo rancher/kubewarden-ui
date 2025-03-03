@@ -11,9 +11,9 @@ import {
 import AsyncButton from '@shell/components/AsyncButton';
 import { Banner } from '@components/Banner';
 
-import { handleGrowl } from '../utils/handle-growl';
-import { addKubewardenDashboards } from '../modules/grafana';
-import { addKubewardenServiceMonitor } from '../modules/metricsConfig';
+import { handleGrowl } from '@kubewarden/utils/handle-growl';
+import { addKubewardenDashboards } from '@kubewarden/modules/grafana';
+import { addKubewardenServiceMonitor } from '@kubewarden/modules/metricsConfig';
 
 export default {
   props: {
@@ -75,7 +75,10 @@ export default {
     }
   },
 
-  components: { AsyncButton, Banner },
+  components: {
+    AsyncButton,
+    Banner
+  },
 
   computed: {
     ...mapGetters(['currentCluster']),
@@ -86,11 +89,11 @@ export default {
     },
 
     controllerLinkTooltip() {
-      if ( this.controllerLinkDisabled ) {
+      if (this.controllerLinkDisabled) {
         return this.t('kubewarden.monitoring.prerequisites.tooltips.prerequisites');
       }
 
-      if ( !this.controllerChart ) {
+      if (!this.controllerChart) {
         return this.t('kubewarden.monitoring.prerequisites.tooltips.chartError', { chart: 'Kubewarden Controller' }, true);
       }
 
@@ -98,11 +101,11 @@ export default {
     },
 
     dashboardsTooltip() {
-      if ( !this.monitoringApp ) {
+      if (!this.monitoringApp) {
         return this.t('kubewarden.monitoring.prerequisites.tooltips.appNotInstalled', { app: 'Rancher Monitoring' }, true);
       }
 
-      if ( this.monitoringApp && isEmpty(this.cattleDashboardNs) ) {
+      if (this.monitoringApp && isEmpty(this.cattleDashboardNs)) {
         return this.t('kubewarden.monitoring.prerequisites.tooltips.nsNotFound');
       }
 
@@ -121,7 +124,7 @@ export default {
     },
 
     monitoringChartLink() {
-      if ( !this.monitoringApp ) {
+      if (!this.monitoringApp) {
         return this.t('kubewarden.monitoring.prerequisites.monitoringApp.install');
       }
 
@@ -129,7 +132,7 @@ export default {
     },
 
     monitoringLinkTooltip() {
-      if ( !this.monitoringChart ) {
+      if (!this.monitoringChart) {
         return this.t('kubewarden.monitoring.prerequisites.tooltips.chartError', { chart: 'Rancher Monitoring' }, true);
       }
 
@@ -141,11 +144,11 @@ export default {
     },
 
     serviceMonitorsTooltip() {
-      if ( !this.monitoringApp ) {
+      if (!this.monitoringApp) {
         return this.t('kubewarden.monitoring.prerequisites.tooltips.prerequisites');
       }
 
-      if ( !this.kubewardenServiceMonitor && this.controllerApp ) {
+      if (!this.kubewardenServiceMonitor && this.controllerApp) {
         return this.t(
           'kubewarden.monitoring.prerequisites.tooltips.monitorsNotFound',
           { namespace: this.controllerApp.metadata?.namespace },
@@ -171,7 +174,10 @@ export default {
         });
         btnCb(true);
       } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
+        handleGrowl({
+          error: e,
+          store: this.$store
+        });
         btnCb(false);
       }
     },
@@ -188,31 +194,38 @@ export default {
         this.$emit('updateServiceMonitors');
         btnCb(true);
       } catch (e) {
-        handleGrowl({ error: e, store: this.$store });
+        handleGrowl({
+          error: e,
+          store: this.$store
+        });
         btnCb(false);
       }
     },
 
     badgeIcon(prop) {
-      if ( Array.isArray(prop) ) {
+      if (Array.isArray(prop)) {
         const emptyProp = isEmpty(prop);
 
         return {
-          'icon-dot-open': emptyProp, 'icon-checkmark': !emptyProp, 'text-success': !emptyProp
+          'icon-dot-open':  emptyProp,
+          'icon-checkmark': !emptyProp,
+          'text-success':   !emptyProp
         };
       }
 
       return {
-        'icon-dot-open': !prop, 'icon-checkmark': prop, 'text-success': prop
+        'icon-dot-open':  !prop,
+        'icon-checkmark': prop,
+        'text-success':   prop
       };
     },
 
     monitoringAppRoute() {
-      if ( !this.monitoringApp && this.monitoringChart ) {
+      if (!this.monitoringApp && this.monitoringChart) {
         this.monitoringChart.goToInstall();
       }
 
-      if ( this.monitoringApp ) {
+      if (this.monitoringApp) {
         const query = {
           [NAMESPACE]: this.monitoringApp.metadata?.namespace,
           [NAME]:      this.monitoringApp.metadata?.name,
@@ -231,7 +244,7 @@ export default {
     },
 
     controllerAppRoute() {
-      if ( this.controllerApp ) {
+      if (this.controllerApp) {
         const metadata = this.controllerApp.spec?.chart?.metadata;
 
         const query = {

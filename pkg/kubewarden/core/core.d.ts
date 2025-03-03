@@ -9,14 +9,14 @@ declare module 'core' {
     }
   };
 
-  export interface Pod extends CoreResource {}
-  export interface Service extends CoreResource {}
-  export interface ReplicationController extends CoreResource {}
-  export interface Secret extends CoreResource {}
-  export interface ConfigMap extends CoreResource {}
-  export interface Namespace extends CoreResource {}
-  export interface Event extends CoreResource {}
-  export interface Node extends CoreResource {}
-  export interface PersistentVolume extends CoreResource {}
-  export interface PersistentVolumeClaim extends CoreResource {}
+  export type Pod = CoreResource;
+  export type Service = CoreResource;
+  export type ReplicationController = CoreResource;
+  export type Secret = CoreResource;
+  export type ConfigMap = CoreResource;
+  export type Namespace = CoreResource;
+  export type Event = CoreResource;
+  export type Node = CoreResource;
+  export type PersistentVolume = CoreResource;
+  export type PersistentVolumeClaim = CoreResource;
 }

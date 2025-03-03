@@ -1,6 +1,6 @@
 import {
   CatalogApp, ClusterPolicyReport, CustomResourceDefinition, PolicyReport, PolicyTrace, PolicyTraceConfig, PolicyReportSummary
-} from '../../types';
+} from '@kubewarden/types';
 import { StateConfig } from './index';
 
 type ReportKeys = 'policyReports' | 'clusterPolicyReports';
@@ -25,7 +25,7 @@ export default {
    * @param app `CatalogApp`
    */
   updateControllerApp(state: StateConfig, app: CatalogApp) {
-    if ( state.controllerApp?.id === app?.id ) {
+    if (state.controllerApp?.id === app?.id) {
       state.controllerApp.metadata = app.metadata;
       state.controllerApp.spec = app.spec;
       state.controllerApp.status = app.status;
@@ -42,7 +42,7 @@ export default {
   removeControllerApp(state: StateConfig, app: CatalogApp) {
     const existing = state.controllerApp?.id === app?.id;
 
-    if ( existing ) {
+    if (existing) {
       state.controllerApp = null;
     }
   },
@@ -55,7 +55,7 @@ export default {
   updateKubewardenCrds(state: StateConfig, crd: CustomResourceDefinition) {
     const existingCrd = state.kubewardenCrds.find((c) => c?.metadata?.name === crd?.metadata?.name);
 
-    if ( existingCrd ) {
+    if (existingCrd) {
       existingCrd.metadata = crd.metadata;
       existingCrd.spec = crd.spec;
       existingCrd.status = crd.status;
@@ -72,7 +72,7 @@ export default {
   removeKubewardenCrds(state: StateConfig, crd: CustomResourceDefinition) {
     const idx = state.kubewardenCrds.findIndex((c) => c?.metadata?.name === crd?.metadata?.name);
 
-    if ( idx !== -1 ) {
+    if (idx !== -1) {
       state.kubewardenCrds.splice(idx, 1);
     }
   },
@@ -145,7 +145,7 @@ export default {
   removePolicyReportById(state: StateConfig, reportId: string) {
     const idx = state.policyReports.findIndex((report) => report.id === reportId);
 
-    if ( idx !== -1 ) {
+    if (idx !== -1) {
       state.policyReports.splice(idx, 1);
     }
   },
@@ -161,9 +161,9 @@ export default {
     const existingPolicyObj = state.policyTraces.find((traceObj: PolicyTraceConfig) => traceObj.policyName === policyName);
     let existingTrace = existingPolicyObj?.traces.find((trace: PolicyTrace) => trace.id === updatedTrace.id);
 
-    if ( existingTrace ) {
+    if (existingTrace) {
       existingTrace = updatedTrace;
-    } else if ( !existingPolicyObj ) {
+    } else if (!existingPolicyObj) {
       state.policyTraces.push({
         policyName,
         cluster,
@@ -184,7 +184,7 @@ export default {
     const existingPolicyObj = state.policyTraces.find((traceObj: PolicyTraceConfig) => traceObj.policyName === policy.policyName);
     const idx = existingPolicyObj?.traces.findIndex((trace: PolicyTrace) => trace.id === updatedTrace.id);
 
-    if ( idx && idx !== -1 ) {
+    if (idx && idx !== -1) {
       existingPolicyObj?.traces.splice(idx, 1);
     }
   },

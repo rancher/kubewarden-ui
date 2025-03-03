@@ -10,7 +10,7 @@ export default {
 
   computed: {
     inputType() {
-      if ( ['text', 'password', 'multiline'].includes(this.question.type) ) {
+      if (['text', 'password', 'multiline'].includes(this.question.type)) {
         return this.question.type;
       }
 

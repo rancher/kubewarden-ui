@@ -29,7 +29,7 @@ export async function grafanaProxy(config: MetricsConfig): Promise<any> {
   try {
     const grafana = await grafanaService(store);
 
-    if ( !isEmpty(grafana) ) {
+    if (!isEmpty(grafana)) {
       const base = `/api/v1/namespaces/${ grafana.metadata.namespace }/services`;
       const proxy = `/http:${ grafana.metadata.name }:80/proxy`;
       const path = `/d/${ type }?orgId=1&kiosk`;
@@ -38,7 +38,9 @@ export async function grafanaProxy(config: MetricsConfig): Promise<any> {
     }
   } catch (e) {
     handleGrowl({
-      error: e as GrowlConfig | any, store, type: 'warning'
+      error: e as GrowlConfig | any,
+      store,
+      type:  'warning'
     });
   }
 
@@ -53,7 +55,9 @@ export async function grafanaService(store: any) {
     }, { root: true });
   } catch (e) {
     handleGrowl({
-      error: e as GrowlConfig | any, store, type: 'warning'
+      error: e as GrowlConfig | any,
+      store,
+      type:  'warning'
     });
   }
 }
@@ -66,7 +70,9 @@ export async function findKubewardenDashboards(store: any) {
     });
   } catch (e) {
     handleGrowl({
-      error: e as GrowlConfig | any, store, type: 'warning'
+      error: e as GrowlConfig | any,
+      store,
+      type:  'warning'
     });
   }
 }
@@ -78,7 +84,7 @@ export async function findKubewardenDashboards(store: any) {
 export async function addKubewardenDashboards(config: DashboardConfig): Promise<void> {
   const { store, monitoringApp, controllerApp } = config;
 
-  if ( monitoringApp && controllerApp ) {
+  if (monitoringApp && controllerApp) {
     /**
      * There are 2 dashboards for Kubewarden:
      * PolicyServer is the default one copied from https://grafana.com/grafana/dashboards/15314-kubewarden/
@@ -86,14 +92,14 @@ export async function addKubewardenDashboards(config: DashboardConfig): Promise<
     */
     const dashboardEnums = Object.values(KubewardenDashboards);
 
-    for ( const type of dashboardEnums ) {
+    for (const type of dashboardEnums) {
       const file = await import(/* webpackChunkName: "policyDashboard" */ `../assets/${ type }.json`);
       const fileKey = `${ type }.json`;
 
       /** Check for existing configmaps */
       const existing = await findKubewardenDashboards(store);
 
-      if ( existing && existing?.metadata?.name === type ) {
+      if (existing && existing?.metadata?.name === type) {
         return;
       }
 
@@ -127,7 +133,10 @@ export async function addKubewardenDashboards(config: DashboardConfig): Promise<
       try {
         await configMapTemplate.save();
       } catch (e) {
-        handleGrowl({ error: e as GrowlConfig | any, store });
+        handleGrowl({
+          error: e as GrowlConfig | any,
+          store
+        });
       }
     }
   }

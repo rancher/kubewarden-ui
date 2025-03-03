@@ -5,7 +5,7 @@ import { isEmpty } from '@shell/utils/object';
 import { Banner } from '@components/Banner';
 import Loading from '@shell/components/Loading';
 
-import { KUBEWARDEN_APPS, ARTIFACTHUB_PKG_ANNOTATION } from '../../../../types';
+import { KUBEWARDEN_APPS, ARTIFACTHUB_PKG_ANNOTATION } from '@kubewarden/types';
 import Resource from './Resource';
 
 export default {
@@ -23,17 +23,19 @@ export default {
   },
 
   components: {
-    Banner, Loading, Resource
+    Banner,
+    Loading,
+    Resource
   },
 
   async fetch() {
-    if ( this.$store.getters['cluster/canList']('apigroup') ) {
+    if (this.$store.getters['cluster/canList']('apigroup')) {
       await this.$store.dispatch('cluster/findAll', { type: 'apigroup' });
     }
 
     this.contextAwareResources = [];
 
-    if ( !!this.value?.policy ) {
+    if (!!this.value?.policy) {
       this.contextAwareResources = this.value.policy?.spec?.contextAwareResources;
     }
   },
@@ -51,10 +53,13 @@ export default {
     apiGroupVersions() {
       const out = [];
 
-      if ( !isEmpty(this.apiGroups) ) {
+      if (!isEmpty(this.apiGroups)) {
         this.apiGroups.forEach((group) => {
-          for ( const version of group.versions ) {
-            out.push({ groupName: group.id, groupVersion: version?.groupVersion });
+          for (const version of group.versions) {
+            out.push({
+              groupName:    group.id,
+              groupVersion: version?.groupVersion
+            });
           }
         });
       }

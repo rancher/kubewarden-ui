@@ -3,15 +3,18 @@ import { CATALOG, UI_PLUGIN } from '@shell/config/types';
 import { Banner } from '@components/Banner';
 import Loading from '@shell/components/Loading';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
-import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '../types';
-import { kwDefaultsHelmChartSettings } from '../modules/policies';
+import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
+import { kwDefaultsHelmChartSettings } from '@kubewarden/modules/policies';
 
-import PolicyList from '../components/Policies/PolicyList';
-import DefaultsBanner from '../components/DefaultsBanner';
+import PolicyList from '@kubewarden/components/Policies/PolicyList';
+import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
 
 export default {
   components: {
-    Banner, Loading, PolicyList, DefaultsBanner
+    Banner,
+    Loading,
+    PolicyList,
+    DefaultsBanner
   },
 
   props: {
@@ -27,10 +30,10 @@ export default {
 
   async fetch() {
     // needed to populate banner for edit settings compatibility for kubewarden-default CAP's
-    if ( this.$store.getters['cluster/canList'](CATALOG.APP) ) {
+    if (this.$store.getters['cluster/canList'](CATALOG.APP)) {
       this.$store.dispatch('cluster/findAll', { type: CATALOG.APP });
     }
-    if ( this.$store.getters['cluster/canList'](UI_PLUGIN) ) {
+    if (this.$store.getters['cluster/canList'](UI_PLUGIN)) {
       this.$store.dispatch('cluster/findAll', { type: UI_PLUGIN });
     }
     await this.$store.dispatch('cluster/findAll', { type: this.resource });
@@ -44,7 +47,7 @@ export default {
       return this.$store.getters['cluster/all'](CATALOG.APP);
     },
     kubewardenDefaultsApp() {
-      if ( this.allApps ) {
+      if (this.allApps) {
         return this.allApps?.find((a) => {
           return (
             a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_DEFAULTS ||
@@ -58,13 +61,13 @@ export default {
     kubewardenExtension() {
       const extensionsInstalled = this.$store.getters['uiplugins/plugins'] || [];
 
-      return extensionsInstalled?.find(ext => ext?.id?.includes(KUBEWARDEN_PRODUCT_NAME));
+      return extensionsInstalled?.find((ext) => ext?.id?.includes(KUBEWARDEN_PRODUCT_NAME));
     },
     kwDefaultsHelmChartSettingsCompatible() {
       const kwDefaultsVersion = this.kubewardenDefaultsApp?.spec?.chart?.metadata?.version;
       const uiPluginVersion = this.kubewardenExtension?.version;
 
-      if ( kwDefaultsVersion && uiPluginVersion) {
+      if (kwDefaultsVersion && uiPluginVersion) {
         return kwDefaultsHelmChartSettings(kwDefaultsVersion, uiPluginVersion);
       }
 

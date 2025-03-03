@@ -11,11 +11,11 @@ export default {
     features() {
       const featuresList = [];
 
-      if ( this.value?.['kubewarden/mutation'] === 'true' ) {
+      if (this.value?.['kubewarden/mutation'] === 'true') {
         featuresList.push('Mutation');
       }
 
-      if ( this.value?.['kubewarden/contextAwareResources'] ) {
+      if (this.value?.['kubewarden/contextAwareResources']) {
         featuresList.push('Context Aware');
       }
 

@@ -3,7 +3,7 @@ import semver from 'semver';
 
 import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 
-import { CatalogApp, Chart, Version } from '../types';
+import { CatalogApp, Chart, Version } from '@kubewarden/types';
 import { handleGrowl } from './handle-growl';
 
 export interface RefreshConfig {
@@ -48,21 +48,24 @@ export async function refreshCharts(config: RefreshConfig): Promise<ReloadReady>
   const { store, chartName, init } = config;
   let retry = config.retry ?? 0;
 
-  while ( retry < 3 ) {
+  while (retry < 3) {
     const rawCharts = store.getters['catalog/rawCharts'];
-    const chart = (Object.values(rawCharts) as Chart[])?.find(c => c?.chartName === chartName);
+    const chart = (Object.values(rawCharts) as Chart[])?.find((c) => c?.chartName === chartName);
 
-    if ( !chart ) {
+    if (!chart) {
       try {
         store.dispatch('kubewarden/updateRefreshingCharts', true);
         await store.dispatch('catalog/refresh');
       } catch (e) {
-        handleGrowl({ error: e as any, store });
+        handleGrowl({
+          error: e as any,
+          store
+        });
       } finally {
         store.dispatch('kubewarden/updateRefreshingCharts', false);
       }
 
-      if ( retry < 2 && !init ) {
+      if (retry < 2 && !init) {
         retry++;
         continue;
       }
@@ -88,8 +91,8 @@ export function appVersionSatisfiesConstraint(
   targetAppVersion?: string,
   constraint?: string
 ): boolean {
-  if ( installedAppVersion ) {
-    if ( targetAppVersion ) {
+  if (installedAppVersion) {
+    if (targetAppVersion) {
       const showPreRelease = store.getters['prefs/get'](SHOW_PRE_RELEASE);
       const versionRange = `${ constraint }${ targetAppVersion }`;
 
@@ -115,48 +118,48 @@ export function appVersionSatisfiesConstraint(
  * @returns Version | null - The highest available upgrade version or null if no upgrade is available.
  */
 export function checkUpgradeAvailable(store: Store<any>, app: CatalogApp | null, chart: Chart | null): Version | null {
-  if ( app && chart ) {
+  if (app && chart) {
     const installedAppVersion = app.spec?.chart?.metadata?.appVersion;
     const installedChartVersion = app.spec?.chart?.metadata?.version;
     const chartVersions = chart.versions;
 
     const showPreRelease = store.getters['prefs/get'](SHOW_PRE_RELEASE);
 
-    if ( installedAppVersion ) {
-      const uniqueSortedVersions = Array.from(new Set(chartVersions?.map(v => v.appVersion)))
-        .filter(v => showPreRelease ? v : !semver.prerelease(v))
+    if (installedAppVersion) {
+      const uniqueSortedVersions = Array.from(new Set(chartVersions?.map((v) => v.appVersion)))
+        .filter((v) => showPreRelease ? v : !semver.prerelease(v))
         .sort(semver.compare);
 
       let highestVersion: string = '';
 
-      for ( const version of uniqueSortedVersions ) {
+      for (const version of uniqueSortedVersions) {
         const upgradeAvailable = getValidUpgrade(installedAppVersion, version, highestVersion);
 
-        if ( upgradeAvailable ) {
+        if (upgradeAvailable) {
           highestVersion = upgradeAvailable;
         }
       }
 
-      if ( !highestVersion ) {
+      if (!highestVersion) {
         // Find the highest chart version for the current appVersion
-        const chartsWithCurrentAppVersion = chartVersions?.filter(v => v.appVersion === installedAppVersion);
+        const chartsWithCurrentAppVersion = chartVersions?.filter((v) => v.appVersion === installedAppVersion);
 
-        if ( !chartsWithCurrentAppVersion ) {
+        if (!chartsWithCurrentAppVersion) {
           return null;
         }
 
         const highestChartForCurrentVersion = chartsWithCurrentAppVersion
           .sort((a, b) => semver.rcompare(a.version, b.version))[0];
 
-        if ( highestChartForCurrentVersion && installedChartVersion && semver.gt(highestChartForCurrentVersion.version, installedChartVersion) ) {
+        if (highestChartForCurrentVersion && installedChartVersion && semver.gt(highestChartForCurrentVersion.version, installedChartVersion)) {
           highestVersion = installedAppVersion;
         }
       }
 
-      if ( highestVersion && chartVersions && chartVersions.length > 0 ) {
+      if (highestVersion && chartVersions && chartVersions.length > 0) {
         // Find the chart with the highest chart version for the highest appVersion
         const matchingCharts = chartVersions
-          .filter(v => v.appVersion === highestVersion)
+          .filter((v) => v.appVersion === highestVersion)
           .sort((a, b) => semver.rcompare(a.version, b.version));
 
         return matchingCharts.length > 0 ? matchingCharts[0] : null;
@@ -176,7 +179,7 @@ export function checkUpgradeAvailable(store: Store<any>, app: CatalogApp | null,
  * @returns string | null - The valid upgrade version or null if no valid upgrade is found.
  */
 export function getValidUpgrade(currentVersion: string, upgradeVersion: string, highestVersion: string): string | null {
-  if ( !currentVersion || !upgradeVersion ) {
+  if (!currentVersion || !upgradeVersion) {
     return null;
   }
 
@@ -189,7 +192,7 @@ export function getValidUpgrade(currentVersion: string, upgradeVersion: string, 
 
   let highestMajor, highestMinor, highestPatch;
 
-  if ( highestVersion ) {
+  if (highestVersion) {
     highestMajor = semver.major(highestVersion);
     highestMinor = semver.minor(highestVersion);
     highestPatch = semver.patch(highestVersion);
@@ -201,23 +204,23 @@ export function getValidUpgrade(currentVersion: string, upgradeVersion: string, 
   }
 
   // Skip versions that are not upgrades
-  if ( semver.lte(upgradeVersion, currentVersion) ) {
+  if (semver.lte(upgradeVersion, currentVersion)) {
     return null;
   }
 
   // Determine if the upgrade is valid based on the major and minor versions
-  const isValidUpgrade = ( upgradeMajor === currentMajor && upgradeMinor === currentMinor + 1 ) ||
-                         ( upgradeMajor === currentMajor + 1 && upgradeMinor === 0 );
+  const isValidUpgrade = (upgradeMajor === currentMajor && upgradeMinor === currentMinor + 1) ||
+                         (upgradeMajor === currentMajor + 1 && upgradeMinor === 0);
 
-  if ( isValidUpgrade ) {
+  if (isValidUpgrade) {
     // If it's a valid upgrade, check if it's higher than the current highest version
-    if ( !highestVersion || semver.gt(upgradeVersion, highestVersion) ) {
+    if (!highestVersion || semver.gt(upgradeVersion, highestVersion)) {
       return upgradeVersion;
     }
   }
 
   // Check for a higher patch version within the same minor version
-  if ( upgradeMajor === highestMajor && upgradeMinor === highestMinor && upgradePatch > highestPatch ) {
+  if (upgradeMajor === highestMajor && upgradeMinor === highestMinor && upgradePatch > highestPatch) {
     return upgradeVersion;
   }
 
@@ -236,15 +239,15 @@ export function findCompatibleDefaultsChart(
   controllerApp: CatalogApp | null,
   defaultsChart: Chart | null
 ): Version | null {
-  if ( controllerApp && defaultsChart ) {
+  if (controllerApp && defaultsChart) {
     const controllerAppVersion = controllerApp.spec?.chart?.metadata?.appVersion;
     const defaultsChartVersions = defaultsChart.versions;
 
-    if ( controllerAppVersion ) {
+    if (controllerAppVersion) {
       // Filter the defaultsChart versions to find a matching appVersion
-      const matchingDefaults = defaultsChartVersions?.filter(v => v.appVersion === controllerAppVersion);
+      const matchingDefaults = defaultsChartVersions?.filter((v) => v.appVersion === controllerAppVersion);
 
-      if ( matchingDefaults && matchingDefaults.length > 0 ) {
+      if (matchingDefaults && matchingDefaults.length > 0) {
         // Sort the matching versions and return the highest one
         const highestMatchingDefaults = matchingDefaults.sort((a, b) => semver.rcompare(a.version, b.version))[0];
 

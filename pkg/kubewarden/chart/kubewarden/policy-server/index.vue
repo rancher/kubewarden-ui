@@ -1,30 +1,30 @@
 <script>
 import { reactive } from 'vue';
+
 import { _CREATE } from '@shell/config/query-params';
 import { CONFIG_MAP, SERVICE_ACCOUNT } from '@shell/config/types';
 import { allHash } from '@shell/utils/promise';
-import { SECCOMP_OPTIONS } from '../../../components/PolicyServer/SeccompProfile.vue';
+import ResourceFetch from '@shell/mixins/resource-fetch';
 
 import Loading from '@shell/components/Loading';
 import Tab from '@shell/components/Tabbed/Tab';
 import Labels from '@shell/components/form/Labels';
 
+import { SECCOMP_OPTIONS } from '@kubewarden/components/PolicyServer/SeccompProfile.vue';
 import General from './General.vue';
 import SecurityContexts from './SecurityContexts.vue';
 import Registry from './Registry/Index.vue';
 import Verification from './Verification.vue';
 
-import ResourceFetch from '@shell/mixins/resource-fetch';
-
 export default {
   props: {
     mode: {
-      type: String,
+      type:    String,
       default: _CREATE,
     },
 
     value: {
-      type: Object,
+      type:    Object,
       default: () => ({}),
     },
   },
@@ -103,7 +103,7 @@ export default {
     return {
       chartValues,
       validationPassed: true,
-      registryRef: null,
+      registryRef:      null,
     };
   },
 
@@ -129,8 +129,7 @@ export default {
           k?.$forceUpdate();
         }
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn(`Error refreshing authority refs: ${e}`);
+        console.warn(`Error refreshing authority refs: ${ e }`);
       }
     },
     updateGeneral(prop, val) {

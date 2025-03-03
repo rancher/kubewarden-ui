@@ -21,7 +21,7 @@ export default class KubewardenModel extends SteveModel {
   async allServices() {
     const services = this.$rootGetters['cluster/all'](SERVICE);
 
-    if ( !isEmpty(services) ) {
+    if (!isEmpty(services)) {
       return services;
     }
 
@@ -46,7 +46,7 @@ export default class KubewardenModel extends SteveModel {
 
   get whitelistSetting() {
     return this.$rootGetters['management/all'](MANAGEMENT.SETTING).find(
-      s => s.id === 'whitelist-domain'
+      (s) => s.id === 'whitelist-domain'
     );
   }
 
@@ -67,7 +67,10 @@ export default class KubewardenModel extends SteveModel {
 
       return await this.$dispatch(
         'management/request',
-        { url, redirectUnauthorized: false },
+        {
+          url,
+          redirectUnauthorized: false
+        },
         { root: true }
       );
     };
@@ -83,11 +86,14 @@ export default class KubewardenModel extends SteveModel {
 
         return this.$dispatch(
           'management/request',
-          { url, redirectUnauthorized: false },
+          {
+            url,
+            redirectUnauthorized: false
+          },
           { root: true }
         );
       } catch (e) {
-        console.warn(`Error fetching pkg: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Error fetching pkg: ${ e }`);
       }
     };
   }
@@ -106,7 +112,7 @@ export default class KubewardenModel extends SteveModel {
           selector: 'app.kubernetes.io/instance=cert-manager'
         }, { root: true });
       } catch (e) {
-        console.warn(`Error fetching cert-manager service: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Error fetching cert-manager service: ${ e }`);
       }
 
       return null;
@@ -116,7 +122,7 @@ export default class KubewardenModel extends SteveModel {
   // Determines if a policy is targeting rancher specific namespaces (which happens by default)
   get namespaceSelector() {
     const rancherNs = RANCHER_NAMESPACES.find(
-      ns => ns === this.metadata?.namespace
+      (ns) => ns === this.metadata?.namespace
     );
     const selector = filter(
       this.spec?.namespaceSelector?.matchExpressions,
@@ -142,6 +148,8 @@ export default class KubewardenModel extends SteveModel {
 
       return true;
     } catch (e) {
+      console.warn(`Error loading component: ${ e }`);
+
       return false;
     }
   }
@@ -160,15 +168,15 @@ export default class KubewardenModel extends SteveModel {
     // If a policy is in monitor mode it will pass multiple trace objects
     if (Array.isArray(traces)) {
       traceArray = [
-        ...new Map(traces.map(trace => [trace['traceID'], trace])).values(),
+        ...new Map(traces.map((trace) => [trace['traceID'], trace])).values(),
       ];
     } else {
       Object.assign(traceArray, traces?.data);
     }
 
     const out = traceArray.flatMap((trace) => {
-      const eSpan = trace.spans?.find(s => s.operationName === 'policy_eval'); // policy in Monitor mode evaluation span
-      const vSpan = trace.spans?.find(s => s.operationName === 'validation'); // policy in Protect mode validation span
+      const eSpan = trace.spans?.find((s) => s.operationName === 'policy_eval'); // policy in Monitor mode evaluation span
+      const vSpan = trace.spans?.find((s) => s.operationName === 'validation'); // policy in Protect mode validation span
 
       if (vSpan) {
         const date = new Date(vSpan.startTime / 1000);
@@ -184,7 +192,7 @@ export default class KubewardenModel extends SteveModel {
         if (eSpan.logs.length > 0) {
           mode = 'monitor';
 
-          const fields = eSpan.logs.flatMap(log => log.fields);
+          const fields = eSpan.logs.flatMap((log) => log.fields);
 
           fields.map((f) => {
             if (f.key === 'response') {
@@ -193,7 +201,7 @@ export default class KubewardenModel extends SteveModel {
           });
         }
 
-        const tags = VALIDATION_KEYS.map(vKey => vSpan.tags.find(tag => tag.key === vKey)
+        const tags = VALIDATION_KEYS.map((vKey) => vSpan.tags.find((tag) => tag.key === vKey)
         );
 
         return tags?.reduce(
@@ -230,7 +238,7 @@ export default class KubewardenModel extends SteveModel {
     const whitelistValue = whitelist?.value.split(',');
 
     if (remove && whitelistValue.includes(url)) {
-      const out = whitelistValue.filter(domain => domain !== url);
+      const out = whitelistValue.filter((domain) => domain !== url);
 
       whitelist.value = out.join();
 
@@ -329,8 +337,8 @@ export function colorForTraceStatus(status) {
 export function getLatestVersion(store, versions) {
   const showPreRelease = store.getters['prefs/get'](SHOW_PRE_RELEASE);
 
-  const versionMap = versions?.map(v => v.version)
-    .filter(v => showPreRelease ? v : !semver.prerelease(v));
+  const versionMap = versions?.map((v) => v.version)
+    .filter((v) => showPreRelease ? v : !semver.prerelease(v));
 
   return semver.rsort(versionMap)[0];
 }

@@ -15,10 +15,10 @@ import { Banner } from '@components/Banner';
 import Loading from '@shell/components/Loading';
 import SortableTable from '@shell/components/SortableTable';
 
-import { TRACE_HEADERS } from '../config/table-headers';
-import { KUBEWARDEN, KUBEWARDEN_CHARTS, MODE_MAP, OPERATION_MAP } from '../types';
-import { jaegerTraces } from '../modules/jaegerTracing';
-import { formatDuration } from '../utils/duration-format';
+import { TRACE_HEADERS } from '@kubewarden/config/table-headers';
+import { KUBEWARDEN, KUBEWARDEN_CHARTS, MODE_MAP, OPERATION_MAP } from '@kubewarden/types';
+import { jaegerTraces } from '@kubewarden/modules/jaegerTracing';
+import { formatDuration } from '@kubewarden/utils/duration-format';
 
 import TraceChecklist from './TraceChecklist';
 
@@ -41,7 +41,11 @@ export default {
   },
 
   components: {
-    BadgeState, Banner, Loading, SortableTable, TraceChecklist
+    BadgeState,
+    Banner,
+    Loading,
+    SortableTable,
+    TraceChecklist
   },
 
   mixins: [ResourceFetch],
@@ -50,15 +54,15 @@ export default {
     const types = [CATALOG.APP, CATALOG.CLUSTER_REPO, SERVICE];
     const hash = [];
 
-    for ( const type of types ) {
-      if ( this.$store.getters['cluster/canList'](type) ) {
+    for (const type of types) {
+      if (this.$store.getters['cluster/canList'](type)) {
         hash.push(this.$fetchType(type));
       }
     }
 
     await allHash(hash);
 
-    if ( this.jaegerQuerySvc ) {
+    if (this.jaegerQuerySvc) {
       const options = {
         store:           this.$store,
         queryService:    this.jaegerQuerySvc,
@@ -67,7 +71,7 @@ export default {
         policy:          null
       };
 
-      if ( this.resource === KUBEWARDEN.POLICY_SERVER ) {
+      if (this.resource === KUBEWARDEN.POLICY_SERVER) {
         options.relatedPolicies = this.relatedPolicies;
       } else {
         options.policy = this.policy;
@@ -77,7 +81,7 @@ export default {
     }
 
     if (this.controllerApp) {
-      await this.controllerApp.fetchValues(true)
+      await this.controllerApp.fetchValues(true);
     }
   },
 
@@ -87,16 +91,19 @@ export default {
       TRACE_HEADERS,
       OPERATION_MAP,
 
-      specificValidations: null,
-      outdatedTelemetrySpec: false,
+      specificValidations:      null,
+      outdatedTelemetrySpec:    false,
       unsupportedTelemetrySpec: false,
-      incompleteTelemetrySpec: false
+      incompleteTelemetrySpec:  false
     };
   },
 
   computed: {
     ...mapGetters(['currentCluster']),
-    ...mapGetters({ charts: 'catalog/charts', refreshingCharts: 'kubewarden/refreshingCharts' }),
+    ...mapGetters({
+      charts:           'catalog/charts',
+      refreshingCharts: 'kubewarden/refreshingCharts'
+    }),
 
     allApps() {
       return this.$store.getters['cluster/all'](CATALOG.APP);
@@ -107,15 +114,15 @@ export default {
     },
 
     controllerApp() {
-      return this.allApps?.find(app => app?.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER);
+      return this.allApps?.find((app) => app?.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER);
     },
 
     controllerChart() {
-      return this.charts?.find(chart => chart?.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
+      return this.charts?.find((chart) => chart?.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
     },
 
     groupField() {
-      if ( this.isPolicyServer ) {
+      if (this.isPolicyServer) {
         return 'policy_id';
       }
 
@@ -127,7 +134,7 @@ export default {
     },
 
     emptyPolicies() {
-      if ( this.resource === KUBEWARDEN.POLICY_SERVER ) {
+      if (this.resource === KUBEWARDEN.POLICY_SERVER) {
         return isEmpty(this.relatedPolicies);
       }
 
@@ -139,7 +146,7 @@ export default {
     },
 
     emptyTracesLabel() {
-      if ( this.resource === KUBEWARDEN.POLICY_SERVER ) {
+      if (this.resource === KUBEWARDEN.POLICY_SERVER) {
         return 'kubewarden.tracing.noRelatedTraces';
       }
 
@@ -147,7 +154,7 @@ export default {
     },
 
     rowsPerPage() {
-      if ( this.isPolicyServer ) {
+      if (this.isPolicyServer) {
         return 40;
       }
 
@@ -168,24 +175,24 @@ export default {
 
         const tracingIsUndefinedOrBoolean = telemetry?.tracing === undefined || typeof telemetry?.tracing === 'boolean';
         const endpointIsDefined = !!telemetry?.sidecar?.tracing?.jaeger?.endpoint;
-        
+
         // Check for unsupported 'custom' mode
         if (telemetry?.mode === 'custom') {
-          this.unsupportedTelemetrySpec = true;
+          this.handleTracingChecklist('unsupportedTelemetrySpec', true);
 
           return null;
         }
 
         // If tracing is not undefined or boolean, it's outdated
         if (!tracingIsUndefinedOrBoolean) {
-          this.outdatedTelemetrySpec = true;
+          this.handleTracingChecklist('outdatedTelemetrySpec', true);
 
           return null;
         }
 
         // If telemetry.tracing is true, ensure sidecar.tracing is defined
         if (telemetry?.tracing === true && !endpointIsDefined) {
-          this.incompleteTelemetrySpec = true;
+          this.handleTracingChecklist('incompleteTelemetrySpec', true);
 
           return null;
         }
@@ -206,16 +213,16 @@ export default {
     },
 
     jaegerServices() {
-      return this.allServices?.filter(svc => svc?.metadata?.labels?.['app.kubernetes.io/part-of'] === 'jaeger');
+      return this.allServices?.filter((svc) => svc?.metadata?.labels?.['app.kubernetes.io/part-of'] === 'jaeger');
     },
 
     jaegerQuerySvc() {
-      if ( !isEmpty(this.jaegerServices) ) {
+      if (!isEmpty(this.jaegerServices)) {
         return this.jaegerServices.find((svc) => {
           const ports = svc?.spec?.ports;
 
-          if ( ports.length ) {
-            return ports.find(p => p.port === 16685 || p.port === 16686);
+          if (ports.length) {
+            return ports.find((p) => p.port === 16685 || p.port === 16686);
           }
         });
       }
@@ -224,16 +231,16 @@ export default {
     },
 
     openTelemetryServices() {
-      return this.allServices?.filter(svc => svc?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === 'opentelemetry-operator');
+      return this.allServices?.filter((svc) => svc?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === 'opentelemetry-operator');
     },
 
     openTelSvc() {
-      if ( !isEmpty(this.openTelemetryServices) ) {
+      if (!isEmpty(this.openTelemetryServices)) {
         return this.openTelemetryServices.find((svc) => {
           const ports = svc?.spec?.ports;
 
-          if ( ports.length ) {
-            return ports.find(p => p.port === 8080);
+          if (ports.length) {
+            return ports.find((p) => p.port === 8080);
           }
         });
       }
@@ -250,9 +257,9 @@ export default {
     },
 
     filteredValidations() {
-      if ( !isEmpty(this.specificValidations) ) {
+      if (!isEmpty(this.specificValidations)) {
         return this.specificValidations.flatMap((v) => {
-          if ( this.currentCluster?.id === v.cluster ) {
+          if (this.currentCluster?.id === v.cluster) {
             return v.traces;
           } else {
             return [];
@@ -279,6 +286,10 @@ export default {
 
     duration(duration) {
       return formatDuration(duration);
+    },
+
+    handleTracingChecklist(prop, val) {
+      this[prop] = val;
     }
   }
 };

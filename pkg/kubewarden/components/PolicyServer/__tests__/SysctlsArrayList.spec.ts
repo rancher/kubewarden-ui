@@ -1,5 +1,3 @@
-import { ExtendedVue, Vue } from 'vue/types/vue';
-import { DefaultProps } from 'vue/types/options';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from '@jest/globals';
 

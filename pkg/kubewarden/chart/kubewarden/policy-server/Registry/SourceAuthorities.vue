@@ -23,8 +23,8 @@ export default {
   components: { Authority },
 
   fetch() {
-    if ( this.value ) {
-      for ( const [key, value] of Object.entries(this.value) ) {
+    if (this.value) {
+      for (const [key, value] of Object.entries(this.value)) {
         this.rows.push({
           registryName: key,
           certs:        value
@@ -54,7 +54,7 @@ export default {
     },
 
     deleteAuthority(index) {
-      if ( !isEmpty(this.value) ) {
+      if (!isEmpty(this.value)) {
         const key = Object.keys(this.value)[index];
 
         this.$delete(this.value, [key]);
@@ -69,7 +69,7 @@ export default {
     updateAuthority(event, index) {
       const { registryName, certs } = event;
 
-      if ( !isEmpty(this.value) ) {
+      if (!isEmpty(this.value)) {
         this.deleteAuthority(index);
       }
 

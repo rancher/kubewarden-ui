@@ -8,13 +8,13 @@ import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 
 import { Banner } from '@components/Banner';
 
-import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '../../types';
+import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
 
-import { newPolicyReportCompatible } from '../../modules/policyReporter';
-import { appVersionSatisfiesConstraint, checkUpgradeAvailable } from '../../utils/chart';
-import { handleGrowl } from '../../utils/handle-growl';
+import { newPolicyReportCompatible } from '@kubewarden/modules/policyReporter';
+import { appVersionSatisfiesConstraint, checkUpgradeAvailable } from '@kubewarden/utils/chart';
+import { handleGrowl } from '@kubewarden/utils/handle-growl';
 
-import DefaultsBanner from '../DefaultsBanner';
+import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
 
 export default {
   props: {
@@ -124,7 +124,7 @@ export default {
           repoType, repoName, name, version
         } = upgradeAvailable;
 
-        if ( version ) {
+        if (version) {
           const query = {
             [REPO_TYPE]: repoType,
             [REPO]:      repoName,

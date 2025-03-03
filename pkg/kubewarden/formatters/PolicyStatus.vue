@@ -1,7 +1,7 @@
 <script>
 import { BadgeState } from '@components/BadgeState';
 
-import { colorForStatus } from '../plugins/kubewarden-class';
+import { colorForStatus } from '@kubewarden/plugins/kubewarden-class';
 
 export default {
   components: { BadgeState },

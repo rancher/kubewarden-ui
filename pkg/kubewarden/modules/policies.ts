@@ -7,7 +7,7 @@ import semver from 'semver';
  * @param string
  * @returns Object
  */
-export function kwDefaultsHelmChartSettings(kwDefaultsVersion: string, uiPluginVersion: string): Object | void {
+export function kwDefaultsHelmChartSettings(kwDefaultsVersion: string, uiPluginVersion: string): boolean | void {
   if (semver.gt(uiPluginVersion, '1.4.1')) {
     return semver.gt(kwDefaultsVersion, '1.9.9');
   }

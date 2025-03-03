@@ -1,8 +1,8 @@
 import isEmpty from 'lodash/isEmpty';
 import { MONITORING } from '@shell/config/types';
 
-import { CatalogApp, Service, ServiceMonitor, ServiceMonitorSpec } from '../types';
-import { handleGrowl, GrowlConfig } from '../utils/handle-growl';
+import { CatalogApp, Service, ServiceMonitor, ServiceMonitorSpec } from '@kubewarden/types';
+import { handleGrowl, GrowlConfig } from '@kubewarden/utils/handle-growl';
 
 type ServiceMonitorConfigured = {
   namespace: boolean,
@@ -34,11 +34,11 @@ interface ServiceMonitorConfig {
 export function monitoringIsConfigured(config: MonitoringConfig): boolean {
   const configured = serviceMonitorsConfigured(config);
 
-  if ( Array.isArray(configured) ) {
+  if (Array.isArray(configured)) {
     return configured?.some((c: ServiceMonitorConfigured) => {
       const selectorsConfigured = !isEmpty(c?.selectors) && c?.selectors?.some((selector) => {
         for (const key in selector) {
-          if ( selector[key] && selector[key] === true ) {
+          if (selector[key] && selector[key] === true) {
             return true;
           }
         }
@@ -63,7 +63,7 @@ export function monitoringIsConfigured(config: MonitoringConfig): boolean {
 export function serviceMonitorsConfigured(config: MonitoringConfig): ServiceMonitorConfigured[] | boolean {
   const { serviceMonitorSpec, controllerApp, policyServerSvcs } = config;
 
-  if ( serviceMonitorSpec ) {
+  if (serviceMonitorSpec) {
     return serviceMonitorSpec?.map((sm) => {
       const configured: ServiceMonitorConfigured = {
         namespace: false,
@@ -71,17 +71,17 @@ export function serviceMonitorsConfigured(config: MonitoringConfig): ServiceMoni
       };
 
       /** Find a matching namespaceSelector to the controllerApp */
-      if ( !isEmpty(controllerApp) ) {
+      if (!isEmpty(controllerApp)) {
         const hasNamespace: boolean = sm.namespaceSelector?.matchNames?.includes(controllerApp?.metadata?.namespace) || false;
 
         configured.namespace = hasNamespace;
       }
 
       /** Find matching label selectors for policy server services */
-      if ( !isEmpty(policyServerSvcs) ) {
+      if (!isEmpty(policyServerSvcs)) {
         policyServerSvcs.forEach((svc) => {
-          if ( sm.selector?.matchLabels ) {
-            for ( const key of Object.keys(sm.selector.matchLabels) ) {
+          if (sm.selector?.matchLabels) {
+            for (const key of Object.keys(sm.selector.matchLabels)) {
               const hasLabel = svc?.metadata?.labels?.[key] && svc.metadata.labels[key] === sm.selector.matchLabels[key];
 
               configured?.selectors?.push({ [key]: !!hasLabel });
@@ -107,10 +107,10 @@ export function serviceMonitorsConfigured(config: MonitoringConfig): ServiceMoni
 export function findServiceMonitor(config: ServiceMonitorConfig): ServiceMonitor | void {
   const { policyObj, policyServerObj, allServiceMonitors } = config;
 
-  if ( !isEmpty(allServiceMonitors) ) {
+  if (!isEmpty(allServiceMonitors)) {
     const smName: string = policyObj ? policyObj.spec?.policyServer : policyServerObj?.id;
 
-    return allServiceMonitors?.find(sm => sm?.spec?.selector?.matchLabels?.['app'] === `kubewarden-policy-server-${ smName }`);
+    return allServiceMonitors?.find((sm) => sm?.spec?.selector?.matchLabels?.['app'] === `kubewarden-policy-server-${ smName }`);
   }
 }
 
@@ -123,7 +123,7 @@ export async function addKubewardenServiceMonitor(config: ServiceMonitorConfig):
     store, policyObj, policyServerObj, controllerNs, serviceMonitor
   } = config;
 
-  if ( store.getters['cluster/schemaFor'](MONITORING.SERVICEMONITOR) ) {
+  if (store.getters['cluster/schemaFor'](MONITORING.SERVICEMONITOR)) {
     const smName: string = policyObj ? policyObj.spec?.policyServer : policyServerObj?.id;
 
     const serviceMonitorTemplate: ServiceMonitor = {
@@ -134,13 +134,16 @@ export async function addKubewardenServiceMonitor(config: ServiceMonitorConfig):
         namespace:   controllerNs
       },
       spec: {
-        endpoints:         [{ interval: '10s', port: 'metrics' }],
+        endpoints:         [{
+          interval: '10s',
+          port:     'metrics'
+        }],
         namespaceSelector: { matchNames: [controllerNs] },
         selector:          { matchLabels: { app: `kubewarden-policy-server-${ smName }` } }
       }
     };
 
-    if ( !serviceMonitor ) {
+    if (!serviceMonitor) {
       const serviceMonitorObj = await store.dispatch(
         'cluster/create',
         serviceMonitorTemplate
@@ -149,7 +152,10 @@ export async function addKubewardenServiceMonitor(config: ServiceMonitorConfig):
       try {
         await serviceMonitorObj.save();
       } catch (e) {
-        handleGrowl({ error: e as GrowlConfig | any, store });
+        handleGrowl({
+          error: e as GrowlConfig | any,
+          store
+        });
       }
     }
   }

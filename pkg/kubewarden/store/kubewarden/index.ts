@@ -9,7 +9,7 @@ import {
   PolicyTraceConfig,
   ClusterPolicyReport,
   PolicyReportSummary,
-} from '../../types';
+} from '@kubewarden/types';
 
 import getters from './getters';
 import mutations from './mutations';

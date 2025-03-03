@@ -1,5 +1,4 @@
 <script>
-import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 
 import { _CREATE } from '@shell/config/query-params';
@@ -7,7 +6,7 @@ import { SCHEMA } from '@shell/config/types';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 
-import * as coreTypes from '../../../../core/core-resources';
+import * as coreTypes from '@kubewarden/core/core-resources';
 
 export default {
   name: 'Resource',
@@ -40,7 +39,6 @@ export default {
   watch: { 'value.apiVersion': 'clearKind' },
 
   computed: {
-
     allSchemas() {
       return this.$store.getters['cluster/all'](SCHEMA);
     },
@@ -52,8 +50,8 @@ export default {
     apiVersionOptions() {
       const out = [];
 
-      if ( !isEmpty(this.apiGroupVersions) ) {
-        this.apiGroupVersions.forEach(group => out.push(group.groupVersion));
+      if (!isEmpty(this.apiGroupVersions)) {
+        this.apiGroupVersions.forEach((group) => out.push(group.groupVersion));
       }
 
       return out;
@@ -63,12 +61,12 @@ export default {
     kindOptions() {
       const kindSchema = [];
 
-      if ( this.value?.apiVersion ) {
-        const matchedGroup = this.apiGroupVersions.find(group => this.value.apiVersion === group.groupVersion);
+      if (this.value?.apiVersion) {
+        const matchedGroup = this.apiGroupVersions.find((group) => this.value.apiVersion === group.groupVersion);
         const matchedSchemas = this.schemaForGroup(matchedGroup);
 
-        if ( !isEmpty(matchedSchemas) ) {
-          matchedSchemas.forEach(schema => kindSchema.push(schema.attributes?.kind));
+        if (!isEmpty(matchedSchemas)) {
+          matchedSchemas.forEach((schema) => kindSchema.push(schema.attributes?.kind));
         }
       }
 
@@ -78,26 +76,26 @@ export default {
 
   methods: {
     clearKind() {
-      if ( !isEmpty(this.value.kind) ) {
+      if (!isEmpty(this.value.kind)) {
         this.value.kind = null;
       }
     },
 
     schemaForGroup(group) {
-      if ( !!group ) {
+      if (!!group) {
         /**
          * If the 'core' group is selected, the Steve api does not have a mechanism to return only
          * the legacy resources that fall under 'core'. They appear in the schemas as having an
          * empty group... but there are **many** schemas that have an empty group, so they have
          * been declared in `./core/core.d.ts` to have a bonified list of core resources.
          */
-        if ( group.groupName === 'core' ) {
+        if (group.groupName === 'core') {
           const types = Object.values(coreTypes);
 
           return types;
         }
 
-        return this.allSchemas?.filter(s => s._group === group.groupName);
+        return this.allSchemas?.filter((s) => s._group === group.groupName);
       }
 
       return null;

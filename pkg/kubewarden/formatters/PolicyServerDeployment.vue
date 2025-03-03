@@ -31,18 +31,18 @@ export default {
 
   computed:   {
     hasErrors() {
-      const out = this.flattenedConditions?.filter(condition => condition.error);
+      const out = this.flattenedConditions?.filter((condition) => condition.error);
 
       return !isEmpty(out);
     },
 
     flattenedConditions() {
-      return this.deployment?.flatMap(dep => dep.status.conditions);
+      return this.deployment?.flatMap((dep) => dep.status.conditions);
     },
 
     formattedConditions() {
-      if ( this.hasErrors ) {
-        const errorConditions = this.flattenedConditions.filter(condition => condition.error);
+      if (this.hasErrors) {
+        const errorConditions = this.flattenedConditions.filter((condition) => condition.error);
         const formattedTooltip = [];
 
         errorConditions?.forEach((c) => {
@@ -56,7 +56,7 @@ export default {
     },
 
     to() {
-      if ( this.row && this.reference ) {
+      if (this.row && this.reference) {
         return get(this.row, this.reference);
       }
 

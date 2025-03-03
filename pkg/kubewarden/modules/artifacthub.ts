@@ -1,4 +1,4 @@
-import { ArtifactHubPackage } from '../types';
+import { ArtifactHubPackage } from '@kubewarden/types';
 
 /**
  * Extracts resource kinds from a list of ArtifactHub packages with the `kubewarden/resources` annotation.
@@ -11,16 +11,16 @@ export function resourcesFromAnnotation(artifactHubPackages: ArtifactHubPackage[
   const resources = artifactHubPackages?.flatMap((artifactHubPackage) => {
     const annotation = artifactHubPackage?.data?.['kubewarden/resources'];
 
-    if ( annotation ) {
+    if (annotation) {
       return annotation;
     }
   });
 
   resources?.flatMap((resource) => {
-    if ( resource ) {
+    if (resource) {
       const split = resource.split(',');
 
-      if ( split.length > 1 ) {
+      if (split.length > 1) {
         split.forEach((s: string) => out.push(s.trim()));
       } else {
         out.push(resource);
@@ -30,7 +30,7 @@ export function resourcesFromAnnotation(artifactHubPackages: ArtifactHubPackage[
     return [];
   })?.sort();
 
-  if ( !out || out?.length === 0 ) {
+  if (!out || out?.length === 0) {
     return [];
   }
 
@@ -44,12 +44,12 @@ export function resourcesFromAnnotation(artifactHubPackages: ArtifactHubPackage[
  * @returns boolean
  */
 export function isGlobalPolicy(artifactHubPackage: ArtifactHubPackage, schemas: any): boolean {
-  if ( artifactHubPackage ) {
+  if (artifactHubPackage) {
     const resources: string[] | undefined = artifactHubPackage.data?.['kubewarden/resources']?.split(',');
     let targetsNonNamespaced: boolean = false;
 
-    if ( resources ) {
-      for ( const resource of resources ) {
+    if (resources) {
+      for (const resource of resources) {
         targetsNonNamespaced = schemas?.some((schema: any) => (
           schema?.attributes?.kind === resource && (schema?.attributes?.namespaced === false || undefined)
         ));

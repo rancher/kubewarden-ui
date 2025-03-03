@@ -6,10 +6,10 @@ import { _CREATE } from '@shell/config/query-params';
 
 import Tab from '@shell/components/Tabbed/Tab';
 
-import { KUBEWARDEN } from '../../../types';
+import { KUBEWARDEN } from '@kubewarden/types';
 
 // Using this custom Questions component until `hide_input` changes are made to @shell version
-import Questions from '../../../components/Questions';
+import Questions from '@kubewarden/components/Questions';
 
 import General from './General';
 import Rules from './Rules';
@@ -55,7 +55,7 @@ export default {
   },
 
   created() {
-    if ( this.value ) {
+    if (this.value) {
       this.chartValues = this.value;
     }
   },
@@ -90,11 +90,11 @@ export default {
     },
 
     showSettings() {
-      if ( this.isCreate && this.isCustom ) {
+      if (this.isCreate && this.isCustom) {
         return true;
       }
 
-      if ( this.hasSettings && !this.hasQuestions ) {
+      if (this.hasSettings && !this.hasQuestions) {
         return true;
       }
 
@@ -120,7 +120,7 @@ export default {
     },
 
     updateMatchConditions(matchConditions) {
-      if ( !this.chartValues.policy.spec ) {
+      if (!this.chartValues.policy.spec) {
         this.chartValues.policy.spec = {};
       }
 

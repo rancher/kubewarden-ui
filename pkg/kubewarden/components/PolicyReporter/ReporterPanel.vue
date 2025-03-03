@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { onMounted, getCurrentInstance, watch, nextTick } from 'vue';
+import { onMounted, getCurrentInstance, nextTick } from 'vue';
 import { useStore } from 'vuex';
-import { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
+import { RouteLocationNormalizedLoaded } from 'vue-router';
 
-import { ClusterPolicyReport, PolicyReport } from '../../types';
-import { getReports } from '../../modules/policyReporter';
+import { ClusterPolicyReport, PolicyReport } from '@kubewarden/types';
+import { getReports } from '@kubewarden/modules/policyReporter';
 
 /**
  * Invisible panel to fetch PolicyReports for ResourceList

@@ -1,5 +1,4 @@
 <script>
-import { mapGetters } from 'vuex';
 import flatMap from 'lodash/flatMap';
 import isEmpty from 'lodash/isEmpty';
 
@@ -7,8 +6,8 @@ import { _CREATE } from '@shell/config/query-params';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 
-import { KUBEWARDEN } from '~/pkg/kubewarden/types';
-import { schemasForGroup } from '~/pkg/kubewarden/modules/core';
+import { KUBEWARDEN } from '@kubewarden/types';
+import { schemasForGroup } from '@kubewarden/modules/core';
 
 export default {
   name: 'Rule',
@@ -59,8 +58,8 @@ export default {
   components: { LabeledSelect },
 
   fetch() {
-    if ( this.isCreate && isEmpty(this.value?.apiGroups) ) {
-      if ( !Array.isArray(this.value.apiGroups) ) {
+    if (this.isCreate && isEmpty(this.value?.apiGroups)) {
+      if (!Array.isArray(this.value.apiGroups)) {
         this.value.apiGroups = [];
       }
 
@@ -106,14 +105,14 @@ export default {
     apiGroupOptions() {
       const out = ['*'];
 
-      if ( !isEmpty(this.filteredGroups) ) {
+      if (!isEmpty(this.filteredGroups)) {
         this.filteredGroups.forEach((g) => {
           out.push(g.id);
         });
 
         const coreIndex = out.indexOf('core');
 
-        if ( coreIndex ) {
+        if (coreIndex) {
           // Removing core from apiGroups as this leads to zero resources
           out.splice(coreIndex, 1);
         }
@@ -129,9 +128,9 @@ export default {
     apiVersionOptions() {
       let out = [];
 
-      if ( !isEmpty(this.value?.apiGroups) && !this.isGroupAll ) {
+      if (!isEmpty(this.value?.apiGroups) && !this.isGroupAll) {
         out = this.apiVersions(this.value.apiGroups, true);
-      } else if ( !isEmpty(this.value?.resources) ) {
+      } else if (!isEmpty(this.value?.resources)) {
         out = this.apiVersions(this.value.resources, false);
       }
 
@@ -149,7 +148,7 @@ export default {
     isGroupAll() {
       const groups = this.value?.apiGroups;
 
-      if ( groups.length === 0 || groups.includes('*') ) {
+      if (groups.length === 0 || groups.includes('*')) {
         return true;
       }
 
@@ -163,12 +162,12 @@ export default {
       */
       let schemas = this.filteredSchemas;
 
-      if ( this.value?.apiGroups?.length > 0 && !this.isGroupAll ) {
-        schemas = this.value.apiGroups.map(group => schemasForGroup(this.$store, group))[0];
+      if (this.value?.apiGroups?.length > 0 && !this.isGroupAll) {
+        schemas = this.value.apiGroups.map((group) => schemasForGroup(this.$store, group))[0];
       }
 
-      const filtered = schemas?.filter(schema => schema?.attributes?.resource);
-      const resourceSet = [...new Set(filtered?.map(f => f.attributes.resource))];
+      const filtered = schemas?.filter((schema) => schema?.attributes?.resource);
+      const resourceSet = [...new Set(filtered?.map((f) => f.attributes.resource))];
 
       return resourceSet.sort();
     }
@@ -183,9 +182,9 @@ export default {
         const toFind = isGroup ? this.apiGroups : this.filteredSchemas;
 
         toFind.find((f) => {
-          if ( isGroup && f.id === type ) {
-            versions = [...versions, flatMap(f.versions, v => v.groupVersion)];
-          } else if ( f.attributes?.resource === type ) {
+          if (isGroup && f.id === type) {
+            versions = [...versions, flatMap(f.versions, (v) => v.groupVersion)];
+          } else if (f.attributes?.resource === type) {
             versions = [...versions, f.attributes.version];
           }
         });
@@ -195,11 +194,11 @@ export default {
     },
 
     setGroup(event) {
-      if ( this.value?.apiGroups?.includes(event) ) {
+      if (this.value?.apiGroups?.includes(event)) {
         return;
       }
 
-      if ( !this.value?.apiGroups?.includes(event) ) {
+      if (!this.value?.apiGroups?.includes(event)) {
         this.value.apiGroups.pop();
       }
 

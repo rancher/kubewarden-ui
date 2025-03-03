@@ -3,7 +3,7 @@ import { sortBy } from '@shell/utils/sort';
 
 import ProgressBarMulti from '@shell/components/ProgressBarMulti';
 
-import { colorForStatus, stateSort } from '../plugins/kubewarden-class';
+import { colorForStatus, stateSort } from '@kubewarden/plugins/kubewarden-class';
 
 export default {
   components: { ProgressBarMulti },
@@ -41,12 +41,12 @@ export default {
     stateParts() {
       const out = {};
 
-      for ( const r of this.relatedPolicies ) {
+      for (const r of this.relatedPolicies) {
         const state = r?.status?.policyStatus;
         const textColor = colorForStatus(state);
         const key = `${ textColor }/${ state }`;
 
-        if ( out[key] ) {
+        if (out[key]) {
           out[key].value += 1;
         } else {
           out[key] = {
@@ -66,8 +66,8 @@ export default {
     colorParts() {
       const out = {};
 
-      for ( const p of this.stateParts ) {
-        if ( out[p.color] ) {
+      for (const p of this.stateParts) {
+        if (out[p.color]) {
           out[p.color].value += 1;
         } else {
           out[p.color] = {
@@ -84,7 +84,7 @@ export default {
     displayLabel() {
       const count = this.relatedPolicies.length || 0;
 
-      if ( this.label ) {
+      if (this.label) {
         return `${ this.label }, ${ count }`;
       }
 
@@ -110,7 +110,7 @@ export default {
       </router-link>
       <span v-else>{{ displayLabel }}</span>
     </div>
-    
+
 
     <template #popper>
       <table v-if="show" class="fixed">

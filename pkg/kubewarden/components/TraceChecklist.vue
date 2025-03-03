@@ -50,11 +50,11 @@ export default {
     ...mapGetters(['currentCluster']),
 
     controllerLinkTooltip() {
-      if ( !this.openTelSvc || !this.jaegerQuerySvc ) {
+      if (!this.openTelSvc || !this.jaegerQuerySvc) {
         return this.t('kubewarden.monitoring.prerequisites.tooltips.prerequisites');
       }
 
-      if ( !this.controllerApp || !this.controllerChart ) {
+      if (!this.controllerApp || !this.controllerChart) {
         return this.t('kubewarden.monitoring.prerequisites.tooltips.chartError', { chart: 'Kubewarden Controller' }, true);
       }
 
@@ -66,7 +66,7 @@ export default {
     },
 
     tracingEnabled() {
-      if ( this.tracingConfiguration ) {
+      if (this.tracingConfiguration) {
         return this.tracingConfiguration.enabled;
       }
 
@@ -77,12 +77,14 @@ export default {
   methods: {
     badgeIcon(prop) {
       return {
-        'icon-dot-open': !prop, 'icon-checkmark': prop, 'text-success': prop
+        'icon-dot-open':  !prop,
+        'icon-checkmark': prop,
+        'text-success':   prop
       };
     },
 
     controllerAppRoute() {
-      if ( this.controllerApp ) {
+      if (this.controllerApp) {
         const metadata = this.controllerApp.spec?.chart?.metadata;
 
         const query = {

@@ -6,7 +6,7 @@ import { get } from '@shell/utils/object';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { KUBERNETES, WORKSPACE_ANNOTATION } from '@shell/config/labels-annotations';
 
-import { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '../types';
+import { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
 import KubewardenModel, { colorForStatus } from './kubewarden-class';
 
 export default class PolicyModel extends KubewardenModel {
@@ -23,10 +23,10 @@ export default class PolicyModel extends KubewardenModel {
     out.unshift(policyMode);
 
     // Filter out actions if deployed with fleet
-    if ( this.isDeployedWithFleet ) {
+    if (this.isDeployedWithFleet) {
       const fleetActions = ['goToEdit', 'goToEditYaml', 'toggleUpdateMode'];
 
-      out = out.filter(action => !fleetActions.includes(action.action));
+      out = out.filter((action) => !fleetActions.includes(action.action));
     }
 
     return out;
@@ -56,7 +56,7 @@ export default class PolicyModel extends KubewardenModel {
         [CHART]:     'kubewarden-defaults',
         [VERSION]:   version
       };
-  
+
       return {
         name:   'c-cluster-apps-charts-install',
         params: { cluster },
@@ -107,7 +107,7 @@ export default class PolicyModel extends KubewardenModel {
   get stateDisplay() {
     const status = get(this, 'status.policyStatus');
 
-    if ( status ) {
+    if (status) {
       return stateDisplay(status);
     }
 
@@ -117,7 +117,7 @@ export default class PolicyModel extends KubewardenModel {
   get colorForState() {
     const status = get(this, 'status.policyStatus');
 
-    if ( status ) {
+    if (status) {
       return colorForStatus(status);
     }
 
@@ -127,7 +127,7 @@ export default class PolicyModel extends KubewardenModel {
   get stateBackground() {
     const color = this.colorForState;
 
-    if ( color ) {
+    if (color) {
       return color.replace('text-', 'bg-');
     }
 
@@ -140,27 +140,30 @@ export default class PolicyModel extends KubewardenModel {
   */
   get artifactHubPackageVersion() {
     return () => {
-      if ( !this.artifactHubWhitelist ) {
+      if (!this.artifactHubWhitelist) {
         return { error: 'ArtifactHub.io has not been added to the `management.cattle.io.settings/whitelist-domain` setting' };
       }
 
       try {
         const pkgAnnotation = this.metadata?.annotations?.[ARTIFACTHUB_PKG_ANNOTATION];
 
-        if ( pkgAnnotation ) {
+        if (pkgAnnotation) {
           const url = `/meta/proxy/${ ARTIFACTHUB_ENDPOINT }/packages/kubewarden/${ pkgAnnotation }`;
 
-          return this.$dispatch('management/request', { url, redirectUnauthorized: false }, { root: true });
+          return this.$dispatch('management/request', {
+            url,
+            redirectUnauthorized: false
+          }, { root: true });
         }
       } catch (e) {
-        console.warn(`Error fetching pkg version: ${ e }`); // eslint-disable-line no-console
+        console.warn(`Error fetching pkg version: ${ e }`);
       }
     };
   }
 
   /** Parse provided yaml into workable json - returns js object */
   parsePackageMetadata(data) {
-    if ( data ) {
+    if (data) {
       const parsed = JSON.parse(JSON.stringify(data));
 
       return jsyaml.load(parsed);

@@ -5,11 +5,11 @@ import Loading from '@shell/components/Loading';
 import { Checkbox } from '@components/Form/Checkbox';
 import { LabeledInput } from '@components/Form/LabeledInput';
 
-import SeLinuxOptions from '../../../../components/PolicyServer/SeLinuxOptions.vue';
-import SeccompProfile from '../../../../components/PolicyServer/SeccompProfile.vue';
-import WindowsOptions from '../../../../components/PolicyServer/WindowsOptions.vue';
-import ArrayListInteger from '../../../../components/ArrayListInteger.vue';
-import SysctlsArrayList from '../../../../components/PolicyServer/SysctlsArrayList.vue';
+import SeLinuxOptions from '@kubewarden/components/PolicyServer/SeLinuxOptions.vue';
+import SeccompProfile from '@kubewarden/components/PolicyServer/SeccompProfile.vue';
+import WindowsOptions from '@kubewarden/components/PolicyServer/WindowsOptions.vue';
+import ArrayListInteger from '@kubewarden/components/ArrayListInteger.vue';
+import SysctlsArrayList from '@kubewarden/components/PolicyServer/SysctlsArrayList.vue';
 
 export default {
   props: {

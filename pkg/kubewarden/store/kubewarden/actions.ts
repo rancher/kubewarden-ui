@@ -1,7 +1,7 @@
 import {
   CatalogApp, CustomResourceDefinition, PolicyReport, ClusterPolicyReport, PolicyTraceConfig, PolicyTrace, PolicyReportSummary
-} from '../../types';
-import { generateSummaryMap } from '../../modules/policyReporter';
+} from '@kubewarden/types';
+import { generateSummaryMap } from '@kubewarden/modules/policyReporter';
 
 export default {
   updateAirGapped({ commit }: any, val: boolean) {

@@ -1,6 +1,6 @@
 import {
   CatalogApp, CustomResourceDefinition, PolicyReport, ClusterPolicyReport, PolicyTraceConfig, PolicyReportSummary
-} from '../../types';
+} from '@kubewarden/types';
 import { StateConfig } from './index';
 
 export default {

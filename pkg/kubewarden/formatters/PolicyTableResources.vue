@@ -11,11 +11,11 @@ export default {
     resources() {
       const resourceList = this.value?.['kubewarden/resources']?.split(',');
 
-      if ( Array.isArray(resourceList) ) {
-        if ( resourceList.length > 1 ) {
+      if (Array.isArray(resourceList)) {
+        if (resourceList.length > 1) {
           return 'Multiple';
-        } else if ( resourceList.length === 1 ) {
-          if ( resourceList[0] === '*' ) {
+        } else if (resourceList.length === 1) {
+          if (resourceList[0] === '*') {
             return 'Global';
           }
 

@@ -7,12 +7,12 @@ import skipFormatting from '@vue/eslint-config-prettier/skip-formatting';
 export default [
   {
     name:  'app/files-to-lint',
-    files: ['**/*.{js,ts,mts,tsx,vue}', '**/*.spec.js', '**/*.test.js'],
+    files: ['**/*.{js,ts,mts,tsx,vue}', '**/*.spec.js', '**/*.test.js', '**/tests/unit/**'],
   },
 
   {
     name:    'app/files-to-ignore',
-    ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/node_modules/**', 'yarn.lock', '**/tests/e2e/**'],
+    ignores: ['**/dist-pkg/**', '**/dist-ssr/**', '**/coverage/**', '**/node_modules/**', 'yarn.lock', '**/tests/**'],
   },
 
   ...pluginVue.configs['flat/essential'],
@@ -32,6 +32,12 @@ export default [
       '@typescript-eslint/no-require-imports': 'off',
 
       'vue/no-multiple-template-root':  'off',
+      'vue/block-lang':                 'off',
+      'vue/html-self-closing':          'off',
+      'vue/no-v-html':                  'off',
+      'vue/multi-word-component-names': 'off',
+      'vue/no-mutating-props':          'off',
+
       'dot-notation':                   'off',
       'guard-for-in':                   'off',
       'new-cap':                        'off',
@@ -41,9 +47,6 @@ export default [
       'no-plusplus':                    'off',
       'no-useless-escape':              'off',
       'strict':                         'off',
-      'vue/html-self-closing':          'off',
-      'vue/no-v-html':                  'off',
-      'vue/multi-word-component-names': 'off',
 
       'space-in-parens':                   'warn',
       'array-bracket-spacing':             'warn',

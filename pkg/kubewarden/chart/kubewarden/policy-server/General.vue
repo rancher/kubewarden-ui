@@ -12,10 +12,10 @@ import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 
-import { KUBEWARDEN_CHARTS, KUBEWARDEN_APPS } from '../../../types';
-import { DEFAULT_POLICY_SERVER } from '../../../models/policies.kubewarden.io.policyserver';
-import { getPolicyServerModule, isFleetDeployment } from '../../../modules/fleet';
-import { findCompatibleDefaultsChart } from '../../../utils/chart';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_APPS } from '@kubewarden/types';
+import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
+import { getPolicyServerModule, isFleetDeployment } from '@kubewarden/modules/fleet';
+import { findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
 
 export default {
   props: {
@@ -50,57 +50,63 @@ export default {
   async mounted() {
     this.isLoading = true;
 
-    if ( this.$store.getters['cluster/canList'](CATALOG.APP) && this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO) ) {
+    if (this.$store.getters['cluster/canList'](CATALOG.APP) && this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO)) {
       await this.$initializeFetchData(CATALOG);
       await this.$fetchType(CATALOG.CLUSTER_REPO);
 
-      if ( !this.$store.getters['kubewarden/controllerApp'] ) {
+      if (!this.$store.getters['kubewarden/controllerApp']) {
         await this.$fetchType(CATALOG.APP);
       }
 
       await this.$store.dispatch('catalog/load');
 
-      if ( this.controllerApp ) {
+      if (this.controllerApp) {
         this.isFleet = isFleetDeployment(this.controllerApp);
 
-        if ( this.isFleet && this.$store.getters['management/all'](FLEET.BUNDLE) ) {
+        if (this.isFleet && this.$store.getters['management/all'](FLEET.BUNDLE)) {
           await this.$initializeFetchData(FLEET);
           await this.$store.dispatch('management/findAll', { type: FLEET.BUNDLE });
         }
 
-        if ( this.defaultsChart ) {
+        if (this.defaultsChart) {
           const compatibleVersion = findCompatibleDefaultsChart(this.controllerApp, this.defaultsChart);
+
+          if (!compatibleVersion) {
+            this.isLoading = false;
+
+            return;
+          }
 
           const chartInfo = await this.$store.dispatch('catalog/getVersionInfo', {
             repoType:    this.defaultsChart?.repoType,
             repoName:    this.defaultsChart?.repoName,
             chartName:   this.defaultsChart?.chartName,
-            versionName: compatibleVersion.version
+            versionName: compatibleVersion?.version
           });
 
-          if ( !isEmpty(chartInfo) ) {
+          if (!isEmpty(chartInfo)) {
             const registry = chartInfo.values?.common?.cattle?.systemDefaultRegistry;
             const psImage = chartInfo.values?.policyServer?.image?.repository;
             const psTag = chartInfo.values?.policyServer?.image?.tag;
 
-            if ( psImage && psTag ) {
+            if (psImage && psTag) {
               this.latestChartVersion = `${ registry || 'ghcr.io' }/${ psImage }:${ psTag }`;
             }
           }
         }
 
-        if ( this.isFleet && !this.defaultsChart ) {
+        if (this.isFleet && !this.defaultsChart) {
           this.latestChartVersion = getPolicyServerModule(this.fleetBundles);
         }
 
-        if ( !this.image || (this.isCreate && this.image === DEFAULT_POLICY_SERVER.spec.image) ) {
+        if (!this.image || (this.isCreate && this.image === DEFAULT_POLICY_SERVER.spec.image)) {
           this.image = this.latestChartVersion || structuredClone(DEFAULT_POLICY_SERVER.spec.image);
-        } else if ( this.image !== this.latestChartVersion && this.image !== DEFAULT_POLICY_SERVER.spec.image ) {
+        } else if (this.image !== this.latestChartVersion && this.image !== DEFAULT_POLICY_SERVER.spec.image) {
           this.defaultImage = false;
         }
 
-        if ( !this.isCreate && this.image ) {
-          if ( this.image === this.latestChartVersion ) {
+        if (!this.isCreate && this.image) {
+          if (this.image === this.latestChartVersion) {
             this.defaultImage = true;
           } else {
             this.defaultImage = false;
@@ -139,8 +145,8 @@ export default {
       this.$emit('update-general', 'replicas', neu);
     },
     defaultImage(neu) {
-      if ( neu ) {
-        if ( this.latestChartVersion ) {
+      if (neu) {
+        if (this.latestChartVersion) {
           this.image = this.latestChartVersion;
         } else {
           this.image = structuredClone(DEFAULT_POLICY_SERVER.spec.image);
@@ -160,7 +166,7 @@ export default {
       const storedApp = this.$store.getters['kubewarden/controllerApp'];
 
       if (!storedApp) {
-        const controller = this.allApps?.find(a => (
+        const controller = this.allApps?.find((a) => (
           a?.spec?.chart?.metadata?.name === (KUBEWARDEN_CHARTS.CONTROLLER || KUBEWARDEN_APPS.RANCHER_CONTROLLER)
         ));
 
@@ -181,7 +187,7 @@ export default {
     },
 
     defaultsChart() {
-      if ( this.kubewardenRepo && !this.isFleet ) {
+      if (this.kubewardenRepo && !this.isFleet) {
         return this.$store.getters['catalog/chart']({
           repoName:  this.kubewardenRepo.repoName,
           repoType:  this.kubewardenRepo.repoType,
@@ -201,7 +207,7 @@ export default {
     },
 
     showVersionBanner() {
-      if ( this.isFleet ) {
+      if (this.isFleet) {
         return (this.isCreate && this.defaultImage && !this.latestChartVersion);
       }
 
