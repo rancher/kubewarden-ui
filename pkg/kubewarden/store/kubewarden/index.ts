@@ -9,6 +9,8 @@ import {
   PolicyTraceConfig,
   ClusterPolicyReport,
   PolicyReportSummary,
+  ArtifactHubPackage,
+  ArtifactHubPackageDetails,
 } from '@kubewarden/types';
 
 import getters from './getters';
@@ -30,6 +32,10 @@ export interface StateConfig {
   summaryMap: Record<string, PolicyReportSummary>;
   policyTraces: PolicyTraceConfig[];
   refreshingCharts: boolean;
+  packages: ArtifactHubPackage[];
+  packageDetails: Record<string, ArtifactHubPackageDetails>
+  loadingPackages: boolean;
+  packageCacheTime: number;
 }
 
 const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
@@ -49,7 +55,11 @@ const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
         reportMap:              config.reportMap,
         summaryMap:             config.summaryMap,
         policyTraces:           config.policyTraces,
-        refreshingCharts:       config.refreshingCharts
+        refreshingCharts:       config.refreshingCharts,
+        packages:               config.packages,
+        packageDetails:         config.packageDetails,
+        loadingPackages:        config.loadingPackages,
+        packageCacheTime:       config.packageCacheTime,
       };
     },
 
@@ -76,7 +86,11 @@ export default {
     reportMap:              {},
     summaryMap:             {},
     policyTraces:           [],
-    refreshingCharts:       false
+    refreshingCharts:       false,
+    packages:               [],
+    packageDetails:         {},
+    loadingPackages:        false,
+    packageCacheTime:       0,
   }),
   config
 };

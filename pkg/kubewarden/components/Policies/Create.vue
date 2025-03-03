@@ -19,6 +19,7 @@ import Wizard from '@shell/components/Wizard';
 import {
   KUBEWARDEN,
   KUBEWARDEN_PRODUCT_NAME,
+  REGO_POLICIES_REPO,
   VALUES_STATE,
   ARTIFACTHUB_PKG_ANNOTATION,
   DEFAULT_POLICY
@@ -62,7 +63,12 @@ export default ({
 
   async fetch() {
     if (this.hasArtifactHub) {
-      await this.getPackages();
+      const repository = await this.value.artifactHubRepo();
+
+      await this.$store.dispatch('kubewarden/fetchPackages', {
+        repository,
+        value: this.value
+      });
     }
 
     this.value.apiVersion = `${ this.schema?.attributes?.group }.${ this.schema?.attributes?.version }`;
@@ -73,9 +79,6 @@ export default ({
     return {
       bannerTitle:       null,
       shortDescription:  null,
-      loadingPackages:   false,
-      packages:          null,
-      repository:        null,
       type:              null,
       typeModule:        null,
       version:           null,
@@ -188,7 +191,19 @@ export default ({
       );
 
       return steps.sort((a, b) => b.weight - a.weight);
-    }
+    },
+
+    packages() {
+      return this.$store.getters['kubewarden/packages'];
+    },
+
+    packageDetailsByKey() {
+      return this.$store.getters['kubewarden/packageDetailsByKey'];
+    },
+
+    loadingPackages() {
+      return this.$store.getters['kubewarden/loadingPackages'];
+    },
   },
 
   methods: {
@@ -343,7 +358,8 @@ export default ({
       this.repository = await this.value.artifactHubRepo();
 
       if (this.repository && this.repository.packages.length > 0) {
-        const promises = this.repository.packages.map((pkg) => this.packageDetails(pkg));
+        const packagesByRepo = this.repository.packages.filter((pkg) => !pkg?.repository?.url?.includes(REGO_POLICIES_REPO));
+        const promises = packagesByRepo.map((pkg) => this.packageDetails(pkg));
 
         try {
           const packages = await Promise.all(promises);
@@ -360,12 +376,8 @@ export default ({
       }
     },
 
-    async packageDetails(pkg) {
-      try {
-        return await this.value.artifactHubPackage(pkg);
-      } catch (e) {
-        console.warn(`Error fetching package details`, e);
-      }
+    packageDetails(pkg) {
+      return this.packageDetailsByKey(pkg?.package_id);
     },
 
     /** Extract policy questions from ArtifactHub package if available */
