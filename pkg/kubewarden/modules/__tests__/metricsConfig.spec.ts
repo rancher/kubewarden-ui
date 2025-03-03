@@ -15,7 +15,7 @@ import {
 
 jest.mock('@kubewarden/utils/handle-growl', () => ({ handleGrowl: jest.fn() }));
 
-const mockControllerApp: CatalogApp = {
+const mockControllerAppLegacy: CatalogApp = {
   metadata: {
     name:      'controller-app',
     namespace: 'controller-ns'
@@ -46,7 +46,7 @@ describe('monitoringIsConfigured', () => {
   it('should return true if at least one service monitor spec is configured correctly', () => {
     const config = {
       serviceMonitorSpec: [mockServiceMonitorSpec],
-      controllerApp:      mockControllerApp,
+      controllerApp:      mockControllerAppLegacy,
       policyServerSvcs:   [{ metadata: { labels: { 'app-label': 'match-me' } } } as Service]
     };
 
@@ -67,7 +67,7 @@ describe('monitoringIsConfigured', () => {
     };
     const config = {
       serviceMonitorSpec: [badSpec],
-      controllerApp:      mockControllerApp,
+      controllerApp:      mockControllerAppLegacy,
       policyServerSvcs:   [{ metadata: { labels: { 'app-label': 'match-me' } } } as Service]
     };
 
@@ -79,7 +79,7 @@ describe('serviceMonitorsConfigured', () => {
   it('should return an array of configured objects based on serviceMonitorSpec', () => {
     const config = {
       serviceMonitorSpec: [mockServiceMonitorSpec],
-      controllerApp:      mockControllerApp,
+      controllerApp:      mockControllerAppLegacy,
       policyServerSvcs:   [
         { metadata: { labels: { 'app-label': 'match-me' } } } as Service,
         { metadata: { labels: { 'app-label': 'no-match' } } } as Service
@@ -97,7 +97,7 @@ describe('serviceMonitorsConfigured', () => {
   it('should return false if serviceMonitorSpec is not provided', () => {
     const config = {
       serviceMonitorSpec: undefined,
-      controllerApp:      mockControllerApp,
+      controllerApp:      mockControllerAppLegacy,
       policyServerSvcs:   []
     };
 

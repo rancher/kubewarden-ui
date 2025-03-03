@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils';
 import PolicyReporter from '@kubewarden/components/PolicyReporter/index.vue';
 
 import mockControllerDeployment from '@/tests/unit/mocks/controllerDeployment';
-import { mockControllerApp } from '@/tests/unit/mocks/controllerApp';
+import { mockControllerAppLegacy } from '@/tests/unit/mocks/controllerApp';
 import { KUBEWARDEN, WG_POLICY_K8S } from '@kubewarden/types';
 
 // Create a mock for the 'cluster/schemaFor' getter that returns different values based on the input.
@@ -29,7 +29,7 @@ const commonMocks = {
       'cluster/all':                () => [mockControllerDeployment],
       'cluster/canList':            jest.fn,
       'cluster/schemaFor':          clusterSchemaFor,
-      'kubewarden/controllerApp':   mockControllerApp,
+      'kubewarden/controllerApp':   mockControllerAppLegacy,
       'i18n/t':                     jest.fn(),
       'management/byId':            () => 'local',
       'resource-fetch/refreshFlag': jest.fn()
@@ -115,7 +115,7 @@ describe('component: PolicyReporter', () => {
   });
 
   it('Should show incompatible banner with old version', () => {
-    const mockCloneAppWithOldVersion = { ...mockControllerApp };
+    const mockCloneAppWithOldVersion = { ...mockControllerAppLegacy };
 
     mockCloneAppWithOldVersion.spec.chart.metadata.appVersion = kwVersions.old;
 
@@ -144,7 +144,7 @@ describe('component: PolicyReporter', () => {
 
   it('Should show CRDs warning banner when not installed', () => {
     // Re-clone the controller app with a new version.
-    const mockCloneAppWithNewVersion = { ...mockControllerApp };
+    const mockCloneAppWithNewVersion = { ...mockControllerAppLegacy };
 
     mockCloneAppWithNewVersion.spec.chart.metadata.appVersion = kwVersions.new;
 

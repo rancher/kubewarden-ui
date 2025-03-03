@@ -4,7 +4,7 @@ import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 import Masthead from '@kubewarden/components/Dashboard/Masthead.vue';
 import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
 
-import controllerCharts from '~/tests/unit/mocks/controllerChart';
+import controllerCharts from '@/tests/unit/mocks/controllerChart';
 
 describe('component: Masthead', () => {
   const commonMocks = {

@@ -3,7 +3,7 @@ import { Store } from 'vuex';
 import * as policyReporterModule from '@kubewarden/modules/policyReporter';
 import { KUBEWARDEN, Severity, Result } from '@kubewarden/types';
 import { mockPolicyReport, mockClusterPolicyReport } from '@tests/unit/mocks/policyReports';
-import { mockControllerApp } from '@tests/unit/mocks/controllerApp';
+import { mockControllerAppLegacy } from '@tests/unit/mocks/controllerApp';
 
 jest.mock('lodash/isEmpty', () => ({
   __esModule: true,
@@ -25,7 +25,7 @@ const mockStore = {
     'kubewarden/reportByResourceId':   jest.fn(),
     'kubewarden/policyReports':        [mockPolicyReport],
     'kubewarden/clusterPolicyReports': [mockClusterPolicyReport],
-    'kubewarden/controllerApp':        mockControllerApp
+    'kubewarden/controllerApp':        mockControllerAppLegacy
   },
   dispatch: jest.fn()
 } as unknown as Store<any>;
