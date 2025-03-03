@@ -30,6 +30,8 @@ describe('KubewardenModel', () => {
     instance.status = {};
     instance.metadata = {};
     instance.spec = {};
+
+    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
   });
 
   describe('allServices', () => {
