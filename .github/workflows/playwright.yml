@@ -1,5 +1,7 @@
 name: Playwright Tests
 
+run-name: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || '' }}
+
 on:
   workflow_dispatch:
     inputs:
@@ -62,8 +64,9 @@ on:
   pull_request:
     branches:
       - main
-      - release-1.6
-      - release-2.1
+      - release-1.6 # rancher 2.8
+      - release-2.1 # rancher 2.9
+      - release-3.1 # rancher 2.10
     paths:
       - pkg/kubewarden/**
       - package.json
@@ -74,10 +77,10 @@ on:
       - completed
 
   schedule:
-    - cron: "0 21 * * *"
+    - cron: "1 21 * * *"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.workflow_run.head_branch || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -101,7 +104,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.8", "2.9", "2.10"]') || fromJSON(format('["{0}"]', inputs.rancher || 'released')) }}
+        rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.8", "2.9", "2.10"]') || fromJSON(format('["{0}"]', inputs.rancher || github.event.pull_request.base.ref )) }}
         mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["base", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'base')) }}
         exclude:
           # Run all modes on 2.10 since it's latest prime version
@@ -132,13 +135,14 @@ jobs:
     # Check out code
     # Use local kuberlr to avoid version skew
 
-    # Test from maintenance branch for Rancher < 2.10
+    # Test from maintenance branch for Rancher < 2.11
     - name: Find checkout branch ref
       id: set-ref
       run: |
         case "${{ matrix.rancher }}" in
           *2.8*) ref='release-1.6';;
           *2.9*) ref='release-2.1';;
+          *2.10*) ref='release-3.1';;
           *)     ref='';;
         esac
         echo "ref=$ref" | tee -a $GITHUB_OUTPUT
@@ -156,8 +160,10 @@ jobs:
         case ${{github.event_name}} in
           pull_request)
             # Override RANCHER for maintenance PRs
+            [[ "${{ github.event.pull_request.base.ref }}" == "main" ]] && RANCHER="2.11-0"
             [[ "${{ github.event.pull_request.base.ref }}" == "release-1.6" ]] && RANCHER="2.8"
             [[ "${{ github.event.pull_request.base.ref }}" == "release-2.1" ]] && RANCHER="2.9"
+            [[ "${{ github.event.pull_request.base.ref }}" == "release-3.1" ]] && RANCHER="2.10"
             KUBEWARDEN=source;;
           schedule)
             KUBEWARDEN=released;;
@@ -167,19 +173,18 @@ jobs:
 
         # Select repository
         helm repo add --force-update rancher-prime https://charts.rancher.com/server-charts/prime
-        helm repo add --force-update rancher-community https://releases.rancher.com/server-charts/latest
+        helm repo add --force-update rancher-community https://releases.rancher.com/server-charts/alpha # alpha | latest
         [[ "$RANCHER" == "rc" || "$RANCHER" == *"-0" ]] && REPO=rancher-community || REPO=rancher-prime
 
         # Translate to sematic version
         [ "$RANCHER" == "rc" ] && RANCHER='*-0'
         [ "$RANCHER" == "released" ] && RANCHER='*'
 
-        # Rancher 2.7 chart requires kubeVersion: < 1.28.0-0
+        # Limit k8s version - Rancher 2.7 chart supports < 1.28.0
         [[ "$RANCHER" == *2.7* ]] && K3S_VERSION="v1.27"
-        # Rancher 2.8 chart requires kubeVersion: < 1.29.0-0
         [[ "$RANCHER" == *2.8* ]] && K3S_VERSION="v1.28"
-        # Rancher 2.9 chart requires kubeVersion: < 1.31.0-0
         [[ "$RANCHER" == *2.9* ]] && K3S_VERSION="v1.30"
+        [[ "$RANCHER" == *2.10* ]] && K3S_VERSION="v1.31"
 
         # Complete partial K3S version from dockerhub v1.30 -> v1.30.5-k3s1
         if [[ ! $K3S_VERSION =~ ^v[0-9.]+-k3s[0-9]$ ]]; then
@@ -247,7 +252,7 @@ jobs:
     - uses: actions/setup-node@v4
       if: env.KUBEWARDEN == 'source'
       with:
-        node-version: ${{ github.event.pull_request.base.ref == 'main' && '20' || '16' }}
+        node-version: ${{ (github.event.pull_request.base.ref == 'release-1.6' || github.event.pull_request.base.ref == 'release-2.1') && '16' || '20' }}
 
     - name: Build Kubewarden extension
       if: env.KUBEWARDEN == 'source'
