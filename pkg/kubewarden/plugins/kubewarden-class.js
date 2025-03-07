@@ -54,12 +54,14 @@ export default class KubewardenModel extends SteveModel {
     Fetches all of the packages from the kubewarden org
   */
   get artifactHubRepo() {
-    return async() => {
+    return async({ offset = 0, limit = 60 } = {}) => {
       let url = '/meta/proxy/';
       const packages = 'packages/search';
+
       const params = {
-        kind:               13, // Kind for Kubewarden policies
-        limit:              50 // limit to 50, default is 20
+        kind: 13, // Kubewarden policies
+        limit, // Max limit is 60, default is 20.
+        offset // Used for pagination
       };
 
       url += `${ ARTIFACTHUB_ENDPOINT }/${ packages }`;
