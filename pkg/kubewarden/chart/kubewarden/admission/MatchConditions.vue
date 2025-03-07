@@ -49,7 +49,7 @@ export default {
     activeTab() {
       if (this.activeTab === 'matchConditions') {
         this.$nextTick(() => {
-          Object.keys(this.cmInstances).forEach((refKey) => {
+          Object.keys(this.cmInstances)?.forEach((refKey) => {
             const cmInstance = this.cmInstances[refKey][0];
 
             if (cmInstance && typeof cmInstance.refresh === 'function') {
