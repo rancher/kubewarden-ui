@@ -252,8 +252,6 @@ export default {
 
     metricsConfiguration() {
       if (!this.controllerApp) {
-        console.log('# 0');
-
         return null;
       }
 

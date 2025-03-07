@@ -13,13 +13,13 @@ import Masthead from '@kubewarden/components/Dashboard/Masthead.vue';
 
 import mockControllerChart from '@tests/unit/mocks/controllerChart';
 import mockPolicyServers from '@tests/unit/mocks/policyServers';
-import { mockControllerApp } from '@tests/unit/mocks/controllerApp';
+import { mockControllerAppLegacy } from '@tests/unit/mocks/controllerApp';
 
 // Create a mock for the 'cluster/all' getter that returns different values based on the input.
 const clusterAllMock = jest.fn((resourceType) => {
   switch (resourceType) {
   case CATALOG.APP:
-    return [mockControllerApp];
+    return [mockControllerAppLegacy];
   case POD:
     return [{
       metadata: {

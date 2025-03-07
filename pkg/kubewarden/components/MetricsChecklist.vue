@@ -42,7 +42,7 @@ export default {
       default: null
     },
     metricsConfiguration: {
-      type:    Object,
+      type:    Boolean,
       default: null
     },
     monitoringApp: {

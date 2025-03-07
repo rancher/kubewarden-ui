@@ -25,7 +25,7 @@ export default {
     }
   },
 
-  async fetch() {
+  async created() {
     this.relatedPolicies = await this.row.allRelatedPolicies();
   },
 
