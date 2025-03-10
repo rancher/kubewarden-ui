@@ -1,28 +1,11 @@
 import isEmpty from 'lodash/isEmpty';
 import { MONITORING } from '@shell/config/types';
 
-import { CatalogApp, Service, ServiceMonitor, ServiceMonitorSpec } from '@kubewarden/types';
+import type { ServiceMonitorConfigured } from '@kubewarden/types';
+import { MonitoringConfig, ServiceMonitor, ServiceMonitorConfig } from '@kubewarden/types';
+
 import { handleGrowl, GrowlConfig } from '@kubewarden/utils/handle-growl';
-
-type ServiceMonitorConfigured = {
-  namespace: boolean,
-  selectors?: {[key: string]: boolean}[];
-}
-
-interface MonitoringConfig {
-  serviceMonitorSpec: ServiceMonitorSpec[],
-  controllerApp: CatalogApp,
-  policyServerSvcs: Service[]
-}
-
-interface ServiceMonitorConfig {
-  store: any,
-  policyObj?: any,
-  policyServerObj?: any,
-  controllerNs: string,
-  allServiceMonitors?: ServiceMonitor[]
-  serviceMonitor?: ServiceMonitor
-}
+import { isPolicyServerResource } from '@kubewarden/modules/policyServer';
 
 /**
  * Determines if the Monitoring App is configured correctly with the namespace and label selectors for
@@ -98,19 +81,29 @@ export function serviceMonitorsConfigured(config: MonitoringConfig): ServiceMoni
 }
 
 /**
- * Searches provided ServiceMonitors for a matching resource based on the `selector.matchLabels` including:
- * `app=kubewarden-policy-server-<policy-server-id>`
- * @param config: `policyObj?, policyServerObj?, allServiceMonitors` | Needs either a policy object or policy server object with all fetched
- * ServiceMonitors
- * @returns `ServiceMonitor | void`
+ * Searches provided ServiceMonitors for a matching resource.
+ *
+ * It checks the labels under `spec.selector.matchLabels` for:
+ * - The legacy label: `app=kubewarden-policy-server-<policyServerName>`
+ * - The new strict labels as described.
+ *
+ * @param {Object} config - An object containing:
+ *        { policyObj?, policyServerObj?, allServiceMonitors }.
+ *        Needs either a policy object or policy server object with all fetched ServiceMonitors.
+ * @returns {Object|undefined} The matching ServiceMonitor if found.
  */
-export function findServiceMonitor(config: ServiceMonitorConfig): ServiceMonitor | void {
+export function findServiceMonitor(config: ServiceMonitorConfig): ServiceMonitor | undefined {
   const { policyObj, policyServerObj, allServiceMonitors } = config;
 
   if (!isEmpty(allServiceMonitors)) {
-    const smName: string = policyObj ? policyObj.spec?.policyServer : policyServerObj?.id;
+    const policyServerName = policyObj ? policyObj.spec?.policyServer : policyServerObj?.id;
 
-    return allServiceMonitors?.find((sm) => sm?.spec?.selector?.matchLabels?.['app'] === `kubewarden-policy-server-${ smName }`);
+    return allServiceMonitors?.find((sm: ServiceMonitor) => {
+      // For ServiceMonitors, labels are under spec.selector.matchLabels
+      const labels = sm?.spec?.selector?.matchLabels;
+
+      return isPolicyServerResource(labels, policyServerName as string);
+    });
   }
 }
 
@@ -124,12 +117,19 @@ export async function addKubewardenServiceMonitor(config: ServiceMonitorConfig):
   } = config;
 
   if (store.getters['cluster/schemaFor'](MONITORING.SERVICEMONITOR)) {
-    const smName: string = policyObj ? policyObj.spec?.policyServer : policyServerObj?.id;
+    const smName: string = policyObj ? policyObj.spec?.policyServer : policyServerObj?.id as string;
+    const labels = {
+      'app.kubernetes.io/instance':   `kubewarden-policy-server-${ policyServerObj?.id }`,
+      'app.kubernetes.io/component':  `kubewarden-policy-server-${ policyServerObj?.id }`,
+      'app.kubernetes.io/part-of':    'kubewarden',
+      'app.kubernetes.io/managed-by': 'kubewarden-controller'
+    };
 
     const serviceMonitorTemplate: ServiceMonitor = {
-      kind:     'ServiceMonitor',
-      type:     MONITORING.SERVICEMONITOR,
-      metadata: {
+      apiVersion: 'monitoring.coreos.com/v1',
+      kind:       'ServiceMonitor',
+      type:       MONITORING.SERVICEMONITOR,
+      metadata:   {
         name:        smName,
         namespace:   controllerNs
       },
@@ -139,7 +139,7 @@ export async function addKubewardenServiceMonitor(config: ServiceMonitorConfig):
           port:     'metrics'
         }],
         namespaceSelector: { matchNames: [controllerNs] },
-        selector:          { matchLabels: { app: `kubewarden-policy-server-${ smName }` } }
+        selector:          { matchLabels: labels }
       }
     };
 

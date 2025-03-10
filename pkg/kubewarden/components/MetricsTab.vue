@@ -23,6 +23,7 @@ import { refreshCharts } from '@kubewarden/utils/chart';
 import { grafanaProxy } from '@kubewarden/modules/grafana';
 import { findServiceMonitor } from '@kubewarden/modules/metricsConfig';
 import { jaegerPolicyName } from '@kubewarden/modules/jaegerTracing';
+import { findPolicyServerResource } from '@kubewarden/modules/policyServer';
 
 import MetricsChecklist from './MetricsChecklist';
 
@@ -324,12 +325,11 @@ export default {
 
     policyServerSvcs() {
       if (!isEmpty(this.allPolicyServers)) {
-        const policyServerNames = this.allPolicyServers.map((ps) => ps?.metadata?.name);
-        const out = [];
+        const policyServerNames = this.allPolicyServers
+          .map((ps) => ps?.metadata?.name)
+          .filter(Boolean);
 
-        for (const ps of policyServerNames) {
-          out.push(this.allServices?.find((svc) => svc?.metadata?.labels?.app === `kubewarden-policy-server-${ ps }`));
-        }
+        const out = policyServerNames.map((name) => findPolicyServerResource(this.allServices, name));
 
         return out;
       }
