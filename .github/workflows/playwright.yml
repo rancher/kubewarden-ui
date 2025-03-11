@@ -258,6 +258,7 @@ jobs:
       if: env.KUBEWARDEN == 'source'
       run: |
         yarn install --ignore-engines
+        git diff --exit-code yarn.lock
         VERSION=0.0.1 yarn build-pkg kubewarden
 
     - uses: actions/setup-node@v4
