@@ -119,8 +119,8 @@ export async function addKubewardenServiceMonitor(config: ServiceMonitorConfig):
   if (store.getters['cluster/schemaFor'](MONITORING.SERVICEMONITOR)) {
     const smName: string = policyObj ? policyObj.spec?.policyServer : policyServerObj?.id as string;
     const labels = {
-      'app.kubernetes.io/instance':   `kubewarden-policy-server-${ policyServerObj?.id }`,
-      'app.kubernetes.io/component':  `kubewarden-policy-server-${ policyServerObj?.id }`,
+      'app.kubernetes.io/instance':   `policy-server-${ policyServerObj?.id }`,
+      'app.kubernetes.io/component':  'policy-server',
       'app.kubernetes.io/part-of':    'kubewarden',
       'app.kubernetes.io/managed-by': 'kubewarden-controller'
     };
