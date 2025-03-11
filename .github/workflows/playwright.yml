@@ -290,6 +290,8 @@ jobs:
       env:
         MODE: ${{ matrix.mode }}
         RANCHER_URL: https://${{ env.RANCHER_FQDN }}
+        # Check that installed extension version matches release tag
+        UIVERSION: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || '' }}
         ORIGIN: ${{ env.KUBEWARDEN }}
         QASE_MODE: ${{ env.QASE == 'true' && 'testops' || 'off' }}
         QASE_TESTOPS_API_TOKEN: ${{ secrets.QASE_APITOKEN }}
