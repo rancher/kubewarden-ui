@@ -40,24 +40,32 @@ export class RancherFleetPage extends BasePage {
 
       if (repo.workspace !== undefined) await this.selectWorkspace(repo.workspace)
 
-      // Repository details
+      // Define metadata details
       await this.ui.input('Name *').fill(repo.name)
+      await this.ui.button('Next').click()
+
+      // Define repository details
+      await expect(this.page.getByRole('heading', { name: 'Create: Step 2', exact: true })).toBeVisible()
       await this.ui.input('Repository URL').fill(repo.url)
       await this.ui.input('Branch Name *').fill(repo.branch)
-      if (repo.selfHealing !== undefined) await this.ui.checkbox('Enable Self-Healing').setChecked(repo.selfHealing)
-      if (repo.keepResources !== undefined) await this.ui.checkbox('Always Keep Resources').setChecked(repo.keepResources)
       if (repo.paths) {
         for (const path of repo.paths) {
-          await this.ui.button('Add Path').click()
+          await this.ui.button(/Add Path/).click()
           await this.page.getByPlaceholder('e.g. /directory/in/your/repo').fill(path)
         }
         // Wait for generated fields
         await this.page.waitForTimeout(200)
       }
-
-      // Target details
       await this.ui.button('Next').click()
-      await expect(this.page.getByRole('heading', { name: 'Create: Step 2', exact: true })).toBeVisible()
+
+      // Define target details
+      await expect(this.page.getByRole('heading', { name: 'Create: Step 3', exact: true })).toBeVisible()
+      await this.ui.button('Next').click()
+
+      // Define advanced settings
+      await expect(this.page.getByRole('heading', { name: 'Create: Step 4', exact: true })).toBeVisible()
+      if (repo.selfHealing !== undefined) await this.ui.checkbox('Enable Self-Healing').setChecked(repo.selfHealing)
+      if (repo.keepResources !== undefined) await this.ui.checkbox('Always Keep Resources').setChecked(repo.keepResources)
 
       // Customize yaml
       if (repo.yamlPatch) {
