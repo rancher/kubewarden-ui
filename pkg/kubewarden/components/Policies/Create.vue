@@ -61,7 +61,7 @@ export default ({
 
   mixins: [CreateEditView],
 
-  async created() {
+  async fetch() {
     if (this.hasArtifactHub) {
       await this.$store.dispatch('kubewarden/fetchPackages', { value: this.value });
     }
