@@ -231,7 +231,7 @@ export default {
     },
 
     isPrerelease(artifactHubPackage) {
-      const parsed = semver.prerelease(artifactHubPackage.version);
+      const parsed = semver.prerelease(artifactHubPackage?.version);
 
       /**
        * Custom condition for Deprecated API Versions policy as these versions
