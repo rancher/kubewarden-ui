@@ -1,4 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
+
 import MetricsChecklist from '@kubewarden/components/MetricsChecklist.vue';
 
 const commons = {

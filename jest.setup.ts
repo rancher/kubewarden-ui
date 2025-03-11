@@ -9,6 +9,7 @@ import i18n from '@shell/plugins/i18n';
 import { floatingVueOptions } from '@shell/plugins/floating-vue';
 import cleanTooltipDirective from '@shell/directives/clean-tooltip';
 import cleanHtmlDirective from '@shell/directives/clean-html';
+import trimWhitespaceDirective from '@shell/directives/trim-whitespace';
 import '@shell/plugins/replaceall';
 
 // Create a Vue application instance
@@ -22,6 +23,7 @@ vueApp.use(i18n, { store: { dispatch() {} } });
 vueApp.use(FloatingVue, floatingVueOptions);
 vueApp.directive('clean-html', cleanHtmlDirective);
 vueApp.directive('clean-tooltip', cleanTooltipDirective);
+vueApp.directive('trim-whitespace', trimWhitespaceDirective);
 vueApp.component('v-select', vSelect);
 
 // Extend global config for @vue/test-utils

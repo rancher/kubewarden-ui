@@ -10,11 +10,9 @@ import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 import { addParams } from '@shell/utils/url';
 
 import {
-  KUBEWARDEN,
   RANCHER_NAMESPACES,
   RANCHER_NS_MATCH_EXPRESSION,
-  ARTIFACTHUB_ENDPOINT,
-  VALIDATION_KEYS
+  ARTIFACTHUB_ENDPOINT
 } from '../types';
 
 export default class KubewardenModel extends SteveModel {
@@ -106,21 +104,6 @@ export default class KubewardenModel extends SteveModel {
     return whitelistValue.includes('artifacthub.io');
   }
 
-  get certManagerService() {
-    return async() => {
-      try {
-        return await this.$dispatch('cluster/findMatch', {
-          type:     SERVICE,
-          selector: 'app.kubernetes.io/instance=cert-manager'
-        }, { root: true });
-      } catch (e) {
-        console.warn(`Error fetching cert-manager service: ${ e }`);
-      }
-
-      return null;
-    };
-  }
-
   // Determines if a policy is targeting rancher specific namespaces (which happens by default)
   get namespaceSelector() {
     const rancherNs = RANCHER_NAMESPACES.find(
@@ -136,12 +119,6 @@ export default class KubewardenModel extends SteveModel {
     }
 
     return false;
-  }
-
-  get policyTypes() {
-    const out = Object.values(KUBEWARDEN.SPOOFED);
-
-    return out;
   }
 
   haveComponent(name) {
@@ -162,66 +139,6 @@ export default class KubewardenModel extends SteveModel {
     }
 
     return () => import(/* webpackChunkName: "chart" */ `../chart/${ name }`);
-  }
-
-  traceTableRows(traces) {
-    let traceArray = [];
-
-    // If a policy is in monitor mode it will pass multiple trace objects
-    if (Array.isArray(traces)) {
-      traceArray = [
-        ...new Map(traces.map((trace) => [trace['traceID'], trace])).values(),
-      ];
-    } else {
-      Object.assign(traceArray, traces?.data);
-    }
-
-    const out = traceArray.flatMap((trace) => {
-      const eSpan = trace.spans?.find((s) => s.operationName === 'policy_eval'); // policy in Monitor mode evaluation span
-      const vSpan = trace.spans?.find((s) => s.operationName === 'validation'); // policy in Protect mode validation span
-
-      if (vSpan) {
-        const date = new Date(vSpan.startTime / 1000);
-        const duration = vSpan.duration / 1000;
-
-        vSpan.startTime = date.toUTCString();
-        vSpan.duration = duration.toFixed(2);
-
-        const logs = {};
-        let mode = 'protect'; // defaults to Protect mode for "Mode" trace header
-
-        // 'policy_eval' logs will only exist when a policy is in monitor mode
-        if (eSpan.logs.length > 0) {
-          mode = 'monitor';
-
-          const fields = eSpan.logs.flatMap((log) => log.fields);
-
-          fields.map((f) => {
-            if (f.key === 'response') {
-              Object.assign(logs, { [f.key]: f.value });
-            }
-          });
-        }
-
-        const tags = VALIDATION_KEYS.map((vKey) => vSpan.tags.find((tag) => tag.key === vKey)
-        );
-
-        return tags?.reduce(
-          (tag, item) => ({
-            ...vSpan,
-            ...tag,
-            [item?.key]: item?.value,
-            mode,
-            logs,
-          }),
-          {}
-        );
-      }
-
-      return null;
-    });
-
-    return out;
   }
 
   toggleUpdateMode(resources = this) {

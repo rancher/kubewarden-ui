@@ -21,7 +21,7 @@ export default {
     }
   },
 
-  async fetch() {
+  async created() {
     this.deployment = await this.row.matchingDeployment();
   },
 
