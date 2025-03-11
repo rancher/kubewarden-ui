@@ -7,7 +7,8 @@ import {
   PolicyTrace,
   REGO_POLICIES_REPO,
   ArtifactHubPackage,
-  ArtifactHubPackageDetails, PolicyReportSummary
+  ArtifactHubPackageDetails,
+  PolicyReportSummary
 } from '@kubewarden/types';
 import { generateSummaryMap } from '@kubewarden/modules/policyReporter';
 
@@ -83,37 +84,64 @@ export default {
   },
 
   /**
-   * Fetch all packages from the provided repository and store them in Vuex.
+   * Fetch all packages from ArtifactHub and store them in Vuex.
    *
-   * @param {Object} param0 The Vuex context
-   * @param {Object} param1 The object containing:
-   *   - repository: The repository object returned by `value.artifactHubRepo()`
-   *   - value: The CR resource containing the method to fetch package details (artifactHubPackage)
-   *   - force: Boolean to force a fetch regardless of TTL (default: false)
+   * @param {Object} context - Vuex context
+   * @param {Object} options - The object containing:
+   *   - value: The CR resource with artifactHubRepo() and artifactHubPackage() methods
+   *   - force: Boolean to force a fetch, ignoring TTL (default: false)
    */
-  async fetchPackages({ state, commit, dispatch }: any, { repository, value, force = false }: any) {
+  async fetchPackages({ state, commit, dispatch }: any, { value, force = false }: any) {
+    const now = Date.now();
+    const isCacheValid = state.packageCacheTime && (now - state.packageCacheTime < PACKAGES_TTL);
+
+    // If not forcing a refresh and the cache is still valid, skip the fetch
+    if (!force && isCacheValid) {
+      return;
+    }
+
     try {
-      // Check if we have a packageCacheTime, and if TTL is still valid
-      const now = Date.now();
-      const isCacheValid = state.packageCacheTime && (now - state.packageCacheTime < PACKAGES_TTL);
-
-      // If not forcing a refresh and the cache is still valid, return immediately
-      if (!force && isCacheValid) {
-        return;
-      }
-
-      if (!repository?.packages?.length) {
-        return;
-      }
-
       commit('updateLoadingPackages', true);
 
-      // Filter out Rego-based packages
-      const packagesByRepo: ArtifactHubPackage[] = repository.packages.filter(
-        (pkg: ArtifactHubPackage) => !pkg?.repository?.url?.includes(REGO_POLICIES_REPO)
+      // -- 1) Fetch all pages in increments of 60 using limit/offset --
+      const limit = 60;
+      let offset = 0;
+      let hasMore = true;
+      let allPackages: ArtifactHubPackage[] = [];
+
+      while (hasMore) {
+        const fetched: { packages: ArtifactHubPackage[] } = await value.artifactHubRepo({
+          offset,
+          limit
+        });
+
+        const { packages } = fetched;
+
+        if (Array.isArray(packages) && packages.length > 0) {
+          allPackages = allPackages.concat(packages);
+
+          // If it's less than 60, we’re done
+          if (packages.length < limit) {
+            hasMore = false;
+          } else {
+            offset += limit; // Move on to the next batch
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+
+      // If we somehow got no packages, just return
+      if (!allPackages.length) {
+        return;
+      }
+
+      // -- 2) Filter out Rego-based packages --
+      const packagesByRepo = allPackages.filter(
+        (pkg) => !pkg?.repository?.url?.includes(REGO_POLICIES_REPO)
       );
 
-      // Store all package details keyed by package_id
+      // -- 3) Fetch full details for each package and build a map --
       const packageDetailsMap: Record<string, ArtifactHubPackageDetails> = {};
 
       const results = await Promise.all(
@@ -122,9 +150,8 @@ export default {
             pkg,
             value
           });
-          const key: string = pkg.package_id;
 
-          packageDetailsMap[key] = details;
+          packageDetailsMap[pkg.package_id] = details;
 
           return details;
         })
@@ -133,6 +160,7 @@ export default {
       // Filter out any hidden UI packages
       const filtered = results.filter((pkg) => pkg?.data?.['kubewarden/hidden-ui'] !== 'true');
 
+      // -- 4) Commit to store --
       commit('updatePackages', filtered);
       commit('updatePackageDetails', packageDetailsMap);
       commit('updatePackageCacheTime', Date.now());
