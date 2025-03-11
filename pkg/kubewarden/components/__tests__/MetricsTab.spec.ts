@@ -130,17 +130,21 @@ describe('KubewardenDashboard Component', () => {
     expect(wrapper.findComponent({ name: 'MetricsChecklist' }).exists()).toBe(true);
   });
 
-  it('renders Banner when showChecklist is false, monitoringApp exists, and metricsProxy is null', () => {
-    // To get showChecklist to be false, supply valid data for every computed property.
-    const wrapper = createWrapper({ props: { policyServerObj: { id: 'policy-server-1' } } });
+  it('renders Banner when showChecklist is false (all dependencies present) but metricsProxy is null', () => {
+    // Pass a valid policyServerObj so the SM is found
+    // and we have the telemetry set, dashboards found, etc.
+    // That means showChecklist = false. Because the store mocks have everything needed.
+    const wrapper = createWrapper({
+      props: {
+        policyServerObj: {
+          id:       'policy-server-1',
+          metadata: { labels: { app: 'kubewarden-policy-server-policy-server-1' } }
+        }
+      }
+    });
 
-    // With the above store data:
-    // - openTelSvc exists (from SERVICE)
-    // - monitoringApp exists (from CATALOG.APP with rancher-monitoring)
-    // - kubewardenServiceMonitor is truthy (because the service monitor selector matches the policy server id)
-    // - metricsConfiguration returns true (from the controller app telemetry setup)
-    // - kubewardenGrafanaDashboards is truthy (from CONFIG_MAP)
-    // So, showChecklist should be false and the template should render the Banner.
+    // By default, metricsProxy is null => so we expect the Banner to appear
+    expect(wrapper.findComponent({ name: 'MetricsChecklist' }).exists()).toBe(true);
     expect(wrapper.findComponent({ name: 'Banner' }).exists()).toBe(true);
     expect(wrapper.findComponent({ name: 'DashboardMetrics' }).exists()).toBe(false);
   });
@@ -153,10 +157,14 @@ describe('KubewardenDashboard Component', () => {
       }
     });
 
+    // Simulate that we found a valid metricsProxy from Grafana
     wrapper.setData({ metricsProxy });
 
     await wrapper.vm.$nextTick();
 
+    // Now showChecklist should be false, metricsProxy is set, active is true => show the DashboardMetrics
+    expect(wrapper.findComponent({ name: 'MetricsChecklist' }).exists()).toBe(false);
+    expect(wrapper.findComponent({ name: 'Banner' }).exists()).toBe(false);
     expect(wrapper.findComponent({ name: 'DashboardMetrics' }).exists()).toBe(true);
   });
 

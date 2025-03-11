@@ -20,8 +20,7 @@ describe('isPolicyServerResource', () => {
     const labels: Labels = {
       'app.kubernetes.io/instance':   'policy-server-default',
       'app.kubernetes.io/component':  'policy-server',
-      'app.kubernetes.io/part-of':    'kubewarden',
-      'app.kubernetes.io/managed-by': 'kubewarden-controller',
+      'app.kubernetes.io/part-of':    'kubewarden'
     };
 
     expect(isPolicyServerResource(labels, 'default')).toBe(true);
@@ -54,8 +53,7 @@ describe('findPolicyServerResource', () => {
         labels: {
           'app.kubernetes.io/instance':   'policy-server-other',
           'app.kubernetes.io/component':  'policy-server',
-          'app.kubernetes.io/part-of':    'kubewarden',
-          'app.kubernetes.io/managed-by': 'kubewarden-controller',
+          'app.kubernetes.io/part-of':    'kubewarden'
         },
       },
     },
@@ -101,8 +99,7 @@ describe('findServiceMonitor', () => {
         matchLabels: {
           'app.kubernetes.io/instance':   'policy-server-default',
           'app.kubernetes.io/component':  'policy-server',
-          'app.kubernetes.io/part-of':    'kubewarden',
-          'app.kubernetes.io/managed-by': 'kubewarden-controller',
+          'app.kubernetes.io/part-of':    'kubewarden'
         },
       },
     },

@@ -11,7 +11,6 @@ export type Labels = Record<string, string> | undefined;
  *    - `app.kubernetes.io/instance`: `policy-server-<policyServerName>`
  *    - `app.kubernetes.io/component`: `policy-server`
  *    - `app.kubernetes.io/part-of`: `kubewarden`
- *    - `app.kubernetes.io/managed-by`: `kubewarden-controller`
  *
  * @param labels - The labels object to check.
  * @param policyServerName - The policy server name.
@@ -29,8 +28,7 @@ export function isPolicyServerResource(labels: Labels, policyServerName: string)
   const newMatch =
     labels['app.kubernetes.io/instance'] === `policy-server-${ policyServerName }` &&
     labels['app.kubernetes.io/component'] === 'policy-server' &&
-    labels['app.kubernetes.io/part-of'] === 'kubewarden' &&
-    labels['app.kubernetes.io/managed-by'] === 'kubewarden-controller';
+    labels['app.kubernetes.io/part-of'] === 'kubewarden';
 
   return legacyMatch || newMatch;
 }

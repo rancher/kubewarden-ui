@@ -1,8 +1,8 @@
 import isEmpty from 'lodash/isEmpty';
 import { MONITORING } from '@shell/config/types';
 
-import type { ServiceMonitorConfigured } from '@kubewarden/types';
-import { MonitoringConfig, ServiceMonitor, ServiceMonitorConfig } from '@kubewarden/types';
+import type { PolicyServer, ServiceMonitorConfigured } from '@kubewarden/types';
+import { KUBEWARDEN, MonitoringConfig, ServiceMonitor, ServiceMonitorConfig } from '@kubewarden/types';
 
 import { handleGrowl, GrowlConfig } from '@kubewarden/utils/handle-growl';
 import { isPolicyServerResource } from '@kubewarden/modules/policyServer';
@@ -113,24 +113,46 @@ export function findServiceMonitor(config: ServiceMonitorConfig): ServiceMonitor
  */
 export async function addKubewardenServiceMonitor(config: ServiceMonitorConfig): Promise<void> {
   const {
-    store, policyObj, policyServerObj, controllerNs, serviceMonitor
+    store, policyObj, controllerNs, serviceMonitor
   } = config;
+  let { policyServerObj } = config;
 
-  if (store.getters['cluster/schemaFor'](MONITORING.SERVICEMONITOR)) {
-    const smName: string = policyObj ? policyObj.spec?.policyServer : policyServerObj?.id as string;
-    const labels = {
-      'app.kubernetes.io/instance':   `policy-server-${ policyServerObj?.id }`,
+  if (!serviceMonitor && store.getters['cluster/schemaFor'](MONITORING.SERVICEMONITOR)) {
+    // Fetch the policy server object if not provided to determine the labels necessary for the service monitor
+    if (!policyServerObj && policyObj && store.getters['cluster/schemaFor'](KUBEWARDEN.POLICY_SERVER)) {
+      const policyServer = await store.dispatch(
+        'cluster/find',
+        {
+          type: KUBEWARDEN.POLICY_SERVER,
+          id:   policyObj.spec?.policyServer
+        }
+      );
+
+      if (policyServer) {
+        policyServerObj = policyServer as PolicyServer;
+      }
+    }
+
+    const policyServerID = policyObj ? policyObj.spec?.policyServer : policyServerObj?.id as string;
+    const defaultLabels = {
+      'app.kubernetes.io/instance':   `policy-server-${ policyServerID }`,
       'app.kubernetes.io/component':  'policy-server',
-      'app.kubernetes.io/part-of':    'kubewarden',
-      'app.kubernetes.io/managed-by': 'kubewarden-controller'
+      'app.kubernetes.io/part-of':    'kubewarden'
     };
+    let labels;
+
+    if (policyServerObj?.metadata?.labels && policyServerObj?.metadata?.labels['app']) {
+      labels = { app: policyServerObj?.metadata?.labels['app'] };
+    } else {
+      labels = defaultLabels;
+    }
 
     const serviceMonitorTemplate: ServiceMonitor = {
       apiVersion: 'monitoring.coreos.com/v1',
       kind:       'ServiceMonitor',
       type:       MONITORING.SERVICEMONITOR,
       metadata:   {
-        name:        smName,
+        name:        'kubewarden',
         namespace:   controllerNs
       },
       spec: {
@@ -143,20 +165,57 @@ export async function addKubewardenServiceMonitor(config: ServiceMonitorConfig):
       }
     };
 
-    if (!serviceMonitor) {
-      const serviceMonitorObj = await store.dispatch(
-        'cluster/create',
-        serviceMonitorTemplate
-      );
+    const serviceMonitorObj = await store.dispatch(
+      'cluster/create',
+      serviceMonitorTemplate
+    );
 
-      try {
-        await serviceMonitorObj.save();
-      } catch (e) {
-        handleGrowl({
-          error: e as GrowlConfig | any,
-          store
-        });
-      }
+    try {
+      await serviceMonitorObj.save();
+    } catch (e) {
+      handleGrowl({
+        error: e as GrowlConfig | any,
+        store
+      });
     }
   }
 }
+
+/**
+ * Returns `true` if the ServiceMonitor is missing the matching label style
+ * of the PolicyServer. In other words, if the PolicyServer is new-style
+ * but the SM only has old-style (or no) labels, or vice versa, then it’s out of date.
+ */
+export function isServiceMonitorOutOfDate(ps: PolicyServer, sm: ServiceMonitor): boolean {
+  if (!ps || !sm) {
+    return false;
+  }
+
+  const psLabels = ps.metadata?.labels || {};
+  const smLabels = sm.spec?.selector?.matchLabels || {};
+
+  const newLabels = {
+    'app.kubernetes.io/instance':  `policy-server-${ ps.metadata?.name }`,
+    'app.kubernetes.io/component': 'policy-server',
+    'app.kubernetes.io/part-of':   'kubewarden'
+  };
+
+  const policyServerIsNewStyle =
+    psLabels['app.kubernetes.io/instance']  === newLabels['app.kubernetes.io/instance']  &&
+    psLabels['app.kubernetes.io/component'] === newLabels['app.kubernetes.io/component'] &&
+    psLabels['app.kubernetes.io/part-of']   === newLabels['app.kubernetes.io/part-of'];
+
+  if (policyServerIsNewStyle) {
+    const smHasNewLabels =
+      smLabels['app.kubernetes.io/instance']  === newLabels['app.kubernetes.io/instance']  &&
+      smLabels['app.kubernetes.io/component'] === newLabels['app.kubernetes.io/component'] &&
+      smLabels['app.kubernetes.io/part-of']   === newLabels['app.kubernetes.io/part-of'];
+
+    return !smHasNewLabels;
+  }
+
+  const smHasOldStyle = smLabels.app === `kubewarden-policy-server-${ ps.metadata?.name }`;
+
+  return !smHasOldStyle;
+}
+

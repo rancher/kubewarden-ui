@@ -21,7 +21,7 @@ import { KUBEWARDEN, KUBEWARDEN_CHARTS, KubewardenDashboardLabels, KubewardenDas
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 import { refreshCharts } from '@kubewarden/utils/chart';
 import { grafanaProxy } from '@kubewarden/modules/grafana';
-import { findServiceMonitor } from '@kubewarden/modules/metricsConfig';
+import { findServiceMonitor, isServiceMonitorOutOfDate } from '@kubewarden/modules/metricsConfig';
 import { jaegerPolicyName } from '@kubewarden/modules/jaegerTracing';
 import { findPolicyServerResource } from '@kubewarden/modules/policyServer';
 
@@ -154,7 +154,7 @@ export default {
       metricsService:              null,
       debouncedRefreshCharts:      null,
       outdatedTelemetrySpec:       false,
-      unsupportedTelemetrySpec:    false,
+      unsupportedTelemetrySpec:    false
     };
   },
 
@@ -301,6 +301,17 @@ export default {
       return this.charts?.find((chart) => chart.chartName === 'rancher-monitoring');
     },
 
+    outdatedServiceMonitor() {
+      const sm = this.kubewardenServiceMonitor;
+      const ps = this.policyServerObj;
+
+      if (!sm || !ps) {
+        return false;
+      }
+
+      return isServiceMonitorOutOfDate(ps, sm);
+    },
+
     openTelemetryServices() {
       if (this.allServices) {
         return this.allServices.filter((svc) => svc?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === 'opentelemetry-operator');
@@ -338,15 +349,27 @@ export default {
     },
 
     showChecklist() {
-      const grafanaDashboardsInstalled = !isEmpty(this.kubewardenGrafanaDashboards);
+      const missingDependencies = [
+        !this.openTelSvc,
+        !this.monitoringApp,
+        !this.kubewardenServiceMonitor,
+        !this.metricsConfiguration,
+        !this.kubewardenGrafanaDashboards || isEmpty(this.kubewardenGrafanaDashboards),
+        this.outdatedServiceMonitor
+      ];
 
-      return !this.openTelSvc || !this.monitoringApp || !this.kubewardenServiceMonitor || !this.metricsConfiguration || !grafanaDashboardsInstalled;
+      return missingDependencies.some(Boolean);
     }
   },
 
   methods: {
     async updateServiceMonitors() {
       await this.$fetchType(MONITORING.SERVICEMONITOR);
+    },
+
+    async updateServiceMonitorLabels() {
+      await this.$fetchType(MONITORING.SERVICEMONITOR);
+      this.outdatedServiceMonitor = false;
     },
 
     handleMetricsChecklist(prop, val) {
@@ -375,7 +398,9 @@ export default {
       :policy-server-obj="policyServerObj"
       :outdated-telemetry-spec="outdatedTelemetrySpec"
       :unsupported-telemetry-spec="unsupportedTelemetrySpec"
+      :outdated-service-monitor="outdatedServiceMonitor"
       @updateServiceMonitors="updateServiceMonitors"
+      @updateServiceMonitorLabels="updateServiceMonitorLabels"
     />
 
     <template v-if="!showChecklist">

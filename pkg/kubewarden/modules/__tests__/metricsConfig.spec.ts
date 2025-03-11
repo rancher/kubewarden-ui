@@ -160,13 +160,30 @@ describe('addKubewardenServiceMonitor', () => {
     await addKubewardenServiceMonitor(config);
 
     expect(mockStore.getters['cluster/schemaFor']).toHaveBeenCalledWith(MONITORING.SERVICEMONITOR);
-    expect(mockStore.dispatch).toHaveBeenCalledWith('cluster/create', expect.objectContaining({
-      type:     MONITORING.SERVICEMONITOR,
-      metadata: expect.objectContaining({
-        name:      'mock',
-        namespace: 'controller-ns'
+
+    // Then it calls 'cluster/create' with an object containing name:'kubewarden' by default
+    expect(mockStore.dispatch).toHaveBeenCalledWith(
+      'cluster/create',
+      expect.objectContaining({
+        type:     MONITORING.SERVICEMONITOR,
+        metadata: expect.objectContaining({
+          name:      'kubewarden',
+          namespace: 'controller-ns'
+        }),
+        // Also check spec.selector.matchLabels
+        spec: expect.objectContaining({
+          selector: expect.objectContaining({
+            matchLabels: {
+              'app.kubernetes.io/component': 'policy-server',
+              'app.kubernetes.io/instance':  'policy-server-mock',
+              'app.kubernetes.io/part-of':   'kubewarden'
+            }
+          })
+        })
       })
-    }));
+    );
+
+    // Finally, that object’s save() is called
     expect(fakeServiceMonitorTemplate.save).toHaveBeenCalled();
   });
 
