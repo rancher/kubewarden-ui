@@ -63,12 +63,7 @@ export default ({
 
   async fetch() {
     if (this.hasArtifactHub) {
-      const repository = await this.value.artifactHubRepo();
-
-      await this.$store.dispatch('kubewarden/fetchPackages', {
-        repository,
-        value: this.value
-      });
+      await this.$store.dispatch('kubewarden/fetchPackages', { value: this.value });
     }
 
     this.value.apiVersion = `${ this.schema?.attributes?.group }.${ this.schema?.attributes?.version }`;
