@@ -146,8 +146,8 @@ export default class PolicyServerModel extends KubewardenModel {
         // Merge the two arrays and remove duplicates based on a unique identifier (e.g. metadata.uid)
         const podsMap = new Map();
 
-        (podsOld || []).forEach((p) => podsMap.set(p.metadata.id, p));
-        (podsNew || []).forEach((p) => podsMap.set(p.metadata.id, p));
+        (podsOld || []).forEach((p) => podsMap.set(p?.metadata?.uid, p));
+        (podsNew || []).forEach((p) => podsMap.set(p?.metadata?.uid, p));
 
         return Array.from(podsMap.values());
       } catch (e) {

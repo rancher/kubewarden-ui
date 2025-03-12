@@ -193,6 +193,7 @@ export function isServiceMonitorOutOfDate(ps: PolicyServer, sm: ServiceMonitor):
 
   const psLabels = ps.metadata?.labels || {};
   const smLabels = sm.spec?.selector?.matchLabels || {};
+  const psName = ps.metadata?.name || ps.id;
 
   const newLabels = {
     'app.kubernetes.io/instance':  `policy-server-${ ps.metadata?.name }`,
@@ -200,12 +201,12 @@ export function isServiceMonitorOutOfDate(ps: PolicyServer, sm: ServiceMonitor):
     'app.kubernetes.io/part-of':   'kubewarden'
   };
 
-  const policyServerIsNewStyle =
+  const psIsNewStyle =
     psLabels['app.kubernetes.io/instance']  === newLabels['app.kubernetes.io/instance']  &&
     psLabels['app.kubernetes.io/component'] === newLabels['app.kubernetes.io/component'] &&
     psLabels['app.kubernetes.io/part-of']   === newLabels['app.kubernetes.io/part-of'];
 
-  if (policyServerIsNewStyle) {
+  if (psIsNewStyle) {
     const smHasNewLabels =
       smLabels['app.kubernetes.io/instance']  === newLabels['app.kubernetes.io/instance']  &&
       smLabels['app.kubernetes.io/component'] === newLabels['app.kubernetes.io/component'] &&
@@ -214,7 +215,7 @@ export function isServiceMonitorOutOfDate(ps: PolicyServer, sm: ServiceMonitor):
     return !smHasNewLabels;
   }
 
-  const smHasOldStyle = smLabels.app === `kubewarden-policy-server-${ ps.metadata?.name }`;
+  const smHasOldStyle = smLabels.app === `kubewarden-policy-server-${ psName }`;
 
   return !smHasOldStyle;
 }

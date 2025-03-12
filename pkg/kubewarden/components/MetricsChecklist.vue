@@ -334,13 +334,13 @@ export default {
     <div class="mt-20 mb-20">
       <!-- openTel -->
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-open-tel">
-        <i class="icon mr-10" :class="badgeIcon(openTelSvc)" />
+        <i data-testid="kw-otel-icon" class="icon mr-10" :class="badgeIcon(openTelSvc)" />
         <p v-clean-html="t('kubewarden.tracing.openTelemetry', {}, true)" />
       </div>
 
       <!-- Monitoring -->
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-monitoring-app">
-        <i class="icon mr-10" :class="badgeIcon(monitoringApp)" />
+        <i data-testid="kw-monitoring-icon" class="icon mr-10" :class="badgeIcon(monitoringApp)" />
         <div class="checklist__config">
           <p v-clean-html="t('kubewarden.monitoring.prerequisites.monitoringApp.label', {}, true)" p />
           <button
@@ -360,7 +360,7 @@ export default {
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-service-monitor-map">
         <template v-if="outdatedServiceMonitor">
           <!-- If it's outdated, we show an "Update" path -->
-          <i class="icon mr-10" :class="badgeIcon(!outdatedServiceMonitor)" />
+          <i data-testid="kw-sm-icon" class="icon mr-10" :class="badgeIcon(!outdatedServiceMonitor)" />
           <div class="checklist__config">
             <p v-clean-html="t('kubewarden.monitoring.prerequisites.serviceMonitor.upgrade.label', {}, true)" p />
             <AsyncButton
@@ -376,7 +376,7 @@ export default {
         </template>
         <template v-else>
           <!-- If it's not outdated, maybe it's simply missing? Show a "Create" path -->
-          <i class="icon mr-10" :class="badgeIcon(kubewardenServiceMonitor)" />
+          <i data-testid="kw-sm-icon" class="icon mr-10" :class="badgeIcon(kubewardenServiceMonitor)" />
           <div class="checklist__config">
             <p v-clean-html="t('kubewarden.monitoring.prerequisites.serviceMonitor.label', {}, true)" p />
             <AsyncButton
@@ -394,7 +394,7 @@ export default {
 
       <!-- Dashboards -->
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-config-map">
-        <i class="icon mr-10" :class="badgeIcon(hasKubewardenDashboards)" />
+        <i data-testid="kw-dashboard-icon" class="icon mr-10" :class="badgeIcon(hasKubewardenDashboards)" />
         <div class="checklist__config">
           <p v-clean-html="t('kubewarden.monitoring.prerequisites.configMap.label', {}, true)" p />
           <AsyncButton
@@ -412,7 +412,7 @@ export default {
         v-if="showConflictingDashboardsBanner"
         color="error"
       >
-        <div class="conflicting-banner">
+        <div data-testid="kw-monitoring-checklist-conflicting-banner" class="conflicting-banner">
           <p>
             {{ t('kubewarden.monitoring.prerequisites.configMap.conflictingDashboardsBanner', { count: conflictingGrafanaDashboards.length }, true) }}
           </p>
@@ -431,11 +431,13 @@ export default {
       <div>
         <Banner
           v-if="outdatedTelemetrySpec"
+          data-testid="kw-monitoring-checklist-outdated-telemetry"
           color="error"
           :label="t('kubewarden.monitoring.prerequisites.outdated')"
         />
         <Banner
           v-if="unsupportedTelemetrySpec"
+          data-testid="kw-monitoring-checklist-unsupported-telemetry"
           color="error"
           :label="t('kubewarden.monitoring.prerequisites.unsupported')"
         />
@@ -443,7 +445,7 @@ export default {
 
       <!-- Controller metrics configuration -->
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-controller-config">
-        <i class="icon mr-10" :class="badgeIcon(metricsConfiguration)" />
+        <i data-testid="kw-metrics-config-icon" class="icon mr-10" :class="badgeIcon(metricsConfiguration)" />
         <div class="checklist__config">
           <p v-clean-html="t('kubewarden.monitoring.prerequisites.controllerConfig.label', {}, true)" p />
           <button

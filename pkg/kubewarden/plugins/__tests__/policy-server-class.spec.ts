@@ -223,7 +223,12 @@ describe('PolicyServerModel', () => {
 
   describe('matchingPods', () => {
     it('returns matching pods using dispatch', async() => {
-      const pods = [{ id: 'pod1' }];
+      const pods = [{
+        metadata: {
+          name: 'pod1',
+          uid:  'asdf'
+        }
+      }];
 
       dispatch.mockResolvedValue(pods);
       const fn = instance.matchingPods;
@@ -237,7 +242,7 @@ describe('PolicyServerModel', () => {
         },
         { root: true }
       );
-      expect(result).toBe(pods);
+      expect(result).toStrictEqual(pods);
     });
 
     it('handles errors and logs a warning', async() => {
@@ -254,7 +259,12 @@ describe('PolicyServerModel', () => {
 
   describe('openLogs', () => {
     it('dispatches wm/open if matching pods are found', async() => {
-      const podArray = [{ id: 'pod1' }];
+      const podArray = [{
+        metadata: {
+          name: 'pod1',
+          uid:  'asdf'
+        }
+      }];
 
       // Stub matchingPods to return podArray.
       jest.spyOn(instance, 'matchingPods', 'get').mockReturnValue(() => Promise.resolve(podArray));

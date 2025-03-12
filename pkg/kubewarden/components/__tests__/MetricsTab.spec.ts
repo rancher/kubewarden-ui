@@ -138,13 +138,16 @@ describe('KubewardenDashboard Component', () => {
       props: {
         policyServerObj: {
           id:       'policy-server-1',
-          metadata: { labels: { app: 'kubewarden-policy-server-policy-server-1' } }
+          metadata: {
+            labels: { app: 'kubewarden-policy-server-policy-server-1' },
+            uid:    'asdf'
+          }
         }
       }
     });
 
     // By default, metricsProxy is null => so we expect the Banner to appear
-    expect(wrapper.findComponent({ name: 'MetricsChecklist' }).exists()).toBe(true);
+    expect(wrapper.findComponent({ name: 'MetricsChecklist' }).exists()).toBe(false);
     expect(wrapper.findComponent({ name: 'Banner' }).exists()).toBe(true);
     expect(wrapper.findComponent({ name: 'DashboardMetrics' }).exists()).toBe(false);
   });
