@@ -5,6 +5,8 @@ kubewarden:
     type:
       dashboard: Kubewarden Dashboard
       policyReporter: Policy Reporter
+      metricsDashboard: Metrics Dashboard
+      tracingDashboard: Tracing Dashboard
   generic:
     name: Name
   dashboard:

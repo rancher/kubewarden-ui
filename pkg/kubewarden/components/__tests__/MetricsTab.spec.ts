@@ -117,15 +117,18 @@ describe('KubewardenDashboard Component', () => {
     expect(wrapper.findComponent({ name: 'Loading' }).exists()).toBe(true);
   });
 
-  it('renders MetricsChecklist when showChecklist is true', () => {
+  it('renders MetricsChecklist when showChecklist is true', async() => {
     // With the above data, computed showChecklist should be true if any required condition is missing.
     // In this test, we let the checklist appear.
     const wrapper = createWrapper({
       props: {
         policyObj:       {},
         policyServerObj: {} // purposely not setting a valid policy server so that showChecklist is true
-      }
+      },
     });
+
+    wrapper.setData({ isAdminUser: true });
+    await wrapper.vm.$nextTick();
 
     expect(wrapper.findComponent({ name: 'MetricsChecklist' }).exists()).toBe(true);
   });
@@ -161,7 +164,10 @@ describe('KubewardenDashboard Component', () => {
     });
 
     // Simulate that we found a valid metricsProxy from Grafana
-    wrapper.setData({ metricsProxy });
+    wrapper.setData({
+      metricsProxy,
+      isAdminUser: true
+    });
 
     await wrapper.vm.$nextTick();
 

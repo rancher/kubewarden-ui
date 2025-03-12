@@ -18,6 +18,7 @@ import Loading from '@shell/components/Loading';
 import { Banner } from '@components/Banner';
 
 import { KUBEWARDEN, KUBEWARDEN_CHARTS, KubewardenDashboardLabels, KubewardenDashboards } from '@kubewarden/types';
+import { isAdminUser } from '@kubewarden/utils/permissions';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 import { refreshCharts } from '@kubewarden/utils/chart';
 import { grafanaProxy } from '@kubewarden/modules/grafana';
@@ -57,86 +58,7 @@ export default {
   mixins: [ResourceFetch],
 
   async fetch() {
-    this.debouncedRefreshCharts = debounce((init = false) => {
-      refreshCharts({
-        store:     this.$store,
-        chartName: 'rancher-monitoring',
-        init
-      });
-    }, 500);
-
-    const resourceMap = [
-      {
-        name:     CATALOG.APP,
-        property: this.allApps
-      },
-      {
-        name:     CATALOG.CLUSTER_REPO,
-        property: this.allRepos
-      },
-      {
-        name:     CONFIG_MAP,
-        property: this.allConfigMaps
-      },
-      {
-        name:     KUBEWARDEN.POLICY_SERVER,
-        property: this.allPolicyServers
-      },
-      {
-        name:     MONITORING.SERVICEMONITOR,
-        property: this.allServiceMonitors
-      },
-      {
-        name:     NAMESPACE,
-        property: this.allNamespaces
-      },
-      {
-        name:     SERVICE,
-        property: this.allServices
-      },
-    ];
-    const hash = [];
-
-    // Check if the resources are already stored with their respective getters before fetching
-    for (const resource of resourceMap) {
-      if (isEmpty(resource.property) && this.$store.getters['cluster/canList'](resource.name)) {
-        hash.push(this.$fetchType(resource.name));
-      }
-    }
-
-    await allHash(hash);
-
-    if (this.showChecklist && !this.monitoringChart) {
-      this.debouncedRefreshCharts(true);
-    }
-
-    // If monitoring is installed look for the dashboard based on the METRICS_TYPE
-    if (this.monitoringStatus.installed) {
-      try {
-        this.metricsProxy = await grafanaProxy({
-          store: this.$store,
-          type:  this.METRICS_TYPE
-        });
-
-        if (this.metricsProxy) {
-          this.metricsService = await dashboardExists('v2', this.$store, this.currentCluster?.id, this.metricsProxy);
-        }
-      } catch (e) {
-        const error = {
-          _statusText: 'Error',
-          message:     `Error fetching Grafana Service: ${ e }`
-        };
-
-        handleGrowl({
-          error,
-          store: this.$store
-        });
-      }
-    }
-
-    if (this.controllerApp) {
-      await this.controllerApp.fetchValues(true);
-    }
+    await this.fetchData();
   },
 
   data() {
@@ -144,6 +66,17 @@ export default {
 
     return {
       METRICS_TYPE,
+
+      isAdminUser: false,
+      permissions: {
+        policyServer:   false,
+        app:            false,
+        clusterRepo:    false,
+        configMap:      false,
+        serviceMonitor: false,
+        namespace:      false,
+        service:        false
+      },
 
       [CATALOG.APP]:               null,
       [CATALOG.CLUSTER_REPO]:      null,
@@ -236,6 +169,10 @@ export default {
       const monitoringServices = this.allServices?.filter((svc) => svc?.metadata?.labels?.['app.kubernetes.io/instance'] === 'rancher-monitoring');
 
       return monitoringServices?.find((svc) => svc?.metadata?.labels?.['app.kubernetes.io/name'] === 'grafana');
+    },
+
+    hasAvailability() {
+      return this.isAdminUser || Object.values(this.permissions).every((value) => value);
     },
 
     kubewardenGrafanaDashboards() {
@@ -363,6 +300,138 @@ export default {
   },
 
   methods: {
+    async fetchData() {
+      this.setAdminUser();
+      this.setPermissions();
+      this.initDebouncedRefreshCharts();
+      await this.fetchResourcesData();
+      this.refreshChartsIfNeeded();
+      await this.handleGrafanaDashboard();
+      await this.fetchControllerAppValues();
+    },
+
+    setAdminUser() {
+      // Determine if the current user is an admin.
+      this.isAdminUser = isAdminUser(this.$store.getters);
+    },
+
+    setPermissions() {
+      // Map resource types to their respective keys.
+      const types = {
+        policyServer:   { type: KUBEWARDEN.POLICY_SERVER },
+        app:            { type: CATALOG.APP },
+        clusterRepo:    { type: CATALOG.CLUSTER_REPO },
+        configMap:      { type: CONFIG_MAP },
+        serviceMonitor: { type: MONITORING.SERVICEMONITOR },
+        namespace:      { type: NAMESPACE },
+        service:        { type: SERVICE }
+      };
+
+      // Set permissions based on store getters.
+      Object.entries(types).forEach(([key, value]) => {
+        if (this.$store.getters['cluster/canList'](value)) {
+          this.permissions[key] = true;
+        }
+      });
+    },
+
+    initDebouncedRefreshCharts() {
+      // Create a debounced function for refreshing charts.
+      this.debouncedRefreshCharts = debounce((init = false) => {
+        refreshCharts({
+          store:     this.$store,
+          chartName: 'rancher-monitoring',
+          init
+        });
+      }, 500);
+    },
+
+    async fetchResourcesData() {
+      // Define the mapping of resource names to their stored properties.
+      const resourceMap = [
+        {
+          name:     CATALOG.APP,
+          property: this.allApps
+        },
+        {
+          name:     CATALOG.CLUSTER_REPO,
+          property: this.allRepos
+        },
+        {
+          name:     CONFIG_MAP,
+          property: this.allConfigMaps
+        },
+        {
+          name:     KUBEWARDEN.POLICY_SERVER,
+          property: this.allPolicyServers
+        },
+        {
+          name:     MONITORING.SERVICEMONITOR,
+          property: this.allServiceMonitors
+        },
+        {
+          name:     NAMESPACE,
+          property: this.allNamespaces
+        },
+        {
+          name:     SERVICE,
+          property: this.allServices
+        }
+      ];
+
+      // Collect resource fetch promises if the property is empty and listing is allowed.
+      const promises = resourceMap.reduce((acc, resource) => {
+        if (isEmpty(resource.property) && this.$store.getters['cluster/canList'](resource.name)) {
+          acc.push(this.$fetchType(resource.name));
+        }
+
+        return acc;
+      }, []);
+
+      await allHash(promises);
+    },
+
+    refreshChartsIfNeeded() {
+      // Refresh charts if the checklist is shown and no monitoring chart exists.
+      if (this.showChecklist && !this.monitoringChart) {
+        this.debouncedRefreshCharts(true);
+      }
+    },
+
+    async handleGrafanaDashboard() {
+      if (this.monitoringStatus.installed) {
+        try {
+          this.metricsProxy = await grafanaProxy({
+            store: this.$store,
+            type:  this.METRICS_TYPE
+          });
+
+          if (this.metricsProxy) {
+            this.metricsService = await dashboardExists(
+              'v2',
+              this.$store,
+              this.currentCluster?.id,
+              this.metricsProxy
+            );
+          }
+        } catch (error) {
+          handleGrowl({
+            error: {
+              _statusText: 'Error',
+              message:     `Error fetching Grafana Service: ${ error }`
+            },
+            store: this.$store
+          });
+        }
+      }
+    },
+
+    async fetchControllerAppValues() {
+      if (this.controllerApp) {
+        await this.controllerApp.fetchValues(true);
+      }
+    },
+
     async updateServiceMonitors() {
       await this.$fetchType(MONITORING.SERVICEMONITOR);
     },
@@ -382,28 +451,36 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" mode="relative" />
   <div v-else>
-    <MetricsChecklist
-      v-if="showChecklist"
-      :cattle-dashboard-ns="cattleDashboardNs"
-      :conflicting-grafana-dashboards="conflictingGrafanaDashboards"
-      :controller-app="controllerApp"
-      :controller-chart="controllerChart"
-      :kubewarden-service-monitor="kubewardenServiceMonitor"
-      :kubewarden-dashboards="kubewardenGrafanaDashboards"
-      :metrics-configuration="metricsConfiguration"
-      :monitoring-app="monitoringApp"
-      :monitoring-chart="monitoringChart"
-      :open-tel-svc="openTelSvc"
-      :policy-obj="policyObj"
-      :policy-server-obj="policyServerObj"
-      :outdated-telemetry-spec="outdatedTelemetrySpec"
-      :unsupported-telemetry-spec="unsupportedTelemetrySpec"
-      :outdated-service-monitor="outdatedServiceMonitor"
-      @updateServiceMonitors="updateServiceMonitors"
-      @updateServiceMonitorLabels="updateServiceMonitorLabels"
-    />
+    <Banner
+        v-if="!hasAvailability"
+        color="error"
+        class="mt-20 mb-20"
+        data-testid="kw-unavailability-banner"
+        :label="t('kubewarden.unavailability.banner', { type: t('kubewarden.unavailability.type.metricsDashboard') })"
+      />
 
-    <template v-if="!showChecklist">
+      <MetricsChecklist
+        v-else-if="showChecklist"
+        :cattle-dashboard-ns="cattleDashboardNs"
+        :conflicting-grafana-dashboards="conflictingGrafanaDashboards"
+        :controller-app="controllerApp"
+        :controller-chart="controllerChart"
+        :kubewarden-service-monitor="kubewardenServiceMonitor"
+        :kubewarden-dashboards="kubewardenGrafanaDashboards"
+        :metrics-configuration="metricsConfiguration"
+        :monitoring-app="monitoringApp"
+        :monitoring-chart="monitoringChart"
+        :open-tel-svc="openTelSvc"
+        :policy-obj="policyObj"
+        :policy-server-obj="policyServerObj"
+        :outdated-telemetry-spec="outdatedTelemetrySpec"
+        :unsupported-telemetry-spec="unsupportedTelemetrySpec"
+        :outdated-service-monitor="outdatedServiceMonitor"
+        @updateServiceMonitors="updateServiceMonitors"
+        @updateServiceMonitorLabels="updateServiceMonitorLabels"
+      />
+
+    <template v-else>
       <Banner
         v-if="monitoringApp && !metricsProxy"
         color="error"
