@@ -10,9 +10,9 @@ import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 import Loading from '@shell/components/Loading';
 
 import { DASHBOARD_HEADERS } from '@kubewarden/config/table-headers';
-import {
-  KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_LABELS, WG_POLICY_K8S
-} from '@kubewarden/types';
+import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '@kubewarden/types';
+
+import { isPolicyServerResource } from '@kubewarden/modules/policyServer';
 
 import Masthead from './Masthead';
 import Card from './Card';
@@ -105,10 +105,18 @@ export default {
 
     policyServerPods() {
       if (this.$store.getters['cluster/canList'](POD)) {
-        const pods = this.allPods?.filter((pod) => pod?.metadata?.labels?.[KUBEWARDEN_LABELS.POLICY_SERVER]);
+        const policyServerNames = this.allPolicyServers
+          ?.map((ps) => ps.metadata?.name)
+          .filter((name) => !!name);
+
+        const pods = this.allPods?.filter((pod) => {
+          const labels = pod?.metadata?.labels;
+
+          return policyServerNames?.some((name) => isPolicyServerResource(labels, name));
+        });
 
         if (!isEmpty(pods)) {
-          return Object.values(pods).flat();
+          return pods;
         }
 
         return null;

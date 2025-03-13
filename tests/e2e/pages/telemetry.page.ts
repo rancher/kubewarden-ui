@@ -23,7 +23,7 @@ export class TelemetryPage extends BasePage {
       otel          : getLine(page, /^The OpenTelemetry Operator/),
       jaeger        : getLine(this.tracingTab, /^The Jaeger Operator/),
       monitoring    : getLine(this.metricsTab, /^The Rancher Monitoring app/),
-      servicemonitor: getLine(this.metricsTab, /^A Service Monitor/),
+      servicemonitor: getLine(this.metricsTab, /^(A|The) Service Monitor/),
       configmap     : getLine(this.metricsTab, /^Grafana Dashboards/),
       config        : getLine(page, /^(Tracing|The Kubewarden Controller) must be (enabled and )?configured/)
     }

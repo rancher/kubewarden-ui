@@ -18,6 +18,7 @@ import SortableTable from '@shell/components/SortableTable';
 import { TRACE_HEADERS } from '@kubewarden/config/table-headers';
 import { KUBEWARDEN, KUBEWARDEN_CHARTS, MODE_MAP, OPERATION_MAP } from '@kubewarden/types';
 import { jaegerTraces } from '@kubewarden/modules/jaegerTracing';
+import { isAdminUser } from '@kubewarden/utils/permissions';
 import { formatDuration } from '@kubewarden/utils/duration-format';
 
 import TraceChecklist from './TraceChecklist';
@@ -51,38 +52,7 @@ export default {
   mixins: [ResourceFetch],
 
   async fetch() {
-    const types = [CATALOG.APP, CATALOG.CLUSTER_REPO, SERVICE];
-    const hash = [];
-
-    for (const type of types) {
-      if (this.$store.getters['cluster/canList'](type)) {
-        hash.push(this.$fetchType(type));
-      }
-    }
-
-    await allHash(hash);
-
-    if (this.jaegerQuerySvc) {
-      const options = {
-        store:           this.$store,
-        queryService:    this.jaegerQuerySvc,
-        resource:        this.resource,
-        relatedPolicies: null,
-        policy:          null
-      };
-
-      if (this.resource === KUBEWARDEN.POLICY_SERVER) {
-        options.relatedPolicies = this.relatedPolicies;
-      } else {
-        options.policy = this.policy;
-      }
-
-      this.specificValidations = await jaegerTraces(options);
-    }
-
-    if (this.controllerApp) {
-      await this.controllerApp.fetchValues(true);
-    }
+    await this.fetchData();
   },
 
   data() {
@@ -90,6 +60,14 @@ export default {
       MODE_MAP,
       TRACE_HEADERS,
       OPERATION_MAP,
+
+      isAdminUser: false,
+      permissions: {
+        policyServer: false,
+        app:          false,
+        clusterRepo:  false,
+        service:      false
+      },
 
       specificValidations:      null,
       outdatedTelemetrySpec:    false,
@@ -114,19 +92,19 @@ export default {
     },
 
     controllerApp() {
-      return this.allApps?.find((app) => app?.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER);
+      return this.allApps?.find(
+        (app) => app?.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER
+      );
     },
 
     controllerChart() {
-      return this.charts?.find((chart) => chart?.chartName === KUBEWARDEN_CHARTS.CONTROLLER);
+      return this.charts?.find(
+        (chart) => chart?.chartName === KUBEWARDEN_CHARTS.CONTROLLER
+      );
     },
 
     groupField() {
-      if (this.isPolicyServer) {
-        return 'policy_id';
-      }
-
-      return null;
+      return this.isPolicyServer ? 'policy_id' : null;
     },
 
     isPolicyServer() {
@@ -134,11 +112,7 @@ export default {
     },
 
     emptyPolicies() {
-      if (this.resource === KUBEWARDEN.POLICY_SERVER) {
-        return isEmpty(this.relatedPolicies);
-      }
-
-      return isEmpty(this.policy);
+      return this.resource === KUBEWARDEN.POLICY_SERVER ? isEmpty(this.relatedPolicies) : isEmpty(this.policy);
     },
 
     emptyTraces() {
@@ -146,19 +120,15 @@ export default {
     },
 
     emptyTracesLabel() {
-      if (this.resource === KUBEWARDEN.POLICY_SERVER) {
-        return 'kubewarden.tracing.noRelatedTraces';
-      }
+      return this.resource === KUBEWARDEN.POLICY_SERVER ? 'kubewarden.tracing.noRelatedTraces' : 'kubewarden.tracing.noTraces';
+    },
 
-      return 'kubewarden.tracing.noTraces';
+    hasAvailability() {
+      return this.isAdminUser || Object.values(this.permissions).every((value) => value);
     },
 
     rowsPerPage() {
-      if (this.isPolicyServer) {
-        return 40;
-      }
-
-      return 20;
+      return this.isPolicyServer ? 40 : 20;
     },
 
     tracingConfiguration() {
@@ -170,50 +140,39 @@ export default {
       const telemetry = this.controllerApp?.values?.telemetry;
 
       if (semver.gte(version, '4.0.0-0')) {
-        // In version 4+, telemetry.tracing should be boolean or undefined (treated as false).
-        // sidecar.tracing is only meaningful if telemetry.tracing === true.
-
-        const tracingIsUndefinedOrBoolean = telemetry?.tracing === undefined || typeof telemetry?.tracing === 'boolean';
+        const tracingIsUndefinedOrBoolean =
+          telemetry?.tracing === undefined || typeof telemetry?.tracing === 'boolean';
         const endpointIsDefined = !!telemetry?.sidecar?.tracing?.jaeger?.endpoint;
 
-        // Check for unsupported 'custom' mode
         if (telemetry?.mode === 'custom') {
           this.handleTracingChecklist('unsupportedTelemetrySpec', true);
 
           return null;
         }
-
-        // If tracing is not undefined or boolean, it's outdated
         if (!tracingIsUndefinedOrBoolean) {
           this.handleTracingChecklist('outdatedTelemetrySpec', true);
 
           return null;
         }
-
-        // If telemetry.tracing is true, ensure sidecar.tracing is defined
         if (telemetry?.tracing === true && !endpointIsDefined) {
           this.handleTracingChecklist('incompleteTelemetrySpec', true);
 
           return null;
         }
-
-        // If telemetry.tracing is undefined or false, treat it as false.
-        // sidecar config is irrelevant in that case, and not considered outdated.
         if (telemetry?.tracing !== true) {
-          // tracing is off, no sidecar config needed
           return null;
         }
 
-        // If we get here, telemetry.tracing === true and endpointIsDefined === true
         return telemetry?.sidecar?.tracing;
       } else {
-        // Old schema: just return telemetry.tracing.enabled
         return telemetry?.tracing?.enabled;
       }
     },
 
     jaegerServices() {
-      return this.allServices?.filter((svc) => svc?.metadata?.labels?.['app.kubernetes.io/part-of'] === 'jaeger');
+      return this.allServices?.filter(
+        (svc) => svc?.metadata?.labels?.['app.kubernetes.io/part-of'] === 'jaeger'
+      );
     },
 
     jaegerQuerySvc() {
@@ -231,7 +190,9 @@ export default {
     },
 
     openTelemetryServices() {
-      return this.allServices?.filter((svc) => svc?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === 'opentelemetry-operator');
+      return this.allServices?.filter(
+        (svc) => svc?.metadata?.labels?.[KUBERNETES.MANAGED_NAME] === 'opentelemetry-operator'
+      );
     },
 
     openTelSvc() {
@@ -259,11 +220,7 @@ export default {
     filteredValidations() {
       if (!isEmpty(this.specificValidations)) {
         return this.specificValidations.flatMap((v) => {
-          if (this.currentCluster?.id === v.cluster) {
-            return v.traces;
-          } else {
-            return [];
-          }
+          return this.currentCluster?.id === v.cluster ? v.traces : [];
         });
       }
 
@@ -272,6 +229,72 @@ export default {
   },
 
   methods: {
+    async fetchData() {
+      this.setAdminUser();
+      this.setPermissions();
+      await this.fetchCanListResources();
+      await this.handleJaegerTracing();
+      await this.fetchControllerAppValues();
+    },
+
+    setAdminUser() {
+      this.isAdminUser = isAdminUser(this.$store.getters);
+    },
+
+    setPermissions() {
+      const types = {
+        policyServer: { type: KUBEWARDEN.POLICY_SERVER },
+        app:          { type: CATALOG.APP },
+        clusterRepo:  { type: CATALOG.CLUSTER_REPO },
+        service:      { type: SERVICE }
+      };
+
+      Object.entries(types).forEach(([key, value]) => {
+        if (this.$store.getters['cluster/canList'](value)) {
+          this.permissions[key] = true;
+        }
+      });
+    },
+
+    async fetchCanListResources() {
+      const canListTypes = [CATALOG.APP, CATALOG.CLUSTER_REPO, SERVICE];
+      const promises = [];
+
+      canListTypes.forEach((type) => {
+        if (this.$store.getters['cluster/canList'](type)) {
+          promises.push(this.$fetchType(type));
+        }
+      });
+
+      await allHash(promises);
+    },
+
+    async handleJaegerTracing() {
+      if (this.jaegerQuerySvc) {
+        const options = {
+          store:           this.$store,
+          queryService:    this.jaegerQuerySvc,
+          resource:        this.resource,
+          relatedPolicies: null,
+          policy:          null
+        };
+
+        if (this.resource === KUBEWARDEN.POLICY_SERVER) {
+          options.relatedPolicies = this.relatedPolicies;
+        } else {
+          options.policy = this.policy;
+        }
+
+        this.specificValidations = await jaegerTraces(options);
+      }
+    },
+
+    async fetchControllerAppValues() {
+      if (this.controllerApp) {
+        await this.controllerApp.fetchValues(true);
+      }
+    },
+
     modeColor(mode) {
       return this.MODE_MAP[mode];
     },
@@ -298,8 +321,16 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending || refreshingCharts" mode="relative" />
   <div v-else>
+    <Banner
+      v-if="!hasAvailability"
+      color="error"
+      class="mt-20 mb-20"
+      data-testid="kw-unavailability-banner"
+      :label="t('kubewarden.unavailability.banner', { type: t('kubewarden.unavailability.type.tracingDashboard') })"
+    />
+
     <TraceChecklist
-      v-if="showChecklist"
+      v-else-if="showChecklist"
       :controller-app="controllerApp"
       :controller-chart="controllerChart"
       :tracing-configuration="tracingConfiguration"
@@ -368,25 +399,19 @@ export default {
         <td :colspan="fullColspan" class="sub-row">
           <div class="details">
             <section class="col">
-              <div class="title">
-                Response Message
-              </div>
+              <div class="title">Response Message</div>
               <span class="text-info text-capitalize">
                 {{ row.responseMessage ? row.responseMessage : '-' }}
               </span>
             </section>
             <section class="col">
-              <div class="title">
-                Response Code
-              </div>
+              <div class="title">Response Code</div>
               <span class="text-info">
                 {{ row.responseCode ? row.responseCode : '-' }}
               </span>
             </section>
             <section class="col">
-              <div class="title">
-                Mutated
-              </div>
+              <div class="title">Mutated</div>
               <span class="text-info">
                 {{ row.mutated }}
               </span>
@@ -403,39 +428,3 @@ export default {
     />
   </div>
 </template>
-
-<style lang="scss" scoped>
-.policy-table-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.filter {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-self: flex-end;
-  align-items: center;
-
-  & > * {
-    margin: 10px;
-    max-width: 33%;
-  }
-  & > *:first-child {
-    margin-left: 0;
-  }
-  & > *:last-child {
-    margin-right: 0;
-  }
-
-  &__category {
-    min-width: 200px;
-    height: unset;
-  }
-
-  &__search, &__reset {
-    height: 61px;
-  }
-}
-</style>

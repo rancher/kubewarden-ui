@@ -3333,10 +3333,10 @@
   resolved "https://registry.npmjs.org/@rancher/icons/-/icons-2.0.29.tgz#6546d69768c706bebd66bfa73b36aef3d105987a"
   integrity sha512-qBBqfazS9y5VjV7fJDPNXmxd9AP/2uiE05mKFWP41kpbO+tEb62RnUBXCm14XLeScDZQcOuiAKVHMmvCFzF0BA==
 
-"@rancher/shell@^3.0.2-rc.5":
-  version "3.0.2-rc.5"
-  resolved "https://registry.npmjs.org/@rancher/shell/-/shell-3.0.2-rc.5.tgz#721a5697c89c3339846f0be9acbbb545cd7ac20e"
-  integrity sha512-oOh/HlMS562OU+UWE35t1b5fLVW0cZD/bq67g7Uos/jMzEZEV7AWtbFzByyhJmo3hSipVMBoWyws4JQKhmqjcA==
+"@rancher/shell@^3.0.2-rc.6":
+  version "3.0.2-rc.6"
+  resolved "https://registry.npmjs.org/@rancher/shell/-/shell-3.0.2-rc.6.tgz#bde65a3da391c4aa0352e2adf8180900a2575000"
+  integrity sha512-UpNCv0iZH16nlo+x/4xVisIX20v1JrQC47GUUtXcGDw9pde6HnnBPxpN0cF32r+Kg7F0QRp4Yvjoljmpp1HS7g==
   dependencies:
     "@aws-sdk/client-ec2" "3.658.1"
     "@aws-sdk/client-eks" "3.1.0"
@@ -3391,7 +3391,7 @@
     entities "4.5.0"
     eslint "7.32.0"
     eslint-config-standard "16.0.3"
-    eslint-import-resolver-node "0.3.4"
+    eslint-import-resolver-node "0.3.9"
     eslint-module-utils "2.6.1"
     eslint-plugin-cypress "2.12.1"
     eslint-plugin-import "2.31.0"
@@ -3412,7 +3412,7 @@
     jest-serializer-vue "2.0.2"
     jexl "2.3.0"
     jquery "3.5.1"
-    js-cookie "2.2.1"
+    js-cookie "3.0.5"
     js-yaml "4.1.0"
     js-yaml-loader "1.2.2"
     jsdiff "1.1.1"
@@ -7406,7 +7406,7 @@ debounce@^1.2.1:
   resolved "https://registry.npmjs.org/debounce/-/debounce-1.2.1.tgz#38881d8f4166a5c5848020c11827b834bcb3e0a5"
   integrity sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==
 
-debug@2.6.9, debug@^2.6.9:
+debug@2.6.9:
   version "2.6.9"
   resolved "https://registry.npmjs.org/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
   integrity sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==
@@ -8042,15 +8042,7 @@ eslint-config-standard@16.0.3:
   resolved "https://registry.npmjs.org/eslint-config-standard/-/eslint-config-standard-16.0.3.tgz#6c8761e544e96c531ff92642eeb87842b8488516"
   integrity sha512-x4fmJL5hGqNJKGHSjnLdgA6U6h1YW/G2dW9fA+cyVur4SK6lyue8+UgNKWlZtUDTXvgKDD/Oa3GQjmB5kjtVvg==
 
-eslint-import-resolver-node@0.3.4:
-  version "0.3.4"
-  resolved "https://registry.npmjs.org/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.4.tgz#85ffa81942c25012d8231096ddf679c03042c717"
-  integrity sha512-ogtf+5AB/O+nM6DIeBUNr2fuT7ot9Qg/1harBfBtaP13ekEWFQEEMP94BCB7zaNW3gyY+8SHYF00rnqYwXKWOA==
-  dependencies:
-    debug "^2.6.9"
-    resolve "^1.13.1"
-
-eslint-import-resolver-node@^0.3.9:
+eslint-import-resolver-node@0.3.9, eslint-import-resolver-node@^0.3.9:
   version "0.3.9"
   resolved "https://registry.npmjs.org/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.9.tgz#d4eaac52b8a2e7c3cd1903eb00f7e053356118ac"
   integrity sha512-WFj2isz22JahUv+B788TlO3N6zL3nNJGU8CcZbPZvVEkBPaJdCV4vy5wyghty5ROFbCRnm132v8BScu5/1BQ8g==
@@ -11091,12 +11083,7 @@ js-beautify@^1.14.9, js-beautify@^1.6.12:
     js-cookie "^3.0.5"
     nopt "^8.0.0"
 
-js-cookie@2.2.1:
-  version "2.2.1"
-  resolved "https://registry.npmjs.org/js-cookie/-/js-cookie-2.2.1.tgz#69e106dc5d5806894562902aa5baec3744e9b2b8"
-  integrity sha512-HvdH2LzI/EAZcUwA8+0nKNtWHqS+ZmijLA30RwZA0bo7ToCckjK5MkGhjED9KoRcXO6BaGI3I9UIzSA1FKFPOQ==
-
-js-cookie@^3.0.5:
+js-cookie@3.0.5, js-cookie@^3.0.5:
   version "3.0.5"
   resolved "https://registry.npmjs.org/js-cookie/-/js-cookie-3.0.5.tgz#0b7e2fd0c01552c58ba86e0841f94dc2557dcdbc"
   integrity sha512-cEiJEAEoIbWfCZYKWhVwFuvPX1gETRYPw6LlaTKoxD3s2AkXzkCjnp6h0V77ozyqj0jakteJ4YqDJT830+lVGw==

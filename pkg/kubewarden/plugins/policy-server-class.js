@@ -128,10 +128,28 @@ export default class PolicyServerModel extends KubewardenModel {
   get matchingPods() {
     return async() => {
       try {
-        return await this.$dispatch('cluster/findMatching', {
-          type:     POD,
-          selector: `app=kubewarden-policy-server-${ this.metadata?.name }` // kubewarden-policy-server is hardcoded from the kubewarden-controller
-        }, { root: true });
+        const name = this.metadata?.name;
+        const oldSelector = `app=kubewarden-policy-server-${ name }`;
+        const newSelector = `app.kubernetes.io/instance=policy-server-${ name }`;
+
+        const [podsOld, podsNew] = await Promise.all([
+          this.$dispatch('cluster/findMatching', {
+            type:     POD,
+            selector: oldSelector
+          }, { root: true }),
+          this.$dispatch('cluster/findMatching', {
+            type:     POD,
+            selector: newSelector
+          }, { root: true })
+        ]);
+
+        // Merge the two arrays and remove duplicates based on a unique identifier (e.g. metadata.uid)
+        const podsMap = new Map();
+
+        (podsOld || []).forEach((p) => podsMap.set(p?.metadata?.uid, p));
+        (podsNew || []).forEach((p) => podsMap.set(p?.metadata?.uid, p));
+
+        return Array.from(podsMap.values());
       } catch (e) {
         console.warn('Error matching policy-server to pod', e);
       }

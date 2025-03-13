@@ -5,6 +5,8 @@ kubewarden:
     type:
       dashboard: Kubewarden Dashboard
       policyReporter: Policy Reporter
+      metricsDashboard: Metrics Dashboard
+      tracingDashboard: Tracing Dashboard
   generic:
     name: Name
   dashboard:
@@ -23,7 +25,7 @@ kubewarden:
       appUpgrade: App Upgrade
       controllerChart: Controller
       defaultsChart: Defaults
-      appVersionUnsatisfied: "The app version of the Kubewarden Defaults ({defaultsAppVersion}) chart does not match the app version of the Kubewarden Controller chart ({controllerAppVersion}). This chart will need to be updated to match the app version of the Kubewarden Controller chart."
+      appVersionUnsatisfied: 'The app version of the Kubewarden Defaults ({defaultsAppVersion}) chart does not match the app version of the Kubewarden Controller chart ({controllerAppVersion}). This chart will need to be updated to match the app version of the Kubewarden Controller chart.'
     policyReports:
       oldPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Kubewarden App. Please update to version v1.11.0 or newer.'
       newPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Kubewarden extension. Please update to version 1.4.0 or newer.'
@@ -214,6 +216,8 @@ kubewarden:
         edit: Edit Config
       serviceMonitor:
         label: A Service Monitor for this Policy Server does not exist. Follow the <a href="https://docs.kubewarden.io/next/howtos/ui-extension/metrics#install" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to learn more about Service Monitors.
+        upgrade:
+          label: The Service Monitor for this Policy Server is outdated. Follow the <a href="https://docs.kubewarden.io/next/howtos/ui-extension/metrics#upgrade" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to learn more about Service Monitors.
       configMap:
         label: Grafana Dashboards (ConfigMaps) for the Policy Servers and for Kubewarden Policies must be created.
         button: Add Dashboards
@@ -507,6 +511,10 @@ asyncButton:
     action: Add Service Monitor
     success: Added
     waiting: Adding&hellip;
+  serviceMonitorUpgrade:
+    action: Upgrade Service Monitor
+    success: Upgraded
+    waiting: Upgrading&hellip;
   policyReporterRepo:
     action: Add Policy Reporter Repository
     success: Added

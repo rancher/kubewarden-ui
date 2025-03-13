@@ -118,7 +118,7 @@ describe('TraceTable.vue', () => {
     expect(wrapper.findComponent({ name: 'Loading' }).exists()).toBe(true);
   });
 
-  it('renders TraceChecklist when showChecklist is true', () => {
+  it('renders TraceChecklist when showChecklist is true', async() => {
     // To force showChecklist to be true we simulate missing required services by making SERVICE getter return an empty array.
     const wrapper = createWrapper({
       props: { resource: 'non-policy-resource' },
@@ -131,6 +131,9 @@ describe('TraceTable.vue', () => {
         }
       }
     });
+
+    wrapper.setData({ isAdminUser: true });
+    await wrapper.vm.$nextTick();
 
     // With no SERVICE data, computed "jaegerQuerySvc" and "openTelSvc" will be null,
     // so "showChecklist" (which is computed as: (!openTelSvc || !jaegerQuerySvc || !tracingConfiguration)) is true.
@@ -179,7 +182,10 @@ describe('TraceTable.vue', () => {
     // Here, we *do not* call fetch if we plan to manually set specificValidations,
     // because fetch might overwrite them with the real Jaeger data (which we’ve mocked as empty).
     // Instead, we just do:
-    wrapper.setData({ specificValidations: mockTraces });
+    wrapper.setData({
+      specificValidations: mockTraces,
+      isAdminUser:         true
+    });
 
     await wrapper.vm.$nextTick();
 

@@ -23,7 +23,7 @@ const clusterAllMock = jest.fn((resourceType) => {
   case POD:
     return [{
       metadata: {
-        labels: { 'kubewarden/policy-server': 'default' },
+        labels: { app: 'kubewarden-policy-server-default' },
         state:  {
           name:          'running',
           error:         false,
@@ -33,15 +33,15 @@ const clusterAllMock = jest.fn((resourceType) => {
     },
     {
       metadata: {
-        labels: { 'kubewarden/policy-server': 'other' },
+        labels: { app: 'kubewarden-policy-server-other' },
         state:  {
           name:          'pending',
           error:         false,
           transitioning: true,
         },
       },
-    }
-    ];
+    }];
+
   case KUBEWARDEN.POLICY_SERVER:
     return mockPolicyServers;
   default:
