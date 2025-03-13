@@ -18,10 +18,10 @@ import {
   KUBEWARDEN_CHARTS_REPO,
   KUBEWARDEN_CHARTS_REPO_GIT,
   KUBEWARDEN_CHARTS,
-} from '../../../types';
-import { findCompatibleDefaultsChart } from '../../../utils/chart';
-import { getPolicyServerModule, isFleetDeployment } from '../../../modules/fleet';
-import { DEFAULT_POLICY_SERVER } from '../../../models/policies.kubewarden.io.policyserver';
+} from '@kubewarden/types';
+import { findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
+import { getPolicyServerModule, isFleetDeployment } from '@kubewarden/modules/fleet';
+import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
 
 import Loading from '@shell/components/Loading';
 import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';

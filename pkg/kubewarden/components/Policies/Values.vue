@@ -7,9 +7,8 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { defineAsyncComponent, toRaw } from 'vue';
-import isEmpty from 'lodash/isEmpty';
 
-import { _CREATE, _EDIT, _VIEW } from '@shell/config/query-params';
+import { _CREATE, _EDIT } from '@shell/config/query-params';
 import { SCHEMA } from '@shell/config/types';
 import { createYaml, saferDump } from '@shell/utils/create-yaml';
 
@@ -24,7 +23,7 @@ import {
   VALUES_STATE,
   YAML_OPTIONS,
   RANCHER_NS_MATCH_EXPRESSION
-} from '../../types';
+} from '@kubewarden/types';
 
 interface Props {
   mode: string;

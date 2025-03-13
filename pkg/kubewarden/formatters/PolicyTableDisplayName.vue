@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import { PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '../types';
+import { PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
 
 const props = defineProps<{ row: PolicyChart }>();
-
-// const displayName = computed<string>((): string => props.row?.annotations?.['kubewarden/displayName'] || props.row?.name);
 
 const displayName = computed<string>(() => {
   const { annotations } = props.row;

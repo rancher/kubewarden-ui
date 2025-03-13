@@ -1,4 +1,4 @@
-import { PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '../types';
+import { PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
 
 /**
  * Extracts resource kinds from a list of policy charts with the `kubewarden/resources` annotation.
@@ -44,10 +44,10 @@ export function resourcesFromAnnotation(policyChart: PolicyChart[]): string[] | 
  * @param policyChart `schemas`
  * @returns Boolean
  */
-export function isGlobalPolicy(policyChart: PolicyChart, schemas: any): Boolean {
+export function isGlobalPolicy(policyChart: PolicyChart, schemas: any): boolean {
   if (policyChart) {
     const resources: string[] | undefined = policyChart.annotations?.['kubewarden/resources']?.split(',');
-    let targetsNonNamespaced: Boolean = false;
+    let targetsNonNamespaced: boolean = false;
 
     if (resources) {
       for (const resource of resources) {

@@ -5,15 +5,13 @@ import semver from 'semver';
 
 import SteveModel from '@shell/plugins/steve/steve-class';
 import { STATES, STATES_ENUM } from '@shell/plugins/dashboard-store/resource-class';
-import { MANAGEMENT, SERVICE } from '@shell/config/types';
+import { SERVICE } from '@shell/config/types';
 import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
-import { addParams } from '@shell/utils/url';
 
 import {
   RANCHER_NAMESPACES,
-  RANCHER_NS_MATCH_EXPRESSION,
-  VALIDATION_KEYS
-} from '../types';
+  RANCHER_NS_MATCH_EXPRESSION
+} from '@kubewarden/types';
 
 export default class KubewardenModel extends SteveModel {
   async allServices() {
