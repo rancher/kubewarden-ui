@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { computed, inject, ref, watch } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import semver from 'semver';
 
 import { SCHEMA } from '@shell/config/types';
-import { _CREATE, CATEGORY, SEARCH_QUERY } from '@shell/config/query-params';
+import { CATEGORY, SEARCH_QUERY } from '@shell/config/query-params';
 import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 import { ensureRegex } from '@shell/utils/string';
-import { sortBy } from '@shell/utils/sort';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { Checkbox } from '@components/Form/Checkbox';
-import SortableTableWrapper from '../SortableTableWrapper';
 
-import { KUBEWARDEN, PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '../../types';
-import { POLICY_TABLE_HEADERS } from '../../config/table-headers';
-import { resourcesFromAnnotation, isGlobalPolicy } from '../../modules/policyChart';
+import { KUBEWARDEN, PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
+import { POLICY_TABLE_HEADERS } from '@kubewarden/config/table-headers';
+import { resourcesFromAnnotation, isGlobalPolicy } from '@kubewarden/modules/policyChart';
+
+import SortableTableWrapper from '@kubewarden/SortableTableWrapper';
 
 type KubewardenKey = keyof typeof KUBEWARDEN_POLICY_ANNOTATIONS;
 type LegacyKey = keyof typeof LEGACY_POLICY_ANNOTATIONS;

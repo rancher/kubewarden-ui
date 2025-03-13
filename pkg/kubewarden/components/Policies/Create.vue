@@ -11,7 +11,6 @@ import { CATALOG, NAMESPACE } from '@shell/config/types';
 import { _CREATE } from '@shell/config/query-params';
 import { saferDump } from '@shell/utils/create-yaml';
 import { set } from '@shell/utils/object';
-import { randomStr, CHARSET } from '@shell/utils/string';
 
 import { Banner } from '@components/Banner';
 
@@ -26,13 +25,12 @@ import {
   KUBEWARDEN_REPO,
   KUBEWARDEN_CHARTS_REPO,
   KUBEWARDEN_CHARTS_REPO_GIT,
-  KUBEWARDEN_CHARTS_REPO_NAME,
   VALUES_STATE,
   DEFAULT_POLICY,
   KUBEWARDEN_POLICY_ANNOTATIONS
-} from '../../types';
-import { removeEmptyAttrs } from '../../utils/object';
-import { handleGrowl } from '../../utils/handle-growl';
+} from '@kubewarden/types';
+import { removeEmptyAttrs } from '@kubewarden/utils/object';
+import { handleGrowl } from '@kubewarden/utils/handle-growl';
 
 import PolicyTable from './PolicyTable';
 import PolicyReadmePanel from './PolicyReadmePanel';

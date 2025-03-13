@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 
 import { WORKLOAD_TYPES } from '@shell/config/types';
 
 import { BadgeState } from '@components/BadgeState';
 
-import { Deployment } from '../types';
-import { colorForPolicyServerState } from '../plugins/kubewarden-class';
+import { Deployment } from '@kubewarden/types';
+import { colorForPolicyServerState } from '@kubewarden/plugins/kubewarden-class';
 
 const props = defineProps<{
   value: string;

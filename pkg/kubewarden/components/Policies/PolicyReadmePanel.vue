@@ -4,7 +4,7 @@ import { useStore } from 'vuex';
 
 import ChartReadme from '@shell/components/ChartReadme';
 
-import { PolicyDetail, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '../../types';
+import { PolicyDetail, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
 
 const props = defineProps<{ policyChartDetails: PolicyDetail }>();
 

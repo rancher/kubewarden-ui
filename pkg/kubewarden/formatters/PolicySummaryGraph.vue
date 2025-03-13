@@ -4,8 +4,8 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { sortBy } from '@shell/utils/sort';
 import ProgressBarMulti from '@shell/components/ProgressBarMulti';
 
-import { Policy } from '../types';
-import { colorForStatus, stateSort } from '../plugins/kubewarden-class';
+import { Policy } from '@kubewarden/types';
+import { colorForStatus, stateSort } from '@kubewarden/plugins/kubewarden-class';
 
 interface StatePart {
   value:      number;

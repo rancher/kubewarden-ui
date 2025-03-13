@@ -54,7 +54,7 @@ describe('grafanaProxy', () => {
     const error = new Error('Test error');
 
     mockStore.dispatch.mockRejectedValueOnce(error);
-    const handleGrowlSpy = jest.spyOn(require('../../utils/handle-growl'), 'handleGrowl');
+    const handleGrowlSpy = jest.spyOn(require('@kubewarden/utils/handle-growl'), 'handleGrowl');
     const result = await grafanaProxy({
       store: mockStore,
       type:  'dashboard'
@@ -90,7 +90,7 @@ describe('grafanaService', () => {
     const error = new Error('Service error');
 
     mockStore.dispatch.mockRejectedValueOnce(error);
-    const handleGrowlSpy = jest.spyOn(require('../../utils/handle-growl'), 'handleGrowl');
+    const handleGrowlSpy = jest.spyOn(require('@kubewarden/utils/handle-growl'), 'handleGrowl');
     const result = await grafanaService(mockStore);
 
     expect(handleGrowlSpy).toHaveBeenCalled();
@@ -118,7 +118,7 @@ describe('findKubewardenDashboards', () => {
     const error = new Error('Dashboard error');
 
     mockStore.dispatch.mockRejectedValueOnce(error);
-    const handleGrowlSpy = jest.spyOn(require('../../utils/handle-growl'), 'handleGrowl');
+    const handleGrowlSpy = jest.spyOn(require('@kubewarden/utils/handle-growl'), 'handleGrowl');
     const result = await findKubewardenDashboards(mockStore);
 
     expect(handleGrowlSpy).toHaveBeenCalled();
@@ -176,7 +176,7 @@ describe('addKubewardenDashboards', () => {
     const fakeConfigMapTemplate = { save: jest.fn().mockRejectedValue(new Error('Save failed')) };
 
     mockStore.dispatch.mockResolvedValueOnce(fakeConfigMapTemplate);
-    const handleGrowlSpy = jest.spyOn(require('../../utils/handle-growl'), 'handleGrowl');
+    const handleGrowlSpy = jest.spyOn(require('@kubewarden/utils/handle-growl'), 'handleGrowl');
 
     await addKubewardenDashboards({
       store: mockStore,
