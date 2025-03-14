@@ -14,11 +14,17 @@ export const KUBEWARDEN_PRODUCT_GROUP = 'policies.kubewarden.io';
 export const CHART_NAME = 'rancher-kubewarden';
 
 export const KUBEWARDEN_DASHBOARD = 'dashboard';
-export const KUBEWARDEN_REPO = 'https://charts.kubewarden.io';
-export const KUBEWARDEN_REPO_NAME = 'kubewarden-charts';
-export const KUBEWARDEN_CHARTS_REPO = 'https://github.com/kubewarden/helm-charts';
-export const KUBEWARDEN_CHARTS_REPO_GIT = 'https://github.com/kubewarden/helm-charts.git';
-export const KUBEWARDEN_CHARTS_REPO_NAME = 'kubewarden-policy-charts';
+
+export const KUBEWARDEN_REPOS = {
+  CHARTS:                   'https://charts.kubewarden.io',
+  CHARTS_REPO:              'https://github.com/kubewarden/helm-charts',
+  CHARTS_REPO_GIT:          'https://github.com/kubewarden/helm-charts.git',
+  CHARTS_REPO_NAME:         'kubewarden-charts',
+  POLICY_CATALOG:           'https://kubewarden.github.io/policy-catalog',
+  POLICY_CATALOG_REPO:      'https://github.com/kubewarden/policy-catalog',
+  POLICY_CATALOG_REPO_GIT:  'https://github.com/kubewarden/policy-catalog.git',
+  POLICY_CATALOG_REPO_NAME: 'kubewarden-policy-catalog',
+};
 
 export const KUBEWARDEN_CHARTS = {
   CONTROLLER:       'kubewarden-controller',
@@ -36,6 +42,17 @@ export const KUBEWARDEN_ANNOTATIONS = {
   CHART_KEY:     'kubewarden.io/chart-key',
   CHART_NAME:    'kubewarden.io/chart-name',
   CHART_VERSION: 'kubewarden.io/chart-version',
+};
+
+export const KUBEWARDEN_CATALOG_ANNOTATIONS = {
+  CONTEXT_AWARE_RESOURCES: 'kubewarden/contextAwareResources',
+  DISPLAY_NAME:            'kubewarden/displayName',
+  MUTATION:                'kubewarden/mutation',
+  REGISTRY:                'kubewarden/registry',
+  REPOSITORY:              'kubewarden/repository',
+  RESOURCES:               'kubewarden/resources',
+  RULES:                   'kubewarden/rules',
+  TAG:                     'kubewarden/tag'
 };
 
 export const KUBEWARDEN = {
@@ -57,6 +74,11 @@ export interface Rule {
   apiVersions: string[];
   operations: string[];
   resources: string[];
+}
+
+export interface ContextAwareResource {
+  apiVersion: string;
+  kind: string;
 }
 
 export interface PolicyServer {
@@ -100,6 +122,8 @@ export interface Policy {
   metadata: V1ObjectMeta;
   spec: {
     backgroundAudit?: boolean;
+    contextAwareResources?: ContextAwareResource[];
+    failurePolicy?: string;
     matchConditions?: V1MatchCondition[];
     matchPolicy?: string;
     mode?: string;
@@ -109,7 +133,6 @@ export interface Policy {
     objectSelector?: V1LabelSelector;
     policyServer: string;
     rules: Array<Rule>;
-    failurePolicy?: string;
     settings?: any;
     sideEffects?: string;
     timeoutSeconds?: number;
