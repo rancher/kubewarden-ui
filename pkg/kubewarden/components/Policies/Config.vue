@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { ref, onBeforeMount, onMounted, toRaw } from 'vue';
 import { useStore } from 'vuex';
-import merge from 'lodash/merge';
 
-import { CATALOG } from '@shell/config/types';
+import { CATALOG, MANAGEMENT } from '@shell/config/types';
 import { saferDump } from '@shell/utils/create-yaml';
 import { set } from '@shell/utils/object';
 
 import Loading from '@shell/components/Loading.vue';
 
-import { Chart, Version, VersionInfo, KUBEWARDEN_ANNOTATIONS } from '@kubewarden/types';
+import {
+  Chart, Version, VersionInfo, KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_CATALOG_ANNOTATIONS
+} from '@kubewarden/types';
 import Values from './Values.vue';
 import PolicyReadmePanel from './PolicyReadmePanel.vue';
 
@@ -35,6 +36,9 @@ const shortDescription = ref('');
 const policyReadme = ref<any>(null);
 
 const fetchPending = ref(true);
+const errorFetchingPolicy = ref(false);
+
+const systemDefaultRegistry = store.getters['management/byId'](MANAGEMENT.SETTING, 'system-default-registry');
 
 async function loadFromAnnotations(chartKey: string, chartName: string, chartVersion: string) {
   if (!chartKey && (!chartName || !chartVersion)) {
@@ -72,6 +76,8 @@ async function loadFromAnnotations(chartKey: string, chartName: string, chartVer
       processChartDetails(toRaw(versionInfo));
     } catch (e) {
       console.warn('Failed to load chart version:', e);
+
+      errorFetchingPolicy.value = true;
     }
   }
 }
@@ -91,7 +97,6 @@ async function loadFromModule() {
       continue;
     }
 
-    // Process all versions of the current chart in parallel
     const versionPromises = chart?.versions?.map(async(version: Version) => {
       try {
         const versionInfo: VersionInfo = await store.dispatch('catalog/getVersionInfo', {
@@ -102,13 +107,20 @@ async function loadFromModule() {
         });
         const rawVersionInfo = toRaw(versionInfo);
 
+        const policyAnnotations = rawVersionInfo.chart?.annotations || {};
+        const registryFromAnnotations = policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REGISTRY] || systemDefaultRegistry?.value;
+        const repositoryFromAnnotations = policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REPOSITORY];
+        const tagFromAnnotations = policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.TAG];
+
+        const module = `${ registryFromAnnotations }/${ repositoryFromAnnotations }`;
+
         return {
           versionInfo: rawVersionInfo,
-          matches:     rawVersionInfo.values?.module?.repository === repo &&
-                   rawVersionInfo.values?.module?.tag === tag
+          matches:     module === repo && tagFromAnnotations === tag
         };
       } catch (e) {
         console.warn('Error loading version:', e);
+        errorFetchingPolicy.value = true;
 
         return { matches: false };
       }
@@ -134,12 +146,6 @@ function processChartDetails(versionInfo: VersionInfo) {
   selectedPolicyDetails.value = versionInfo;
   shortDescription.value = versionInfo?.chart?.description || '';
   policyReadme.value = versionInfo?.readme;
-
-  if (versionInfo.values?.spec?.settings) {
-    const merged = merge({}, versionInfo.values.spec.settings, chartValues.value?.policy.spec.settings);
-
-    set(chartValues.value?.policy.spec, 'settings', merged);
-  }
 
   if (versionInfo.questions) {
     set(chartValues.value, 'questions', versionInfo.questions);
@@ -211,6 +217,7 @@ onMounted(async() => {
         :chart-values="chartValues"
         :yaml-values="yamlValues"
         :mode="props.mode"
+        :error-fetching-policy="errorFetchingPolicy"
         @updateYamlValues="val => emit('updateYamlValues', val)"
       />
     </div>

@@ -28,7 +28,7 @@ import {
 interface Props {
   mode: string;
   chartValues: Record<string, any>;
-  customPolicy: boolean;
+  customPolicy?: boolean;
   value: Record<string, any>;
   yamlValues: string;
   errorFetchingPolicy: boolean;
