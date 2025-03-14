@@ -11,7 +11,7 @@ import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
 import Markdown from '@shell/components/Markdown';
 
-import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPO } from '@kubewarden/types';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPOS } from '@kubewarden/types';
 import { getLatestVersion } from '@kubewarden/plugins/kubewarden-class';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 import { refreshCharts } from '@kubewarden/utils/chart';
@@ -158,8 +158,8 @@ export default {
       try {
         const repoObj = await this.$store.dispatch('cluster/create', {
           type:     CATALOG.CLUSTER_REPO,
-          metadata: { name: 'kubewarden-charts' },
-          spec:     { url: KUBEWARDEN_REPO },
+          metadata: { name: KUBEWARDEN_REPOS.CHARTS_REPO_NAME },
+          spec:     { url: KUBEWARDEN_REPOS.CHARTS },
         });
 
         try {

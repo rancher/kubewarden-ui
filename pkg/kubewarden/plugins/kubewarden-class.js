@@ -5,15 +5,13 @@ import semver from 'semver';
 
 import SteveModel from '@shell/plugins/steve/steve-class';
 import { STATES, STATES_ENUM } from '@shell/plugins/dashboard-store/resource-class';
-import { MANAGEMENT, SERVICE } from '@shell/config/types';
+import { SERVICE } from '@shell/config/types';
 import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
-import { addParams } from '@shell/utils/url';
 
 import {
   RANCHER_NAMESPACES,
-  RANCHER_NS_MATCH_EXPRESSION,
-  ARTIFACTHUB_ENDPOINT
-} from '../types';
+  RANCHER_NS_MATCH_EXPRESSION
+} from '@kubewarden/types';
 
 export default class KubewardenModel extends SteveModel {
   async allServices() {
@@ -42,66 +40,19 @@ export default class KubewardenModel extends SteveModel {
     return null;
   }
 
-  get whitelistSetting() {
-    return this.$rootGetters['management/all'](MANAGEMENT.SETTING).find(
-      (s) => s.id === 'whitelist-domain'
-    );
-  }
-
-  /*
-    Fetches all of the packages from the kubewarden org
-  */
-  get artifactHubRepo() {
-    return async({ offset = 0, limit = 60 } = {}) => {
-      let url = '/meta/proxy/';
-      const packages = 'packages/search';
-
-      const params = {
-        kind: 13, // Kubewarden policies
-        limit, // Max limit is 60, default is 20.
-        offset // Used for pagination
-      };
-
-      url += `${ ARTIFACTHUB_ENDPOINT }/${ packages }`;
-      url = addParams(url, params);
-
-      return await this.$dispatch(
-        'management/request',
-        {
-          url,
-          redirectUnauthorized: false
-        },
-        { root: true }
-      );
-    };
-  }
-
-  /*
-    Necessary for retrieving detailed package info
-  */
-  get artifactHubPackage() {
-    return (pkg) => {
+  get certManagerService() {
+    return async() => {
       try {
-        const url = `/meta/proxy/${ ARTIFACTHUB_ENDPOINT }/packages/kubewarden/${ pkg.repository.name }/${ pkg.name }`;
-
-        return this.$dispatch(
-          'management/request',
-          {
-            url,
-            redirectUnauthorized: false
-          },
-          { root: true }
-        );
+        return await this.$dispatch('cluster/findMatch', {
+          type:     SERVICE,
+          selector: 'app.kubernetes.io/instance=cert-manager'
+        }, { root: true });
       } catch (e) {
-        console.warn(`Error fetching pkg: ${ e }`);
+        console.warn(`Error fetching cert-manager service: ${ e }`);
       }
+
+      return null;
     };
-  }
-
-  get artifactHubWhitelist() {
-    const whitelistValue = this.whitelistSetting?.value?.split(',');
-
-    return whitelistValue.includes('artifacthub.io');
   }
 
   // Determines if a policy is targeting rancher specific namespaces (which happens by default)
@@ -151,51 +102,14 @@ export default class KubewardenModel extends SteveModel {
       { root: true }
     );
   }
-
-  updateWhitelist(url, remove) {
-    const whitelist = this.whitelistSetting;
-    const whitelistValue = whitelist?.value.split(',');
-
-    if (remove && whitelistValue.includes(url)) {
-      const out = whitelistValue.filter((domain) => domain !== url);
-
-      whitelist.value = out.join();
-
-      try {
-        return whitelist.save();
-      } catch (e) {
-        const error = e?.data || e;
-
-        this.$dispatch('growl/error', {
-          title:   error._statusText,
-          message: error.message,
-          timeout: 5000,
-        }, { root: true });
-      }
-    }
-
-    if (!whitelistValue.includes(url)) {
-      whitelistValue.push(url);
-
-      whitelist.value = whitelistValue.join();
-
-      try {
-        return whitelist.save();
-      } catch (e) {
-        const error = e?.data || e;
-
-        this.$dispatch('growl/error', {
-          title:   error._statusText,
-          message: error.message,
-          timeout: 5000,
-        }, { root: true });
-      }
-    }
-  }
 }
 
 export function colorForStatus(status) {
-  const lowStatus = status.toLowerCase();
+  const lowStatus = status?.toLowerCase();
+
+  if (!lowStatus || lowStatus === 'unknown') {
+    return 'text-disabled';
+  }
 
   switch (lowStatus) {
   case 'unschedulable':
@@ -213,6 +127,10 @@ export function colorForStatus(status) {
 
 export function colorForPolicyServerState(state) {
   for (const key of Object.keys(STATES_ENUM)) {
+    if (typeof state === 'undefined') {
+      return STATES['unknown'].color;
+    }
+
     if (state === STATES_ENUM[key]) {
       return STATES[STATES_ENUM[key]].color;
     }
