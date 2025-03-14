@@ -14,10 +14,8 @@ import {
   ClusterRepo,
   Chart,
   FleetBundle,
-  KUBEWARDEN_REPO,
-  KUBEWARDEN_CHARTS_REPO,
-  KUBEWARDEN_CHARTS_REPO_GIT,
-  KUBEWARDEN_CHARTS,
+  KUBEWARDEN_REPOS,
+  KUBEWARDEN_CHARTS
 } from '@kubewarden/types';
 import { findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
 import { getPolicyServerModule, isFleetDeployment } from '@kubewarden/modules/fleet';
@@ -46,7 +44,8 @@ const name = ref(props.value?.metadata?.name);
 const image = ref(props.value?.spec?.image);
 const serviceAccountName = ref(props.value?.spec?.serviceAccountName);
 const replicas = ref(props.value?.spec?.replicas);
-const kubewardenRepo = ref<ClusterRepo | null>(null);
+const kubewardenChartsRepo = ref<ClusterRepo | null>(null);
+const kubewardenPolicyCatalogRepo = ref<ClusterRepo | null>(null);
 const defaultsChart = ref<Chart | null>(null);
 
 const isCreate = computed(() => props.mode === _CREATE);
@@ -137,20 +136,26 @@ watch([defaultImage, latestChartVersion], ([defaultImg, latest]) => {
 
 watchEffect(() => {
   if (allRepos.value.length) {
-    const OFFICIAL_REPOS = [
-      KUBEWARDEN_REPO,
-      KUBEWARDEN_CHARTS_REPO,
-      KUBEWARDEN_CHARTS_REPO_GIT
+    const OFFICIAL_CHART_REPOS = [
+      KUBEWARDEN_REPOS.CHARTS,
+      KUBEWARDEN_REPOS.CHARTS_REPO,
+      KUBEWARDEN_REPOS.CHARTS_REPO_GIT
+    ];
+    const OFFICIAL_CATALOG_REPOS = [
+      KUBEWARDEN_REPOS.POLICY_CATALOG,
+      KUBEWARDEN_REPOS.POLICY_CATALOG_REPO,
+      KUBEWARDEN_REPOS.POLICY_CATALOG_REPO_GIT
     ];
 
-    kubewardenRepo.value = allRepos.value.find((r) => r.spec?.url && OFFICIAL_REPOS.includes(r.spec?.url)) || null;
+    kubewardenChartsRepo.value = allRepos.value.find((r) => r.spec?.url && OFFICIAL_CHART_REPOS.includes(r.spec?.url)) || null;
+    kubewardenPolicyCatalogRepo.value = allRepos.value.find((r) => r.spec?.url && OFFICIAL_CATALOG_REPOS.includes(r.spec?.url)) || null;
   }
 });
 
 watchEffect(() => {
-  if (kubewardenRepo.value && !isFleet.value) {
+  if (kubewardenChartsRepo.value && !isFleet.value) {
     defaultsChart.value = store.getters['catalog/chart']({
-      repoName:  kubewardenRepo.value.metadata?.name,
+      repoName:  kubewardenChartsRepo.value.metadata?.name,
       repoType:  'cluster',
       chartName: KUBEWARDEN_CHARTS.DEFAULTS,
     });

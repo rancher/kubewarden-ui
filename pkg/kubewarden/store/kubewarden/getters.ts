@@ -12,7 +12,7 @@ import { StateConfig } from './index';
 export default {
   airGapped:              (state: StateConfig): boolean => state.airGapped,
   hideBannerDefaults:     (state: StateConfig): boolean => state.hideBannerDefaults,
-  hideBannerArtifactHub:  (state: StateConfig): boolean => state.hideBannerArtifactHub,
+  // hideBannerArtifactHub:  (state: StateConfig): boolean => state.hideBannerArtifactHub,
   hideBannerAirgapPolicy: (state: StateConfig): boolean => state.hideBannerAirgapPolicy,
   controllerApp:          (state: StateConfig): CatalogApp | null => state.controllerApp,
   kubewardenCrds:         (state: StateConfig): CustomResourceDefinition[] => state.kubewardenCrds,

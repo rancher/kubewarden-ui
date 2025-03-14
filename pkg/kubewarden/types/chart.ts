@@ -39,9 +39,9 @@ export interface VersionInfo {
   questions: {
     questions: [];
   };
-  chart: Chart;
+  chart: ChartInfo;
 }
-  
+
 export interface Chart {
   key: string,
   type: string,
@@ -69,4 +69,19 @@ export interface Chart {
   provides?: string[],
   windowsIncompatible?: boolean,
   deploysOnWindows?: boolean
+}
+
+/**
+ * This is essentially the Chart.yaml file in the Helm chart
+ */
+export interface ChartInfo {
+  annotations?: {[key: string]: string}
+  apiVersion: string
+  appVersion: string
+  description?: string
+  home?: string
+  keywords?: string[]
+  name: string
+  sources?: string[]
+  version: string
 }

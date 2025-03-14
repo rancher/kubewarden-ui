@@ -91,7 +91,7 @@ export default class PolicyModel extends KubewardenModel {
     }
 
     if (this.metadata?.annotations && Object.values(KUBEWARDEN_ANNOTATIONS).some((key) => this.metadata.annotations[key])) {
-      return 'Policy Chart';
+      return 'Policy Catalog';
     }
 
     return 'Custom';

@@ -49,6 +49,7 @@ export const DEFAULT_POLICY: Policy = {
   spec:       {
     backgroundAudit: true,
     policyServer:    '',
+    mode:            '',
     module:          '',
     rules:           [{
       apiGroups:   [],
