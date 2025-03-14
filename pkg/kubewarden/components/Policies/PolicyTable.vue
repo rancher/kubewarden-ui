@@ -13,11 +13,11 @@ import LabeledSelect from '@shell/components/form/LabeledSelect';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { Checkbox } from '@components/Form/Checkbox';
 
-import { KUBEWARDEN, PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
+import { PolicyChart, KUBEWARDEN, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
 import { POLICY_TABLE_HEADERS } from '@kubewarden/config/table-headers';
 import { resourcesFromAnnotation, isGlobalPolicy } from '@kubewarden/modules/policyChart';
 
-import SortableTableWrapper from '@kubewarden/SortableTableWrapper';
+import SortableTableWrapper from '@kubewarden/components/SortableTableWrapper';
 
 type KubewardenKey = keyof typeof KUBEWARDEN_POLICY_ANNOTATIONS;
 type LegacyKey = keyof typeof LEGACY_POLICY_ANNOTATIONS;
