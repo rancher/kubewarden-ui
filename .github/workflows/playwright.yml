@@ -173,7 +173,7 @@ jobs:
 
         # Select repository
         helm repo add --force-update rancher-prime https://charts.rancher.com/server-charts/prime
-        helm repo add --force-update rancher-community https://releases.rancher.com/server-charts/alpha # alpha | latest
+        helm repo add --force-update rancher-community https://releases.rancher.com/server-charts/latest # /alpha | /latest
         [[ "$RANCHER" == "rc" || "$RANCHER" == *"-0" ]] && REPO=rancher-community || REPO=rancher-prime
 
         # Translate to sematic version
