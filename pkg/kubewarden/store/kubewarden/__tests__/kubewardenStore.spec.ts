@@ -12,7 +12,6 @@ describe('Kubewarden Vuex Store Module', () => {
       expect(state.airGapped).toBe(false);
       expect(state.fleetRepos).toEqual([]);
       expect(state.hideBannerDefaults).toBe(false);
-      expect(state.hideBannerArtifactHub).toBe(false);
       expect(state.hideBannerAirgapPolicy).toBe(false);
       expect(state.controllerApp).toBeNull();
       expect(state.kubewardenCrds).toEqual([]);
@@ -35,10 +34,6 @@ describe('Kubewarden Vuex Store Module', () => {
 
     it('should return hideBannerDefaults state', () => {
       expect(getters.hideBannerDefaults(state)).toBe(false);
-    });
-
-    it('should return hideBannerArtifactHub state', () => {
-      expect(getters.hideBannerArtifactHub(state)).toBe(false);
     });
 
     it('should return hideBannerAirgapPolicy state', () => {

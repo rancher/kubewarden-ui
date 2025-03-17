@@ -19,7 +19,7 @@ interface StatePart {
 const props = defineProps<{
   row: any;
   label: string;
-  linkTo: object;
+  linkTo?: object;
 }>();
 
 const isLoading = ref(false);

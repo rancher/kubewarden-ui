@@ -51,8 +51,9 @@ config.global.directives = {
       el.textContent = `%${ binding.value }%`;
     },
   },
-  'clean-tooltip': cleanTooltipDirective,
-  'clean-html':    cleanHtmlDirective,
+  'clean-tooltip':   cleanTooltipDirective,
+  'clean-html':      cleanHtmlDirective,
+  'trim-whitespace': trimWhitespaceDirective,
 };
 config.global.stubs = {
   ...config.global.stubs,

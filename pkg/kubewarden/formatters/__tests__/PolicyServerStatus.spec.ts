@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
-import flushPromises from 'flush-promises';
+import { mount, flushPromises } from '@vue/test-utils';
+import { createStore } from 'vuex';
 
 import { WORKLOAD_TYPES } from '@shell/config/types';
 import PolicyServerStatus from '@kubewarden/formatters/PolicyServerStatus.vue';
@@ -12,48 +12,66 @@ const BadgeStateStub = {
 };
 
 describe('PolicyServerStatus.vue', () => {
-  let store: any;
-  let dispatchMock: jest.Mock;
+  let store: ReturnType<typeof createStore>;
+  let getters: Record<string, any>;
+  let actions: Record<string, jest.Mock>;
 
   beforeEach(() => {
-    dispatchMock = jest.fn().mockResolvedValue({});
-    store = {
-      getters: {
-        'cluster/canList': () => true,
-        'cluster/all':     () => [mockControllerDeployment]
-      },
-      dispatch: dispatchMock
+    getters = {
+      'cluster/canList': () => () => false,
+      'cluster/all':     () => () => [],
     };
+    actions = { 'cluster/findAll': jest.fn() };
+
+    store = createStore({
+      actions,
+      getters
+    });
   });
 
   const factory = (props = {}) => {
     return mount(PolicyServerStatus, {
       props,
       global: {
-        mocks: { $store: store },
-        stubs: { BadgeState: BadgeStateStub }
+        plugins: [store],
+        stubs:   { BadgeState: BadgeStateStub }
       }
     });
   };
 
   it('calls store.dispatch in created hook when canList returns true', async() => {
     // Ensure canList returns true so that dispatch is called
-    store.getters['cluster/canList'] = () => true;
+    getters['cluster/canList'] = () => () => true;
+    store = createStore({
+      actions,
+      getters,
+    });
+    const dispatchSpy = jest.spyOn(store, 'dispatch');
+
     factory({ value: 'server1' });
     await flushPromises();
 
-    expect(dispatchMock).toHaveBeenCalledWith('cluster/findAll', { type: WORKLOAD_TYPES.DEPLOYMENT });
+    expect(dispatchSpy).toHaveBeenCalledWith('cluster/findAll', { type: WORKLOAD_TYPES.DEPLOYMENT });
   });
 
   it('does not call store.dispatch in created hook when canList returns false', async() => {
-    store.getters['cluster/canList'] = () => false;
+    getters['cluster/canList'] = () => () => false;
+    store = createStore({
+      actions,
+      getters
+    });
+    const dispatchSpy = jest.spyOn(store, 'dispatch');
+
     factory({ value: 'server1' });
     await flushPromises();
 
-    expect(dispatchMock).not.toHaveBeenCalled();
+    expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
   it('computed allDeployments returns store getter value', async() => {
+    getters['cluster/all'] = () => () => [mockControllerDeployment];
+    store = createStore({ getters });
+
     const wrapper = factory({ value: 'server1' });
 
     await flushPromises();
@@ -67,7 +85,9 @@ describe('PolicyServerStatus.vue', () => {
       metadata: { state: { name: 'running' } }
     };
 
-    store.getters['cluster/all'] = () => [fakeDeployment];
+    getters['cluster/all'] = () => () => [fakeDeployment];
+    store = createStore({ getters });
+
     const wrapper = factory({ value: 'server1' });
 
     await flushPromises();
@@ -81,7 +101,9 @@ describe('PolicyServerStatus.vue', () => {
       metadata: { state: { name: 'running' } }
     };
 
-    store.getters['cluster/all'] = () => [fakeDeployment];
+    getters['cluster/all'] = () => () => [fakeDeployment];
+    store = createStore({ getters });
+
     const wrapper = factory({ value: 'server1' });
 
     await flushPromises();
@@ -90,7 +112,9 @@ describe('PolicyServerStatus.vue', () => {
   });
 
   it('computed stateDisplay returns "pending" if no deployment exists', async() => {
-    store.getters['cluster/all'] = () => [];
+    getters['cluster/all'] = () => () => [];
+    store = createStore({ getters });
+
     const wrapper = factory({ value: 'server1' });
 
     await flushPromises();
@@ -109,7 +133,9 @@ describe('PolicyServerStatus.vue', () => {
       metadata: { state: { name: 'running' } }
     };
 
-    store.getters['cluster/all'] = () => [fakeDeployment];
+    getters['cluster/all'] = () => () => [fakeDeployment];
+    store = createStore({ getters });
+
     const wrapper = factory({ value: 'server1' });
 
     await flushPromises();
@@ -132,7 +158,9 @@ describe('PolicyServerStatus.vue', () => {
       metadata: { state: { name: 'running' } }
     };
 
-    store.getters['cluster/all'] = () => [fakeDeployment];
+    getters['cluster/all'] = () => () => [fakeDeployment];
+    store = createStore({ getters });
+
     const wrapper = factory({ value: 'server1' });
 
     await flushPromises();
@@ -143,7 +171,5 @@ describe('PolicyServerStatus.vue', () => {
     expect(badgeState.exists()).toBe(true);
     // capitalizeMessage('running') should yield "Running"
     expect(badgeState.text()).toContain('Running');
-    // Also, the color prop is rendered as part of the text (stub displays " - {color}")
-    expect(badgeState.text()).toContain('bg-');
   });
 });

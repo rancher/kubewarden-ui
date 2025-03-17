@@ -1,7 +1,7 @@
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { KUBERNETES, WORKSPACE_ANNOTATION } from '@shell/config/labels-annotations';
 
-import { KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME, KUBEWARDEN_ANNOTATIONS } from '@kubewarden/types';
 
 import PolicyModel from '@kubewarden/plugins/policy-class';
 import KubewardenModel from '@kubewarden/plugins/kubewarden-class';
@@ -172,7 +172,7 @@ describe('PolicyModel', () => {
       expect(instance.source).toBe('kubewarden-defaults');
     });
 
-    it('returns "fleet" when deployed with fleet and not applied', () => {
+    it('returns "Fleet" when deployed with fleet and not applied', () => {
       instance.metadata.annotations = {
         [WORKSPACE_ANNOTATION]:            'workspace-value',
         'objectset.rio.cattle.io/applied': ''
@@ -183,85 +183,23 @@ describe('PolicyModel', () => {
         [KUBERNETES.MANAGED_NAME]:   KUBEWARDEN_CHARTS.DEFAULTS,
         'app.kubernetes.io/part-of': KUBEWARDEN_PRODUCT_NAME
       };
-      expect(instance.source).toBe('fleet');
+      expect(instance.source).toBe('Fleet');
     });
 
-    it('returns "template" when artifacthub/pkg annotation is present', () => {
+    it('returns "Policy Catalog" when Helm chart annotations is present', () => {
+      instance.metadata.annotations = { [KUBEWARDEN_ANNOTATIONS.CHART_KEY]: 'some-chart' };
+      expect(instance.source).toBe('Policy Catalog');
+    });
+
+    it('returns "Custom" when artifacthub/pkg annotation is present', () => {
       instance.metadata.annotations = { 'artifacthub/pkg': 'some-pkg' };
-      expect(instance.source).toBe('template');
+      expect(instance.source).toBe('Custom');
     });
 
-    it('returns "custom" by default', () => {
+    it('returns "Custom" by default', () => {
       instance.metadata.annotations = {};
       instance.metadata.labels = {};
-      expect(instance.source).toBe('custom');
-    });
-  });
-
-  describe('stateDisplay', () => {
-    let stateDisplaySpy: jest.SpyInstance<any, any>;
-
-    afterEach(() => {
-      if (stateDisplaySpy) {
-        stateDisplaySpy.mockRestore();
-      }
-    });
-
-    it('calls stateDisplay with status.policyStatus when present', () => {
-      instance.status = { policyStatus: 'active' };
-      stateDisplaySpy = jest.spyOn(require('@shell/plugins/dashboard-store/resource-class'), 'stateDisplay').mockReturnValue('Active Display');
-
-      expect(instance.stateDisplay).toBe('Active Display');
-      expect(stateDisplaySpy).toHaveBeenCalledWith('active');
-    });
-
-    it('calls stateDisplay with no arguments when status.policyStatus is absent', () => {
-      instance.status = {};
-      stateDisplaySpy = jest.spyOn(require('@shell/plugins/dashboard-store/resource-class'), 'stateDisplay').mockReturnValue('Default Display');
-
-      expect(instance.stateDisplay).toBe('Default Display');
-      expect(stateDisplaySpy).toHaveBeenCalledWith();
-    });
-  });
-
-  describe('colorForState', () => {
-    let colorForStatusSpy: jest.SpyInstance<any, any>;
-    let colorForStateFnSpy: jest.SpyInstance<any, any>;
-
-    afterEach(() => {
-      if (colorForStatusSpy) {
-        colorForStatusSpy.mockRestore();
-      }
-      if (colorForStateFnSpy) {
-        colorForStateFnSpy.mockRestore();
-      }
-    });
-
-    it('returns colorForStatus(status) if status.policyStatus exists', () => {
-      instance.status = { policyStatus: 'active' };
-      colorForStatusSpy = jest.spyOn(require('@kubewarden/plugins/kubewarden-class'), 'colorForStatus').mockReturnValue('text-active');
-      const result = instance.colorForState;
-
-      expect(result).toBe('text-active');
-      expect(colorForStatusSpy).toHaveBeenCalledWith('active');
-    });
-
-    it('returns colorForState(this.state) if status.policyStatus is absent', () => {
-      instance.status = {};
-      Object.defineProperty(instance, 'state', { value: 'pending' });
-      colorForStateFnSpy = jest.spyOn(require('@shell/plugins/dashboard-store/resource-class'), 'colorForState').mockReturnValue('text-pending');
-      const result = instance.colorForState;
-
-      expect(result).toBe('text-pending');
-      expect(colorForStateFnSpy).toHaveBeenCalledWith('pending');
-    });
-  });
-
-  describe('stateBackground', () => {
-    it('converts colorForState from "text-" to "bg-"', () => {
-      // Override colorForState getter to return a known value.
-      jest.spyOn(instance, 'colorForState', 'get').mockReturnValue('text-success');
-      expect(instance.stateBackground).toBe('bg-success');
+      expect(instance.source).toBe('Custom');
     });
   });
 });

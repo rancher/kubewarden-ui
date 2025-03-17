@@ -1,80 +1,56 @@
-import { mount } from '@vue/test-utils';
-import flushPromises from 'flush-promises';
+import { mount, flushPromises } from '@vue/test-utils';
+import { h } from 'vue';
+import { createStore } from 'vuex';
 
 import PolicySummaryGraph from '@kubewarden/formatters/PolicySummaryGraph.vue';
 
-import * as kubewarden from '@kubewarden/plugins/kubewarden-class';
+jest.mock('@kubewarden/plugins/kubewarden-class', () => ({
+  colorForStatus: jest.fn().mockImplementation((state: string) => `text-${ state }`),
+  stateSort:      jest.fn().mockImplementation((textColor: string, state: string) => {
+    if (state === 'pass') {
+      return 2;
+    } else if (state === 'fail') {
+      return 1;
+    }
+
+    return 0;
+  })
+}));
 
 describe('PolicySummaryGraph.vue', () => {
-  let row: any;
-  let fakePolicies: any[];
-  let colorForStatusSpy: jest.SpyInstance; // eslint-disable-line
-  let stateSortSpy: jest.SpyInstance; // eslint-disable-line
+  let store: ReturnType<typeof createStore>;
 
   beforeEach(() => {
-    // Stub colorForStatus: returns "text-<state>"
-    colorForStatusSpy = jest.spyOn(kubewarden, 'colorForStatus')
-      .mockImplementation((...args: unknown[]) => {
-        const state = args[0] as string;
-
-        return `text-${ state }`;
-      });
-    // Stub stateSort: for simplicity, return numeric values based on the state
-    stateSortSpy = jest.spyOn(kubewarden, 'stateSort')
-      .mockImplementation((...args: unknown[]) => {
-        const state = args[1] as string;
-
-        // For example: "pass" -> 2, "fail" -> 1, others 0
-        if (state === 'pass') {
-          return 2;
-        }
-        if (state === 'fail') {
-          return 1;
-        }
-
-        return 0;
-      });
-
-    // Fake policies array returned by row.allRelatedPolicies()
-    fakePolicies = [
-      { status: { policyStatus: 'fail' } },
-      { status: { policyStatus: 'fail' } },
-      { status: { policyStatus: 'pass' } }
-    ];
-
-    // Fake row object with an id and an allRelatedPolicies() method
-    row = {
-      id:                 'row1',
-      allRelatedPolicies: jest.fn().mockResolvedValue(fakePolicies)
-    };
+    store = createStore({
+      getters: {},
+      actions: {}
+    });
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  // Factory helper to mount the component with necessary stubs
-  const factory = (propsData = {}) => {
+  function factory(propsData: any = {}) {
     return mount(PolicySummaryGraph, {
       props:  {
-        row,
+        row:    {},
+        label:  '',
+        linkTo: {},
         ...propsData
       },
       global: {
-        stubs: {
-          // Stub VDropdown: render default and popper slots
+        plugins: [store],
+        stubs:   {
           VDropdown: {
             template: `<div class="vdropdown">
               <slot></slot>
               <slot name="popper"></slot>
             </div>`
           },
-          // Stub ProgressBarMulti: render its "values" prop as JSON for testing
           ProgressBarMulti: {
-            template: '<div class="progress-bar-multi">{{ JSON.stringify(values) }}</div>',
-            props:    ['values']
+            name:  'ProgressBarMulti',
+            props: ['values'],
+            render() {
+              return h('div', { class: 'progress-bar-multi' }, JSON.stringify(this.values));
+            }
           },
-          // Stub router-link to render an <a> element with its content
           'router-link': {
             template: '<a class="router-link"><slot /></a>',
             props:    ['to']
@@ -82,144 +58,187 @@ describe('PolicySummaryGraph.vue', () => {
         }
       }
     });
-  };
+  }
 
-  it('calls row.allRelatedPolicies in created() and sets relatedPolicies', async() => {
-    const wrapper = factory();
+  it('displays a loading spinner while onMounted is fetching policies', async() => {
+    let resolveFn: any;
+    const row = {
+      id:                 'row1',
+      allRelatedPolicies: jest.fn().mockImplementation(() => new Promise((r) => {
+        resolveFn = r;
+      }))
+    };
 
-    await flushPromises();
-
-    expect((wrapper.vm as any).relatedPolicies).toEqual(fakePolicies);
-  });
-
-  it('computed "show" returns true if stateParts is non-empty', async() => {
-    const wrapper = factory();
-
-    await flushPromises();
-    expect(wrapper.vm.show).toBe(true);
-  });
-
-  it('computed "show" returns false if stateParts is empty', async() => {
-    const wrapper = factory();
+    const wrapper = factory({ row });
 
     await flushPromises();
 
-    await wrapper.setData({ relatedPolicies: [] });
+    const spinner = wrapper.find('.icon-spinner');
 
-    expect(wrapper.vm.show).toBe(false);
+    expect(spinner.exists()).toBe(true);
+
+    resolveFn([]);
+    await flushPromises();
+
+    // The spinner should be gone after the fetch finishes
+    expect(wrapper.find('.icon-spinner').exists()).toBe(false);
   });
 
-  it('computed "stateParts" groups policies by state correctly', async() => {
-    const wrapper = factory();
+  it('renders fallback when there are no policies (relatedPolicies is empty)', async() => {
+    // Provide a row whose allRelatedPolicies returns an empty array
+    const row = {
+      id:                 'rowEmpty',
+      allRelatedPolicies: jest.fn().mockResolvedValue([])
+    };
+
+    const wrapper = factory({ row });
 
     await flushPromises();
 
-    const stateParts = wrapper.vm.stateParts;
+    // The fallback is the "—" inside a div with .text-center.text-muted
+    const fallback = wrapper.find('div.text-center.text-muted');
 
-    // Expect two groups: one for "fail" (value 2) and one for "pass" (value 1)
-    // Expected groups:
-    // For "fail": colorForStatus returns "text-fail" → key "text-fail/fail",
-    //   value should be 2, color becomes "bg-fail", sort returns 1.
-    // For "pass": key "text-pass/pass", value 1, color "bg-pass", sort returns 2.
-    const failGroup = stateParts.find((item: any) => item.label === 'fail');
-    const passGroup = stateParts.find((item: any) => item.label === 'pass');
+    expect(fallback.exists()).toBe(true);
+    expect(fallback.text()).toContain('—');
 
-    expect(failGroup).toBeDefined();
-    expect(failGroup.value).toBe(2);
-    expect(failGroup.color).toBe('bg-fail');
-    expect(failGroup.textColor).toBe('text-fail');
-    expect(failGroup.sort).toBe(1);
-
-    expect(passGroup).toBeDefined();
-    expect(passGroup.value).toBe(1);
-    expect(passGroup.color).toBe('bg-pass');
-    expect(passGroup.textColor).toBe('text-pass');
-    expect(passGroup.sort).toBe(2);
+    // No progress bar
+    expect(wrapper.find('.progress-bar-multi').exists()).toBe(false);
   });
 
-  it('computed "colorParts" groups stateParts by color correctly', async() => {
-    const wrapper = factory();
+  it('renders progress bar and summary if policies exist', async() => {
+    const row = {
+      id:                 'row1',
+      allRelatedPolicies: jest.fn().mockResolvedValue([
+        { status: { policyStatus: 'fail' } },
+        { status: { policyStatus: 'fail' } },
+        { status: { policyStatus: 'pass' } }
+      ])
+    };
+
+    const wrapper = factory({ row });
 
     await flushPromises();
 
-    const colorParts = wrapper.vm.colorParts;
-    // Expect two groups: one for "bg-fail" (value 2) and one for "bg-pass" (value 1)
-    const failColor = colorParts.find((item: any) => item.color === 'bg-fail');
-    const passColor = colorParts.find((item: any) => item.color === 'bg-pass');
+    const pieces = wrapper.findAll('.piece.bg-fail');
 
-    expect(failColor).toBeDefined();
-    expect(failColor.value).toBe(2);
-    expect(passColor).toBeDefined();
-    expect(passColor.value).toBe(1);
+    expect(pieces.length).toBe(1);
+    expect(pieces[0].attributes()['style']).toContain('width: 66.66%');
+
+    // No fallback
+    expect(wrapper.find('.text-center.text-muted').exists()).toBe(false);
   });
 
-  it('computed "displayLabel" returns label with count when label prop is provided', async() => {
-    const wrapper = factory({ label: 'Test Label' });
-
-    await flushPromises();
-
-    // fakePolicies.length is 3, so displayLabel should be "Test Label, 3"
-    expect(wrapper.vm.displayLabel).toBe('Test Label, 3');
-  });
-
-  it('computed "displayLabel" returns count as string when no label prop is provided', async() => {
-    const wrapper = factory();
-
-    await flushPromises();
-
-    expect(wrapper.vm.displayLabel).toBe('3');
-  });
-
-  describe('template rendering', () => {
-    it('renders VDropdown with ProgressBarMulti and a router-link when linkTo prop is provided', async() => {
-      const linkTo = { name: 'detail' };
-      const wrapper = factory({
-        label: 'Test Label',
-        linkTo
-      });
-
-      await flushPromises();
-
-      // Check that VDropdown is rendered (stubbed as element with class "vdropdown")
-      expect(wrapper.find('.vdropdown').exists()).toBe(true);
-      const progressBar = wrapper.find('.progress-bar-multi');
-
-      expect(progressBar.exists()).toBe(true);
-      expect(progressBar.text()).toEqual(JSON.stringify(wrapper.vm.colorParts));
-
-      // Check that router-link is rendered with the correct "to" prop and displays displayLabel text
-      const routerLink = wrapper.findComponent('.router-link') as any;
-
-      expect(routerLink.exists()).toBe(true);
-      expect(routerLink.props('to')).toEqual(linkTo);
-      expect(routerLink.text()).toContain(wrapper.vm.displayLabel);
+  it('shows a label plus count if the "label" prop is provided', async() => {
+    const row = {
+      id:                 'row1',
+      allRelatedPolicies: jest.fn().mockResolvedValue([
+        { status: { policyStatus: 'pass' } },
+        { status: { policyStatus: 'fail' } }
+      ])
+    };
+    const wrapper = factory({
+      row,
+      label: 'Hello Label'
     });
 
-    it('renders a span with displayLabel when linkTo prop is not provided', async() => {
-      const wrapper = factory({ label: 'Test Label' });
+    await flushPromises();
 
-      await flushPromises();
+    // The total is 2
+    // The template says: if label is given => "Hello Label, 2"
+    expect(wrapper.text()).toContain('Hello Label, 2');
+  });
 
-      // router-link should not exist; a span should display displayLabel
-      expect(wrapper.findComponent({ name: 'router-link' }).exists()).toBe(false);
-      const span = wrapper.find('span');
+  it('shows just the count if no label is given', async() => {
+    const row = {
+      id:                 'row1',
+      allRelatedPolicies: jest.fn().mockResolvedValue([
+        { status: { policyStatus: 'pass' } }
+      ])
+    };
 
-      expect(span.exists()).toBe(true);
-      expect(span.text()).toBe(wrapper.vm.displayLabel);
+    const wrapper = factory({ row });
+
+    await flushPromises();
+
+    // The total is 1. So we expect just "1"
+    expect(wrapper.text()).toContain('1');
+    // Should not see a comma or any label text
+    expect(wrapper.text()).not.toContain(',');
+  });
+
+  it('renders a <router-link> if linkTo is provided, otherwise a <span>', async() => {
+    const row = {
+      id:                 'rowlink',
+      allRelatedPolicies: jest.fn().mockResolvedValue([{ status: { policyStatus: 'fail' } }])
+    };
+
+    // 1) Provide linkTo, expect <router-link>
+    const wrapperWithLink = factory({
+      row,
+      label:  'Has Link',
+      linkTo: { name: 'someRoute' }
     });
 
-    it('renders fallback div when "show" is false', async() => {
-      // Set relatedPolicies to empty so that stateParts (and thus show) is empty.
-      const wrapper = factory({ label: 'Test Label' });
+    await flushPromises();
 
-      await flushPromises();
-      await wrapper.setData({ relatedPolicies: [] });
+    const linkEl = wrapperWithLink.find('.router-link');
 
-      // When show is false, the template renders a div with classes "text-center text-muted" containing an em-dash.
-      const fallback = wrapper.find('div.text-center.text-muted');
+    expect(linkEl.exists()).toBe(true);
+    // The link text should be "Has Link, 1"
+    expect(linkEl.text()).toContain('Has Link, 1');
 
-      expect(fallback.exists()).toBe(true);
-      expect(fallback.text()).toContain('—'); // or the &mdash; character
+    // 2) Provide no linkTo, expect <span>
+    const wrapperNoLink = factory({
+      row,
+      label:  'No Link',
+      linkTo: null
     });
+
+    await flushPromises();
+
+    // We should get a span instead
+    expect(wrapperNoLink.find('.router-link').exists()).toBe(false);
+    const span = wrapperNoLink.find('span');
+
+    expect(span.text()).toBe('No Link, 1');
+  });
+
+  it('displays a table of states in the VDropdown popper when there are policies', async() => {
+    const row = {
+      id:                 'row2',
+      allRelatedPolicies: jest.fn().mockResolvedValue([
+        { status: { policyStatus: 'fail' } },
+        { status: { policyStatus: 'fail' } },
+        { status: { policyStatus: 'pass' } }
+      ])
+    };
+    const wrapper = factory({ row });
+
+    await flushPromises();
+
+    // The popper slot is rendered in our stub, so let's find the table
+    const popperTable = wrapper.find('table.fixed');
+
+    expect(popperTable.exists()).toBe(true);
+
+    const rows = popperTable.findAll('tbody tr');
+
+    expect(rows.length).toBe(2); // 'fail', 'pass'
+
+    // Check one row with "fail" and count=2
+    const failRow = rows.find((r) => r.text().includes('fail'));
+
+    expect(failRow).toBeTruthy();
+    expect(failRow?.text()).toContain('2');
+    // The first cell should have class "text-fail"
+    const tds = failRow?.findAll('td') || [];
+
+    expect(tds[0].classes()).toContain('text-fail');
+
+    // Check one row with "pass" and count=1
+    const passRow = rows.find((r) => r.text().includes('pass'));
+
+    expect(passRow).toBeTruthy();
+    expect(passRow?.text()).toContain('1');
   });
 });
