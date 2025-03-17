@@ -132,7 +132,7 @@ export default {
     },
 
     tracingConfiguration() {
-      if (!this.controllerApp) {
+      if (!this.controllerApp?.values) {
         return null;
       }
 

@@ -189,7 +189,7 @@ export default {
     },
 
     metricsConfiguration() {
-      if (!this.controllerApp) {
+      if (!this.controllerApp?.values) {
         return null;
       }
 
