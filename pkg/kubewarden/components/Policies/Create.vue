@@ -662,7 +662,7 @@ export default ({
               {{ shortDescription }}
             </p>
             <button
-              v-if="(selectedPolicyDetails?.readme || selectPolicyDetails?.appreadme) && !errorFetchingPolicy"
+              v-if="selectedPolicyDetails && (selectedPolicyDetails?.readme || selectPolicyDetails?.appreadme) && !errorFetchingPolicy"
               class="btn btn-sm role-link banner__readme-button"
               @click="showReadme"
             >
@@ -693,7 +693,7 @@ export default ({
       </template>
     </Wizard>
 
-    <template v-if="(selectedPolicyDetails?.readme || selectPolicyDetails?.appreadme) && !customPolicy && !errorFetchingPolicy">
+    <template v-if="selectedPolicyDetails && (selectedPolicyDetails?.readme || selectPolicyDetails?.appreadme) && !customPolicy && !errorFetchingPolicy">
       <PolicyReadmePanel
         ref="readmePanel"
         :policy-chart-details="selectedPolicyDetails"
