@@ -1,5 +1,5 @@
 <script>
-import { defineAsyncComponent } from 'vue';
+import { defineAsyncComponent, markRaw } from 'vue';
 import merge from 'lodash/merge';
 import isEmpty from 'lodash/isEmpty';
 import jsyaml from 'js-yaml';
@@ -121,7 +121,7 @@ export default {
       if (this.value.haveComponent('kubewarden/policy-server')) {
         const importFn = this.value.importComponent('kubewarden/policy-server');
 
-        this.valuesComponent = defineAsyncComponent(importFn);
+        this.valuesComponent = markRaw(defineAsyncComponent(importFn));
 
         this.showValuesComponent = true;
       }

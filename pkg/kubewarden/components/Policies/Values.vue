@@ -3,7 +3,8 @@ import {
   ref,
   onMounted,
   watch,
-  computed
+  computed,
+  markRaw
 } from 'vue';
 import { useStore } from 'vuex';
 import { defineAsyncComponent, toRaw } from 'vue';
@@ -90,7 +91,7 @@ function loadValuesComponent() {
     // Dynamic import of the form component
     const importFn = props.value.importComponent('kubewarden/admission');
 
-    valuesComponent.value = defineAsyncComponent(importFn);
+    valuesComponent.value = markRaw(defineAsyncComponent(importFn));
   }
 }
 
