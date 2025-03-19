@@ -18,7 +18,7 @@ interface StatePart {
 
 const props = defineProps<{
   row: any;
-  label: string;
+  label?: string;
   linkTo?: object;
 }>();
 
