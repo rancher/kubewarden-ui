@@ -60,6 +60,10 @@ export default {
       type:    Boolean,
       default: false
     },
+    mode: {
+      type:    String,
+      default: _VIEW
+    },
     question: {
       type:     Object,
       required: true
@@ -203,6 +207,7 @@ export default {
                 <component
                   :is="componentForQuestion(q)"
                   in-store="cluster"
+                  :mode="mode"
                   :question="q"
                   :value="get(value[vIndex], q.variable)"
                   @update:value="update(q.variable, vIndex, $event)"

@@ -1,52 +1,45 @@
-<script>
-import { mapGetters } from 'vuex';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { useStore } from 'vuex';
 
 import ChartReadme from '@shell/components/ChartReadme';
 
-export default {
-  props: {
-    packageValues: {
-      type:     Object,
-      required: true,
-    },
-  },
+import { PolicyDetail, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
 
-  components: { ChartReadme },
+const props = defineProps<{ policyChartDetails: PolicyDetail }>();
 
-  data() {
-    return {
-      showSlideIn:      false,
-      info:             undefined,
-      infoVersion:      undefined,
-      versionInfo:      undefined,
-      versionError:     undefined,
-      headerBannerSize: 0,
-    };
-  },
+const store = useStore();
+const showSlideIn = ref(false);
+const t = store.getters['i18n/t'];
 
-  computed: {
-    ...mapGetters({ theme: 'prefs/theme' }),
+const displayName = computed<string>(() => {
+  const { annotations } = props.policyChartDetails.chart;
+  let name = props.policyChartDetails.chart.name;
 
-    applyDarkModeBg() {
-      if (this.theme === 'dark') {
-        return { 'dark-mode': true };
-      }
-
-      return {};
-    },
-  },
-
-  methods: {
-    show() {
-      this.showSlideIn = true;
-    },
-
-    hide() {
-      this.showSlideIn = false;
-    }
+  if (annotations) {
+    name =
+      annotations[KUBEWARDEN_POLICY_ANNOTATIONS.DISPLAY_NAME] ??
+      annotations[LEGACY_POLICY_ANNOTATIONS.DISPLAY_NAME] ??
+      name;
   }
+
+  return name;
+});
+
+const show = () => {
+  showSlideIn.value = true;
 };
+
+const hide = () => {
+  showSlideIn.value = false;
+};
+
+defineExpose({
+  show,
+  hide,
+});
 </script>
+
 <template>
   <div
     class="policy-info-panel"
@@ -56,7 +49,7 @@ export default {
       v-if="showSlideIn"
       class="glass"
       data-testid="extension-details-bg"
-      @click="hide()"
+      @click="hide"
     />
     <div
       class="slideIn"
@@ -65,7 +58,7 @@ export default {
     >
       <div class="slideIn__header">
         <div
-          v-if="packageValues"
+          v-if="props.policyChartDetails"
           class="policy-info-content"
         >
           <div class="policy-header pb-10">
@@ -79,11 +72,11 @@ export default {
 
           <div class="policy-title mt-20">
             <h2 class="policy-info-title">
-              {{ packageValues.display_name }}
+              {{ displayName }}
             </h2>
           </div>
 
-          <ChartReadme class="mt-20" :version-info="packageValues" />
+          <ChartReadme class="mt-20" :version-info="policyChartDetails" />
         </div>
       </div>
     </div>

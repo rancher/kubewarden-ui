@@ -9,8 +9,8 @@ import {
   GrafanaDashboardLabels,
   GrafanaDashboardAnnotations,
   HelmAnnotations
-} from '../types';
-import { handleGrowl, GrowlConfig } from '../utils/handle-growl';
+} from '@kubewarden/types';
+import { handleGrowl, GrowlConfig } from '@kubewarden/utils/handle-growl';
 
 interface MetricsConfig {
   store: any,

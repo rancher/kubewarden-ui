@@ -1,6 +1,44 @@
 import { V1LabelSelectorRequirement } from '@kubernetes/client-node';
 import { Policy } from './kubewarden';
 
+export interface PolicyChart {
+  name: string;
+  home: string;
+  version: string;
+  description: string;
+  keywords: string[];
+  icon: string;
+  apiVersion: string;
+  appVersion: string;
+  annotations: {
+    [key: string]: string | undefined;
+  };
+  kubeVersion: string;
+  type: string;
+  urls: string[];
+  created: string;
+  digest: string;
+  key: string;
+  repoType: string;
+  repoName: string;
+  official?: boolean;
+}
+
+export interface PolicyDetail {
+  readme: string;
+  values: {
+    metadata?: {
+      name: string;
+    }
+    clusterScoped: boolean;
+    spec: Policy['spec'];
+  };
+  questions: {
+    questions: [];
+  };
+  chart: PolicyChart;
+}
+
 export const DEFAULT_POLICY: Policy = {
   apiVersion: '',
   kind:       '',
@@ -11,6 +49,7 @@ export const DEFAULT_POLICY: Policy = {
   spec:       {
     backgroundAudit: true,
     policyServer:    '',
+    mode:            '',
     module:          '',
     rules:           [{
       apiGroups:   [],
@@ -27,8 +66,6 @@ export const DEFAULT_POLICY: Policy = {
     settings: {}
   }
 };
-
-export const ARTIFACTHUB_ENDPOINT = 'artifacthub.io/api/v1';
 
 export const ARTIFACTHUB_PKG_ANNOTATION = 'artifacthub/pkg';
 
@@ -104,3 +141,20 @@ export const YAML_OPTIONS = [
     value:    VALUES_STATE.YAML,
   }
 ];
+
+
+export const KUBEWARDEN_POLICY_ANNOTATIONS = {
+  CONTEXT_AWARE_RESOURCES:  'kubewarden/contextAwareResources',
+  DISPLAY_NAME:             'kubewarden/displayName',
+  MUTATION:                 'kubewarden/mutation',
+  RESOURCES:                'kubewarden/resources',
+  HIDDEN_UI:                'kubewarden/hidden-ui',
+  KEYWORDS:                 'kubewarden/keywords',
+};
+
+export const LEGACY_POLICY_ANNOTATIONS = {
+  DISPLAY_NAME:             'io.artifacthub.displayName',
+  KEYWORDS:                 'io.artifacthub.keywords',
+  RESOURCES:                'io.artifacthub.resources',
+};
+

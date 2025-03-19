@@ -17,7 +17,7 @@ export default {
         return 0;
       }
 
-      return (Math.round(this.reports?.status.success * 100) / this.reports.total).toFixed(0);
+      return parseFloat(((this.reports?.status.success * 100) / this.reports.total).toFixed(2));
     },
 
     secondaryColor() {

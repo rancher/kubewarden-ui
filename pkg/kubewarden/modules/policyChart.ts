@@ -1,15 +1,16 @@
-import { ArtifactHubPackageDetails } from '@kubewarden/types';
+import { PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
 
 /**
- * Extracts resource kinds from a list of ArtifactHub packages with the `kubewarden/resources` annotation.
- * @param artifactHubPackages
+ * Extracts resource kinds from a list of policy charts with the `kubewarden/resources` annotation.
+ * @param policyCharts
  * @returns `string[]` | Resource kinds
  */
-export function resourcesFromAnnotation(artifactHubPackages: ArtifactHubPackageDetails[]): string[] | void {
+export function resourcesFromAnnotation(policyChart: PolicyChart[]): string[] | void {
   const out: string[] = [];
 
-  const resources = artifactHubPackages?.flatMap((artifactHubPackage) => {
-    const annotation = artifactHubPackage?.data?.['kubewarden/resources'];
+  const resources = policyChart?.flatMap((policyChart) => {
+    const annotation = policyChart?.annotations?.[KUBEWARDEN_POLICY_ANNOTATIONS.RESOURCES] ??
+                       policyChart?.annotations?.[LEGACY_POLICY_ANNOTATIONS.RESOURCES];
 
     if (annotation) {
       return annotation;
@@ -38,14 +39,14 @@ export function resourcesFromAnnotation(artifactHubPackages: ArtifactHubPackageD
 }
 
 /**
- * Checks the resources within a ArtifactHub package's `kubewarden/resources` annotation to determine if
+ * Checks the resources within a policy chart's `kubewarden/resources` annotation to determine if
  * the policy is targeting non-namespaced resources. Needed to gate CAP from AP grid.
- * @param artifactHubPackage `schemas`
- * @returns boolean
+ * @param policyChart `schemas`
+ * @returns Boolean
  */
-export function isGlobalPolicy(artifactHubPackage: ArtifactHubPackageDetails, schemas: any): boolean {
-  if (artifactHubPackage) {
-    const resources: string[] | undefined = artifactHubPackage.data?.['kubewarden/resources']?.split(',');
+export function isGlobalPolicy(policyChart: PolicyChart, schemas: any): boolean {
+  if (policyChart) {
+    const resources: string[] | undefined = policyChart.annotations?.['kubewarden/resources']?.split(',');
     let targetsNonNamespaced: boolean = false;
 
     if (resources) {
