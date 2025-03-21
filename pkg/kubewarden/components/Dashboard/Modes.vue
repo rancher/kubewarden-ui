@@ -19,7 +19,7 @@ export default {
       {{ t('kubewarden.dashboard.headers.modes.title') }}:&nbsp;
     </h4>
     <div>
-      <span>{{ gauges.mode.protect }}</span>
+      <span>{{ gauges.mode.protect }}&nbsp;</span>
       <router-link
         class="modeLink"
         :to="modeLink({ q: 'protect' })"
@@ -31,7 +31,7 @@ export default {
     <span>&nbsp;/&nbsp;</span>
 
     <div>
-      <span>{{ gauges.mode.monitor }}</span>
+      <span>{{ gauges.mode.monitor }}&nbsp;</span>
       <router-link
         class="modeLink"
         :to="modeLink({ q: 'monitor' })"
