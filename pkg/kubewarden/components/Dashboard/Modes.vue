@@ -44,7 +44,7 @@ export default {
 
 <style lang="scss" scoped>
 .modeLink {
-  color: var(--primary-text);
+  color: var(--body-text);
   text-decoration: none;
   cursor: pointer;
 }
