@@ -48,7 +48,7 @@ export default {
         <span class="percentage"><i>/&nbsp;</i>{{ formattedPercentage('fail') }}</span>
       </div>
     </div>
-    <div>
+    <div class="mt-10">
       <Bar
         :percentage="percentageBarValue"
         primary-color="--success"

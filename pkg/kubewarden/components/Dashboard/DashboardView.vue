@@ -365,26 +365,9 @@ export default {
             <span v-if="index === 2" class="count">{{ allPolicyServers.length || 0 }}</span>
           </template>
 
-          <template #action>
-            <router-link
-              class="btn action"
-              :class="{
-                'role-primary': (index === 0 && namespacedPolicies.length < 1) ||
-                  (index === 1 && globalPolicies.length < 1) ||
-                  (index === 2 && allPolicyServers.length < 1),
-                'role-secondary': (index === 0 && namespacedPolicies.length >= 1) ||
-                  (index === 1 && globalPolicies.length >= 1) ||
-                  (index === 2 && allPolicyServers.length >= 1)
-              }"
-              :to="card.cta"
-            >
-              {{ t(card.linkText) }}
-            </router-link>
-          </template>
-
           <template #content>
             <span v-if="index === 0">
-              <Modes :gauges="namespacedGuages" />
+              <Modes :gauges="namespacedGuages" :mode-link="card.modeLink" />
               <template v-if="showReports">
                 <Reports :gauges="namespacedResultsGauges" :show-reporter-link="showReporterLink" />
                 <ReportsGauge
@@ -397,7 +380,7 @@ export default {
             </span>
 
             <span v-if="index === 1">
-              <Modes :gauges="globalGuages" />
+              <Modes :gauges="globalGuages" :mode-link="card.modeLink" />
               <template v-if="showReports">
                 <Reports :gauges="clusterResultsGauges" :show-reporter-link="showReporterLink" />
                 <ReportsGauge
@@ -447,10 +430,6 @@ export default {
     font-size: 12px;
     margin-bottom: 0;
   }
-
-  div {
-    margin-top: 0 !important;
-  }
 }
 
 .count {
@@ -462,7 +441,7 @@ export default {
 .modes, .events {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: baseline;
 }
 
 .action {

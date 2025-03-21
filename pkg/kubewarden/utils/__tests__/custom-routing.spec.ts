@@ -28,7 +28,8 @@ describe('Kubewarden Route Utilities', () => {
         meta:   {
           pkg:     KUBEWARDEN_PRODUCT_NAME,
           product: KUBEWARDEN_PRODUCT_NAME
-        }
+        },
+        query: {}
       });
     });
 
