@@ -21,7 +21,7 @@ export default {
     <div>
       <span>{{ gauges.mode.protect }}</span>
       <router-link
-        class="link"
+        class="modeLink"
         :to="modeLink({ q: 'protect' })"
       >
         {{ t('kubewarden.dashboard.headers.modes.protect') }}
@@ -33,7 +33,7 @@ export default {
     <div>
       <span>{{ gauges.mode.monitor }}</span>
       <router-link
-        class="link"
+        class="modeLink"
         :to="modeLink({ q: 'monitor' })"
       >
         {{ t('kubewarden.dashboard.headers.modes.monitor') }}
@@ -41,3 +41,11 @@ export default {
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.modeLink {
+  color: var(--primary-text);
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
