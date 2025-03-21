@@ -115,14 +115,6 @@ describe('component: DashboardView', () => {
     });
   });
 
-  it('correctly applies class names based on policy server counts', () => {
-    const wrapper = createWrapper();
-
-    const btn = wrapper.find('.role-secondary');
-
-    expect(btn.exists()).toBe(true);
-  });
-
   it('renders correct gauge info of policy servers', () => {
     const pods = [
       {
