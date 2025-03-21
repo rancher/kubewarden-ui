@@ -195,21 +195,20 @@ export function isServiceMonitorOutOfDate(ps: PolicyServer, sm: ServiceMonitor):
   const smLabels = sm.spec?.selector?.matchLabels || {};
 
   const newLabels = {
-    'app.kubernetes.io/instance':  `policy-server-${ ps.metadata?.name }`,
     'app.kubernetes.io/component': 'policy-server',
     'app.kubernetes.io/part-of':   'kubewarden'
   };
 
   // Determine if the PolicyServer is using the new label style.
   const psIsNewStyle =
-    psLabels['app.kubernetes.io/instance'] === newLabels['app.kubernetes.io/instance'] &&
-    psLabels['app.kubernetes.io/component'] === newLabels['app.kubernetes.io/component'] &&
-    psLabels['app.kubernetes.io/part-of'] === newLabels['app.kubernetes.io/part-of'];
+    psLabels['app.kubernetes.io/instance'] &&
+    psLabels['app.kubernetes.io/component'] &&
+    psLabels['app.kubernetes.io/part-of'];
 
   // Only if the PolicyServer is new style do we need the ServiceMonitor to have the new labels.
   if (psIsNewStyle) {
     const smHasNewLabels =
-      smLabels['app.kubernetes.io/instance'] === newLabels['app.kubernetes.io/instance'] &&
+      smLabels['app.kubernetes.io/instance'] &&
       smLabels['app.kubernetes.io/component'] === newLabels['app.kubernetes.io/component'] &&
       smLabels['app.kubernetes.io/part-of'] === newLabels['app.kubernetes.io/part-of'];
 
