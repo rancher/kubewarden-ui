@@ -31,13 +31,6 @@ export default {
     <span class="text-success">{{ gauges.status.success }} {{ t('kubewarden.dashboard.headers.reports.success') }}</span>
     <span>&nbsp;/&nbsp;</span>
     <span class="text-error">{{ gauges.status.fail }} {{ t('kubewarden.dashboard.headers.reports.fail') }}</span>
-    <router-link
-      v-if="showReporterLink && gauges.total > 0"
-      :to="reporterLink"
-      class="ml-10"
-    >
-      Show All
-    </router-link>
   </div>
 </template>
 
