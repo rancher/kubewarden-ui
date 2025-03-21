@@ -81,7 +81,7 @@ test('Install UI extension', async({ page, ui }) => {
     if (ORIGIN === 'source') {
       await extensions.developerLoad('http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js')
     } else {
-      await extensions.install('kubewarden')
+      await extensions.install('kubewarden', { version: process.env.UIVERSION?.replace(/^kubewarden-/, '') } )
     }
   })
 })
