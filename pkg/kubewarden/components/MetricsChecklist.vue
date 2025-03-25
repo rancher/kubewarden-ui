@@ -72,6 +72,10 @@ export default {
     unsupportedTelemetrySpec: {
       type:    Boolean,
       default: false
+    },
+    outdatedServiceMonitor: {
+      type:    Boolean,
+      default: false
     }
   },
 
@@ -156,6 +160,22 @@ export default {
       return null;
     },
 
+    updateServiceMonitorsTooltip() {
+      return this.t(
+        'kubewarden.monitoring.prerequisites.tooltips.updateServiceMonitor',
+        {},
+        true
+      );
+    },
+
+    updateServiceMonitorButtonDisabled() {
+      if (!this.kubewardenServiceMonitor || !this.monitoringApp) {
+        return true;
+      }
+
+      return false;
+    },
+
     showConflictingDashboardsBanner() {
       return !this.hasKubewardenDashboards && !isEmpty(this.conflictingGrafanaDashboards);
     }
@@ -189,6 +209,37 @@ export default {
         btnCb(true);
       } catch (e) {
         handleGrowl({ error: e, store: this.$store });
+        btnCb(false);
+      }
+    },
+
+    async updateServiceMonitor(btnCb) {
+      if (!this.kubewardenServiceMonitor) {
+        btnCb(false);
+
+        return;
+      }
+
+      try {
+        const sm = this.kubewardenServiceMonitor;
+
+        const psName = this.policyServerObj?.metadata?.name || this.policyObj?.spec?.policyServer;
+
+        sm.spec.selector.matchLabels = {
+          'app.kubernetes.io/instance':  `policy-server-${ psName }`,
+          'app.kubernetes.io/component': 'policy-server',
+          'app.kubernetes.io/part-of':   'kubewarden'
+        };
+
+        await sm.save();
+        this.$emit('updateServiceMonitorLabels');
+
+        btnCb(true);
+      } catch (err) {
+        handleGrowl({
+          error: err,
+          store: this.$store
+        });
         btnCb(false);
       }
     },
@@ -260,21 +311,23 @@ export default {
       <h2>{{ t('kubewarden.monitoring.prerequisites.label') }}</h2>
       <p>{{ t('kubewarden.monitoring.prerequisites.description') }}</p>
     </div>
+
     <Banner
       color="warning"
       :label="t('kubewarden.monitoring.prerequisites.warning')"
     />
+
+    <!-- Basic prerequisites items: OpenTelemetry, Monitoring app, etc. -->
     <div class="mt-20 mb-20">
-      <div class="checklist__step mt-20 mb-20" data-testid="kw-monitoring-checklist-step-open-tel">
-        <i class="icon mr-10" :class="badgeIcon(openTelSvc)" />
+      <!-- openTel -->
+      <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-open-tel">
+        <i data-testid="kw-otel-icon" class="icon mr-10" :class="badgeIcon(openTelSvc)" />
         <p v-clean-html="t('kubewarden.tracing.openTelemetry', {}, true)" />
       </div>
 
+      <!-- Monitoring -->
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-monitoring-app">
-        <i
-          class="icon mr-10"
-          :class="badgeIcon(monitoringApp)"
-        />
+        <i data-testid="kw-monitoring-icon" class="icon mr-10" :class="badgeIcon(monitoringApp)" />
         <div class="checklist__config">
           <p v-clean-html="t('kubewarden.monitoring.prerequisites.monitoringApp.label', {}, true)" p />
           <button
@@ -290,24 +343,45 @@ export default {
         </div>
       </div>
 
+      <!-- ServiceMonitor: now split for "outdated" vs. "non-existent" -->
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-service-monitor-map">
-        <i class="icon mr-10" :class="badgeIcon(kubewardenServiceMonitor)" />
-        <div class="checklist__config">
-          <p v-clean-html="t('kubewarden.monitoring.prerequisites.serviceMonitor.label', {}, true)" p />
-          <AsyncButton
-            v-if="!kubewardenServiceMonitor"
-            v-clean-tooltip="serviceMonitorsTooltip"
-            data-testid="kw-monitoring-checklist-step-service-monitor-button"
-            mode="serviceMonitor"
-            class="ml-10"
-            :disabled="serviceMonitorButtonDisabled"
-            @click="addServiceMonitor"
-          />
-        </div>
+        <template v-if="outdatedServiceMonitor">
+          <!-- If it's outdated, we show an "Update" path -->
+          <i data-testid="kw-sm-icon" class="icon mr-10" :class="badgeIcon(!outdatedServiceMonitor)" />
+          <div class="checklist__config">
+            <p v-clean-html="t('kubewarden.monitoring.prerequisites.serviceMonitor.upgrade.label', {}, true)" p />
+            <AsyncButton
+              v-if="kubewardenServiceMonitor && outdatedServiceMonitor"
+              v-clean-tooltip="updateServiceMonitorsTooltip"
+              data-testid="kw-monitoring-checklist-step-service-monitor-upgrade-button"
+              mode="serviceMonitorUpgrade"
+              class="ml-10"
+              :disabled="updateServiceMonitorButtonDisabled"
+              @click="updateServiceMonitor"
+            />
+          </div>
+        </template>
+        <template v-else>
+          <!-- If it's not outdated, maybe it's simply missing? Show a "Create" path -->
+          <i data-testid="kw-sm-icon" class="icon mr-10" :class="badgeIcon(kubewardenServiceMonitor)" />
+          <div class="checklist__config">
+            <p v-clean-html="t('kubewarden.monitoring.prerequisites.serviceMonitor.label', {}, true)" p />
+            <AsyncButton
+              v-if="!kubewardenServiceMonitor"
+              v-clean-tooltip="serviceMonitorsTooltip"
+              data-testid="kw-monitoring-checklist-step-service-monitor-button"
+              mode="serviceMonitor"
+              class="ml-10"
+              :disabled="serviceMonitorButtonDisabled"
+              @click="addServiceMonitor"
+            />
+          </div>
+        </template>
       </div>
 
+      <!-- Dashboards -->
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-config-map">
-        <i class="icon mr-10" :class="badgeIcon(hasKubewardenDashboards)" />
+        <i data-testid="kw-dashboard-icon" class="icon mr-10" :class="badgeIcon(hasKubewardenDashboards)" />
         <div class="checklist__config">
           <p v-clean-html="t('kubewarden.monitoring.prerequisites.configMap.label', {}, true)" p />
           <AsyncButton
@@ -325,7 +399,7 @@ export default {
         v-if="showConflictingDashboardsBanner"
         color="error"
       >
-        <div class="conflicting-banner">
+        <div data-testid="kw-monitoring-checklist-conflicting-banner" class="conflicting-banner">
           <p>
             {{ t('kubewarden.monitoring.prerequisites.configMap.conflictingDashboardsBanner', { count: conflictingGrafanaDashboards.length }, true) }}
           </p>
@@ -344,18 +418,21 @@ export default {
       <div>
         <Banner
           v-if="outdatedTelemetrySpec"
+          data-testid="kw-monitoring-checklist-outdated-telemetry"
           color="error"
           :label="t('kubewarden.monitoring.prerequisites.outdated')"
         />
         <Banner
           v-if="unsupportedTelemetrySpec"
+          data-testid="kw-monitoring-checklist-unsupported-telemetry"
           color="error"
           :label="t('kubewarden.monitoring.prerequisites.unsupported')"
         />
       </div>
 
+      <!-- Controller metrics configuration -->
       <div class="checklist__step mb-20" data-testid="kw-monitoring-checklist-step-controller-config">
-        <i class="icon mr-10" :class="badgeIcon(metricsConfiguration)" />
+        <i data-testid="kw-metrics-config-icon" class="icon mr-10" :class="badgeIcon(metricsConfiguration)" />
         <div class="checklist__config">
           <p v-clean-html="t('kubewarden.monitoring.prerequisites.controllerConfig.label', {}, true)" p />
           <button
@@ -370,6 +447,7 @@ export default {
           </button>
         </div>
       </div>
+
     </div>
   </div>
 </template>
