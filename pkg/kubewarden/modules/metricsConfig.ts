@@ -152,7 +152,7 @@ export async function addKubewardenServiceMonitor(config: ServiceMonitorConfig):
       kind:       'ServiceMonitor',
       type:       MONITORING.SERVICEMONITOR,
       metadata:   {
-        name:        'kubewarden',
+        name:        `kubewarden-${ policyServerID }`,
         namespace:   controllerNs
       },
       spec: {

@@ -19,7 +19,7 @@ const config: Config.InitialOptions = {
   transform: {
     '^.+\\.js$':   '<rootDir>/node_modules/babel-jest',
     '.*\\.vue$':   '<rootDir>/node_modules/@vue/vue3-jest',
-    '^.+\\.tsx?$': ['ts-jest', { isolatedModules: true }],
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }],
     '^.+\\.svg$':  '<rootDir>/tests/unit/config/svgTransform.ts' // to mock `*.svg` files
   },
   transformIgnorePatterns:  ['/node_modules/(?!(@vue|@rancher|jsonpath-plus))'],
