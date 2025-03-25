@@ -7,6 +7,7 @@ export * from './types/grafana';
 export * from './types/kubewarden';
 export * from './types/jaeger';
 export * from './types/metrics';
+export * from './types/monitoring.coreos.com';
 export * from './types/policy';
 export * from './types/policy-reporter';
 export * from './types/rancher';
