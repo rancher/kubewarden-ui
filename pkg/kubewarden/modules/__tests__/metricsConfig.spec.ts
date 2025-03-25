@@ -167,7 +167,7 @@ describe('addKubewardenServiceMonitor', () => {
       expect.objectContaining({
         type:     MONITORING.SERVICEMONITOR,
         metadata: expect.objectContaining({
-          name:      'kubewarden',
+          name:      'kubewarden-mock',
           namespace: 'controller-ns'
         }),
         // Also check spec.selector.matchLabels
