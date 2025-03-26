@@ -186,6 +186,7 @@ export default {
             :groupable="true"
             :group-by="groupPreference"
             :table-actions="true"
+            :use-query-params-for-simple-filtering="true"
             data-testid="kw-ps-detail-related-policies-list"
           >
             <template #col:operation="{ row }">
