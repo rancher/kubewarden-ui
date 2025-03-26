@@ -19,10 +19,10 @@ export function step(originalMethod: any, context: ClassMethodDecoratorContext) 
 }
 
 export type TestOptions = {
-  ui: RancherUI
-  nav: Navigation
+  ui   : RancherUI
+  nav  : Navigation
   shell: Shell
-};
+}
 
 export const test = baseTest.extend<TestOptions>({
   ui: ({ page }, use) => {
@@ -58,15 +58,15 @@ export const expect = baseExpect.extend({
 
     const message = pass
       ? () => `${this.utils.matcherHint(assertionName, undefined, undefined)
-        }\n\n` +
-        `Locator: ${locator}\n` +
-        `Expected: ${this.utils.printExpected(expected)}\n${
-        matcherResult ? `Received: ${this.utils.printReceived(matcherResult.actual)}` : ''}`
+        }\n\n`
+        + `Locator: ${locator}\n`
+        + `Expected: ${this.utils.printExpected(expected)}\n${
+          matcherResult ? `Received: ${this.utils.printReceived(matcherResult.actual)}` : ''}`
       : () => `${this.utils.matcherHint(assertionName, undefined, undefined)
-        }\n\n` +
-        `Locator: ${locator}\n` +
-        `Expected: ${this.utils.printExpected(expected)}\n${
-        matcherResult ? `Received: ${this.utils.printReceived(matcherResult.actual)}` : ''}`
+        }\n\n`
+        + `Locator: ${locator}\n`
+        + `Expected: ${this.utils.printExpected(expected)}\n${
+          matcherResult ? `Received: ${this.utils.printReceived(matcherResult.actual)}` : ''}`
 
     return {
       message,

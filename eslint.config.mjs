@@ -3,16 +3,12 @@ import jest from 'eslint-plugin-jest';
 import pluginVue from 'eslint-plugin-vue';
 import vueTsEslintConfig from '@vue/eslint-config-typescript';
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting';
+import stylistic from '@stylistic/eslint-plugin';
 
 export default [
   {
-    name:  'app/files-to-lint',
-    files: ['**/*.{js,ts,mts,tsx,vue}', '**/*.spec.js', '**/*.test.js', '**/tests/unit/**'],
-  },
-
-  {
     name:    'app/files-to-ignore',
-    ignores: ['**/dist-pkg/**', '**/dist-ssr/**', '**/coverage/**', '**/node_modules/**', 'yarn.lock', '**/tests/**'],
+    ignores: ['**/dist-pkg/**', '**/dist-ssr/**', '**/coverage/**', '**/node_modules/**', 'yarn.lock', '.nuxt/**']
   },
 
   ...pluginVue.configs['flat/essential'],
@@ -20,6 +16,10 @@ export default [
   skipFormatting,
 
   {
+    name: 'app/files-to-lint',
+    files: ['**/*.{js,ts,mts,tsx,vue}'],
+    ignores: ['tests/**', '!tests/unit/**'],
+
     languageOptions: {
       globals: {
         ...Object.fromEntries(Object.entries(globals.browser).map(([key, value]) => [key.trim(), value])),
@@ -167,5 +167,28 @@ export default [
         }
       ]
     }
-  }
+  },
+
+  {
+    files: ['tests/**/*.ts'],
+    ignores: ['tests/unit/**'],
+    plugins: {
+      '@stylistic': stylistic
+    },
+    rules: {
+      ...stylistic.configs.recommended.rules,
+
+      '@typescript-eslint/no-explicit-any':         'off',
+      '@stylistic/padding-line-between-statements': 'off',
+      '@stylistic/comma-dangle':                    ['error', 'only-multiline'],
+      '@stylistic/space-before-function-paren':     ['error', 'never'],
+      '@stylistic/brace-style':                     ['error', '1tbs', { allowSingleLine: true }],
+      '@stylistic/space-infix-ops':                 ['error', { "ignoreTypes": true }],
+
+      '@stylistic/key-spacing':                     ['error', { align: { mode: 'minimum' }}],
+      '@stylistic/no-multi-spaces':                 ['error', { exceptions: { TSPropertySignature: true, PropertyDefinition: true }}],
+      '@stylistic/type-annotation-spacing':         'off',
+    },
+  },
+
 ];

@@ -21,7 +21,6 @@ const monitoringChart: Chart = { title: 'Monitoring', check: 'rancher-monitoring
  * Expect timeout has to be increased after telemetry installation on local cluster
  */
 test.describe('Setup', () => {
-
   test('Install OpenTelemetry', async({ page, nav }) => {
     test.skip(process.env.MODE === 'fleet')
 
@@ -38,7 +37,9 @@ test.describe('Setup', () => {
     // Install Cert-Manager on imported clusters
     if (nav.testCluster.name !== 'local') {
       await apps.addRepository(cmanRepo)
-      await apps.installChart(cmanChart, { yamlPatch: (y) => { y.crds.enabled = true } })
+      await apps.installChart(cmanChart, {
+        yamlPatch: (y) => { y.crds.enabled = true }
+      })
     }
 
     // Install OpenTelemetry
@@ -228,32 +229,32 @@ test.describe('Metrics', () => {
       /Total mutated requests/,
       /Total rejected requests/,
       /Request count/,
-    ];
+    ]
 
     const checkMetrics = async() => {
-      const frame = page.frameLocator('iframe');
+      const frame = page.frameLocator('iframe')
 
       for (const metric of metrics) {
         // Skip some panels until bugfix is backported to Rancher <2.9 (1.6.4 release)
-        if (RancherUI.isVersion('<2.9') && metric.source.match(/Total accepted|rejected/)) continue;
+        if (RancherUI.isVersion('<2.9') && metric.source.match(/Total accepted|rejected/)) continue
 
         // byTestId for Rancher >2.9, byLabel for old versions
-        const panel = frame.getByTestId(metric).or(frame.getByLabel(metric));
+        const panel = frame.getByTestId(metric).or(frame.getByLabel(metric))
         // Accepted metrics should be >0, rejected could be 0
-        const number = metric.source.includes('accepted') ? /^[1-9][0-9.]*%?$/ : /^[0-9.]+%?$/;
-        await expect(panel.getByText(number)).toBeVisible({ timeout: 7 * 60_000 });
+        const number = metric.source.includes('accepted') ? /^[1-9][0-9.]*%?$/ : /^[0-9.]+%?$/
+        await expect(panel.getByText(number)).toBeVisible({ timeout: 7 * 60_000 })
       }
-    };
+    }
 
     await test.step('Check default PS metrics', async() => {
       await nav.pservers('default', 'Metrics')
-      await checkMetrics();
+      await checkMetrics()
     })
 
     await test.step('Check custom PS metrics', async() => {
       await nav.pservers('custom-ps', 'Metrics')
       await ui.button('Add Service Monitor').click()
-      await checkMetrics();
+      await checkMetrics()
     })
   })
 
@@ -297,5 +298,4 @@ test.describe('Teardown', () => {
       await apps.deleteRepository(cmanRepo)
     }
   })
-
 })

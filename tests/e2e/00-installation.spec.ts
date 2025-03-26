@@ -81,7 +81,7 @@ test('Install UI extension', async({ page, ui }) => {
     if (ORIGIN === 'source') {
       await extensions.developerLoad('http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js')
     } else {
-      await extensions.install('kubewarden', { version: process.env.UIVERSION?.replace(/^kubewarden-/, '') } )
+      await extensions.install('kubewarden', { version: process.env.UIVERSION?.replace(/^kubewarden-/, '') })
     }
   })
 })
@@ -250,7 +250,7 @@ test('Check kubewarden resources', async({ page, nav, shell }) => {
 
     // Check for ERROR text in logs
     await shell.runBatch(...labels.map(
-      (label) => `k logs -n cattle-kubewarden-system -l '${label}' --tail -1
+      label => `k logs -n cattle-kubewarden-system -l '${label}' --tail -1
      | grep ERROR | grep -vE '${ignore}'
      | tee /dev/stderr | wc -l | grep -x 0`))
   })

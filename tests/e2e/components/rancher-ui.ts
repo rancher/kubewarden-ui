@@ -12,7 +12,7 @@ export type YAMLPatch = { [key: string]: unknown } | string | ((patch:any) => vo
  * aria-label is not always filled - we have to use filters to find elements reliably
  */
 export class RancherUI {
-  readonly page: Page
+  readonly page      : Page
   readonly codeMirror: Locator
 
   constructor(page: Page) {
@@ -160,7 +160,7 @@ export class RancherUI {
     const optReload = options?.reload || true
     try {
       await code()
-    } catch (e) {
+    } catch {
       test.info().annotations.push({ type: 'Retry', description: message })
       if (optReload) await this.page.reload()
       await code()

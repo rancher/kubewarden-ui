@@ -6,8 +6,12 @@ import { RancherAppsPage } from './rancher/rancher-apps.page'
 
 const MODE = process.env.MODE || 'base'
 
-function isAP(polPage: BasePolicyPage) { return polPage instanceof AdmissionPoliciesPage }
-function isCAP(polPage: BasePolicyPage) { return polPage instanceof ClusterAdmissionPoliciesPage }
+function isAP(polPage: BasePolicyPage) {
+  return polPage instanceof AdmissionPoliciesPage
+}
+function isCAP(polPage: BasePolicyPage) {
+  return polPage instanceof ClusterAdmissionPoliciesPage
+}
 
 const pMinimal: Policy = {
   title: 'Pod Privileged Policy',
@@ -35,7 +39,7 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     // The regex inserts spaces and matches both singular and plural
     const polKindTitle = new RegExp(`^\\s+${polPage.kind
       .replace(/([a-z])([A-Z])/g, '$1 $2')
-      .replace(/Policy$/, "Polic(y|ies)")
+      .replace(/Policy$/, 'Polic(y|ies)')
     }:\\s+${p.name}`)
 
     await row.open()

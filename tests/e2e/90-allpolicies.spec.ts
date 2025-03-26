@@ -10,8 +10,8 @@ const pserver = { name: process.env.CI ? 'allpolicies-pserver' : 'default' }
 const polkeep = !!process.env.keep || false
 
 type PolicySettings = {
-  settings?: (ui: RancherUI) => Promise<void>;
-  skip?: string;
+  settings?: (ui: RancherUI) => Promise<void>
+  skip?    : string
 }
 
 const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
@@ -27,7 +27,7 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'Container Resources'        : { settings: setupContainerResources },
   'PVC StorageClass Validator' : { settings: setupPvcScValidator },
   'CEL Policy'                 : { skip: 'https://github.com/kubewarden/cel-policy/issues/12' },
-  volumeMounts                 : { settings: setupVolumeMounts },
+  'volumeMounts'               : { settings: setupVolumeMounts },
 }
 
 async function setupPvcScValidator(ui: RancherUI) {
@@ -83,13 +83,17 @@ async function setupVerifyImageSignatures(ui: RancherUI) {
   await ui.selectOption('Signature Type', 'GithubAction')
   await ui.button('Add').click()
   await ui.input('Image*').fill('ghcr.io/kubewarden/*')
-  await ui.editYaml((y) => { y.githubActions.owner = 'kubewarden' })
+  await ui.editYaml((y) => {
+    y.githubActions.owner = 'kubewarden'
+  })
 }
 
 async function setupEnvironmentVariablePolicy(ui: RancherUI) {
   await ui.button('Add').click()
   await ui.selectOption('Reject Operator', 'anyIn')
-  await ui.editYaml((y) => { y.environmentVariables[0].name = 'novar' })
+  await ui.editYaml((y) => {
+    y.environmentVariables[0].name = 'novar'
+  })
 }
 
 async function setupUserGroupPSP(ui: RancherUI) {
@@ -129,7 +133,7 @@ for (const title of capList) {
     const p: Policy = generateName({
       title,
       server: pserver.name,
-      mode    : polmode,
+      mode  : polmode,
       settings
     })
 

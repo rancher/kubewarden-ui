@@ -11,8 +11,8 @@ function getLine(tab: Page|Locator, text: string|RegExp) {
 export class TelemetryPage extends BasePage {
   readonly tracingTab: Locator
   readonly metricsTab: Locator
-  readonly configBtn: Locator
-  readonly lines: Record<ChecklistLine, Locator>
+  readonly configBtn : Locator
+  readonly lines     : Record<ChecklistLine, Locator>
 
   constructor(page: Page) {
     super(page)
