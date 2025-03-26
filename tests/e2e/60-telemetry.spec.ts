@@ -1,7 +1,9 @@
 import { test, expect } from './rancher/rancher-test'
 import { Chart, ChartRepo, RancherAppsPage } from './rancher/rancher-apps.page'
+import { PolicyServersPage } from './pages/policyservers.page'
 import { TelemetryPage } from './pages/telemetry.page'
 import { RancherUI } from './components/rancher-ui'
+import { AdmissionPoliciesPage } from './pages/policies.page'
 
 // Cert-Manager
 const cmanRepo: ChartRepo = { name: 'jetstack', url: 'https://charts.jetstack.io' }
@@ -18,35 +20,43 @@ const monitoringChart: Chart = { title: 'Monitoring', check: 'rancher-monitoring
 /**
  * Expect timeout has to be increased after telemetry installation on local cluster
  */
-test('Install OpenTelemetry', async({ page, nav }) => {
-  test.skip(process.env.MODE === 'fleet')
+test.describe('Setup', () => {
 
-  const apps = new RancherAppsPage(page)
-  const telPage = new TelemetryPage(page)
+  test('Install OpenTelemetry', async({ page, nav }) => {
+    test.skip(process.env.MODE === 'fleet')
 
-  // Otel is not installed
-  for (const tab of ['Tracing', 'Metrics'] as const) {
-    await nav.pserver('default', tab)
-    await telPage.toBeIncomplete('otel')
-    await expect(telPage.configBtn).toBeDisabled()
-  }
+    const apps = new RancherAppsPage(page)
+    const telPage = new TelemetryPage(page)
 
-  // Install Cert-Manager on imported clusters
-  if (nav.testCluster.name !== 'local') {
-    await apps.addRepository(cmanRepo)
-    await apps.installChart(cmanChart, { yamlPatch: (y) => { y.crds.enabled = true } })
-  }
+    // Otel is not installed
+    for (const tab of ['Tracing', 'Metrics'] as const) {
+      await nav.pserver('default', tab)
+      await telPage.toBeIncomplete('otel')
+      await expect(telPage.configBtn).toBeDisabled()
+    }
 
-  // Install OpenTelemetry
-  await apps.addRepository(otelRepo)
-  await apps.installChart(otelChart,
-    { yamlPatch: (y) => { y.manager.collectorImage.repository = 'otel/opentelemetry-collector-contrib' } })
+    // Install Cert-Manager on imported clusters
+    if (nav.testCluster.name !== 'local') {
+      await apps.addRepository(cmanRepo)
+      await apps.installChart(cmanChart, { yamlPatch: (y) => { y.crds.enabled = true } })
+    }
 
-  // Otel is installed
-  for (const tab of ['Tracing', 'Metrics'] as const) {
-    await nav.pserver('default', tab)
-    await telPage.toBeComplete('otel')
-  }
+    // Install OpenTelemetry
+    await apps.addRepository(otelRepo)
+    await apps.installChart(otelChart,
+      { yamlPatch: (y) => { y.manager.collectorImage.repository = 'otel/opentelemetry-collector-contrib' } })
+
+    // Otel is installed
+    for (const tab of ['Tracing', 'Metrics'] as const) {
+      await nav.pserver('default', tab)
+      await telPage.toBeComplete('otel')
+    }
+  })
+
+  test('Create custom PolicyServer', async({ page }) => {
+    await new PolicyServersPage(page).create({ name: 'custom-ps' })
+    await new AdmissionPoliciesPage(page).create({ name: 'no-privileged-custom', title: 'Pod Privileged Policy', mode: 'Monitor', server: 'custom-ps' })
+  })
 })
 
 test.describe('Tracing', () => {
@@ -83,7 +93,7 @@ test.describe('Tracing', () => {
     await telPage.toBeComplete('jaeger')
   })
 
-  test('Enable tracing', async({ ui, shell }) => {
+  test('Configure tracing', async({ ui, shell }) => {
     test.skip(process.env.MODE === 'fleet')
 
     await telPage.toBeIncomplete('config')
@@ -108,12 +118,24 @@ test.describe('Tracing', () => {
     // Create trace log line
     await nav.cluster()
     await shell.privpod({ name: 'tracing-privpod' })
-    // Check logs on policy server
-    await nav.pserver('default', 'Tracing')
-    await expect(logline).toBeVisible()
-    // Check logs on the (recommended) policy
-    await nav.capolicy('no-privileged-pod', 'Tracing')
-    await expect(logline).toBeVisible()
+
+    await test.step('Check default PS', async() => {
+      // Check logs on policy server
+      await nav.pserver('default', 'Tracing')
+      await expect(logline).toBeVisible()
+      // Check logs on (recommended) policy
+      await nav.capolicy('no-privileged-pod', 'Tracing')
+      await expect(logline).toBeVisible()
+    })
+
+    await test.step('Check custom PS', async() => {
+      // Check logs on the custom policy server
+      await nav.pserver('custom-ps', 'Tracing')
+      await expect(logline).toBeVisible()
+      // Check logs on the (custom) policy
+      await nav.apolicy('no-privileged-custom', 'Tracing')
+      await expect(logline).toBeVisible()
+    })
   })
 
   test('Uninstall tracing', async({ ui, nav, shell }) => {
@@ -167,43 +189,38 @@ test.describe('Metrics', () => {
     await telPage.toBeComplete('monitoring')
   })
 
-  test('Create Prometheus ServiceMonitor', async({ ui }) => {
-    // ServiceMonitor does not exist
-    await telPage.toBeIncomplete('servicemonitor')
-    await expect(telPage.configBtn).toBeDisabled()
-    // Create service monitor
-    await ui.button('Add Service Monitor').click()
-    await telPage.toBeComplete('servicemonitor')
-  })
-
-  test('Create Grafana ConfigMaps', async({ ui }) => {
-    // ConfigMap does not exist
-    await telPage.toBeIncomplete('configmap')
-    await expect(telPage.configBtn).toBeDisabled()
-    // Create configmaps
-    await ui.button('Add Grafana Dashboards').click()
-    await telPage.toBeComplete('configmap')
-  })
-
-  test('Enable metrics', async({ ui, shell }) => {
-    await telPage.toBeIncomplete('config')
-    await telPage.configBtn.click()
-    await apps.updateApp('rancher-kubewarden-controller', {
-      navigate : false,
-      questions: async() => {
-        await ui.tab(/^(Open)?Telemetry/).click()
-        await ui.checkbox('Enable Metrics').check()
-      }
+  test('Configure metrics', async({ ui, shell }) => {
+    await test.step('Configure default PolicyServer', async() => {
+      // Create Prometheus ServiceMonitor
+      await telPage.toBeIncomplete('servicemonitor')
+      await expect(telPage.configBtn).toBeDisabled()
+      await ui.button('Add Service Monitor').click()
+      await telPage.toBeComplete('servicemonitor')
+      // Create Grafana ConfigMaps
+      await telPage.toBeIncomplete('configmap')
+      await expect(telPage.configBtn).toBeDisabled()
+      await ui.button('Add Grafana Dashboards').click()
+      await telPage.toBeComplete('configmap')
     })
-    // Wait until kubewarden controller restarts policyserver
-    const now = new Date().toISOString()
-    await shell.retry(`kubectl logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container --since-time ${now} | grep -F "Everything is ready."`)
+
+    await test.step('Enable metrics in controller', async() => {
+      await telPage.toBeIncomplete('config')
+      await telPage.configBtn.click()
+      await apps.updateApp('rancher-kubewarden-controller', {
+        navigate : false,
+        questions: async() => {
+          await ui.tab(/^(Open)?Telemetry/).click()
+          await ui.checkbox('Enable Metrics').check()
+        }
+      })
+      // Wait until kubewarden controller restarts policyserver
+      const now = new Date().toISOString()
+      await shell.retry(`kubectl logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container --since-time ${now} | grep -F "Everything is ready."`)
+    })
   })
 
-  test('Check metrics are visible', async({ page, nav }) => {
-    await nav.pserver('default', 'Metrics')
-    const frame = page.frameLocator('iframe')
-    for (const metric of [
+  test('Check metrics are visible', async({ ui, page, nav }) => {
+    const metrics = [
       /Request accepted with no mutation percentage/,
       /Request rejection percentage/,
       /Request mutation percentage/,
@@ -211,16 +228,33 @@ test.describe('Metrics', () => {
       /Total mutated requests/,
       /Total rejected requests/,
       /Request count/,
-    ]) {
-      // Skip some panels until bugfix is backported to Rancher <2.9 (1.6.4 release)
-      if (RancherUI.isVersion('<2.9') && metric.source.match(/Total accepted|rejected/)) continue
+    ];
 
-      // byTestId for Rancher >2.9, byLabel for old versions
-      const panel = frame.getByTestId(metric).or(frame.getByLabel(metric))
-      // Accepted metrics should be >0, rejected could be 0
-      const number = metric.source.includes('accepted') ? /^[1-9][0-9.]*%?$/ : /^[0-9.]+%?$/
-      await expect(panel.getByText(number)).toBeVisible({ timeout: 7 * 60_000 })
-    }
+    const checkMetrics = async() => {
+      const frame = page.frameLocator('iframe');
+
+      for (const metric of metrics) {
+        // Skip some panels until bugfix is backported to Rancher <2.9 (1.6.4 release)
+        if (RancherUI.isVersion('<2.9') && metric.source.match(/Total accepted|rejected/)) continue;
+
+        // byTestId for Rancher >2.9, byLabel for old versions
+        const panel = frame.getByTestId(metric).or(frame.getByLabel(metric));
+        // Accepted metrics should be >0, rejected could be 0
+        const number = metric.source.includes('accepted') ? /^[1-9][0-9.]*%?$/ : /^[0-9.]+%?$/;
+        await expect(panel.getByText(number)).toBeVisible({ timeout: 7 * 60_000 });
+      }
+    };
+
+    await test.step('Check default PS metrics', async() => {
+      await nav.pserver('default', 'Metrics')
+      await checkMetrics();
+    })
+
+    await test.step('Check custom PS metrics', async() => {
+      await nav.pserver('custom-ps', 'Metrics')
+      await ui.button('Add Service Monitor').click()
+      await checkMetrics();
+    })
   })
 
   test('Uninstall metrics', async({ ui, nav, shell }) => {
@@ -247,14 +281,21 @@ test.describe('Metrics', () => {
   })
 })
 
-test('Uninstall OpenTelemetry', async({ page, nav }) => {
-  test.skip(process.env.MODE === 'fleet')
+test.describe('Teardown', () => {
+  test('Delete custom PolicyServer', async({ page }) => {
+    await new PolicyServersPage(page).delete('custom-ps')
+  })
 
-  const apps = new RancherAppsPage(page)
-  await apps.deleteApp('opentelemetry-operator')
-  await apps.deleteRepository(otelRepo)
-  if (nav.testCluster.name !== 'local') {
-    await apps.deleteApp('cert-manager')
-    await apps.deleteRepository(cmanRepo)
-  }
+  test('Uninstall OpenTelemetry', async({ page, nav }) => {
+    test.skip(process.env.MODE === 'fleet')
+
+    const apps = new RancherAppsPage(page)
+    await apps.deleteApp('opentelemetry-operator')
+    await apps.deleteRepository(otelRepo)
+    if (nav.testCluster.name !== 'local') {
+      await apps.deleteApp('cert-manager')
+      await apps.deleteRepository(cmanRepo)
+    }
+  })
+
 })
