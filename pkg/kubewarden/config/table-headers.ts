@@ -1,7 +1,7 @@
 import { NAME as NAME_HEADER } from '@shell/config/table-headers';
 
 import { createKubewardenRoute } from '@kubewarden/utils/custom-routing';
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN, PolicyServer } from '@kubewarden/types';
 
 export const ADMISSION_POLICY_STATE = {
   name:      'policyStatus',
@@ -197,7 +197,27 @@ export const DASHBOARD_HEADERS = [
       name:   'c-cluster-product-resource',
       params: { resource: KUBEWARDEN.POLICY_SERVER }
     }),
-    linkText:    'kubewarden.dashboard.headers.policyServer.linkText',
+    linkText: 'kubewarden.dashboard.headers.policyServer.linkText',
+    psLink:   (ps: PolicyServer) => {
+      return createKubewardenRoute({
+        name:   'c-cluster-product-resource-id',
+        params: {
+          resource: KUBEWARDEN.POLICY_SERVER,
+          id:       ps.id
+        }
+      });
+    },
+    modeLink:  (ps: PolicyServer, query: { [key: string]: string }) => {
+      return createKubewardenRoute({
+        name:   'c-cluster-product-resource-id',
+        hash:   '#related-policies',
+        query,
+        params: {
+          resource: KUBEWARDEN.POLICY_SERVER,
+          id:       ps.id
+        }
+      });
+    },
     description: 'kubewarden.dashboard.headers.policyServer.description',
     slotTitle:   'kubewarden.dashboard.headers.policyServer.slotTitle',
     title:       'kubewarden.dashboard.headers.policyServer.title'

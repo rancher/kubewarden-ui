@@ -6,7 +6,6 @@ import { CATALOG, POD, UI_PLUGIN } from '@shell/config/types';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 import { allHash } from '@shell/utils/promise';
 
-import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 import Loading from '@shell/components/Loading';
 
 import { DASHBOARD_HEADERS } from '@kubewarden/config/table-headers';
@@ -19,16 +18,17 @@ import Card from './Card';
 import Modes from './Modes';
 import Reports from './Reports';
 import ReportsGauge from './ReportsGauge';
+import PolicyServerCard from './PolicyServerCard';
 
 export default {
   components: {
     Card,
     Modes,
     Reports,
-    ConsumptionGauge,
     Loading,
     Masthead,
-    ReportsGauge
+    ReportsGauge,
+    PolicyServerCard
   },
 
   async fetch() {
@@ -117,50 +117,67 @@ export default {
       return null;
     },
 
-    /** Counts the current policy server pods - returns the status and total count */
-    policyServerCounts() {
-      const pods = this.policyServerPods || [];
+    policyServersWithStatusAndModes() {
+      return this.allPolicyServers.map((server) => {
+        const name = server.metadata?.name;
 
-      if (!isEmpty(pods)) {
-        return pods?.reduce((ps, neu) => {
-          const neuContainerStatues = neu?.status?.containerStatuses;
-          let terminated = false;
+        const podsForThisServer = (this.policyServerPods || []).filter((pod) => {
+          const labels = pod?.metadata?.labels;
 
-          // If the container state is terminated, remove it from the available counts
-          if (!isEmpty(neuContainerStatues)) {
-            const filtered = neuContainerStatues.filter((status) => status?.state['terminated']);
-
-            if (!isEmpty(filtered)) {
-              terminated = true;
-            }
-          }
-
-          return {
-            status: {
-              running:       ps?.status?.running + (neu?.metadata?.state?.name === 'running' && !terminated ? 1 : 0),
-              stopped:       ps?.status?.stopped + (neu?.metadata?.state?.error ? 1 : 0),
-              pending:       ps?.status?.transitioning + (neu?.metadata?.state?.transitioning ? 1 : 0)
-            },
-            total: terminated ? ps?.total || 0 : ps?.total + 1
-          };
-        }, {
-          status: {
-            running: 0,
-            stopped: 0,
-            pending: 0
-          },
-          total: 0
+          return isPolicyServerResource(labels, name);
         });
-      }
 
-      return {
-        status: {
-          running: 0,
-          stopped: 0,
-          pending: 0
-        },
-        total: 0
-      };
+        let runningCount = 0;
+        let pendingCount = 0;
+        let errorCount   = 0;
+
+        podsForThisServer.forEach((pod) => {
+          if (pod?.metadata?.state?.name === 'running') {
+            runningCount++;
+          } else if (pod?.metadata?.state?.transitioning) {
+            pendingCount++;
+          } else if (pod?.metadata?.state?.error) {
+            errorCount++;
+          }
+        });
+
+        const totalPods   = podsForThisServer.length;
+        let overallStatus = 'stopped'; // default
+
+        if (runningCount === totalPods && totalPods > 0) {
+          overallStatus = 'running';
+        } else if (pendingCount > 0) {
+          overallStatus = 'pending';
+        } else if (errorCount > 0) {
+          overallStatus = 'error';
+        }
+
+        // Counts how many policies (namespaced + cluster) reference this server
+        const allPolicies = [...this.namespacedPolicies, ...this.globalPolicies];
+        const polsForThisServer = allPolicies.filter((p) => p.spec?.policyServer === name);
+
+        let monitorCount = 0;
+        let protectCount = 0;
+
+        polsForThisServer.forEach((p) => {
+          if (p.spec?.mode === 'monitor') {
+            monitorCount++;
+          } else if (p.spec?.mode === 'protect') {
+            protectCount++;
+          }
+        });
+
+        return {
+          ...server,
+          _status:       overallStatus,
+          _totalPods:    totalPods,
+          _runningCount: runningCount,
+          _pendingCount: pendingCount,
+          _errorCount:   errorCount,
+          _monitorCount: monitorCount,
+          _protectCount: protectCount
+        };
+      });
     },
 
     globalPolicies() {
@@ -401,15 +418,7 @@ export default {
             </span>
 
             <span v-if="index === 2">
-              <ConsumptionGauge
-                data-testid="kw-dashboard-ps-gauge"
-                resource-name="Active"
-                :color-stops="colorStops"
-                :capacity="policyServerCounts.total"
-                :used-as-resource-name="true"
-                :used="policyServerCounts.status.running"
-                units="Pods"
-              />
+              <PolicyServerCard :policyServers="policyServersWithStatusAndModes" :card="card" />
             </span>
           </template>
         </Card>
@@ -430,6 +439,7 @@ export default {
 
     .card-container {
       padding: 0;
+      margin: 0;
     }
   }
 }
