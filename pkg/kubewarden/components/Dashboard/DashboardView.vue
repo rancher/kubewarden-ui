@@ -19,6 +19,7 @@ import {
 } from '../../types';
 import { handleGrowl } from '../../utils/handle-growl';
 import { appVersionSatisfiesConstraint, checkUpgradeAvailable } from '../../utils/chart';
+import { isPolicyServerResource } from '../../modules/policyServer';
 
 import DefaultsBanner from '../DefaultsBanner';
 import Card from './Card';
@@ -33,6 +34,7 @@ export default {
     const types = [
       KUBEWARDEN.ADMISSION_POLICY,
       KUBEWARDEN.CLUSTER_ADMISSION_POLICY,
+      KUBEWARDEN.POLICY_SERVER,
       POD,
       CATALOG.APP,
       CATALOG.CLUSTER_REPO,
@@ -75,6 +77,10 @@ export default {
       return this.$store.getters['cluster/all'](POD);
     },
 
+    allPolicyServers() {
+      return this.$store.getters['cluster/all'](KUBEWARDEN.POLICY_SERVER);
+    },
+
     controllerApp() {
       if ( this.allApps ) {
         return this.allApps?.find((a) => {
@@ -115,11 +121,19 @@ export default {
     },
 
     policyServerPods() {
-      if ( this.$store.getters['cluster/canList'](POD) ) {
-        const pods = this.allPods?.filter(pod => pod?.metadata?.labels?.[KUBEWARDEN_LABELS.POLICY_SERVER]);
+      if (this.$store.getters['cluster/canList'](POD)) {
+        const policyServerNames = this.allPolicyServers
+          ?.map((ps) => ps.metadata?.name)
+          .filter((name) => !!name);
 
-        if ( !isEmpty(pods) ) {
-          return Object.values(pods).flat();
+        const pods = this.allPods?.filter((pod) => {
+          const labels = pod?.metadata?.labels;
+
+          return policyServerNames?.some((name) => isPolicyServerResource(labels, name));
+        });
+
+        if (!isEmpty(pods)) {
+          return pods;
         }
 
         return null;
@@ -132,31 +146,33 @@ export default {
     policyServerCounts() {
       const pods = this.policyServerPods || [];
 
-      if ( !isEmpty(pods) ) {
+      if (!isEmpty(pods)) {
         return pods?.reduce((ps, neu) => {
           const neuContainerStatues = neu?.status?.containerStatuses;
           let terminated = false;
 
           // If the container state is terminated, remove it from the available counts
-          if ( !isEmpty(neuContainerStatues) ) {
-            const filtered = neuContainerStatues.filter(status => status?.state['terminated']);
+          if (!isEmpty(neuContainerStatues)) {
+            const filtered = neuContainerStatues.filter((status) => status?.state['terminated']);
 
-            if ( !isEmpty(filtered) ) {
+            if (!isEmpty(filtered)) {
               terminated = true;
             }
           }
 
           return {
             status: {
-              running:       ps?.status?.running + ( neu?.metadata?.state?.name === 'running' && !terminated ? 1 : 0 ),
-              stopped:       ps?.status?.stopped + ( neu?.metadata?.state?.error ? 1 : 0 ),
-              pending:       ps?.status?.transitioning + ( neu?.metadata?.state?.transitioning ? 1 : 0 )
+              running:       ps?.status?.running + (neu?.metadata?.state?.name === 'running' && !terminated ? 1 : 0),
+              stopped:       ps?.status?.stopped + (neu?.metadata?.state?.error ? 1 : 0),
+              pending:       ps?.status?.transitioning + (neu?.metadata?.state?.transitioning ? 1 : 0)
             },
             total: terminated ? ps?.total || 0 : ps?.total + 1
           };
         }, {
           status: {
-            running: 0, stopped: 0, pending: 0
+            running: 0,
+            stopped: 0,
+            pending: 0
           },
           total: 0
         });
@@ -164,7 +180,9 @@ export default {
 
       return {
         status: {
-          running: 0, stopped: 0, pending: 0
+          running: 0,
+          stopped: 0,
+          pending: 0
         },
         total: 0
       };
