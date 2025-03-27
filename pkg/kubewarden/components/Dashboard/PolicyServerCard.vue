@@ -15,23 +15,30 @@ const props = defineProps<{
   policyServers: PolicyServerDetails[];
   card: any;
 }>();
+
+function modeLink(server: PolicyServerDetails, mode: string) {
+  return props.card.modeLink(server, { q: mode });
+}
 </script>
 
 <template>
   <div class="policy-servers">
     <ul v-if="props.policyServers.length">
       <li v-for="server in props.policyServers" :key="server.metadata.name" class="policy-server-item">
-        <span class="status-icon" :class="server._status" />
-        <!-- <span class="server-name">{{ server.metadata.name }}</span> -->
-         <router-link
-          :to="props.card.psLink(server)"
-          class="server-name"
-         >
+        <span class="status-icon" :class="server._status" v-clean-tooltip="server._status" />
+        <router-link
+        :to="props.card.psLink(server)"
+        class="server-name"
+        >
           {{ server.metadata.name }}
-         </router-link>
-        <span class="server-modes">
-          ({{ server._monitorCount }} Monitor / {{ server._protectCount }} Protect)
-        </span>
+        </router-link>
+        <div class="server-modes">
+          (
+            <router-link :to="modeLink(server, 'protect')">{{ server._protectCount }} Protect</router-link>
+            <span>&nbsp;/&nbsp;</span>
+            <router-link :to="modeLink(server, 'monitor')">{{ server._monitorCount }} Monitor</router-link>
+          )
+        </div>
       </li>
     </ul>
     <p v-else>No policy servers found.</p>
@@ -76,5 +83,11 @@ const props = defineProps<{
 
 .server-modes {
   color: var(--text-color-secondary);
+
+  & a {
+    color: var(--text-color-secondary);
+    text-decoration: none;
+    cursor: pointer;
+  }
 }
 </style>
