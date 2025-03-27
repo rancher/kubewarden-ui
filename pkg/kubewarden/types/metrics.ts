@@ -1,26 +1,23 @@
-type Endpoint = {
-  interval: string,
-  port: string
+import {
+  ServiceMonitor, ServiceMonitorSpec, CatalogApp, Service, PolicyServer, Policy
+} from '@kubewarden/types';
+
+export type ServiceMonitorConfigured = {
+  namespace: boolean,
+  selectors?: {[key: string]: boolean}[];
 }
 
-export interface ServiceMonitorSpec {
-  endpoints?: Endpoint[],
-  name?: string,
-  namespaceSelector?: {
-    matchNames?: string[]
-  },
-  selector?: {
-    matchLabels?: {[key: string]: string}
-  }
+export interface MonitoringConfig {
+  serviceMonitorSpec: ServiceMonitorSpec[],
+  controllerApp: CatalogApp,
+  policyServerSvcs: Service[]
 }
 
-export interface ServiceMonitor {
-  apiVersion?: string,
-  kind?: string,
-  metadata: {
-    name: string
-    namespace: string
-  },
-  spec: ServiceMonitorSpec,
-  type?: string
+export interface ServiceMonitorConfig {
+  store: any,
+  policyObj?: Policy,
+  policyServerObj?: PolicyServer,
+  controllerNs: string,
+  allServiceMonitors?: ServiceMonitor[]
+  serviceMonitor?: ServiceMonitor
 }

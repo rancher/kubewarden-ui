@@ -1215,7 +1215,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Kubewarden Policy Server",
+  "title": "Kubewarden / Policy Server",
   "uid": "kubewarden-dashboard-policyserver",
   "version": 3
 }
