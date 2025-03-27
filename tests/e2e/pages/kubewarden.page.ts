@@ -43,10 +43,6 @@ export class KubewardenPage extends BasePage {
       return this.getPane(pane).locator('span.count')
     }
 
-    getStats(pane: Pane) {
-      return this.getPane(pane).locator('span.numbers-stats')
-    }
-
     getPolicyServer(name: string|RegExp) {
       return this.getPane('Policy Servers').getByRole('listitem').filter({has: this.page.getByRole('link', {name: name, exact: true})})
     }

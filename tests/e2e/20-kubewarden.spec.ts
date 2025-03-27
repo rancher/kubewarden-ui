@@ -17,7 +17,7 @@ test('Check initial state', async({ page, ui, nav }) => {
     await expect(kwPage.getCount(('Namespaced Policies'))).toHaveText('0')
     await expect(kwPage.getCount(('Cluster Policies'))).toHaveText('6')
     await expect(kwPage.getCount(('Policy Servers'))).toHaveText('1')
-    await expect(kwPage.getPolicyServer('default')).toContainText('6 Monitor / 0 Protect')
+    await expect(kwPage.getPolicyServer('default')).toContainText('0 Protect / 6 Monitor')
   })
 
   await test.step('Policy Servers Landing Page', async() => {
@@ -52,8 +52,6 @@ test('Check initial state', async({ page, ui, nav }) => {
 })
 
 test('Stats reflect resource changes', async({ ui, page, nav }) => {
-  const expect2m = expect.configure({ timeout: 2 * 60_000 })
-
   const kwPage = new KubewardenPage(page)
   const psPage = new PolicyServersPage(page)
   const apPage = new AdmissionPoliciesPage(page)
@@ -74,7 +72,7 @@ test('Stats reflect resource changes', async({ ui, page, nav }) => {
     await psPage.create(ps, { navigate: false })
     await nav.explorer('Kubewarden')
     await expect(kwPage.getCount('Policy Servers')).toHaveText((+psCount + 1).toString())
-    await expect(kwPage.getPolicyServer(ps.name)).toContainText('0 Monitor / 0 Protect')
+    await expect(kwPage.getPolicyServer(ps.name)).toContainText('0 Protect / 0 Monitor')
   })
 
   await test.step('Namespaced Policy counter++', async() => {
@@ -83,6 +81,7 @@ test('Stats reflect resource changes', async({ ui, page, nav }) => {
     await apPage.create(policy, { navigate: false })
     await nav.explorer('Kubewarden')
     await expect(kwPage.getCount('Namespaced Policies')).toHaveText((+apCount + 1).toString())
+    await expect(kwPage.getPolicyServer(ps.name)).toContainText('1 Protect / 0 Monitor')
   })
 
   await test.step('Cluster Policy counter++', async() => {
@@ -91,6 +90,7 @@ test('Stats reflect resource changes', async({ ui, page, nav }) => {
     await capPage.create(policy, { navigate: false })
     await nav.explorer('Kubewarden')
     await expect(kwPage.getCount('Cluster Policies')).toHaveText((+capCount + 1).toString())
+    await expect(kwPage.getPolicyServer(ps.name)).toContainText('2 Protect / 0 Monitor')
   })
 
   await test.step('Stats after deleting resources ', async() => {
@@ -99,5 +99,6 @@ test('Stats reflect resource changes', async({ ui, page, nav }) => {
     await expect(kwPage.getCount('Namespaced Policies')).toHaveText(apCount)
     await expect(kwPage.getCount('Cluster Policies')).toHaveText(capCount)
     await expect(kwPage.getCount('Policy Servers')).toHaveText(psCount)
+    await expect(kwPage.getPolicyServer(ps.name)).not.toBeVisible()
   })
 })
