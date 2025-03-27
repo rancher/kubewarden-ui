@@ -157,7 +157,7 @@ test('Recommended policies', async({ page, ui, nav }) => {
   test.skip(MODE === 'fleet', 'https://github.com/rancher/kubewarden-ui/pull/703')
 
   await test.step('Edit Recommended policy settings', async() => {
-    await nav.capolicy()
+    await nav.capolicies()
     await ui.tableRow('no-privileged-pod').action('Edit Policy Settings')
 
     const apps = new RancherAppsPage(page)
@@ -170,7 +170,7 @@ test('Recommended policies', async({ page, ui, nav }) => {
     })
 
     const capPage = new ClusterAdmissionPoliciesPage(page)
-    await nav.capolicy('no-privileged-pod')
+    await nav.capolicies('no-privileged-pod')
     await ui.button('Config').click()
     await capPage.selectTab('Settings')
     await expect(ui.codeMirror).toContainText('skip_init_containers: true')

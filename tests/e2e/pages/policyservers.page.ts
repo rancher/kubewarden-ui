@@ -21,8 +21,7 @@ export class PolicyServersPage extends BasePage {
     }
 
     async goto(): Promise<void> {
-      await this.nav.explorer('Kubewarden', 'PolicyServers')
-      // await this.nav.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.policyserver')
+      await this.nav.pservers()
     }
 
     async setName(name: string) {

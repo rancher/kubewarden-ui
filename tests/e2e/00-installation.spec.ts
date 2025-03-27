@@ -93,7 +93,7 @@ test('Install Kubewarden', async({ page, ui, nav }) => {
   await kwPage.installKubewarden({ version: MODE === 'upgrade' ? upMap[0].controller : undefined })
 
   // Check UI is active
-  await nav.explorer('Kubewarden')
+  await nav.kubewarden()
   await ui.retry(async() => {
     await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
   }, 'Kubewarden installation not detected')
@@ -146,7 +146,7 @@ test('Whitelist Artifact Hub', async({ page, ui, nav }) => {
   const capCount = capList.length - 1
 
   await test.step('Whitelist ArtifactHub', async() => {
-    await nav.capolicy()
+    await nav.capolicies()
     await ui.button('Create').click()
     await expect(ui.button('Create Custom Policy')).toBeVisible()
     await expect(cap.cards()).toHaveCount(0)
@@ -155,13 +155,13 @@ test('Whitelist Artifact Hub', async({ page, ui, nav }) => {
 
   await test.step('Check Official policies', async() => {
     // CAP
-    await nav.capolicy()
+    await nav.capolicies()
     await ui.button('Create').click()
     await cap.handleRateLimitError()
     await expect(cap.cards()).toHaveCount(capCount)
     await expect(cap.cards({ signed: true, official: true })).toHaveCount(capCount)
     // AP
-    await nav.apolicy()
+    await nav.apolicies()
     await ui.button('Create').click()
     await cap.handleRateLimitError()
     await expect(cap.cards()).toHaveCount(apCount)
@@ -176,7 +176,7 @@ test('Whitelist Artifact Hub', async({ page, ui, nav }) => {
   })
 
   await test.step('Check Unofficial policies', async() => {
-    await nav.capolicy()
+    await nav.capolicies()
     await ui.button('Create').click()
     await cap.handleRateLimitError()
     // Display User policies

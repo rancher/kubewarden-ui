@@ -49,7 +49,7 @@ test('New resources should be reported', async({ ui, page, nav, shell }) => {
 
   // Check that audit reported unsafe label and privileged pod
   await reporter.runJob()
-  await nav.explorer('Kubewarden', 'Policy Reporter')
+  await nav.kubewarden('Policy Reporter')
   await reporter.selectTab('Dashboard')
   await expect(reporter.getCard('fail')).toHaveText('1', { timeout: 2 * 60_000 })
   await expect(reporter.getChip(testNs, 'fail')).toHaveText('1')
@@ -83,13 +83,13 @@ test('Check reports on resources details page', async({ ui, nav }) => {
 test('Cleanup & check results are gone', async({ page, ui, nav, shell }) => {
   const reporter = new PolicyReporterPage(page)
 
-  await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
+  await nav.capolicies()
   await ui.tableRow(policyLabels).delete()
   await shell.runBatch(
     `kubectl delete ns ${testNs}`,
     'kubectl delete cpolr,polr -A --all'
   )
 
-  await nav.explorer('Kubewarden', 'Policy Reporter')
+  await nav.kubewarden('Policy Reporter')
   await expect(reporter.frame.getByText('No resources for the selected kinds found')).toBeVisible()
 })

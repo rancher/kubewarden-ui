@@ -2,13 +2,13 @@ import { expect, Page } from '@playwright/test'
 import { step } from '../rancher/rancher-test'
 import { RancherUI } from './rancher-ui'
 
-type ExpGroup = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Kubewarden'
+type ExpGroup = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Admission Policy Management'
 type ExpItemMap = {
     Cluster: 'Projects/Namespaces' | 'Nodes' | 'Cluster and Project Members' | 'Events'
     Workloads: 'CronJobs' | 'DaemonSets' | 'Deployments' | 'Jobs' | 'StatefulSets' | 'Pods'
     Apps: 'Charts' | 'Installed Apps' | 'Repositories' | 'Recent Operations'
     Storage: 'PersistentVolumes' | 'StorageClasses' | 'ConfigMaps' | 'PersistentVolumeClaims' | 'Secrets'
-    Kubewarden: 'PolicyServers' | 'ClusterAdmissionPolicies' | 'AdmissionPolicies' | 'Policy Reporter'
+    'Admission Policy Management': 'PolicyServers' | 'ClusterAdmissionPolicies' | 'AdmissionPolicies' | 'Policy Reporter'
 };
 
 type FleetGroup = '' | 'Advanced'
@@ -85,9 +85,13 @@ export class Navigation {
     async explorer<T extends ExpGroup>(groupName: T, childName?: ExpItemMap[T]) {
       if (this.isblank()) await this.cluster()
       await this.sideNavHandler(groupName, childName)
-      // Wait for child page before next step
-      if (groupName == 'Kubewarden' && childName && childName != 'Policy Reporter') {
-        await expect(this.page.getByRole('heading', { name: childName })).toBeVisible()
+
+      // Wait for page before next step
+      if (groupName == 'Admission Policy Management') {
+        const heading = childName || /^(Kubewarden|Welcome to Kubewarden)$/
+        if (childName != 'Policy Reporter') {
+          await expect(this.page.getByRole('heading', { name: heading })).toBeVisible()
+        }
       }
     }
 
@@ -116,14 +120,13 @@ export class Navigation {
     // Kubewarden specific helpers
 
     @step // Overview
-    async kubewarden() {
-      await this.explorer('Kubewarden')
-      await expect(this.page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
+    async kubewarden(childName?: ExpItemMap['Admission Policy Management']) {
+      await this.explorer('Admission Policy Management', childName)
     }
 
     @step // Policy Servers
-    async pserver(name?: string, tab?: 'Policies' | 'Metrics' | 'Tracing' | 'Conditions' | 'Recent Events' | 'Related Resources') {
-      await this.explorer('Kubewarden', 'PolicyServers')
+    async pservers(name?: string, tab?: 'Policies' | 'Metrics' | 'Tracing' | 'Conditions' | 'Recent Events' | 'Related Resources') {
+      await this.explorer('Admission Policy Management', 'PolicyServers')
       if (name) {
         await this.ui.tableRow(name).open()
         await expect(this.page.getByRole('heading', { name: new RegExp(`PolicyServer:? ${name}`) })).toBeVisible()
@@ -132,15 +135,15 @@ export class Navigation {
     }
 
     @step // Cluster Admission Policies
-    async capolicy(name?: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events' | 'Related Resources') {
-      await this.explorer('Kubewarden', 'ClusterAdmissionPolicies')
+    async capolicies(name?: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events' | 'Related Resources') {
+      await this.explorer('Admission Policy Management', 'ClusterAdmissionPolicies')
       if (name) await this.ui.tableRow(name).open()
       if (tab) await this.ui.tab(tab).click()
     }
 
     @step // Admission Policies
-    async apolicy(name?: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events') {
-      await this.explorer('Kubewarden', 'AdmissionPolicies')
+    async apolicies(name?: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events') {
+      await this.explorer('Admission Policy Management', 'AdmissionPolicies')
       if (name) await this.ui.tableRow(name).open()
       if (tab) await this.ui.tab(tab).click()
     }
