@@ -10,6 +10,7 @@ import { DASHBOARD_HEADERS } from '@kubewarden/config/table-headers';
 import DashboardView from '@kubewarden/components/Dashboard/DashboardView.vue';
 import Card from '@kubewarden/components/Dashboard/Card.vue';
 import Masthead from '@kubewarden/components/Dashboard/Masthead.vue';
+import PolicyServerCard from '@kubewarden/components/Dashboard/PolicyServerCard.vue';
 
 import mockControllerChart from '@tests/unit/mocks/controllerChart';
 import mockPolicyServers from '@tests/unit/mocks/policyServers';
@@ -100,56 +101,35 @@ describe('component: DashboardView', () => {
     expect(cardComponents.length).toBe(DASHBOARD_HEADERS.length);
   });
 
-  it('renders ConsumptionGauge component with correct props', () => {
+  it('renders PolicyServerCard component for the Policy Servers card', () => {
+    commonMocks.$fetchState.pending = false;
+
     const wrapper = createWrapper();
 
-    const gauge = wrapper.findComponent(ConsumptionGauge);
+    const cards = wrapper.findAllComponents(Card);
 
-    expect(gauge.exists()).toBe(true);
-    expect(gauge.props('capacity')).toBe(2);
-    expect(gauge.props('used')).toBe(1);
-    expect(gauge.props('colorStops')).toEqual({
-      25: '--error',
-      50: '--warning',
-      70: '--success'
-    });
+    expect(cards.length).toBe(DASHBOARD_HEADERS.length);
+
+    // The third card in the array is index 2
+    const policyServersCard = cards[2];
+    const policyServerCardComponent = policyServersCard.findComponent(PolicyServerCard);
+
+    expect(policyServerCardComponent.exists()).toBe(true);
+
+    const serversProp = policyServerCardComponent.props('policyServers');
+
+    expect(Array.isArray(serversProp)).toBe(true);
+
+    expect(serversProp).toHaveLength(mockPolicyServers.length);
   });
 
-  it('correctly applies class names based on policy server counts', () => {
+  it('renders correct policy-server data', () => {
     const wrapper = createWrapper();
+    const policyServerCardComponent = wrapper.findComponent(PolicyServerCard);
 
-    const btn = wrapper.find('.role-secondary');
+    const serversProp = policyServerCardComponent.props('policyServers');
 
-    expect(btn.exists()).toBe(true);
-  });
-
-  it('renders correct gauge info of policy servers', () => {
-    const pods = [
-      {
-        metadata: {
-          state: {
-            name:          'running',
-            error:         false,
-            transitioning: false,
-          },
-        },
-      },
-      {
-        metadata: {
-          state: {
-            name:          'pending',
-            error:         false,
-            transitioning: true,
-          },
-        },
-      },
-    ];
-
-    const wrapper = createWrapper({ stubs: { Masthead: { template: '<span />' } } });
-
-    const gauges = wrapper.findComponent(ConsumptionGauge);
-
-    expect(gauges.props().capacity).toStrictEqual(pods.length as number);
-    expect(gauges.props().used).toStrictEqual(1 as number);
+    expect(serversProp[0]._status).toBe('running');
+    expect(serversProp[1]._status).toBe('pending');
   });
 });

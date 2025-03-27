@@ -172,20 +172,20 @@ export default {
       data-testid="kw-dashboard-pr-incompatible-banner-old-policy-structure"
     />
 
+    <div v-if="controllerAppVersion && defaultsApp && !appVersionSatisfies">
+      <Banner
+        :label="t('kubewarden.dashboard.upgrade.appVersionUnsatisfied', { controllerAppVersion, defaultsAppVersion }, true)"
+        color="warning"
+        class="mb-20"
+        data-testid="kw-dashboard-upgrade-unsatisfied-banner"
+      />
+    </div>
+
     <div class="head">
       <div class="head-title">
         <h1 data-testid="kw-dashboard-title">
           {{ t('kubewarden.dashboard.intro') }}
         </h1>
-
-        <div v-if="controllerAppVersion && defaultsApp && !appVersionSatisfies">
-          <Banner
-            :label="t('kubewarden.dashboard.upgrade.appVersionUnsatisfied', { controllerAppVersion, defaultsAppVersion }, true)"
-            color="warning"
-            class="mb-20"
-            data-testid="kw-dashboard-upgrade-unsatisfied-banner"
-          />
-        </div>
 
         <div v-if="controllerAppVersion" class="head-version-container">
           <div class="head-version bg-primary mr-10">

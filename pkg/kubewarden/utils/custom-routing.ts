@@ -2,6 +2,7 @@ import { KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
 
 interface KubewardenRouteConfig {
   name?: string;
+  hash?: string;
   query?: {
     [key: string]: any;
   };
@@ -24,11 +25,12 @@ export const rootKubewardenRoute = (): KubewardenRouteConfig => ({
 
 export const createKubewardenRoute = (config?: KubewardenRouteConfig) => {
   const {
-    name, query = {}, params = {}, meta = {}
+    name, hash, query = {}, params = {}, meta = {}
   } = config || {};
 
   return {
     name:   name || `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource`,
+    hash,
     query:  { ...query },
     params: {
       ...rootKubewardenRoute().params,
