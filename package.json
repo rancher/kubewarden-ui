@@ -1,6 +1,6 @@
 {
   "name": "ui",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "private": false,
   "scripts": {
     "build-pkg": "./node_modules/@rancher/shell/scripts/build-pkg.sh",
