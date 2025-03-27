@@ -136,7 +136,12 @@ export default {
       </button>
     </div>
 
-    <ResourceTable :schema="schema" :rows="filteredRows" :headers="headers" />
+    <ResourceTable
+      :schema="schema"
+      :rows="filteredRows"
+      :headers="headers"
+      :use-query-params-for-simple-filtering="true"
+    />
   </div>
 </template>
 

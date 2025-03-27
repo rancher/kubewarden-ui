@@ -155,10 +155,13 @@ export const DASHBOARD_HEADERS = [
     isEnabled:   true,
     isLoaded:    true,
     icon:        'icon-question-mark',
-    cta:         createKubewardenRoute({
-      name:   'c-cluster-product-resource-create',
-      params: { resource: KUBEWARDEN.ADMISSION_POLICY }
-    }),
+    modeLink:  (query: { [key: string]: string }) => {
+      return createKubewardenRoute({
+        name:   'c-cluster-product-resource',
+        query,
+        params: { resource: KUBEWARDEN.ADMISSION_POLICY }
+      });
+    },
     link:        createKubewardenRoute({
       name:   'c-cluster-product-resource',
       params: { resource: KUBEWARDEN.ADMISSION_POLICY }
@@ -172,10 +175,13 @@ export const DASHBOARD_HEADERS = [
     isEnabled:   true,
     isLoaded:    true,
     icon:        'icon-question-mark',
-    cta:         createKubewardenRoute({
-      name:   'c-cluster-product-resource-create',
-      params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }
-    }),
+    modeLink:  (query: { [key: string]: string }) => {
+      return createKubewardenRoute({
+        name:   'c-cluster-product-resource',
+        query,
+        params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }
+      });
+    },
     link:        createKubewardenRoute({
       name:   'c-cluster-product-resource',
       params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }
@@ -189,10 +195,6 @@ export const DASHBOARD_HEADERS = [
     isEnabled:   true,
     isLoaded:    true,
     icon:        'icon-question-mark',
-    cta:         createKubewardenRoute({
-      name:   'c-cluster-product-resource-create',
-      params: { resource: KUBEWARDEN.POLICY_SERVER }
-    }),
     link:        createKubewardenRoute({
       name:   'c-cluster-product-resource',
       params: { resource: KUBEWARDEN.POLICY_SERVER }

@@ -14,9 +14,6 @@ export interface AppVersion {
 }
 
 export class KubewardenPage extends BasePage {
-    readonly createPsBtn: Locator;
-    readonly createApBtn: Locator;
-    readonly createCapBtn: Locator;
     readonly currentApp: Locator;
     readonly upgradeApp: Locator;
     readonly upController: Locator;
@@ -24,10 +21,6 @@ export class KubewardenPage extends BasePage {
 
     constructor(page: Page) {
       super(page)
-      this.createPsBtn = this.ui.button('Create Policy Server')
-      this.createApBtn = this.ui.button('Create Namespaced Policy')
-      this.createCapBtn = this.ui.button('Create Cluster Policy')
-
       const head = this.page.locator('div.head')
       this.currentApp = head.locator('div.head-version')
       this.upgradeApp = head.locator('div.head-upgrade')

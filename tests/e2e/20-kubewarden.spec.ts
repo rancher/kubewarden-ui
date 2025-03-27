@@ -67,7 +67,8 @@ test('Stats reflect resource changes', async({ ui, page, nav }) => {
   const capCount = await kwPage.getCount('Cluster Policies').textContent() || 'Empty'
 
   await test.step('Policy Server counter++', async() => {
-    await kwPage.createPsBtn.click()
+    await page.getByRole('heading', { name: 'Policy Servers' }).click()
+    await ui.button('Create').click()
     await psPage.create(ps, { navigate: false })
     await nav.explorer('Kubewarden')
     await expect(kwPage.getCount('Policy Servers')).toHaveText((+psCount + 1).toString())
@@ -75,7 +76,8 @@ test('Stats reflect resource changes', async({ ui, page, nav }) => {
   })
 
   await test.step('Namespaced Policy counter++', async() => {
-    await kwPage.createApBtn.click()
+    await page.getByRole('heading', { name: 'Namespaced Policies' }).click()
+    await ui.button('Create').click()
     await apPage.create(policy, { navigate: false })
     await nav.explorer('Kubewarden')
     await expect(kwPage.getCount('Namespaced Policies')).toHaveText((+apCount + 1).toString())
@@ -83,7 +85,8 @@ test('Stats reflect resource changes', async({ ui, page, nav }) => {
   })
 
   await test.step('Cluster Policy counter++', async() => {
-    await kwPage.createCapBtn.click()
+    await page.getByRole('heading', { name: 'Cluster Policies' }).click()
+    await ui.button('Create').click()
     await capPage.create(policy, { navigate: false })
     await nav.explorer('Kubewarden')
     await expect(kwPage.getCount('Cluster Policies')).toHaveText((+capCount + 1).toString())

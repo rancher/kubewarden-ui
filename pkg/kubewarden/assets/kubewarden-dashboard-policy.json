@@ -561,7 +561,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Kubewarden Policy",
+  "title": "Kubewarden / Policy",
   "uid": "kubewarden-dashboard-policy",
   "version": 3
 }

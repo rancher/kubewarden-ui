@@ -165,7 +165,9 @@ test.describe('Metrics', () => {
     })
     // Monitoring is installed
     await nav.pserver('default', 'Metrics')
-    await telPage.toBeComplete('monitoring')
+    await ui.retry(async() => {
+      await telPage.toBeComplete('monitoring')
+    }, 'The Grafana proxy URL can not be found or is configured incorrectly')
   })
 
   test('Create Prometheus ServiceMonitor', async({ ui }) => {
