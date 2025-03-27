@@ -34,7 +34,11 @@ export default {
     search:        {
       type:    Boolean,
       default: false
-    }
+    },
+    useQueryParamsForSimpleFiltering: {
+      type:    Boolean,
+      default: false
+    },
   },
 
   components: { SortableTable },
@@ -94,6 +98,7 @@ export default {
       :default-sort-by="defaultSortBy"
       :paging="paging"
       :search="search"
+      :use-query-params-for-simple-filtering="useQueryParamsForSimpleFiltering"
     />
   </div>
 </template>

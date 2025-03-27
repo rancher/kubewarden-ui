@@ -35,11 +35,8 @@ export default {
               {{ t(card.title) }}
             </h1>
           </router-link>
-          <p v-clean-html="t(card.description)" class="mb-0" />
         </div>
       </div>
-
-      <slot name="action" class="action" />
     </div>
 
     <div class="d-slot">
@@ -72,7 +69,6 @@ export default {
     .title-container {
       display: flex;
       align-items: center;
-      width: 55%;
     }
 
     .title {
@@ -138,10 +134,6 @@ export default {
         cursor: not-allowed;
       }
     }
-  }
-
-  .d-action {
-    width: auto;
   }
 }
 
