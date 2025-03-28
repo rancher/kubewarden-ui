@@ -7,6 +7,7 @@ import { apList, capList, ClusterAdmissionPoliciesPage } from './pages/policies.
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherFleetPage } from './rancher/rancher-fleet.page'
 import { RancherUI } from './components/rancher-ui'
+import { Common } from './components/common'
 
 // source (yarn dev) | rc (add github repo) | released (just install)
 const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
@@ -15,28 +16,11 @@ expect(ORIGIN).toMatch(/^(source|rc|released)$/)
 const MODE = process.env.MODE || 'base'
 expect(MODE).toMatch(/^(base|fleet|upgrade)$/)
 
-// Known Kubewarden versions for upgrade test, start at [0]
-const upMap: AppVersion[] = [
-  { app: 'v1.11.0', controller: '2.0.10', crds: '1.4.6', defaults: '1.9.4' },
-  { app: 'v1.12.0', controller: '2.0.11', crds: '1.5.0', defaults: '2.0.0' },
-  { app: 'v1.13.0', controller: '2.1.0', crds: '1.5.1', defaults: '2.0.3' },
-  { app: 'v1.14.0', controller: '2.2.1', crds: '1.6.0', defaults: '2.1.0' },
-  { app: 'v1.15.0', controller: '2.3.1', crds: '1.7.0', defaults: '2.2.1' },
-  { app: 'v1.16.0', controller: '2.4.0', crds: '1.8.0', defaults: '2.3.1' },
-  { app: 'v1.17.0', controller: '3.0.1', crds: '1.9.0', defaults: '2.4.0' },
-  { app: 'v1.18.0', controller: '3.1.0', crds: '1.10.0', defaults: '2.5.0' },
-  { app: 'v1.19.0', controller: '3.2.0', crds: '1.11.0', defaults: '2.6.0' },
-  { app: 'v1.20.0', controller: '4.0.1', crds: '1.12.1', defaults: '2.7.1' },
-  { app: 'v1.21.0', controller: '4.1.0', crds: '1.13.0', defaults: '2.8.1' },
-  { app: 'v1.22.0', controller: '4.2.0', crds: '1.14.0', defaults: '2.9.0' },
-].splice(-3) // Limit upgrade path to last 3 versions
-
-// Support for Rancher 2.9 was added in KW 1.13.0
-if (RancherUI.isVersion('>=2.9')) {
-  upMap.splice(0, upMap.findIndex(v => v.app === 'v1.13.0'))
-} else if (RancherUI.isVersion('>=2.10')) {
-  upMap.splice(0, upMap.findIndex(v => v.app === 'v1.18.0'))
-}
+// Fetch Kubewarden versions for upgrade test
+let upMap: AppVersion[]
+test.beforeAll(async() => {
+  if (MODE === 'upgrade') upMap = (await Common.fetchVersionMap()).splice(-3)
+})
 
 test('Initial rancher setup', async({ page, ui, nav }) => {
   const rancher = new RancherCommonPage(page)
@@ -94,7 +78,7 @@ test('Install UI extension', async({ page, ui }) => {
     if (ORIGIN === 'source') {
       await extensions.developerLoad('http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js')
     } else {
-      await extensions.install('kubewarden')
+      await extensions.install('kubewarden', { version: process.env.UIVERSION?.replace(/^kubewarden-/, '') } )
     }
   })
 })
