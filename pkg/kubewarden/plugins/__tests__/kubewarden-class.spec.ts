@@ -135,8 +135,8 @@ describe('KubewardenModel', () => {
         expect(colorForStatus('pending')).toBe('text-info');
         expect(colorForStatus('active')).toBe('text-success');
       });
-      it('returns default color for unknown status', () => {
-        expect(colorForStatus('unknown')).toBe('text-warning');
+      it('returns default color for asdf status', () => {
+        expect(colorForStatus('asdf')).toBe('text-warning');
       });
     });
 

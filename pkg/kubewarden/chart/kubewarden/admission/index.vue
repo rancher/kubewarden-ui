@@ -24,6 +24,10 @@ export default {
       type:    Boolean,
       default: false
     },
+    errorFetchingPolicy: {
+      type:    Boolean,
+      default: false
+    },
     mode: {
       type:    String,
       default: _CREATE
@@ -31,7 +35,7 @@ export default {
     value: {
       type:     Object,
       required: true
-    }
+    },
   },
 
   components: {
@@ -95,6 +99,10 @@ export default {
       }
 
       if (this.hasSettings && !this.hasQuestions) {
+        return true;
+      }
+
+      if (this.errorFetchingPolicy) {
         return true;
       }
 

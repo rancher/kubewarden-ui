@@ -47,7 +47,7 @@ export default {
   data() {
     return {
       errors:           [],
-      chartValues:      this.value,
+      chartValues:      this.value
     };
   },
 
