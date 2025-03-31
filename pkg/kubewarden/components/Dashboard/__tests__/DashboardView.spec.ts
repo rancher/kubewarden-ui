@@ -1,6 +1,5 @@
 import { mount } from '@vue/test-utils';
 
-import ConsumptionGauge from '@shell/components/ConsumptionGauge';
 import Loading from '@shell/components/Loading';
 import { CATALOG, POD } from '@shell/config/types';
 
