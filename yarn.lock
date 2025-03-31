@@ -3334,10 +3334,10 @@
   resolved "https://registry.npmjs.org/@rancher/icons/-/icons-2.0.29.tgz#6546d69768c706bebd66bfa73b36aef3d105987a"
   integrity sha512-qBBqfazS9y5VjV7fJDPNXmxd9AP/2uiE05mKFWP41kpbO+tEb62RnUBXCm14XLeScDZQcOuiAKVHMmvCFzF0BA==
 
-"@rancher/shell@^3.0.2":
-  version "3.0.2"
-  resolved "https://registry.npmjs.org/@rancher/shell/-/shell-3.0.2.tgz#2cd1ebc32d1d6b6b0067815cdb64471cfa8f810b"
-  integrity sha512-8TOzSeu+o8W0/iTtmmLDJLJwGiFFSP2NdjBM2pRHCk7y1eW7iCUKVwS1/gsHpURgKK9Vu6cNafJmEM4UIraFeA==
+"@rancher/shell@^3.0.4":
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@rancher/shell/-/shell-3.0.4.tgz#63569e85166a778771b9e129f0c17cc4578daaa2"
+  integrity sha512-YaUUMdSg2C1sKlged9wNvCt+WCwkJtfOhjjX1PwcWPqbq/zL6nPUWAVDcxiD9Ah5KbLMBoMtNWL/K3DG5xpoyQ==
   dependencies:
     "@aws-sdk/client-ec2" "3.658.1"
     "@aws-sdk/client-eks" "3.1.0"
@@ -3362,7 +3362,7 @@
     "@vue/vue3-jest" "27.0.0"
     add "2.0.6"
     ansi_up "5.0.0"
-    axios "0.21.4"
+    axios "1.8.4"
     axios-retry "3.1.9"
     babel-eslint "10.1.0"
     babel-plugin-module-resolver "4.0.0"
@@ -5648,17 +5648,10 @@ axios-retry@3.1.9:
   dependencies:
     is-retry-allowed "^1.1.0"
 
-axios@0.21.4:
-  version "0.21.4"
-  resolved "https://registry.npmjs.org/axios/-/axios-0.21.4.tgz#c67b90dc0568e5c1cf2b0b858c43ba28e2eda575"
-  integrity sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==
-  dependencies:
-    follow-redirects "^1.14.0"
-
-axios@^1.7.9:
-  version "1.7.9"
-  resolved "https://registry.npmjs.org/axios/-/axios-1.7.9.tgz#d7d071380c132a24accda1b2cfc1535b79ec650a"
-  integrity sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==
+axios@1.8.4, axios@^1.7.9:
+  version "1.8.4"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.8.4.tgz#78990bb4bc63d2cae072952d374835950a82f447"
+  integrity sha512-eBSYY4Y68NNlHbHBMdeDmKNtDgXWhQsJcGqzO3iLUM0GraQFSS9cVgPX5I9b3lbdFKyYoAEGAZF1DwhTaljNAw==
   dependencies:
     follow-redirects "^1.15.6"
     form-data "^4.0.0"
@@ -8871,7 +8864,7 @@ focus-trap@7.6.2:
   dependencies:
     tabbable "^6.2.0"
 
-follow-redirects@^1.0.0, follow-redirects@^1.14.0, follow-redirects@^1.15.6:
+follow-redirects@^1.0.0, follow-redirects@^1.15.6:
   version "1.15.9"
   resolved "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.9.tgz#a604fa10e443bf98ca94228d9eebcc2e8a2c8ee1"
   integrity sha512-gew4GsXizNgdoRyqmyfMHyAmXsZDk6mHkSxZFCzW9gwlbtOW44CDtYavM+y+72qD/Vq2l550kMF52DT8fOLJqQ==
