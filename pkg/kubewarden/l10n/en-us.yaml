@@ -1,3 +1,7 @@
+product:
+  # This is used as the display name of the product in the UI SideNav
+  kubewarden: Admission Policy Management
+
 kubewarden:
   title: Kubewarden
   unavailability:
