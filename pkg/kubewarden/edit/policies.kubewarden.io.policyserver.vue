@@ -6,6 +6,7 @@ import CreateEditView from '@shell/mixins/create-edit-view';
 
 import CruResource from '@shell/components/CruResource';
 import Loading from '@shell/components/Loading';
+import { Banner } from '@components/Banner';
 
 import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
 import { KUBEWARDEN } from '@kubewarden/types';
@@ -14,6 +15,7 @@ import Values from '@kubewarden/components/PolicyServer/Values';
 
 export default {
   components: {
+    Banner,
     CruResource,
     Loading,
     Values
@@ -45,10 +47,7 @@ export default {
   },
 
   data() {
-    return {
-      errors:           [],
-      chartValues:      this.value,
-    };
+    return { chartValues: this.value };
   },
 
   created() {
@@ -62,12 +61,22 @@ export default {
       return this.realMode === _CREATE;
     },
 
+    hasErrors() {
+      return this.errors?.length && Array.isArray(this.errors);
+    },
+
     validationPassed() {
       return !!this.chartValues?.metadata?.name;
     }
   },
 
   methods: {
+    closeError(index) {
+      const errors = this.errors.filter((_, i) => i !== index);
+
+      this.errors = errors;
+    },
+
     async finish(event) {
       // Clean up the securityContexts "seccompProfile" property if there are no keys set on the object
       const securityContexts = this.chartValues?.spec?.securityContexts;
@@ -103,12 +112,27 @@ export default {
     :errors="errors"
     :validation-passed="validationPassed"
     @finish="finish"
-    @error="e => errors = e"
   >
     <Values
       :value="value"
       :chart-values="chartValues"
       :mode="mode"
     />
+    <div
+      v-if="hasErrors"
+      id="cru-errors"
+      class="cru__errors"
+    >
+      <Banner
+        v-for="(err, i) in errors"
+        :key="i"
+        color="error"
+        :data-testid="`error-banner${ i }`"
+        :closable="true"
+        @close="closeError(i)"
+      >
+        {{ err }}
+      </Banner>
+    </div>
   </CruResource>
 </template>
