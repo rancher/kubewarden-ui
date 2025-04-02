@@ -529,18 +529,6 @@ asyncButton:
     waiting: Installing&hellip;
 
 typeLabel:
-  policies.kubewarden.io.policyserver: |-
-    {count, plural,
-      one { Policy Server }
-      other { Policy Servers }
-    }
-  policies.kubewarden.io.admissionpolicy: |-
-    {count, plural,
-      one { Admission Policy }
-      other { Admission Policies }
-    }
-  policies.kubewarden.io.clusteradmissionpolicy: |-
-    {count, plural,
-      one { Cluster Admission Policy }
-      other { Cluster Admission Policies }
-    }
+  policies.kubewarden.io.policyserver: Policy Servers
+  policies.kubewarden.io.admissionpolicy: Admission Policies
+  policies.kubewarden.io.clusteradmissionpolicy: Cluster Admission Policies
