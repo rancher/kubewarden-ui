@@ -7,7 +7,7 @@ test('Check initial state', async({ page, ui, nav }) => {
   await test.step('Kubewarden Landing page', async() => {
     const kwPage = new KubewardenPage(page)
 
-    await nav.explorer('Kubewarden')
+    await nav.kubewarden()
     // Header contains version
     const head = page.locator('div.head')
     await expect(head.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
@@ -21,7 +21,7 @@ test('Check initial state', async({ page, ui, nav }) => {
   })
 
   await test.step('Policy Servers Landing Page', async() => {
-    await nav.explorer('Kubewarden', 'PolicyServers')
+    await nav.pservers()
     await expect(page.getByRole('heading', { name: 'PolicyServers' })).toBeVisible()
 
     // Default policy server
@@ -35,14 +35,14 @@ test('Check initial state', async({ page, ui, nav }) => {
   })
 
   await test.step('Admission Policies Landing page', async() => {
-    await nav.explorer('Kubewarden', 'AdmissionPolicies')
+    await nav.apolicies()
 
     await expect(page.getByRole('heading', { name: 'AdmissionPolicies' })).toBeVisible()
     await expect(page.getByText('There are no rows to show.')).toBeVisible()
   })
 
   await test.step('Cluster Admission Policies Landing page', async() => {
-    await nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
+    await nav.capolicies()
 
     await expect(page.getByRole('heading', { name: 'ClusterAdmissionPolicies' })).toBeVisible()
     await expect(page.locator('.col-policy-status')).toHaveCount(6)
@@ -61,7 +61,7 @@ test('Stats reflect resource changes', async({ ui, page, nav }) => {
   const policy: Policy = { title: 'Pod Privileged Policy', name: 'kw-policy-privpod', server: ps.name }
 
   // Get initial counts
-  await nav.explorer('Kubewarden')
+  await nav.kubewarden()
   const psCount = await kwPage.getCount('Policy Servers').textContent() || 'Empty'
   const apCount = await kwPage.getCount('Namespaced Policies').textContent() || 'Empty'
   const capCount = await kwPage.getCount('Cluster Policies').textContent() || 'Empty'
@@ -70,7 +70,7 @@ test('Stats reflect resource changes', async({ ui, page, nav }) => {
     await page.getByRole('heading', { name: 'Policy Servers' }).click()
     await ui.button('Create').click()
     await psPage.create(ps, { navigate: false })
-    await nav.explorer('Kubewarden')
+    await nav.kubewarden()
     await expect(kwPage.getCount('Policy Servers')).toHaveText((+psCount + 1).toString())
     await expect(kwPage.getPolicyServer(ps.name)).toContainText('0 Protect / 0 Monitor')
   })
@@ -79,7 +79,7 @@ test('Stats reflect resource changes', async({ ui, page, nav }) => {
     await page.getByRole('heading', { name: 'Namespaced Policies' }).click()
     await ui.button('Create').click()
     await apPage.create(policy, { navigate: false })
-    await nav.explorer('Kubewarden')
+    await nav.kubewarden()
     await expect(kwPage.getCount('Namespaced Policies')).toHaveText((+apCount + 1).toString())
     await expect(kwPage.getPolicyServer(ps.name)).toContainText('1 Protect / 0 Monitor')
   })
@@ -88,14 +88,14 @@ test('Stats reflect resource changes', async({ ui, page, nav }) => {
     await page.getByRole('heading', { name: 'Cluster Policies' }).click()
     await ui.button('Create').click()
     await capPage.create(policy, { navigate: false })
-    await nav.explorer('Kubewarden')
+    await nav.kubewarden()
     await expect(kwPage.getCount('Cluster Policies')).toHaveText((+capCount + 1).toString())
     await expect(kwPage.getPolicyServer(ps.name)).toContainText('2 Protect / 0 Monitor')
   })
 
   await test.step('Stats after deleting resources ', async() => {
     await psPage.delete(ps.name)
-    await nav.explorer('Kubewarden')
+    await nav.kubewarden()
     await expect(kwPage.getCount('Namespaced Policies')).toHaveText(apCount)
     await expect(kwPage.getCount('Cluster Policies')).toHaveText(capCount)
     await expect(kwPage.getCount('Policy Servers')).toHaveText(psCount)

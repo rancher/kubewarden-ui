@@ -25,7 +25,7 @@ test('Policy Servers', async({ page, ui, nav }) => {
 
   await test.step('Check Overview page', async() => {
     // PS is active and has 2 policies
-    await nav.pserver()
+    await nav.pservers()
     await expect3m(psRow.column('Status')).toHaveText('Active')
     await expect(psRow.column('Policies')).toHaveText('2')
 
@@ -53,7 +53,7 @@ test('Policy Servers', async({ page, ui, nav }) => {
   })
 
   await test.step('Scale policy server', async() => {
-    await nav.pserver()
+    await nav.pservers()
     await psRow.action('Edit Config')
     await psPage.setReplicas(2)
     await ui.button('Save').click()
@@ -77,7 +77,7 @@ test('Configure with custom values', async({ page, ui, nav }) => {
   const ps = { name: 'test-policyserver', image: 'ghcr.io/kubewarden/policy-server:latest', replicas: 2 }
   await psPage.create(ps, { wait: false })
 
-  await nav.pserver(ps.name)
+  await nav.pservers(ps.name)
   await ui.button('Config').click()
   await expect(ui.input('Name*')).toHaveValue(ps.name)
   await expect(ui.input('Image URL')).toHaveValue(ps.image)

@@ -30,7 +30,7 @@ test.describe('Setup', () => {
 
     // Otel is not installed
     for (const tab of ['Tracing', 'Metrics'] as const) {
-      await nav.pserver('default', tab)
+      await nav.pservers('default', tab)
       await telPage.toBeIncomplete('otel')
       await expect(telPage.configBtn).toBeDisabled()
     }
@@ -48,7 +48,7 @@ test.describe('Setup', () => {
 
     // Otel is installed
     for (const tab of ['Tracing', 'Metrics'] as const) {
-      await nav.pserver('default', tab)
+      await nav.pservers('default', tab)
       await telPage.toBeComplete('otel')
     }
   })
@@ -66,7 +66,7 @@ test.describe('Tracing', () => {
   test.beforeEach(async({ nav, page }) => {
     apps = new RancherAppsPage(page)
     telPage = new TelemetryPage(page)
-    await nav.pserver('default', 'Tracing')
+    await nav.pservers('default', 'Tracing')
   })
 
   test('Install Jaeger', async({ nav }) => {
@@ -89,7 +89,7 @@ test.describe('Tracing', () => {
     }
 
     // Jaeger is installed
-    await nav.pserver('default', 'Tracing')
+    await nav.pservers('default', 'Tracing')
     await telPage.toBeComplete('jaeger')
   })
 
@@ -121,19 +121,19 @@ test.describe('Tracing', () => {
 
     await test.step('Check default PS', async() => {
       // Check logs on policy server
-      await nav.pserver('default', 'Tracing')
+      await nav.pservers('default', 'Tracing')
       await expect(logline).toBeVisible()
       // Check logs on (recommended) policy
-      await nav.capolicy('no-privileged-pod', 'Tracing')
+      await nav.capolicies('no-privileged-pod', 'Tracing')
       await expect(logline).toBeVisible()
     })
 
     await test.step('Check custom PS', async() => {
       // Check logs on the custom policy server
-      await nav.pserver('custom-ps', 'Tracing')
+      await nav.pservers('custom-ps', 'Tracing')
       await expect(logline).toBeVisible()
       // Check logs on the (custom) policy
-      await nav.apolicy('no-privileged-custom', 'Tracing')
+      await nav.apolicies('no-privileged-custom', 'Tracing')
       await expect(logline).toBeVisible()
     })
   })
@@ -155,7 +155,7 @@ test.describe('Tracing', () => {
     }
 
     // Check
-    await nav.pserver('default', 'Tracing')
+    await nav.pservers('default', 'Tracing')
     await telPage.toBeIncomplete('config')
     await telPage.toBeIncomplete('jaeger')
     await expect(telPage.configBtn).toBeDisabled()
@@ -171,7 +171,7 @@ test.describe('Metrics', () => {
   test.beforeEach(async({ nav, page }) => {
     apps = new RancherAppsPage(page)
     telPage = new TelemetryPage(page)
-    await nav.pserver('default', 'Metrics')
+    await nav.pservers('default', 'Metrics')
   })
 
   test('Install Monitoring', async({ ui, nav }) => {
@@ -185,7 +185,7 @@ test.describe('Metrics', () => {
       timeout : 7 * 60_000
     })
     // Monitoring is installed
-    await nav.pserver('default', 'Metrics')
+    await nav.pservers('default', 'Metrics')
     await telPage.toBeComplete('monitoring')
   })
 
@@ -246,12 +246,12 @@ test.describe('Metrics', () => {
     };
 
     await test.step('Check default PS metrics', async() => {
-      await nav.pserver('default', 'Metrics')
+      await nav.pservers('default', 'Metrics')
       await checkMetrics();
     })
 
     await test.step('Check custom PS metrics', async() => {
-      await nav.pserver('custom-ps', 'Metrics')
+      await nav.pservers('custom-ps', 'Metrics')
       await ui.button('Add Service Monitor').click()
       await checkMetrics();
     })
@@ -270,7 +270,7 @@ test.describe('Metrics', () => {
     await apps.deleteApp('rancher-monitoring-crd')
     await shell.run('kubectl delete cm -n cattle-dashboards kubewarden-dashboard-policy kubewarden-dashboard-policyserver')
     // Check
-    await nav.pserver('default', 'Metrics')
+    await nav.pservers('default', 'Metrics')
     await ui.retry(async() => {
       await telPage.toBeIncomplete('config')
       await telPage.toBeIncomplete('monitoring')

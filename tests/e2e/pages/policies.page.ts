@@ -198,8 +198,7 @@ export class AdmissionPoliciesPage extends BasePolicyPage {
     kind: PolicyKind = 'AdmissionPolicy';
 
     async goto(): Promise<void> {
-      await this.nav.explorer('Kubewarden', 'AdmissionPolicies')
-      // await this.nav.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.admissionpolicy')
+      await this.nav.apolicies()
     }
 
     async setNamespace(name: string) {
@@ -220,8 +219,7 @@ export class ClusterAdmissionPoliciesPage extends BasePolicyPage {
     kind: PolicyKind = 'ClusterAdmissionPolicy'
 
     async goto(): Promise<void> {
-      await this.nav.explorer('Kubewarden', 'ClusterAdmissionPolicies')
-      // await this.nav.goto('dashboard/c/local/kubewarden/policies.kubewarden.io.clusteradmissionpolicy')
+      await this.nav.capolicies()
     }
 
     async setIgnoreRancherNS(checked: boolean) {

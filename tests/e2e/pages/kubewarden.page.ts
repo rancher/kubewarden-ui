@@ -29,8 +29,7 @@ export class KubewardenPage extends BasePage {
     }
 
     async goto(): Promise<void> {
-      await this.nav.explorer('Kubewarden')
-      // await this.nav.goto('dashboard/c/local/kubewarden')
+      await this.nav.kubewarden()
     }
 
     getPane(name: Pane) {
