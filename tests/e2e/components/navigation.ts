@@ -129,7 +129,7 @@ export class Navigation {
       await this.explorer('Admission Policy Management', 'Policy Servers')
       if (name) {
         await this.ui.tableRow(name).open()
-        await expect(this.page.getByRole('heading', { name: new RegExp(`Policy Server:? ${name}`) })).toBeVisible()
+        await expect(this.page.getByRole('heading', { name: new RegExp(`Policy Servers:? ${name}`) })).toBeVisible()
       }
       if (tab) await this.ui.tab(tab).click()
     }
