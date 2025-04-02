@@ -98,9 +98,6 @@ test('Install Kubewarden', async({ page, ui, nav }) => {
     await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
   }, 'Kubewarden installation not detected')
 
-  // Workaround for issues#938: Both singular & plural resource names in menu
-  await page.reload()
-
   await test.step('Install default policyserver', async() => {
     const psPage = new PolicyServersPage(page)
 

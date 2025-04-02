@@ -32,8 +32,11 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
   })
 
   await test.step(`Check details page: ${p.name}`, async() => {
+    // The regex inserts a space between lowercase letter followed by an uppercase letter
+    const polKindTitle = new RegExp(`^\\s+${polPage.kind.replace(/([a-z])([A-Z])/g, '$1 $2')}:\\s+${p.name}`)
+
     await row.open()
-    await expect(ui.page.getByText(new RegExp(`^\\s+${polPage.kind}:\\s+${p.name}`))).toBeVisible()
+    await expect(ui.page.getByText(polKindTitle)).toBeVisible()
     await expect(ui.page.getByText('API Versions')).toBeVisible()
   })
 
