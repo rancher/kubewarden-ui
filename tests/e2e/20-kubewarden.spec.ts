@@ -22,7 +22,7 @@ test('Check initial state', async({ page, ui, nav }) => {
 
   await test.step('Policy Servers Landing Page', async() => {
     await nav.pservers()
-    await expect(page.getByRole('heading', { name: 'PolicyServers' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Policy Servers' })).toBeVisible()
 
     // Default policy server
     const psRow = ui.tableRow('default')
@@ -37,14 +37,14 @@ test('Check initial state', async({ page, ui, nav }) => {
   await test.step('Admission Policies Landing page', async() => {
     await nav.apolicies()
 
-    await expect(page.getByRole('heading', { name: 'AdmissionPolicies' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Admission Policies' })).toBeVisible()
     await expect(page.getByText('There are no rows to show.')).toBeVisible()
   })
 
   await test.step('Cluster Admission Policies Landing page', async() => {
     await nav.capolicies()
 
-    await expect(page.getByRole('heading', { name: 'ClusterAdmissionPolicies' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Cluster Admission Policies' })).toBeVisible()
     await expect(page.locator('.col-policy-status')).toHaveCount(6)
     await expect(page.locator('.col-policy-status').getByText('Active')).toHaveCount(6)
     await expect(page.locator('.col-link-detail').first()).not.toBeEmpty()

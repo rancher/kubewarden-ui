@@ -8,7 +8,7 @@ type ExpItemMap = {
     Workloads: 'CronJobs' | 'DaemonSets' | 'Deployments' | 'Jobs' | 'StatefulSets' | 'Pods'
     Apps: 'Charts' | 'Installed Apps' | 'Repositories' | 'Recent Operations'
     Storage: 'PersistentVolumes' | 'StorageClasses' | 'ConfigMaps' | 'PersistentVolumeClaims' | 'Secrets'
-    'Admission Policy Management': 'PolicyServers' | 'ClusterAdmissionPolicies' | 'AdmissionPolicies' | 'Policy Reporter'
+    'Admission Policy Management': 'Policy Servers' | 'Cluster Admission Policies' | 'Admission Policies' | 'Policy Reporter'
 };
 
 type FleetGroup = '' | 'Advanced'
@@ -126,24 +126,24 @@ export class Navigation {
 
     @step // Policy Servers
     async pservers(name?: string, tab?: 'Policies' | 'Metrics' | 'Tracing' | 'Conditions' | 'Recent Events' | 'Related Resources') {
-      await this.explorer('Admission Policy Management', 'PolicyServers')
+      await this.explorer('Admission Policy Management', 'Policy Servers')
       if (name) {
         await this.ui.tableRow(name).open()
-        await expect(this.page.getByRole('heading', { name: new RegExp(`PolicyServer:? ${name}`) })).toBeVisible()
+        await expect(this.page.getByRole('heading', { name: new RegExp(`Policy Servers:? ${name}`) })).toBeVisible()
       }
       if (tab) await this.ui.tab(tab).click()
     }
 
     @step // Cluster Admission Policies
     async capolicies(name?: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events' | 'Related Resources') {
-      await this.explorer('Admission Policy Management', 'ClusterAdmissionPolicies')
+      await this.explorer('Admission Policy Management', 'Cluster Admission Policies')
       if (name) await this.ui.tableRow(name).open()
       if (tab) await this.ui.tab(tab).click()
     }
 
     @step // Admission Policies
     async apolicies(name?: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events') {
-      await this.explorer('Admission Policy Management', 'AdmissionPolicies')
+      await this.explorer('Admission Policy Management', 'Admission Policies')
       if (name) await this.ui.tableRow(name).open()
       if (tab) await this.ui.tab(tab).click()
     }

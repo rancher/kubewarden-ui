@@ -527,3 +527,8 @@ asyncButton:
     action: Install Policy Reporter Chart
     success: Installed
     waiting: Installing&hellip;
+
+typeLabel:
+  policies.kubewarden.io.policyserver: Policy Servers
+  policies.kubewarden.io.admissionpolicy: Admission Policies
+  policies.kubewarden.io.clusteradmissionpolicy: Cluster Admission Policies
