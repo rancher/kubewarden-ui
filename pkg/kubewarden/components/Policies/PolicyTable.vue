@@ -1,19 +1,19 @@
 <script>
 import semver from 'semver';
 
-import { SCHEMA } from '@shell/config/types';
 import { _CREATE, CATEGORY, SEARCH_QUERY } from '@shell/config/query-params';
+import { SCHEMA } from '@shell/config/types';
 import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
-import { ensureRegex } from '@shell/utils/string';
 import { sortBy } from '@shell/utils/sort';
+import { ensureRegex } from '@shell/utils/string';
 
-import LabeledSelect from '@shell/components/form/LabeledSelect';
-import { LabeledInput } from '@components/Form/LabeledInput';
 import { Checkbox } from '@components/Form/Checkbox';
+import { LabeledInput } from '@components/Form/LabeledInput';
+import LabeledSelect from '@shell/components/form/LabeledSelect';
 
-import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
 import { POLICY_TABLE_HEADERS } from '@kubewarden/config/table-headers';
-import { resourcesFromAnnotation, isGlobalPolicy } from '@kubewarden/modules/artifacthub';
+import { KUBEWARDEN, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/constants';
+import { isGlobalPolicy, resourcesFromAnnotation } from '@kubewarden/modules/artifacthub';
 
 import SortableTableWrapper from '@kubewarden/components/SortableTableWrapper';
 

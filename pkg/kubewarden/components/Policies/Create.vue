@@ -17,13 +17,15 @@ import Loading from '@shell/components/Loading';
 import Wizard from '@shell/components/Wizard';
 
 import {
-  KUBEWARDEN,
-  KUBEWARDEN_PRODUCT_NAME,
-  REGO_POLICIES_REPO,
   VALUES_STATE,
   ARTIFACTHUB_PKG_ANNOTATION,
   DEFAULT_POLICY
 } from '@kubewarden/types';
+import {
+  KUBEWARDEN,
+  KUBEWARDEN_PRODUCT_NAME,
+  REGO_POLICIES_REPO
+} from '@kubewarden/constants';
 import { removeEmptyAttrs } from '@kubewarden/utils/object';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 

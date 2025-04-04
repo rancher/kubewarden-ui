@@ -1,18 +1,18 @@
 <script>
-import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
+import { mapGetters } from 'vuex';
 
-import ResourceFetch from '@shell/mixins/resource-fetch';
-import { CATALOG, FLEET } from '@shell/config/types';
 import { _CREATE } from '@shell/config/query-params';
+import { CATALOG, FLEET } from '@shell/config/types';
+import ResourceFetch from '@shell/mixins/resource-fetch';
 
-import Loading from '@shell/components/Loading';
-import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
 import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
+import Loading from '@shell/components/Loading';
+import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
 
-import { KUBEWARDEN_CHARTS, KUBEWARDEN_APPS } from '@kubewarden/types';
+import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS } from '@kubewarden/constants';
 import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
 import { getPolicyServerModule, isFleetDeployment } from '@kubewarden/modules/fleet';
 import { findCompatibleDefaultsChart } from '@kubewarden/utils/chart';

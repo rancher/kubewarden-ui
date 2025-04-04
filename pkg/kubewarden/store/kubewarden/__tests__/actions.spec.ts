@@ -1,4 +1,4 @@
-import { REGO_POLICIES_REPO } from '@kubewarden/types';
+import { REGO_POLICIES_REPO } from '@kubewarden/constants';
 
 import actions from '@kubewarden/store/kubewarden/actions';
 import { generateSummaryMap } from '@kubewarden/modules/policyReporter';

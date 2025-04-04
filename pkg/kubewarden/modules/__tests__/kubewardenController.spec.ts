@@ -1,5 +1,5 @@
 import { CATALOG } from '@shell/config/labels-annotations';
-import { KUBEWARDEN_APPS } from '@kubewarden/types';
+import { KUBEWARDEN_APPS } from '@kubewarden/constants';
 import { fetchControllerApp } from '@kubewarden/modules/kubewardenController';
 
 const mockStore: any = {

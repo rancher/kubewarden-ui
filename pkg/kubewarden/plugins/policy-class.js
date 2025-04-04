@@ -6,7 +6,8 @@ import { get } from '@shell/utils/object';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { KUBERNETES, WORKSPACE_ANNOTATION } from '@shell/config/labels-annotations';
 
-import { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/constants';
+import { ARTIFACTHUB_ENDPOINT, ARTIFACTHUB_PKG_ANNOTATION } from '@kubewarden/types';
 import KubewardenModel, { colorForStatus } from './kubewarden-class';
 
 export default class PolicyModel extends KubewardenModel {

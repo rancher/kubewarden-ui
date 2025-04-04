@@ -4,9 +4,12 @@ import { SCHEMA } from '@shell/config/types';
 
 import Loading from '@shell/components/Loading';
 
-import Rule from './Rule';
-import { KUBEWARDEN, KUBEWARDEN_APPS, ARTIFACTHUB_PKG_ANNOTATION } from '@kubewarden/types';
+import { KUBEWARDEN, KUBEWARDEN_APPS } from '@kubewarden/constants';
+import { ARTIFACTHUB_PKG_ANNOTATION } from '@kubewarden/types';
+
 import { namespacedGroups, namespacedSchemas } from '@kubewarden/modules/core';
+
+import Rule from './Rule';
 
 export default {
   name: 'Rules',
