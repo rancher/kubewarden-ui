@@ -9,7 +9,6 @@ describe('Vuex Mutations', () => {
       airGapped:              false,
       fleetRepos:             [],
       hideBannerDefaults:     false,
-      hideBannerArtifactHub:  false,
       hideBannerAirgapPolicy: false,
       controllerApp:          null,
       kubewardenCrds:         [],
@@ -31,11 +30,6 @@ describe('Vuex Mutations', () => {
   it('updateHideBannerDefaults sets hideBannerDefaults state', () => {
     mutations.updateHideBannerDefaults(state, true);
     expect(state.hideBannerDefaults).toBe(true);
-  });
-
-  it('updateHideBannerArtifactHub sets hideBannerArtifactHub state', () => {
-    mutations.updateHideBannerArtifactHub(state, true);
-    expect(state.hideBannerArtifactHub).toBe(true);
   });
 
   it('updateHideBannerAirgapPolicy sets hideBannerAirgapPolicy state', () => {
