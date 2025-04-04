@@ -11,10 +11,12 @@ import ResourceManager from '@shell/mixins/resource-manager';
 import Loading from '@shell/components/Loading';
 import { Banner } from '@components/Banner';
 
+import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS } from '@kubewarden/constants';
+import { WG_POLICY_K8S } from '@kubewarden/types';
+
 import { isAdminUser } from '@kubewarden/utils/permissions';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 import { rootKubewardenRoute } from '@kubewarden/utils/custom-routing';
-import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '@kubewarden/types';
 
 export default {
   components: {

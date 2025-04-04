@@ -1,30 +1,32 @@
 <script>
-import { mapGetters } from 'vuex';
-import isEmpty from 'lodash/isEmpty';
 import debounce from 'lodash/debounce';
+import isEmpty from 'lodash/isEmpty';
 import semver from 'semver';
+import { mapGetters } from 'vuex';
 
+import { KUBERNETES } from '@shell/config/labels-annotations';
 import {
   CATALOG, CONFIG_MAP, MONITORING, NAMESPACE, SERVICE
 } from '@shell/config/types';
-import { KUBERNETES } from '@shell/config/labels-annotations';
+import ResourceFetch from '@shell/mixins/resource-fetch';
 import { dashboardExists } from '@shell/utils/grafana';
 import { monitoringStatus } from '@shell/utils/monitoring';
 import { allHash } from '@shell/utils/promise';
-import ResourceFetch from '@shell/mixins/resource-fetch';
 
+import { Banner } from '@components/Banner';
 import DashboardMetrics from '@shell/components/DashboardMetrics';
 import Loading from '@shell/components/Loading';
-import { Banner } from '@components/Banner';
 
-import { KUBEWARDEN, KUBEWARDEN_CHARTS, KubewardenDashboardLabels, KubewardenDashboards } from '@kubewarden/types';
-import { isAdminUser } from '@kubewarden/utils/permissions';
-import { handleGrowl } from '@kubewarden/utils/handle-growl';
-import { refreshCharts } from '@kubewarden/utils/chart';
+import { KUBEWARDEN, KUBEWARDEN_CHARTS } from '@kubewarden/constants';
+import { KubewardenDashboardLabels, KubewardenDashboards } from '@kubewarden/types';
+
 import { grafanaProxy } from '@kubewarden/modules/grafana';
-import { findServiceMonitor, isServiceMonitorOutOfDate } from '@kubewarden/modules/metricsConfig';
 import { jaegerPolicyName } from '@kubewarden/modules/jaegerTracing';
+import { findServiceMonitor, isServiceMonitorOutOfDate } from '@kubewarden/modules/metricsConfig';
 import { findPolicyServerResource } from '@kubewarden/modules/policyServer';
+import { refreshCharts } from '@kubewarden/utils/chart';
+import { handleGrowl } from '@kubewarden/utils/handle-growl';
+import { isAdminUser } from '@kubewarden/utils/permissions';
 
 import MetricsChecklist from './MetricsChecklist';
 

@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 
 
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 import General from '@kubewarden/chart/kubewarden/admission/General.vue';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';

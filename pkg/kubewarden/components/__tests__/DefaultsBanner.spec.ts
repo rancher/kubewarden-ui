@@ -3,7 +3,7 @@ import flushPromises from 'flush-promises';
 import DefaultsBanner from '@kubewarden/components/DefaultsBanner.vue';
 import { CATALOG } from '@shell/config/types';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
-import { KUBEWARDEN_CHARTS } from '@kubewarden/types';
+import { KUBEWARDEN_CHARTS } from '@kubewarden/constants';
 
 import { getLatestVersion } from '@kubewarden/plugins/kubewarden-class';
 import { refreshCharts, findCompatibleDefaultsChart } from '@kubewarden/utils/chart';

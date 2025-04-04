@@ -1,7 +1,7 @@
 import { CoreStoreSpecifics, CoreStoreConfig } from '@shell/core/types';
 
+import { KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/constants';
 import {
-  KUBEWARDEN_PRODUCT_NAME,
   CatalogApp,
   CustomResourceDefinition,
   FleetGitRepo,

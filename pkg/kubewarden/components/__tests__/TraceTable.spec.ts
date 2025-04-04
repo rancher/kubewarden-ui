@@ -1,6 +1,6 @@
 import { shallowMount, flushPromises } from '@vue/test-utils';
 
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 import { CATALOG, SERVICE } from '@shell/config/types';
 import { KUBERNETES } from '@shell/config/labels-annotations';
 

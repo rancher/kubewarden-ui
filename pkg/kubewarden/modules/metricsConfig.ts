@@ -1,8 +1,9 @@
 import isEmpty from 'lodash/isEmpty';
 import { MONITORING } from '@shell/config/types';
 
+import { KUBEWARDEN } from '@kubewarden/constants';
 import type { PolicyServer, ServiceMonitorConfigured } from '@kubewarden/types';
-import { KUBEWARDEN, MonitoringConfig, ServiceMonitor, ServiceMonitorConfig } from '@kubewarden/types';
+import { MonitoringConfig, ServiceMonitor, ServiceMonitorConfig } from '@kubewarden/types';
 
 import { handleGrowl, GrowlConfig } from '@kubewarden/utils/handle-growl';
 import { isPolicyServerResource } from '@kubewarden/modules/policyServer';
@@ -218,4 +219,3 @@ export function isServiceMonitorOutOfDate(ps: PolicyServer, sm: ServiceMonitor):
   // If the PolicyServer is still using old labels, we consider the ServiceMonitor up-to-date.
   return false;
 }
-

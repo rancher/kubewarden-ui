@@ -20,14 +20,16 @@ import Wizard from '@shell/components/Wizard';
 
 import {
   DEFAULT_POLICY,
+  VALUES_STATE
+} from '@kubewarden/types';
+import {
   KUBEWARDEN,
   KUBEWARDEN_ANNOTATIONS,
   KUBEWARDEN_CATALOG_ANNOTATIONS,
   KUBEWARDEN_POLICY_ANNOTATIONS,
   KUBEWARDEN_PRODUCT_NAME,
-  KUBEWARDEN_REPOS,
-  VALUES_STATE
-} from '@kubewarden/types';
+  KUBEWARDEN_REPOS
+} from '@kubewarden/constants';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 import { removeEmptyAttrs } from '@kubewarden/utils/object';
 import { trimTrailingSlash } from '@kubewarden/utils/string';
