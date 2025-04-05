@@ -28,7 +28,7 @@ test('Check initial state', async({ page, ui, nav }) => {
     const psRow = ui.tableRow('default')
     await expect(psRow.row).toBeVisible()
     await expect(psRow.column('Status')).toHaveText('Active')
-    await expect(psRow.column('Policies')).toHaveText('6')
+    await expect(psRow.column('Policy Status')).toHaveText('6')
 
     // Check there is only default policy server
     await expect(page.locator('td.col-policy-server-status')).toHaveCount(1)
