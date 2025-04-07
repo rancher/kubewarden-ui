@@ -278,7 +278,7 @@ export default ({
       try {
         const repoObj = await this.$store.dispatch('cluster/create', {
           type:     CATALOG.CLUSTER_REPO,
-          metadata: { name: this.repoName },
+          metadata: { name: 'kubewarden-policy-catalog' },
           spec:     { url: KUBEWARDEN_REPOS.POLICY_CATALOG },
         });
 
@@ -605,7 +605,7 @@ export default ({
         @close="closeBanner('updateHideBannerOfficialRepo')"
       >
         <div>
-          <p class="mb-10">{{ t('kubewarden.policies.noOfficialPolicies') }}</p>
+          <p v-clean-html="t('kubewarden.policies.noOfficialPolicies', {}, true)" class="mb-10" />
           <AsyncButton mode="kubewardenPolicyCatalog" @click="addRepository" />
         </div>
       </Banner>
