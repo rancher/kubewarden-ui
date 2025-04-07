@@ -4,9 +4,9 @@ import { SCHEMA } from '@shell/config/types';
 
 import Loading from '@shell/components/Loading';
 
-import Rule from './Rule';
-import { KUBEWARDEN, KUBEWARDEN_APPS, ARTIFACTHUB_PKG_ANNOTATION } from '@kubewarden/types';
 import { namespacedGroups, namespacedSchemas } from '@kubewarden/modules/core';
+import { KUBEWARDEN, KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_APPS } from '@kubewarden/types';
+import Rule from './Rule';
 
 export default {
   name: 'Rules',
@@ -53,7 +53,7 @@ export default {
     disabledRules() {
       const annotations = this.value.policy?.metadata?.annotations;
 
-      return !!annotations?.[ARTIFACTHUB_PKG_ANNOTATION] || annotations?.['meta.helm.sh/release-name'] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
+      return !!annotations?.[KUBEWARDEN_ANNOTATIONS.CHART_KEY] || annotations?.['meta.helm.sh/release-name'] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
     },
 
     isView() {

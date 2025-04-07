@@ -509,6 +509,10 @@ asyncButton:
     action: Add Kubewarden Repository
     success: Added
     waiting: Adding&hellip;
+  kubewardenPolicyCatalog:
+    action: Add Policy Catalog Repository
+    success: Added
+    waiting: Adding&hellip;
   grafanaDashboard:
     action: Add Grafana Dashboards
     success: Added

@@ -1,14 +1,14 @@
 <script>
-import { toRaw } from 'vue';
-import { mapGetters } from 'vuex';
 import jsyaml from 'js-yaml';
-import merge from 'lodash/merge';
 import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
+import merge from 'lodash/merge';
+import { toRaw } from 'vue';
+import { mapGetters } from 'vuex';
 
-import CreateEditView from '@shell/mixins/create-edit-view';
-import { CATALOG, NAMESPACE, MANAGEMENT } from '@shell/config/types';
 import { _CREATE } from '@shell/config/query-params';
+import { CATALOG, MANAGEMENT, NAMESPACE } from '@shell/config/types';
+import CreateEditView from '@shell/mixins/create-edit-view';
 import { saferDump } from '@shell/utils/create-yaml';
 import { set } from '@shell/utils/object';
 
@@ -19,21 +19,21 @@ import Loading from '@shell/components/Loading';
 import Wizard from '@shell/components/Wizard';
 
 import {
+  DEFAULT_POLICY,
   KUBEWARDEN,
   KUBEWARDEN_ANNOTATIONS,
   KUBEWARDEN_CATALOG_ANNOTATIONS,
+  KUBEWARDEN_POLICY_ANNOTATIONS,
   KUBEWARDEN_PRODUCT_NAME,
   KUBEWARDEN_REPOS,
-  VALUES_STATE,
-  DEFAULT_POLICY,
-  KUBEWARDEN_POLICY_ANNOTATIONS
+  VALUES_STATE
 } from '@kubewarden/types';
-import { removeEmptyAttrs } from '@kubewarden/utils/object';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
+import { removeEmptyAttrs } from '@kubewarden/utils/object';
 import { trimTrailingSlash } from '@kubewarden/utils/string';
 
-import PolicyTable from './PolicyTable';
 import PolicyReadmePanel from './PolicyReadmePanel';
+import PolicyTable from './PolicyTable';
 import Values from './Values';
 
 export default ({
@@ -606,7 +606,7 @@ export default ({
       >
         <div>
           <p class="mb-10">{{ t('kubewarden.policies.noOfficialPolicies') }}</p>
-          <AsyncButton mode="kubewardenRepository" @click="addRepository" />
+          <AsyncButton mode="kubewardenPolicyCatalog" @click="addRepository" />
         </div>
       </Banner>
     </template>
@@ -688,6 +688,7 @@ export default ({
           data-testid="kw-policy-create-finish-button"
           :disabled="!canFinish"
           mode="finish"
+          class="ml-20"
           @click="finish"
         />
       </template>

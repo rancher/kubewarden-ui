@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import { PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
+import { KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS, PolicyChart } from '@kubewarden/types';
 
 const props = defineProps<{ row: PolicyChart }>();
 
@@ -43,8 +43,14 @@ const isOfficial = computed<boolean>((): boolean => props.row?.official || false
   align-content: center;
 
   &__icon {
-    width: 22px;
+    display: flex;
+    align-items: center;
+    width: 20px;
     height: auto;
+
+    & img {
+      width: 100%;
+    }
   }
 }
 </style>

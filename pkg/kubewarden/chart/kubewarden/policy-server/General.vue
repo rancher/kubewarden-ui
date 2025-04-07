@@ -1,31 +1,31 @@
 <script setup lang="ts">
+import { V1ServiceAccount } from '@kubernetes/client-node';
 import {
-  ref, computed, onMounted, watch, watchEffect
+  computed, onMounted, ref, watch, watchEffect
 } from 'vue';
 import { useStore } from 'vuex';
-import { V1ServiceAccount } from '@kubernetes/client-node';
 
-import { CATALOG, FLEET } from '@shell/config/types';
 import { _CREATE } from '@shell/config/query-params';
+import { CATALOG, FLEET } from '@shell/config/types';
 
+import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
+import { getPolicyServerModule, isFleetDeployment } from '@kubewarden/modules/fleet';
 import {
-  PolicyServer,
   CatalogApp,
-  ClusterRepo,
   Chart,
+  ClusterRepo,
   FleetBundle,
+  KUBEWARDEN_CHARTS,
   KUBEWARDEN_REPOS,
-  KUBEWARDEN_CHARTS
+  PolicyServer
 } from '@kubewarden/types';
 import { findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
-import { getPolicyServerModule, isFleetDeployment } from '@kubewarden/modules/fleet';
-import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
 
-import Loading from '@shell/components/Loading';
-import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
 import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
+import Loading from '@shell/components/Loading';
+import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
 
 const props = defineProps<{
   mode?: string;
@@ -40,10 +40,7 @@ const isLoading = ref(false);
 const defaultImage = ref(true);
 const latestChartVersion = ref<string | null>(null);
 const isFleet = ref(false);
-const name = ref(props.value?.metadata?.name);
 const image = ref(props.value?.spec?.image);
-const serviceAccountName = ref(props.value?.spec?.serviceAccountName);
-const replicas = ref(props.value?.spec?.replicas);
 const kubewardenChartsRepo = ref<ClusterRepo | null>(null);
 const kubewardenPolicyCatalogRepo = ref<ClusterRepo | null>(null);
 const defaultsChart = ref<Chart | null>(null);
@@ -182,7 +179,7 @@ watchEffect(() => {
     <div class="row mt-10">
       <div class="col span-6 mb-20">
         <LabeledInput
-          v-model:value="name"
+          v-model:value="value.metadata.name"
           data-testid="ps-config-name-input"
           :mode="mode"
           :disabled="!isCreate"
@@ -219,7 +216,7 @@ watchEffect(() => {
           />
           <template v-if="!defaultImage">
             <LabeledInput
-              v-model:value="image"
+              v-model:value="value.spec.image"
               data-testid="ps-config-image-input"
               :mode="mode"
               :label="t('kubewarden.policyServerConfig.image.label')"
@@ -233,7 +230,7 @@ watchEffect(() => {
     <div class="row">
       <div class="col span-12">
         <ServiceNameSelect
-          v-model:value="serviceAccountName"
+          v-model:value="value.spec.serviceAccountName"
           data-testid="ps-config-service-account-input"
           :mode="mode"
           :select-label="t('workload.serviceAccountName.label')"
@@ -253,7 +250,7 @@ watchEffect(() => {
           {{ t('kubewarden.policyServerConfig.replicas') }}
         </h3>
         <LabeledInput
-          v-model:value.number="replicas"
+          v-model:value.number="value.spec.replicas"
           data-testid="ps-config-replicas-input"
           type="number"
           min="0"
