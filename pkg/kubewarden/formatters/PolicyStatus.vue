@@ -21,7 +21,6 @@ watch(() => props.value, () => {
 
   stateDisplay.value = props.value || 'unknown';
   stateBackground.value = color.replace('text-', 'bg-');
-
 }, { immediate: true });
 
 onUnmounted(() => {

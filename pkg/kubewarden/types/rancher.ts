@@ -1,4 +1,4 @@
-import { V1Deployment, V1ObjectMeta } from "@kubernetes/client-node"
+import { V1Deployment, V1ObjectMeta } from '@kubernetes/client-node';
 
 export type ResourceField = {
   type: string,
@@ -47,7 +47,7 @@ export type Schema = {
   },
   _id: string,
   _group: string,
-  linkFor: (id: string) => string,
+  linkFor: (id: string) => string, // eslint-disable-line no-unused-vars
 }
 
 export const PROJECT = { APP: 'project.cattle.io.app' };

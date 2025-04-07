@@ -321,12 +321,12 @@ export const POLICY_REPORTER_HEADERS = [
 
 export const POLICY_TABLE_HEADERS = [
   {
-    name:     'name',
-    labelKey: 'tableHeaders.name',
-    value:    'row',
-    getValue: (row: any) => row,
+    name:      'name',
+    labelKey:  'tableHeaders.name',
+    value:     'row',
+    getValue:  (row: any) => row,
     formatter: 'PolicyTableDisplayName',
-    width:    300
+    width:     300
   },
   {
     name:      'resource',
