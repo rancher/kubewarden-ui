@@ -40,7 +40,6 @@ const isLoading = ref(false);
 const defaultImage = ref(true);
 const latestChartVersion = ref<string | null>(null);
 const isFleet = ref(false);
-const image = ref(props.value?.spec?.image);
 const kubewardenChartsRepo = ref<ClusterRepo | null>(null);
 const kubewardenPolicyCatalogRepo = ref<ClusterRepo | null>(null);
 const defaultsChart = ref<Chart | null>(null);
@@ -108,14 +107,14 @@ async function fetchData() {
         latestChartVersion.value = getPolicyServerModule(fleetBundles.value);
       }
 
-      if (!image.value || (isCreate.value && image.value === DEFAULT_POLICY_SERVER.spec.image)) {
-        image.value = latestChartVersion.value || DEFAULT_POLICY_SERVER.spec.image;
-      } else if (image.value !== latestChartVersion.value && image.value !== DEFAULT_POLICY_SERVER.spec.image) {
+      if (!props.value?.spec?.image || (isCreate.value && props.value?.spec?.image === DEFAULT_POLICY_SERVER.spec.image)) {
+        Object.assign(props.value?.spec, { image: latestChartVersion.value || DEFAULT_POLICY_SERVER.spec.image });
+      } else if (props.value?.spec?.image !== latestChartVersion.value && props.value?.spec?.image !== DEFAULT_POLICY_SERVER.spec.image) {
         defaultImage.value = false;
       }
 
-      if (!isCreate.value && image.value) {
-        defaultImage.value = image.value === latestChartVersion.value;
+      if (!isCreate.value && props.value?.spec?.image) {
+        defaultImage.value = props.value?.spec?.image === latestChartVersion.value;
       }
     }
   }
@@ -127,7 +126,7 @@ onMounted(fetchData);
 
 watch([defaultImage, latestChartVersion], ([defaultImg, latest]) => {
   if (defaultImg) {
-    image.value = latest || DEFAULT_POLICY_SERVER.spec.image;
+    Object.assign(props.value?.spec, { image: latest || DEFAULT_POLICY_SERVER.spec.image });
   }
 });
 
