@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onBeforeMount, onMounted, toRaw } from 'vue';
+import { onBeforeMount, onMounted, ref, toRaw } from 'vue';
 import { useStore } from 'vuex';
 
 import { CATALOG, MANAGEMENT } from '@shell/config/types';
@@ -11,17 +11,13 @@ import Loading from '@shell/components/Loading.vue';
 import {
   Chart, Version, VersionInfo, KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_CATALOG_ANNOTATIONS
 } from '@kubewarden/types';
-import Values from './Values.vue';
+
 import PolicyReadmePanel from './PolicyReadmePanel.vue';
+import Values from './Values.vue';
 
 interface Props {
   mode: string;
   value: Record<string, any>;
-}
-
-interface MatchingPolicyDetail {
-  versionInfo?: VersionInfo;
-  matches: boolean;
 }
 
 const props = defineProps<Props>();
@@ -92,52 +88,45 @@ async function loadFromModule() {
   const [repo, tag] = module.split(':');
   const charts: Chart[] = store.getters['catalog/charts'].filter((c: Chart) => c.chartType === 'kubewarden-policy');
 
+  let matchingChart = null;
+  let matchingVersion = null;
+
+  chartLoop:
   for (const chart of charts) {
-    if (chart?.versions?.length === 0) {
+    if (!chart?.versions?.length) {
       continue;
     }
 
-    const versionPromises = chart?.versions?.map(async(version: Version) => {
-      try {
-        const versionInfo: VersionInfo = await store.dispatch('catalog/getVersionInfo', {
-          repoType:    version.repoType,
-          repoName:    version.repoName,
-          chartName:   chart.chartName,
-          versionName: version.version
-        });
-        const rawVersionInfo = toRaw(versionInfo);
+    for (const version of chart.versions) {
+      const annos = version.annotations || {};
+      const registryFromAnnotations = annos[KUBEWARDEN_CATALOG_ANNOTATIONS.REGISTRY] || systemDefaultRegistry?.value;
+      const repositoryFromAnnotations = annos[KUBEWARDEN_CATALOG_ANNOTATIONS.REPOSITORY];
+      const tagFromAnnotations = annos[KUBEWARDEN_CATALOG_ANNOTATIONS.TAG];
 
-        const policyAnnotations = rawVersionInfo.chart?.annotations || {};
-        const registryFromAnnotations = policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REGISTRY] || systemDefaultRegistry?.value;
-        const repositoryFromAnnotations = policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REPOSITORY];
-        const tagFromAnnotations = policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.TAG];
+      const assembledRepo = `${ registryFromAnnotations }/${ repositoryFromAnnotations }`;
 
-        const module = `${ registryFromAnnotations }/${ repositoryFromAnnotations }`;
+      if (assembledRepo === repo && tagFromAnnotations === tag) {
+        matchingChart = chart;
+        matchingVersion = version;
 
-        return {
-          versionInfo: rawVersionInfo,
-          matches:     module === repo && tagFromAnnotations === tag
-        };
-      } catch (e) {
-        console.warn('Error loading version:', e);
-        errorFetchingPolicy.value = true;
-
-        return { matches: false };
+        break chartLoop;
       }
-    });
-
-    if (!versionPromises?.length) {
-      continue;
     }
+  }
 
-    const results: MatchingPolicyDetail[] = await Promise.all(versionPromises);
+  if (matchingChart && matchingVersion) {
+    try {
+      const versionInfo: VersionInfo = await store.dispatch('catalog/getVersionInfo', {
+        repoType:    matchingVersion.repoType,
+        repoName:    matchingVersion.repoName,
+        chartName:   matchingChart.chartName,
+        versionName: matchingVersion.version
+      });
 
-    const matchingResult = results?.find((result) => result?.matches);
-
-    if (matchingResult && matchingResult.versionInfo) {
-      processChartDetails(matchingResult.versionInfo);
-
-      return;
+      processChartDetails(toRaw(versionInfo));
+    } catch (e) {
+      console.warn('Failed to fetch version info:', e);
+      errorFetchingPolicy.value = true;
     }
   }
 }
