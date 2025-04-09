@@ -57,14 +57,13 @@ export abstract class BasePolicyPage extends BasePage {
     this.readme = page.locator('div.policy-info-content')
   }
 
-  cards = (options?: { name?: policyTitle, signed?: boolean, official?: boolean, aware?: boolean, mutation?: boolean }): Locator => {
+  cards = (options?: { name?: policyTitle, official?: boolean, aware?: boolean, mutation?: boolean }): Locator => {
     let cards = options?.name
       ? this.ui.tableRow(options.name).row
       : this.page.locator('table.sortable-table > tbody:visible').locator('tr.main-row')
 
     const optionMap: Partial<Record<keyof NonNullable<typeof options>, Locator>> = {
-      signed  : this.page.locator('div.badge__signed').locator('i.icon-lock'),
-      official: this.page.locator('div.badge__icon').getByAltText('Official Kubewarden Policy'),
+      official: this.page.getByAltText('Official Rancher Policy'),
       aware   : this.page.getByText('Context Aware'),
       mutation: this.page.getByText('Mutation'),
     }
@@ -109,16 +108,10 @@ export abstract class BasePolicyPage extends BasePage {
     await this.audit(state).check()
   }
 
-  async whitelist() {
-    await expect(this.page.getByText('Official Kubewarden policies are hosted on ArtifactHub')).toBeVisible()
-    await this.ui.button('Add ArtifactHub To Whitelist').click()
-  }
-
-  // ArtifactHub error: https://github.com/kubewarden/kubewarden-controller/issues/911#issuecomment-2426954817
-  async handleRateLimitError() {
-    await this.ui.retry(async() => {
-      await expect(this.cards({ official: true, signed: true }).first()).toBeVisible({ timeout: 80_000 })
-    }, 'Artifact Hub: 429 Too Many Requests')
+  // Get number of policies from pagination: 1 - 100 of 105 Items
+  async policyCount(): Promise<number> {
+    const paging = await this.page.locator('div.paging').getByText(/[0-9]+ of [0-9]+ Items/).textContent() || 'Error'
+    return parseInt(paging.split('of ')[1])
   }
 
   @step
@@ -129,10 +122,11 @@ export abstract class BasePolicyPage extends BasePage {
     }
 
     // Open requested policy
-    await this.handleRateLimitError()
     if (p.title === 'Custom Policy') {
       await this.ui.button('Create Custom Policy').click()
     } else {
+      // Filter policy in case it's hidden by pagination
+      await this.ui.input('Filter').fill(p.title.split(' ')[0])
       await this.ui.tableRow(p.title).row.click()
     }
     // Check we are on policy creation page

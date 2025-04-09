@@ -27,7 +27,7 @@ test('Policy Servers', async({ page, ui, nav }) => {
     // PS is active and has 2 policies
     await nav.pservers()
     await expect3m(psRow.column('Status')).toHaveText('Active')
-    await expect(psRow.column('Policies')).toHaveText('2')
+    await expect(psRow.column('Policy Status')).toHaveText('2')
 
     const defaultImage = (await ui.tableRow('default').column('Image').textContent())?.trim().split(':') || []
     const createdImage = (await psRow.column('Image').textContent())?.trim().split(':') || []

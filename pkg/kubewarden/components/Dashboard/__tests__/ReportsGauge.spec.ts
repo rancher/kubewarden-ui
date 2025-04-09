@@ -78,7 +78,7 @@ describe('ReportsGauge.vue', () => {
 
     await flushPromises();
 
-    expect(wrapper.vm.percentageBarValue).toBe('70');
+    expect(wrapper.vm.percentageBarValue).toBe(70);
 
     // Since total is not 0, secondaryColor should be '--error'
     expect(wrapper.vm.secondaryColor).toBe('--error');
@@ -103,7 +103,7 @@ describe('ReportsGauge.vue', () => {
     const barStub = wrapper.findComponent({ name: 'Bar' });
 
     expect(barStub.exists()).toBe(true);
-    expect(barStub.props('percentage')).toBe('70');
+    expect(barStub.props('percentage')).toBe(70);
     expect(barStub.props('primaryColor')).toBe('--success');
     expect(barStub.props('secondaryColor')).toBe('--error');
   });

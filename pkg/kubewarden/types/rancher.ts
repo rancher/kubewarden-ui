@@ -1,3 +1,5 @@
+import { V1Deployment, V1ObjectMeta } from '@kubernetes/client-node';
+
 export type ResourceField = {
   type: string,
   nullable: boolean,
@@ -45,6 +47,18 @@ export type Schema = {
   },
   _id: string,
   _group: string,
+  linkFor: (id: string) => string, // eslint-disable-line no-unused-vars
 }
 
 export const PROJECT = { APP: 'project.cattle.io.app' };
+
+export interface Deployment extends V1Deployment {
+  metadata: V1ObjectMeta &{
+    state: {
+      error: boolean,
+      message: string,
+      name: string,
+      transitioning: boolean
+    }
+  }
+}

@@ -149,10 +149,12 @@ kubewarden:
       resource: Resource Type
       features: Features
   policies:
+    noPolicyRepo: No policy repository found. Please add a policy repository to view policies.
+    noOfficialPolicies: No official policies found. Please add <a href="https://kubewarden.github.io/policy-catalog/" target="_blank" rel="noopener noreferrer nofollow">policy catalog repository</a> to view official policies.
     noArtifactHub: Official Kubewarden policies are hosted on <a href="https://artifacthub.io/packages/search?kind=13" target="_blank" rel="noopener noreferrer nofollow">ArtifactHub</a>, in order to show these you will need to add `artifacthub.io` to the whitelist-domain setting.
     noRules: There are no rules configured for this policy.
     namespaceWarning: This policy is targeting Rancher specific namespaces which will cause catastrophic failures with your Rancher deployment.
-    official: Official Kubewarden Policy
+    official: Official Rancher Policy
     airgap:
       banner: 'An air-gapped installation is detected, you will be unable to use the policies listed within the ArtifactHub catalog. You are still able to deploy a custom policy by referencing a WebAssembly module that is accessible to this cluster.'
   utils:
@@ -170,7 +172,7 @@ kubewarden:
     search: Filter
     resetFilter: Reset Filter
     official:
-      label: Show only official Kubewarden policies
+      label: Show only official Rancher policies
     custom:
       create: Create Custom Policy
   tracing:
@@ -505,6 +507,10 @@ asyncButton:
     waiting: Installing&hellip;
   kubewardenRepository:
     action: Add Kubewarden Repository
+    success: Added
+    waiting: Adding&hellip;
+  kubewardenPolicyCatalog:
+    action: Add Policy Catalog Repository
     success: Added
     waiting: Adding&hellip;
   grafanaDashboard:

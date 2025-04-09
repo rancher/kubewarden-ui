@@ -5,7 +5,6 @@
     "target": "esnext",
     "module": "esnext",
     "strict": true,
-    "jsx": "preserve",
     "importHelpers": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
@@ -32,9 +31,11 @@
   },
   "include": [
     "./**/*.ts",
+    "./**/*.d.ts",
     "./**/*.tsx",
     "./**/*.vue",
-    "../../node_modules/@rancher/shell/core/types.ts"
+    "../../node_modules/@rancher/shell/core/types.ts",
+    "../../node_modules/@rancher/shell/types/**/*.d.ts"
   ],
   "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"]
 }

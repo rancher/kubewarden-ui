@@ -1,12 +1,14 @@
 <script>
 import jsyaml from 'js-yaml';
-import merge from 'lodash/merge';
 import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
+import merge from 'lodash/merge';
+import { toRaw } from 'vue';
+import { mapGetters } from 'vuex';
 
-import CreateEditView from '@shell/mixins/create-edit-view';
-import { NAMESPACE } from '@shell/config/types';
 import { _CREATE } from '@shell/config/query-params';
+import { CATALOG, MANAGEMENT, NAMESPACE } from '@shell/config/types';
+import CreateEditView from '@shell/mixins/create-edit-view';
 import { saferDump } from '@shell/utils/create-yaml';
 import { set } from '@shell/utils/object';
 
@@ -17,19 +19,21 @@ import Loading from '@shell/components/Loading';
 import Wizard from '@shell/components/Wizard';
 
 import {
+  DEFAULT_POLICY,
   KUBEWARDEN,
+  KUBEWARDEN_ANNOTATIONS,
+  KUBEWARDEN_CATALOG_ANNOTATIONS,
+  KUBEWARDEN_POLICY_ANNOTATIONS,
   KUBEWARDEN_PRODUCT_NAME,
-  REGO_POLICIES_REPO,
-  VALUES_STATE,
-  ARTIFACTHUB_PKG_ANNOTATION,
-  DEFAULT_POLICY
+  KUBEWARDEN_REPOS,
+  VALUES_STATE
 } from '@kubewarden/types';
-import { removeEmptyAttrs } from '@kubewarden/utils/object';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
+import { removeEmptyAttrs } from '@kubewarden/utils/object';
+import { trimTrailingSlash } from '@kubewarden/utils/string';
 
-import { DATA_ANNOTATIONS } from '@kubewarden/types/artifacthub';
-import PolicyTable from './PolicyTable';
 import PolicyReadmePanel from './PolicyReadmePanel';
+import PolicyTable from './PolicyTable';
 import Values from './Values';
 
 export default ({
@@ -62,21 +66,46 @@ export default ({
   mixins: [CreateEditView],
 
   async created() {
-    if (this.hasArtifactHub) {
-      await this.$store.dispatch('kubewarden/fetchPackages', { value: this.value });
+    this.isLoading = true;
+    const isReposLoaded = this.$store.getters['catalog/repos']?.length > 0;
+
+    if (!isReposLoaded && this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO)) {
+      await this.$store.dispatch('cluster/findAll', { type: CATALOG.CLUSTER_REPO });
+    }
+
+    const isChartsLoaded = this.$store.getters['catalog/charts']?.length > 0;
+
+    if (!isChartsLoaded) {
+      await this.$store.dispatch('catalog/refresh');
     }
 
     this.value.apiVersion = `${ this.schema?.attributes?.group }.${ this.schema?.attributes?.version }`;
     this.value.kind = this.schema?.attributes?.kind;
+
+    this.isLoading = false;
   },
 
   data() {
+    const OFFICIAL_REPOS = [
+      KUBEWARDEN_REPOS.POLICY_CATALOG,
+      KUBEWARDEN_REPOS.POLICY_CATALOG_REPO,
+      KUBEWARDEN_REPOS.POLICY_CATALOG_REPO_GIT
+    ];
+
     return {
-      bannerTitle:       null,
-      shortDescription:  null,
-      type:              null,
-      typeModule:        null,
-      version:           null,
+      OFFICIAL_REPOS,
+
+      isLoading:              false,
+      bannerTitle:            null,
+      shortDescription:       null,
+      loadingPackages:        false,
+      packages:               null,
+      repository:             null,
+      selectedPolicyChart:    null,
+      selectedPolicyDetails:  null,
+      typeModule:             null,
+      version:                null,
+      errorFetchingPolicy:    false,
 
       chartValues: {
         policy:    {},
@@ -108,6 +137,11 @@ export default ({
   },
 
   computed: {
+    ...mapGetters({
+      charts:   'catalog/charts',
+      repos:    'catalog/repos',
+    }),
+
     isAirgap() {
       return this.$store.getters['kubewarden/airGapped'];
     },
@@ -117,11 +151,11 @@ export default ({
     },
 
     isSelected() {
-      return !!this.type;
+      return !!this.selectedPolicyChart;
     },
 
     customPolicy() {
-      return this.type === 'custom';
+      return this.selectedPolicyChart === 'custom';
     },
 
     /** Allow create if either editing in yaml view or module and required rules/settings have been met */
@@ -133,8 +167,8 @@ export default ({
       return !!this.chartValues?.policy?.spec?.module && this.hasRequired;
     },
 
-    hasArtifactHub() {
-      return this.value.artifactHubWhitelist;
+    systemDefaultRegistry() {
+      return this.$store.getters['management/byId'](MANAGEMENT.SETTING, 'system-default-registry');
     },
 
     /** Determines if the required rules/settings are set, if not the resource can not be created */
@@ -161,20 +195,18 @@ export default ({
       return false;
     },
 
-    hideArtifactHubBanner() {
-      return this.$store.getters['kubewarden/hideBannerArtifactHub'] || !!this.hasArtifactHub || !!this.isAirgap;
+    hideOfficialRepoBanner() {
+      return !!this.officialKubewardenRepo || this.$store.getters['kubewarden/hideBannerOfficialRepo'];
+    },
+
+    hideRepoBanner() {
+      return !this.hideOfficialRepoBanner ||
+             (this.policiesCharts.length ||
+             this.$store.getters['kubewarden/hideBannerPolicyRepo']);
     },
 
     hideAirgapBanner() {
       return !this.isAirgap || this.$store.getters['kubewarden/hideBannerAirgapPolicy'];
-    },
-
-    packageValues() {
-      if (this.type?.repository?.url) {
-        return this.packages?.find((p) => p.repository?.url === this.type.repository.url);
-      }
-
-      return null;
     },
 
     steps() {
@@ -188,20 +220,92 @@ export default ({
       return steps.sort((a, b) => b.weight - a.weight);
     },
 
-    packages() {
-      return this.$store.getters['kubewarden/packages'];
+    policiesCharts() {
+      return this.charts?.filter((chart) => chart.chartType === 'kubewarden-policy');
     },
 
-    packageDetailsByKey() {
-      return this.$store.getters['kubewarden/packageDetailsByKey'];
+    latestPolicyChartsVersion() {
+      return this.policiesCharts?.map((chart) => {
+        const out = chart.versions[0];
+        const chartRepo = this.$store.getters['catalog/repo']({
+          repoType: out.repoType,
+          repoName: out.repoName
+        });
+
+        const repoUrl = trimTrailingSlash(chartRepo?.spec?.url || '');
+
+        out.official = this.OFFICIAL_REPOS.includes(repoUrl);
+
+        return out;
+      });
     },
 
-    loadingPackages() {
-      return this.$store.getters['kubewarden/loadingPackages'];
+    reposByName() {
+      return this.repos.reduce((acc, repo) => {
+        acc[repo.metadata.name] = repo;
+
+        return acc;
+      }, {});
     },
+
+    reposByUrl() {
+      return this.repos.reduce((acc, repo) => {
+        // For OCI or plain https/http repos, use spec.url. For Git repos, use spec.gitRepo.
+        const rawRepoUrl = repo.spec.url || repo.spec.gitRepo;
+        const repoUrl = rawRepoUrl ? trimTrailingSlash(rawRepoUrl) : rawRepoUrl;
+
+        if (repoUrl) {
+          acc[repoUrl] = repo;
+        }
+
+        return acc;
+      }, {});
+    },
+
+    officialKubewardenRepo() {
+      for (const repoUrl of this.OFFICIAL_REPOS) {
+        if (this.reposByUrl[repoUrl]) {
+          return this.reposByUrl[repoUrl];
+        }
+      }
+
+      return null;
+    }
   },
 
   methods: {
+    async addRepository(btnCb) {
+      try {
+        const repoObj = await this.$store.dispatch('cluster/create', {
+          type:     CATALOG.CLUSTER_REPO,
+          metadata: { name: 'kubewarden-policy-catalog' },
+          spec:     { url: KUBEWARDEN_REPOS.POLICY_CATALOG },
+        });
+
+        try {
+          await repoObj.save();
+        } catch (e) {
+          handleGrowl({
+            error: e,
+            store: this.$store
+          });
+          btnCb(false);
+
+          return;
+        }
+
+        if (!this.officialKubewardenRepo) {
+          await this.$store.dispatch('catalog/refresh');
+        }
+      } catch (e) {
+        handleGrowl({
+          error: e,
+          store: this.$store
+        });
+        btnCb(false);
+      }
+    },
+
     /** Determine values which need to be required from supplied property and keys */
     acceptedValues(requiredProp, requiredKeys) {
       if (isEmpty(requiredKeys)) {
@@ -263,26 +367,6 @@ export default ({
         } catch (e) {
           this.errors.push(e);
         }
-      }
-    },
-
-    async addArtifactHub(btnCb) {
-      try {
-        this.loadingPackages = true;
-
-        await this.value.updateWhitelist('artifacthub.io');
-        await this.getPackages();
-
-        btnCb(true);
-        this.loadingPackages = false;
-      } catch (e) {
-        handleGrowl({
-          error: e,
-          store: this.$store
-        });
-
-        btnCb(false);
-        this.loadingPackages = false;
       }
     },
 
@@ -348,93 +432,102 @@ export default ({
       }
     },
 
-    /** Fetch packages from ArtifactHub repository */
-    async getPackages() {
-      this.repository = await this.value.artifactHubRepo();
-
-      if (this.repository && this.repository.packages.length > 0) {
-        const packagesByRepo = this.repository.packages.filter((pkg) => !pkg?.repository?.url?.includes(REGO_POLICIES_REPO));
-        const promises = packagesByRepo.map((pkg) => this.packageDetails(pkg));
-
-        try {
-          const packages = await Promise.all(promises);
-
-          this.packages = packages.filter((pkg) => pkg?.data?.['kubewarden/hidden-ui'] !== 'true');
-        } catch (e) {
-          handleGrowl({
-            error: e,
-            store: this.$store
-          });
-
-          console.warn(`Error fetching packages`, e);
-        }
+    parseObj(obj) {
+      if (!obj) {
+        return null;
       }
+
+      const parsed = JSON.parse(JSON.stringify(obj));
+
+      return jsyaml.load(parsed);
     },
 
-    packageDetails(pkg) {
-      return this.packageDetailsByKey(pkg?.package_id);
-    },
-
-    /** Extract policy questions from ArtifactHub package if available */
-    policyQuestions() {
+    /** Extract policy questions from the policy chart's details */
+    async policyQuestions() {
       const defaultPolicy = structuredClone(DEFAULT_POLICY);
 
       if (this.customPolicy) {
         // Add contextAwareResources to custom policy spec
         const updatedCustomPolicy = { spec: { contextAwareResources: [] } };
 
-        merge(defaultPolicy, updatedCustomPolicy);
-        set(this.chartValues, 'policy', defaultPolicy);
-        this.yamlValues = saferDump(defaultPolicy);
+        const finalPolicy = merge({}, defaultPolicy, updatedCustomPolicy);
+
+        set(this.chartValues, 'policy', finalPolicy);
+        this.yamlValues = saferDump(finalPolicy);
 
         return;
+      } else {
+        // Add chart metadata annotations for fetching chart details/questions later
+        this.value.metadata.annotations = this.value.metadata.annotations || {};
+        this.value.metadata.annotations[KUBEWARDEN_ANNOTATIONS.CHART_KEY] = this.selectedPolicyChart.key;
+        this.value.metadata.annotations[KUBEWARDEN_ANNOTATIONS.CHART_NAME] = this.selectedPolicyChart.name;
+        this.value.metadata.annotations[KUBEWARDEN_ANNOTATIONS.CHART_VERSION] = this.selectedPolicyChart.version;
       }
 
-      const policyDetails = this.packages.find((pkg) => pkg.repository?.url === this.type?.repository?.url);
-      const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.[DATA_ANNOTATIONS.QUESTIONS]);
-      const packageAnnotation = `${ policyDetails?.repository?.name }/${ policyDetails?.name }/${ policyDetails?.version }`;
-      /** Return spec from package if annotation exists */
-      const parseAnnotation = (annotation, obj) => {
-        const spec = this.value.parsePackageMetadata(policyDetails?.data?.[annotation]);
+      try {
+        this.selectedPolicyDetails = await this.$store.dispatch('catalog/getVersionInfo', {
+          repoType:     this.selectedPolicyChart.repoType,
+          repoName:     this.selectedPolicyChart.repoName,
+          chartName:    this.selectedPolicyChart.name,
+          versionName:  this.selectedPolicyChart.version
+        });
 
-        if (spec?.[obj] !== undefined) {
-          return spec[obj];
+        const policyQuestions = this.selectedPolicyDetails?.questions;
+        const policyAnnotations = toRaw(this.selectedPolicyDetails?.chart?.annotations);
+
+        if (!policyAnnotations) {
+          throw new Error('Policy annotations are missing');
         }
 
-        return spec || [];
-      };
+        let registry = policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REGISTRY];
+        let policyModule = `${ policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REPOSITORY] }:${ policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.TAG] }`;
 
-      /** Return value of annotation if it exists */
-      const determineAnnotation = (annotation) => {
-        if (policyDetails?.data?.[annotation] !== undefined) {
-          return JSON.parse(policyDetails.data[annotation]);
+        if (this.systemDefaultRegistry?.value) {
+          registry = this.systemDefaultRegistry.value;
         }
 
-        return false;
-      };
-
-      const updatedPolicy = {
-        apiVersion: this.value.apiVersion,
-        kind:       this.value.kind,
-        metadata:   { annotations: { [ARTIFACTHUB_PKG_ANNOTATION]: packageAnnotation } },
-        spec:       {
-          module:                policyDetails?.containers_images[0].image,
-          contextAwareResources: parseAnnotation(DATA_ANNOTATIONS.CONTEXT_AWARE, 'contextAwareResources'),
-          rules:                 parseAnnotation(DATA_ANNOTATIONS.RULES, 'rules'),
-          mutating:              determineAnnotation(DATA_ANNOTATIONS.MUTATION)
+        if (registry) {
+          policyModule = `${ registry }/${ policyModule }`;
         }
-      };
 
-      merge(defaultPolicy, updatedPolicy);
-      set(this.chartValues, 'policy', defaultPolicy);
+        const updatedPolicy = {
+          apiVersion: this.value.apiVersion,
+          kind:       this.value.kind,
+          metadata:   { ...this.value.metadata },
+          spec:       {
+            module:   policyModule,
+            mode:     'monitor', // Default to monitor mode
+            mutating: policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.MUTATING] === 'true' || false,
+            rules:    this.parseObj(policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.RULES]) || []
+          }
+        };
 
-      this.yamlValues = saferDump(defaultPolicy);
+        if (this.chartType === KUBEWARDEN.CLUSTER_ADMISSION_POLICY) {
+          Object.assign(updatedPolicy.spec, { contextAwareResources: this.parseObj(policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.CONTEXT_AWARE_RESOURCES]) || [] });
+        }
 
-      if (packageQuestions) {
-        set(this.chartValues, 'questions', packageQuestions);
+        merge(defaultPolicy, updatedPolicy);
+        set(this.chartValues, 'policy', defaultPolicy);
+
+        this.yamlValues = saferDump(this.chartValues.policy);
+
+        if (policyQuestions) {
+          set(this.chartValues, 'questions', policyQuestions);
+        }
+
+        this.shortDescription = this.selectedPolicyChart?.description;
+      } catch (e) {
+        console.warn('Error fetching policy questions. Using default policy scaffold. Details:', e);
+
+        this.errorFetchingPolicy = true;
+
+        this.bannerTitle = 'Policy Details Unavailable';
+        this.shortDescription = `There was an issue retrieving the policy details. The default configuration will be used. (Error: ${ e.message || 'Unknown error' })`;
+
+        // Fallback: use the default policy scaffold without additional questions
+        set(this.chartValues, 'policy', defaultPolicy);
+        this.yamlValues = saferDump(defaultPolicy);
       }
-
-      this.shortDescription = policyDetails?.description;
     },
 
     reset(event) {
@@ -444,7 +537,8 @@ export default ({
             'errors',
             'bannerTitle',
             'shortDescription',
-            'type',
+            'selectedPolicyChart',
+            'selectedPolicyDetails',
             'typeModule',
             'version',
             'hasCustomPolicy',
@@ -463,12 +557,19 @@ export default ({
           };
           this.yamlOption = VALUES_STATE.FORM;
           this.yamlValues = '';
+
+          // Remove the hash created from the tabbed component
+          this.$router.replace({
+            path:  this.$route.path,
+            query: this.$route.query,
+            hash:  ''
+          });
         }
       });
     },
 
-    selectType(type) {
-      this.type = type;
+    async selectPolicy(policy) {
+      this.selectedPolicyChart = policy;
 
       if (this.customPolicy) {
         this.hasCustomPolicy = true;
@@ -476,15 +577,16 @@ export default ({
         this.hasCustomPolicy = false;
       }
 
-      this.policyQuestions();
+      await this.policyQuestions();
       this.stepPolicies.ready = true;
       this.$refs.wizard.next();
-      this.bannerTitle = this.customPolicy ? 'Custom Policy' : type?.display_name;
-      this.typeModule = this.chartValues?.policy?.spec.module;
+      this.bannerTitle = this.customPolicy ? 'Custom Policy' : (
+        policy?.annotations?.[KUBEWARDEN_POLICY_ANNOTATIONS.DISPLAY_NAME] || policy?.name
+      );
     },
 
     showReadme() {
-      this.$refs.readmePanel.show();
+      this.$refs.readmePanel?.show();
     }
   }
 
@@ -492,20 +594,31 @@ export default ({
 </script>
 
 <template>
-  <Loading v-if="$fetchState.pending" mode="relative" />
+  <Loading v-if="isLoading" mode="relative" />
   <div v-else>
-    <template v-if="!hideArtifactHubBanner">
+    <template v-if="!hideOfficialRepoBanner">
       <Banner
-        data-testid="kw-policy-create-ah-banner"
+        data-testid="kw-policy-add-official-repo-banner"
         class="type-banner mb-20 mt-0"
         color="warning"
         :closable="true"
-        @close="closeBanner('updateHideBannerArtifactHub')"
+        @close="closeBanner('updateHideBannerOfficialRepo')"
       >
         <div>
-          <p v-clean-html="t('kubewarden.policies.noArtifactHub', {}, true)" class="mb-10" />
-          <AsyncButton mode="artifactHub" @click="addArtifactHub" />
+          <p v-clean-html="t('kubewarden.policies.noOfficialPolicies', {}, true)" class="mb-10" />
+          <AsyncButton mode="kubewardenPolicyCatalog" @click="addRepository" />
         </div>
+      </Banner>
+    </template>
+    <template v-if="!hideRepoBanner">
+      <Banner
+        data-testid="kw-policy-add-repo-banner"
+        class="type-banner mb-20 mt-0"
+        color="warning"
+        :closable="true"
+        @close="closeBanner('updateHideBannerPolicyRepo')"
+      >
+        <p>{{ t('kubewarden.policies.noPolicyRepo') }}</p>
       </Banner>
     </template>
     <template v-if="!hideAirgapBanner">
@@ -518,9 +631,8 @@ export default ({
         @close="closeBanner('updateHideBannerAirgapPolicy')"
       />
     </template>
-    <Loading v-if="loadingPackages" />
     <Wizard
-      v-if="value && !loadingPackages"
+      v-if="value"
       ref="wizard"
       :value="value"
       data-testid="kw-policy-create-wizard"
@@ -536,8 +648,9 @@ export default ({
       <template #policies>
         <PolicyTable
           data-testid="kw-policy-create-table"
-          :value="packages"
-          @selectType="selectType($event)"
+          :mode="mode"
+          :charts="latestPolicyChartsVersion"
+          @selectPolicy="selectPolicy($event)"
         />
       </template>
 
@@ -548,9 +661,14 @@ export default ({
             <p class="banner__short-description">
               {{ shortDescription }}
             </p>
-            <button class="btn btn-sm role-link banner__readme-button" @click="showReadme">
+            <button
+              v-if="selectedPolicyDetails && (selectedPolicyDetails?.readme || selectPolicyDetails?.appreadme) && !errorFetchingPolicy"
+              class="btn btn-sm role-link banner__readme-button"
+              @click="showReadme"
+            >
               {{ t('kubewarden.policyConfig.description.showReadme') }}
             </button>
+            <div v-else class="mb-10"></div>
           </template>
         </div>
         <Values
@@ -559,6 +677,7 @@ export default ({
           :yaml-values="yamlValues"
           :mode="mode"
           :custom-policy="customPolicy"
+          :error-fetching-policy="errorFetchingPolicy"
           @editor="$event => yamlOption = $event"
           @updateYamlValues="$event => yamlValues = $event"
         />
@@ -569,15 +688,16 @@ export default ({
           data-testid="kw-policy-create-finish-button"
           :disabled="!canFinish"
           mode="finish"
+          class="ml-20"
           @click="finish"
         />
       </template>
     </Wizard>
 
-    <template v-if="packageValues && !customPolicy">
+    <template v-if="selectedPolicyDetails && (selectedPolicyDetails?.readme || selectPolicyDetails?.appreadme) && !customPolicy && !errorFetchingPolicy">
       <PolicyReadmePanel
         ref="readmePanel"
-        :package-values="packageValues"
+        :policy-chart-details="selectedPolicyDetails"
       />
     </template>
   </div>

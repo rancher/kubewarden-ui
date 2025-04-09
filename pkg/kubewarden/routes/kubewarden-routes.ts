@@ -1,4 +1,4 @@
-import { KUBEWARDEN_PRODUCT_NAME, POLICY_REPORTER_PRODUCT } from '../types';
+import { KUBEWARDEN_PRODUCT_NAME, POLICY_REPORTER_PRODUCT } from '@kubewarden/types';
 
 import Dashboard from '@kubewarden/pages/c/_cluster/kubewarden/index.vue';
 import PolicyReport from '@kubewarden/pages/c/_cluster/kubewarden/_resource/policy-reporter.vue';

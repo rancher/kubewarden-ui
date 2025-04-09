@@ -3,7 +3,7 @@ import { RancherCommonPage } from './rancher/rancher-common.page'
 import { RancherExtensionsPage } from './rancher/rancher-extensions.page'
 import { AppVersion, KubewardenPage } from './pages/kubewarden.page'
 import { PolicyServersPage } from './pages/policyservers.page'
-import { apList, capList, ClusterAdmissionPoliciesPage } from './pages/policies.page'
+import { ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherFleetPage } from './rancher/rancher-fleet.page'
 import { RancherUI } from './components/rancher-ui'
@@ -136,55 +136,22 @@ test('Install Kubewarden by Fleet', async({ page, ui }) => {
   }, 'Installed but not refreshed?')
 })
 
-test('Whitelist Artifact Hub', async({ page, ui, nav }) => {
+test('Add Policy Catalog Repository', async({ page, ui, nav }) => {
   const cap = new ClusterAdmissionPoliciesPage(page)
-  // Count -1 because of Custom Policy
-  const apCount = apList.length - 1
-  const capCount = capList.length - 1
+  await nav.capolicies()
 
-  await test.step('Whitelist ArtifactHub', async() => {
-    await nav.capolicies()
-    await ui.button('Create').click()
-    await expect(ui.button('Create Custom Policy')).toBeVisible()
-    await expect(cap.cards()).toHaveCount(0)
-    await cap.whitelist()
-  })
+  // Check without the repository
+  await ui.button('Create').click()
+  await expect(ui.button('Create Custom Policy')).toBeVisible()
+  await expect(cap.cards()).toHaveCount(0)
+  await expect(page.getByText('No official policies found.')).toBeVisible()
 
-  await test.step('Check Official policies', async() => {
-    // CAP
-    await nav.capolicies()
-    await ui.button('Create').click()
-    await cap.handleRateLimitError()
-    await expect(cap.cards()).toHaveCount(capCount)
-    await expect(cap.cards({ signed: true, official: true })).toHaveCount(capCount)
-    // AP
-    await nav.apolicies()
-    await ui.button('Create').click()
-    await cap.handleRateLimitError()
-    await expect(cap.cards()).toHaveCount(apCount)
-    await expect(cap.cards({ signed: true, official: true })).toHaveCount(apCount)
-
-    // All policies should be signed and official
-    await expect(cap.cards({ signed: false })).toHaveCount(0)
-    await expect(cap.cards({ official: false })).toHaveCount(0)
-    // We have context-aware and mutating policy
-    await expect(cap.cards({ aware: true }).first()).toBeVisible()
-    await expect(cap.cards({ mutation: true }).first()).toBeVisible()
-  })
-
-  await test.step('Check Unofficial policies', async() => {
-    await nav.capolicies()
-    await ui.button('Create').click()
-    await cap.handleRateLimitError()
-    // Display User policies
-    await ui.checkbox('Show only official Kubewarden policies').uncheck()
-    await expect(cap.cards().nth(capCount + 1)).toBeVisible()
-    // Check User policies
-    const extraCount = await cap.cards().count() - capCount
-    expect(extraCount, 'Extra policies should be visible').toBeGreaterThanOrEqual(1)
-    await expect(cap.cards({ official: false }), 'Extra policies should be unofficial').toHaveCount(extraCount)
-    await expect(cap.cards({ official: true }), 'Official count should not change').toHaveCount(capCount)
-  })
+  // Add the repository
+  await ui.button('Add Policy Catalog Repository').click()
+  await expect(page.getByText('No official policies found.')).not.toBeVisible()
+  await ui.retry(async() => {
+    await expect(cap.cards()).toHaveCount(100)
+  }, 'No policy repository found. Please add a policy repository to view policies.')
 })
 
 test('Upgrade Kubewarden', async({ page, nav }) => {

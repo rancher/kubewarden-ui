@@ -5,14 +5,14 @@ import {
   ClusterPolicyReport,
   PolicyTraceConfig,
   PolicyTrace,
-  REGO_POLICIES_REPO,
-  ArtifactHubPackage,
-  ArtifactHubPackageDetails,
+  // REGO_POLICIES_REPO,
+  // ArtifactHubPackage,
+  // ArtifactHubPackageDetails,
   PolicyReportSummary
 } from '@kubewarden/types';
 import { generateSummaryMap } from '@kubewarden/modules/policyReporter';
 
-const PACKAGES_TTL = 5 * 60 * 1000; // 5 minutes
+// const PACKAGES_TTL = 5 * 60 * 1000; // 5 minutes
 
 export default {
   updateAirGapped({ commit }: any, val: boolean) {
@@ -24,10 +24,17 @@ export default {
     commit('updateHideBannerDefaults', val);
   },
 
-  // ArtifactHub banner
-  updateHideBannerArtifactHub({ commit }: any, val: boolean) {
-    commit('updateHideBannerArtifactHub', val);
+  // Official Repo banner
+  updateHideBannerOfficialRepo({ commit }: any, val: boolean) {
+    commit('updateHideBannerOfficialRepo', val);
   },
+
+  // Policy Repo banner
+  updateHideBannerPolicyRepo({ commit }: any, val: boolean) {
+    commit('updateHideBannerPolicyRepo', val);
+  },
+
+  // Airgap Policy banner
   updateHideBannerAirgapPolicy({ commit }: any, val: boolean) {
     commit('updateHideBannerAirgapPolicy', val);
   },
@@ -83,104 +90,104 @@ export default {
     commit('removeKubewardenCrds', val);
   },
 
-  /**
-   * Fetch all packages from ArtifactHub and store them in Vuex.
-   *
-   * @param {Object} context - Vuex context
-   * @param {Object} options - The object containing:
-   *   - value: The CR resource with artifactHubRepo() and artifactHubPackage() methods
-   *   - force: Boolean to force a fetch, ignoring TTL (default: false)
-   */
-  async fetchPackages({ state, commit, dispatch }: any, { value, force = false }: any) {
-    const now = Date.now();
-    const isCacheValid = state.packageCacheTime && (now - state.packageCacheTime < PACKAGES_TTL);
+  // /**
+  //  * Fetch all packages from ArtifactHub and store them in Vuex.
+  //  *
+  //  * @param {Object} context - Vuex context
+  //  * @param {Object} options - The object containing:
+  //  *   - value: The CR resource with artifactHubRepo() and artifactHubPackage() methods
+  //  *   - force: Boolean to force a fetch, ignoring TTL (default: false)
+  //  */
+  // async fetchPackages({ state, commit, dispatch }: any, { value, force = false }: any) {
+  //   const now = Date.now();
+  //   const isCacheValid = state.packageCacheTime && (now - state.packageCacheTime < PACKAGES_TTL);
 
-    // If not forcing a refresh and the cache is still valid, skip the fetch
-    if (!force && isCacheValid) {
-      return;
-    }
+  //   // If not forcing a refresh and the cache is still valid, skip the fetch
+  //   if (!force && isCacheValid) {
+  //     return;
+  //   }
 
-    try {
-      commit('updateLoadingPackages', true);
+  //   try {
+  //     commit('updateLoadingPackages', true);
 
-      // -- 1) Fetch all pages in increments of 60 using limit/offset --
-      const limit = 60;
-      let offset = 0;
-      let hasMore = true;
-      let allPackages: ArtifactHubPackage[] = [];
+  //     // -- 1) Fetch all pages in increments of 60 using limit/offset --
+  //     const limit = 60;
+  //     let offset = 0;
+  //     let hasMore = true;
+  //     let allPackages: ArtifactHubPackage[] = [];
 
-      while (hasMore) {
-        const fetched: { packages: ArtifactHubPackage[] } = await value.artifactHubRepo({
-          offset,
-          limit
-        });
+  //     while (hasMore) {
+  //       const fetched: { packages: ArtifactHubPackage[] } = await value.artifactHubRepo({
+  //         offset,
+  //         limit
+  //       });
 
-        const { packages } = fetched;
+  //       const { packages } = fetched;
 
-        if (Array.isArray(packages) && packages.length > 0) {
-          allPackages = allPackages.concat(packages);
+  //       if (Array.isArray(packages) && packages.length > 0) {
+  //         allPackages = allPackages.concat(packages);
 
-          // If it's less than 60, we’re done
-          if (packages.length < limit) {
-            hasMore = false;
-          } else {
-            offset += limit; // Move on to the next batch
-          }
-        } else {
-          hasMore = false;
-        }
-      }
+  //         // If it's less than 60, we’re done
+  //         if (packages.length < limit) {
+  //           hasMore = false;
+  //         } else {
+  //           offset += limit; // Move on to the next batch
+  //         }
+  //       } else {
+  //         hasMore = false;
+  //       }
+  //     }
 
-      // If we somehow got no packages, just return
-      if (!allPackages.length) {
-        return;
-      }
+  //     // If we somehow got no packages, just return
+  //     if (!allPackages.length) {
+  //       return;
+  //     }
 
-      // -- 2) Filter out Rego-based packages --
-      const packagesByRepo = allPackages.filter(
-        (pkg) => !pkg?.repository?.url?.includes(REGO_POLICIES_REPO)
-      );
+  //     // -- 2) Filter out Rego-based packages --
+  //     const packagesByRepo = allPackages.filter(
+  //       (pkg) => !pkg?.repository?.url?.includes(REGO_POLICIES_REPO)
+  //     );
 
-      // -- 3) Fetch full details for each package and build a map --
-      const packageDetailsMap: Record<string, ArtifactHubPackageDetails> = {};
+  //     // -- 3) Fetch full details for each package and build a map --
+  //     const packageDetailsMap: Record<string, ArtifactHubPackageDetails> = {};
 
-      const results = await Promise.all(
-        packagesByRepo.map(async(pkg) => {
-          const details = await dispatch('fetchPackageDetails', {
-            pkg,
-            value
-          });
+  //     const results = await Promise.all(
+  //       packagesByRepo.map(async(pkg) => {
+  //         const details = await dispatch('fetchPackageDetails', {
+  //           pkg,
+  //           value
+  //         });
 
-          packageDetailsMap[pkg.package_id] = details;
+  //         packageDetailsMap[pkg.package_id] = details;
 
-          return details;
-        })
-      );
+  //         return details;
+  //       })
+  //     );
 
-      // Filter out any hidden UI packages
-      const filtered = results.filter((pkg) => pkg?.data?.['kubewarden/hidden-ui'] !== 'true');
+  //     // Filter out any hidden UI packages
+  //     const filtered = results.filter((pkg) => pkg?.data?.['kubewarden/hidden-ui'] !== 'true');
 
-      // -- 4) Commit to store --
-      commit('updatePackages', filtered);
-      commit('updatePackageDetails', packageDetailsMap);
-      commit('updatePackageCacheTime', Date.now());
-    } catch (err) {
-      console.warn('Error fetching packages', err);
-    } finally {
-      commit('updateLoadingPackages', false);
-    }
-  },
+  //     // -- 4) Commit to store --
+  //     commit('updatePackages', filtered);
+  //     commit('updatePackageDetails', packageDetailsMap);
+  //     commit('updatePackageCacheTime', Date.now());
+  //   } catch (err) {
+  //     console.warn('Error fetching packages', err);
+  //   } finally {
+  //     commit('updateLoadingPackages', false);
+  //   }
+  // },
 
-  /**
-     * Fetch details for a single package.
-     */
-  async fetchPackageDetails(context: any, { pkg, value }: any) {
-    try {
-      return await value.artifactHubPackage(pkg);
-    } catch (err) {
-      console.warn('Error fetching package details:', err);
+  // /**
+  //    * Fetch details for a single package.
+  //    */
+  // async fetchPackageDetails(context: any, { pkg, value }: any) {
+  //   try {
+  //     return await value.artifactHubPackage(pkg);
+  //   } catch (err) {
+  //     console.warn('Error fetching package details:', err);
 
-      return null;
-    }
-  },
+  //     return null;
+  //   }
+  // },
 };

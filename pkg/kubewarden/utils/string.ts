@@ -13,3 +13,19 @@ export function extractPortNumber(inputString: any): number | null | void {
     return null;
   }
 }
+
+
+/**
+ * Takes a URL and returns the url without the trailing slash
+ * @param inputString | URL e.g. 'https://my-service.local:4317/'
+ * @returns `string` | Returns the URL without the trailing slash
+ * @example
+ * ```ts
+ * const url = 'https://my-service.local:4317/';
+ * const result = trimTrailingSlash(url);
+ * console.log(result); // 'https://my-service.local:4317'
+ * ```
+ */
+export function trimTrailingSlash(inputString: string): string {
+  return inputString.replace(/\/$/, '');
+};

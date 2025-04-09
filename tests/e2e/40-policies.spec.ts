@@ -163,6 +163,55 @@ for (const PolicyPage of pageTypes) {
   })
 }
 
+test('Check Official policies', async({ page, nav, ui }) => {
+  const polPage = new ClusterAdmissionPoliciesPage(page)
+
+  // CAP
+  await nav.capolicies()
+  await ui.button('Create').click()
+  await expect(polPage.cards()).toHaveCount(100)
+  await expect(polPage.cards({ official: true })).toHaveCount(100)
+  const capCount = await polPage.policyCount()
+  // AP
+  await nav.apolicies()
+  await ui.button('Create').click()
+  await expect(polPage.cards()).toHaveCount(100)
+  await expect(polPage.cards({ official: true })).toHaveCount(100)
+  const apCount = await polPage.policyCount()
+
+  // Some policies are only Cluster wide
+  expect(apCount, 'AP count should be less than CAP count').toBeLessThan(capCount)
+  // All policies should be official
+  await expect(polPage.cards({ official: false })).toHaveCount(0)
+  // We have context-aware and mutating policy
+  await expect(polPage.cards({ aware: true }).first()).toBeVisible()
+  await expect(polPage.cards({ mutation: true }).first()).toBeVisible()
+})
+
+test('Check Unofficial policies', async({ page, nav, ui }) => {
+  const apps = new RancherAppsPage(page)
+  const cap = new ClusterAdmissionPoliciesPage(page)
+  await apps.addRepository({ name: 'kravciak-policy-catalog', url: 'https://kravciak.github.io/policy-catalog' })
+
+  // Display Pod Privileged Policy
+  await nav.capolicies()
+  await ui.button('Create').click()
+  await ui.input('Filter').fill('pod privileged')
+
+  // Display Unofficial policies
+  const officialCount = await cap.cards().count()
+  await ui.checkbox('Show only official Rancher policies').uncheck()
+  await expect(cap.cards().nth(officialCount)).toBeVisible()
+
+  // Check User policies
+  const extraCount = await cap.cards().count() - officialCount
+  expect(extraCount, 'Extra policies should be visible').toBeGreaterThanOrEqual(1)
+  await expect(cap.cards({ official: false }), 'Extra policies should be unofficial').toHaveCount(extraCount)
+  await expect(cap.cards({ official: true }), 'Official count should not change').toHaveCount(officialCount)
+
+  await apps.deleteRepository('kravciak-policy-catalog')
+})
+
 test('Recommended policies', async({ page, ui, nav }) => {
   test.skip(MODE === 'fleet', 'https://github.com/rancher/kubewarden-ui/pull/703')
 
@@ -183,6 +232,7 @@ test('Recommended policies', async({ page, ui, nav }) => {
     await nav.capolicies('no-privileged-pod')
     await ui.button('Config').click()
     await capPage.selectTab('Settings')
-    await expect(ui.codeMirror).toContainText('skip_init_containers: true')
+    // await expect(ui.codeMirror).toContainText('skip_init_containers: true')
+    await expect(ui.checkbox('Skip init containers')).toBeChecked()
   })
 })
