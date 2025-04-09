@@ -1,12 +1,12 @@
 <script>
-import { mapGetters } from 'vuex';
-import isEmpty from 'lodash/isEmpty';
-import semver from 'semver';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import isEmpty from 'lodash/isEmpty';
+import semver from 'semver';
+import { mapGetters } from 'vuex';
 
-import { CATALOG, SERVICE } from '@shell/config/types';
 import { KUBERNETES } from '@shell/config/labels-annotations';
+import { CATALOG, SERVICE } from '@shell/config/types';
 import ResourceFetch from '@shell/mixins/resource-fetch';
 import { allHash } from '@shell/utils/promise';
 
@@ -15,11 +15,13 @@ import { Banner } from '@components/Banner';
 import Loading from '@shell/components/Loading';
 import SortableTable from '@shell/components/SortableTable';
 
+import { KUBEWARDEN, KUBEWARDEN_CHARTS } from '@kubewarden/constants';
 import { TRACE_HEADERS } from '@kubewarden/config/table-headers';
-import { KUBEWARDEN, KUBEWARDEN_CHARTS, MODE_MAP, OPERATION_MAP } from '@kubewarden/types';
+import { MODE_MAP, OPERATION_MAP } from '@kubewarden/types';
+
 import { jaegerTraces } from '@kubewarden/modules/jaegerTracing';
-import { isAdminUser } from '@kubewarden/utils/permissions';
 import { formatDuration } from '@kubewarden/utils/duration-format';
+import { isAdminUser } from '@kubewarden/utils/permissions';
 
 import TraceChecklist from './TraceChecklist';
 
