@@ -149,7 +149,9 @@ test('Add Policy Catalog Repository', async({ page, ui, nav }) => {
   // Add the repository
   await ui.button('Add Policy Catalog Repository').click()
   await expect(page.getByText('No official policies found.')).not.toBeVisible()
-  await expect(cap.cards()).toHaveCount(100)
+  await ui.retry(async() => {
+    await expect(cap.cards()).toHaveCount(100)
+  }, 'No policy repository found. Please add a policy repository to view policies.')
 })
 
 test('Upgrade Kubewarden', async({ page, nav }) => {
