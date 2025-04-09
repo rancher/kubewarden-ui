@@ -1,5 +1,5 @@
 import { rootKubewardenRoute } from '@kubewarden/utils/custom-routing';
-import { POLICY_REPORTER_PRODUCT, WG_POLICY_K8S } from '@kubewarden/types';
+// import { POLICY_REPORTER_PRODUCT, WG_POLICY_K8S } from '@kubewarden/types';
 import {
   KUBEWARDEN,
   KUBEWARDEN_MENU,
@@ -7,12 +7,16 @@ import {
 } from '@kubewarden/constants';
 import { POLICY_SERVER_HEADERS } from './table-headers';
 
+// import UnifiedPolicyDetail from '@kubewarden/components/UnifiedPolicy/UnifiedPolicyDetail.vue';
+// import UnifiedPolicyEdit from '@kubewarden/components/UnifiedPolicy/UnifiedPolicyEdit.vue';
+
 export function init($plugin: any, store: any) {
   const {
     product,
     basicType,
-    // configureType,
+    configureType,
     // componentForType,
+    ignoreType,
     weightType,
     virtualType,
     headers
@@ -20,10 +24,10 @@ export function init($plugin: any, store: any) {
 
   const {
     POLICY_SERVER,
-    // ADMISSION_POLICY,
-    // CLUSTER_ADMISSION_POLICY,
-    // ADMISSION_POLICY_GROUP,
-    // CLUSTER_ADMISSION_POLICY_GROUP
+    ADMISSION_POLICY,
+    CLUSTER_ADMISSION_POLICY,
+    ADMISSION_POLICY_GROUP,
+    CLUSTER_ADMISSION_POLICY_GROUP
   } = KUBEWARDEN;
 
   product({
@@ -56,29 +60,20 @@ export function init($plugin: any, store: any) {
     }
   });
 
-  virtualType({
-    label:      store.getters['i18n/t']('kubewarden.policyReporter.title'),
-    icon:       'notifier',
-    ifHaveType: WG_POLICY_K8S.POLICY_REPORT.TYPE,
-    name:       POLICY_REPORTER_PRODUCT,
-    namespaced: false,
-    weight:     95,
-    route:      {
-      name:   `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-${ POLICY_REPORTER_PRODUCT }`,
-      params: { product: KUBEWARDEN_PRODUCT_NAME }
-    }
-  });
-
   basicType([
     KUBEWARDEN_MENU.DASHBOARD,
     KUBEWARDEN_MENU.POLICY,
-    POLICY_REPORTER_PRODUCT,
     POLICY_SERVER,
-    // ADMISSION_POLICY,
-    // CLUSTER_ADMISSION_POLICY,
-    // ADMISSION_POLICY_GROUP,
-    // CLUSTER_ADMISSION_POLICY_GROUP
+    ADMISSION_POLICY,
+    CLUSTER_ADMISSION_POLICY,
+    ADMISSION_POLICY_GROUP,
+    CLUSTER_ADMISSION_POLICY_GROUP
   ]);
+
+  ignoreType(ADMISSION_POLICY);
+  ignoreType(CLUSTER_ADMISSION_POLICY);
+  ignoreType(ADMISSION_POLICY_GROUP);
+  ignoreType(CLUSTER_ADMISSION_POLICY_GROUP);
 
   weightType(POLICY_SERVER, 98, true);
   // weightType(CLUSTER_ADMISSION_POLICY, 97, true);
@@ -89,5 +84,15 @@ export function init($plugin: any, store: any) {
   headers(POLICY_SERVER, POLICY_SERVER_HEADERS);
   // headers(ADMISSION_POLICY, POLICY_HEADERS);
   // headers(CLUSTER_ADMISSION_POLICY, POLICY_HEADERS);
-  //
+
+  for (const type of [ADMISSION_POLICY, CLUSTER_ADMISSION_POLICY, ADMISSION_POLICY_GROUP, CLUSTER_ADMISSION_POLICY_GROUP]) {
+    configureType(type, {
+      resourceDetail: 'policies.kubewarden.io.unifiedpolicy',
+      // resourceEdit:   UnifiedPolicyEdit,
+      location:       {
+        name:   `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-${ KUBEWARDEN_MENU.POLICY }`,
+        params: { product: KUBEWARDEN_PRODUCT_NAME }
+      }
+    });
+  }
 }

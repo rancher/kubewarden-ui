@@ -81,6 +81,13 @@ kubewarden:
         warning: 'An air-gapped installation has been detected, this will require intervention to enable access to Kubewarden images and policies. It is necessary to make them available from an OCI registry that is accessible to the cluster.'
         docs: |
           Follow the documentation to setup an OCI registry for further installation.
+  group:
+    detail:
+      columns:
+        backgroundAudit: Background Audit
+        mode: Mode
+        policyServer: Policy Server
+        module: Module
   policy:
     title: Policies
     legacyAccordionTitle: Legacy Policies
@@ -247,6 +254,9 @@ kubewarden:
     noService: The Metrics service is not currently active or is not installed correctly. Check the status of the Monitoring app.
 
   policyConfig:
+    columns:
+      module: Module
+      settings: Settings
     tabs:
       general: General
       rules: Rules

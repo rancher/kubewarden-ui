@@ -446,3 +446,39 @@ export const UNIFIED_POLICY_HEADERS = [
   // UNIFIED_POLICY_SERVER,
   UNIFIED_POLICY_AGE
 ];
+
+export const GROUP_POLICY_TABLE_HEADERS = [
+  {
+    name:          'name',
+    labelKey:      'tableHeaders.name',
+    value:         (row: any) => row.name,
+    sort:          ['nameSort'],
+  },
+  {
+    name:     'module',
+    labelKey: 'kubewarden.group.detail.columns.module',
+    value:    (row: any) => row.module,
+    sort:     ['module'],
+  }
+];
+
+export const GROUP_OVERVIEW_TABLE_HEADERS = [
+  {
+    name:     'backgroundAudit',
+    labelKey: 'kubewarden.group.detail.columns.backgroundAudit',
+    value:    'spec.backgroundAudit',
+    sort:     ['backgroundAudit'],
+  },
+  {
+    name:     'mode',
+    labelKey: 'kubewarden.group.detail.columns.mode',
+    value:    'spec.mode',
+    sort:     ['mode'],
+  },
+  {
+    name:     'policyServer',
+    labelKey: 'kubewarden.group.detail.columns.policyServer',
+    value:    'spec.policyServer',
+    sort:     ['policyServer'],
+  }
+];
