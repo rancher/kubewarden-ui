@@ -24,11 +24,13 @@ on:
         - '~ 2.9'
         - '~ 2.10'
         - '~ 2.11'
+        - '~ 2.12'
         - 'rc'       # rc versions
         - '~ 2.8-0'
         - '~ 2.9-0'
         - '~ 2.10-0'
         - '~ 2.11-0'
+        - '~ 2.12-0'
       k3s:
         description: Kubernetes version
         type: choice
@@ -104,7 +106,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.8", "2.9", "2.10"]') || fromJSON(format('["{0}"]', inputs.rancher || github.event.pull_request.base.ref )) }}
+        rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.8", "2.9", "2.10", "2.11"]') || fromJSON(format('["{0}"]', inputs.rancher || github.event.pull_request.base.ref )) }}
         mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["base", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'base')) }}
         exclude:
           # Run all modes on 2.10 since it's latest prime version
@@ -116,13 +118,23 @@ jobs:
             mode: upgrade
           - rancher: ${{ github.event_name == 'schedule' && '2.9' }}
             mode: fleet
+          - rancher: ${{ github.event_name == 'schedule' && '2.11' }}
+            mode: upgrade
+          - rancher: ${{ github.event_name == 'schedule' && '2.11' }}
+            mode: fleet
           # Exclude unrelated Rancher versions from release jobs # head_branch = tag (kubewarden-2.1.0-rc.1)
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && '2.9' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && '2.10' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && '2.11' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && '2.8' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && '2.10' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && '2.11' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && '2.8' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && '2.9' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && '2.11' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && '2.8' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && '2.9' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && '2.10' }}
 
 
     # Run schedule workflows only on original repo, not forks
@@ -160,7 +172,7 @@ jobs:
         case ${{github.event_name}} in
           pull_request)
             # Override RANCHER for maintenance PRs
-            [[ "${{ github.event.pull_request.base.ref }}" == "main" ]] && RANCHER="2.11-0"
+            [[ "${{ github.event.pull_request.base.ref }}" == "main" ]] && RANCHER="2.11"
             [[ "${{ github.event.pull_request.base.ref }}" == "release-1.6" ]] && RANCHER="2.8"
             [[ "${{ github.event.pull_request.base.ref }}" == "release-2.1" ]] && RANCHER="2.9"
             [[ "${{ github.event.pull_request.base.ref }}" == "release-3.1" ]] && RANCHER="2.10"
@@ -174,17 +186,16 @@ jobs:
         # Select repository
         helm repo add --force-update rancher-prime https://charts.rancher.com/server-charts/prime
         helm repo add --force-update rancher-community https://releases.rancher.com/server-charts/latest # /alpha | /latest
-        [[ "$RANCHER" == "rc" || "$RANCHER" == *"-0" ]] && REPO=rancher-community || REPO=rancher-prime
+        [[ "$RANCHER" == *"2.11"* ]] && REPO=rancher-community || REPO=rancher-prime
 
         # Translate to sematic version
         [ "$RANCHER" == "rc" ] && RANCHER='*-0'
         [ "$RANCHER" == "released" ] && RANCHER='*'
 
-        # Limit k8s version - Rancher 2.7 chart supports < 1.28.0
-        [[ "$RANCHER" == *2.7* ]] && K3S_VERSION="v1.27"
-        [[ "$RANCHER" == *2.8* ]] && K3S_VERSION="v1.28"
-        [[ "$RANCHER" == *2.9* ]] && K3S_VERSION="v1.30"
-        [[ "$RANCHER" == *2.10* ]] && K3S_VERSION="v1.31"
+        # Limit k8s version - https://www.suse.com/suse-rancher/support-matrix
+        [[ "$RANCHER" == *2.8* ]] && K3S_VERSION="v1.28"   # v1.25 - v1.28
+        [[ "$RANCHER" == *2.9* ]] && K3S_VERSION="v1.30"   # v1.27 - v1.30
+        [[ "$RANCHER" == *2.10* ]] && K3S_VERSION="v1.31"  # v1.28 - v1.31
 
         # Complete partial K3S version from dockerhub v1.30 -> v1.30.5-k3s1
         if [[ ! $K3S_VERSION =~ ^v[0-9.]+-k3s[0-9]$ ]]; then
