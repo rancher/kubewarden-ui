@@ -72,7 +72,17 @@ test('Policy Servers', async({ page, ui, nav }) => {
   })
 })
 
-test('Configure with custom values', async({ page, ui, nav }) => {
+test('Create with invalid values', async({ page, ui, nav }) => {
+  const psPage = new PolicyServersPage(page)
+
+  await nav.pservers()
+  await ui.button('Create').click()
+  await psPage.setName('in valid')
+  await ui.button('Create').click()
+  await expect(page.getByRole('banner').getByText('Invalid value: "in valid"')).toBeVisible()
+})
+
+test('Create with custom values', async({ page, ui, nav }) => {
   const psPage = new PolicyServersPage(page)
   const ps = { name: 'test-policyserver', image: 'ghcr.io/kubewarden/policy-server:latest', replicas: 2 }
   await psPage.create(ps, { wait: false })

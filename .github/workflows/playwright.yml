@@ -178,7 +178,7 @@ jobs:
             [[ "${{ github.event.pull_request.base.ref }}" == "release-3.1" ]] && RANCHER="2.10"
             KUBEWARDEN=source;;
           schedule)
-            KUBEWARDEN=released;;
+            [[ "$RANCHER" == *"2.11"* ]] && KUBEWARDEN=rc || KUBEWARDEN=released;;
           workflow_run)
             KUBEWARDEN=rc;;
         esac

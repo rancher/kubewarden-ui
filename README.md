@@ -1,6 +1,7 @@
 [![Build & Release](https://github.com/rancher/kubewarden-ui/actions/workflows/build-extension-charts.yml/badge.svg)](https://github.com/rancher/kubewarden-ui/actions/workflows/build-extension-charts.yml)
 
-[![E2E](https://github.com/rancher/kubewarden-ui/actions/workflows/playwright.yml/badge.svg)](https://github.com/rancher/kubewarden-ui/actions/workflows/playwright.yml) [![Unit tests](https://github.com/rancher/kubewarden-ui/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/rancher/kubewarden-ui/actions/workflows/unit-tests.yml)
+[![E2E](https://github.com/rancher/kubewarden-ui/actions/workflows/playwright.yml/badge.svg?event=schedule)](https://github.com/rancher/kubewarden-ui/actions/workflows/playwright.yml?query=event%3Aschedule)
+[![Unit tests](https://github.com/rancher/kubewarden-ui/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/rancher/kubewarden-ui/actions/workflows/unit-tests.yml)
 
 # Kubewarden UI
 
