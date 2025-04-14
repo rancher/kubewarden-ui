@@ -1,11 +1,11 @@
 <script>
-import jsyaml from 'js-yaml';
-import { _CREATE, _EDIT, _CLONE } from '@shell/config/query-params';
+import { _CLONE, _CREATE, _EDIT } from '@shell/config/query-params';
 import CreateEditView from '@shell/mixins/create-edit-view';
+import jsyaml from 'js-yaml';
 
-import CruResource from '@shell/components/CruResource';
-import { removeEmptyAttrs } from '@kubewarden/utils/object';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
+import { removeEmptyAttrs } from '@kubewarden/utils/object';
+import CruResource from '@shell/components/CruResource';
 
 import Config from '@kubewarden/components/Policies/Config';
 import Create from '@kubewarden/components/Policies/Create';
@@ -86,12 +86,34 @@ export default {
     // this updates the "value" obj for CAP's
     // with the updated values that came from the "edit YAML" scenario
     updateYamlValuesFromEdit(val) {
+      // Parse the YAML input and remove any empty attributes.
       const parsed = jsyaml.load(val);
 
       removeEmptyAttrs(parsed);
 
-      this.value = { ...parsed }; // Assign a new object to avoid prop mutation
-      this.$emit('input', this.value); // Emit changes
+      /*
+       * We update the contents of this.value in place instead of replacing it with a new object.
+       *
+       * The reason for this is that the CreateEditView mixin directly works with the object
+       * referenced by this.value. Replacing the object (e.g., using `this.value = { ...parsed }`)
+       * would break that reference and prevent the mixin from observing the updated properties.
+       *
+       * Instead, we:
+       *   1. Delete any properties from this.value that no longer exist in the parsed object.
+       *   2. Merge the parsed object's properties into the existing this.value using Object.assign.
+       *
+       * See issue https://github.com/rancher/kubewarden-ui/issues/1155
+       */
+      Object.keys(this.value).forEach((key) => {
+        if (!Object.prototype.hasOwnProperty.call(parsed, key)) {
+          delete this.value[key];
+        }
+      });
+
+      Object.assign(this.value, parsed);
+
+      // Emit the updated object to inform the parent/component using v-model that a change has occurred.
+      this.$emit('input', this.value);
     }
   }
 };
