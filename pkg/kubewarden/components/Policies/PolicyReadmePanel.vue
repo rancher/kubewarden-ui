@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 
 import ChartReadme from '@shell/components/ChartReadme';
 
-import { PolicyDetail, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
+import { KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS, PolicyDetail } from '@kubewarden/types';
 
 const props = defineProps<{ policyChartDetails: PolicyDetail }>();
 
@@ -130,7 +130,7 @@ defineExpose({
     transition: right .5s ease;
 
     &__header {
-      text-transform: capitalize;
+      text-transform: inherit;
     }
 
     .policy-info-content {
