@@ -56,7 +56,7 @@ export class RancherCommonPage extends BasePage {
   async setHelmCharts(option: 'Show Releases Only' | 'Include Prerelease Versions') {
     const btn = this.ui.button(option)
     await btn.click()
-    await expect(btn).toHaveClass(/bg-primary/)
+    await expect(btn).toContainClass('bg-primary')
     await this.page.waitForTimeout(100)
   }
 
