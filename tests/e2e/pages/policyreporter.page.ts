@@ -20,7 +20,7 @@ export class PolicyReporterPage extends BasePage {
   }
 
   async goto(): Promise<void> {
-    await this.nav.explorer('Kubewarden', 'Policy Reporter')
+    await this.nav.kubewarden('Policy Reporter')
   }
 
   @step
@@ -36,7 +36,7 @@ export class PolicyReporterPage extends BasePage {
     // Open menu & select tab
     if (!await menuActive.isVisible()) await menuButton.click()
     await tabItem.click()
-    await expect(tabItem).toHaveClass(/v-list-item--active/)
+    await expect(tabItem).toContainClass('v-list-item--active')
 
     // Menu animation can match previous closing nemu
     await this.page.waitForTimeout(500)
