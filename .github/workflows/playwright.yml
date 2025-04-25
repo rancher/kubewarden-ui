@@ -118,9 +118,9 @@ jobs:
             mode: upgrade
           - rancher: ${{ github.event_name == 'schedule' && '2.9' }}
             mode: fleet
-          - rancher: ${{ github.event_name == 'schedule' && '2.11' }}
+          - rancher: ${{ github.event_name == 'schedule' && '2.10' }}
             mode: upgrade
-          - rancher: ${{ github.event_name == 'schedule' && '2.11' }}
+          - rancher: ${{ github.event_name == 'schedule' && '2.10' }}
             mode: fleet
           # Exclude unrelated Rancher versions from release jobs # head_branch = tag (kubewarden-2.1.0-rc.1)
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && '2.9' }}
@@ -178,7 +178,7 @@ jobs:
             [[ "${{ github.event.pull_request.base.ref }}" == "release-3.1" ]] && RANCHER="2.10"
             KUBEWARDEN=source;;
           schedule)
-            [[ "$RANCHER" == *"2.11"* ]] && KUBEWARDEN=rc || KUBEWARDEN=released;;
+            [[ "$RANCHER" == *"2.12"* ]] && KUBEWARDEN=rc || KUBEWARDEN=released;;
           workflow_run)
             KUBEWARDEN=rc;;
         esac
@@ -186,7 +186,7 @@ jobs:
         # Select repository
         helm repo add --force-update rancher-prime https://charts.rancher.com/server-charts/prime
         helm repo add --force-update rancher-community https://releases.rancher.com/server-charts/latest # /alpha | /latest
-        [[ "$RANCHER" == *"2.11"* ]] && REPO=rancher-community || REPO=rancher-prime
+        [[ "$RANCHER" == *"2.12"* ]] && REPO=rancher-community || REPO=rancher-prime
 
         # Translate to sematic version
         [ "$RANCHER" == "rc" ] && RANCHER='*-0'
@@ -196,6 +196,7 @@ jobs:
         [[ "$RANCHER" == *2.8* ]] && K3S_VERSION="v1.28"   # v1.25 - v1.28
         [[ "$RANCHER" == *2.9* ]] && K3S_VERSION="v1.30"   # v1.27 - v1.30
         [[ "$RANCHER" == *2.10* ]] && K3S_VERSION="v1.31"  # v1.28 - v1.31
+        [[ "$RANCHER" == *2.11* ]] && K3S_VERSION="v1.32"  # v1.30 - v1.32
 
         # Complete partial K3S version from dockerhub v1.30 -> v1.30.5-k3s1
         if [[ ! $K3S_VERSION =~ ^v[0-9.]+-k3s[0-9]$ ]]; then
