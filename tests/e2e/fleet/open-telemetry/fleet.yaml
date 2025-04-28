@@ -2,7 +2,7 @@ defaultNamespace: opentelemetry
 helm:
   releaseName: opentelemetry
   chart: opentelemetry-operator
-  version: "*" # 0.68.1
+  version: "0.86.4" # *
   repo: https://open-telemetry.github.io/opentelemetry-helm-charts
   values:
     manager:
