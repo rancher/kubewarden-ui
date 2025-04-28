@@ -9,7 +9,7 @@ const cmanChart: Chart = { title: 'cert-manager', name: 'cert-manager', namespac
 // OpenTelemetry
 const otelRepo: ChartRepo = { name: 'open-telemetry', url: 'https://open-telemetry.github.io/opentelemetry-helm-charts' }
 // Locked to v0.80.2: https://github.com/kubewarden/kubewarden-controller/issues/1026
-const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator', version: '0.80.2' }
+const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator', version: process.env.OTEL_OPERATOR }
 // Jaeger Tracing
 const jaegerRepo: ChartRepo = { name: 'jaegertracing', url: 'https://jaegertracing.github.io/helm-charts' }
 const jaegerChart: Chart = { title: 'jaeger-operator', name: 'jaeger-operator', namespace: 'jaeger', check: 'jaeger-operator' }
