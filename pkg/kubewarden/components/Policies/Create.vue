@@ -482,7 +482,8 @@ export default ({
         let registry = policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REGISTRY];
         let policyModule = `${ policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REPOSITORY] }:${ policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.TAG] }`;
 
-        if (this.systemDefaultRegistry?.value) {
+        // Override annotation by rancher system-default-registry if user changed default value (expected in airgap)
+        if (this.systemDefaultRegistry?.value && this.systemDefaultRegistry.value !== this.systemDefaultRegistry.default) {
           registry = this.systemDefaultRegistry.value;
         }
 

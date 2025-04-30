@@ -10,7 +10,7 @@ const cmanRepo: ChartRepo = { name: 'jetstack', url: 'https://charts.jetstack.io
 const cmanChart: Chart = { title: 'cert-manager', name: 'cert-manager', namespace: 'cert-manager', check: 'cert-manager' }
 // OpenTelemetry
 const otelRepo: ChartRepo = { name: 'open-telemetry', url: 'https://open-telemetry.github.io/opentelemetry-helm-charts' }
-const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator', version: process.env.OTEL_OPERATOR }
+const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator', version: process.env.OTEL_OPERATOR || '0.86.4' }
 // Jaeger Tracing
 const jaegerRepo: ChartRepo = { name: 'jaegertracing', url: 'https://jaegertracing.github.io/helm-charts' }
 const jaegerChart: Chart = { title: 'jaeger-operator', name: 'jaeger-operator', namespace: 'jaeger', check: 'jaeger-operator' }
