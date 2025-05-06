@@ -26,8 +26,14 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'Verify Image Signatures'    : { settings: setupVerifyImageSignatures },
   'Container Resources'        : { settings: setupContainerResources },
   'PVC StorageClass Validator' : { settings: setupPvcScValidator },
+  'Priority class policy'      : { settings: setupPriorityClassPolicy },
   'CEL Policy'                 : { skip: 'https://github.com/kubewarden/cel-policy/issues/12' },
   'volumeMounts'               : { settings: setupVolumeMounts },
+}
+
+async function setupPriorityClassPolicy(ui: RancherUI) {
+  await ui.button('Add').click()
+  await ui.page.getByPlaceholder('e.g. bar').fill('low-priority')
 }
 
 async function setupPvcScValidator(ui: RancherUI) {
