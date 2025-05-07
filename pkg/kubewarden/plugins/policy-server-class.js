@@ -2,7 +2,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import { POD, WORKLOAD_TYPES } from '@shell/config/types';
 
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 import KubewardenModel, { colorForStatus, colorForTraceStatus } from './kubewarden-class';
 
 export default class PolicyServerModel extends KubewardenModel {

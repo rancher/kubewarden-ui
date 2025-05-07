@@ -8,8 +8,8 @@ import { Banner } from '@components/Banner';
 import CruResource from '@shell/components/CruResource';
 import Loading from '@shell/components/Loading';
 
+import { KUBEWARDEN } from '@kubewarden/constants';
 import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
-import { KUBEWARDEN } from '@kubewarden/types';
 
 import Values from '@kubewarden/components/PolicyServer/Values';
 
