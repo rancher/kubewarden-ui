@@ -6,7 +6,7 @@
   "devDependencies": {
     "@playwright/test": "~1.52.0",
     "@types/js-yaml": "^4.0.9",
-    "@types/lodash": "^4.17.16",
+    "@types/lodash": "^4.17.17",
     "@types/semver": "^7.7.0",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
