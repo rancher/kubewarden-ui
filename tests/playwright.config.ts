@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import { execSync } from 'child_process'
 
 /**
  * Read environment variables from file.
@@ -41,7 +42,8 @@ export default defineConfig({
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    baseURL          : process.env.RANCHER_URL, /* Base URL to use in actions like `await page.goto('/')`. */
+    /* Base URL to use in actions like `await page.goto('/')`. */
+    baseURL          : process.env.RANCHER_URL || 'https://' + JSON.parse(execSync('helm get values -n cattle-system rancher -o json', { encoding: 'utf-8' })).hostname.trimEnd(),
     actionTimeout    : 60_000, /* Maximum time each action such as `click()` can take. */
     navigationTimeout: 60_000, /* Timeout for navigation actions like page.goto() */
     // launchOptions    : { slowMo: 200 }, /* Slows down Playwright operations by the specified amount of milliseconds. */
