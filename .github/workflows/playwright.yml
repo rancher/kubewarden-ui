@@ -255,7 +255,6 @@ jobs:
             [ $i -ne 20 ] && sleep 30 || { echo "Godot: pods not running"; exit 1; }
         done
 
-        echo "RANCHER_FQDN=$RANCHER_FQDN" | tee -a $GITHUB_ENV
 
     # ==================================================================================================
     # Setup playwright ENV and run tests
@@ -301,7 +300,6 @@ jobs:
         yarn playwright test ${TFILTER:-} ${GFILTER:+-gv "$GFILTER"} -x | tee qase-report.log
       env:
         MODE: ${{ matrix.mode }}
-        RANCHER_URL: https://${{ env.RANCHER_FQDN }}
         # Override OTEL operator version by github variable
         OTEL_OPERATOR: ${{ vars.OTEL_OPERATOR }}
         # Check that installed extension version matches release tag
