@@ -6,50 +6,47 @@ on:
   workflow_dispatch:
     inputs:
       kubewarden:
-        description: Kubewarden version
+        description: Kubewarden UI from
         type: choice
         default: 'rc'
-        required: true
         options:
-        - source
-        - rc
-        - released
+        - source # build extension from main branch
+        - rc     # https://rancher.github.io/kubewarden-ui/
+        - released # ui-plugin-charts in released rancher prime
       rancher:
         description: Rancher version
         type: choice
         default: 'released'
         options:
-        - 'released' # released versions
-        - '~ 2.8'
-        - '~ 2.9'
-        - '~ 2.10'
-        - '~ 2.11'
-        - '~ 2.12'
-        - 'rc'       # rc versions
-        - '~ 2.8-0'
-        - '~ 2.9-0'
-        - '~ 2.10-0'
-        - '~ 2.11-0'
-        - '~ 2.12-0'
+        - released
+        - 'v2.9'
+        - 'v2.10'
+        - 'v2.11'
+        - 'v2.12'
+        - 'v2.9-0 (devel)'
+        - 'v2.10-0 (devel)'
+        - 'v2.11-0 (devel)'
+        - 'v2.12-0 (devel)'
+      rancher_text:
+        description: Rancher constraint
+        required: false
       k3s:
         description: Kubernetes version
         type: choice
-        default: 'v1.30'
-        required: true
+        default: 'auto'
         options:
-        - v1.25
-        - v1.26
+        - auto
         - v1.27
         - v1.28
         - v1.29
         - v1.30
         - v1.31
         - v1.32
+        - v1.33
       mode:
         description: Installation mode
         type: choice
         default: 'base'
-        required: true
         options:
         - base
         - fleet
@@ -87,9 +84,8 @@ concurrency:
 
 env:
   # Github -> Secrets and variables -> Actions -> New repository variable
-  KUBEWARDEN: ${{ inputs.kubewarden || 'rc' }}
   K3D_VERSION: # 'v5.6.3' - optionally pin version
-  K3S_VERSION: ${{ inputs.k3s || 'v1.30' }}
+  K3S_VERSION: ${{ inputs.k3s != 'auto' && inputs.k3s || '' }}
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
   # First value after the && must be truthy. Otherwise, the value after the || will always be returned
   TESTBASE: ${{ github.event_name != 'workflow_dispatch' && true || inputs.testbase }}
@@ -106,35 +102,36 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.8", "2.9", "2.10", "2.11"]') || fromJSON(format('["{0}"]', inputs.rancher || github.event.pull_request.base.ref )) }}
+        # Rancher versions for PRs is based on the branch
+        rancher:  ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["p2.8", "p2.9", "p2.10", "p2.11"]') || fromJSON(format('["{0}"]', inputs.rancher_text || inputs.rancher )) }}
         mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["base", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'base')) }}
         exclude:
-          # Run all modes on 2.10 since it's latest prime version
-          - rancher: ${{ github.event_name == 'schedule' && '2.8' }}
+          # Run all modes on latest prime version (2.11)
+          - rancher: ${{ github.event_name == 'schedule' && 'p2.8' }}
             mode: upgrade
-          - rancher: ${{ github.event_name == 'schedule' && '2.8' }}
+          - rancher: ${{ github.event_name == 'schedule' && 'p2.8' }}
             mode: fleet
-          - rancher: ${{ github.event_name == 'schedule' && '2.9' }}
+          - rancher: ${{ github.event_name == 'schedule' && 'p2.9' }}
             mode: upgrade
-          - rancher: ${{ github.event_name == 'schedule' && '2.9' }}
+          - rancher: ${{ github.event_name == 'schedule' && 'p2.9' }}
             mode: fleet
-          - rancher: ${{ github.event_name == 'schedule' && '2.10' }}
+          - rancher: ${{ github.event_name == 'schedule' && 'p2.10' }}
             mode: upgrade
-          - rancher: ${{ github.event_name == 'schedule' && '2.10' }}
+          - rancher: ${{ github.event_name == 'schedule' && 'p2.10' }}
             mode: fleet
           # Exclude unrelated Rancher versions from release jobs # head_branch = tag (kubewarden-2.1.0-rc.1)
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && '2.9' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && '2.10' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && '2.11' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && '2.8' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && '2.10' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && '2.11' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && '2.8' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && '2.9' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && '2.11' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && '2.8' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && '2.9' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && '2.10' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && 'p2.9' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && 'p2.10' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && 'p2.11' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && 'p2.8' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && 'p2.10' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && 'p2.11' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && 'p2.8' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && 'p2.9' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && 'p2.11' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'p2.8' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'p2.9' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'p2.10' }}
 
 
     # Run schedule workflows only on original repo, not forks
@@ -144,117 +141,88 @@ jobs:
     runs-on: self-hosted
     steps:
     # ==================================================================================================
-    # Check out code
-    # Use local kuberlr to avoid version skew
 
-    # Test from maintenance branch for Rancher < 2.11
-    - name: Find checkout branch ref
-      id: set-ref
+    # Checkout tests specific to used Rancher version
+    - name: Find branch with tests
+      if: ${{ github.event_name != 'pull_request' }}
+      id: find-branch
       run: |
-        case "${{ matrix.rancher }}" in
-          *2.8*) ref='release-1.6';;
-          *2.9*) ref='release-2.1';;
-          *2.10*) ref='release-3.1';;
+        rancher=$(sed 's/^[^0-9]*//' <<< "${{ matrix.rancher }}")
+        case "$rancher" in
+          2.8*)  ref='release-1.6';;
+          2.9*)  ref='release-2.1';;
+          2.10*) ref='release-3.1';;
           *)     ref='';;
         esac
         echo "ref=$ref" | tee -a $GITHUB_OUTPUT
 
-    - uses: actions/checkout@v4
-      with:
-        ref: ${{ steps.set-ref.outputs.ref }}
+    # Install Rancher specific to PR target branch
+    - name: Find Rancher from PR
+      if: ${{ github.event_name == 'pull_request' }}
+      id: find-rancher
+      run: |
+        case "${{ github.event.pull_request.base.ref }}" in
+          release-1.6) rancher="p2.8";;
+          release-2.1) rancher="p2.9";;
+          release-3.1) rancher="p2.10";;
+          main)        rancher="prime";;
+        esac
+        echo "rancher=$rancher" | tee -a $GITHUB_OUTPUT
 
     # ==================================================================================================
     # Set up parameters and ENV
+
+    # Override env based on github action trigger
     - name: Setup global ENV
       run: |
         RANCHER="${{ matrix.rancher }}"
-        # Override KUBEWARDEN for automated triggers
+
         case ${{github.event_name}} in
+          workflow_dispatch)
+            KUBEWARDEN=${{ inputs.kubewarden }}
+            # Translate input to semver constraint
+            RANCHER=${RANCHER/released/*}
+            RANCHER=${RANCHER%(devel)}
+            ;;
           pull_request)
-            # Override RANCHER for maintenance PRs
-            [[ "${{ github.event.pull_request.base.ref }}" == "main" ]] && RANCHER="2.11"
-            [[ "${{ github.event.pull_request.base.ref }}" == "release-1.6" ]] && RANCHER="2.8"
-            [[ "${{ github.event.pull_request.base.ref }}" == "release-2.1" ]] && RANCHER="2.9"
-            [[ "${{ github.event.pull_request.base.ref }}" == "release-3.1" ]] && RANCHER="2.10"
-            KUBEWARDEN=source;;
+            KUBEWARDEN=source
+            RANCHER="${{ steps.find-rancher.outputs.rancher }}"
+            ;;
           schedule)
-            [[ "$RANCHER" == *"2.12"* ]] && KUBEWARDEN=rc || KUBEWARDEN=released;;
+            [[ "$RANCHER" == c* ]] && KUBEWARDEN=rc || KUBEWARDEN=released;;
           workflow_run)
             KUBEWARDEN=rc;;
         esac
-
-        # Select repository
-        helm repo add --force-update rancher-prime https://charts.rancher.com/server-charts/prime
-        helm repo add --force-update rancher-community https://releases.rancher.com/server-charts/latest # /alpha | /latest
-        [[ "$RANCHER" == *"2.12"* ]] && REPO=rancher-community || REPO=rancher-prime
-
-        # Translate to sematic version
-        [ "$RANCHER" == "rc" ] && RANCHER='*-0'
-        [ "$RANCHER" == "released" ] && RANCHER='*'
-
-        # Limit k8s version - https://www.suse.com/suse-rancher/support-matrix
-        [[ "$RANCHER" == *2.8* ]] && K3S_VERSION="v1.28"   # v1.25 - v1.28
-        [[ "$RANCHER" == *2.9* ]] && K3S_VERSION="v1.30"   # v1.27 - v1.30
-        [[ "$RANCHER" == *2.10* ]] && K3S_VERSION="v1.31"  # v1.28 - v1.31
-        [[ "$RANCHER" == *2.11* ]] && K3S_VERSION="v1.32"  # v1.30 - v1.32
-
-        # Complete partial K3S version from dockerhub v1.30 -> v1.30.5-k3s1
-        if [[ ! $K3S_VERSION =~ ^v[0-9.]+-k3s[0-9]$ ]]; then
-            K3S_VERSION=$(curl -L -s "https://registry.hub.docker.com/v2/repositories/rancher/k3s/tags?page_size=20&name=$K3S_VERSION" | jq -re 'first(.results[].name | select(test("^v[0-9.]+-k3s[0-9]$")))')
-        fi
 
         # Print matrix
         echo "Event: ${{github.event_name}}"
         echo "Mode: ${{matrix.mode}}"
         echo RANCHER="$RANCHER" | tee -a $GITHUB_ENV
-        echo K3S_VERSION="$K3S_VERSION" | tee -a $GITHUB_ENV
-        echo REPO="$REPO" | tee -a $GITHUB_ENV
         echo KUBEWARDEN="$KUBEWARDEN" | tee -a $GITHUB_ENV
         echo TESTBASE=$TESTBASE
         echo TESTPOLICIES="$TESTPOLICIES" | tee -a $GITHUB_ENV
 
     # ==================================================================================================
     # Create k3d cluster and install rancher
-    - name: "Create kubernetes cluster"
-      run: |
-        TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG k3d-install
+    # Use local kuberlr to avoid version skew
 
-        # Registry config with docker auth https://k3d.io/v5.8.2/faq/faq/#dockerhub-pull-rate-limit
-        k3d cluster create ${{ env.K3D_CLUSTER_NAME }} --agents 1 --image rancher/k3s:${{ env.K3S_VERSION }} --registry-config <(echo "${{secrets.K3D_REGISTRY_CONFIG}}")
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ steps.find-branch.outputs.ref }}
 
-        # Wait for kube-system
-        for i in {1..20}; do
-            output=$(kubectl get pods --no-headers -o wide -n kube-system | grep -vw Completed || echo 'Fail')
-            grep -vE '([0-9]+)/\1 +Running' <<< $output || break
-            [ $i -ne 20 ] && sleep 10 || { echo "Godot: pods not running"; exit 1; }
-        done
+    - name: Install k3d
+      run: TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG k3d-install
 
     - name: Install Rancher
-      run: |
-        RANCHER_FQDN=$(k3d cluster list ${{ env.K3D_CLUSTER_NAME }} -o json | jq -r '[.[].nodes[] | select(.role == "server").IP.IP] | first').nip.io
-
-        # Install cert-manager
-        helm repo add jetstack https://charts.jetstack.io --force-update
-        helm upgrade -i --wait cert-manager jetstack/cert-manager -n cert-manager --create-namespace --set crds.enabled=true
-
-        # Install Rancher
-        helm search repo $REPO/rancher ${RANCHER:+--version "$RANCHER"}
-        helm upgrade --install rancher $REPO/rancher --wait \
-            --namespace cattle-system --create-namespace \
-            --set hostname=$RANCHER_FQDN \
-            --set bootstrapPassword=sa \
-            --set replicas=1 \
-            ${RANCHER:+--version "$RANCHER"}
-
-        # Wait for Rancher
-        for i in {1..20}; do
-            output=$(kubectl get pods --no-headers -o wide -n cattle-system -l app=rancher-webhook | grep -vw Completed || echo 'Wait: cattle-system')$'\n'
-            output+=$(kubectl get pods --no-headers -o wide -n cattle-system | grep -vw Completed || echo 'Wait: cattle-system')$'\n'
-            output+=$(kubectl get pods --no-headers -o wide -n cattle-fleet-system | grep -vw Completed || echo 'Wait: cattle-fleet-system')$'\n'
-            grep -vE '([0-9]+)/\1 +Running|^$' <<< $output || break
-            [ $i -ne 20 ] && sleep 30 || { echo "Godot: pods not running"; exit 1; }
-        done
-
+      uses: kubewarden/kubewarden-end-to-end-tests@main
+      with:
+        make: rancher
+      env:
+        RANCHER: ${{ env.RANCHER }}
+        K3S: ${{ env.K3S_VERSION }}
+        WORKER_COUNT: 1
+        CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
+        K3D_REGISTRY_CONFIG: ${{secrets.K3D_REGISTRY_CONFIG}}
 
     # ==================================================================================================
     # Setup playwright ENV and run tests

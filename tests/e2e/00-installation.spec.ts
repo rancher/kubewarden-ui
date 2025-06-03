@@ -9,7 +9,7 @@ import { RancherFleetPage } from './rancher/rancher-fleet.page'
 import { RancherUI } from './components/rancher-ui'
 import { Common } from './components/common'
 
-// source (yarn dev) | rc (add github repo) | released (just install)
+// source (yarn dev) | rc (github tag) | released (official)
 const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
 expect(ORIGIN).toMatch(/^(source|rc|released)$/)
 
