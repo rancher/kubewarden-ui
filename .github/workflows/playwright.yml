@@ -8,11 +8,11 @@ on:
       kubewarden:
         description: Kubewarden UI from
         type: choice
-        default: 'rc'
+        default: 'github'
         options:
         - source # build extension from main branch
-        - rc     # https://rancher.github.io/kubewarden-ui/
-        - released # ui-plugin-charts in released rancher prime
+        - github # https://rancher.github.io/kubewarden-ui/
+        - prime  # ui-plugin-charts in released rancher prime
       rancher:
         description: Rancher version
         type: choice
@@ -44,19 +44,19 @@ on:
         - v1.32
         - v1.33
       mode:
-        description: Installation mode
+        description: Kubewarden install mode
         type: choice
-        default: 'base'
+        default: 'manual'
         options:
-        - base
+        - manual
         - fleet
         - upgrade
       testbase:
-        description: Run base tests
+        description: Run standard e2e tests
         type: boolean
         default: true
       testpolicies:
-        description: Run policy tests
+        description: Run extra policy tests
         type: boolean
         default: false
 
@@ -104,7 +104,7 @@ jobs:
       matrix:
         # Rancher versions for PRs is based on the branch
         rancher:  ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["p2.8", "p2.9", "p2.10", "p2.11"]') || fromJSON(format('["{0}"]', inputs.rancher_text || inputs.rancher )) }}
-        mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["base", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'base')) }}
+        mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["manual", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'manual')) }}
         exclude:
           # Run all modes on latest prime version (2.11)
           - rancher: ${{ github.event_name == 'schedule' && 'p2.8' }}
@@ -189,9 +189,9 @@ jobs:
             RANCHER="${{ steps.find-rancher.outputs.rancher }}"
             ;;
           schedule)
-            [[ "$RANCHER" == c* ]] && KUBEWARDEN=rc || KUBEWARDEN=released;;
+            [[ "$RANCHER" == c* ]] && KUBEWARDEN=github || KUBEWARDEN=prime;;
           workflow_run)
-            KUBEWARDEN=rc;;
+            KUBEWARDEN=github;;
         esac
 
         # Print matrix
