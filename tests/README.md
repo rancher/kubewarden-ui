@@ -36,7 +36,7 @@ ENV variables can be used to change behaviour
 
 ```bash
 # Install UI extension from source, tag or official one
-MODE=[base|upgrade|fleet] ORIGIN=[source|rc|released] pw test --ui -x
+MODE=[manual|upgrade|fleet] ORIGIN=[source|github|prime] pw test --ui -x
 
 # Install old kubewarden and upgrade it before tests
 MODE=upgrade pw test --ui -x

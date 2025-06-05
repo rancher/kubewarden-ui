@@ -9,12 +9,12 @@ import { RancherFleetPage } from './rancher/rancher-fleet.page'
 import { RancherUI } from './components/rancher-ui'
 import { Common } from './components/common'
 
-// source (yarn dev) | rc (add github repo) | released (just install)
-const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
-expect(ORIGIN).toMatch(/^(source|rc|released)$/)
+// source (yarn dev) | github (add github repo) | prime (just install)
+const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'github')
+expect(ORIGIN).toMatch(/^(source|github|prime)$/)
 
-const MODE = process.env.MODE || 'base'
-expect(MODE).toMatch(/^(base|fleet|upgrade)$/)
+const MODE = process.env.MODE || 'manual'
+expect(MODE).toMatch(/^(manual|fleet|upgrade)$/)
 
 // Fetch Kubewarden versions for upgrade test
 let upMap: AppVersion[]
@@ -53,10 +53,10 @@ test('Install UI extension', async({ page, ui }) => {
 
   await test.step('Enable extension support', async() => {
     if (RancherUI.isVersion('<2.9')) {
-      await extensions.enable({ rancherRepo: ORIGIN === 'released' })
+      await extensions.enable({ rancherRepo: ORIGIN === 'prime' })
     }
     // Wait for default list of extensions
-    if (ORIGIN === 'released') {
+    if (ORIGIN === 'prime') {
       await ui.retry(async() => {
         await extensions.selectTab('All')
         await expect(page.locator('.plugin', { hasText: 'Kubewarden' })).toBeVisible({ timeout: 30_000 })
@@ -64,12 +64,12 @@ test('Install UI extension', async({ page, ui }) => {
     }
   })
 
-  if (ORIGIN === 'rc') {
+  if (ORIGIN === 'github') {
     await test.step('Add UI charts repository', async() => {
       const apps = new RancherAppsPage(page)
       await page.getByTestId('extensions-page-menu').click()
       await page.getByText('Manage Repositories', { exact: true }).click()
-      await apps.addRepository({ name: 'kubewarden-extension-rc', url: 'https://rancher.github.io/kubewarden-ui/' })
+      await apps.addRepository({ name: 'kubewarden-extension-github', url: 'https://rancher.github.io/kubewarden-ui/' })
     })
   }
 
