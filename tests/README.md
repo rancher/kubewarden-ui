@@ -2,13 +2,14 @@
 
 | Trigger            	| Rancher    	| Mode    	| UI Ext 	| K3S  	| Notes                            	| Status 	|
 |--------------------	|------------	|---------	|--------	|------	|----------------------------------	|:------:	|
-| nightly (schedule) 	| 2.7 (p)    	| base    	| prime  	| 1.27 	|                                  	| [![E2E](https://github.com/rancher/kubewarden-ui/actions/workflows/playwright.yml/badge.svg?event=schedule)](https://github.com/rancher/kubewarden-ui/actions/workflows/playwright.yml?query=event%3Aschedule) |
-|                    	| 2.8 (p)    	| base    	| prime  	| 1.28 	|                                  	|  |
-|                    	| 2.9 (p)    	| base    	| prime  	| 1.30 	| install kubewarden from UI       	|  |
-|                    	| 2.9 (p)    	| upgrade 	| prime  	| 1.30 	| upgrade path of kubewarden stack 	|  |
-|                    	| 2.9 (p)    	| fleet   	| prime  	| 1.30 	| install kubewarden by fleet      	|  |
+| nightly (schedule) 	| 2.8 (p)    	| manual   	| prime  	| 1.28 	|                                  	| [![E2E](https://github.com/rancher/kubewarden-ui/actions/workflows/playwright.yml/badge.svg?event=schedule)](https://github.com/rancher/kubewarden-ui/actions/workflows/playwright.yml?query=event%3Aschedule) |
+|                    	| 2.9 (p)    	| manual   	| prime  	| 1.30 	| install kubewarden from UI       	|  |
+|                    	| 2.10 (p)    	| manual   	| prime  	| 1.31 	| install kubewarden from UI       	|  |
+|                    	| 2.11 (p)    	| manual 	| prime  	| 1.32 	| upgrade path of kubewarden stack 	|  |
+|                    	| 2.11 (p)    	| fleet   	| prime  	| 1.32 	| install kubewarden by fleet      	|  |
+|                    	| 2.11 (p)    	| upgrade  	| prime  	| 1.32 	| install kubewarden by fleet      	|  |
 | release (tag)      	| ^          	| ^       	| github 	| ^    	| same matrix as nightly job       	| [![E2E](https://github.com/rancher/kubewarden-ui/actions/workflows/playwright.yml/badge.svg?event=workflow_run)](https://github.com/rancher/kubewarden-ui/actions/workflows/playwright.yml?query=event%3Aworkflow_run) |
-| pull request       	| latest (c) 	| base    	| source 	| 1.30 	|                                  	|  |
+| pull request       	| latest (c) 	| manual   	| source 	| 1.30 	|                                  	|  |
 | manual             	| any        	| any      	| any    	| any  	|                                  	|  |
 
 ## Setup
@@ -49,7 +50,7 @@ ENV variables can be used to change behaviour
 
 ```bash
 # Install UI extension from source, tag or official one
-MODE=[base|upgrade|fleet] ORIGIN=[source|rc|released] pw test --ui -x
+MODE=[manual|upgrade|fleet] ORIGIN=[source|github|prime] pw test --ui -x
 
 # Install old kubewarden and upgrade it before tests
 MODE=upgrade pw test --ui -x

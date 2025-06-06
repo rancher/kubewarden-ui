@@ -9,17 +9,22 @@ import { RancherFleetPage } from './rancher/rancher-fleet.page'
 import { RancherUI } from './components/rancher-ui'
 import { Common } from './components/common'
 
-// source (yarn dev) | rc (github tag) | released (official)
-const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'rc')
-expect(ORIGIN).toMatch(/^(source|rc|released)$/)
+const conf = {
+  // Install UI extension from: source (yarn dev), github (github tag), prime (official)
+  ui_from: process.env.ORIGIN || (process.env.API ? 'source' : RancherUI.isPrime ? 'prime' : 'github'),
+  // How to install Kubewarden: manual (from UI extension), fleet, upgrade (previously version)
+  kw_mode: process.env.MODE || 'manual',
+  // Fetch Kubewarden versions from github for upgrade test
+  upMap  : [] as AppVersion[]
+}
 
-const MODE = process.env.MODE || 'base'
-expect(MODE).toMatch(/^(base|fleet|upgrade)$/)
+expect(conf.ui_from).toMatch(/^(source|github|prime)$/)
+expect(conf.kw_mode).toMatch(/^(manual|fleet|upgrade)$/)
 
-// Fetch Kubewarden versions for upgrade test
-let upMap: AppVersion[]
 test.beforeAll(async() => {
-  if (MODE === 'upgrade') upMap = (await Common.fetchVersionMap()).splice(-3)
+  if (conf.kw_mode === 'upgrade') {
+    conf.upMap = (await Common.fetchVersionMap()).splice(-3)
+  }
 })
 
 test('Initial rancher setup', async({ page, ui, nav }) => {
@@ -53,10 +58,10 @@ test('Install UI extension', async({ page, ui }) => {
 
   await test.step('Enable extension support', async() => {
     if (RancherUI.isVersion('<2.9')) {
-      await extensions.enable({ rancher: ORIGIN === 'released', partners: false })
+      await extensions.enable({ rancher: conf.ui_from === 'prime', partners: false })
     }
     // Wait for default list of extensions
-    if (ORIGIN === 'released') {
+    if (conf.ui_from === 'prime') {
       if (RancherUI.isVersion('>=2.9')) {
         await extensions.addRancherRepos({ rancher: true, partners: false })
       }
@@ -67,18 +72,18 @@ test('Install UI extension', async({ page, ui }) => {
     }
   })
 
-  if (ORIGIN === 'rc') {
+  if (conf.ui_from === 'github') {
     await test.step('Add UI charts repository', async() => {
       const apps = new RancherAppsPage(page)
       await page.getByTestId('extensions-page-menu').click()
       await page.getByText('Manage Repositories', { exact: true }).click()
-      await apps.addRepository({ name: 'kubewarden-extension-rc', url: 'https://rancher.github.io/kubewarden-ui/' })
+      await apps.addRepository({ name: 'kubewarden-extension-github', url: 'https://rancher.github.io/kubewarden-ui/' })
     })
   }
 
   await test.step('Install or developer load extension', async() => {
     await extensions.goto()
-    if (ORIGIN === 'source') {
+    if (conf.ui_from === 'source') {
       await extensions.developerLoad('http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js')
     } else {
       await extensions.install('kubewarden', { version: process.env.UIVERSION?.replace(/^kubewarden-/, '') })
@@ -87,10 +92,10 @@ test('Install UI extension', async({ page, ui }) => {
 })
 
 test('Install Kubewarden', async({ page, ui, nav }) => {
-  test.skip(MODE === 'fleet')
+  test.skip(conf.kw_mode === 'fleet')
 
   const kwPage = new KubewardenPage(page)
-  await kwPage.installKubewarden({ version: MODE === 'upgrade' ? upMap[0].controller : undefined })
+  await kwPage.installKubewarden({ version: conf.kw_mode === 'upgrade' ? conf.upMap[0].controller : undefined })
 
   // Check UI is active
   await nav.kubewarden()
@@ -117,7 +122,7 @@ test('Install Kubewarden', async({ page, ui, nav }) => {
 })
 
 test('Install Kubewarden by Fleet', async({ page, ui }) => {
-  test.skip(MODE !== 'fleet')
+  test.skip(conf.kw_mode !== 'fleet')
   test.slow()
 
   const fleetPage = new RancherFleetPage(page)
@@ -155,7 +160,7 @@ test('Add Policy Catalog Repository', async({ page, ui, nav }) => {
 })
 
 test('Upgrade Kubewarden', async({ page, nav }) => {
-  test.skip(MODE !== 'upgrade')
+  test.skip(conf.kw_mode !== 'upgrade')
   test.slow()
 
   const kwPage = new KubewardenPage(page)
@@ -164,16 +169,16 @@ test('Upgrade Kubewarden', async({ page, nav }) => {
   // Check we installed old versions
   await nav.explorer('Apps', 'Installed Apps')
   for (const chart of ['controller', 'crds', 'defaults']) {
-    await apps.checkChart(`rancher-kubewarden-${chart}`, upMap[0][chart])
+    await apps.checkChart(`rancher-kubewarden-${chart}`, conf.upMap[0][chart])
   }
 
   // Keep track of last upgraded version
-  let last: AppVersion = upMap[upMap.length - 1]
+  let last: AppVersion = conf.upMap[conf.upMap.length - 1]
 
   await test.step('Upgrade predefined versions', async() => {
-    for (let i = 0; i < upMap.length - 1; i++) {
+    for (let i = 0; i < conf.upMap.length - 1; i++) {
       await nav.kubewarden()
-      await kwPage.upgrade({ from: upMap[i], to: upMap[i + 1] })
+      await kwPage.upgrade({ from: conf.upMap[i], to: conf.upMap[i + 1] })
     }
   })
 
