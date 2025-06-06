@@ -4,7 +4,7 @@ import { AdmissionPoliciesPage, ClusterAdmissionPoliciesPage, BasePolicyPage, Po
 import { RancherUI } from './components/rancher-ui'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 
-const MODE = process.env.MODE || 'base'
+const MODE = process.env.MODE || 'manual'
 
 function isAP(polPage: BasePolicyPage) { return polPage instanceof AdmissionPoliciesPage }
 function isCAP(polPage: BasePolicyPage) { return polPage instanceof ClusterAdmissionPoliciesPage }
