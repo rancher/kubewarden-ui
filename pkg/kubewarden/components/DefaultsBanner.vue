@@ -1,17 +1,17 @@
 <script>
-import { mapGetters } from 'vuex';
 import debounce from 'lodash/debounce';
+import { mapGetters } from 'vuex';
 
+import { CHART, REPO, REPO_TYPE, VERSION } from '@shell/config/query-params';
 import { CATALOG } from '@shell/config/types';
-import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 
 import { Banner } from '@components/Banner';
 
-import { KUBEWARDEN_CHARTS } from '@kubewarden/types';
-import { getLatestVersion } from '@kubewarden/plugins/kubewarden-class';
-import { handleGrowl } from '@kubewarden/utils/handle-growl';
-import { refreshCharts, findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
+import { KUBEWARDEN_CHARTS } from '@kubewarden/constants';
 import { fetchControllerApp } from '@kubewarden/modules/kubewardenController';
+import { getLatestVersion } from '@kubewarden/plugins/kubewarden-class';
+import { findCompatibleDefaultsChart, refreshCharts } from '@kubewarden/utils/chart';
+import { handleGrowl } from '@kubewarden/utils/handle-growl';
 
 export default {
   components: { Banner },

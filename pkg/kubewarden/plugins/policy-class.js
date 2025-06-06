@@ -3,7 +3,7 @@ import semver from 'semver';
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { KUBERNETES, WORKSPACE_ANNOTATION } from '@shell/config/labels-annotations';
 
-import { KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
+import { KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/constants';
 import KubewardenModel from './kubewarden-class';
 
 export default class PolicyModel extends KubewardenModel {
