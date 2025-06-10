@@ -216,7 +216,7 @@ jobs:
     - name: Checkout kubewarden-end-to-end-tests
       uses: actions/checkout@v4
       with:
-        repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
+        repository: kubewarden/kubewarden-end-to-end-tests
         ref: main
         path: action-make
 
