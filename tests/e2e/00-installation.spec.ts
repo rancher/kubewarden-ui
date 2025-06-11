@@ -11,17 +11,21 @@ import { Common } from './components/common'
 
 const conf = {
   // Install UI extension from: source (yarn dev), github (github tag), prime (official)
-  ui_from: process.env.ORIGIN || (process.env.API ? 'source' : RancherUI.isPrime ? 'prime' : 'github'),
+  ui_from: process.env.ORIGIN as 'source'|'github'|'prime'|undefined,
   // How to install Kubewarden: manual (from UI extension), fleet, upgrade (previously version)
-  kw_mode: process.env.MODE || 'manual',
+  kw_mode: process.env.MODE as 'manual'|'fleet'|'upgrade'|undefined,
   // Fetch Kubewarden versions from github for upgrade test
   upMap  : [] as AppVersion[]
 }
 
-expect(conf.ui_from).toMatch(/^(source|github|prime)$/)
-expect(conf.kw_mode).toMatch(/^(manual|fleet|upgrade)$/)
+if (conf.ui_from) expect(conf.ui_from).toMatch(/^(source|github|prime)$/)
+if (conf.kw_mode) expect(conf.kw_mode).toMatch(/^(manual|fleet|upgrade)$/)
 
+// Configure defaults after env is loaded
 test.beforeAll(async() => {
+  conf.ui_from ??= RancherUI.isPrime ? 'prime' : 'github'
+  conf.kw_mode ??= 'manual'
+
   if (conf.kw_mode === 'upgrade') {
     conf.upMap = (await Common.fetchVersionMap()).splice(-3)
   }
