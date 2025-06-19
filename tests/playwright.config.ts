@@ -13,7 +13,6 @@ import { execSync } from 'child_process'
 export default defineConfig({
   testDir             : './e2e',
   forbidOnly          : !!process.env.CI, /* Fail the build on CI if you accidentally left test.only in the source code. */
-  retries             : process.env.CI ? 1 : 0, /* Retry on CI only */
   workers             : 1, /* Opt out of parallel tests */
   snapshotPathTemplate: '{testDir}/screenshots/{projectName}/{arg}{ext}', /* Use shared directory for screenshots instead of per-test dir */
   updateSnapshots     : process.env.CI ? 'none' : 'missing', /* Don't generate snapshots by accident */
