@@ -178,11 +178,15 @@ export class RancherAppsPage extends BasePage {
 
   @step
   async installChart(chart: Chart, options?: { questions?: () => Promise<void>, yamlPatch?: YAMLPatch, timeout?: number, navigate?: boolean }) {
+    // Apps grid was redesigned in Rancher 2.12
+    const card = this.page.locator('.grid > .item').or(this.page.locator('.app-chart-cards > .item-card'))
+      .filter({ has: this.page.getByRole('heading', { name: chart.title, exact: true }) })
+
     // Select chart by title
     if (options?.navigate !== false) {
       await this.nav.explorer('Apps', 'Charts')
       await expect(this.page.getByRole('heading', { name: 'Charts', exact: true })).toBeVisible()
-      await this.page.locator('.grid > .item').getByRole('heading', { name: chart.title, exact: true }).click()
+      await card.click()
 
       if (chart.version) {
         const versionPane = this.page.getByRole('heading', { name: 'Chart Versions', exact: true }).locator('..')

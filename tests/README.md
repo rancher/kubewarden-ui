@@ -39,7 +39,8 @@ This should be clean rancher if you want to run all the tests.
 docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged -e CATTLE_BOOTSTRAP_PASSWORD=sa rancher/rancher:latest
 
 # Run tests
-export RANCHER_URL=https://127.0.0.1.nip.io/
+# Tests can detect Rancher URL automatically if not set
+# export RANCHER_URL=https://127.0.0.1.nip.io/
 pw test --ui -x
 ```
 
