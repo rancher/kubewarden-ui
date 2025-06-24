@@ -5,14 +5,6 @@ run-name: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.h
 on:
   workflow_dispatch:
     inputs:
-      kubewarden:
-        description: Kubewarden UI from
-        type: choice
-        default: 'github'
-        options:
-        - source # build extension from main branch
-        - github # https://rancher.github.io/kubewarden-ui/
-        - prime  # ui-plugin-charts in released rancher prime
       rancher:
         description: Rancher version
         type: choice
@@ -30,6 +22,14 @@ on:
       rancher_text:
         description: Rancher constraint
         required: false
+      kubewarden:
+        description: Kubewarden UI from
+        type: choice
+        default: 'github'
+        options:
+        - source # build extension from main branch
+        - github # https://rancher.github.io/kubewarden-ui/
+        - prime  # ui-plugin-charts in released rancher prime
       k3s:
         description: Kubernetes version
         type: choice
