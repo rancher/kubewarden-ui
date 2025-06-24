@@ -93,9 +93,9 @@ async function setupVerifyImageSignatures(ui: RancherUI) {
 }
 
 async function setupEnvironmentVariablePolicy(ui: RancherUI) {
+  await ui.selectOption('Criteria*', 'containsAnyOf')
   await ui.button('Add').click()
-  await ui.selectOption('Reject Operator', 'anyIn')
-  await ui.editYaml((y) => { y.environmentVariables[0].name = 'novar' })
+  await ui.page.getByPlaceholder('e.g. bar').fill('reqvar')
 }
 
 async function setupUserGroupPSP(ui: RancherUI) {
