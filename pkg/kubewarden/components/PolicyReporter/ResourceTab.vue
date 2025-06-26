@@ -12,7 +12,8 @@ import { BadgeState } from '@components/BadgeState';
 import { Banner } from '@components/Banner';
 import SortableTable from '@shell/components/SortableTable';
 
-import { KUBEWARDEN, PolicyReport, PolicyReportResult, ClusterPolicyReport } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
+import { PolicyReport, PolicyReportResult, ClusterPolicyReport } from '@kubewarden/types';
 import { POLICY_REPORTER_HEADERS } from '@kubewarden/config/table-headers';
 import {
   getFilteredReport,

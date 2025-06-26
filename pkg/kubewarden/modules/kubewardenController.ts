@@ -3,7 +3,8 @@ import { Store } from 'vuex';
 import { CATALOG } from '@shell/config/types';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 
-import { KUBEWARDEN_APPS, CatalogApp } from '@kubewarden/types';
+import { KUBEWARDEN_APPS } from '@kubewarden/constants';
+import { CatalogApp } from '@kubewarden/types';
 
 export const fetchControllerApp = async(store: Store<any>): Promise<CatalogApp | undefined> => {
   if (store?.getters['cluster/schemaFor'](CATALOG.APP)) {

@@ -4,14 +4,14 @@ import isEmpty from 'lodash/isEmpty';
 import { _CREATE } from '@shell/config/query-params';
 import { set } from '@shell/utils/object';
 
-import LabeledSelect from '@shell/components/form/LabeledSelect';
-import Loading from '@shell/components/Loading';
-import NameNsDescription from '@shell/components/form/NameNsDescription';
 import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
+import LabeledSelect from '@shell/components/form/LabeledSelect';
+import NameNsDescription from '@shell/components/form/NameNsDescription';
+import Loading from '@shell/components/Loading';
 
-import { KUBEWARDEN, KUBEWARDEN_APPS } from '@kubewarden/types';
+import { KUBEWARDEN, KUBEWARDEN_APPS } from '@kubewarden/constants';
 
 export default {
   name: 'General',
