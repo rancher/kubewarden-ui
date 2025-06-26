@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 
 
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 
 import Rules from '@kubewarden/chart/kubewarden/admission/Rules';
 import Rule from '@kubewarden/chart/kubewarden/admission/Rules/Rule.vue';
