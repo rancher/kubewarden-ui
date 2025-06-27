@@ -3,7 +3,7 @@ import { Chart, ChartRepo, RancherAppsPage } from './rancher/rancher-apps.page'
 import { PolicyServersPage } from './pages/policyservers.page'
 import { TelemetryPage } from './pages/telemetry.page'
 import { RancherUI } from './components/rancher-ui'
-import { AdmissionPoliciesPage } from './pages/policies.page'
+import { AdmissionPoliciesPage, Policy } from './pages/policies.page'
 
 // Cert-Manager
 const cmanRepo: ChartRepo = { name: 'jetstack', url: 'https://charts.jetstack.io' }
@@ -54,9 +54,10 @@ test.describe('Setup', () => {
     }
   })
 
-  test('Create custom PolicyServer', async({ page }) => {
+  test('Create custom PolicyServer & Policy', async({ page }) => {
+    const policy: Policy = { name: 'no-privileged-custom', title: 'Pod Privileged Policy', mode: 'Monitor', server: 'custom-ps' }
     await new PolicyServersPage(page).create({ name: 'custom-ps' })
-    await new AdmissionPoliciesPage(page).create({ name: 'no-privileged-custom', title: 'Pod Privileged Policy', mode: 'Monitor', server: 'custom-ps' })
+    await new AdmissionPoliciesPage(page).create(policy, { wait: process.env.MODE == 'fleet' })
   })
 })
 
