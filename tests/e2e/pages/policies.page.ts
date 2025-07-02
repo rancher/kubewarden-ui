@@ -4,25 +4,27 @@ import { TableRow } from '../components/table-row'
 import { step } from '../rancher/rancher-test'
 import { BasePage } from '../rancher/basepage'
 
-export const apList = ['Custom Policy', 'Allow Privilege Escalation PSP', 'Allowed Fs Groups PSP', 'Allowed Proc Mount Types PSP', 'Apparmor PSP', 'Capabilities PSP', 'CEL Policy',
-  'Container Resources', 'Affinity Node Selector', 'Containers Block Ssh Port', 'Container Block Sysctls', 'Container Block Sysctls CVE-2022-0811', 'Container Running As Root',
-  'Container Running As User', 'Containers Block Specific Image Names', 'Missing Kubernetes App Component Label', 'Missing Kubernetes App Created By Label', 'Missing Kubernetes App Instance Label',
-  'Missing Kubernetes App Label', 'Missing Kubernetes App Managed By Label', 'Missing Kubernetes App Part Of Label', 'Missing Kubernetes App Version Label', 'Metadata Missing Label And Value',
-  'Block Workloads Created Without Specifying Namespace', 'Missing Owner Label', 'Containers Missing Security Context', 'Containers Should Not Run In Namespace', 'Deprecated API Versions',
-  'Disallow Service Loadbalancer', 'Disallow Service Nodeport', 'Do not expose admission controller webhook services', 'Echo', 'Environment Variable Secrets Scanner', 'Environment Variable Policy',
-  'Flexvolume Drivers Psp', 'Bucket Approved Region', 'Bucket Endpoint Domain', 'Bucket Insecure Connections', 'GitRepository Ignore Suffixes', 'GitRepository Organization Domains',
-  'GitRepository Specific Branch', 'GitRepository Untrusted Domains', 'HelmChart Cosign Verification', 'HelmChart Values File Format', 'Helm Release Max History', 'Helm Release Namespace Match',
-  'Helm Release Post Renderer', 'Helm Release Remediation Retries', 'Helm Release Rollback Should Be Disabled', 'Helm Release Service Account Name', 'Helm Release Storage Namespace',
-  'Helm Release Target Namespace', 'Helm Release Values From', 'Helm Repo Type Should Be OCI', 'Helm Repo URL Should Be in Organisation Domain', 'Kustomization Decryption Provider',
-  'Kustomization Image Tag Standards', 'Kustomization Excluded Paths', 'Kustomization Target Namespace', 'Kustomization Var Substitution', 'Kustomization Images Requirement', 'Kustomization Patches',
-  'Kustomization Prune', 'OCIRepository Cosign Verification', 'OCIRepository Ignore Suffixes', 'OCIRepository Layer Selector', 'OCIRepository Not Latest Tag', 'OCIRepository Organization Domains',
-  'OCIRepository Patch Annotation', 'Resource Reconcile Interval Must Be Set Between Lower and Upper Bound', 'Resource Suspend Waiver', 'Host Namespaces PSP', 'Hostpaths PSP', 'Ingress Policy',
-  'Istio Gateway Approved Hosts', 'Namespace label propagator', 'Namespace Resources Limitrange', 'Namespace Pod Quota', 'Resource Quota Setting Is Missing',
-  'Network Allow Egress Traffic From Namespace To Another', 'Network Allow Ingress Traffic From Namespace To Another', 'Network Block All Ingress Traffic To Namespace From CIDR Block',
-  'PVC StorageClass Validator', 'Persistent Volume Claim Snapshot', 'Pod ndots', 'Pod Privileged Policy', 'Pod Runtime', 'Priority class policy', 'Rbac Prohibit List On Secrets',
-  'Rbac Prohibit Watch On Secrets', 'Rbac Prohibit Wildcard On Secrets', 'Rbac Prohibit Wildcards on Policy Rule Resources', 'Rbac Prohibit Wildcards on Policy Rule Verbs', 'Readonly Root Filesystem PSP',
-  'Safe Annotations', 'Safe Labels', 'Seccomp PSP', 'Selinux PSP', 'Share PID namespace', 'Sysctl PSP', 'Trusted Repos', 'Unique Ingress host', 'Unique service selector', 'User Group PSP',
-  'Verify Image Signatures', 'volumeMounts', 'Volumes PSP'] as const
+export const apList = ['Custom Policy',
+  'Affinity Node Selector', 'Allow Privilege Escalation PSP', 'Allowed Fs Groups PSP', 'Allowed Proc Mount Types PSP', 'Apparmor PSP', 'Bucket Approved Region', 'Bucket Endpoint Domain',
+  'Bucket Insecure Connections', 'Capabilities PSP', 'CEL Policy', 'Container Block Sysctls', 'Container Block Sysctls CVE-2022-0811', 'Container Resources', 'Container Running As Root',
+  'Container Running As User', 'Containers Block Ssh Port', 'Containers Block Specific Image Names', 'Containers Missing Security Context', 'Containers Should Not Run In Namespace',
+  'Deprecated API Versions', 'Disallow Service Loadbalancer', 'Disallow Service Nodeport', 'Do not expose admission controller webhook services', 'Echo', 'Environment Variable Policy',
+  'Environment Variable Secrets Scanner', 'Flexvolume Drivers Psp', 'GitRepository Ignore Suffixes', 'GitRepository Organization Domains', 'GitRepository Specific Branch',
+  'GitRepository Untrusted Domains', 'Helm Release Max History', 'Helm Release Namespace Match', 'Helm Release Post Renderer', 'Helm Release Remediation Retries',
+  'Helm Release Rollback Should Be Disabled', 'Helm Release Service Account Name', 'Helm Release Storage Namespace', 'Helm Release Target Namespace', 'Helm Release Values From',
+  'Helm Repo Type Should Be OCI', 'Helm Repo URL Should Be in Organisation Domain', 'HelmChart Cosign Verification', 'HelmChart Values File Format', 'Host Namespaces PSP',
+  'Hostpaths PSP', 'Ingress Policy', 'Istio Gateway Approved Hosts', 'Kustomization Decryption Provider', 'Kustomization Excluded Paths', 'Kustomization Image Tag Standards',
+  'Kustomization Images Requirement', 'Kustomization Patches', 'Kustomization Prune', 'Kustomization Target Namespace', 'Kustomization Var Substitution',
+  'Metadata Missing Label And Value', 'Missing Kubernetes App Component Label', 'Missing Kubernetes App Created By Label', 'Missing Kubernetes App Instance Label',
+  'Missing Kubernetes App Label', 'Missing Kubernetes App Managed By Label', 'Missing Kubernetes App Part Of Label', 'Missing Kubernetes App Version Label',
+  'Missing Owner Label', 'Namespace Pod Quota', 'Namespace Resources Limitrange', 'Namespace label propagator', 'Network Allow Egress Traffic From Namespace To Another',
+  'Network Allow Ingress Traffic From Namespace To Another', 'Network Block All Ingress Traffic To Namespace From CIDR Block', 'OCIRepository Cosign Verification',
+  'OCIRepository Ignore Suffixes', 'OCIRepository Layer Selector', 'OCIRepository Not Latest Tag', 'OCIRepository Organization Domains', 'OCIRepository Patch Annotation',
+  'PVC StorageClass Validator', 'Persistent Volume Claim Snapshot', 'Pod Privileged Policy', 'Pod Runtime', 'Pod ndots', 'Priority class policy', 'Rbac Prohibit List On Secrets',
+  'Rbac Prohibit Watch On Secrets', 'Rbac Prohibit Wildcard On Secrets', 'Rbac Prohibit Wildcards on Policy Rule Resources', 'Rbac Prohibit Wildcards on Policy Rule Verbs',
+  'Readonly Root Filesystem PSP', 'Resource Quota Setting Is Missing', 'Resource Reconcile Interval Must Be Set Between Lower and Upper Bound', 'Resource Suspend Waiver',
+  'Safe Annotations', 'Safe Labels', 'Seccomp PSP', 'Selinux PSP', 'Share PID namespace', 'Sysctl PSP', 'Trusted Repos', 'Unique Ingress host', 'Unique service selector',
+  'User Group PSP', 'Verify Image Signatures', 'Volumes PSP', 'volumeMounts'] as const
 
 export const capList = [...apList, 'PSA Label Enforcer', 'Istio Injected Namespaces', 'Persistent Volume Access Modes'] as const
 
