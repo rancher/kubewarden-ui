@@ -28,7 +28,7 @@ export class RancherFleetPage extends BasePage {
   }
 
   async selectWorkspace(workspace: string) {
-    await this.ui.selectOption(this.page.locator('.rd-header-right').locator('.unlabeled-select'), workspace)
+    await this.ui.selectOption(this.page.getByTestId('workspace-switcher'), workspace)
   }
 
   @step
