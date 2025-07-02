@@ -329,7 +329,7 @@ export default ({
 
       if (!isEmpty(requiredKeys)) {
         for (const key of requiredKeys.values()) {
-          if (!isEmpty(requiredProp[key])) {
+          if (!isEmpty(requiredProp[key]) || typeof requiredProp[key] === 'boolean' || typeof requiredProp[key] === 'number') {
             match.push(key);
           }
         }
