@@ -34,6 +34,7 @@ export class RancherUI {
     return this.page.locator('div.labeled-input')
       .filter({ has: this.page.getByText(label, { exact: true }) })
       .locator('input')
+      .filter({ visible: true })
   }
 
   // Labeled Checkbox
