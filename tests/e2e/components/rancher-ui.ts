@@ -34,6 +34,7 @@ export class RancherUI {
     return this.page.locator('div.labeled-input')
       .filter({ has: this.page.getByText(label, { exact: true }) })
       .locator('input')
+      .filter({ visible: true })
   }
 
   // Labeled Checkbox
@@ -62,15 +63,22 @@ export class RancherUI {
     return this.radioGroup(label).getByRole('radio', { name })
   }
 
-  // Labeled Select (ComboBox)
-  select(label: string) {
-    return this.page.locator('div.labeled-select').filter({ hasText: label })
-      .getByRole('combobox', { name: 'Search for option' })
+  // (un)Labeled Select (ComboBox)
+  select(label: string|Locator) {
+    const base = (typeof label === 'string')
+      ? this.page.locator('div.labeled-select').filter({ hasText: label })
+      : label.locator('div.unlabeled-select')
+
+    return base.getByRole('combobox', { name: 'Search for option' })
   }
 
   // Select option from (un)labeled Select
   async selectOption(label: string|Locator, option: string | RegExp | number) {
-    const select = (typeof label === 'string') ? this.select(label) : label.getByRole('combobox', { name: 'Search for option' })
+    const select = (typeof label === 'string')
+      ? this.select(label)
+      : (await label.getAttribute('role') === 'combobox')
+          ? label
+          : this.select(label)
     await select.click()
 
     const optionItem = typeof option === 'number'
