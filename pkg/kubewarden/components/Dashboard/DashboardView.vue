@@ -1,24 +1,25 @@
 <script>
-import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
+import { mapGetters } from 'vuex';
 
-import { CATALOG, POD, UI_PLUGIN } from '@shell/config/types';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
+import { CATALOG, POD, UI_PLUGIN } from '@shell/config/types';
 import { allHash } from '@shell/utils/promise';
 
 import Loading from '@shell/components/Loading';
 
 import { DASHBOARD_HEADERS } from '@kubewarden/config/table-headers';
-import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '@kubewarden/types';
+import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS } from '@kubewarden/constants';
+import { WG_POLICY_K8S } from '@kubewarden/types';
 
 import { isPolicyServerResource } from '@kubewarden/modules/policyServer';
 
-import Masthead from './Masthead';
 import Card from './Card';
+import Masthead from './Masthead';
 import Modes from './Modes';
+import PolicyServerCard from './PolicyServerCard';
 import Reports from './Reports';
 import ReportsGauge from './ReportsGauge';
-import PolicyServerCard from './PolicyServerCard';
 
 export default {
   components: {

@@ -1,7 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
-
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 import NamespaceSelector from '@kubewarden/chart/kubewarden/admission/NamespaceSelector/index.vue';
 
 import KeyValue from '@shell/components/form/KeyValue';
