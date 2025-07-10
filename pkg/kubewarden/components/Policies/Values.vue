@@ -19,12 +19,8 @@ import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
 
-import {
-  KUBEWARDEN_CHARTS,
-  VALUES_STATE,
-  YAML_OPTIONS,
-  RANCHER_NS_MATCH_EXPRESSION
-} from '@kubewarden/types';
+import { KUBEWARDEN_CHARTS } from '@kubewarden/constants';
+import { VALUES_STATE, YAML_OPTIONS, RANCHER_NS_MATCH_EXPRESSION } from '@kubewarden/types';
 
 interface Props {
   mode: string;

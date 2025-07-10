@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils';
 import Loading from '@shell/components/Loading';
 import { CATALOG, POD } from '@shell/config/types';
 
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 import { DASHBOARD_HEADERS } from '@kubewarden/config/table-headers';
 
 import DashboardView from '@kubewarden/components/Dashboard/DashboardView.vue';
