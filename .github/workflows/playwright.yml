@@ -103,7 +103,7 @@ jobs:
       fail-fast: false
       matrix:
         # Rancher versions for PRs is based on the branch
-        rancher:  ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["p2.9", "p2.10", "p2.11", "c2.12"]') || fromJSON(format('["{0}"]', inputs.rancher_text || inputs.rancher )) }}
+        rancher:  ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["p2.9", "p2.10", "p2.11", "c2.12-0"]') || fromJSON(format('["{0}"]', inputs.rancher_text || inputs.rancher )) }}
         mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["manual", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'manual')) }}
         exclude:
           # Run all modes on latest prime version (2.11)
@@ -115,21 +115,21 @@ jobs:
             mode: upgrade
           - rancher: ${{ github.event_name == 'schedule' && 'p2.10' }}
             mode: fleet
-          - rancher: ${{ github.event_name == 'schedule' && 'c2.12' }}
+          - rancher: ${{ github.event_name == 'schedule' && 'c2.12-0' }}
             mode: upgrade
-          - rancher: ${{ github.event_name == 'schedule' && 'c2.12' }}
+          - rancher: ${{ github.event_name == 'schedule' && 'c2.12-0' }}
             mode: fleet
           # Exclude unrelated Rancher versions from release jobs # head_branch = tag (kubewarden-2.1.0-rc.1)
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && 'p2.9' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && 'p2.10' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && 'p2.11' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && 'c2.12' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && 'c2.12-0' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && 'p2.10' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && 'p2.11' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && 'c2.12' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && 'c2.12-0' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && 'p2.9' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && 'p2.11' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'c2.12' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'c2.12-0' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'p2.9' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'p2.10' }}
 
@@ -270,8 +270,8 @@ jobs:
         [[ "$TESTPOLICIES" != "true" ]] && GFILTER="$EXCLUDE" # Limit number of tested policies
 
         # List tests and execute
-        echo yarn playwright test ${TFILTER:-} ${GFILTER:+-gv "$GFILTER"} -x
-        yarn playwright test ${TFILTER:-} ${GFILTER:+-gv "$GFILTER"} -x | tee qase-report.log
+        echo yarn playwright test ${TFILTER:-} ${GFILTER:+--grep-invert "$GFILTER"} -x
+        yarn playwright test ${TFILTER:-} ${GFILTER:+--grep-invert "$GFILTER"} -x | tee qase-report.log
       env:
         MODE: ${{ matrix.mode }}
         # Override OTEL operator version by github variable
