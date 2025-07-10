@@ -20,10 +20,14 @@ async function globalSetup(config: FullConfig) {
   // Get clusterId from displayName
   const clusterName = process.env.CLUSTER
   if (clusterName) {
-    resp = await requestContext.get(`/v1/provisioning.cattle.io.clusters/fleet-default/${clusterName}`)
+    resp = await requestContext.get('/v1/management.cattle.io.clusters')
     expect(resp.ok()).toBeTruthy()
+
     const reqJson = await resp.json()
-    process.env.CLUSTER_ID = reqJson.status.clusterName
+    const cluster = reqJson.data.find((c: any) => c.spec?.displayName === clusterName)
+    expect(cluster).toBeDefined()
+
+    process.env.CLUSTER_ID = cluster.metadata.name
   }
 
   // Get Rancher version

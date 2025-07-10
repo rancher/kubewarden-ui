@@ -142,6 +142,11 @@ export class Shell {
     const status = options?.status ?? 0
     const timeout = options?.timeout || 60_000
 
+    // To run on imported cluster we need to set context
+    if (process.env.CLUSTER && cmd.startsWith('kubectl')) {
+      cmd = cmd.replace(/^kubectl/, `kubectl --context=k3d-${process.env.CLUSTER}`)
+    }
+
     let cmdStatus = 0
     let cmdOutput: string
     try {
