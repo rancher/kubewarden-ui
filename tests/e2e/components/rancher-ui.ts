@@ -24,9 +24,8 @@ export class RancherUI {
 
   // Button
   button(name: string|RegExp) {
-    return this.page.getByRole('button', { name, exact: true }).or(
-      this.page.locator('a.btn').filter({ has: this.page.getByText(name, { exact: true }) })
-    )
+    return this.page.getByRole('button', { name, exact: true })
+      .or(this.page.locator('a.btn,button', { has: this.page.getByText(name, { exact: true }) }))
   }
 
   // Labeled Input
@@ -70,6 +69,18 @@ export class RancherUI {
       : label.locator('div.unlabeled-select')
 
     return base.getByRole('combobox', { name: 'Search for option' })
+  }
+
+  // Slide-in drawer or old config
+  async showConfiguration() {
+    const configBtn = RancherUI.isVersion('>=2.12') ? 'Show Configuration' : 'Config'
+    await this.button(configBtn).click()
+  }
+
+  // Handling for second "Close" button on policy readme
+  async hideConfiguration() {
+    if (RancherUI.isVersion('>=2.12'))
+      await this.button(/^Close.*Configuration drawer$/).last().click()
   }
 
   // Select option from (un)labeled Select
@@ -162,8 +173,8 @@ export class RancherUI {
   }
 
   /**
-     * Call await ui.retry(async()=> { <code> }, 'Reason')
-     */
+   * Call await ui.retry(async()=> { <code> }, 'Reason')
+   */
   async retry(code: () => Promise<void>, message: string, options?: { reload?: boolean }) {
     const optReload = options?.reload || true
     try {
