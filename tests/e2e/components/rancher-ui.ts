@@ -71,6 +71,18 @@ export class RancherUI {
     return base.getByRole('combobox', { name: 'Search for option' })
   }
 
+  // Slide-in drawer or old config
+  async showConfiguration() {
+    const configBtn = RancherUI.isVersion('>=2.12') ? 'Show Configuration' : 'Config'
+    await this.button(configBtn).click()
+  }
+
+  // Handling for second "Close" button on policy readme
+  async hideConfiguration() {
+    if (RancherUI.isVersion('>=2.12'))
+      await this.button(/^Close.*Configuration drawer$/).last().click()
+  }
+
   // Select option from (un)labeled Select
   async selectOption(label: string|Locator, option: string | RegExp | number) {
     const select = (typeof label === 'string')
@@ -161,8 +173,8 @@ export class RancherUI {
   }
 
   /**
-     * Call await ui.retry(async()=> { <code> }, 'Reason')
-     */
+   * Call await ui.retry(async()=> { <code> }, 'Reason')
+   */
   async retry(code: () => Promise<void>, message: string, options?: { reload?: boolean }) {
     const optReload = options?.reload || true
     try {
