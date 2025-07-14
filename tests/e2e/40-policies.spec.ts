@@ -48,7 +48,7 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
   })
 
   await test.step(`Check config page: ${p.name}`, async() => {
-    await ui.button('Config').click()
+    await ui.showConfiguration()
     await expect(polPage.name).toHaveValue(p.name)
     if (p.title === 'Custom Policy') await expect(polPage.module).toHaveValue(module)
     await expect(polPage.mode(mode)).toBeChecked()
@@ -57,6 +57,7 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     if (isAP(polPage)) {
       await expect(polPage.namespace).toContainText(namespace)
     }
+    await ui.hideConfiguration()
   })
 
   await test.step(`Check edit config: ${p.name}`, async() => {
@@ -230,9 +231,10 @@ test('Recommended policies', async({ page, ui, nav }) => {
 
     const capPage = new ClusterAdmissionPoliciesPage(page)
     await nav.capolicies('no-privileged-pod')
-    await ui.button('Config').click()
+    await ui.showConfiguration()
     await capPage.selectTab('Settings')
     // await expect(ui.codeMirror).toContainText('skip_init_containers: true')
     await expect(ui.checkbox('Skip init containers')).toBeChecked()
+    await ui.hideConfiguration()
   })
 })

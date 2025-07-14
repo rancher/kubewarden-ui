@@ -88,10 +88,11 @@ test('Create with custom values', async({ page, ui, nav }) => {
   await psPage.create(ps, { wait: false })
 
   await nav.pservers(ps.name)
-  await ui.button('Config').click()
+  await ui.showConfiguration()
   await expect(ui.input('Name*')).toHaveValue(ps.name)
   await expect(ui.input('Image URL')).toHaveValue(ps.image)
   await expect(ui.input('Replicas*')).toHaveValue(ps.replicas.toString())
+  await ui.hideConfiguration()
 
   await psPage.delete(ps.name)
 })
