@@ -26,6 +26,7 @@ export class RancherUI {
   button(name: string|RegExp) {
     return this.page.getByRole('button', { name, exact: true })
       .or(this.page.locator('a.btn,button', { has: this.page.getByText(name, { exact: true }) }))
+      .filter({ visible: true })
   }
 
   // Labeled Input
