@@ -11,10 +11,12 @@ type ExpItemMap = {
   'Admission Policy Management': 'Policy Servers' | 'Cluster Admission Policies' | 'Admission Policies' | 'Policy Reporter'
 }
 
-type FleetGroup = '' | 'Advanced'
+// Rancher v2.12 renamed Advanced to Resources
+type FleetGroup = '' | 'Advanced' | 'Resources'
 type FleetItemMap = {
-  ''        : 'Dashboard' | 'Git Repos' | 'Clusters' | 'Cluster Groups'
-  'Advanced': 'Workspaces' | 'BundleNamespaceMappings' | 'Bundles' | 'Cluster Registration Tokens' | 'GitRepoRestrictions'
+  ''         : 'Dashboard' | 'Git Repos' | 'App Bundles' | 'Clusters' | 'Cluster Groups' | 'Workspaces'
+  'Advanced' : 'Workspaces' | 'BundleNamespaceMappings' | 'Bundles' | 'Cluster Registration Tokens' | 'GitRepoRestrictions'
+  'Resources': 'Git Repos' | 'Helm Ops' | 'BundleNamespaceMappings' | 'Bundles' | 'Cluster Registration Tokens' | 'GitRepoRestrictions'
 }
 
 export interface Cluster {

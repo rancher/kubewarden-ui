@@ -63,8 +63,6 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'User Group PSP'                                                       : { settings: setupUserGroupPSP },
   'Verify Image Signatures'                                              : { settings: setupVerifyImageSignatures },
   'volumeMounts'                                                         : { settings: setupVolumeMounts },
-  'Rbac Prohibit Wildcards on Policy Rule Resources'                     : { skip: 'https://github.com/kubewarden/rego-policies-library/pull/54' },
-  'Rbac Prohibit Wildcards on Policy Rule Verbs'                         : { skip: 'https://github.com/kubewarden/rego-policies-library/pull/54' },
   'Containers Block Ssh Port'                                            : { skip: 'https://github.com/rancher/kubewarden-ui/pull/1250' },
   'Container Running As User'                                            : { skip: 'https://github.com/rancher/kubewarden-ui/pull/1250' },
   'Helm Release Max History'                                             : { skip: 'https://github.com/rancher/kubewarden-ui/pull/1250' },

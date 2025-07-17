@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test'
-import type { YAMLPatch } from '../components/rancher-ui'
+import { RancherUI, type YAMLPatch } from '../components/rancher-ui'
 import { step, expect } from './rancher-test'
 import { BasePage } from './basepage'
 
@@ -22,6 +22,10 @@ export class RancherFleetPage extends BasePage {
     this.updateBtn = this.ui.button('Update')
   }
 
+  get navGroup() {
+    return RancherUI.isVersion('>=2.12') ? 'Resources' : ''
+  }
+
   async goto(): Promise<void> {
     // await this.nav.fleet('', 'Dashboard')
     await this.nav.goto('dashboard/c/local/fleet')
@@ -34,7 +38,7 @@ export class RancherFleetPage extends BasePage {
   @step
   async addRepository(repo: GitRepo) {
     // Rancher navigation
-    await this.nav.fleet('', 'Git Repos')
+    await this.nav.fleet(this.navGroup, 'Git Repos')
     await this.ui.button('Add Repository').first().click()
     await expect(this.page.getByRole('heading', { name: 'Create: Step 1', exact: true })).toBeVisible()
 
@@ -80,7 +84,7 @@ export class RancherFleetPage extends BasePage {
 
   @step
   async deleteRepository(name: string) {
-    await this.nav.fleet('', 'Git Repos')
+    await this.nav.fleet(this.navGroup, 'Git Repos')
     await this.ui.tableRow(name).delete()
   }
 }
