@@ -79,6 +79,7 @@ test('Install UI extension', async({ page, ui }) => {
   if (conf.ui_from === 'github') {
     await test.step('Add UI charts repository', async() => {
       const apps = new RancherAppsPage(page)
+      await expect(page.getByText('No Extensions available', { exact: true })).toBeVisible()
       await page.getByTestId('extensions-page-menu').click()
       await page.getByText('Manage Repositories', { exact: true }).click()
       await apps.addRepository({ name: 'kubewarden-extension-github', url: 'https://rancher.github.io/kubewarden-ui/' })
