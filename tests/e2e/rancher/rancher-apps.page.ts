@@ -5,7 +5,7 @@ import { Shell } from '../components/kubectl-shell'
 import { step } from './rancher-test'
 import { BasePage } from './basepage'
 
-export interface ChartRepo {
+export interface Repo {
   // type: 'http'|'git'|'oci'
   name     : string
   url      : string
@@ -26,7 +26,7 @@ export interface Chart {
   project?  : string
 }
 
-export const appColRepo: ChartRepo = {
+const appCoRepo: Repo = {
   name    : 'application-collection',
   url     : 'oci://dp.apps.rancher.io/charts',
   httpAuth: (() => {
@@ -68,12 +68,12 @@ export class RancherAppsPage extends BasePage {
   }
 
   /**
-     * Add helm charts repository to local cluster
-     * @param name
-     * @param url Git or http(s) url of the repository
-     */
+   * Add helm charts repository to local cluster
+   * @param name
+   * @param url Git or http(s) url of the repository
+   */
   @step
-  async addRepository(repo: ChartRepo) {
+  async addRepository(repo: Repo) {
     await this.nav.explorer('Apps', 'Repositories')
     await this.ui.button('Create').click()
 
@@ -112,7 +112,7 @@ export class RancherAppsPage extends BasePage {
   }
 
   @step
-  async deleteRepository(repo: string|ChartRepo) {
+  async deleteRepository(repo: string|Repo) {
     await this.nav.explorer('Apps', 'Repositories')
     const repoName = typeof repo === 'string' ? repo : repo.name
     await this.ui.tableRow(repoName).delete()
@@ -161,13 +161,13 @@ export class RancherAppsPage extends BasePage {
     await shell.open()
     // Secret to pull images from app collection
     if (ns !== 'default') await shell.run(`kubectl create ns ${ns}`, shellOpts)
-    await shell.run(`kubectl create secret docker-registry application-collection -n ${ns} --docker-server=dp.apps.rancher.io --docker-username=${appColRepo.httpAuth?.username} --docker-password=${appColRepo.httpAuth?.password}`, shellOpts)
+    await shell.run(`kubectl create secret docker-registry application-collection -n ${ns} --docker-server=dp.apps.rancher.io --docker-username=${appCoRepo.httpAuth?.username} --docker-password=${appCoRepo.httpAuth?.password}`, shellOpts)
     // Login to app collection to access helm chart
-    await shell.run(`helm registry login ${appColRepo.url.split('://')[1]} -u ${appColRepo.httpAuth?.username} -p ${appColRepo.httpAuth?.password}`, shellOpts)
+    await shell.run(`helm registry login ${appCoRepo.url.split('://')[1]} -u ${appCoRepo.httpAuth?.username} -p ${appCoRepo.httpAuth?.password}`, shellOpts)
 
     // Chart-specific setup
     if (chart.name === 'jaeger-operator') {
-      await shell.run(`helm install ${chart.name} ${appColRepo.url}/jaeger-operator -n ${ns} --set jaeger.create=true --set rbac.clusterRole=true --set image.imagePullSecrets[0]=application-collection`, shellOpts)
+      await shell.run(`helm install ${chart.name} ${appCoRepo.url}/jaeger-operator -n ${ns} --set jaeger.create=true --set rbac.clusterRole=true --set image.imagePullSecrets[0]=application-collection`, shellOpts)
       // Workaround for jaeger issue https://github.com/jaegertracing/helm-charts/issues/581
       await shell.run('kubectl get clusterrole jaeger-operator -o json | jq \'.rules[] |= (select(.apiGroups | index("networking.k8s.io")).resources += ["ingressclasses"])\' | kubectl apply -f -', shellOpts)
       // Patch SA to use pull secret for jaeger creation (retry waits for SA creation)

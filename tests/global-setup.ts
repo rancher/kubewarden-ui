@@ -38,6 +38,12 @@ async function globalSetup(config: FullConfig) {
   process.env.RANCHER_PRIME = data.RancherPrime
 
   await requestContext.dispose()
+
+  // OTEL version in GitHub workflows:
+  // PRs: hardcoded default, github variables are not passed to PRs from forks
+  // Fleet: latest released OTEL (*) to check for future failures
+  // Other workflows: github action variable or hardcoded default
+  process.env.OTEL_OPERATOR ||= '0.92.3'
 }
 
 export default globalSetup
