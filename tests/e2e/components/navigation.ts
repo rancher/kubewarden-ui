@@ -78,9 +78,9 @@ export class Navigation {
   }
 
   @step
-  async fleet<T extends FleetGroup>(groupName: T, childName?: FleetItemMap[T]) {
-    if (this.isblank()) await this.mainNav('Continuous Delivery')
-    await this.sideNavHandler(groupName, childName)
+  async fleet<T extends FleetGroup>(groupName?: T, childName?: FleetItemMap[T]) {
+    await this.mainNav('Continuous Delivery')
+    if (groupName !== undefined) await this.sideNavHandler(groupName, childName)
   }
 
   @step
