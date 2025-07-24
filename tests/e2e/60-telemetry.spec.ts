@@ -71,7 +71,7 @@ test.describe('Tracing', () => {
     await nav.pservers('default', 'Tracing')
   })
 
-  test('Install Jaeger', async({ nav }) => {
+  test('Install Jaeger', async({ nav, ui }) => {
     test.skip(process.env.MODE === 'fleet')
 
     // Jaeger is not installed
@@ -92,7 +92,9 @@ test.describe('Tracing', () => {
 
     // Jaeger is installed
     await nav.pservers('default', 'Tracing')
-    await telPage.toBeComplete('jaeger')
+    await ui.retry(async() => {
+      await telPage.toBeComplete('jaeger')
+    }, 'Jaeger does not show checkmark')
   })
 
   test('Configure tracing', async({ ui, shell }) => {
