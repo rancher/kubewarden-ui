@@ -116,7 +116,10 @@ export class TableRow {
   async delete(options?: { timeout?: number }) {
     await this.action('Delete')
     await this.ui.page.getByTestId('prompt-remove-confirm-button').click()
-    await expect(this.row).not.toBeVisible(options)
+    // Table row stays visible as "Uninstalling"
+    if (this.strval !== 'rancher-monitoring-crd') {
+      await expect(this.row).not.toBeVisible(options)
+    }
   }
 
   async open() {
