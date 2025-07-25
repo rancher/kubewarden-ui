@@ -28,6 +28,7 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'GitRepository Organization Domains'                                   : { settings: generalArray },
   'GitRepository Specific Branch'                                        : { settings: gitRepositorySpecificBranch },
   'GitRepository Untrusted Domains'                                      : { settings: generalArray },
+  'High Risk Service Account'                                            : { settings: setupHighRiskServiceAccount },
   'Helm Release Service Account Name'                                    : { settings: generalArray },
   'Helm Release Storage Namespace'                                       : { settings: generalArray },
   'Helm Release Target Namespace'                                        : { settings: generalArray },
@@ -76,6 +77,22 @@ async function generalArray(ui: RancherUI) {
   await ui.page.getByPlaceholder('e.g. bar').fill('item')
 }
 
+async function fillGroup(ui: RancherUI, group: string|RegExp, values: string[]) {
+  const row = ui.page.locator('div.row.question').filter({ has: ui.page.getByText(group, { exact: true }) }).last()
+  for (const val of values) {
+    await row.getByRole('button', { name: 'Add' }).click()
+    await row.getByPlaceholder('e.g. bar').last().fill(val)
+  }
+}
+
+async function setupHighRiskServiceAccount(ui: RancherUI) {
+  await ui.button('Add').click()
+  await fillGroup(ui, 'API Groups', ['rbac.authorization.k8s.io'])
+  await fillGroup(ui, 'Resources', ['roles', 'rolebindings'])
+  await fillGroup(ui, 'Verbs', ['*'])
+  await ui.input('namespace').fill('default')
+}
+
 async function affinityNodeSelector(ui: RancherUI) {
   await ui.input('Key*').fill('node-role.kubernetes.io/control-plane')
   await ui.input('Value*').fill('true')
@@ -106,10 +123,8 @@ async function networkBlockAllIngressTrafficToNamespaceFromCIDRBlock(ui: Rancher
 }
 
 async function ociRepositoryLayerSelector(ui: RancherUI) {
-  await ui.button('Add').first().click()
-  await ui.page.getByRole('textbox').first().fill('registry.my-corp.com')
-  await ui.button('Add').last().click()
-  await ui.page.getByRole('textbox').last().fill('registry.my-corp.com')
+  await fillGroup(ui, 'Media types', ['registry.my-corp.com'])
+  await fillGroup(ui, 'Operations', ['registry.my-corp.com'])
 }
 
 async function ociRepositoryPatchAnnotation(ui: RancherUI) {
@@ -165,8 +180,7 @@ async function setupCustomPolicy(ui: RancherUI) {
 
 async function setupVolumeMounts(ui: RancherUI) {
   await ui.selectOption('Reject', 'anyIn')
-  await ui.button('Add').click()
-  await ui.page.getByPlaceholder('e.g. bar').fill('/nomount')
+  await fillGroup(ui, 'Volume Mount Names', ['/nomount'])
 }
 
 async function setupSelinuxPSP(ui: RancherUI) {
