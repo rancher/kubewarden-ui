@@ -28,7 +28,24 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'PVC StorageClass Validator' : { settings: setupPvcScValidator },
   'Priority class policy'      : { settings: setupPriorityClassPolicy },
   'CEL Policy'                 : { skip: 'https://github.com/kubewarden/cel-policy/issues/12' },
+  'High Risk Service Account'  : { settings: setupHighRiskServiceAccount },
   volumeMounts                 : { settings: setupVolumeMounts },
+}
+
+async function fillGroup(ui: RancherUI, group: string|RegExp, values: string[]) {
+  const row = ui.page.locator('div.row.question').filter({ has: ui.page.getByText(group, { exact: true }) }).last()
+  for (const val of values) {
+    await row.getByRole('button', { name: 'Add' }).click()
+    await row.getByPlaceholder('e.g. bar').last().fill(val)
+  }
+}
+
+async function setupHighRiskServiceAccount(ui: RancherUI) {
+  await ui.button('Add').click()
+  await fillGroup(ui, 'API Groups', ['rbac.authorization.k8s.io'])
+  await fillGroup(ui, 'Resources', ['roles', 'rolebindings'])
+  await fillGroup(ui, 'Verbs', ['*'])
+  await ui.input('namespace').fill('default')
 }
 
 async function setupPriorityClassPolicy(ui: RancherUI) {
