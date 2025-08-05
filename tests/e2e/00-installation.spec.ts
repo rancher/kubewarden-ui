@@ -126,24 +126,18 @@ test('Install Kubewarden', async({ page, ui, nav }) => {
   })
 })
 
-test('Install Kubewarden by Fleet', async({ page, ui }) => {
+test('Install Kubewarden by Fleet', async({ page }) => {
   test.skip(conf.kw_mode !== 'fleet')
   test.slow()
 
   const fleetPage = new RancherFleetPage(page)
-  const repoRow = await fleetPage.addRepository({
-    name       : 'therepo',
+  await fleetPage.addGitRepo({
+    name       : 'kubewarden',
     url        : 'https://github.com/rancher/kubewarden-ui.git',
     branch     : 'main',
     selfHealing: true,
     paths      : ['tests/e2e/fleet/'],
-    workspace  : 'fleet-local'
-  })
-
-  await ui.retry(async() => {
-    await fleetPage.selectWorkspace('fleet-local')
-    await expect(repoRow.column('Clusters Ready')).toHaveText('1/1', { timeout: 7 * 60_000 })
-  }, 'Installed but not refreshed?')
+  }, { timeout: 2 * 60_000 })
 })
 
 test('Add Policy Catalog Repository', async({ page, ui, nav }) => {

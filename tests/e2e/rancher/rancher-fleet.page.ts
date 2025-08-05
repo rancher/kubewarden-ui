@@ -1,17 +1,34 @@
 import type { Locator, Page } from '@playwright/test'
 import { RancherUI, type YAMLPatch } from '../components/rancher-ui'
-import { step, expect } from './rancher-test'
+import { test, step, expect } from './rancher-test'
 import { BasePage } from './basepage'
 
-export interface GitRepo {
+interface AppBundle {
   name          : string
-  url           : string
-  branch        : string
+  labels?       : Record<string, string>
+  workspace?    : 'fleet-default' | 'fleet-local'
+  // Fails if a cluster scoped resource is used in the workload manifests, use defaultNamespace
+  namespace?    : string
+  yamlPatch?    : YAMLPatch
   selfHealing?  : boolean
   keepResources?: boolean
-  paths?        : string[]
-  yamlPatch?    : YAMLPatch
-  workspace?    : string
+}
+
+interface GitRepo extends AppBundle {
+  url   : string
+  branch: string
+  paths?: string[]
+}
+
+interface HelmOp extends AppBundle {
+  release: string
+  // type : 'Repository' | 'OCI Registry' | 'Tarball'
+  repo: {
+    url     : string
+    chart   : string
+    version?: string
+  }
+  values?: YAMLPatch
 }
 
 export class RancherFleetPage extends BasePage {
@@ -35,55 +52,116 @@ export class RancherFleetPage extends BasePage {
     await this.ui.selectOption(this.page.getByTestId('workspace-switcher'), workspace)
   }
 
-  @step
-  async addRepository(repo: GitRepo) {
-    // Rancher navigation
-    await this.nav.fleet(this.navGroup, 'Git Repos')
-    await this.ui.button('Add Repository').first().click()
+  private async addBundle(bundle: GitRepo | HelmOp, typeSpecificSteps: () => Promise<void>, options?: { timeout?: number }) {
     await expect(this.page.getByRole('heading', { name: 'Create: Step 1', exact: true })).toBeVisible()
-
-    if (repo.workspace !== undefined) await this.selectWorkspace(repo.workspace)
+    await this.selectWorkspace(bundle.workspace || 'fleet-local')
 
     // Define metadata details
-    await this.ui.input('Name *').fill(repo.name)
-    await this.ui.button('Next').click()
-
-    // Define repository details
-    await expect(this.page.getByRole('heading', { name: 'Create: Step 2', exact: true })).toBeVisible()
-    await this.ui.input('Repository URL').fill(repo.url)
-    await this.ui.input('Branch Name *').fill(repo.branch)
-    if (repo.paths) {
-      for (const path of repo.paths) {
-        await this.ui.button(/Add Path/).click()
-        await this.page.getByPlaceholder('e.g. /directory/in/your/repo').fill(path)
+    await test.step('Define metadata details', async() => {
+      await this.ui.input('Name *').fill(bundle.name)
+      if (bundle.labels) {
+        for (const [key, value] of Object.entries(bundle.labels)) {
+          await this.ui.button('Add Label').click()
+          await this.page.getByPlaceholder('e.g. foo').last().fill(key)
+          await this.page.getByPlaceholder('e.g. bar').last().fill(value)
+        }
+        // Wait for generated fields
+        await this.page.waitForTimeout(500)
       }
-      // Wait for generated fields
-      await this.page.waitForTimeout(200)
-    }
-    await this.ui.button('Next').click()
+      await this.ui.button('Next').click()
+    })
+
+    // GitRepo or HelmOp details
+    await typeSpecificSteps()
 
     // Define target details
-    await expect(this.page.getByRole('heading', { name: 'Create: Step 3', exact: true })).toBeVisible()
-    await this.ui.button('Next').click()
+    await test.step('Define target details', async() => {
+      if (bundle.namespace) await this.ui.input('Target Namespace').fill(bundle.namespace)
+      await this.ui.button('Next').click()
+    })
 
     // Define advanced settings
-    await expect(this.page.getByRole('heading', { name: 'Create: Step 4', exact: true })).toBeVisible()
-    if (repo.selfHealing !== undefined) await this.ui.checkbox('Enable Self-Healing').setChecked(repo.selfHealing)
-    if (repo.keepResources !== undefined) await this.ui.checkbox('Always Keep Resources').setChecked(repo.keepResources)
+    await test.step('Define advanced settings', async() => {
+      if (bundle.selfHealing !== undefined) await this.ui.checkbox('Enable Self-Healing').setChecked(bundle.selfHealing)
+      if (bundle.keepResources !== undefined) await this.ui.checkbox('Always Keep Resources').setChecked(bundle.keepResources)
+      if (bundle.yamlPatch) {
+        await this.ui.openView('Edit as YAML')
+        await this.ui.editYaml(bundle.yamlPatch)
+      }
+      await this.ui.button('Create').click()
+    })
 
-    // Customize yaml
-    if (repo.yamlPatch) {
-      await this.ui.openView('Edit as YAML')
-      await this.ui.editYaml(repo.yamlPatch)
-    }
-    await this.ui.button('Create').click()
+    // Wait for Active state
+    await test.step('Wait for Active state', async() => {
+      const bundleRow = await this.ui.tableRow(bundle.name).waitFor({ state: 'Active' })
+      await this.ui.retry(async() => {
+        await this.selectWorkspace(bundle.workspace || 'fleet-local')
+        await expect(bundleRow.column('Clusters Ready')).toHaveText('1/1', { timeout: options?.timeout })
+      }, 'Installed but not refreshed?')
+    })
+  }
 
-    // Get row and wait for Active state
-    return await this.ui.tableRow(repo.name).waitFor({ state: 'Active' })
+  /**
+   * Feature added in Rancher v2.12
+   * Example usage: Add OTEL with version from env
+   * await fleetPage.addHelmOp({
+   *   name   : 'opentelemetry',
+   *   release: 'opentelemetry-operator',
+   *   repo     : {
+   *     url    : 'https://open-telemetry.github.io/opentelemetry-helm-charts',
+   *     chart  : 'opentelemetry-operator',
+   *     version: process.env.OTEL_OPERATOR
+   *   },
+   *   values   : { 'manager.collectorImage.repository': 'otel/opentelemetry-collector-contrib' },
+   *   yamlPatch: (y) => { y.spec.defaultNamespace = 'open-telemetry' },
+   * }, { timeout: 20_000 })
+   */
+  async addHelmOp(helmop: HelmOp, options?: { timeout?: number }) {
+    await this.nav.fleet('Resources', 'Helm Ops')
+    await this.ui.button('Create Helm Op').first().click()
+
+    await this.addBundle(helmop, async() => {
+      // Define Helm Chart source details
+      await test.step('Define Helm Chart source details', async() => {
+        await this.ui.input('Name').fill(helmop.release)
+        await this.ui.input('URL').fill(helmop.repo.url)
+        await this.ui.input('Chart').fill(helmop.repo.chart)
+        if (helmop.repo.version) await this.ui.input('Version').fill(helmop.repo.version)
+        await this.ui.button('Next').click()
+      })
+
+      // Define Helm Values for the chart
+      await test.step('Define Helm Values for the chart', async() => {
+        if (helmop.values) await this.ui.editYaml(helmop.values)
+        await this.ui.button('Next').click()
+      })
+    }, options)
+  }
+
+  async addGitRepo(repo: GitRepo, options?: { timeout?: number }) {
+    await this.nav.fleet(this.navGroup, 'Git Repos')
+    await this.ui.button('Add Repository').first().click()
+
+    await this.addBundle(repo, async() => {
+      // Define repository details
+      await test.step('Define repository details', async() => {
+        await this.ui.input('Repository URL').fill(repo.url)
+        await this.ui.input('Branch Name *').fill(repo.branch)
+        if (repo.paths) {
+          for (const path of repo.paths) {
+            await this.ui.button(/Add Path/).click()
+            await this.page.getByPlaceholder('e.g. /directory/in/your/repo').fill(path)
+          }
+          // Wait for generated fields
+          await this.page.waitForTimeout(200)
+        }
+        await this.ui.button('Next').click()
+      })
+    }, options)
   }
 
   @step
-  async deleteRepository(name: string) {
+  async deleteGitRepo(name: string) {
     await this.nav.fleet(this.navGroup, 'Git Repos')
     await this.ui.tableRow(name).delete()
   }
