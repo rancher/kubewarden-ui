@@ -158,6 +158,9 @@ export class KubewardenPage extends BasePage {
     if (!to?.controller?.startsWith('4.1') && !to?.controller?.startsWith('5.0')) {
       await shell.waitPods()
     }
+    // Workaround for controller upgrade showing twice (issue#1275)
+    await this.nav.explorer('Apps', 'Installed Apps')
+    await this.ui.tableRow('rancher-kubewarden-controller').toHaveState('Deployed')
 
     // Defaults upgrade
     await this.nav.kubewarden()
