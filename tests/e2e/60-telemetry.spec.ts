@@ -1,21 +1,9 @@
 import { test, expect } from './rancher/rancher-test'
-import { Chart, ChartRepo, RancherAppsPage } from './rancher/rancher-apps.page'
+import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { PolicyServersPage } from './pages/policyservers.page'
-import { TelemetryPage } from './pages/telemetry.page'
+import { managedApps, TelemetryPage } from './pages/telemetry.page'
 import { RancherUI } from './components/rancher-ui'
 import { AdmissionPoliciesPage, Policy } from './pages/policies.page'
-
-// Cert-Manager
-const cmanRepo: ChartRepo = { name: 'jetstack', url: 'https://charts.jetstack.io' }
-const cmanChart: Chart = { title: 'cert-manager', name: 'cert-manager', namespace: 'cert-manager', check: 'cert-manager' }
-// OpenTelemetry
-const otelRepo: ChartRepo = { name: 'open-telemetry', url: 'https://open-telemetry.github.io/opentelemetry-helm-charts' }
-const otelChart: Chart = { title: 'opentelemetry-operator', name: 'opentelemetry-operator', namespace: 'open-telemetry', check: 'opentelemetry-operator', version: process.env.OTEL_OPERATOR || '0.86.4' }
-// Jaeger Tracing
-const jaegerRepo: ChartRepo = { name: 'jaegertracing', url: 'https://jaegertracing.github.io/helm-charts' }
-const jaegerChart: Chart = { title: 'jaeger-operator', name: 'jaeger-operator', namespace: 'jaeger', check: 'jaeger-operator' }
-// Monitoring
-const monitoringChart: Chart = { title: 'Monitoring', check: 'rancher-monitoring' }
 
 /**
  * Expect timeout has to be increased after telemetry installation on local cluster
@@ -24,7 +12,6 @@ test.describe('Setup', () => {
   test('Install OpenTelemetry', async({ page, nav }) => {
     test.skip(process.env.MODE === 'fleet')
 
-    const apps = new RancherAppsPage(page)
     const telPage = new TelemetryPage(page)
 
     // Otel is not installed
@@ -36,18 +23,11 @@ test.describe('Setup', () => {
 
     // Install Cert-Manager on imported clusters
     if (nav.testCluster.name !== 'local') {
-      await apps.addRepository(cmanRepo)
-      await apps.installChart(cmanChart, {
-        yamlPatch: (y) => { y.crds.enabled = true }
-      })
+      await telPage.addManaged('certManager')
     }
 
-    // Install OpenTelemetry
-    await apps.addRepository(otelRepo)
-    await apps.installChart(otelChart,
-      { yamlPatch: (y) => { y.manager.collectorImage.repository = 'otel/opentelemetry-collector-contrib' } })
-
-    // Otel is installed
+    // Install OpenTelemetry & Check
+    await telPage.addManaged('openTelemetry')
     for (const tab of ['Tracing', 'Metrics'] as const) {
       await nav.pservers('default', tab)
       await telPage.toBeComplete('otel')
@@ -62,11 +42,11 @@ test.describe('Setup', () => {
 })
 
 test.describe('Tracing', () => {
-  let apps: RancherAppsPage
+  let appsPage: RancherAppsPage
   let telPage: TelemetryPage
 
   test.beforeEach(async({ nav, page }) => {
-    apps = new RancherAppsPage(page)
+    appsPage = new RancherAppsPage(page)
     telPage = new TelemetryPage(page)
     await nav.pservers('default', 'Tracing')
   })
@@ -79,15 +59,9 @@ test.describe('Tracing', () => {
     await expect(telPage.configBtn).toBeDisabled()
     // Install Jaeger
     if (RancherUI.hasAppCollection) {
-      await apps.installFromAppCollection(jaegerChart)
+      await appsPage.installFromAppCollection(managedApps.jaeger)
     } else {
-      await apps.addRepository(jaegerRepo)
-      await apps.installChart(jaegerChart, {
-        yamlPatch: {
-          'jaeger.create'   : true,
-          'rbac.clusterRole': true,
-        }
-      })
+      await telPage.addManaged('jaeger')
     }
 
     // Jaeger is installed
@@ -103,7 +77,7 @@ test.describe('Tracing', () => {
     await telPage.toBeIncomplete('config')
     await telPage.configBtn.click()
     const now = new Date().toISOString()
-    await apps.updateApp('rancher-kubewarden-controller', {
+    await appsPage.updateApp('rancher-kubewarden-controller', {
       navigate : false,
       questions: async() => {
         await ui.tab(/^(Open)?Telemetry/).click()
@@ -146,17 +120,18 @@ test.describe('Tracing', () => {
     test.skip(process.env.MODE === 'fleet')
 
     // Clean up
-    await apps.updateApp('rancher-kubewarden-controller', {
+    await appsPage.updateApp('rancher-kubewarden-controller', {
       questions: async() => {
         await ui.tab(/^(Open)?Telemetry/).click()
         await ui.checkbox('Enable Tracing').uncheck()
       }
     })
-    await apps.deleteApp('jaeger-operator')
-    await shell.run('kubectl delete ns jaeger')
-    if (!RancherUI.hasAppCollection) {
-      await apps.deleteRepository(jaegerRepo)
+    if (RancherUI.hasAppCollection) {
+      await appsPage.deleteApp('jaeger-operator')
+    } else {
+      await telPage.removeManaged('jaeger')
     }
+    await shell.run('kubectl delete ns jaeger')
 
     // Check
     await nav.pservers('default', 'Tracing')
@@ -169,11 +144,11 @@ test.describe('Tracing', () => {
 test.describe('Metrics', () => {
   test.skip(process.env.MODE === 'fleet')
 
-  let apps: RancherAppsPage
+  let appsPage: RancherAppsPage
   let telPage: TelemetryPage
 
   test.beforeEach(async({ nav, page }) => {
-    apps = new RancherAppsPage(page)
+    appsPage = new RancherAppsPage(page)
     telPage = new TelemetryPage(page)
     await nav.pservers('default', 'Metrics')
   })
@@ -184,10 +159,10 @@ test.describe('Metrics', () => {
     await expect(telPage.configBtn).toBeDisabled()
     // Install Monitoring
     await ui.button('Install App').click()
-    await apps.installChart(monitoringChart, {
-      navigate: false,
-      timeout : 7 * 60_000
-    })
+    await appsPage.installChart(
+      { title: 'Monitoring', check: 'rancher-monitoring' },
+      { navigate: false, timeout: 7 * 60_000 }
+    )
     // Monitoring is installed
     await nav.pservers('default', 'Metrics')
     await ui.retry(async() => {
@@ -212,7 +187,7 @@ test.describe('Metrics', () => {
     await test.step('Enable metrics in controller', async() => {
       await telPage.toBeIncomplete('config')
       await telPage.configBtn.click()
-      await apps.updateApp('rancher-kubewarden-controller', {
+      await appsPage.updateApp('rancher-kubewarden-controller', {
         navigate : false,
         questions: async() => {
           await ui.tab(/^(Open)?Telemetry/).click()
@@ -265,15 +240,15 @@ test.describe('Metrics', () => {
 
   test('Uninstall metrics', async({ ui, nav, shell }) => {
     // Disable metrics
-    await apps.updateApp('rancher-kubewarden-controller', {
+    await appsPage.updateApp('rancher-kubewarden-controller', {
       questions: async() => {
         await ui.tab(/^(Open)?Telemetry/).click()
         await ui.checkbox('Enable Metrics').uncheck()
       }
     })
     // Uninstall monitoring
-    await apps.deleteApp('rancher-monitoring')
-    await apps.deleteApp('rancher-monitoring-crd')
+    await appsPage.deleteApp('rancher-monitoring')
+    await appsPage.deleteApp('rancher-monitoring-crd')
     await shell.run('kubectl delete cm -n cattle-dashboards kubewarden-dashboard-policy kubewarden-dashboard-policyserver')
     // Check
     await nav.pservers('default', 'Metrics')
@@ -295,12 +270,10 @@ test.describe('Teardown', () => {
   test('Uninstall OpenTelemetry', async({ page, nav }) => {
     test.skip(process.env.MODE === 'fleet')
 
-    const apps = new RancherAppsPage(page)
-    await apps.deleteApp('opentelemetry-operator')
-    await apps.deleteRepository(otelRepo)
+    const telPage = new TelemetryPage(page)
+    await telPage.removeManaged('openTelemetry')
     if (nav.testCluster.name !== 'local') {
-      await apps.deleteApp('cert-manager')
-      await apps.deleteRepository(cmanRepo)
+      await telPage.removeManaged('certManager')
     }
   })
 })
