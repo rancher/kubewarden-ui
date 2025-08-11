@@ -1,13 +1,13 @@
 <script>
-import { CATALOG, UI_PLUGIN } from '@shell/config/types';
 import { Banner } from '@components/Banner';
+import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/constants';
+import { kwDefaultsHelmChartSettings } from '@kubewarden/modules/policies';
 import Loading from '@shell/components/Loading';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
-import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
-import { kwDefaultsHelmChartSettings } from '@kubewarden/modules/policies';
+import { CATALOG, UI_PLUGIN } from '@shell/config/types';
 
-import PolicyList from '@kubewarden/components/Policies/PolicyList';
 import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
+import PolicyList from '@kubewarden/components/Policies/PolicyList';
 
 export default {
   components: {

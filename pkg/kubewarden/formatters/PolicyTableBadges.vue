@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
+import { KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/constants';
 
 const props = defineProps<{
   row: {

@@ -1,4 +1,4 @@
-import { KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
+import { KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/constants';
 
 interface KubewardenRouteConfig {
   name?: string;

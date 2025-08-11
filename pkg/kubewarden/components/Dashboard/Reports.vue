@@ -1,5 +1,6 @@
 <script>
-import { KUBEWARDEN_PRODUCT_NAME, POLICY_REPORTER_PRODUCT } from '@kubewarden/types';
+import { KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/constants';
+import { POLICY_REPORTER_PRODUCT } from '@kubewarden/types';
 
 export default {
   props: {
