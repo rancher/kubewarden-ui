@@ -1,11 +1,11 @@
 <script>
-import { CATALOG } from '@shell/config/types';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
+import { CATALOG } from '@shell/config/types';
 
 import Loading from '@shell/components/Loading';
 import ResourceTable from '@shell/components/ResourceTable';
 
-import { KUBEWARDEN_APPS } from '@kubewarden/types';
+import { KUBEWARDEN_APPS } from '@kubewarden/constants';
 
 import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
 
