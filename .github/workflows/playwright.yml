@@ -206,7 +206,7 @@ jobs:
     # Create k3d cluster and install rancher
     # Use local kuberlr to avoid version skew
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         ref: ${{ steps.find-branch.outputs.ref }}
 
@@ -214,7 +214,7 @@ jobs:
       run: TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG k3d-install
 
     - name: Checkout kubewarden-end-to-end-tests
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: kubewarden/kubewarden-end-to-end-tests
         ref: main
