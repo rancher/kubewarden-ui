@@ -60,24 +60,18 @@ test('Install UI extension', async({ page, ui }) => {
   const extensions = new RancherExtensionsPage(page)
   await extensions.goto()
 
-  await test.step('Enable extension support', async() => {
-    if (RancherUI.isVersion('<2.9')) {
-      await extensions.enable({ rancher: conf.ui_from === 'prime', partners: false })
-    }
-    // Wait for default list of extensions
-    if (conf.ui_from === 'prime') {
-      if (RancherUI.isVersion('>=2.9')) {
-        await extensions.addRancherRepos({ rancher: true, partners: false })
-      }
+  if (conf.ui_from === 'prime') {
+    await test.step('Add official repository', async() => {
+      await extensions.addRancherRepos({ rancher: true, partners: false })
       await ui.retry(async() => {
         await extensions.selectTab('All')
         await expect(page.locator('.plugin', { hasText: 'Kubewarden' })).toBeVisible({ timeout: 30_000 })
       }, 'Not showing kubewarden extension')
-    }
-  })
+    })
+  }
 
   if (conf.ui_from === 'github') {
-    await test.step('Add UI charts repository', async() => {
+    await test.step('Add github repository', async() => {
       const apps = new RancherAppsPage(page)
       await expect(page.getByText('No Extensions available', { exact: true })).toBeVisible()
       await page.getByTestId('extensions-page-menu').click()

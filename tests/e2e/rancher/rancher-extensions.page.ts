@@ -32,23 +32,6 @@ export class RancherExtensionsPage extends BasePage {
     if (options?.partners !== undefined) await partnersRepo.setChecked(options.partners)
   }
 
-  // Extensions need to be enabled before 2.9
-  async enable(options?: { rancher?: boolean, partners?: boolean }) {
-    await expect(this.page.getByRole('heading', { name: 'Extension support is not enabled' })).toBeVisible()
-
-    await this.ui.button('Enable').click()
-    await expect(this.page.getByRole('heading', { name: 'Enable Extension Support?' })).toBeVisible()
-
-    // Select requested repositories
-    await this.selectRepos(options)
-    await this.ui.button('OK').click()
-
-    // Wait for extensions to be visible
-    await this.ui.retry(async() => {
-      await expect(this.tabs).toBeVisible({ timeout: 60_000 })
-    }, 'Extensions enabled but not visible')
-  }
-
   // Repositories need to be added since 2.9
   async addRancherRepos(options?: { rancher?: boolean, partners?: boolean }) {
     await this.dotMenu('Add Rancher Repositories')
