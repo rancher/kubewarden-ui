@@ -215,9 +215,6 @@ test.describe('Metrics', () => {
       const frame = page.frameLocator('iframe')
 
       for (const metric of metrics) {
-        // Skip some panels until bugfix is backported to Rancher <2.9 (1.6.4 release)
-        if (RancherUI.isVersion('<2.9') && metric.source.match(/Total accepted|rejected/)) continue
-
         // byTestId for Rancher >2.9, byLabel for old versions
         const panel = frame.getByTestId(metric).or(frame.getByLabel(metric))
         // Accepted metrics should be >0, rejected could be 0
