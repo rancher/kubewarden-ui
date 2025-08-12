@@ -10,8 +10,9 @@ export class RancherExtensionsPage extends BasePage {
   }
 
   async goto(): Promise<void> {
-    // await this.nav.mainNav('Extensions')
-    await this.page.goto('dashboard/c/local/uiplugins')
+    await this.nav.mainNav('Extensions')
+    await expect(this.page.getByRole('heading', { name: 'Extensions', exact: true })).toBeVisible()
+    await expect(this.page.getByText('Loading…', { exact: true })).not.toBeVisible()
   }
 
   async selectTab(name: 'Installed' | 'Available' | 'Updates' | 'All') {
