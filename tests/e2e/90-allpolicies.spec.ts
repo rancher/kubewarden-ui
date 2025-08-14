@@ -18,6 +18,8 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'Custom Policy'              : { settings: setupCustomPolicy },
   'Deprecated API Versions'    : { settings: setupDeprecatedAPIVersions },
   'Environment Variable Policy': { settings: setupEnvironmentVariablePolicy },
+  'Labels'                     : { settings: setupEnvironmentVariablePolicy },
+  'Annotations'                : { settings: setupEnvironmentVariablePolicy },
   'Namespace label propagator' : { settings: setupNamespaceLabelPropagator },
   'PSA Label Enforcer'         : { settings: setupPSALabelEnforcer },
   'Selinux PSP'                : { settings: setupSelinuxPSP },
