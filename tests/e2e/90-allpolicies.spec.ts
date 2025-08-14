@@ -17,6 +17,7 @@ type PolicySettings = {
 const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'Custom Policy'                                                        : { settings: setupCustomPolicy },
   'Affinity Node Selector'                                               : { settings: affinityNodeSelector },
+  'Annotations'                                                          : { settings: generalArray },
   'Bucket Approved Region'                                               : { settings: generalArray },
   'Bucket Endpoint Domain'                                               : { settings: generalArray },
   'CEL Policy'                                                           : { skip: 'https://github.com/kubewarden/cel-policy/issues/12' },
@@ -42,6 +43,7 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'Kustomization Patches'                                                : { skip: 'https://github.com/rancher/kubewarden-ui/pull/1250', settings: kustomizationPatches },
   'Kustomization Prune'                                                  : { skip: 'https://github.com/rancher/kubewarden-ui/pull/1250', settings: kustomizationPrune },
   'Kustomization Target Namespace'                                       : { settings: generalArray },
+  'Labels'                                                               : { settings: generalArray },
   'Metadata Missing Label And Value'                                     : { settings: metadataMissingLabelAndValue },
   'Namespace Resources Limitrange'                                       : { settings: namespaceResourcesLimitrange },
   'Namespace label propagator'                                           : { settings: generalArray },
