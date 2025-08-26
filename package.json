@@ -29,7 +29,7 @@
     "@types/lodash": "^4.17.16",
     "@types/node": "~20.10.0",
     "@types/semver": "7.7.0",
-    "@vue/cli-plugin-typescript": "^5.0.8",
+    "@vue/cli-plugin-typescript": "^5.0.9",
     "@vue/cli-plugin-unit-jest": "^5.0.8",
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.5.0",
