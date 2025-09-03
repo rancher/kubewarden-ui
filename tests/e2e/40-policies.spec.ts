@@ -140,7 +140,7 @@ for (const PolicyPage of pageTypes) {
     await psPage.create(ps)
 
     // Create and check policy
-    const row = await polPage.create(p)
+    const row = await polPage.create(p, { wait: true })
     await checkPolicy(p, polPage, ui)
     await shell.privpod({ ns: p.namespace })
 
