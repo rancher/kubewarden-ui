@@ -121,8 +121,10 @@ export class RancherUI {
    *   await editYaml((y) => { y.policyServer.telemetry.enabled = false })
    * Yaml nodes are created automatically
    *   await editYaml({ 'policyServer.telemetry.enabled': false })
-   * String patch
+   * String patch (contains ':')
    *   await editYaml('{"policyServer": {"telemetry": { "enabled": false }}}')
+   * String value
+   *   await editYaml('any value will be pasted as string')
    */
   @step
   async editYaml(patch: YAMLPatch) {
@@ -148,7 +150,10 @@ export class RancherUI {
     // Paste edited yaml
     await this.codeMirror.click()
     await this.page.keyboard.press('Control+A')
-    await this.page.keyboard.insertText(jsyaml.dump(cmYaml))
+    // If patch is a string but not JSON, insert it as-is
+    await this.page.keyboard.insertText(
+      typeof patch === 'string' && !patch.trim().startsWith('{') && !patch.includes(':') ? patch : jsyaml.dump(cmYaml)
+    )
   }
 
   @step

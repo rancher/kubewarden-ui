@@ -235,3 +235,17 @@ test('Recommended policies', async({ page, ui, nav }) => {
     await ui.hideConfiguration()
   })
 })
+
+// Prevent privileged pods from running in restricted namespace
+test('Match Conditions', async({ page, shell }) => {
+  const matchns = 'restricted-ns'
+  const polPage = new ClusterAdmissionPoliciesPage(page)
+  const pol: Policy = { ...pMinimal, matchConditions: `object.metadata.namespace == "${matchns}"` }
+
+  await polPage.create(pol, { wait: true })
+  await shell.run(`kubectl create ns ${matchns}`)
+  await shell.privpod({ status: 0 })
+  await shell.privpod({ ns: matchns, status: 1 })
+  await shell.run(`kubectl delete ns ${matchns}`)
+  await polPage.delete(pol.name)
+})
