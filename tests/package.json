@@ -7,7 +7,7 @@
     "@playwright/test": "~1.55.0",
     "@types/js-yaml": "^4.0.9",
     "@types/lodash": "^4.17.20",
-    "@types/semver": "^7.7.0",
+    "@types/semver": "^7.7.1",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "playwright-qase-reporter": "^2.1.5",
