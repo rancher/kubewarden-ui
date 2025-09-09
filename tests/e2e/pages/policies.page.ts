@@ -41,6 +41,7 @@ export interface Policy {
   namespace?      : string // AdmissionPolicy specific
   ignoreRancherNS?: boolean // ClusterAdmissionAdmissionPolicy specific
   settings?(ui: RancherUI): Promise<void>
+  matchConditions?: string
   yamlPatch?      : YAMLPatch
 }
 
@@ -99,7 +100,7 @@ export abstract class BasePolicyPage extends BasePage {
     return this.auditGroup.getByRole('radio', { name: state })
   }
 
-  async selectTab(name: 'General' | 'Rules' | 'Settings' | 'Namespace Selector' | 'Context Aware Resources') {
+  async selectTab(name: 'General' | 'Rules' | 'Settings' | 'Namespace Selector' | 'Match Conditions' | 'Context Aware Resources') {
     await this.ui.tab(name).click()
     await expect(this.page.locator('.tab-header').getByRole('heading', { name })).toBeVisible()
   }
@@ -164,6 +165,12 @@ export abstract class BasePolicyPage extends BasePage {
       await p.settings(this.ui)
       // Wait for generated fields
       await this.page.waitForTimeout(200)
+    }
+    if (p.matchConditions) {
+      await this.selectTab('Match Conditions')
+      await this.ui.button('Add Match Condition').click()
+      await this.ui.input('Name*').fill('con1')
+      await this.ui.editYaml(p.matchConditions)
     }
     if (p.yamlPatch) {
       await this.ui.openView('Edit YAML')
