@@ -1,5 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test'
 import { BasePage } from './basepage'
+import { RancherUI } from '../components/rancher-ui'
 
 export class RancherExtensionsPage extends BasePage {
   readonly tabs: Locator
@@ -44,14 +45,14 @@ export class RancherExtensionsPage extends BasePage {
   }
 
   /**
-     * Get extension (plugin) locator from list of extensions
+     * Get extension (card) locator from list of extensions
      * @param name Case insensitive exact match of plugin name
      * @returns plugin Locator
      */
-  getExtension(name: string) {
-    // Filter plugins by name
-    return this.page.locator('.plugin')
-      .filter({ has: this.page.locator('.plugin-name').getByText(name, { exact: true }) })
+  getExtension(name: string|RegExp) {
+    return RancherUI.isVersion('>=2.13')
+      ? this.page.locator('.item-card', { has: this.page.getByRole('heading', { name, exact: true }) })
+      : this.page.locator('.plugin', { has: this.page.locator('.plugin-name').getByText(name, { exact: true }) })
 
     // Can't filter by repository in case of duplicit plugins - there is race condition in rancher, does not work as expected yet
     // plugin = plugin.filter({ has: this.page.locator(`xpath=//img[contains(@src, "clusterrepos/${repository}")]`) })
@@ -66,16 +67,30 @@ export class RancherExtensionsPage extends BasePage {
     await this.selectTab('Available')
 
     const plugin = this.getExtension(name)
-    await plugin.getByRole('button', { name: 'Install' }).click()
+    if (RancherUI.isVersion('>=2.13')) {
+      await plugin.getByTestId('item-card-header-action-menu').click()
+      await plugin.getByRole('menuitem', { name: 'Install' }).click()
+    } else {
+      await plugin.getByRole('button', { name: 'Install' }).click()
+    }
 
+    // Handle installation dialog
     const dialog = this.page.locator('.plugin-install-dialog')
     if (options?.version) {
       await this.ui.selectOption('Version', options.version)
     }
     await dialog.getByRole('button', { name: 'Install' }).click()
-    await this.ui.retry(async() => {
-      await expect(plugin.getByRole('button', { name: 'Uninstall' })).toBeEnabled({ timeout: 60_000 })
-    }, 'Extension stuck in "Installing..."')
+    await expect(dialog).not.toBeVisible({ timeout: 60_000 })
+
+    // Wait until extension is installed
+    if (RancherUI.isVersion('>=2.13')) {
+      await expect(plugin.getByText('Installing')).not.toBeVisible()
+      await expect(plugin.locator('i.icon-confirmation-alt')).toBeVisible()
+    } else {
+      await this.ui.retry(async() => {
+        await expect(plugin.getByRole('button', { name: 'Uninstall' })).toBeEnabled()
+      }, 'Extension stuck in "Installing..."')
+    }
   }
 
   /**

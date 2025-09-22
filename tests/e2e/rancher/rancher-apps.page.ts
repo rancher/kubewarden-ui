@@ -52,8 +52,8 @@ export class RancherAppsPage extends BasePage {
     this.step2 = page.getByRole('heading', { name: 'Install: Step 2' })
     this.stepTitle = page.locator('div.top.choice-banner>.title')
     this.nextBtn = this.ui.button('Next')
-    this.installBtn = this.ui.button('Install')
-    this.updateBtn = page.getByRole('button', { name: /Update|Upgrade/ })
+    this.installBtn = this.ui.button(/Install|Install this version/)
+    this.updateBtn = this.ui.button(/Update|Upgrade|Save changes/)
   }
 
   async goto(): Promise<void> {
@@ -199,7 +199,7 @@ export class RancherAppsPage extends BasePage {
         // Select requested version
         await chartVersion.click()
         // Active version has bold text, not active are links
-        await expect(versionPane.locator(`b:text-is("${chart.version}")`)).toBeVisible()
+        await expect(versionPane.locator('b', { has: this.page.getByText(chart.version, { exact: true }) })).toBeVisible()
       }
       await this.installBtn.click()
     }
