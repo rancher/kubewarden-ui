@@ -6,7 +6,7 @@ export class TableRow {
   readonly row   : Locator
   readonly name  : Locator
   readonly status: Locator
-  readonly strval: string
+  readonly strval: string = ''
 
   /**
      * Filter rows by column header or index. Has to be applied to this.row (tr)

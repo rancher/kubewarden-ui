@@ -160,7 +160,7 @@ test('Upgrade Kubewarden', async({ page, nav }) => {
 
   // Check we installed old versions
   await nav.explorer('Apps', 'Installed Apps')
-  for (const chart of ['controller', 'crds', 'defaults']) {
+  for (const chart of ['controller', 'crds', 'defaults'] as const) {
     await apps.checkChart(`rancher-kubewarden-${chart}`, conf.upMap[0][chart])
   }
 

@@ -5,7 +5,7 @@ import { Navigation } from '../components/navigation'
 import { Shell } from '../components/kubectl-shell'
 
 export function step(originalMethod: any, context: ClassMethodDecoratorContext) {
-  return function replacementMethod(...args: any) {
+  return function replacementMethod(this: any, ...args: any) {
     let name = `${this.constructor.name}.${context.name as string}`
     // Log object if it overrides toString method
     if (this.toString !== Object.prototype.toString) name += `: ${this}`

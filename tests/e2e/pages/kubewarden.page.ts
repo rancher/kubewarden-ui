@@ -173,7 +173,7 @@ export class KubewardenPage extends BasePage {
 
     // Check resources are online
     await this.nav.explorer('Apps', 'Installed Apps')
-    for (const chart of ['controller', 'crds', 'defaults']) {
+    for (const chart of ['controller', 'crds', 'defaults'] as const) {
       await apps.checkChart(`rancher-kubewarden-${chart}`, to ? to[chart] : undefined)
     }
     await shell.waitPods()
