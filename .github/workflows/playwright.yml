@@ -25,8 +25,9 @@ on:
       kubewarden:
         description: Kubewarden UI from
         type: choice
-        default: 'github'
+        default: 'auto'
         options:
+        - auto
         - source # build extension from main branch
         - github # https://rancher.github.io/kubewarden-ui/
         - prime  # ui-plugin-charts in released rancher prime
@@ -43,6 +44,7 @@ on:
         - v1.31
         - v1.32
         - v1.33
+        - v1.34
       mode:
         description: Kubewarden install mode
         type: choice
@@ -179,7 +181,7 @@ jobs:
 
         case ${{github.event_name}} in
           workflow_dispatch)
-            KUBEWARDEN=${{ inputs.kubewarden }}
+            KUBEWARDEN=${{ inputs.kubewarden != 'auto' && inputs.kubewarden || '' }}
             # Translate input to semver constraint
             RANCHER=${RANCHER/released/*}
             RANCHER=${RANCHER%(devel)}
