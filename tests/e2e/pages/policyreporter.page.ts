@@ -25,11 +25,11 @@ export class PolicyReporterPage extends BasePage {
     }
 
     @step
-    async selectTab(name: 'Dashboard' | 'Other' | 'Policy Dashboard' | 'Kubewarden') {
+    async selectTab(name: 'Dashboard' | 'Other' | 'PSP' | 'Policy Dashboard' | 'Kubewarden') {
       const menuButton = this.frame.locator('header').locator('i.mdi-menu')
       const menuActive = this.frame.locator('nav.v-navigation-drawer.v-navigation-drawer--active')
       const overlay = this.frame.locator('div.v-navigation-drawer__scrim')
-      const tabItem = this.frame.locator('nav').getByRole('link', { name, exact: true })
+      const tabItem = this.frame.locator('nav').locator('a', { has: this.page.getByText(name, { exact: true }) })
 
       // Wait until iframe is loaded
       await expect(menuButton).toBeVisible()
