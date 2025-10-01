@@ -11,9 +11,9 @@ import { Common } from './components/common'
 
 const conf = {
   // Install UI extension from: source (yarn dev), github (github tag), prime (official)
-  ui_from: process.env.ORIGIN as 'source'|'github'|'prime'|undefined,
-  // How to install Kubewarden: manual (from UI extension), fleet, upgrade (previously version)
-  kw_mode: process.env.MODE as 'manual'|'fleet'|'upgrade'|undefined,
+  ui_from: (process.env.ORIGIN || undefined) as 'source'|'github'|'prime'|undefined,
+  // How to install Kubewarden: manual (from UI extension), fleet, upgrade (previous version)
+  kw_mode: (process.env.MODE || undefined) as 'manual'|'fleet'|'upgrade'|undefined,
   // Fetch Kubewarden versions from github for upgrade test
   upMap  : [] as AppVersion[]
 }
@@ -22,9 +22,14 @@ if (conf.ui_from) expect(conf.ui_from).toMatch(/^(source|github|prime)$/)
 if (conf.kw_mode) expect(conf.kw_mode).toMatch(/^(manual|fleet|upgrade)$/)
 
 // Configure defaults after env is loaded
-test.beforeAll(async() => {
-  conf.ui_from ??= RancherUI.isPrime ? 'prime' : 'github'
-  conf.kw_mode ??= 'manual'
+test.beforeAll(async({ request }) => {
+  // Use local build (yarn serve), prime (if available) or github
+  conf.ui_from ||= await request.head('http://127.0.0.1:4500/')
+    .then(() => 'source' as const)
+    .catch(() => RancherUI.isPrime ? 'prime' : 'github')
+
+  // Default to manual mode, unless fleet or upgrade is requested
+  conf.kw_mode ||= 'manual'
 
   if (conf.kw_mode === 'upgrade') {
     conf.upMap = (await Common.fetchVersionMap()).splice(-3)
