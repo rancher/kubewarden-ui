@@ -84,8 +84,8 @@ export abstract class BasePolicyPage extends BasePage {
       aware   : this.page.getByText('Context Aware'),
       mutation: this.page.getByText('Mutation'),
     }
-    for (const o in optionMap) {
-      if (options && options[o] !== undefined) {
+    for (const o of Object.keys(optionMap) as (keyof typeof optionMap)[]) {
+      if (options?.[o] !== undefined) {
         cards = options[o] ? cards.filter({ has: optionMap[o] }) : cards.filter({ hasNot: optionMap[o] })
       }
     }

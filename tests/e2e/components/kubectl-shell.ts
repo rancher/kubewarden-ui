@@ -151,7 +151,7 @@ export class Shell {
     let cmdOutput: string
     try {
       cmdOutput = execSync(cmd, { timeout }).toString()
-    } catch (e) {
+    } catch (e: any) {
       cmdStatus = e.status
       cmdOutput = e.stderr.toString()
     }
