@@ -79,7 +79,7 @@ test('Create with invalid values', async({ page, ui, nav }) => {
   await ui.button('Create').click()
   await psPage.setName('in valid')
   await ui.button('Create').click()
-  await expect(page.getByRole('banner').getByText('Invalid value: "in valid"')).toBeVisible()
+  await expect(page.locator('#cru-errors').getByText('Invalid value: "in valid"')).toBeVisible()
 })
 
 test('Create with custom values', async({ page, ui, nav }) => {
