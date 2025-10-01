@@ -33,6 +33,9 @@ test.beforeAll(async({ request }) => {
 
   if (conf.kw_mode === 'upgrade') {
     conf.upMap = (await Common.fetchVersionMap()).splice(-3)
+    if (conf.upMap.length === 0) {
+      throw new Error('No compatible version was found, check rancher-version annotations')
+    }
   }
 })
 
