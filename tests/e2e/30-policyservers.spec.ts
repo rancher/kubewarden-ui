@@ -2,6 +2,7 @@ import semver from 'semver'
 import { test, expect } from './rancher/rancher-test'
 import { PolicyServersPage, PolicyServer } from './pages/policyservers.page'
 import { Policy, AdmissionPoliciesPage, ClusterAdmissionPoliciesPage } from './pages/policies.page'
+import { RancherUI } from './components/rancher-ui'
 
 const expect3m = expect.configure({ timeout: 3 * 60_000 })
 
@@ -87,12 +88,15 @@ test('Create with custom values', async({ page, ui, nav }) => {
   const ps = { name: 'test-policyserver', image: 'ghcr.io/kubewarden/policy-server:latest', replicas: 2 }
   await psPage.create(ps, { wait: false })
 
-  await nav.pservers(ps.name)
-  await ui.showConfiguration()
-  await expect(ui.input('Name*')).toHaveValue(ps.name)
-  await expect(ui.input('Image URL')).toHaveValue(ps.image)
-  await expect(ui.input('Replicas*')).toHaveValue(ps.replicas.toString())
-  await ui.hideConfiguration()
+  // https://github.com/rancher/kubewarden-ui/issues/1310
+  if (RancherUI.isVersion('<2.13')) {
+    await nav.pservers(ps.name)
+    await ui.showConfiguration()
+    await expect(ui.input('Name*')).toHaveValue(ps.name)
+    await expect(ui.input('Image URL')).toHaveValue(ps.image)
+    await expect(ui.input('Replicas*')).toHaveValue(ps.replicas.toString())
+    await ui.hideConfiguration()
+  }
 
   await psPage.delete(ps.name)
 })
