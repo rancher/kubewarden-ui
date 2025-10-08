@@ -24,9 +24,10 @@ export const managedApps = {
     yaml     : (y) => { y.crds.enabled = true }
   },
   openTelemetry: {
+    // https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/UPGRADING.md
     title    : 'opentelemetry-operator', name     : 'opentelemetry-operator', namespace: 'open-telemetry', check    : 'opentelemetry-operator', version  : process.env.OTEL_OPERATOR,
     repo     : { name: 'open-telemetry', url: 'https://open-telemetry.github.io/opentelemetry-helm-charts' },
-    yaml     : (y) => { y.manager.collectorImage.repository = 'otel/opentelemetry-collector-contrib' }
+    yaml     : (y) => { y.manager.collectorImage.repository = 'ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib' }
   },
   jaeger: {
     title    : 'jaeger-operator', name     : 'jaeger-operator', namespace: 'jaeger', check    : 'jaeger-operator',
