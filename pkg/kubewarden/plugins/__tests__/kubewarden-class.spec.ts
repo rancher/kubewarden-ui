@@ -128,6 +128,84 @@ describe('KubewardenModel', () => {
     });
   });
 
+  describe('showConfiguration', () => {
+    let commit: jest.Mock;
+    let $ctx: any;
+
+    beforeEach(() => {
+      commit = jest.fn();
+      $ctx = { commit };
+      
+      // Mock the properties that might already exist
+      if (instance.$ctx) {
+        instance.$ctx.commit = commit;
+      } else {
+        Object.defineProperty(instance, '$ctx', { value: $ctx, writable: true });
+      }
+      
+      Object.defineProperty(instance, '$route', { 
+        value: { params: { cluster: 'test-cluster' } },
+        writable: true
+      });
+      Object.defineProperty(instance, 'type', { 
+        value: 'policies.kubewarden.io.policyserver',
+        writable: true
+      });
+      Object.defineProperty(instance, 'id', { 
+        value: 'test-id',
+        writable: true
+      });
+    });
+
+    it('opens slide-in panel with ResourceDetailDrawer', async () => {
+      // Mock the dynamic import
+      const mockComponent = { default: 'ResourceDetailDrawer' };
+      jest.doMock('@shell/components/Drawer/ResourceDetailDrawer', () => mockComponent);
+
+      await instance.showConfiguration('test-selector');
+
+      expect(commit).toHaveBeenCalledWith(
+        'slideInPanel/open',
+        expect.objectContaining({
+          component: mockComponent,
+          componentProps: expect.objectContaining({
+            resource: instance,
+            width: '73%',
+            height: '100vh',
+            top: '0',
+            'z-index': 101,
+            closeOnRouteChange: ['name', 'params', 'query'],
+            triggerFocusTrap: true,
+            returnFocusSelector: 'test-selector'
+          })
+        }),
+        { root: true }
+      );
+    });
+
+    it('handles missing route params gracefully', async () => {
+      Object.defineProperty(instance, '$route', { 
+        value: {},
+        writable: true
+      });
+      
+      const mockComponent = { default: 'ResourceDetailDrawer' };
+      jest.doMock('@shell/components/Drawer/ResourceDetailDrawer', () => mockComponent);
+
+      await instance.showConfiguration();
+
+      expect(commit).toHaveBeenCalledWith(
+        'slideInPanel/open',
+        expect.objectContaining({
+          componentProps: expect.objectContaining({
+            returnFocusSelector: undefined
+          })
+        }),
+        { root: true }
+      );
+    });
+  });
+
   describe('Exported functions', () => {
     describe('colorForStatus', () => {
       it('returns correct colors for known statuses', () => {

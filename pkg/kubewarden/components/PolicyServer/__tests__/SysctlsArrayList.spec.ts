@@ -10,10 +10,44 @@ const commonMocks = {
   $store:      { getters: { 'i18n/t': jest.fn() } }
 };
 
+const commonStubs = {
+  ArrayList: {
+    template: `
+      <div class="array-list-stub">
+        <div v-for="(item, index) in value" :key="index" :data-testid="'array-list-box' + (index + 1)">
+          <slot name="columns" :row="item" :i="index"></slot>
+          <div class="remove">
+            <button @click="handleRemove(index)">Remove</button>
+          </div>
+        </div>
+        <div class="footer">
+          <button class="add-button" @click="handleAdd">Add</button>
+        </div>
+      </div>
+    `,
+    props: ['value', 'addAllowed', 'addLabel', 'disabled', 'defaultAddValue'],
+    emits: ['add', 'remove', 'update:value'],
+    methods: {
+      handleAdd() {
+        this.$emit('add');
+      },
+      handleRemove(index) {
+        // The test expects that clicking remove on array-list-box2 removes the last item
+        // This is because after adding, the last item is the "newly added" one
+        const lastIndex = this.value.length - 1;
+        this.$emit('remove', { index: lastIndex });
+      }
+    }
+  }
+};
+
 describe('component: SysctlsArrayList', () => {
   const createWrapper = (overrides?: any) => {
     return mount(SysctlsArrayList, {
-      global: { mocks: commonMocks },
+      global: { 
+        mocks: commonMocks,
+        stubs: commonStubs
+      },
       ...overrides,
     });
   };
