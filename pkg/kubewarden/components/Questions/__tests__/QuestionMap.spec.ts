@@ -20,7 +20,13 @@ const commonMocks = {
 
 const commonStubs = {
   'v-select':     { template: '<span />' },
-  LabeledTooltip: { template: '<span />' }
+  LabeledTooltip: { template: '<span />' },
+  Tab: { template: '<div class="tab-stub"><slot /></div>' },
+  ArrayList: {
+    template: '<div class="array-list-stub"><slot name="columns" :row="{value: \'test\'}" :i="0"></slot></div>',
+    props: ['value', 'addAllowed', 'addLabel', 'disabled', 'defaultAddValue'],
+    emits: ['update:value']
+  }
 };
 
 const createWrapper = (component: any, overrides?: any) => {

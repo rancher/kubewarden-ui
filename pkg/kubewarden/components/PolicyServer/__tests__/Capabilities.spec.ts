@@ -9,11 +9,21 @@ const commonMocks = {
   $store:      { getters: { 'i18n/t': jest.fn() } }
 };
 
+const commonStubs = {
+  ArrayList: {
+    template: '<div class="array-list-stub"><slot name="columns" :row="{value: \'NET_ADMIN\'}" :i="0"></slot></div>',
+    props: ['value', 'addAllowed', 'addLabel', 'disabled', 'defaultAddValue'],
+    emits: ['update:value']
+  }
+};
 
 describe('component: Capabilities', () => {
   const createWrapper = (overrides?: any) => {
     return mount(Capabilities, {
-      global: { mocks: commonMocks },
+      global: { 
+        mocks: commonMocks,
+        stubs: commonStubs
+      },
       ...overrides,
     });
   };
