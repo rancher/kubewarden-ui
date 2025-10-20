@@ -266,7 +266,7 @@ watchEffect(() => {
         v-model:value="value.spec.priorityClassName"
         data-testid="ps-config-priority-class-name-select"
         :mode="mode"
-        resource-type="PriorityClass"
+        resource-type="scheduling.k8s.io.priorityclass"
         :label="t('kubewarden.policyServerConfig.priorityClassName.label')"
       />
       </div>

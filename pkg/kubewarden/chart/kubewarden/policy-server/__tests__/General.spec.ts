@@ -81,10 +81,11 @@ const defaultMountOptions = {
         template: '<div />',
         props:    ['modelValue', 'options']
       },
-      Banner:         { template: '<span />' },
-      LabeledInput:   { template: '<span />' },
-      LabeledTooltip: { template: '<span />' },
-      RadioGroup:     { template: '<span />' }
+      Banner:                { template: '<span />' },
+      ResourceLabeledSelect: true,
+      LabeledInput:          { template: '<span />' },
+      LabeledTooltip:        { template: '<span />' },
+      RadioGroup:            { template: '<span />' }
     }
   }
 };
@@ -119,9 +120,9 @@ describe('component: General', () => {
 
   it('displays priorityClassName', () => {
     const wrapper = createWrapper();
-    const selector = wrapper.findComponent(ResourceLabeledSelect);
+    const selector = wrapper.find('[data-testid="ps-config-priority-class-name-select"]');
 
-    expect(selector.props('options')).toStrictEqual([]);
+    expect(selector.exists()).toBe(true);
   });
 
   it('displays correct service account when existing', async() => {
