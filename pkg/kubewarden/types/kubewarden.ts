@@ -97,6 +97,7 @@ export interface PolicyServer {
     env: V1EnvVar[];
     image?: string;
     replicas?: number;
+    priorityClassName?: string;
     securityContexts?: {
       container?: V1SecurityContext;
       pod?: V1PodSecurityContext;

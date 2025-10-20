@@ -21,6 +21,7 @@ import {
 } from '@kubewarden/types';
 import { findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
 
+import ResourceLabeledSelect from '@shell/components/form/ResourceLabeledSelect';
 import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
@@ -257,6 +258,17 @@ watchEffect(() => {
           :mode="mode"
           :label="t('kubewarden.policyServerConfig.replicas')"
         />
+      </div>
+    </div>
+    <div class="row mt-20">
+      <div class="col span-6">
+      <ResourceLabeledSelect
+        v-model:value="value.spec.priorityClassName"
+        data-testid="ps-config-priority-class-name-select"
+        :mode="mode"
+        resource-type="PriorityClass"
+        :label="t('kubewarden.policyServerConfig.priorityClassName.label')"
+      />
       </div>
     </div>
   </div>
