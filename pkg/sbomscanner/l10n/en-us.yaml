@@ -1,0 +1,364 @@
+product:
+  imageScanner: Image Vulnerability Scanner
+imageScanner:
+  installationWizard: 
+    repo4CertManager:
+      title: Add the Cert-manager Helm repository
+      description: Cert-manager creates TLS certificates for workloads in your Kubernetes cluster and renews the certificates before they expire.
+    repo4Cnpg:
+      title: Add the CNPG Helm repository
+      description: To customize the CloudNativePG installation, add the CNPG Helm repository to your Helm client to access the SBOMScanner chart. You can also skip this step to bring your own PostgreSQL instance instead of using CloudNativePG
+    repo4Sbomscanner:
+      title: Add the SBOMScanner Helm repository
+      description: Add the SBOMScanner Helm repository to your Helm client to access the SBOMScanner chart.
+    install4CertManager:
+      title: Installation for cert-manager
+      description: Install and configure cert-manager through Rancher manager
+    install4Cnpg:
+      title: Installation for CloudNativePG
+      description: Install and configure CNPG through Rancher manager to have customized database for SBOMScanner.
+    install4Sbomscanner:
+      title: Installation for SBOMScanner
+      description: Install and configure SBOMScanner Image Vulnerability Scanner to get a comprehensive view of your container image vulnerabilities and risk assessment across all your registries.
+    button:
+      skipToSbomscannerRepo: Skip to Repository of Sbomscanner
+      previous: previous
+  dashboard:
+    title: Dashboard
+    subtitle: Main highlights as of
+    description: Main highlights and overview of image vulnerability scanning status
+    lastUpdated: Last updated
+    button:
+      refresh: Refresh
+    registryDropdown:
+      placeholder: All registries
+    vulnerabilityStats:
+      title: Affecting vulnerabilities distribution
+      critical: Critical
+      high: High
+      medium: Medium
+      low: Low
+      total: Total vulnerabilities
+    scanningStatus:
+      title: Scanning stats
+      lastScan: Last scan
+      totalImages: scanned in total
+      failedScans: Failed scans
+      initialDuration: No scan has been run yet
+      durationSubtitle: passed since the last scan
+      imageCntSubtitle: failed to be scanned
+      errorSubtitle: detected in the last scan
+      errors: Errors
+    topVulnerabilities:
+      title: Most severe, affecting vulnerabilities
+      viewAll: View all
+      affectedImages: affected images
+    mostAffectedImages:
+      title: Most affected images at risk
+      viewAll: View all
+      totalVulns: total vulnerabilities
+    appInstall:
+      title: Install SBOMScanner
+      description: Get a comprehensive view of your container image vulnerabilities and risk assessment across all your registries.
+      button: Install Image Vulnerability Scanner
+      reload: Unable to fetch SBOMScanner Helm chart - reload required.
+      checking: Checking...
+      versionError:
+        title: Chart Version not found.
+        message: Unable to determine the latest stable version of the SBOMScanner chart. Please make sure the Helm repository is configured correctly.
+  registries:
+    title: Registries configuration
+    button:
+      addNew: Create
+      refresh: Refresh data
+      startScan: Start scan
+      delete: Delete
+    recentUpdatedRegistries:
+      title: Latest status updates
+      tooltip: The most recent status for each configured registry scan. A registry may be listed multiple times for separate configurations.
+    StatusDistribution:
+      title: Status distribution
+      subTitle: registry scans
+      tooltip: A summary of the current status across all your configured registry scans.
+    registrytable:
+      filters:
+        placeholder:
+          name: Search by name
+          address: Search by address
+      selection:
+        registry: registry selected
+        registries: registries selected
+      header:
+        scan: Scan
+        registry: Registry
+        uri: URI
+        namespace: Namespace
+        repos: Repositories
+        schedule: Scan interval
+        status: Status
+        progress: Progress
+        prevScan: Previous scan
+    configuration:
+      cru:
+        description: Start from scratch by using the steps below or go back and clone an existing configuration
+        registry:
+          label: Registry
+          type:
+            label: Type
+            ecr: Docker Hub Registry
+            custom: Custom Registry
+            placeholder: Choose a registry type
+          uri:
+            label: URI
+            placeholder: "The registry address URI"
+        proxy:
+          enable: Use the embedded proxy
+          tooltip: "When enabled, Rancher routes all registry traffic through its secure proxy instead of direct connections."
+        authentication:
+          label: Authentication
+        scan:
+          label: Scanning
+          repoName: Repositories to scan
+          placeholder:
+            ociDistribution: Leave empty to scan all. Type and press Enter to add repositories.
+            nocatalog: Add at least one repository. Type and press Enter to add.
+          schedule:
+            label: Scan Interval
+            manualScan: Manual scan
+            placeholder: Selecting '{manualScan}' disables automatic scanning
+      scan: Start Scan
+      meta:
+        namespace: Namespace
+        uri: URI
+        repositories: Repositories
+        schedule: Schedule
+      scanTable:
+        header:
+          status: Status
+          since: Since
+          progress: Progress
+          imagesScanned: Images scanned
+          imagesFound: Images found
+          error: Error
+    detail:
+      description: Registry configuration description
+    messages:
+      registryScanFailed: Registry scan failed to start
+      registryScanComplete: Registry scan is started successfully
+  images:
+    title: Images
+    downloadReport: Download full report
+    downloadSBOM: Download SBOM
+    downloadImageDetailReport: Image detail report (CSV)
+    downloadVulnerabilityReport: Vulnerability report (JSON)
+    imageBySeverityChart:
+      title: Most affected images at risk
+    imageRiskAssessment:
+      title: Image risk assessment
+      subTitle: images in total
+    filters:
+      image:
+        allImages: All images
+        excludeBaseImages: Exclude base images
+        includeBaseImages: Include base images only
+      cve:
+        allCves: All identified CVEs
+        affectingCvesOnly: Affecting CVEs only
+    buttons:
+      downloadCustomReport: Download custom report
+      downloadSbom: Download SBOM
+      downloadCsv: Image detail report (CSV)
+      downloadJson: Vulnerability report (JSON)
+    listTable:
+      checkbox:
+        groupByRepo: Group by repository
+      headers:
+        imageName: Image Reference
+        identifiedCVEs: CVEs
+        repository: Repository
+        registry: Registry
+        imageId: Image ID
+        platform: Platform
+        vulnerabilities: Vulnerabilities
+      filters:
+        placeholder:
+          image: Search by name
+        label:
+          image: Image
+          severity: Severity
+          repository: Repository
+          registry: Registry
+          platform: OS
+  imageDetails:
+    status: Status
+    vulnerabilities: Vulnerabilities
+    repository: Repository
+    registry: Registry
+    architecture: Architecture
+    operatingSystem: Operating system
+    size: Size
+    author: Author
+    dockerVersion: Docker version
+    created: Created
+    showAllProperties: Show all image properties
+    showLessProperties: Show less properties
+    imageId: Image ID
+    layers: Layers
+    groupByLayer: Group by layer
+    mostSevereVulnerabilities:
+      title: Most severe, affecting vulnerabilities
+      tooltip: A list of the most severe vulnerabilities confirmed to be exploitable in your code, sorted by CVSS score.
+    fixAvailable: Fix available
+    noFixAvailable: No fix available
+    severityDistribution:
+      title: Severity distribution
+      subTitle: vulnerabilities
+      tooltip: A summary of all affecting vulnerabilities, categorized by their severity level.
+    searchById: Search by ID
+    searchByIdPlaceholder: Search CVE ID
+    score: Score
+    searchByName: Search by name
+    searchByNamePlaceholder: Search package name
+    any: Any
+    available: Available
+    notAvailable: Not available
+    severity: Severity
+    exploitability: Exploitability
+    affected: Affected
+    suppressed: Suppressed
+    not-affected: Not affected
+    investigating: Investigating
+    fixed: Fixed
+    no-vex-data: No VEX data
+    noVexData: No VEX data
+    selected: selected
+    table:
+      headers:
+        cveId: CVE ID
+        score: Score
+        package: Package
+        layerId: Layer
+        vulnerabilities: Vulnerabilities
+        updated: Updated
+        size: Size
+        fixAvailable: Fix available
+        severity: Severity
+        exploitability: Exploitability
+        packageVersion: Package version
+        packagePath: Package path
+  vulnerabilities:
+    title: Vulnerabilities
+    vulnerabilitiesBySeverityChart:
+      title: Most severe, affecting vulnerabilities
+    severityDistribution:
+      title: Severity distribution
+      subTitle: vulnerabilities in total
+    table:
+      headers:
+        cve: CVE ID
+        score: Score
+        affectedImages: Affected images
+        severity: Severity
+        identifiedImages: Images identified in
+    details:
+      score: Score
+      affectedImages: Affected images
+      imageIdentifiedIn: Image identified in
+      published: Published
+      lastModified: Last modified
+      source: Source
+      advisoryVendors: Advisory vendors
+      cvssScores: CVSS scores
+      table:
+        headers:
+          imageName: Image name
+          package: Package
+          status: Status
+          fixVersion: Fix available
+          packageVersion: Package version
+          packagePath: Package path
+          repository: Repository
+          registry: Registry
+  vexManagement:
+    title: VEX management
+    description: Configure the security scanner to use up-to-date VEX reports. This will prioritize remediation efforts, focusing on vulnerabilities that are confirmed to be exploitable and reducing the noise coming from false positives.
+    button:
+      create: Create
+    buttons:
+      enable: Enable
+      disable: Disable
+      delete: Delete
+      editConfiguration: Edit configuration
+    actions:
+      clone: Clone
+      editConfig: Edit configuration
+      editYaml: Edit YAML
+    table:
+      headers:
+        status: Status
+        name: Name
+        uri: URI
+        createdBy: Created by
+        lastSync: Last sync
+        updated: Updated
+        actions: Actions
+    cru:
+      name: Name
+      desc:
+        placeholder: Any text you want that better describes this entry
+      uri:
+        label: VEX hub URI
+        placeholder: A valid URI address
+      enable:
+        label: Enabled
+        tooltip: Controls whether this VEX entry is active in vulnerability assessments.
+    detail:
+      description: VEX management hub description, if any
+  enum:
+    cve:
+      critical: Critical
+      high: High
+      medium: Medium
+      low: Low
+      none: None
+      unknown: None
+      suppressed: Suppressed
+    status:
+      pending: Pending
+      scheduled: Scheduled
+      inprogress: In progress
+      complete: Finished
+      failed: Failed
+      none: n/a
+      enabled: Enabled
+      disabled: Disabled
+    prevScan:
+      none: n/a
+      scheduled: Scheduled
+      inprogress: In progress
+      complete: Finished at
+      failed: Failed at
+  general:
+    refresh: Refresh data
+    ago: ago
+    justNow: Just now
+    none: none
+    error: Error
+    at: at
+    schedule: Every {i}
+    reload: Reload
+    any: Any
+    every: Every
+    unknown: Unknown
+
+typeLabel:
+  sbomscanner.kubewarden.io.registry: Registries configuration
+  sbomscanner.kubewarden.io.vexhub: Vex Management
+  storage.sbomscanner.kubewarden.io.image: Image
+  storage.sbomscanner.kubewarden.io.vulnerabilityreport: Vulnerability Report
+  storage.sbomscanner.kubewarden.io.sbom: SBOM
+
+resources:
+  image: storage.sbomscanner.kubewarden.io.image
+  vulnerabilityreport: storage.sbomscanner.kubewarden.io.vulnerabilityreport
+  sbom: storage.sbomscanner.kubewarden.io.sbom
