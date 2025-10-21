@@ -11,19 +11,13 @@ import { Banner } from '@components/Banner';
 import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
 import {
-  SBOMSCANNER, SBOMSCANNER_REPOS, CNPG, CNPG_REPOS, CERT_MANAGER, CERT_MANAGER_REPOS
+  SBOMSCANNER, SBOMSCANNER_REPOS, CNPG, CNPG_REPOS
 } from '@pkg/types';
 import { handleGrowl } from '@pkg/utils/handle-growl';
 import { refreshCharts, getLatestVersion } from '@pkg/utils/chart';
 import InstallWizard from '@pkg/components/common/InstallWizard';
 
 export default {
-  props: {
-    hasSchema: {
-      type:     Object,
-      default:  null
-    }
-  },
 
   components: {
     AsyncButton,
@@ -46,11 +40,6 @@ export default {
         chartName: CNPG_REPOS.CHARTS_REPO_NAME,
         init
       });
-      refreshCharts({
-        store:     this.$store,
-        chartName: SBOMSCANNER_REPOS.CHARTS_REPO_NAME,
-        init
-      });
     }, 500);
 
     await this.load();
@@ -58,11 +47,6 @@ export default {
 
   data() {
     const installSteps = ref([
-      {
-        name:  'repository4CertManager',
-        label: 'Cert-manager Repo',
-        ready: false,
-      },
       {
         name:  'repository4Cnpg',
         label: 'CNPG Repo',
@@ -93,16 +77,14 @@ export default {
 
   watch: {
     combinedWacthedValues: {
-      async handler([newCertManagerRepo, newCnpgRepo, newSbomscannerRepo], [oldCertManagerRepo, oldCnpgRepo, oldSbomscannerRepo]) {
+      async handler([newCnpgRepo, newSbomscannerRepo], [oldCnpgRepo, oldSbomscannerRepo]) {
         let stepNum = 1;
 
         await this.$nextTick();
-        if (newCertManagerRepo !== oldCertManagerRepo || newCnpgRepo !== oldCnpgRepo || newSbomscannerRepo !== oldSbomscannerRepo) {
-          if (newCertManagerRepo && newCnpgRepo && newSbomscannerRepo) {
-            stepNum = 4;
-          } else if (newCertManagerRepo && newCnpgRepo) {
+        if (newCnpgRepo !== oldCnpgRepo || newSbomscannerRepo !== oldSbomscannerRepo) {
+          if (newCnpgRepo && newSbomscannerRepo) {
             stepNum = 3;
-          } else if (newCertManagerRepo) {
+          } else if (newCnpgRepo) {
             stepNum = 2;
           } else {
             stepNum = 1;
@@ -132,7 +114,7 @@ export default {
      * the sbomscannerRepo. This is because the repo is not saved to the store?
      */
     combinedWacthedValues() {
-      return [this.certManagerRepo, this.cnpgRepo, this.sbomscannerRepo];
+      return [this.cnpgRepo, this.sbomscannerRepo];
     },
 
     controllerChart4Sbomscanner() {
@@ -159,18 +141,6 @@ export default {
       return null;
     },
 
-    controllerChart4CertManager() {
-      if (this.certManagerRepo) {
-        return this.$store.getters['catalog/chart']({
-          repoName:  this.certManagerRepo.id,
-          repoType:  'cluster',
-          chartName: CERT_MANAGER.CHART_NAME
-        });
-      }
-
-      return null;
-    },
-
     sbomscannerRepo() {
       const chart = this.charts?.find((chart) => chart.chartName === SBOMSCANNER.CONTROLLER);
 
@@ -183,22 +153,12 @@ export default {
       return this.repos?.find((repo) => repo.id === chart?.repoName);
     },
 
-    certManagerRepo() {
-      const chart = this.charts?.find((chart) => chart.chartName === CERT_MANAGER.CONTROLLER);
-
-      return this.repos?.find((repo) => repo.id === chart?.repoName);
-    },
-
     hasSbomscannerSchema() {
       return this.$store.getters['cluster/schemaFor'](SBOMSCANNER.SCHEMA);
     },
 
     hasCnpgSchema() {
       return this.$store.getters['cluster/schemaFor'](CNPG.SCHEMA);
-    },
-
-    hasCertManagerSchema() {
-      return this.$store.getters['cluster/schemaFor'](CERT_MANAGER.SCHEMA);
     }
   },
 
@@ -206,77 +166,26 @@ export default {
     async load() {
       this.reloadReady = false;
 
-      if (!this.hasSchema) {
-        if (this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO)) {
-          await this.$fetchType(CATALOG.CLUSTER_REPO);
-        }
-
-        if (this.certManagerRepo) {
-          setTimeout(() => {
-            this.installSteps[1].ready = true;
-            this.$refs.wizard?.goToStep(2, true);
-          }, 500);
-        }
-
-        if (this.cnpgRepo) {
-          setTimeout(() => {
-            this.installSteps[2].ready = true;
-            this.$refs.wizard?.goToStep(3, true);
-          }, 500);
-        }
-
-        if (this.sbomscannerRepo) {
-          setTimeout(() => {
-            this.installSteps[3].ready = true;
-            this.$refs.wizard?.goToStep(4, true);
-          }, 500);
-        }
-
-        if (!this.sbomscannerRepo || !this.controllerChart4Sbomscanner) {
-          this.debouncedRefreshCharts(true);
-        }
+      if (this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO)) {
+        await this.$fetchType(CATALOG.CLUSTER_REPO);
       }
-    },
 
-    async addRepository4CertManager(btnCb) {
-      this.isSkipped = false;
-      if (this.certManagerRepo) {
-        this.installSteps[0].ready = true;
-        this.$refs.wizard?.goToStep(2);
-
-        return;
+      if (this.cnpgRepo) {
+        setTimeout(() => {
+          this.installSteps[2].ready = true;
+          this.$refs.wizard?.goToStep(2, true);
+        }, 500);
       }
-      try {
-        const certManagerRepoObj = await this.$store.dispatch('cluster/create', {
-          type:     CATALOG.CLUSTER_REPO,
-          metadata: { name: CERT_MANAGER_REPOS.CHARTS_REPO_NAME },
-          spec:     { url: CERT_MANAGER_REPOS.CHARTS_REPO },
-        });
 
-        try {
-          await certManagerRepoObj.save();
-        } catch (e) {
-          handleGrowl({
-            error: e,
-            store: this.$store
-          });
-          if (btnCb) {
-            btnCb(false);
-          }
+      if (this.sbomscannerRepo) {
+        setTimeout(() => {
+          this.installSteps[3].ready = true;
+          this.$refs.wizard?.goToStep(3, true);
+        }, 500);
+      }
 
-          return;
-        }
-        if (!this.controllerChart4CertManager) {
-          this.debouncedRefreshCharts();
-        }
-      } catch (e) {
-        handleGrowl({
-          error: e,
-          store: this.$store
-        });
-        if (btnCb) {
-          btnCb(false);
-        }
+      if (!this.sbomscannerRepo || !this.controllerChart4Sbomscanner) {
+        this.debouncedRefreshCharts(true);
       }
     },
 
@@ -376,7 +285,7 @@ export default {
     },
 
     chartRoute() {
-      if (!this.controllerChart4Sbomscanner && !this.controllerChart4Cnpg && !this.controllerChart4CertManager) {
+      if (!this.controllerChart4Sbomscanner && !this.controllerChart4Cnpg) {
         try {
           this.debouncedRefreshCharts();
         } catch (e) {
@@ -388,43 +297,7 @@ export default {
           return;
         }
       }
-      if (!this.hasCertManagerSchema) {
-        try {
-          const {
-            repoType, repoName, chartName, versions
-          } = this.controllerChart4CertManager;
-
-          const latestChartVersion = getLatestVersion(this.$store, versions);
-
-          if (latestChartVersion) {
-            const query = {
-              [REPO_TYPE]: repoType,
-              [REPO]:      repoName,
-              [CHART]:     chartName,
-              [VERSION]:   latestChartVersion
-            };
-
-            this.$router.push({
-              name:   'c-cluster-apps-charts-install',
-              params: { cluster: this.currentCluster?.id || '_' },
-              query,
-            });
-          } else {
-            const error = {
-              _statusText: this.t('imageScanner.dashboard.appInstall.versionError.title'),
-              message:     this.t('imageScanner.dashboard.appInstall.versionError.message')
-            };
-
-            handleGrowl({
-              error,
-              store: this.$store
-            });
-          }
-        } catch (error) {
-          this.installSteps[0].ready = false;
-          this.$refs.wizard?.goToStep(1);
-        }
-      } else if (!this.hasCnpgSchema && !this.isSkipped) {
+      if (!this.hasCnpgSchema && !this.isSkipped) {
         try {
           const {
             repoType, repoName, chartName, versions
@@ -508,7 +381,7 @@ export default {
     class="container"
   >
     <div
-      v-if="!install && !cnpgRepo && !sbomscannerRepo && !certManagerRepo"
+      v-if="!install && !cnpgRepo && !sbomscannerRepo"
       class="title p-10"
     >
       <div class="logo mt-20 mb-10">
@@ -527,7 +400,6 @@ export default {
         {{ t("imageScanner.dashboard.appInstall.description") }}
       </div>
       <button
-        v-if="!hasSchema"
         class="btn role-primary mt-20"
         data-testid="sb-initial-install-button"
         @click="install = true"
@@ -548,22 +420,6 @@ export default {
           data-testid="sb-install-wizard"
           style="width: 100%;"
         >
-          <template #repository4CertManager>
-            <h2
-              class="mt-20 mb-10"
-              data-testid="sb-repo-title"
-            >
-              {{ t("imageScanner.installationWizard.repo4CertManager.title") }}
-            </h2>
-            <p class="mb-20">
-              {{ t("imageScanner.installationWizard.repo4CertManager.description") }}
-            </p>
-            <AsyncButton
-              mode="certManagerRepository"
-              data-testid="sb-repo-add-button"
-              @click="addRepository4CertManager"
-            />
-          </template>
           <template #repository4Cnpg>
             <h2
               class="mt-20 mb-10"
@@ -614,18 +470,7 @@ export default {
           </template>
 
           <template #install>
-            <div v-if="!hasCertManagerSchema">
-              <h2
-                class="mt-20 mb-10"
-                data-testid="sb-app-install-title"
-              >
-                {{ t("imageScanner.installationWizard.install4CertManager.title") }}
-              </h2>
-              <p class="mb-20">
-                {{ t("imageScanner.installationWizard.install4CertManager.description") }}
-              </p>
-            </div>
-            <div v-else-if="!hasCnpgSchema && !isSkipped">
+            <div v-if="!hasCnpgSchema && !isSkipped">
               <h2
                 class="mt-20 mb-10"
                 data-testid="sb-app-install-title"
@@ -650,12 +495,12 @@ export default {
 
             <div class="chart-route">
               <Loading
-                v-if="!controllerChart4Cnpg && !controllerChart4Sbomscanner && !controllerChart4CertManager && !reloadReady"
+                v-if="!controllerChart4Cnpg && !controllerChart4Sbomscanner && !reloadReady"
                 mode="relative"
                 class="mt-20"
               />
 
-              <template v-else-if="!controllerChart4Cnpg && !controllerChart4Sbomscanner && !controllerChart4CertManager && reloadReady">
+              <template v-else-if="!controllerChart4Cnpg && !controllerChart4Sbomscanner && reloadReady">
                 <Banner color="warning">
                   <span class="mb-20">
                     {{ t('imageScanner.dashboard.appInstall.reload' ) }}
@@ -674,10 +519,10 @@ export default {
                 <button
                   data-testid="sb-app-install-button"
                   class="btn role-primary mt-20"
-                  :disabled="!controllerChart4Cnpg && !controllerChart4Sbomscanner && !controllerChart4CertManager"
+                  :disabled="!controllerChart4Cnpg && !controllerChart4Sbomscanner"
                   @click.prevent="chartRoute"
                 >
-                  {{ t("imageScanner.dashboard.appInstall.button") }}
+                  {{ !controllerChart4Cnpg ? t("imageScanner.dashboard.appInstall.button4Cnpg") : t("imageScanner.dashboard.appInstall.button4Sbomscanner")}}
                 </button>
               </template>
             </div>

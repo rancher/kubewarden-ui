@@ -1,27 +1,21 @@
 product:
-  imageScanner: Image Vulnerability Scanner
+  imageScanner: SBOMScanner
 imageScanner:
   installationWizard: 
-    repo4CertManager:
-      title: Add the Cert-manager Helm repository
-      description: Cert-manager creates TLS certificates for workloads in your Kubernetes cluster and renews the certificates before they expire.
     repo4Cnpg:
       title: Add the CNPG Helm repository
       description: To customize the CloudNativePG installation, add the CNPG Helm repository to your Helm client to access the SBOMScanner chart. You can also skip this step to bring your own PostgreSQL instance instead of using CloudNativePG
     repo4Sbomscanner:
       title: Add the SBOMScanner Helm repository
       description: Add the SBOMScanner Helm repository to your Helm client to access the SBOMScanner chart.
-    install4CertManager:
-      title: Installation for cert-manager
-      description: Install and configure cert-manager through Rancher manager
     install4Cnpg:
       title: Installation for CloudNativePG
       description: Install and configure CNPG through Rancher manager to have customized database for SBOMScanner.
     install4Sbomscanner:
       title: Installation for SBOMScanner
-      description: Install and configure SBOMScanner Image Vulnerability Scanner to get a comprehensive view of your container image vulnerabilities and risk assessment across all your registries.
+      description: Install and configure SBOMScanner to get a comprehensive view of your container image vulnerabilities and risk assessment across all your registries.
     button:
-      skipToSbomscannerRepo: Skip to Repository of Sbomscanner
+      skipToSbomscannerRepo: Skip to Repository of SBOMScanner
       previous: previous
   dashboard:
     title: Dashboard
@@ -60,7 +54,8 @@ imageScanner:
     appInstall:
       title: Install SBOMScanner
       description: Get a comprehensive view of your container image vulnerabilities and risk assessment across all your registries.
-      button: Install Image Vulnerability Scanner
+      button4Cnpg: Install CloudNativePG
+      button4Sbomscanner: Install SBOMScanner
       reload: Unable to fetch SBOMScanner Helm chart - reload required.
       checking: Checking...
       versionError:

@@ -39,7 +39,6 @@ export default {
   <div v-if="allSchemas">
     <InstallView
       v-if="!hasSchema"
-      :has-schema="hasSchema"
     />
     <Dashboard v-else />
   </div>
