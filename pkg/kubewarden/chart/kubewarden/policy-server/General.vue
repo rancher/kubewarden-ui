@@ -160,6 +160,12 @@ watchEffect(() => {
 }
 );
 
+const mapPriorityClassNameUpdate = {
+  updateResources: (options: any[]) => options
+    .filter((option) => option.metadata.name === props.value.spec.priorityClassName)
+    .map((option) => option.name)
+};
+
 watchEffect(() => {
   if (!controllerApp.value && allApps.value.length) {
     const controller = allApps.value.find(
@@ -266,7 +272,9 @@ watchEffect(() => {
         v-model:value="value.spec.priorityClassName"
         data-testid="ps-config-priority-class-name-select"
         :mode="mode"
+        :key="value.spec.priorityClassName"
         resource-type="scheduling.k8s.io.priorityclass"
+        :get-option-label="(priorityClasses: any) => priorityClasses.metadata.name"
         :label="t('kubewarden.policyServerConfig.priorityClassName.label')"
       />
       </div>
