@@ -63,7 +63,6 @@ import DistributionChart from '@pkg/components/DistributionChart';
 import TopSevereVulnerabilitiesChart from '@pkg/components/TopSevereVulnerabilitiesChart';
 import DownloadCustomReport from '@pkg/components/common/DownloadCustomReport';
 import { VULNERABILITIES_TABLE } from '@pkg/config/table-headers';
-import { severityDistribution, cves } from '@pkg/data/sbomscanner.kubewarden.io.vulnerability';
 
 export default {
   name:       'Vulnerabilities',
@@ -83,7 +82,13 @@ export default {
 
     return {
       VULNERABILITIES_TABLE,
-      severityDistribution:     null,
+      severityDistribution:     {
+        critical: 0,
+        high:     0,
+        medium:   0,
+        low:      0,
+      },
+      cves: [],
       topSevereVulnerabilities: [],
       vulnerabilities:          [],
       selectedRows:             [],
@@ -93,10 +98,9 @@ export default {
   },
   async fetch() {
     // await this.$store.dispatch('sbomscanner/load');
-    this.severityDistribution = severityDistribution;
     const totalVulnerabilities = Object.values(this.severityDistribution).reduce((sum, value) => sum + value, 0);
 
-    this.vulnerabilities = cves.map((vul) => ({
+    this.vulnerabilities = this.cves.map((vul) => ({
       ...vul,
       spec: {
         ...vul.spec,
