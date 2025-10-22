@@ -1,6 +1,10 @@
 import { ImageVulnerability } from "@pkg/types";
 
 export function imageDetailsToCSV(vuls: ImageVulnerability[]): Object[] {
+  if (!vuls) {
+    return [];
+  }
+
   return vuls.map((vul) => {
     return {
       CVE_ID: vul.cve,
