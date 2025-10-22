@@ -18,7 +18,7 @@
             </span>
             <StatusBadge
               style="margin-left: 12px; margin-top: 6px;"
-              :status="registryStatus"
+              :status="registry?.scanRec.currStatus"
             />
           </h1>
           <span class="resource-header-description">
@@ -28,7 +28,7 @@
         <div class="resource-header-actions">
           <ScanButton
             v-if="canEdit"
-            :selected-registries="[{name: $route.params.id, namespace: $route.params.ns, currStatus: registryStatus}]"
+            :selected-registries="[{name: $route.params.id, namespace: $route.params.ns, currStatus: registry?.scanRec.currStatus}]"
             :reload-fn="loadData"
           />
           <ActionMenu
@@ -70,7 +70,6 @@ export default {
       RESOURCE,
       PAGE,
       registry:         null,
-      registryStatus:   null,
       registryMetadata: [],
       scanHistory:      [],
       canEdit:          getPermissions(this.$store.getters).canEdit,
@@ -86,7 +85,6 @@ export default {
         return rec.spec.registry === this.registry.metadata.name;
       });
 
-      this.registryStatus = this.registry.scanRec.currStatus;
       this.registryMetadata = [
         {
           type:  'text',

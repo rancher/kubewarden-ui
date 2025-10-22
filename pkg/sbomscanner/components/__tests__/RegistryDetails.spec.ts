@@ -94,7 +94,7 @@ describe('RegistryDetails.vue', () => {
     expect(storeMock.dispatch).toHaveBeenCalledWith('cluster/findAll', expect.any(Object));
 
     expect(wrapper.vm.registry).toEqual(registryMock);
-    expect(wrapper.vm.registryStatus).toBe('complete');
+    expect(wrapper.vm.registry.scanRec.currStatus).toBe('complete');
     expect(wrapper.vm.scanHistory).toEqual([{ spec: { registry: 'my-reg' } }]);
     expect(wrapper.vm.registryMetadata.length).toBeGreaterThan(0);
 

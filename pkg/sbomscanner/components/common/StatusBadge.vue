@@ -20,7 +20,7 @@ export default {
   props: {
     status: {
       type:    String,
-      default: '0'
+      default: ''
     },
   },
   computed: {
