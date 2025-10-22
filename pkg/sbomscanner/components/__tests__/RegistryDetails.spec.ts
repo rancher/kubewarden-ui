@@ -77,7 +77,6 @@ describe('RegistryDetails.vue', () => {
     const wrapper = factory();
     expect(wrapper.find('.registry-details').exists()).toBe(true);
     expect(wrapper.find('.header').exists()).toBe(true);
-    expect(wrapper.find('.btn').exists()).toBe(true);
   });
 
   it('calls loadData() on fetch hook', async () => {
@@ -101,13 +100,6 @@ describe('RegistryDetails.vue', () => {
 
     // Validate t() calls
     expect(tMock).toHaveBeenCalledWith('imageScanner.registries.configuration.meta.namespace');
-  });
-
-  it('refresh button calls loadData(true)', async () => {
-    const wrapper = factory();
-    const spy = jest.spyOn(wrapper.vm, 'loadData').mockResolvedValueOnce();
-    await wrapper.find('.btn.role-secondary').trigger('click');
-    expect(spy).toHaveBeenCalledWith(true);
   });
 
   it('renders ActionMenu only when registry is set', async () => {

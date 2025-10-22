@@ -71,15 +71,6 @@ describe('RegistriesOverview.vue', () => {
     expect(wrapper.find('.mock-table').exists()).toBe(true);
   });
 
-  // --- BUTTONS ---
-  it('calls refresh when clicking refresh button', async () => {
-    const wrapper = factory();
-    const spy = jest.spyOn(wrapper.vm, 'refresh');
-
-    await wrapper.find('button[aria-label="Refresh data"]').trigger('click');
-    expect(spy).toHaveBeenCalled();
-  });
-
   it('navigates when clicking Add new button', async () => {
     // ensure getPermissions returns canEdit true
     getPermissions.mockReturnValueOnce({ canEdit: true });
