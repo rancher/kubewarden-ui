@@ -39,6 +39,7 @@
             <i
               class="icon icon-question-mark"
               style="margin-left: .5rem;"
+              v-clean-tooltip="tooltip"
             ></i>
           </div>
           <div class="header-right">
@@ -152,6 +153,7 @@ export default {
       disabled:         false,
       // lastUpdatedTime: '',
       selectedRegistry: 'All registries',
+      tooltip:          this.t('imageScanner.dashboard.scanningStatus.tooltip'),
       // vulnerabilityStats: {
       //   critical: 0,
       //   high: 0,

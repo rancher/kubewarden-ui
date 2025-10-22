@@ -17,7 +17,7 @@
               {{ $route.params.id }}
             </span>
             <StatusBadge
-              style="margin-left: 12px"
+              style="margin-left: 12px; margin-top: 6px;"
               :status="registryStatus"
             />
           </h1>
@@ -26,15 +26,6 @@
           </span>
         </div>
         <div class="resource-header-actions">
-          <button
-            class="btn role-secondary"
-            aria-label="Refresh data"
-            type="button"
-            @click="loadData(true)"
-          >
-            <i class="icon icon-refresh"></i>
-            {{ t('imageScanner.general.refresh') }}
-          </button>
           <ScanButton
             v-if="canEdit"
             :selected-registries="[{name: $route.params.id, namespace: $route.params.ns, currStatus: registryStatus}]"
@@ -161,6 +152,7 @@ export default {
       /* layout */
       display: flex;
       align-items: flex-start;
+      justify-content: space-between;
       gap: 24px;
       align-self: stretch;
       /* style */

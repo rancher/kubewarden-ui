@@ -17,17 +17,6 @@
       <div class="header-right">
         <div class="header-btn">
           <button
-            mat-button
-            class="btn role-secondary"
-            aria-label="Refresh data"
-            type="button"
-            @click="refresh()"
-          >
-            <em class="icon-refresh-ss"></em>{{ t('imageScanner.registries.button.refresh') }}
-          </button>
-        </div>
-        <div class="header-btn">
-          <button
             v-if="canEdit"
             mat-button
             class="btn role-primary"

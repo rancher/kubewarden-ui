@@ -44,8 +44,10 @@ export default class Registry extends SteveModel {
     };
     const divider = { divider: true };
 
-    out.unshift(divider);
-    out.unshift(scanAction);
+    if (this.canEdit) {
+      out.unshift(divider);
+      out.unshift(scanAction);
+    }
 
     return out;
   }

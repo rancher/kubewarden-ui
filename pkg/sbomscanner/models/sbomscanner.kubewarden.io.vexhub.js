@@ -13,8 +13,6 @@ export default class SbomscannerRancherIoVexhub extends SteveModel {
       'download',
       'downloadYaml',
       'downloadyaml',
-      'viewYaml',
-      'goToViewYaml',
       'viewInApi',
       'showConfiguration',
     ]);
@@ -24,10 +22,15 @@ export default class SbomscannerRancherIoVexhub extends SteveModel {
     // Customize the edit action label
     out = out.map((action) => {
       // Check for various possible edit action names
-      if (action?.action === 'edit' || action?.action === 'goToEdit' || action?.action === 'editConfig') {
+      if (action?.action === 'edit' || action?.action === 'goToEdit' || action?.action === 'editConfiguration') {
         return {
           ...action,
           label: this.t('imageScanner.vexManagement.buttons.editConfiguration') || 'Edit configuration'
+        };
+      } else if (action?.action === 'view' || action?.action === 'goToView' || action?.action === 'viewConfiguration') {
+        return {
+          ...action,
+          label: this.t('imageScanner.vexManagement.buttons.viewConfiguration') || 'View configuration'
         };
       }
 
@@ -39,17 +42,16 @@ export default class SbomscannerRancherIoVexhub extends SteveModel {
 
     if (isEnabled) {
       // For enabled items: Disable, then other actions
-      const reordered = [toggle]; // Only the disable action
+      const reordered = super.canEdit ? [toggle] : []; // Only the disable action
 
       // Add other actions except delete (which goes last)
-      const otherActions = out.filter((a) => a && a.action !== 'promptRemove');
-
+      const otherActions = out.filter((a) => a && (a.action !== 'promptRemove' && (a.action !== 'goToClone' || super.canEdit)));
       reordered.push(...otherActions);
 
       // Add delete at the end
       const deleteAction = out.find((a) => a?.action === 'promptRemove');
 
-      if (deleteAction) {
+      if (deleteAction && this.canDelete) {
         reordered.push(deleteAction);
       }
 
@@ -67,13 +69,21 @@ export default class SbomscannerRancherIoVexhub extends SteveModel {
 
     // When disabled: Enable, then Delete
     const cloneAction = out.find((a) => a?.action === 'goToClone');
-    const returnActions = [toggle, ...(cloneAction && this.canEdit ? [cloneAction] : [])];
+    const returnActions = [...(super.canEdit ? [toggle] : []), ...(cloneAction && super.canEdit ? [cloneAction] : [])];
+
+    if (returnActions.length === 0) {
+      returnActions.push({
+        label:  this.t('imageScanner.general.noActions'),
+        enable: false,
+        action: null,
+      });
+    }
 
     return isDetailsPage ? returnActions.slice(1) : returnActions;
   }
 
   get canDelete() {
-    return !this.spec?.enabled && super.canDelete;
+    return this.spec?.enabled && super.canDelete;
   }
 
   get fullDetailPageOverride() {
@@ -83,8 +93,8 @@ export default class SbomscannerRancherIoVexhub extends SteveModel {
   get toggle() {
     const isEnabled = !!this.spec?.enabled;
 
-    return isEnabled
-      ? {
+    if (isEnabled) {
+      return {
         action:   'disable',
         label:    this.t('imageScanner.vexManagement.buttons.disable') || 'Disable',
         icon:     'icon icon-pause',
@@ -106,8 +116,9 @@ export default class SbomscannerRancherIoVexhub extends SteveModel {
             await this.save();
           }
         }
-      }
-      : {
+      };
+    } else {
+      return {
         action:   'enable',
         label:    this.t('imageScanner.vexManagement.buttons.enable') || 'Enable',
         icon:     'icon-play',
@@ -130,6 +141,7 @@ export default class SbomscannerRancherIoVexhub extends SteveModel {
           }
         }
       };
+    }
   }
 
   get listLocation() {

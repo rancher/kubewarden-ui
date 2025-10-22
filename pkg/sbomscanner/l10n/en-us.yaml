@@ -35,6 +35,7 @@ imageScanner:
       total: Total vulnerabilities
     scanningStatus:
       title: Scanning stats
+      tooltip: A high-level summary of the most recent scan, showing time elapsed, failed images, and any errors.
       lastScan: Last scan
       totalImages: scanned in total
       failedScans: Failed scans
@@ -54,6 +55,7 @@ imageScanner:
     appInstall:
       title: Install SBOMScanner
       description: Get a comprehensive view of your container image vulnerabilities and risk assessment across all your registries.
+      button4Entry: Start installation
       button4Cnpg: Install CloudNativePG
       button4Sbomscanner: Install SBOMScanner
       reload: Unable to fetch SBOMScanner Helm chart - reload required.
@@ -284,6 +286,7 @@ imageScanner:
       disable: Disable
       delete: Delete
       editConfiguration: Edit configuration
+      viewConfiguration: View configuration
     actions:
       clone: Clone
       editConfig: Edit configuration
@@ -345,6 +348,7 @@ imageScanner:
     any: Any
     every: Every
     unknown: Unknown
+    noActions: No actions
 
 typeLabel:
   sbomscanner.kubewarden.io.registry: Registries configuration

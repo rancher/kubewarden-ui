@@ -17,7 +17,7 @@
               {{ $route.params.id }}
             </span>
             <StatusBadge
-              style="margin-left: 12px"
+              style="margin-left: 12px; margin-top: 6px;"
               :status="vexHub.spec.enabled ? VEX_STATUS.ENABLED : VEX_STATUS.DISABLED"
             />
           </h1>

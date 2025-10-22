@@ -30,6 +30,7 @@
           class="btn role-primary"
           aria-label="Download full report"
           type="button"
+          :disabled="rows.length === 0"
           @click="downloadCSVReport(rows)"
         >
           <i class="icon icon-download"></i>

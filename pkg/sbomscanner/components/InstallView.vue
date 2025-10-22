@@ -143,13 +143,13 @@ export default {
 
     sbomscannerRepo() {
       const chart = this.charts?.find((chart) => chart.chartName === SBOMSCANNER.CONTROLLER);
-
+      console.log("sbomscannerRepo", this.repos?.find((repo) => repo.id === chart?.repoName))
       return this.repos?.find((repo) => repo.id === chart?.repoName);
     },
 
     cnpgRepo() {
       const chart = this.charts?.find((chart) => chart.chartName === CNPG.CONTROLLER);
-
+      console.log("cnpgRepo",this.repos?.find((repo) => repo.id === chart?.repoName))
       return this.repos?.find((repo) => repo.id === chart?.repoName);
     },
 
@@ -172,14 +172,14 @@ export default {
 
       if (this.cnpgRepo) {
         setTimeout(() => {
-          this.installSteps[2].ready = true;
+          this.installSteps[1].ready = true;
           this.$refs.wizard?.goToStep(2, true);
         }, 500);
       }
 
       if (this.sbomscannerRepo) {
         setTimeout(() => {
-          this.installSteps[3].ready = true;
+          this.installSteps[2].ready = true;
           this.$refs.wizard?.goToStep(3, true);
         }, 500);
       }
@@ -192,8 +192,8 @@ export default {
     async addRepository4Cnpg(btnCb) {
       this.isSkipped = false;
       if (this.cnpgRepo) {
-        this.installSteps[1].ready = true;
-        this.$refs.wizard?.goToStep(3);
+        this.installSteps[0].ready = true;
+        this.$refs.wizard?.goToStep(2);
 
         return;
       }
@@ -233,8 +233,8 @@ export default {
 
     async addRepository4Sbomscanner(btnCb) {
       if (this.sbomscannerRepo) {
-        this.installSteps[2].ready = true;
-        this.$refs.wizard?.goToStep(4);
+        this.installSteps[1].ready = true;
+        this.$refs.wizard?.goToStep(3);
 
         return;
       }
@@ -274,14 +274,14 @@ export default {
 
     skip() {
       this.isSkipped = true;
-      this.installSteps[1].ready = true;
-      this.$refs.wizard?.goToStep(2);
+      this.installSteps[0].ready = true;
+      this.$refs.wizard?.goToStep(1);
     },
 
     previous() {
       this.isSkipped = false;
-      this.installSteps[1].ready = false;
-      this.$refs.wizard?.goToStep(2);
+      this.installSteps[0].ready = false;
+      this.$refs.wizard?.goToStep(1);
     },
 
     chartRoute() {
@@ -404,7 +404,7 @@ export default {
         data-testid="sb-initial-install-button"
         @click="install = true"
       >
-        {{ t("imageScanner.dashboard.appInstall.button") }}
+        {{ t("imageScanner.dashboard.appInstall.button4Entry") }}
       </button>
     </div>
 
@@ -517,12 +517,22 @@ export default {
 
               <template v-else>
                 <button
+                  v-if="!hasCnpgSchema && !isSkipped"
                   data-testid="sb-app-install-button"
                   class="btn role-primary mt-20"
-                  :disabled="!controllerChart4Cnpg && !controllerChart4Sbomscanner"
+                  :disabled="!controllerChart4Cnpg"
                   @click.prevent="chartRoute"
                 >
-                  {{ !controllerChart4Cnpg ? t("imageScanner.dashboard.appInstall.button4Cnpg") : t("imageScanner.dashboard.appInstall.button4Sbomscanner")}}
+                  {{ t("imageScanner.dashboard.appInstall.button4Cnpg")}}
+                </button>
+                <button
+                  v-else-if="!hasSbomscannerSchema"
+                  data-testid="sb-app-install-button"
+                  class="btn role-primary mt-20"
+                  :disabled="!controllerChart4Sbomscanner"
+                  @click.prevent="chartRoute"
+                >
+                  {{ t("imageScanner.dashboard.appInstall.button4Sbomscanner") }}
                 </button>
               </template>
             </div>
