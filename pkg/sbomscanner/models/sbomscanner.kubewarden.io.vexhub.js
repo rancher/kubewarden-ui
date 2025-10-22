@@ -87,10 +87,6 @@ export default class SbomscannerRancherIoVexhub extends SteveModel {
     return this.spec?.enabled && super.canDelete;
   }
 
-  get fullDetailPageOverride() {
-    return true;
-  }
-
   get toggle() {
     const isEnabled = !!this.spec?.enabled;
 
