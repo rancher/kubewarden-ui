@@ -37,9 +37,9 @@
           <div class="header-left">
             <h3>{{ t('imageScanner.dashboard.scanningStatus.title') }}</h3>
             <i
+              v-clean-tooltip="tooltip"
               class="icon icon-question-mark"
               style="margin-left: .5rem;"
-              v-clean-tooltip="tooltip"
             ></i>
           </div>
           <div class="header-right">

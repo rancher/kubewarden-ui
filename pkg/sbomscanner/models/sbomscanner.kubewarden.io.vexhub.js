@@ -46,6 +46,7 @@ export default class SbomscannerRancherIoVexhub extends SteveModel {
 
       // Add other actions except delete (which goes last)
       const otherActions = out.filter((a) => a && (a.action !== 'promptRemove' && (a.action !== 'goToClone' || super.canEdit)));
+
       reordered.push(...otherActions);
 
       // Add delete at the end

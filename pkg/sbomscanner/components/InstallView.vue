@@ -10,9 +10,7 @@ import ResourceFetch from '@shell/mixins/resource-fetch';
 import { Banner } from '@components/Banner';
 import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
-import {
-  SBOMSCANNER, SBOMSCANNER_REPOS, CNPG, CNPG_REPOS
-} from '@pkg/types';
+import { SBOMSCANNER, SBOMSCANNER_REPOS, CNPG, CNPG_REPOS } from '@pkg/types';
 import { handleGrowl } from '@pkg/utils/handle-growl';
 import { refreshCharts, getLatestVersion } from '@pkg/utils/chart';
 import InstallWizard from '@pkg/components/common/InstallWizard';
@@ -143,13 +141,17 @@ export default {
 
     sbomscannerRepo() {
       const chart = this.charts?.find((chart) => chart.chartName === SBOMSCANNER.CONTROLLER);
-      console.log("sbomscannerRepo", this.repos?.find((repo) => repo.id === chart?.repoName))
+
+      console.log('sbomscannerRepo', this.repos?.find((repo) => repo.id === chart?.repoName));
+
       return this.repos?.find((repo) => repo.id === chart?.repoName);
     },
 
     cnpgRepo() {
       const chart = this.charts?.find((chart) => chart.chartName === CNPG.CONTROLLER);
-      console.log("cnpgRepo",this.repos?.find((repo) => repo.id === chart?.repoName))
+
+      console.log('cnpgRepo', this.repos?.find((repo) => repo.id === chart?.repoName));
+
       return this.repos?.find((repo) => repo.id === chart?.repoName);
     },
 
@@ -523,7 +525,7 @@ export default {
                   :disabled="!controllerChart4Cnpg"
                   @click.prevent="chartRoute"
                 >
-                  {{ t("imageScanner.dashboard.appInstall.button4Cnpg")}}
+                  {{ t("imageScanner.dashboard.appInstall.button4Cnpg") }}
                 </button>
                 <button
                   v-else-if="!hasSbomscannerSchema"
