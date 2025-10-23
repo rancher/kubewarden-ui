@@ -4,6 +4,7 @@ import { LabeledInput } from '@components/Form/LabeledInput';
 import NameNsDescription from '@shell/components/form/NameNsDescription';
 import CruResource from '@shell/components/CruResource';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
+import Banner from '@components/Banner/Banner.vue';
 import { SECRET } from '@shell/config/types';
 import {
   REGISTRY_TYPE,
@@ -20,7 +21,8 @@ export default {
     LabeledInput,
     NameNsDescription,
     CruResource,
-    LabeledSelect
+    LabeledSelect,
+    Banner,
   },
 
   mixins: [CreateEditView],
@@ -53,47 +55,57 @@ export default {
       filteredSecrets: null,
       PAGE,
       PRODUCT_NAME,
+      authLoading:     false,
     };
   },
 
   computed: {
 
     /**
-     * Filter secrets given their namespace and required secret type
-     *
-     * Convert secrets to list of options and supplement with custom entries
+     * Build the options list for the authentication dropdown
      */
     options() {
-      let filteredSecrets = [];
-
-      if (this.allSecrets) {
-        const currentNamespace = this.value.metadata?.namespace ? this.value.metadata.namespace : 'default';
-
-        if (this.allSecrets) {
-          // Filter secrets given their namespace
-          filteredSecrets = this.allSecrets
-            .filter((secret) => secret.metadata.namespace === currentNamespace)
-            .filter((secret) => SECRET_TYPES.DOCKER_JSON === secret._type
-            );
+      const headerOptions = [
+        {
+          label: this.t('imageScanner.registries.configuration.cru.authentication.create'),
+          value: 'create',
+          kind:  'highlighted'
+        },
+        {
+          label:    'divider',
+          disabled: true,
+          kind:     'divider'
+        },
+        {
+          label: this.t('generic.none'),
+          value: '',
         }
+      ];
+
+      if (!this.allSecrets) {
+        return headerOptions;
       }
 
-      const out = filteredSecrets.map((x) => {
-        const { metadata, id } = x;
-        const label = metadata.name;
+      const currentNamespace = this.value.metadata?.namespace ?? 'default';
 
-        return {
-          label,
-          value: id.includes('/') ? id.split('/')[1] : id,
-        };
-      });
+      const secretOptions = this.allSecrets
+        .filter((secret) => {
+          return secret.metadata.namespace === currentNamespace &&
+                secret._type === SECRET_TYPES.DOCKER_JSON;
+        })
+        .map((secret) => {
+          const name = secret.metadata.name;
 
-      out.unshift({
-        label: this.t('generic.none'),
-        value: '',
-      });
+          return {
+            label: name,
+            value: name,
+          };
+        });
 
-      return out;
+      return [
+        ...headerOptions,
+        ...secretOptions
+      ];
     },
 
     SCAN_INTERVAL_OPTIONS() {
@@ -108,6 +120,9 @@ export default {
       return REGISTRY_TYPE;
     },
 
+    /**
+     * Validation for the CruResource save button.
+     */
     validationPassed() {
       const spec = this.value?.spec || {};
 
@@ -118,8 +133,18 @@ export default {
       const requiresRepositories = spec.catalogType === REGISTRY_TYPE.NO_CATALOG;
       const hasRepositories = !requiresRepositories || !!spec.repositories?.length;
 
-      return hasName && hasCatalogType && hasUri && hasRepositories;
-    }
+      const validSecret = spec.authSecret !== 'create';
+
+      return hasName && hasCatalogType && hasUri && hasRepositories && validSecret;
+    },
+
+    secretCreateUrl() {
+      const clusterId = this.$route.params.cluster;
+
+      const namespace = this.value.metadata?.namespace ?? 'default';
+
+      return `/c/${ clusterId }/explorer/secret/create?namespace=${ namespace }`;
+    },
   },
 
   methods: {
@@ -130,9 +155,6 @@ export default {
 
       try {
         await this.save(event);
-      } catch (e) {
-        this.errors.push(e);
-      } finally {
         this.$router.push({
           name:   `c-cluster-${ PRODUCT_NAME }-${ PAGE.REGISTRIES }`,
           params: {
@@ -140,8 +162,26 @@ export default {
             product: PRODUCT_NAME
           }
         });
+      } catch (e) {
+        this.errors = [e];
       }
-    }
+    },
+
+    /**
+     * Manually refresh the list of secrets for the dropdown.
+     */
+    async refreshList() {
+      this.authLoading = true;
+      try {
+        this.allSecrets = await this.$store.dispatch(
+          `${ this.inStore }/findAll`, { type: SECRET }
+        );
+      } catch (e) {
+        this.errors = [e];
+      } finally {
+        this.authLoading = false;
+      }
+    },
   }
 };
 </script>
@@ -201,10 +241,43 @@ export default {
             :label="t('imageScanner.registries.configuration.cru.authentication.label')"
             :mode="mode"
             :options="options"
+            :loading="authLoading"
           />
         </div>
       </div>
-      <div class="registry-input-label mt-24">
+      <div
+        v-if="value.spec.authSecret === 'create' "
+        class="row"
+      >
+        <div class="col span-12">
+          <Banner color="info">
+            <div>
+              <p class="m-0 mb-5">
+                {{ t('imageScanner.registries.configuration.cru.authentication.createDescriptionLine1_start') }}
+                <a
+                  :href="secretCreateUrl"
+                  target="_blank"
+                >
+                  {{ t('imageScanner.registries.configuration.cru.authentication.createDescriptionLine1_link') }}
+                </a>
+                {{ t('imageScanner.registries.configuration.cru.authentication.createDescriptionLine1_end') }}
+              </p>
+
+              <p class="m-0">
+                {{ t('imageScanner.registries.configuration.cru.authentication.createDescriptionLine2_start') }}
+                <a
+                  href="#"
+                  @click.prevent="refreshList"
+                >
+                  {{ t('imageScanner.registries.configuration.cru.authentication.createDescriptionLine2_link') }}
+                </a>
+                {{ t('imageScanner.registries.configuration.cru.authentication.createDescriptionLine2_end') }}
+              </p>
+            </div>
+          </Banner>
+        </div>
+      </div>
+      <div :class="['registry-input-label', { 'mt-24': value.spec.authSecret !== 'create' }]">
         {{ t('imageScanner.registries.configuration.cru.scan.label') }}
       </div>
 
