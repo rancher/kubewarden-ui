@@ -1,7 +1,7 @@
 {
-  "name": "sbomscanner",
-  "description": "SBOMscanner Image Vulnerability Scanner plugin",
-  "version": "0.2.0-private",
+  "name": "sbomscanner-ui-ext",
+  "description": "SBOMscanner UI extesion for rancher manager",
+  "version": "0.3.0",
   "private": false,
   "rancher": {
     "annotations": {
