@@ -80,10 +80,11 @@ const defaultMountOptions = {
         template: '<div />',
         props:    ['modelValue', 'options']
       },
-      Banner:         { template: '<span />' },
-      LabeledInput:   { template: '<span />' },
-      LabeledTooltip: { template: '<span />' },
-      RadioGroup:     { template: '<span />' }
+      Banner:                { template: '<span />' },
+      ResourceLabeledSelect: true,
+      LabeledInput:          { template: '<span />' },
+      LabeledTooltip:        { template: '<span />' },
+      RadioGroup:            { template: '<span />' }
     }
   }
 };
@@ -114,6 +115,25 @@ describe('component: General', () => {
     const selector = wrapper.findComponent(ServiceNameSelect);
 
     expect(selector.props('options')).toStrictEqual(['sa-1', 'sa-2', 'sa-3']);
+  });
+
+  it('displays priorityClassName', () => {
+    const expectation = 'whatever';
+    const wrapper = createWrapper({
+      props: {
+        value: {
+          ...DEFAULT_POLICY_SERVER,
+          spec: {
+            ...DEFAULT_POLICY_SERVER.spec,
+            priorityClassName: expectation
+          }
+        }
+      }
+    });
+    const selector = wrapper.find('[data-testid="ps-config-priority-class-name-select"]');
+
+    expect(selector.exists()).toBe(true);
+    expect(selector.attributes('value')).toBe(expectation);
   });
 
   it('displays correct service account when existing', async() => {

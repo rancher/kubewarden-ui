@@ -414,6 +414,8 @@ kubewarden:
       label: Image URL
       tooltip: This is the container image the policy server.
     replicas: Replicas
+    priorityClassName:
+      label: Priority Class Name
     registry:
       description: The PolicyServer allows you to pull policies from OCI registries and HTTP servers, by default HTTPS is enforced with host TLS verification. You can interact with registries using untrusted certificates or even without TLS by using the `insecureSources` setting. This approach is highly discouraged in environments closer to production. More information on configuring custom certificate authorities can be found <a href="https://docs.kubewarden.io/next/howtos/policy-servers/custom-cas" target="_blank" rel="noopener noreferrer nofollow">here</a>.
     insecureSources:

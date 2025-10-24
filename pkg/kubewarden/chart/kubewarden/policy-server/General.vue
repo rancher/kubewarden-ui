@@ -7,6 +7,7 @@ import { useStore } from 'vuex';
 
 import { _CREATE } from '@shell/config/query-params';
 import { CATALOG, FLEET } from '@shell/config/types';
+import { PRIORITY_CLASS } from '@kubewarden/config/contstants';
 
 import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
 import { getPolicyServerModule, isFleetDeployment } from '@kubewarden/modules/fleet';
@@ -21,6 +22,7 @@ import {
 } from '@kubewarden/types';
 import { findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
 
+import ResourceLabeledSelect from '@shell/components/form/ResourceLabeledSelect';
 import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
@@ -256,6 +258,20 @@ watchEffect(() => {
           required
           :mode="mode"
           :label="t('kubewarden.policyServerConfig.replicas')"
+        />
+      </div>
+    </div>
+    <div class="row mt-20">
+      <div class="col span-6">
+        <!-- Reduce is required as the component maps to object.value if any -->
+        <ResourceLabeledSelect
+          v-model:value="value.spec.priorityClassName"
+          data-testid="ps-config-priority-class-name-select"
+          :mode="mode"
+          :resource-type="PRIORITY_CLASS"
+          :label="t('kubewarden.policyServerConfig.priorityClassName.label')"
+          option-label="metadata.name"
+          :reduce="(priorityClassName: any) => priorityClassName.metadata.name"
         />
       </div>
     </div>
