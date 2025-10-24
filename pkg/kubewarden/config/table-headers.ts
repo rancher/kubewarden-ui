@@ -98,6 +98,12 @@ export const POLICY_SERVER_HEADERS = [
     canBeVariable: true,
   },
   {
+    name:  'priorityClassName',
+    label: 'Priority Class Name',
+    value: 'spec.priorityClassName',
+    sort:  ['spec.priorityClassName']
+  },
+  {
     name:          'kubewardenPolicyServers',
     label:         'Image',
     value:         'spec.image',
