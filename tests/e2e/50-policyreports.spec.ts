@@ -1,7 +1,6 @@
 import { test, expect } from './rancher/rancher-test'
 import { Policy, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { PolicyReporterPage } from './pages/policyreporter.page'
-import { RancherUI } from './components/rancher-ui'
 
 const testNs = 'audit-unsafe-ns'
 const testPod = 'audit-pod-privileged'
@@ -68,13 +67,10 @@ test('Check reports on resources details page', async({ ui, nav }) => {
   await expect(failrow.column('Compliance').locator('div.bg-success')).toHaveText('5')
 
   // Check Compliance tab on pod details
-  await test.step('Check Compliance tab on pod details', async(step) => {
-    step.skip(RancherUI.isVersion('>=2.12'), 'https://github.com/rancher/kubewarden-ui/issues/1266')
-    await failrow.open()
-    await ui.tab('Compliance').click()
-    await expect(ui.tableRow({ Policy: 'no-privileged-pod' }).column('Status')).toHaveText('fail')
-    await expect(ui.tableRow({ Policy: 'drop-capabilities' }).column('Status')).toHaveText('pass')
-  })
+  await failrow.open()
+  await ui.tab('Compliance').click()
+  await expect(ui.tableRow({ Policy: 'no-privileged-pod' }).column('Status')).toHaveText('fail')
+  await expect(ui.tableRow({ Policy: 'drop-capabilities' }).column('Status')).toHaveText('pass')
 
   // Check namespace
   await nav.explorer('Cluster', 'Projects/Namespaces')
