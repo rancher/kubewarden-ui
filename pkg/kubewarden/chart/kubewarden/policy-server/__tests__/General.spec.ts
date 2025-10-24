@@ -5,7 +5,6 @@ import flushPromises from 'flush-promises';
 import General from '@kubewarden/chart/kubewarden/policy-server/General.vue';
 import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
 import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
-import ResourceLabeledSelect from '@shell/components/form/ResourceLabeledSelect';
 
 import { fleetBundles as bundles } from '@tests/unit/mocks/fleetBundles';
 import { mockControllerAppWithFleet } from '@tests/unit/mocks/controllerApp';
@@ -119,10 +118,22 @@ describe('component: General', () => {
   });
 
   it('displays priorityClassName', () => {
-    const wrapper = createWrapper();
+    const expectation = 'whatever';
+    const wrapper = createWrapper({
+      props: {
+        value: {
+          ...DEFAULT_POLICY_SERVER,
+          spec: {
+            ...DEFAULT_POLICY_SERVER.spec,
+            priorityClassName: expectation
+          }
+        }
+      }
+    });
     const selector = wrapper.find('[data-testid="ps-config-priority-class-name-select"]');
 
     expect(selector.exists()).toBe(true);
+    expect(selector.attributes('value')).toBe(expectation);
   });
 
   it('displays correct service account when existing', async() => {
