@@ -8,6 +8,7 @@ import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherFleetPage } from './rancher/rancher-fleet.page'
 import { RancherUI } from './components/rancher-ui'
 import { Common } from './components/common'
+import semver from 'semver'
 
 const conf = {
   // Install UI extension from: source (yarn dev), github (github tag), prime (official)
@@ -33,6 +34,9 @@ test.beforeAll(async({ request }) => {
 
   if (conf.kw_mode === 'upgrade') {
     conf.upMap = (await Common.fetchVersionMap()).splice(-3)
+      // Limit because of https://github.com/kubewarden/policy-server/issues/1300
+      .filter(v => semver.gte(v.app.replace(/^v/, ''), '1.29.0'))
+
     if (conf.upMap.length === 0) {
       throw new Error('No compatible version was found, check rancher-version annotations')
     }
