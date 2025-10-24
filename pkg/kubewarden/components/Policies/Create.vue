@@ -498,7 +498,7 @@ export default ({
           spec:       {
             module:   policyModule,
             mode:     'monitor', // Default to monitor mode
-            mutating: policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.MUTATING] === 'true' || false,
+            mutating: policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.MUTATION] === 'true' || false,
             rules:    this.parseObj(policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.RULES]) || []
           }
         };
