@@ -7,6 +7,7 @@ import { useStore } from 'vuex';
 
 import { _CREATE } from '@shell/config/query-params';
 import { CATALOG, FLEET } from '@shell/config/types';
+import { PRIORITY_CLASS } from '@kubewarden/config/contstants';
 
 import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
 import { getPolicyServerModule, isFleetDeployment } from '@kubewarden/modules/fleet';
@@ -160,12 +161,6 @@ watchEffect(() => {
 }
 );
 
-const mapPriorityClassNameUpdate = {
-  updateResources: (options: any[]) => options
-    .filter((option) => option.metadata.name === props.value.spec.priorityClassName)
-    .map((option) => option.name)
-};
-
 watchEffect(() => {
   if (!controllerApp.value && allApps.value.length) {
     const controller = allApps.value.find(
@@ -268,15 +263,16 @@ watchEffect(() => {
     </div>
     <div class="row mt-20">
       <div class="col span-6">
-      <ResourceLabeledSelect
-        v-model:value="value.spec.priorityClassName"
-        data-testid="ps-config-priority-class-name-select"
-        :mode="mode"
-        :key="value.spec.priorityClassName"
-        resource-type="scheduling.k8s.io.priorityclass"
-        :get-option-label="(priorityClasses: any) => priorityClasses.metadata.name"
-        :label="t('kubewarden.policyServerConfig.priorityClassName.label')"
-      />
+        <!-- Reduce is required as the component maps to object.value if any -->
+        <ResourceLabeledSelect
+          v-model:value="value.spec.priorityClassName"
+          data-testid="ps-config-priority-class-name-select"
+          :mode="mode"
+          :resource-type="PRIORITY_CLASS"
+          :label="t('kubewarden.policyServerConfig.priorityClassName.label')"
+          option-label="metadata.name"
+          :reduce="(priorityClassName: any) => priorityClassName.metadata.name"
+        />
       </div>
     </div>
   </div>
