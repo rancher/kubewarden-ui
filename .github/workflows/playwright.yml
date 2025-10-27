@@ -310,7 +310,7 @@ jobs:
     # Set current run ID
     - name: Upload current QASE_RUN_ID
       if: ${{ env.QASE == 'true' && !cancelled() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: QASE_RUN_ID-${{ matrix.rancher }}-${{ matrix.mode }}
         path: QASE_RUN_ID.txt
@@ -319,7 +319,7 @@ jobs:
 
     # ==================================================================================================
     # Artifacts & Summary
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v5
       if: always()
       with:
         name: playwright-report-${{ matrix.rancher }}-${{ matrix.mode }}
