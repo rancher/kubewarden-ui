@@ -15,10 +15,12 @@ on:
         - 'v2.10'
         - 'v2.11'
         - 'v2.12'
+        - 'v2.13'
         - 'v2.9-0 (devel)'
         - 'v2.10-0 (devel)'
         - 'v2.11-0 (devel)'
         - 'v2.12-0 (devel)'
+        - 'v2.13-0 (devel)'
       rancher_text:
         description: Rancher constraint
         required: false
@@ -105,7 +107,7 @@ jobs:
       fail-fast: false
       matrix:
         # Rancher versions for PRs is based on the branch
-        rancher:  ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["p2.9", "p2.10", "p2.11", "p2.12"]') || fromJSON(format('["{0}"]', inputs.rancher_text || inputs.rancher )) }}
+        rancher:  ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["p2.9", "p2.10", "p2.11", "p2.12", "c2.13-0"]') || fromJSON(format('["{0}"]', inputs.rancher_text || inputs.rancher )) }}
         mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["manual", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'manual')) }}
         exclude:
           # Run all modes on latest prime version (2.11)
@@ -121,19 +123,26 @@ jobs:
             mode: upgrade
           - rancher: ${{ github.event_name == 'schedule' && 'p2.11' }}
             mode: fleet
+          - rancher: ${{ github.event_name == 'schedule' && 'c2.13-0' }}
+            mode: upgrade
+          - rancher: ${{ github.event_name == 'schedule' && 'c2.13-0' }}
+            mode: fleet
           # Exclude unrelated Rancher versions from release jobs # head_branch = tag (kubewarden-2.1.0-rc.1)
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && 'p2.9' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && 'p2.10' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-1.') && 'p2.11' }}
+          # UI 2.1 -> Rancher 2.9
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && 'p2.10' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && 'p2.11' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && 'p2.12' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-2.') && 'c2.13-0' }}
+          # UI 3.1 -> Rancher 2.10
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && 'p2.9' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && 'p2.11' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && 'p2.12' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-3.') && 'c2.13-0' }}
+          # UI 4.0 -> Rancher 2.11+
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'p2.9' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'p2.10' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'p2.11' }}
+          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'p2.12' }}
 
 
     # Run schedule workflows only on original repo, not forks
