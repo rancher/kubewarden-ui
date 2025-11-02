@@ -17,7 +17,7 @@ export class Shell {
 
   constructor(protected readonly page: Page) {
     // Window manager owns kubectl tab
-    this.win = this.page.locator('div#windowmanager')
+    this.win = this.page.locator('div#windowmanager').or(this.page.locator('div#horizontal-window-manager'))
     // Connected message
     this.connected = this.win.locator('.status').getByText('Connected', { exact: true })
     // Visible terminal screen

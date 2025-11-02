@@ -137,7 +137,7 @@ export class RancherAppsPage extends BasePage {
     await expect(passedMsg).toBeVisible({ timeout })
     // Close the window
     if (keepLog === false) {
-      const win = this.page.locator('#windowmanager')
+      const win = this.page.locator('#windowmanager').or(this.page.locator('div#horizontal-window-manager'))
       await win.locator('div.tab.active').locator('i.closer').click()
     }
   }
