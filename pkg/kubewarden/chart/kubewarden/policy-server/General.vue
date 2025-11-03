@@ -264,6 +264,9 @@ watchEffect(() => {
     <div class="row mt-20">
       <div class="col span-6">
         <!-- Reduce is required as the component maps to object.value if any -->
+        <h3>
+          {{ t('kubewarden.policyServerConfig.priorityClassName.label') }}
+        </h3>
         <ResourceLabeledSelect
           v-model:value="value.spec.priorityClassName"
           data-testid="ps-config-priority-class-name-select"
