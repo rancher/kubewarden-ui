@@ -267,6 +267,7 @@ watchEffect(() => {
         <ResourceLabeledSelect
           v-model:value="value.spec.priorityClassName"
           data-testid="ps-config-priority-class-name-select"
+          :clearable="true"
           :mode="mode"
           :resource-type="PRIORITY_CLASS"
           :label="t('kubewarden.policyServerConfig.priorityClassName.label')"
