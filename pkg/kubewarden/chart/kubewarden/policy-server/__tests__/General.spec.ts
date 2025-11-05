@@ -136,6 +136,24 @@ describe('component: General', () => {
     expect(selector.attributes('value')).toBe(expectation);
   });
 
+  it('can clear priorityClassName', () => {
+    const wrapper = createWrapper({
+      props: {
+        value: {
+          ...DEFAULT_POLICY_SERVER,
+          spec: {
+            ...DEFAULT_POLICY_SERVER.spec,
+            priorityClassName: 'whatever'
+          }
+        }
+      }
+    });
+
+    wrapper.find('[data-testid="ps-config-priority-class-name-clear"]').element.click();
+
+    expect(wrapper.vm.value.spec.priorityClassName).toBe('');
+  });
+
   it('displays correct service account when existing', async() => {
     const policyServer = {
       ...DEFAULT_POLICY_SERVER,
