@@ -28,6 +28,7 @@ import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 import Loading from '@shell/components/Loading';
 import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
+import { RcButton } from '@components/RcButton';
 
 const props = defineProps<{
   mode?: string;
@@ -267,16 +268,23 @@ watchEffect(() => {
         <h3>
           {{ t('kubewarden.policyServerConfig.priorityClassName.label') }}
         </h3>
-        <ResourceLabeledSelect
-          v-model:value="value.spec.priorityClassName"
-          data-testid="ps-config-priority-class-name-select"
-          :clearable="true"
-          :mode="mode"
-          :resource-type="PRIORITY_CLASS"
-          :label="t('kubewarden.policyServerConfig.priorityClassName.label')"
-          option-label="metadata.name"
-          :reduce="(priorityClassName: any) => priorityClassName.metadata.name"
-        />
+        <div style="display:flex; gap: 8px">
+          <ResourceLabeledSelect
+            v-model:value="value.spec.priorityClassName"
+            data-testid="ps-config-priority-class-name-select"
+            :clearable="true"
+            :mode="mode"
+            :resource-type="PRIORITY_CLASS"
+            :label="t('kubewarden.policyServerConfig.priorityClassName.label')"
+            option-label="metadata.name"
+            :reduce="(priorityClassName: any) => priorityClassName.metadata.name"
+          />
+          <RcButton
+            secondary
+            data-testid="ps-config-priority-class-name-clear"
+            @click="value.spec.priorityClassName = ''"
+          >{{ t("generic.clear") }}</RcButton>
+        </div>
       </div>
     </div>
   </div>
