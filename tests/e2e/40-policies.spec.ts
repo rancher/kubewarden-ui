@@ -47,8 +47,7 @@ async function checkPolicy(p: Policy, polPage: BasePolicyPage, ui: RancherUI) {
     await expect(ui.page.getByText('API Versions')).toBeVisible()
   })
 
-  // Skip: https://github.com/rancher/kubewarden-ui/issues/1310
-  await test.step.skip(`Check config page: ${p.name}`, async() => {
+  await test.step(`Check config page: ${p.name}`, async() => {
     await ui.showConfiguration()
     await expect(polPage.name).toHaveValue(p.name)
     if (p.title === 'Custom Policy') await expect(polPage.module).toHaveValue(module)
@@ -227,15 +226,13 @@ test('Recommended policies', async({ page, ui, nav }) => {
       }
     })
 
-    // https://github.com/rancher/kubewarden-ui/issues/1310
-    if (RancherUI.isVersion('<2.13')) {
-      const capPage = new ClusterAdmissionPoliciesPage(page)
-      await nav.capolicies('no-privileged-pod')
-      await ui.showConfiguration()
-      await capPage.selectTab('Settings')
-      await expect(ui.checkbox('Skip init containers')).toBeChecked()
-      await ui.hideConfiguration()
-    }
+    const capPage = new ClusterAdmissionPoliciesPage(page)
+    await nav.capolicies('no-privileged-pod')
+    await ui.showConfiguration()
+    await capPage.selectTab('Settings')
+    // await expect(ui.codeMirror).toContainText('skip_init_containers: true')
+    await expect(ui.checkbox('Skip init containers')).toBeChecked()
+    await ui.hideConfiguration()
   })
 })
 
