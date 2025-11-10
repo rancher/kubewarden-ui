@@ -1,6 +1,6 @@
 import type { Config } from '@jest/types';
 
-const config: Config.InitialOptions = {
+const baseConfig: Config.InitialOptions = {
   setupFilesAfterEnv:     ['./jest.setup.ts'],
   testEnvironment:        'jest-environment-jsdom',
   testEnvironmentOptions: { customExportConditions: ['node', 'node-addons'] },
@@ -14,6 +14,7 @@ const config: Config.InitialOptions = {
     '@components/(.*)':
       '<rootDir>/node_modules/@rancher/components/dist/@rancher/components.common.js',
     '@kubewarden/(.*)': '<rootDir>/pkg/kubewarden/$1',
+    '@sbomscanner/(.*)': '<rootDir>/pkg/sbomscanner/$1',
     '@tests/(.*)':      '<rootDir>/tests/$1',
   },
   transform: {
@@ -36,4 +37,20 @@ const config: Config.InitialOptions = {
   preset:            'ts-jest',
 };
 
+const config: Config.InitialOptions = {
+  projects: [
+    {
+      displayName: 'kubewarden',
+      testMatch:   ['<rootDir>/pkg/kubewarden/**/*.spec.[jt]s?(x)'],
+      ...baseConfig,
+    },
+    {
+      displayName: 'sbomscanner',
+      testMatch:   ['<rootDir>/pkg/sbomscanner/**/*.spec.[jt]s?(x)'],
+      ...baseConfig,
+    },
+  ],
+};
+
 export default config;
+
