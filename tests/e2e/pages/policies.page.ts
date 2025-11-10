@@ -9,7 +9,7 @@ export const apList = ['Custom Policy', 'Allow Privilege Escalation PSP', 'Allow
   'Host Namespaces PSP', 'Hostpaths PSP', 'Ingress Policy', 'Namespace label propagator', 'Pod Privileged Policy', 'Pod Runtime', 'Readonly Root Filesystem PSP', 'Share PID namespace',
   'Safe Annotations', 'Safe Labels', 'Seccomp PSP', 'Selinux PSP', 'Sysctl PSP', 'Trusted Repos', 'User Group PSP', 'Verify Image Signatures', 'volumeMounts', 'Volumes PSP', 'Unique Ingress host',
   'Unique service selector', 'PVC StorageClass Validator', 'CEL Policy', 'Pod ndots', 'Do not expose admission controller webhook services', 'Priority class policy', 'High Risk Service Account',
-  'Labels', 'Annotations'] as const
+  'Labels', 'Annotations', 'image-cve'] as const
 
 export const capList = [...apList, 'PSA Label Enforcer'] as const
 
