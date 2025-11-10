@@ -35,6 +35,7 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'Helm Release Target Namespace'                                 : { settings: generalArray },
   'Helm Release Values From'                                      : { settings: generalArray },
   'Helm Repo URL Should Be in Organisation Domain'                : { settings: generalArray },
+  'image-cve'                                                     : { skip: 'https://github.com/kubewarden/image-cve-policy/issues/82' },
   'Istio Gateway Approved Hosts'                                  : { settings: generalArray },
   'Istio Injected Namespaces'                                     : { settings: generalArray },
   'Kustomization Decryption Provider'                             : { settings: generalArray },
