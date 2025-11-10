@@ -12,6 +12,10 @@
     "clean": "./node_modules/@rancher/shell/scripts/clean",
     "test:ci": "jest --collectCoverage",
     "test:unit": "jest --watch",
+    "test:ci:kubewarden": "jest --collectCoverage --selectProjects=kubewarden",
+    "test:unit:kubewarden": "jest --watch --selectProjects=kubewarden",
+    "test:ci:sbomscanner": "jest --collectCoverage --selectProjects=sbomscanner",
+    "test:unit:sbomscanner": "jest --watch --selectProjects=sbomscanner",
     "lint": "eslint .",
     "format": "eslint . --fix"
   },
