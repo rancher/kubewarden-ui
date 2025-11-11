@@ -31,6 +31,7 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'Priority class policy'      : { settings: setupPriorityClassPolicy },
   'CEL Policy'                 : { skip: 'https://github.com/kubewarden/cel-policy/issues/12' },
   'High Risk Service Account'  : { settings: setupHighRiskServiceAccount },
+  'image-cve'                  : { skip: 'https://github.com/kubewarden/image-cve-policy/issues/82' },
   volumeMounts                 : { settings: setupVolumeMounts },
 }
 
