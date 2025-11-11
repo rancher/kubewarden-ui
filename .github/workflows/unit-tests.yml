@@ -9,8 +9,27 @@ on:
       - main
 
 jobs:
-  unit-test:
-    if: github.repository_owner == 'rancher'
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      kubewarden: ${{ steps.filter.outputs.kubewarden }}
+      sbomscanner: ${{ steps.filter.outputs.sbomscanner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changed directories
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            kubewarden:
+              - 'pkg/kubewarden/**'
+            sbomscanner:
+              - 'pkg/sbomscanner/**'
+  unit-test-kubewarden:
+    if: github.repository_owner == 'rancher' && ${{ needs.detect-changes.outputs.kubewarden == 'true' }}
+    needs: detect-changes
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,6 +59,40 @@ jobs:
           yarn test:ci
           mkdir -p coverage-artifacts/coverage/unit
           cp coverage/unit/coverage-final.json coverage-artifacts/coverage/coverage-unit.json
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{github.run_number}}-${{github.run_attempt}}-coverage
+          path: coverage-artifacts/**/*
+  unit-test-sbomscanner:
+    if: github.repository_owner == 'rancher' && ${{ needs.detect-changes.outputs.sbomscanner == 'true' }}
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Setup yarn
+        run: npm install -g yarn
+
+      - name: Setup Nodejs with yarn caching
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Run tests and collect coverage
+        run: |
+          npm run test:ci:sbomscanner
+          mkdir -p coverage-artifacts/coverage/sbomscanner/unit
+          cp coverage/sbomscanner/unit/coverage-final.json coverage-artifacts/coverage/sbomscanner/coverage-unit.json
 
       - name: Upload coverage
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
