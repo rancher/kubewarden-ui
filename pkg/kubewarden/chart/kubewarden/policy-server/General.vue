@@ -7,6 +7,7 @@ import { useStore } from 'vuex';
 
 import { _CREATE } from '@shell/config/query-params';
 import { CATALOG, FLEET } from '@shell/config/types';
+import { PRIORITY_CLASS } from '@kubewarden/config/contstants';
 
 import { DEFAULT_POLICY_SERVER } from '@kubewarden/models/policies.kubewarden.io.policyserver';
 import { getPolicyServerModule, isFleetDeployment } from '@kubewarden/modules/fleet';
@@ -21,11 +22,13 @@ import {
 } from '@kubewarden/types';
 import { findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
 
+import ResourceLabeledSelect from '@shell/components/form/ResourceLabeledSelect';
 import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 import Loading from '@shell/components/Loading';
 import ServiceNameSelect from '@shell/components/form/ServiceNameSelect';
+import { RcButton } from '@components/RcButton';
 
 const props = defineProps<{
   mode?: string;
@@ -57,6 +60,15 @@ const showVersionBanner = computed(() => {
 
   return isCreate.value && defaultImage.value && !defaultsChart?.value && !latestChartVersion.value;
 });
+
+const policyClassPaginateSettings = {
+  requestSettings: (opts: any) => {
+    return {
+      ...opts,
+      groupByNamespace: false,
+    };
+  }
+};
 
 async function fetchData() {
   isLoading.value = true;
@@ -257,6 +269,32 @@ watchEffect(() => {
           :mode="mode"
           :label="t('kubewarden.policyServerConfig.replicas')"
         />
+      </div>
+    </div>
+    <div class="row mt-20">
+      <div class="col span-6">
+        <!-- Reduce is required as the component maps to object.value if any -->
+        <h3>
+          {{ t('kubewarden.policyServerConfig.priorityClassName.label') }}
+        </h3>
+        <div style="display:flex; gap: 8px">
+          <ResourceLabeledSelect
+            v-model:value="value.spec.priorityClassName"
+            data-testid="ps-config-priority-class-name-select"
+            :clearable="true"
+            :mode="mode"
+            :resource-type="PRIORITY_CLASS"
+            :label="t('kubewarden.policyServerConfig.priorityClassName.label')"
+            option-label="metadata.name"
+            :paginated-resource-settings="policyClassPaginateSettings"
+            :reduce="(priorityClassName: any) => priorityClassName.metadata.name"
+          />
+          <RcButton
+            secondary
+            data-testid="ps-config-priority-class-name-clear"
+            @click="value.spec.priorityClassName = ''"
+          >{{ t("generic.clear") }}</RcButton>
+        </div>
       </div>
     </div>
   </div>

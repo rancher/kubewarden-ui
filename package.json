@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "^1.3.0",
-    "@rancher/components": "^0.3.0-alpha.1",
+    "@rancher/components": "^0.3.0-alpha.2",
     "@rancher/shell": "^3.0.4",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
