@@ -61,6 +61,15 @@ const showVersionBanner = computed(() => {
   return isCreate.value && defaultImage.value && !defaultsChart?.value && !latestChartVersion.value;
 });
 
+const policyClassPaginateSettings = {
+  requestSettings: (opts: any) => {
+    return {
+      ...opts,
+      groupByNamespace: false,
+    };
+  }
+};
+
 async function fetchData() {
   isLoading.value = true;
 
@@ -277,6 +286,7 @@ watchEffect(() => {
             :resource-type="PRIORITY_CLASS"
             :label="t('kubewarden.policyServerConfig.priorityClassName.label')"
             option-label="metadata.name"
+            :paginated-resource-settings="policyClassPaginateSettings"
             :reduce="(priorityClassName: any) => priorityClassName.metadata.name"
           />
           <RcButton
