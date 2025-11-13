@@ -16,10 +16,9 @@ import {
   Chart,
   ClusterRepo,
   FleetBundle,
-  KUBEWARDEN_CHARTS,
-  KUBEWARDEN_REPOS,
   PolicyServer
 } from '@kubewarden/types';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPOS } from '@kubewarden/constants';
 import { findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
 
 import ResourceLabeledSelect from '@shell/components/form/ResourceLabeledSelect';
