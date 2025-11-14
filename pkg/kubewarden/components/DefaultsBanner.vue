@@ -201,20 +201,24 @@ export default {
     :closable="isClosable"
     @close="closeDefaultsBanner()"
   >
-    <span v-clean-html="bannerCopy" />
-
-    <RcButton
-      secondary
-      v-if="highestCompatibleDefaultsChart"
-      data-testid="kw-defaults-banner-button"
-      @click.prevent="chartRoute"
-    >{{ btnText }}</RcButton>
+    <div class="kw-banner-content">
+      <span v-clean-html="bannerCopy" />
+      <RcButton
+        secondary
+        v-if="highestCompatibleDefaultsChart"
+        data-testid="kw-defaults-banner-button"
+        @click.prevent="chartRoute"
+      >{{ btnText }}</RcButton>
+    </div>
   </Banner>
 </template>
 <style scoped>
 /** This is an anti pattern and will break on component changes */
-.default-banner :deep(.banner__content) {
-  justify-content: space-between;
+.kw-banner-content {
+  display: flex;
+  flex-direction: row;
   align-items: center;
+  flex-grow: 1;
+  justify-content: space-between;
 }
 </style>
