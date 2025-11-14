@@ -3,7 +3,7 @@
     {
       "name": "DS_PROMETHEUS",
       "label": "Prometheus",
-      "description": "Prometheus storing Kubewarden metrics",
+      "description": "Prometheus storing Admission Policy Manager metrics",
       "type": "datasource",
       "pluginId": "prometheus",
       "pluginName": "Prometheus"
@@ -60,7 +60,7 @@
       }
     ]
   },
-  "description": "Official Kubewarden Grafana dashboard. It allows the user to visualize an overview of the Kubewarden components as well as metrics for specific policies. ",
+  "description": "Official Admission Policy Manager Grafana dashboard. It allows the user to visualize an overview of the Admission Policy Manager components as well as metrics for specific policies. ",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "gnetId": 15314,
@@ -81,7 +81,7 @@
       },
       "id": 53,
       "panels": [],
-      "title": "Kubewarden overview",
+      "title": "Admission Policy Manager overview",
       "type": "row"
     },
     {
@@ -1215,7 +1215,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Kubewarden / Policy Server",
+  "title": "Admission Policy Manager / Policy Server",
   "uid": "kubewarden-dashboard-policyserver",
   "version": 3
 }

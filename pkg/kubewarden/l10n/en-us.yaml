@@ -3,11 +3,11 @@ product:
   kubewarden: Admission Policy Management
 
 kubewarden:
-  title: Kubewarden
+  title: Admission Policy Manager
   unavailability:
     banner: 'You do not have access to the {type}. Please contact your administrator.'
     type:
-      dashboard: Kubewarden Dashboard
+      dashboard: Admission Policy Manager Dashboard
       policyReporter: Policy Reporter
       metricsDashboard: Metrics Dashboard
       tracingDashboard: Tracing Dashboard
@@ -16,12 +16,12 @@ kubewarden:
   dashboard:
     title: Dashboard
     install: Install
-    notInstalled: Kubewarden is not installed
-    button: Install Kubewarden Prerequisites
-    intro: Welcome to Kubewarden
+    notInstalled: Admission Policy Manager is not installed
+    button: Install Admission Policy Manager Prerequisites Prerequisites
+    intro: Welcome to Admission Policy Manager
     blurb: A Dynamic Admission Controller for Kubernetes
     description: |
-      Kubewarden is a policy engine for Kubernetes. It helps with keeping your Kubernetes clusters secure and compliant. Kubewarden policies can be written using regular programming languages or Domain Specific Languages (DSL). Policies are compiled into WebAssembly modules that are then distributed using traditional container registries.
+      Admission Policy Manager is a policy engine for Kubernetes. It helps with keeping your Kubernetes clusters secure and compliant. Admission Policy Manager policies can be written using regular programming languages or Domain Specific Languages (DSL). Policies are compiled into WebAssembly modules that are then distributed using traditional container registries.
     getStarted: Get Started
     issues: Issues
     upgrade:
@@ -29,10 +29,10 @@ kubewarden:
       appUpgrade: App Upgrade
       controllerChart: Controller
       defaultsChart: Defaults
-      appVersionUnsatisfied: 'The app version of the Kubewarden Defaults ({defaultsAppVersion}) chart does not match the app version of the Kubewarden Controller chart ({controllerAppVersion}). This chart will need to be updated to match the app version of the Kubewarden Controller chart.'
+      appVersionUnsatisfied: 'The app version of the Admission Policy Manager Defaults ({defaultsAppVersion}) chart does not match the app version of the Admission Policy Manager Controller chart ({controllerAppVersion}). This chart will need to be updated to match the app version of the Admission Policy Manager Controller chart.'
     policyReports:
-      oldPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Kubewarden App. Please update to version v1.11.0 or newer.'
-      newPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Kubewarden extension. Please update to version 1.4.0 or newer.'
+      oldPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Admission Policy Manager App. Please update to version v1.11.0 or newer.'
+      newPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Admission Policy Manager extension. Please update to version 1.4.0 or newer.'
     headers:
       policyServer:
         title: Policy Servers
@@ -56,11 +56,11 @@ kubewarden:
         fail: Fail
         error: Error
     appInstall:
-      title: Kubewarden App Install
-      description: This will take you to the app installation page for Kubewarden.
-      button: Install Kubewarden
-      stepTitle: Kubewarden Install
-      reload: Unable to fetch Kubewarden Helm chart - reload required.
+      title: Admission Policy Manager App Install
+      description: This will take you to the app installation page for Admission Policy Manager.
+      button: Install Admission Policy Manager
+      stepTitle: Admission Policy Manager Install
+      reload: Unable to fetch Admission Policy Manager Helm chart - reload required.
       versionError:
         title: Chart Version not found.
         message: Unable to determine the latest stable version of the kubewarden-controller chart. Please make sure the Helm repository is configured correctly.
@@ -76,9 +76,9 @@ kubewarden:
         stepProgress: The active step will progress once Cert-Manager is installed.
       repository:
         title: Repository
-        description: You will need the Kubewarden Helm repository (https://charts.kubewarden.io) to install the `kubewarden` chart.
+        description: You will need the Admission Policy Manager Helm repository (https://charts.kubewarden.io) to install the `kubewarden` chart.
       airGapped:
-        warning: 'An air-gapped installation has been detected, this will require intervention to enable access to Kubewarden images and policies. It is necessary to make them available from an OCI registry that is accessible to the cluster.'
+        warning: 'An air-gapped installation has been detected, this will require intervention to enable access to Admission Policy Manager images and policies. It is necessary to make them available from an OCI registry that is accessible to the cluster.'
         docs: |
           Follow the documentation to setup an OCI registry for further installation.
   tabs:
@@ -151,7 +151,7 @@ kubewarden:
   policies:
     noPolicyRepo: No policy repository found. Please add a policy repository to view policies.
     noOfficialPolicies: No official policies found. Please add <a href="https://kubewarden.github.io/policy-catalog/" target="_blank" rel="noopener noreferrer nofollow">policy catalog repository</a> to view official policies.
-    noArtifactHub: Official Kubewarden policies are hosted on <a href="https://artifacthub.io/packages/search?kind=13" target="_blank" rel="noopener noreferrer nofollow">ArtifactHub</a>, in order to show these you will need to add `artifacthub.io` to the whitelist-domain setting.
+    noArtifactHub: Official Admission Policy Manager policies are hosted on <a href="https://artifacthub.io/packages/search?kind=13" target="_blank" rel="noopener noreferrer nofollow">ArtifactHub</a>, in order to show these you will need to add `artifacthub.io` to the whitelist-domain setting.
     noRules: There are no rules configured for this policy.
     namespaceWarning: This policy is targeting Rancher specific namespaces which will cause catastrophic failures with your Rancher deployment.
     official: Official Rancher Policy
@@ -176,10 +176,10 @@ kubewarden:
     custom:
       create: Create Custom Policy
   tracing:
-    description: Tracing allows to collect fine grained details about policy evaluations. It can be a useful tool for debugging issues inside of your Kubewarden deployment and policies.
+    description: Tracing allows to collect fine grained details about policy evaluations. It can be a useful tool for debugging issues inside of your Admission Policy Manager deployment and policies.
     prerequisites:
       label: Prerequisites
-      description: There are a few resources which need to be installed for tracing to work correctly with the Kubewarden Controller.
+      description: There are a few resources which need to be installed for tracing to work correctly with the Admission Policy Manager Controller.
       warning: The deployments of these resources can take a few minutes to become active.
       outdated: The tracing configuration is outdated, please update the configuration.
       unsupported: The custom tracing configuration is unsupported, please update the configuration to use the sidecar.
@@ -197,11 +197,11 @@ kubewarden:
     noTraces: No tracing data exists for this policy.
     config:
       label: |
-        Tracing must be <a href="https://docs.kubewarden.io/next/howtos/ui-extension/tracing#update-rancher-kubewarden-controller-with-jaeger-endpoint" target="_blank" rel="noopener noreferrer nofollow">enabled and configured</a> with a Jaeger endpoint in the "Telemetry" tab of the Kubewarden Controller chart settings.
+        Tracing must be <a href="https://docs.kubewarden.io/next/howtos/ui-extension/tracing#update-rancher-kubewarden-controller-with-jaeger-endpoint" target="_blank" rel="noopener noreferrer nofollow">enabled and configured</a> with a Jaeger endpoint in the "Telemetry" tab of the Admission Policy Manager Controller chart settings.
       link: Update Config
   monitoring:
     notInstalled: |
-      The Monitoring app is not installed, this will will need to be installed and configured to enable metrics. Follow <a href="https://docs.kubewarden.io/next/howtos/ui-extension/metrics" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to add the Kubewarden ServiceMonitor for Prometheus.
+      The Monitoring app is not installed, this will will need to be installed and configured to enable metrics. Follow <a href="https://docs.kubewarden.io/next/howtos/ui-extension/metrics" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to add the Admission Policy Manager ServiceMonitor for Prometheus.
     install: Install Monitoring
     prerequisites:
       label: Prerequisites
@@ -225,7 +225,7 @@ kubewarden:
         upgrade:
           label: The Service Monitor for this Policy Server is outdated. Follow the <a href="https://docs.kubewarden.io/next/howtos/ui-extension/metrics#upgrade" target="_blank" rel="noopener noreferrer nofollow">documentation</a> to learn more about Service Monitors.
       configMap:
-        label: Grafana Dashboards (ConfigMaps) for the Policy Servers and for Kubewarden Policies must be created.
+        label: Grafana Dashboards (ConfigMaps) for the Policy Servers and for Admission Policy Manager Policies must be created.
         button: Add Dashboards
         conflictingDashboardsBanner: |-
           {count, plural,
@@ -233,13 +233,13 @@ kubewarden:
           other {There are conflicting ConfigMaps, the following must be deleted before proceeding:}
           }
       controllerConfig:
-        label: The Kubewarden Controller must be configured to enable metrics. Follow <a href="https://docs.kubewarden.io/next/howtos/ui-extension/metrics#enable-telemetry-for-your-rancher-kubewarden-controller-resource" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to properly configure the kubewarden-controller chart.
+        label: The Admission Policy Manager Controller must be configured to enable metrics. Follow <a href="https://docs.kubewarden.io/next/howtos/ui-extension/metrics#enable-telemetry-for-your-rancher-kubewarden-controller-resource" target="_blank" rel="noopener noreferrer nofollow">these steps</a> to properly configure the kubewarden-controller chart.
         button: Edit Config
     warning:
       noProxy: The Grafana proxy URL can not be found or is configured incorrectly.
 
   metrics:
-    notInstalled: The Grafana dashboard for this Kubewarden resource can not be found. You need to create the ConfigMap for the dashboard.
+    notInstalled: The Grafana dashboard for this Admission Policy Manager resource can not be found. You need to create the ConfigMap for the dashboard.
     reload: Grafana dashboard created - reload required
     noService: The Metrics service is not currently active or is not installed correctly. Check the status of the Monitoring app.
 
@@ -316,7 +316,7 @@ kubewarden:
       label: Context Aware Resources
       description: A list of Kubernetes resources the policy is allowed to access at evaluation time. Access to these resources is done using the ServiceAccount of the PolicyServer the policy is assigned to.
       warning: >-
-        Kubewarden administrators need to thoroughly examine the types of resources that a policy will access in order to prevent any misuse or abuse of the system. In some cases, it may be necessary to increase the permissions of the ServiceAccount associated with the PolicyServer to enable the policy to retrieve the required information. Although policies are restricted to read-only access to Kubernetes resources, there is a risk that a malicious attacker could exploit a Kubewarden policy to extract sensitive data from the cluster.
+        Admission Policy Manager administrators need to thoroughly examine the types of resources that a policy will access in order to prevent any misuse or abuse of the system. In some cases, it may be necessary to increase the permissions of the ServiceAccount associated with the PolicyServer to enable the policy to retrieve the required information. Although policies are restricted to read-only access to Kubernetes resources, there is a risk that a malicious attacker could exploit an Admission Policy Manager policy to extract sensitive data from the cluster.
       resource:
         add: Add Resource
         remove: Remove Resource
@@ -432,7 +432,7 @@ kubewarden:
         file: Read Certificate from File
     verification:
       label: Verification Config
-      description: This is the name of a VerificationConfig configmap within the same namespace, containing a Sigstore verification configuration. The configuration must be under a key named verification-config in the Configmap. More information can be found in the <a href="https://docs.kubewarden.io/next/howtos/secure-supply-chain#configuring-the-policy-server-to-check-policy-signatures" target="_blank" rel="noopener noreferrer nofollow">Kubewarden docs</a>.
+      description: This is the name of a VerificationConfig configmap within the same namespace, containing a Sigstore verification configuration. The configuration must be under a key named verification-config in the Configmap. More information can be found in the <a href="https://docs.kubewarden.io/next/howtos/secure-supply-chain#configuring-the-policy-server-to-check-policy-signatures" target="_blank" rel="noopener noreferrer nofollow">Admission Policy Manager docs</a>.
   policyCharts:
     signedPolicy:
       label: Signed
@@ -447,20 +447,20 @@ kubewarden:
     title: Policy Reporter
     link: Policy Reporter UI
     noSchema:
-      banner: Kubewarden has not been installed, this will need to be accomplished before installing the Policy Reporter
-      link: Install Kubewarden
+      banner: Admission Policy Manager has not been installed, this will need to be accomplished before installing the Policy Reporter
+      link: Install Admission Policy Manager
     incompatible:
-      banner: 'Your cluster does not support policy reports, upgrade your Kubewarden to version `1.7.0` or greater to add the required crds.'
-      current: Current Kubewarden Controller version
+      banner: 'Your cluster does not support policy reports, upgrade your Admission Policy Manager to version `1.7.0` or greater to add the required crds.'
+      current: Current Admission Policy Manager Controller version
       noCrds:
         banner: 'The CRDs for `wgpolicyk8s.io.clusterpolicyreport` or `wgpolicyk8s.io.policyreport` can not be found. These must be installed to support policy reports.'
     service:
       main:
         banner:
-          unavailable: 'The Policy Reporter service is unavailable, ensure the properties `auditScanner.enable` and `auditScanner.policyReporter` are set to `true` within the Kubewarden Controller chart.'
+          unavailable: 'The Policy Reporter service is unavailable, ensure the properties `auditScanner.enable` and `auditScanner.policyReporter` are set to `true` within the Admission Policy Manager Controller chart.'
       ui:
         banner:
-          unavailable: 'The Policy Reporter UI service is unavailable, ensure the property `policy-reporter.ui.enabled` is set to `true` within the Kubewarden Controller chart.'
+          unavailable: 'The Policy Reporter UI service is unavailable, ensure the property `policy-reporter.ui.enabled` is set to `true` within the Admission Policy Manager Controller chart.'
     url:
       banner:
         unavailable: The Policy Reporter UI proxy URL is unavailble, please ensure that the UI is properly configured.
@@ -475,7 +475,7 @@ kubewarden:
         label: Cluster Compliance
         description: Cluster Policy Reports are the results of the policy scans that are stored using the ClusterPolicyReport Custom Resource.
       label: Compliance
-      description: When using the Kubewarden Audit Scanner, the results of the policy scans are stored using the PolicyReport Custom Resource.
+      description: When using the Admission Policy Manager Audit Scanner, the results of the policy scans are stored using the PolicyReport Custom Resource.
       policyReportsTab:
         policy:
           label: Policy
@@ -506,7 +506,7 @@ asyncButton:
     success: Applied
     waiting: Installing&hellip;
   kubewardenRepository:
-    action: Add Kubewarden Repository
+    action: Add Admission Policy Manager Repository
     success: Added
     waiting: Adding&hellip;
   kubewardenPolicyCatalog:

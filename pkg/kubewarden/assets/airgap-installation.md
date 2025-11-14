@@ -1,9 +1,9 @@
 # Air gap installation
 
-This guide will show you how to install Kubewarden in air-gapped environments. In an air-gapped installation of Kubewarden,
-you will need a private OCI registry accessible by your Kubernetes cluster. Kubewarden Policies
+This guide will show you how to install Admission Policy Manager in air-gapped environments. In an air-gapped installation of Admission Policy Manager,
+you will need a private OCI registry accessible by your Kubernetes cluster. Admission Policy Manager Policies
 are WebAssembly modules; therefore, they can be stored inside an OCI-compliant registry as OCI artifacts.
-You need to add Kubewarden's images and policies to this OCI registry. Let's see how to do that.
+You need to add Admission Policy Manager's images and policies to this OCI registry. Let's see how to do that.
 
 ## Requirements
 
@@ -13,7 +13,7 @@ You need to add Kubewarden's images and policies to this OCI registry. Let's see
 
 ## Save container images in your workstation
 
-1. Download `kubewarden-images.txt` from the Kubewarden [release page](https://github.com/kubewarden/helm-charts/releases/). Alternatively, the `imagelist.txt` and `policylist.txt` files are shipped inside the helm charts containing the used container images and policy wasm modules, respectively.
+1. Download `kubewarden-images.txt` from the Admission Policy Manager [release page](https://github.com/kubewarden/helm-charts/releases/). Alternatively, the `imagelist.txt` and `policylist.txt` files are shipped inside the helm charts containing the used container images and policy wasm modules, respectively.
 
 >**Note:** Optionally, you can verify the signatures of the [helm charts](../../security/verifying-kubewarden#helm-charts) and [container images](../../security/verifying-kubewarden#container-images)
 
@@ -28,7 +28,7 @@ helm template ./cert-manager-<Version>.tgz | \
 ```
 
 3. Download `kubewarden-save-images.sh` and `kubewarden-load-images.sh` from the [utils repository](https://github.com/kubewarden/utils).
-4. Save Kubewarden container images into a .tar.gz file:
+4. Save Admission Policy Manager container images into a .tar.gz file:
 
 ```
 ./kubewarden-save-images.sh \
@@ -41,7 +41,7 @@ When the process completes, your current directory will output a tarball named `
 
 ## Save policies in your workstation
 
-1. Add all the policies you want to use in a `policies.txt` file. A file with a list of the default policies can be found in the Kubewarden defaults [release page](https://github.com/kubewarden/helm-charts/releases/)
+1. Add all the policies you want to use in a `policies.txt` file. A file with a list of the default policies can be found in the Admission Policy Manager defaults [release page](https://github.com/kubewarden/helm-charts/releases/)
 2. Download `kubewarden-save-policies.sh` and `kubewarden-load-policies.sh` from the [kwctl repository](https://github.com/kubewarden/kwctl/tree/main/scripts)
 3. Save policies into a .tar.gz file:
 
@@ -72,14 +72,14 @@ helm pull jetstack/cert-manager
 Move `kubewarden-policies.tar.gz`, `kubewarden-images.tar.gz`, `kubewarden-load-images.sh`, `kubewarden-load-policies.sh` and `policies.txt`
 to the air gap environment.
 
-1. Load Kubewarden images into the private registry. Docker client must be authenticated against the local registry
+1. Load Admission Policy Manager images into the private registry. Docker client must be authenticated against the local registry
 ```
 ./kubewarden-load-images.sh \
   --image-list ./kubewarden-images.txt \
   --images kubewarden-images.tar.gz \
   --registry <REGISTRY.YOURDOMAIN.COM:PORT>
 ```
-2. Load Kubewarden policies into the private registry. Kwctl must be authenticated against the local registry (`kwctl` uses the same mechanism to authenticate as `docker`, a `~/.docker/config.json` file)
+2. Load Admission Policy Manager policies into the private registry. Kwctl must be authenticated against the local registry (`kwctl` uses the same mechanism to authenticate as `docker`, a `~/.docker/config.json` file)
 ```
 ./kubewarden-load-policies.sh \
   --policies-list policies.txt \
@@ -98,10 +98,12 @@ to the air gap environment.
 >Please refer to [the section on custom certificate authorities](../../distributing-policies/custom-certificate-authorities.md) in our documentation to learn more about configuring the `sources.yaml` file
 
 
-## Install Kubewarden
+```
 
-Let's install Kubewarden now that we have everything we need in our private registry. The only difference with a normal
-Kubewarden installation is that we need to change the registry in the container images and policies to our private registry.
+## Install Admission Policy Manager
+
+Let's install Admission Policy Manager now that we have everything we need in our private registry. The only difference with a normal
+Admission Policy Manager installation is that we need to change the registry in the container images and policies to our private registry.
 
 Install `cert-manager` if it is not already installed in the air gap cluster:
 
@@ -115,7 +117,7 @@ helm install --create-namespace cert-manager ./cert-manager-<Version>.tgz \
     --set startupapicheck.image.repository=<REGISTRY.YOURDOMAIN.COM:PORT>/jetstack/cert-manager-ctl
 ```
 
-Let's install the Kubewarden stack:
+Let's install the Admission Policy Manager stack:
 
 ```
 helm install --wait -n kubewarden \

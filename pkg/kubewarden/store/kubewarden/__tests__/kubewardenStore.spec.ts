@@ -1,6 +1,6 @@
 import storeModule, { StateConfig } from '@kubewarden/store/kubewarden/index';
 
-describe('Kubewarden Vuex Store Module', () => {
+describe('Admission Policy Manager Vuex Store Module', () => {
   let state: StateConfig;
 
   beforeEach(() => {

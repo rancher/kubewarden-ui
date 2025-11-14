@@ -3,7 +3,7 @@
     {
       "name": "DS_PROMETHEUS",
       "label": "Prometheus",
-      "description": "Prometheus storing Kubewarden metrics",
+      "description": "Prometheus storing Admission Policy Manager metrics",
       "type": "datasource",
       "pluginId": "prometheus",
       "pluginName": "Prometheus"
@@ -60,7 +60,7 @@
       }
     ]
   },
-  "description": "Official dashboard for Kubewarden metrics",
+  "description": "Official dashboard for Admission Policy Manager metrics",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "gnetId": 15314,
@@ -561,7 +561,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Kubewarden / Policy",
+  "title": "Admission Policy Manager / Policy",
   "uid": "kubewarden-dashboard-policy",
   "version": 3
 }
