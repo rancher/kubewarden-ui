@@ -4,7 +4,9 @@ import Admission from '@kubewarden/chart/kubewarden/admission/index.vue';
 import Settings from '@kubewarden/chart/kubewarden/admission/Settings.vue';
 import Questions from '@kubewarden/components/Questions/index.vue';
 
-import { DEFAULT_POLICY, KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
+import { DEFAULT_POLICY } from '@kubewarden/types';
+
 import { userGroupPolicy } from '@tests/unit/mocks/policyConfig';
 import { question } from '@tests/unit/mocks/questions';
 

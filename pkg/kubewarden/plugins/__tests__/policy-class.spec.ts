@@ -1,7 +1,7 @@
 import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import { KUBERNETES, WORKSPACE_ANNOTATION } from '@shell/config/labels-annotations';
 
-import { KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME, KUBEWARDEN_ANNOTATIONS } from '@kubewarden/types';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME, KUBEWARDEN_ANNOTATIONS } from '@kubewarden/constants';
 
 import PolicyModel from '@kubewarden/plugins/policy-class';
 import KubewardenModel from '@kubewarden/plugins/kubewarden-class';
