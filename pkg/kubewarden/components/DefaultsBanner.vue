@@ -12,9 +12,13 @@ import { getLatestVersion } from '@kubewarden/plugins/kubewarden-class';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 import { refreshCharts, findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
 import { fetchControllerApp } from '@kubewarden/modules/kubewardenController';
+import { RcButton } from '@components/RcButton';
 
 export default {
-  components: { Banner },
+  components: {
+    Banner,
+    RcButton
+  },
 
   props: {
     mode: {
@@ -190,21 +194,27 @@ export default {
 
 <template>
   <Banner
+    class="default-banner"
     v-if="$fetchState.pending === false && hasPermission"
     data-testid="kw-defaults-banner"
-    class="mb-20 mt-0"
     :color="colorMode"
     :closable="isClosable"
     @close="closeDefaultsBanner()"
   >
     <span v-clean-html="bannerCopy" />
-    <button
+
+    <RcButton
+      secondary
       v-if="highestCompatibleDefaultsChart"
       data-testid="kw-defaults-banner-button"
-      class="btn role-primary ml-10"
       @click.prevent="chartRoute"
-    >
-      {{ btnText }}
-    </button>
+    >{{ btnText }}</RcButton>
   </Banner>
 </template>
+<style scoped>
+/** This is an anti pattern and will break on component changes */
+.default-banner :deep(.banner__content) {
+  justify-content: space-between;
+  align-items: center;
+}
+</style>
