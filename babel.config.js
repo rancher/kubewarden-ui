@@ -10,6 +10,7 @@ module.exports = {
               '@':           '.',
               '~':           '.',
               '@kubewarden': './pkg/kubewarden',
+              '@sbomscanner': './pkg/sbomscanner',
             },
           },
         ],

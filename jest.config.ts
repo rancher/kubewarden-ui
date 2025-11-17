@@ -1,9 +1,16 @@
 import type { Config } from '@jest/types';
 
-const baseConfig: Config.InitialOptions = {
+let project = '';
+const arg = process.argv.find((arg) => arg.startsWith('--project='));
+if (arg) project = arg.split('=')[1];
+
+if (!project) project = 'kubewarden';
+
+const config: Config.InitialOptions = {
   setupFilesAfterEnv:     ['./jest.setup.ts'],
   testEnvironment:        'jest-environment-jsdom',
   testEnvironmentOptions: { customExportConditions: ['node', 'node-addons'] },
+  testMatch: [`<rootDir>/pkg/${project}/**/*.spec.[jt]s?(x)`],
   modulePaths:            ['<rootDir>'],
   moduleFileExtensions:   ['js', 'json', 'vue', 'ts', 'tsx'],
   moduleNameMapper:       {
@@ -31,26 +38,10 @@ const baseConfig: Config.InitialOptions = {
     '<rootDir>/extensions/',
     '<rootDir>/tests/e2e/',
   ],
-  coverageDirectory: '<rootDir>/coverage/unit',
+  coverageDirectory: `<rootDir>/coverage/unit/${project}`,
   coverageReporters: ['json', 'text-summary'],
   coverageProvider:  'v8',
   preset:            'ts-jest',
 };
 
-const config: Config.InitialOptions = {
-  projects: [
-    {
-      displayName: 'kubewarden',
-      testMatch:   ['<rootDir>/pkg/kubewarden/**/*.spec.[jt]s?(x)'],
-      ...baseConfig,
-    },
-    {
-      displayName: 'sbomscanner',
-      testMatch:   ['<rootDir>/pkg/sbomscanner/**/*.spec.[jt]s?(x)'],
-      ...baseConfig,
-    },
-  ],
-};
-
 export default config;
-
