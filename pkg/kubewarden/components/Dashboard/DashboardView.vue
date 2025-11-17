@@ -5,6 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import { CATALOG, POD, UI_PLUGIN } from '@shell/config/types';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 import { allHash } from '@shell/utils/promise';
+import { RcItemCard } from '@components/RcItemCard';
 
 import Loading from '@shell/components/Loading';
 
@@ -28,6 +29,7 @@ export default {
     Loading,
     Masthead,
     ReportsGauge,
+    RcItemCard,
     PolicyServerCard
   },
 
@@ -375,6 +377,25 @@ export default {
         :key="index"
         class="card-container"
       >
+
+<!-- TEMPORARY CHECK -->
+      <RcItemCard
+        :id="index"
+        class="dashboard-resource-card"
+        variant="small"
+        :header="{
+          title: { text: 'test' },
+          statuses: [],
+        }"
+        :content="{}"
+        :value="value"
+        @click="select"
+      >
+        <template #item-card-image></template>
+        <template #item-card-actions></template>
+        <template #item-card-content></template>
+      </RcItemCard>
+
         <Card v-if="card.isEnabled" :card="card">
           <template #count>
             <span v-if="index === 0" class="count">{{ namespacedPolicies.length || 0 }}</span>
