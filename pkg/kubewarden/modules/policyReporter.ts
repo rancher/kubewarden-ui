@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import semver from 'semver';
 import { NAMESPACE } from '@shell/config/types';
 import {
-  KUBEWARDEN, Severity, Result, PolicyReport, ClusterPolicyReport, PolicyReportResult, PolicyReportSummary, WG_POLICY_K8S
+  KUBEWARDEN, Severity, Result, Report, ClusterReport, ReportResult, ReportSummary, OPEN_REPORTS
 } from '@kubewarden/types';
 import * as coreTypes from '@kubewarden/core/core-resources';
 import { createKubewardenRoute } from '@kubewarden/utils/custom-routing';
@@ -24,13 +24,13 @@ export function __clearReportCache() {
 }
 
 /**
- * Fetches either PolicyReports or ClusterPolicyReports based on version compatibility and dispatches update actions.
+ * Fetches either Reports or ClusterReports and dispatches update actions.
  * @param store
  * @param isClusterLevel
  * @param resourceType
- * @returns `PolicyReport[] | ClusterPolicyReport[] | void`
+ * @returns `Report[] | ClusterReport[] | void`
  */
-export async function getReports<T extends PolicyReport | ClusterPolicyReport>(
+export async function getReports<T extends Report | ClusterReport>(
   store: Store<any>,
   isClusterLevel: boolean = false,
   resourceType?: string
@@ -38,12 +38,19 @@ export async function getReports<T extends PolicyReport | ClusterPolicyReport>(
   const now = Date.now();
   const reportTypes: string[] = [];
 
+  // Use OpenReports only
   if (isClusterLevel) {
-    reportTypes.push(WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
+    const openReportsSchema = store.getters['cluster/schemaFor'](OPEN_REPORTS.CLUSTER_REPORT.TYPE);
+    if (openReportsSchema) {
+      reportTypes.push(OPEN_REPORTS.CLUSTER_REPORT.TYPE);
+    }
   }
 
   if (resourceType || !isClusterLevel) {
-    reportTypes.push(WG_POLICY_K8S.POLICY_REPORT.TYPE);
+    const openReportsSchema = store.getters['cluster/schemaFor'](OPEN_REPORTS.REPORT.TYPE);
+    if (openReportsSchema) {
+      reportTypes.push(OPEN_REPORTS.REPORT.TYPE);
+    }
   }
 
   // Map over the report types to get (or create) the promise for each
@@ -70,7 +77,8 @@ export async function getReports<T extends PolicyReport | ClusterPolicyReport>(
       if (!isEmpty(reports)) {
         // Cache the reports right away so subsequent calls don’t trigger a new fetch
         // (even though the store will eventually be updated asynchronously).
-        const updateAction = reportType === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE ? 'kubewarden/updateClusterPolicyReports' : 'kubewarden/updatePolicyReports';
+        const isClusterReport = reportType === OPEN_REPORTS.CLUSTER_REPORT.TYPE;
+        const updateAction = isClusterReport ? 'kubewarden/updateClusterReports' : 'kubewarden/updateReports';
 
         await processReportsInBatches(store, reports, updateAction);
       }
@@ -100,7 +108,7 @@ export async function getReports<T extends PolicyReport | ClusterPolicyReport>(
  */
 async function processReportsInBatches(
   store: Store<any>,
-  reports: Array<PolicyReport | ClusterPolicyReport>,
+  reports: Array<Report | ClusterReport>,
   action: string
 ): Promise<void> {
   const totalReports = reports.length;
@@ -139,13 +147,13 @@ async function processReportsInBatches(
 }
 
 /**
- * Generates a map of { [resourceId]: PolicyReportSummary } for all PolicyReports
- * and ClusterPolicyReports currently in the store.
+ * Generates a map of { [resourceId]: ReportSummary } for all Reports
+ * and ClusterReports currently in the store.
  */
-export function generateSummaryMap(storeState: any): Record<string, PolicyReportSummary> {
-  const summaryMap: Record<string, PolicyReportSummary> = {};
+export function generateSummaryMap(storeState: any): Record<string, ReportSummary> {
+  const summaryMap: Record<string, ReportSummary> = {};
 
-  function processReport(report: PolicyReport | ClusterPolicyReport) {
+  function processReport(report: Report | ClusterReport) {
     // Skip non-Kubewarden managed
     if (report.metadata?.labels?.['app.kubernetes.io/managed-by'] !== 'kubewarden') {
       return;
@@ -173,7 +181,7 @@ export function generateSummaryMap(storeState: any): Record<string, PolicyReport
     }
 
     report.results?.forEach((r) => {
-      const key = r.result?.toLowerCase() as keyof PolicyReportSummary;
+      const key = r.result?.toLowerCase() as keyof ReportSummary;
 
       if (key && summaryMap[resourceId][key] !== undefined) {
         summaryMap[resourceId][key]! += 1;
@@ -181,22 +189,22 @@ export function generateSummaryMap(storeState: any): Record<string, PolicyReport
     });
   }
 
-  // Process clusterPolicyReports
-  storeState.clusterPolicyReports.forEach(processReport);
+  // Process clusterReports
+  storeState.clusterReports.forEach(processReport);
 
-  // Process policyReports
-  storeState.policyReports.forEach(processReport);
+  // Process reports
+  storeState.reports.forEach(processReport);
 
   return summaryMap;
 }
 
 /**
- * Filters PolicyReports for namespaced resources or the Namespace resource type
+ * Filters Reports for namespaced resources or the Namespace resource type
  * @param store
  * @param resource
- * @returns `PolicyReport | PolicyReportResult[] | null | void`
+ * @returns `Report | ReportResult[] | null | void`
  */
-export async function getFilteredReport(store: Store<any>, resource: any): Promise<PolicyReport | ClusterPolicyReport | null> {
+export async function getFilteredReport(store: Store<any>, resource: any): Promise<Report | ClusterReport | null> {
   const schema = store.getters['cluster/schemaFor'](resource?.type);
 
   if (schema) {
@@ -215,7 +223,7 @@ export async function getFilteredReport(store: Store<any>, resource: any): Promi
         return filteredReport;
       }
     } catch (e) {
-      console.warn(`Error fetching PolicyReports: ${ e }`);
+      console.warn(`Error fetching Reports: ${ e }`);
     }
   }
 
@@ -223,12 +231,12 @@ export async function getFilteredReport(store: Store<any>, resource: any): Promi
 }
 
 /**
- * Finds the resource (policy) that is connected to the PolicyReportResult and returns the route.
+ * Finds the resource (policy) that is connected to the ReportResult and returns the route.
  * @param store
- * @param report: `PolicyReportResult`
+ * @param report: `ReportResult`
  * @returns `createKubewardenRoute` | Will return a route to either a ClusterAdmissionPolicy or AdmissionPolicy
  */
-export function getLinkForPolicy(store: Store<any>, report: PolicyReportResult): object | void {
+export function getLinkForPolicy(store: Store<any>, report: ReportResult): object | void {
   if (report?.policy) {
     const apSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.ADMISSION_POLICY);
     const capSchema = store.getters['cluster/schemaFor'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
@@ -263,10 +271,10 @@ export function getLinkForPolicy(store: Store<any>, report: PolicyReportResult):
  * not passed in from the report, it needs to be determined by the `kind` of the resource. For core
  * resources this works as is, but for non-core resources (e.g. `apps.deployments`), this is extrapolated
  * by the `apiVersion` combined with the `kind`.
- * @param report: `PolicyReport
+ * @param report: `Report
  * @returns `Route | void`
  */
-export function getLinkForResource(report: PolicyReport): object | void {
+export function getLinkForResource(report: Report): object | void {
   if (!isEmpty(report.scope)) {
     const resource = report.scope;
 
@@ -305,8 +313,8 @@ export function getLinkForResource(report: PolicyReport): object | void {
 }
 
 /**
- * Determines color for PolicyReport status
- * @param result | PolicyReport summary result || report resource.result
+ * Determines color for Report status
+ * @param result | Report summary result || report resource.result
  * @returns string
  */
 export function colorForResult(result: Result): string {
@@ -327,8 +335,8 @@ export function colorForResult(result: Result): string {
 }
 
 /**
- * Determines color for PolicyReport severity
- * @param severity | PolicyReport severity
+ * Determines color for Report severity
+ * @param severity | Report severity
  * @returns string
  */
 export function colorForSeverity(severity: Severity): string {
@@ -349,30 +357,16 @@ export function colorForSeverity(severity: Severity): string {
 }
 
 /**
- * Determines if the kubewarden-controller app has a compatible version for PolicyReports,
- * for kubewarden-controller version `>= 1.11` it requires an extension version of `>= 1.4.0`
- * for kubewarden-controller version `<= 1.10` it requires an extension version of `< 1.4.0`
- * @param string
- * @param string
+ * Determines if the kubewarden-controller app has a compatible version for OpenReports.
+ * For Kubewarden 1.30+, OpenReports are supported.
+ * @param string controllerAppVersion
+ * @param string uiPluginVersion
  * @returns Object
  */
 export function newPolicyReportCompatible(controllerAppVersion: string, uiPluginVersion: string): object | void {
-  if (semver.gte(uiPluginVersion, '1.4.0')) {
-    return {
-      oldPolicyReports: semver.gt(controllerAppVersion, '1.10.100'),
-      newPolicyReports:  true
-    };
-  }
-
-  if (semver.lt(uiPluginVersion, '1.4.0')) {
-    return {
-      oldPolicyReports: true,
-      newPolicyReports:  semver.lte(controllerAppVersion, '1.10.100')
-    };
-  }
-
+  // OpenReports are supported in Kubewarden 1.30+
   return {
-    oldPolicyReports: true,
+    oldPolicyReports: false,
     newPolicyReports:  true
   };
 }

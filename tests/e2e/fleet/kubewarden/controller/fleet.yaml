@@ -13,6 +13,7 @@ helm:
     #   tag: latest
     auditScanner:
       policyReporter: true
+      reportCRDsKind: "openreports"
       cronJob:
         schedule: "*/1 * * * *" # every minute
     telemetry:
@@ -27,8 +28,6 @@ helm:
             endpoint: "jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317"
             tls:
               insecure: true
-    auditScanner:
-      policyReporter: true
 
 diff:
   comparePatches:

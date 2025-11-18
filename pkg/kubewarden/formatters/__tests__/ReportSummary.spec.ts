@@ -2,11 +2,11 @@ import { mount } from '@vue/test-utils';
 import { createStore } from 'vuex';
 import { nextTick } from 'vue';
 
-import PolicyReportSummary from '@kubewarden/formatters/PolicyReportSummary.vue';
+import ReportSummary from '@kubewarden/formatters/ReportSummary.vue';
 
 jest.mock('@kubewarden/modules/policyReporter', () => ({ colorForResult: (result: string) => `text-${ result }` }));
 
-describe('PolicyReportSummary.vue', () => {
+describe('ReportSummary.vue', () => {
   let store: ReturnType<typeof createStore>;
   let getters: Record<string, any>;
 
@@ -20,7 +20,7 @@ describe('PolicyReportSummary.vue', () => {
   });
 
   const factory = (propsData = {}) => {
-    return mount(PolicyReportSummary, {
+    return mount(ReportSummary, {
       props:  propsData,
       global: {
         plugins: [store],

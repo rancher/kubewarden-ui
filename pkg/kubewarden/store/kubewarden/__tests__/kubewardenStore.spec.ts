@@ -16,8 +16,8 @@ describe('Kubewarden Vuex Store Module', () => {
       expect(state.controllerApp).toBeNull();
       expect(state.kubewardenCrds).toEqual([]);
       expect(state.loadingReports).toBe(false);
-      expect(state.policyReports).toEqual([]);
-      expect(state.clusterPolicyReports).toEqual([]);
+      expect(state.reports).toEqual([]);
+      expect(state.clusterReports).toEqual([]);
       expect(state.reportMap).toEqual({});
       expect(state.summaryMap).toEqual({});
       expect(state.policyTraces).toEqual([]);
@@ -52,12 +52,12 @@ describe('Kubewarden Vuex Store Module', () => {
       expect(getters.loadingReports(state)).toBe(false);
     });
 
-    it('should return policyReports state', () => {
-      expect(getters.policyReports(state)).toEqual([]);
+    it('should return reports state', () => {
+      expect(getters.reports(state)).toEqual([]);
     });
 
-    it('should return clusterPolicyReports state', () => {
-      expect(getters.clusterPolicyReports(state)).toEqual([]);
+    it('should return clusterReports state', () => {
+      expect(getters.clusterReports(state)).toEqual([]);
     });
 
     it('should return policyTraces state', () => {

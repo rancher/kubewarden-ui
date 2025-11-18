@@ -2,7 +2,7 @@ import { Store } from 'vuex';
 
 import * as policyReporterModule from '@kubewarden/modules/policyReporter';
 import { KUBEWARDEN, Severity, Result } from '@kubewarden/types';
-import { mockPolicyReport, mockClusterPolicyReport } from '@tests/unit/mocks/policyReports';
+import { mockReport, mockClusterReport } from '@tests/unit/mocks/policyReports';
 import { mockControllerAppLegacy } from '@tests/unit/mocks/controllerApp';
 
 jest.mock('lodash/isEmpty', () => ({
@@ -23,8 +23,8 @@ const mockStore = {
     'cluster/schemaFor':               jest.fn(),
     'cluster/all':                     jest.fn(),
     'kubewarden/reportByResourceId':   jest.fn(),
-    'kubewarden/policyReports':        [mockPolicyReport],
-    'kubewarden/clusterPolicyReports': [mockClusterPolicyReport],
+    'kubewarden/reports':        [mockReport],
+    'kubewarden/clusterReports': [mockClusterReport],
     'kubewarden/controllerApp':        mockControllerAppLegacy
   },
   dispatch: jest.fn()
@@ -51,46 +51,46 @@ beforeEach(() => {
 
 describe('getReports', () => {
   it('should fetch and dispatch cluster policy reports when cluster level is true', async() => {
-    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockClusterPolicyReport]);
+    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockClusterReport]);
 
     const reports = await policyReporterModule.getReports(mockStore, true);
 
-    expect(reports).toEqual([mockClusterPolicyReport]);
+    expect(reports).toEqual([mockClusterReport]);
     expect(mockStore.dispatch).toHaveBeenCalledWith(
       'kubewarden/updateClusterPolicyReports',
-      [mockClusterPolicyReport]
+      [mockClusterReport]
     );
     expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/regenerateSummaryMap');
   });
 
   it('should fetch and dispatch policy reports when cluster level is false', async() => {
-    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockPolicyReport]);
+    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockReport]);
 
     const reports = await policyReporterModule.getReports(mockStore, false);
 
-    expect(reports).toEqual([mockPolicyReport]);
+    expect(reports).toEqual([mockReport]);
     expect(mockStore.dispatch).toHaveBeenCalledWith(
       'kubewarden/updatePolicyReports',
-      [mockPolicyReport]
+      [mockReport]
     );
     expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/regenerateSummaryMap');
   });
 
   it('should fetch and dispatch policy reports when cluster level is false and resourceType is specified', async() => {
-    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockPolicyReport]);
+    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockReport]);
 
-    const reports = await policyReporterModule.getReports(mockStore, false, mockPolicyReport.scope.kind);
+    const reports = await policyReporterModule.getReports(mockStore, false, mockReport.scope.kind);
 
-    expect(reports).toEqual([mockPolicyReport]);
+    expect(reports).toEqual([mockReport]);
     expect(mockStore.dispatch).toHaveBeenCalledWith(
       'kubewarden/updatePolicyReports',
-      [mockPolicyReport]
+      [mockReport]
     );
     expect(mockStore.dispatch).toHaveBeenCalledWith('kubewarden/regenerateSummaryMap');
   });
 
   it('should use cache for subsequent calls within TTL', async() => {
-    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockPolicyReport]);
+    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockReport]);
     const firstCall = await policyReporterModule.getReports(mockStore, false);
     const secondCall = await policyReporterModule.getReports(mockStore, false);
 
@@ -106,7 +106,7 @@ describe('getReports', () => {
 
 describe('__clearReportCache', () => {
   it('should clear the report cache so that new fetches occur', async() => {
-    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockPolicyReport]);
+    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockReport]);
     // First call caches the result.
     await policyReporterModule.getReports(mockStore, false);
     // Clear cache.
@@ -134,8 +134,8 @@ describe('generateSummaryMap', () => {
     };
 
     const storeState = {
-      clusterPolicyReports: [mockReport],
-      policyReports:        []
+      clusterReports: [mockReport],
+      reports:        []
     };
 
     const summary = policyReporterModule.generateSummaryMap(storeState);
@@ -178,16 +178,16 @@ describe('getFilteredReport', () => {
 
   it('should return a filtered report if found in store getters', async() => {
     mockStore.getters['cluster/schemaFor'].mockReturnValue(true);
-    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockPolicyReport]);
+    (mockStore.dispatch as jest.Mock).mockResolvedValueOnce([mockReport]);
     // Simulate that reportByResourceId returns a report.
-    mockStore.getters['kubewarden/reportByResourceId'].mockReturnValueOnce(mockPolicyReport);
+    mockStore.getters['kubewarden/reportByResourceId'].mockReturnValueOnce(mockReport);
     const report = await policyReporterModule.getFilteredReport(mockStore, {
       id:       'abc',
       type:     'mock',
       metadata: { namespace: 'default' }
     });
 
-    expect(report).toEqual(mockPolicyReport);
+    expect(report).toEqual(mockReport);
   });
 
   it('should return null if an error occurs during fetching', async() => {

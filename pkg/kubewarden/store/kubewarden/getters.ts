@@ -1,10 +1,10 @@
 import {
   CatalogApp,
   CustomResourceDefinition,
-  PolicyReport,
-  ClusterPolicyReport,
+  Report,
+  ClusterReport,
   PolicyTraceConfig,
-  PolicyReportSummary,
+  ReportSummary,
   ArtifactHubPackageDetails
 } from '@kubewarden/types';
 import { StateConfig } from './index';
@@ -17,8 +17,8 @@ export default {
   controllerApp:          (state: StateConfig): CatalogApp | null => state.controllerApp,
   kubewardenCrds:         (state: StateConfig): CustomResourceDefinition[] => state.kubewardenCrds,
   loadingReports:         (state: StateConfig): boolean => state.loadingReports,
-  policyReports:          (state: StateConfig): PolicyReport[] => state.policyReports,
-  clusterPolicyReports:   (state: StateConfig): ClusterPolicyReport[] => state.clusterPolicyReports,
+  reports:          (state: StateConfig): Report[] => state.reports,
+  clusterReports:   (state: StateConfig): ClusterReport[] => state.clusterReports,
   policyTraces:           (state: StateConfig): PolicyTraceConfig[] => state.policyTraces,
   refreshingCharts:       (state: StateConfig): boolean => state.refreshingCharts,
   packages:               (state: StateConfig): any[] => state.packages,
@@ -26,11 +26,11 @@ export default {
   packageDetailsByKey:    (state: StateConfig) => (key: string): ArtifactHubPackageDetails => state.packageDetails[key],
 
 
-  reportByResourceId:     (state: StateConfig) => (resourceId: string): PolicyReport | ClusterPolicyReport => {
+  reportByResourceId:     (state: StateConfig) => (resourceId: string): Report | ClusterReport => {
     return state.reportMap[resourceId];
   },
 
-  summaryByResourceId:    (state: StateConfig) => (resourceId: string): PolicyReportSummary => {
+  summaryByResourceId:    (state: StateConfig) => (resourceId: string): ReportSummary => {
     return state.summaryMap[resourceId] || {
       pass:  0,
       fail:  0,

@@ -13,8 +13,8 @@ describe('Vuex Mutations', () => {
       controllerApp:          null,
       kubewardenCrds:         [],
       loadingReports:         false,
-      policyReports:          [],
-      clusterPolicyReports:   [],
+      reports:                [],
+      clusterReports:         [],
       reportMap:              {},
       summaryMap:             {},
       policyTraces:           [],
@@ -129,7 +129,7 @@ describe('Vuex Mutations', () => {
   });
 
   it('updateReportsBatch updates reports and reportMap', () => {
-    // Setup initial policyReports and reportMap
+    // Setup initial reports and reportMap
     const report1 = {
       id:      'r1',
       scope:   { name: 'ns1' },
@@ -143,7 +143,7 @@ describe('Vuex Mutations', () => {
       summary: {}
     };
 
-    state.policyReports = [report1];
+    state.reports = [report1];
     state.reportMap = { ns1: report1 };
 
     // Create updated versions: update report1 and add report2
@@ -155,12 +155,12 @@ describe('Vuex Mutations', () => {
     };
 
     mutations.updateReportsBatch(state, {
-      reportArrayKey: 'policyReports',
+      reportArrayKey: 'reports',
       updatedReports: [updatedReport1, report2]
     });
 
-    expect(state.policyReports.find((r) => r.id === 'r1')).toEqual(updatedReport1);
-    expect(state.policyReports.find((r) => r.id === 'r2')).toEqual(report2);
+    expect(state.reports.find((r) => r.id === 'r1')).toEqual(updatedReport1);
+    expect(state.reports.find((r) => r.id === 'r2')).toEqual(report2);
 
     const resourceId1 = updatedReport1.scope?.name || updatedReport1.id;
     const resourceId2 = report2.scope?.name || report2.id;
@@ -208,12 +208,12 @@ describe('Vuex Mutations', () => {
     });
   });
 
-  it('removePolicyReportById removes a policy report by id', () => {
+  it('removeReportById removes a report by id', () => {
     const report = { id: 'r1' };
 
-    state.policyReports = [report];
-    mutations.removePolicyReportById(state, 'r1');
-    expect(state.policyReports).not.toContain(report);
+    state.reports = [report];
+    mutations.removeReportById(state, 'r1');
+    expect(state.reports).not.toContain(report);
   });
 
   describe('updatePolicyTraces', () => {

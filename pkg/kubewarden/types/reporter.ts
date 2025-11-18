@@ -2,7 +2,7 @@ import { V1ObjectMeta } from '@kubernetes/client-node';
 
 import { Links } from './core';
 
-export const POLICY_REPORTER_PRODUCT = 'policy-reporter';
+export const REPORTER_PRODUCT = 'policy-reporter';
 
 export interface Resource {
   apiVersion: string;

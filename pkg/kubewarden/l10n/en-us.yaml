@@ -455,7 +455,7 @@ kubewarden:
       banner: 'Your cluster does not support policy reports, upgrade your Kubewarden to version `1.7.0` or greater to add the required crds.'
       current: Current Kubewarden Controller version
       noCrds:
-        banner: 'The CRDs for `wgpolicyk8s.io.clusterpolicyreport` or `wgpolicyk8s.io.policyreport` can not be found. These must be installed to support policy reports.'
+        banner: 'The CRDs for `openreports.io.clusterreport` or `openreports.io.report` can not be found. These must be installed to support policy reports.'
     service:
       main:
         banner:
@@ -472,12 +472,12 @@ kubewarden:
     headers:
       policyReports:
         label: Compliance
-        description: Policy Reports are the results of the policy scans that are stored using the PolicyReport Custom Resource.
+        description: Reports are the results of the policy scans that are stored using the OpenReports Report Custom Resource.
       clusterPolicyReports:
         label: Cluster Compliance
-        description: Cluster Policy Reports are the results of the policy scans that are stored using the ClusterPolicyReport Custom Resource.
+        description: Cluster Reports are the results of the policy scans that are stored using the OpenReports ClusterReport Custom Resource.
       label: Compliance
-      description: When using the Kubewarden Audit Scanner, the results of the policy scans are stored using the PolicyReport Custom Resource.
+      description: When using the Kubewarden Audit Scanner, the results of the policy scans are stored using the OpenReports Report Custom Resource.
       policyReportsTab:
         policy:
           label: Policy
