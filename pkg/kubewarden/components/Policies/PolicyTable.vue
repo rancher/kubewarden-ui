@@ -9,11 +9,12 @@ import { CATEGORY, SEARCH_QUERY } from '@shell/config/query-params';
 import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 import { ensureRegex } from '@shell/utils/string';
 
-import LabeledSelect from '@shell/components/form/LabeledSelect';
-import { LabeledInput } from '@components/Form/LabeledInput';
 import { Checkbox } from '@components/Form/Checkbox';
+import { LabeledInput } from '@components/Form/LabeledInput';
+import LabeledSelect from '@shell/components/form/LabeledSelect';
 
-import { PolicyChart, KUBEWARDEN, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
+import { PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 import { POLICY_TABLE_HEADERS } from '@kubewarden/config/table-headers';
 import { resourcesFromAnnotation, isGlobalPolicy } from '@kubewarden/modules/policyChart';
 
