@@ -68,7 +68,7 @@ export default function($plugin: any) {
       labelKey:  'kubewarden.policyReporter.headers.policyReports.label',
       getValue:  (row: any) => row,
       weight:    3,
-      formatter: 'PolicyReportSummary'
+      formatter: 'ReportSummary'
     }
   );
 
@@ -92,7 +92,7 @@ export default function($plugin: any) {
       labelKey:  'kubewarden.policyReporter.headers.label',
       getValue:  (row: any) => row,
       weight:    3,
-      formatter: 'PolicyReportSummary'
+      formatter: 'ReportSummary'
     }
   );
 

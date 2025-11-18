@@ -5,7 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import { sortBy } from '@shell/utils/sort';
 
-import { Result, PolicyReportSummary } from '@kubewarden/types';
+import { Result, ReportSummary } from '@kubewarden/types';
 import { colorForResult } from '@kubewarden/modules/policyReporter';
 
 const attrs = useAttrs();
@@ -20,7 +20,7 @@ const store = useStore();
 
 const loadingReports = computed(() => store.getters['kubewarden/loadingReports']);
 
-const summary = computed<PolicyReportSummary>(() => {
+const summary = computed<ReportSummary>(() => {
   const resourceId = props.value?.id;
 
   return store.getters['kubewarden/summaryByResourceId'](resourceId);

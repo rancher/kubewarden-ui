@@ -1,5 +1,5 @@
 import {
-  Resource, PolicyReportResult, PolicyReport, ClusterPolicyReport, Result, Severity
+  Resource, ReportResult, Report, ClusterReport, Result, Severity
 } from '@kubewarden/types';
 
 export const mockResource: Resource = {
@@ -11,7 +11,7 @@ export const mockResource: Resource = {
   uid:             'mock-pod-uid'
 };
 
-export const mockPolicyReportResult: PolicyReportResult = {
+export const mockReportResult: ReportResult = {
   category:  'security',
   message:   'Pod lacks a security policy',
   policy:    'require-pod-security-policy',
@@ -25,17 +25,17 @@ export const mockPolicyReportResult: PolicyReportResult = {
   resources: [mockResource],
 };
 
-export const mockPolicyReport: PolicyReport = {
-  apiVersion: 'policy.k8s.io/v1beta1',
-  id:         'policyreport-123',
-  kind:       'PolicyReport',
+export const mockReport: Report = {
+  apiVersion: 'openreports.io/v1alpha1',
+  id:         'report-123',
+  kind:       'Report',
   metadata:   {
     labels:            { 'app.kubernetes.io/managed-by': 'kubewarden' },
     creationTimestamp: new Date(),
-    name:              'policyreport-123',
+    name:              'report-123',
     namespace:         'default',
   },
-  results:    [mockPolicyReportResult],
+  results:    [mockReportResult],
   scope:      {
     apiVersion: 'v1',
     kind:       'pod',
@@ -49,20 +49,20 @@ export const mockPolicyReport: PolicyReport = {
     error: 0,
     skip:  0,
   },
-  type: 'PolicyReport',
+  type: 'openreports.io.report',
   uid:  'report-uid-123',
 };
 
-export const mockClusterPolicyReport: ClusterPolicyReport = {
-  apiVersion: 'policy.k8s.io/v1beta1',
-  id:         'clusterpolicyreport-123',
-  kind:       'ClusterPolicyReport',
+export const mockClusterReport: ClusterReport = {
+  apiVersion: 'openreports.io/v1alpha1',
+  id:         'clusterreport-123',
+  kind:       'ClusterReport',
   metadata:   {
     labels:            { 'app.kubernetes.io/managed-by': 'kubewarden' },
     creationTimestamp: new Date(),
-    name:              'clusterpolicyreport-123',
+    name:              'clusterreport-123',
   },
-  results:    [mockPolicyReportResult],
+  results:    [mockReportResult],
   scope:      {
     apiVersion: 'v1',
     kind:       'Cluster',
@@ -76,6 +76,6 @@ export const mockClusterPolicyReport: ClusterPolicyReport = {
     error: 0,
     skip:  0,
   },
-  type: 'ClusterPolicyReport',
+  type: 'openreports.io.clusterreport',
   uid:  'report-uid-cluster-123',
 };
