@@ -1,6 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
 
-
 import PolicyServer from '@kubewarden/detail/policies.kubewarden.io.policyserver.vue';
 import CountGauge from '@shell/components/CountGauge';
 

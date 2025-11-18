@@ -1,7 +1,7 @@
 <script>
 import { _CREATE } from '@shell/config/query-params';
 
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 
 import PolicyDetail from '@kubewarden/components/Policies/PolicyDetail';
 
