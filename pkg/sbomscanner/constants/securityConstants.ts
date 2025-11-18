@@ -1,11 +1,11 @@
 export const NVD_BASE_URL = 'https://nvd.nist.gov/vuln/detail/';
 export const CVSS_VECTOR_BASE_URL = 'https://www.first.org/cvss/calculator/';
 export const SCAN_INTERVALS = {
-  ONE_HOUR:          '1h',
-  THREE_HOURS:       '3h',
-  SIX_HOURS:         '6h',
-  TWELVE_HOURS:      '12h',
-  TWENTY_FOUR_HOURS: '24h',
+  ONE_HOUR:          '1h0m0s',
+  THREE_HOURS:       '3h0m0s',
+  SIX_HOURS:         '6h0m0s',
+  TWELVE_HOURS:      '12h0m0s',
+  TWENTY_FOUR_HOURS: '24h0m0s',
   MANUAL:            '0s'
 };
 

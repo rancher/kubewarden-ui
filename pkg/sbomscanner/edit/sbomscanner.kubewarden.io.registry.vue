@@ -112,6 +112,21 @@ export default {
       return SCAN_INTERVAL_OPTIONS;
     },
 
+    selectedScanInterval: {
+      get() {
+        const currentInterval = this.value.spec.scanInterval;
+
+        if (!currentInterval || currentInterval === SCAN_INTERVALS.MANUAL ) {
+          return SCAN_INTERVALS.MANUAL;
+        }
+
+        return currentInterval;
+      },
+      set(newValue) {
+        this.value.spec.scanInterval = newValue;
+      }
+    },
+
     REGISTRY_TYPE_OPTIONS() {
       return REGISTRY_TYPE_OPTIONS;
     },
@@ -302,7 +317,7 @@ export default {
         </div>
         <div class="col span-3">
           <LabeledSelect
-            v-model:value="value.spec.scanInterval"
+            v-model:value="selectedScanInterval"
             data-testid="registry-scanning-interval-select"
             :placeholder="t('imageScanner.registries.configuration.cru.scan.schedule.placeholder', { manualScan: t('imageScanner.registries.configuration.cru.scan.schedule.manualScan') })"
             :options="SCAN_INTERVAL_OPTIONS"
