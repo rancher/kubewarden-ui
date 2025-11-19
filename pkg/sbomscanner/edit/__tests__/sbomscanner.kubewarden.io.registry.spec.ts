@@ -2,25 +2,7 @@ import { shallowMount, Wrapper, flushPromises } from '@vue/test-utils';
 import CruRegistry from '../sbomscanner.kubewarden.io.registry.vue';
 import { SECRET } from '@shell/config/types';
 import { SECRET_TYPES } from '@shell/config/secret';
-
-jest.mock('@sbomscanner/constants', () => ({
-  REGISTRY_TYPE: {
-    OCI_DISTRIBUTION: 'oci-distribution',
-    NO_CATALOG:       'no-catalog',
-  },
-  REGISTRY_TYPE_OPTIONS: [
-    { label: 'OCI', value: 'oci-distribution' },
-    { label: 'No Catalog', value: 'no-catalog' },
-  ],
-  SCAN_INTERVAL_OPTIONS: [
-    { label: 'Manual', value: 'manual' },
-    { label: 'Daily', value: '24h' },
-  ],
-  SCAN_INTERVALS: {
-    MANUAL: 'manual',
-    DAILY:  '24h',
-  },
-}));
+import { SCAN_INTERVALS, REGISTRY_TYPE } from '../../constants';
 
 jest.mock('@sbomscanner/types', () => ({
   PRODUCT_NAME: 'kubewarden',
@@ -28,14 +10,30 @@ jest.mock('@sbomscanner/types', () => ({
   LOCAT_HOST:   [],
 }));
 
-const { REGISTRY_TYPE, SCAN_INTERVALS } = require('@sbomscanner/constants');
+const LabeledSelectStub = {
+  name:     'LabeledSelect',
+  template: `
+    <select :data-testid="dataTestid" @change="$emit('input', value)" :required="required">
+      <option
+        v-for="opt in options"
+        :key="opt[optionKey]"
+        :value="opt[optionKey]"
+      >
+        {{ opt[optionLabel] }}
+      </option>
+    </select>
+  `,
+  props: ['value', 'options', 'optionKey', 'optionLabel', 'required', 'dataTestid'],
+};
+
+const { REGISTRY_TYPE } = require('@sbomscanner/constants');
 
 const stubs = {
   CruResource:       { name: 'CruResource', template: '<div><slot /></div>' },
   NameNsDescription: true,
   LabeledInput:      true,
-  LabeledSelect:     true,
   Banner:            { name: 'Banner', template: '<div><slot /></div>' },
+  LabeledSelect:     LabeledSelectStub
 };
 
 const t = (key: string) => key;
@@ -350,7 +348,10 @@ describe('CruRegistry', () => {
       await wrapper.vm.$nextTick();
       const repoSelect = wrapper.find('[data-testid="registry-scanning-repository-names"]');
 
-      expect(repoSelect.attributes('required')).toBe('true');
+      expect(repoSelect.exists()).toBe(true);
+      const requiredAttr = repoSelect.attributes('required');
+
+      expect(requiredAttr).toBe('');
     });
 
     it('should NOT mark repositories as required when type is OCI_DISTRIBUTION', async() => {
@@ -360,7 +361,26 @@ describe('CruRegistry', () => {
       const repoSelect = wrapper.find('[data-testid="registry-scanning-repository-names"]');
       const requiredAttr = repoSelect.attributes('required');
 
-      expect([undefined, 'false']).toContain(requiredAttr);
+      expect(requiredAttr).toBe(undefined);
+    });
+  });
+
+  describe('registry scan interval select', () => {
+    it('Confirm the key-value pair of constants in the select > options', async() => {
+      wrapper = createWrapper({});
+
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="1h"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="1h"]').text()).toBe('Every 1 hour');
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="3h"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="3h"]').text()).toBe('Every 3 hours');
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="6h"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="6h"]').text()).toBe('Every 6 hours');
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="12h"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="12h"]').text()).toBe('Every 12 hours');
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="24h"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="24h"]').text()).toBe('Every 24 hours');
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="0s"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="0s"]').text()).toBe('Manual Scan');
     });
   });
 });
