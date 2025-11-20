@@ -213,12 +213,10 @@ export default {
   </Banner>
 </template>
 <style scoped>
-/** This is an anti pattern and will break on component changes */
 .kw-banner-content {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex-grow: 1;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: start;
+  gap: 12px;
 }
 </style>
