@@ -36,24 +36,6 @@ const routes = [
     }
   },
   {
-    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource-create`,
-    path:       `/c/:cluster/${ KUBEWARDEN_PRODUCT_NAME }/:resource/create`,
-    component:  CreateKubewardenResource,
-    meta:       {
-      product: KUBEWARDEN_PRODUCT_NAME,
-      pkg:     KUBEWARDEN_PRODUCT_NAME
-    }
-  },
-  {
-    name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource-id`,
-    path:       `/c/:cluster/${ KUBEWARDEN_PRODUCT_NAME }/:resource/:id`,
-    component:  ViewKubewardenResource,
-    meta:       {
-      product: KUBEWARDEN_PRODUCT_NAME,
-      pkg:     KUBEWARDEN_PRODUCT_NAME
-    }
-  },
-  {
     name:       `c-cluster-${ KUBEWARDEN_PRODUCT_NAME }-resource-namespace-id`,
     path:       `/c/:cluster/${ KUBEWARDEN_PRODUCT_NAME }/:resource/:namespace/:id`,
     component:  ViewKubewardenNsResource,
