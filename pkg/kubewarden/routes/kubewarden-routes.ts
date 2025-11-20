@@ -3,8 +3,6 @@ import { KUBEWARDEN_PRODUCT_NAME, POLICY_REPORTER_PRODUCT } from '@kubewarden/ty
 import Dashboard from '@kubewarden/pages/c/_cluster/kubewarden/index.vue';
 import PolicyReport from '@kubewarden/pages/c/_cluster/kubewarden/_resource/policy-reporter.vue';
 import KubewardenResourcedList from '@kubewarden/pages/c/_cluster/kubewarden/_resource/index.vue';
-import CreateKubewardenResource from '@kubewarden/pages/c/_cluster/kubewarden/_resource/create.vue';
-import ViewKubewardenResource from '@kubewarden/pages/c/_cluster/kubewarden/_resource/_id.vue';
 import ViewKubewardenNsResource from '@kubewarden/pages/c/_cluster/kubewarden/_resource/_namespace/_id.vue';
 
 const routes = [
