@@ -5,7 +5,6 @@ import isEmpty from 'lodash/isEmpty';
 import { CATALOG, POD, UI_PLUGIN } from '@shell/config/types';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 import { allHash } from '@shell/utils/promise';
-import { RcItemCard } from '@components/RcItemCard';
 
 import Loading from '@shell/components/Loading';
 
@@ -20,6 +19,10 @@ import Modes from './Modes';
 import Reports from './Reports';
 import ReportsGauge from './ReportsGauge';
 import PolicyServerCard from './PolicyServerCard';
+import { RcItemCard } from '@components/RcItemCard';
+import VerticalGap from '@shell/components/Resource/Detail/Card/VerticalGap.vue';
+import StatusBar from '@shell/components/Resource/Detail/StatusBar.vue';
+import StatusRow from '@shell/components/Resource/Detail/StatusRow.vue';
 
 export default {
   components: {
@@ -30,7 +33,10 @@ export default {
     Masthead,
     ReportsGauge,
     RcItemCard,
-    PolicyServerCard
+    PolicyServerCard,
+    VerticalGap,
+    StatusBar,
+    StatusRow
   },
 
   async fetch() {
@@ -73,7 +79,21 @@ export default {
 
     return {
       DASHBOARD_HEADERS,
-      colorStops
+      colorStops,
+      statusRow: [
+        {
+          label:   'Success',
+          count:   10,
+          percent: 50,
+          color:   'success'
+        },
+        {
+          label:   'Failed',
+          count:   5,
+          percent: 25,
+          color:   'error'
+        },
+      ]
     };
   },
 
@@ -285,7 +305,7 @@ export default {
       }
 
       return false;
-    }
+    },
   },
 
   methods: {
@@ -371,31 +391,70 @@ export default {
   <div v-else class="dashboard">
     <Masthead :controller-app="controllerApp" />
 
+    <!-- TEMPORARY CHECK -->
+    <div class="get-started">
+      <template
+        v-for="(card, index) in DASHBOARD_HEADERS"
+        :key="index"
+      >
+        <RcItemCard
+          :id="index"
+          variant="small"
+          :header="{
+            title: { text: t(card.title) },
+            statuses: [],
+          }"
+          :content="{}"
+        >
+          <template #item-card-actions></template>
+          <template #item-card-content>
+
+            <template v-if="index === 0">
+              <StatusBar :segments="namespacedResultsGauges" />
+              <VerticalGap />
+              <StatusRow
+                class="status-row"
+                v-for="(row, i) in statusRow"
+                data-testid="kw-dashboard-ap-gauge"
+                :key="i"
+                :color="row.color"
+                :label="row.label"
+                :count="row.count"
+                :percent="row.percent"
+              />
+            </template>
+
+            <template v-if="index === 1">
+              <StatusBar :segments="globalGuages" />
+              <VerticalGap />
+              <StatusRow
+                data-testid="kw-dashboard-cap-gauge"
+                class="status-row"
+                v-for="(row, i) in statusRow"
+                :key="i"
+                :color="row.color"
+                :label="row.label"
+                :count="row.count"
+                :percent="row.percent"
+              />
+            </template>
+
+            <template v-else-if="index === 2">
+              <span v-if="index === 2">
+                <PolicyServerCard :policyServers="policyServersWithStatusAndModes" :card="card" />
+              </span>
+            </template>
+          </template>
+        </RcItemCard>
+      </template>
+    </div>
+
     <div class="get-started">
       <div
         v-for="(card, index) in DASHBOARD_HEADERS"
         :key="index"
         class="card-container"
       >
-
-<!-- TEMPORARY CHECK -->
-      <RcItemCard
-        :id="index"
-        class="dashboard-resource-card"
-        variant="small"
-        :header="{
-          title: { text: 'test' },
-          statuses: [],
-        }"
-        :content="{}"
-        :value="value"
-        @click="select"
-      >
-        <template #item-card-image></template>
-        <template #item-card-actions></template>
-        <template #item-card-content></template>
-      </RcItemCard>
-
         <Card v-if="card.isEnabled" :card="card">
           <template #count>
             <span v-if="index === 0" class="count">{{ namespacedPolicies.length || 0 }}</span>
@@ -448,35 +507,12 @@ export default {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
     grid-gap: 20px;
-
-    .card-container {
-      padding: 0;
-      margin: 0;
-    }
   }
 }
-
-:deep(.consumption-gauge) {
-  h4, .numbers {
-    font-size: 12px;
-    margin-bottom: 0;
-  }
-}
-
-.count {
-  font-size: 36px;
-  color: var(--text-color);
-  margin-right: 1rem;
-}
-
-.modes, .events {
+.status-row {
+  width: 100%;
   display: flex;
   flex-direction: row;
-  align-items: baseline;
-}
-
-.action {
-  justify-content: center;
-  width: 100%;
+  align-items: center;
 }
 </style>
