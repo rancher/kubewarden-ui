@@ -369,18 +369,31 @@ describe('CruRegistry', () => {
     it('Confirm the key-value pair of constants in the select > options', async() => {
       wrapper = createWrapper({});
 
-      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="1h"]').exists()).toBe(true);
-      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="1h"]').text()).toBe('Every 1 hour');
-      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="3h"]').exists()).toBe(true);
-      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="3h"]').text()).toBe('Every 3 hours');
-      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="6h"]').exists()).toBe(true);
-      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="6h"]').text()).toBe('Every 6 hours');
-      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="12h"]').exists()).toBe(true);
-      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="12h"]').text()).toBe('Every 12 hours');
-      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="24h"]').exists()).toBe(true);
-      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="24h"]').text()).toBe('Every 24 hours');
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="1h0m0s"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="1h0m0s"]').text()).toBe('Every 1 hour');
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="3h0m0s"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="3h0m0s"]').text()).toBe('Every 3 hours');
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="6h0m0s"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="6h0m0s"]').text()).toBe('Every 6 hours');
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="12h0m0s"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="12h0m0s"]').text()).toBe('Every 12 hours');
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="24h0m0s"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="24h0m0s"]').text()).toBe('Every 24 hours');
       expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="0s"]').exists()).toBe(true);
       expect(wrapper.find('select[data-testid="registry-scanning-interval-select"] option[value="0s"]').text()).toBe('Manual Scan');
+    });
+  });
+
+  describe('registry type select', () => {
+    it('should confirm the key-value pairs of REGISTRY_TYPE_OPTIONS in the select > options', () => {
+      wrapper = createWrapper({});
+
+      // The LabeledSelect stub renders a select with options
+      expect(wrapper.find('select[data-testid="registry-type-select"] option[value="OCIDistribution"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-type-select"] option[value="OCIDistribution"]').text()).toBe('OCI Distribution');
+
+      expect(wrapper.find('select[data-testid="registry-type-select"] option[value="NoCatalog"]').exists()).toBe(true);
+      expect(wrapper.find('select[data-testid="registry-type-select"] option[value="NoCatalog"]').text()).toBe('No Catalog');
     });
   });
 });
