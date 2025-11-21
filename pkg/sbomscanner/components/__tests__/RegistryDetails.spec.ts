@@ -51,7 +51,7 @@ describe('RegistryDetails.vue', () => {
         mocks: {
           $store:      storeMock,
           $fetchState: { pending: false },
-          $route: {
+          $route:      {
             params: {
               cluster: 'local', id: 'my-reg', ns: 'ns1'
             }

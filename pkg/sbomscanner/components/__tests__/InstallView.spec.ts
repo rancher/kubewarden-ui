@@ -18,13 +18,11 @@ jest.mock('@sbomscanner/utils/chart', () => ({
 let modules: Vuex.Modules<any, any> = {
   'resource-fetch': {
     namespaced: true,
-    getters: {
-      refreshFlag: () => false,
-    },
+    getters:    { refreshFlag: () => false },
   },
   catalog: {
     namespaced: true,
-    getters: {
+    getters:    {
       charts: () => [],
       repos:  () => []
     },
@@ -78,7 +76,7 @@ describe('InstallView.vue', () => {
 
     dispatch = jest.fn(() => ({ save: jest.fn() }));
 
-    store = createStore({ 
+    store = createStore({
       getters,
       modules
     });
@@ -440,7 +438,7 @@ describe('InstallView.vue', () => {
       currentStore: () => (id: string) => {
         return { id, name: 'mocked-store' };
       },
-      currentCluster:      () => ({ id: 'cluster-1' }),
+      currentCluster:    () => ({ id: 'cluster-1' }),
       'catalog/chart':   () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
       'management/byId': () => (id: string) => {
         return { id, name: 'mocked-management' };
@@ -461,6 +459,7 @@ describe('InstallView.vue', () => {
         },
       },
     });
+
     await Object.defineProperty(wrapper.vm, 'controllerChart4Cnpg' , {
       get: () => ({
         repoType: 'cluster', repoName: 'repo1', chartName: 'chart1', versions: ['1.0.0']
@@ -489,8 +488,8 @@ describe('InstallView.vue', () => {
       },
       currentCluster:      () => ({ id: 'cluster-1' }),
       'cluster/schemaFor': () => jest.fn().mockReturnValue(mockSchema),
-      'catalog/chart':   () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
-      'management/byId': () => (id: string) => {
+      'catalog/chart':     () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
+      'management/byId':   () => (id: string) => {
         return { id, name: 'mocked-management' };
       },
       'i18n/t': () => jest.fn((key) => key),
@@ -509,8 +508,9 @@ describe('InstallView.vue', () => {
         },
       },
     });
+
     require('@sbomscanner/utils/chart').getLatestVersion.mockReturnValue(null);
-    
+
     await wrapper.vm.chartRoute();
     expect(handleGrowl).toHaveBeenCalled();
   });
@@ -613,11 +613,11 @@ describe('InstallView.vue - schema computed tests', () => {
         currentStore: () => (id: string) => {
           return { id, name: 'mocked-store' };
         },
-        'catalog/chart':   () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
+        'catalog/chart':     () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
         'cluster/schemaFor': () => jest.fn().mockReturnValue(mockSchema),
         'cluster/canList':   () => jest.fn().mockReturnValue(true),
-        
-        'management/byId':   () => (id: string) => {
+
+        'management/byId': () => (id: string) => {
           return { id, name: 'mocked-management' };
         },
         'i18n/t': () => jest.fn((key) => key),
@@ -648,7 +648,7 @@ describe('InstallView.vue - schema computed tests', () => {
         currentStore: () => (id: string) => {
           return { id, name: 'mocked-store' };
         },
-        'catalog/chart':   () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
+        'catalog/chart':     () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
         'cluster/schemaFor': () => jest.fn().mockReturnValue(mockSchema),
         'cluster/canList':   () => jest.fn().mockReturnValue(true),
         'management/byId':   () => (id: string) => {
@@ -807,6 +807,7 @@ describe('InstallView.vue - schema computed tests', () => {
 
     mockStore.dispatch = jest.fn().mockResolvedValue(mockRepo);
     const wrapper = factory(mockStore);
+
     Object.defineProperty(wrapper.vm.$, 'refs', {
       value:        { wizard: { goToStep: jest.fn() } },
       configurable: true,
@@ -1076,9 +1077,7 @@ describe('chartRoute - InstallView router push', () => {
   });
 
   it('hasSbomscannerSchema is false - calls $router.push normally', async() => {
-    const routerMock = { 
-      push: jest.fn()
-    };
+    const routerMock = { push: jest.fn() };
     const wrapper = factory({ routerMock });
 
     await Object.defineProperty(wrapper.vm, 'controllerChart4Sbomscanner' , {

@@ -26,8 +26,6 @@ const LabeledSelectStub = {
   props: ['value', 'options', 'optionKey', 'optionLabel', 'required', 'dataTestid'],
 };
 
-const { REGISTRY_TYPE } = require('@sbomscanner/constants');
-
 const stubs = {
   CruResource:       { name: 'CruResource', template: '<div><slot /></div>' },
   NameNsDescription: true,

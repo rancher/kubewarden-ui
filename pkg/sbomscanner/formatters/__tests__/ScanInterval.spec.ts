@@ -1,46 +1,68 @@
-import { jest } from '@jest/globals';
 import { shallowMount } from '@vue/test-utils';
 import ScanInterval from '../ScanInterval.vue';
 
-describe('ScanInterval.vue', () => {
-  const mockT = jest.fn((key) => key);
+describe('ScanIntervalCell.vue', () => {
+  const tMock = (key: any) => key; // simple mock translation
 
-  const mountComponent = (value) => {
+  function factory(propsData: any) {
     return shallowMount(ScanInterval, {
-      props:  { value },
-      global: { mocks: { t: mockT } },
+      propsData,
+      mocks: { t: tMock }
     });
-  };
+  }
 
-  beforeEach(() => {
-    mockT.mockClear();
+  test('renders n/a when value is empty string', () => {
+    const wrapper = factory({ value: '' });
+
+    expect(wrapper.find('.scan-interval-none').exists()).toBe(true);
+    expect(wrapper.find('.scan-interval-none').text()).toBe('n/a');
   });
 
-  it('should render the interval when value is provided', () => {
-    const mockValue = '1h 30m';
-    const wrapper = mountComponent(mockValue);
+  test('parses full h/m/s (e.g., "1h30m20s")', () => {
+    const wrapper = factory({ value: '1h30m20s' });
 
-    const span = wrapper.find('.scan-interval-text');
-
-    expect(span.exists()).toBe(true);
-    expect(span.classes()).not.toContain('text-muted');
-
-    expect(mockT).toHaveBeenCalledTimes(1);
-    expect(mockT).toHaveBeenCalledWith('imageScanner.general.every');
-
-    expect(span.text()).toBe(`imageScanner.general.every\u00A0${ mockValue }`);
+    expect(wrapper.vm.scanInterval).toBe('1h30m20s');
+    expect(wrapper.find('.scan-interval-text').text()).toContain('1h30m20s');
   });
 
-  it('should render "n/a" when value is an empty string', () => {
-    const mockValue = '';
-    const wrapper = mountComponent(mockValue);
+  test('parses only hours (e.g., "2h")', () => {
+    const wrapper = factory({ value: '2h' });
 
-    const span = wrapper.find('.scan-interval-text');
+    expect(wrapper.vm.scanInterval).toBe('2h');
+  });
 
-    expect(span.exists()).toBe(true);
-    expect(span.classes()).toContain('scan-interval-none');
-    expect(span.text()).toBe('n/a');
+  test('parses only minutes (e.g., "45m")', () => {
+    const wrapper = factory({ value: '45m' });
 
-    expect(mockT).not.toHaveBeenCalled();
+    expect(wrapper.vm.scanInterval).toBe('45m');
+  });
+
+  test('parses only seconds (e.g., "10s")', () => {
+    const wrapper = factory({ value: '10s' });
+
+    expect(wrapper.vm.scanInterval).toBe('10s');
+  });
+
+  test('filters out zero values (e.g., "0h10m0s")', () => {
+    const wrapper = factory({ value: '0h10m0s' });
+
+    // Should remove hours and seconds
+    expect(wrapper.vm.scanInterval).toBe('10m');
+  });
+
+  test('returns raw string when regex does not match', () => {
+    const wrapper = factory({ value: 'invalid' });
+
+    // regex still matches empty groups, but value="invalid" → returns original string
+    expect(wrapper.vm.scanInterval).toBe('invalid');
+  });
+
+  test('renders translated prefix + parsed value', () => {
+    const wrapper = factory({ value: '1h' });
+
+    const text = wrapper.find('.scan-interval-text').text();
+
+    expect(text).toContain('imageScanner.general.every');
+    expect(text).toContain('1h');
   });
 });

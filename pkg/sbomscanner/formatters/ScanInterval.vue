@@ -3,7 +3,7 @@
     <span
       v-if="value"
       class="scan-interval-text"
-    >{{ t('imageScanner.general.every') }}&nbsp;{{ value }}</span>
+    >{{ t('imageScanner.general.every') }}&nbsp;{{ scanInterval }}</span>
     <span
       v-else
       class="scan-interval-text scan-interval-none"
@@ -18,6 +18,33 @@ export default {
       required: true
     }
   },
+  computed: {
+    scanInterval() {
+      const regex = /(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/;
+      const matches = this.value.match(regex);
+
+      if (!matches) {
+        return this.value;
+      }
+
+      const [, hours, minutes, seconds] = matches;
+      let result = '';
+
+      if (hours && hours !== '0') {
+        result += `${hours}h`;
+      }
+
+      if (minutes && minutes !== '0') {
+        result += `${minutes}m`;
+      }
+
+      if (seconds && seconds !== '0') {
+        result += `${seconds}s`;
+      }
+
+      return result || this.value;
+    }
+  }
 };
 </script>
 

@@ -15,7 +15,7 @@ jest.mock('lodash', () => {
 
 jest.mock('@sbomscanner/utils/permissions', () => ({ getPermissions: jest.fn() }));
 
-// jest.mock('@shell/types/store/pagination.types', () => ({ 
+// jest.mock('@shell/types/store/pagination.types', () => ({
 //   PaginationParamFilter: { createMultipleFields: jest.fn((fields) => ({ createdFilter: true, fields })) }
 // }));
 
@@ -33,11 +33,11 @@ jest.mock('@shell/types/store/pagination.types', () => {
     }
   }
 
-  const PaginationParamFilter = {
-    createMultipleFields: jest.fn((fields) => ({ createdFilter: true, fields })),
-  };
+  const PaginationParamFilter = { createMultipleFields: jest.fn((fields) => ({ createdFilter: true, fields })) };
 
-  return { PaginationFilterField, FilterArgs, PaginationParamFilter };
+  return {
+    PaginationFilterField, FilterArgs, PaginationParamFilter
+  };
 });
 
 
@@ -78,7 +78,7 @@ describe('Registries.vue', () => {
   beforeEach(() => {
     mockStore = {
       dispatch: jest.fn().mockResolvedValue([]),
-      getters: {
+      getters:  {
         'cluster/schemaFor':         jest.fn(() => ({ schema: 'test-schema' })),
         'cluster/paginationEnabled': jest.fn(() => true),
       },
@@ -118,58 +118,38 @@ describe('Registries.vue', () => {
     expect(wrapper.vm.selectedRows).toEqual([]);
   });
 
-    it('runs promptRemoveRegistry when action exists', async () => {
-      const mockAct = { action: 'promptRemove' };
-      const mockTable = {
-        availableActions: [mockAct],
-        setBulkActionOfInterest: jest.fn(),
-        applyTableAction: jest.fn(),
-      };
-      
-      Object.defineProperty(wrapper.vm.$, 'refs', {
-        value: Object.defineProperty({}, 'registryTable', {
-          value: {
-            $refs: {
-              table: {
-                $refs: {
-                  table: mockTable,
-                },
-              },
-            },
-          },
-        }),
-        configurable: true,
-      });
-      
-      await wrapper.vm.promptRemoveRegistry();
-      expect(mockTable.setBulkActionOfInterest).toHaveBeenCalledWith(mockAct);
-      expect(mockTable.applyTableAction).toHaveBeenCalledWith(mockAct);
+  it('runs promptRemoveRegistry when action exists', async() => {
+    const mockAct = { action: 'promptRemove' };
+    const mockTable = {
+      availableActions:        [mockAct],
+      setBulkActionOfInterest: jest.fn(),
+      applyTableAction:        jest.fn(),
+    };
+
+    Object.defineProperty(wrapper.vm.$, 'refs', {
+      value:        Object.defineProperty({}, 'registryTable', { value: { $refs: { table: { $refs: { table: mockTable } } } } }),
+      configurable: true,
     });
 
-    it('skips promptRemoveRegistry when action not found', async () => {
-      const mockTable = {
-        availableActions: [],
-        setBulkActionOfInterest: jest.fn(),
-        applyTableAction: jest.fn(),
-      };
+    await wrapper.vm.promptRemoveRegistry();
+    expect(mockTable.setBulkActionOfInterest).toHaveBeenCalledWith(mockAct);
+    expect(mockTable.applyTableAction).toHaveBeenCalledWith(mockAct);
+  });
 
-      Object.defineProperty(wrapper.vm.$, 'refs', {
-        value: Object.defineProperty({}, 'registryTable', {
-          value: {
-            $refs: {
-              table: {
-                $refs: {
-                  table: mockTable,
-                },
-              },
-            },
-          },
-        }),
-        configurable: true,
-      });
-      await wrapper.vm.promptRemoveRegistry();
-      expect(mockTable.setBulkActionOfInterest).not.toHaveBeenCalled();
+  it('skips promptRemoveRegistry when action not found', async() => {
+    const mockTable = {
+      availableActions:        [],
+      setBulkActionOfInterest: jest.fn(),
+      applyTableAction:        jest.fn(),
+    };
+
+    Object.defineProperty(wrapper.vm.$, 'refs', {
+      value:        Object.defineProperty({}, 'registryTable', { value: { $refs: { table: { $refs: { table: mockTable } } } } }),
+      configurable: true,
     });
+    await wrapper.vm.promptRemoveRegistry();
+    expect(mockTable.setBulkActionOfInterest).not.toHaveBeenCalled();
+  });
 
   it('filters rows locally by all fields - currStatus is String', () => {
     const rows = [
