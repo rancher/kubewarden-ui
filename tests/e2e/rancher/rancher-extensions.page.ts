@@ -85,6 +85,7 @@ export class RancherExtensionsPage extends BasePage {
     // Wait until extension is installed
     if (RancherUI.isVersion('>=2.13')) {
       await expect(plugin.getByText('Installing')).not.toBeVisible()
+      await this.ui.tab('Installed').click()
       await expect(plugin.locator('i.icon-confirmation-alt')).toBeVisible()
     } else {
       await this.ui.retry(async() => {
