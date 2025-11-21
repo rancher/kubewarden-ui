@@ -23,6 +23,7 @@ import { RcItemCard } from '@components/RcItemCard';
 import VerticalGap from '@shell/components/Resource/Detail/Card/VerticalGap.vue';
 import StatusBar from '@shell/components/Resource/Detail/StatusBar.vue';
 import StatusRow from '@shell/components/Resource/Detail/StatusRow.vue';
+import { RcButton } from '@rancher/components';
 
 export default {
   components: {
@@ -33,6 +34,7 @@ export default {
     Masthead,
     ReportsGauge,
     RcItemCard,
+    RcButton,
     PolicyServerCard,
     VerticalGap,
     StatusBar,
@@ -80,20 +82,6 @@ export default {
     return {
       DASHBOARD_HEADERS,
       colorStops,
-      statusRow: [
-        {
-          label:   'Success',
-          count:   10,
-          percent: 50,
-          color:   'success'
-        },
-        {
-          label:   'Failed',
-          count:   5,
-          percent: 25,
-          color:   'error'
-        },
-      ]
     };
   },
 
@@ -226,6 +214,13 @@ export default {
       return this.getPolicyGauges(this.namespacedPolicies);
     },
 
+    namespacesRows() {
+      return this.mapRow(this.admissionPolicyResults);
+    },
+    clusterRows() {
+      return this.mapRow(this.clusterPolicyResults);
+    },
+
     namespacedResultsGauges() {
       return this.getPolicyResultGauges(this.admissionPolicyResults);
     },
@@ -309,6 +304,50 @@ export default {
   },
 
   methods: {
+    mapRow(type) {
+      if (!isEmpty(type)) {
+        const total = type.length;
+        const getPercentage = (count) => {
+          return count ? Math.round((count / total) * 100) : 0;
+        };
+
+        return type?.reduce((acc, item) => {
+          const isActive = item?.result === 'pass';
+          const isError = item?.result === 'fail';
+          const activeCount = acc[0].count + (isActive ? 1 : 0);
+          const failedCount = acc[1].count + (isError ? 1 : 0);
+
+          return [
+            {
+              label:   'Success',
+              count:   activeCount,
+              percent: getPercentage(activeCount),
+              color:   'success'
+            },
+            {
+              label:   'Failed',
+              count:   failedCount,
+              percent: getPercentage(failedCount),
+              color:   'error'
+            },
+          ];
+        }, [
+          {
+            label:   'Success',
+            count:   0,
+            percent: 0,
+            color:   'success'
+          },
+          {
+            label:   'Failed',
+            count:   0,
+            percent: 0,
+            color:   'error'
+          }]
+        );
+      }
+    },
+
     getPolicyGauges(type) {
       if (!isEmpty(type)) {
         return type?.reduce((policy, neu) => {
@@ -410,33 +449,48 @@ export default {
           <template #item-card-content>
 
             <template v-if="index === 0">
-              <StatusBar :segments="namespacedResultsGauges" />
-              <VerticalGap />
-              <StatusRow
-                class="status-row"
-                v-for="(row, i) in statusRow"
-                data-testid="kw-dashboard-ap-gauge"
-                :key="i"
-                :color="row.color"
-                :label="row.label"
-                :count="row.count"
-                :percent="row.percent"
-              />
+              <p>Rules that apply only to a single, specific namespace</p>
+              <template v-if="namespacesRows">
+                <p>Policies 0 Protect + 5 Monitor</p>
+                <StatusBar :segments="namespacedResultsGauges" />
+                <VerticalGap />
+                <StatusRow
+                  class="status-row"
+                  v-for="(row, i) in namespacesRows"
+                  data-testid="kw-dashboard-ap-gauge"
+                  :key="i"
+                  :color="row.color"
+                  :label="row.label"
+                  :count="row.count"
+                  :percent="row.percent"
+                />
+              </template>
+              <div v-else>
+                <p>No active namespaced policies defined</p>
+                <RcButton link>Add a new policy</RcButton>
+              </div>
             </template>
 
             <template v-if="index === 1">
-              <StatusBar :segments="globalGuages" />
-              <VerticalGap />
-              <StatusRow
-                data-testid="kw-dashboard-cap-gauge"
-                class="status-row"
-                v-for="(row, i) in statusRow"
-                :key="i"
-                :color="row.color"
-                :label="row.label"
-                :count="row.count"
-                :percent="row.percent"
-              />
+              <template v-if="clusterRows">
+                <p>Policies 0 Protect + 5 Monitor</p>
+                <StatusBar :segments="globalGuages" />
+                <VerticalGap />
+                <StatusRow
+                  data-testid="kw-dashboard-cap-gauge"
+                  class="status-row"
+                  v-for="(row, i) in clusterRows"
+                  :key="i"
+                  :color="row.color"
+                  :label="row.label"
+                  :count="row.count"
+                  :percent="row.percent"
+                />
+              </template>
+              <div v-else>
+                <p>No active cluster policies defined</p>
+                <RcButton link>Add a new policy</RcButton>
+              </div>
             </template>
 
             <template v-else-if="index === 2">
