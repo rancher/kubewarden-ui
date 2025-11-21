@@ -207,7 +207,16 @@ export default {
           }
         }
       });
-      const top5StatusUpdates = Array.from(registryStatusMap.values()).slice(0, 5);
+
+      const statusList = Array.from(registryStatusMap.values());
+      const top5StatusUpdates = statusList.slice(0, 5);
+
+      statusList.forEach((rec) => {
+        // Summarize the data for Status distribution panel
+        if (Object.prototype.hasOwnProperty.call(statusSummary, rec[0].statusResult.type.toLowerCase())) {
+          statusSummary[rec[0].statusResult.type.toLowerCase()]++;
+        }
+      });
 
       top5StatusUpdates.forEach((rec) => {
         registryStatusList.push({
@@ -219,10 +228,6 @@ export default {
           lastTransitionTime: Math.max(new Date(rec[0].lastTransitionTime), new Date(rec[0].completionTime))
         });
 
-        // Summarize the data for Status distribution panel
-        if (Object.prototype.hasOwnProperty.call(statusSummary, rec[0].statusResult.type.toLowerCase())) {
-          statusSummary[rec[0].statusResult.type.toLowerCase()]++;
-        }
       });
       // Sort and limit the registryStatusList to 5 most recent updates
       registryStatusList.sort((a, b) => new Date(b.lastTransitionTime) - new Date(a.lastTransitionTime)).slice(0, 5);

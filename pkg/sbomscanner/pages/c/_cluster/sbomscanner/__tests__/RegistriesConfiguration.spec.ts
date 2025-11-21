@@ -513,3 +513,171 @@ describe('RegistriesOverview.vue', () => {
     );
   });
 });
+
+describe('getSummaryData → statusSummary aggregation', () => {
+  it('increments correct counters for known status types', () => {
+    const wrapper = factory();
+
+    const mockJobs = [
+      // Pending
+      {
+        metadata: {
+          namespace: 'ns', name: 'reg1', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+        },
+        spec:   { registry: 'r1' },
+        status: {
+          conditions: [{
+            type: 'Pending', status: 'True', lastTransitionTime: new Date().toISOString()
+          }]
+        }
+      },
+      // Complete
+      {
+        metadata: {
+          namespace: 'ns', name: 'reg2', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+        },
+        spec:   { registry: 'r2' },
+        status: {
+          conditions: [{
+            type: 'Complete', status: 'True', lastTransitionTime: new Date().toISOString()
+          }]
+        }
+      },
+      // Failed
+      {
+        metadata: {
+          namespace: 'ns', name: 'reg3', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+        },
+        spec:   { registry: 'r3' },
+        status: {
+          conditions: [{
+            type: 'Failed', status: 'True', lastTransitionTime: new Date().toISOString()
+          }]
+        }
+      },
+      // Pending
+      {
+        metadata: {
+          namespace: 'ns', name: 'reg4', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+        },
+        spec:   { registry: 'r4' },
+        status: {
+          conditions: [{
+            type: 'Pending', status: 'True', lastTransitionTime: new Date().toISOString()
+          }]
+        }
+      },
+      // Inprogress
+      {
+        metadata: {
+          namespace: 'ns', name: 'reg5', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+        },
+        spec:   { registry: 'r5' },
+        status: {
+          conditions: [{
+            type: 'Inprogress', status: 'True', lastTransitionTime: new Date().toISOString()
+          }]
+        }
+      },
+      // scheduled
+      {
+        metadata: {
+          namespace: 'ns', name: 'reg6', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+        },
+        spec:   { registry: 'r6' },
+        status: {
+          conditions: [{
+            type: 'Scheduled', status: 'True', lastTransitionTime: new Date().toISOString()
+          }]
+        }
+      },
+    ];
+
+    const { statusSummary } = wrapper.vm.getSummaryData(mockJobs);
+
+    expect(statusSummary.pending).toBe(2);
+    expect(statusSummary.complete).toBe(1);
+    expect(statusSummary.failed).toBe(1);
+
+    // untouched types remain 0
+    expect(statusSummary.inprogress).toBe(1);
+    expect(statusSummary.scheduled).toBe(1);
+  });
+
+  it('ignores status types that are not defined in summary map', () => {
+    const wrapper = factory();
+
+    const mockJobs = [
+      {
+        metadata: {
+          namespace: 'ns', name: 'jX', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+        },
+        spec:   { registry: 'rX' },
+        status: {
+          conditions: [{
+            type: 'UnknownType', status: 'True', lastTransitionTime: new Date().toISOString()
+          }]
+        }
+      },
+    ];
+
+    const { statusSummary } = wrapper.vm.getSummaryData(mockJobs);
+
+    // All counters remain at 0
+    expect(statusSummary.pending).toBe(0);
+    expect(statusSummary.complete).toBe(0);
+    expect(statusSummary.failed).toBe(0);
+    expect(statusSummary.scheduled).toBe(0);
+    expect(statusSummary.inprogress).toBe(0);
+  });
+
+  it('handles mixture of valid and invalid status types', () => {
+    const wrapper = factory();
+
+    const mockJobs = [
+      {
+        metadata: {
+          namespace: 'ns', name: 'j1', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+        },
+        spec:   { registry: 'r1' },
+        status: {
+          conditions: [{
+            type: 'Complete', status: 'True', lastTransitionTime: new Date().toISOString()
+          }]
+        }
+      },
+      {
+        metadata: {
+          namespace: 'ns', name: 'j2', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+        },
+        spec:   { registry: 'r2' },
+        status: {
+          conditions: [{
+            type: 'WhoKnows', status: 'True', lastTransitionTime: new Date().toISOString()
+          }]
+        }
+      },
+      {
+        metadata: {
+          namespace: 'ns', name: 'j3', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+        },
+        spec:   { registry: 'r3' },
+        status: {
+          conditions: [{
+            type: 'Failed', status: 'True', lastTransitionTime: new Date().toISOString()
+          }]
+        }
+      },
+    ];
+
+    const { statusSummary } = wrapper.vm.getSummaryData(mockJobs);
+
+    expect(statusSummary.complete).toBe(1);
+    expect(statusSummary.failed).toBe(1);
+
+    // Unknown type does not increment anything
+    expect(statusSummary.pending).toBe(0);
+    expect(statusSummary.inprogress).toBe(0);
+    expect(statusSummary.scheduled).toBe(0);
+  });
+});
