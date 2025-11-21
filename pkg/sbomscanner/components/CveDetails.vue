@@ -13,9 +13,8 @@ export default {
       PRODUCT_NAME,
       RESOURCE,
       PAGE,
-      cveDetail:   null,
-      hoverVendor: null,
-      inside:      false,
+      cveDetail:      null,
+      selectedVendor: null,
     };
   },
 
@@ -139,8 +138,15 @@ export default {
           link: isNvd ? `${ NVD_BASE_URL }${ cveId }` : ''
         };
       });
-    }
+    },
 
+    toggleVendor(vendor) {
+      if (this.selectedVendor === vendor) {
+        this.selectedVendor = null;
+      } else {
+        this.selectedVendor = vendor;
+      }
+    },
   },
 
   watch: {
@@ -220,30 +226,28 @@ export default {
             <span class="label"> Advisory vendors </span>
             <span class="value">{{ cveDetail?.advisoryVendors?.length || t('imageScanner.general.unknown') }}</span>
           </div>
-          <div
-            class="vendor-tags-wrapper"
-            @mouseenter="inside = true"
-            @mouseleave="inside = false; hoverVendor = null"
-          >
+          <div class="vendor-tags-wrapper">
             <div class="vendor-tags">
               <span
                 v-for="(vendor, index) in cveDetail?.advisoryVendors"
                 :key="index"
                 class="vendor-tag"
-                @mouseenter="hoverVendor = vendor"
+                :class="{ 'active': selectedVendor === vendor}"
+                @click="toggleVendor(vendor)"
               >
                 {{ vendor.name }}
               </span>
             </div>
-
-            <!-- Hover panel (always aligned with first tag) -->
             <div
-              v-if="hoverVendor && inside"
+              v-if="selectedVendor"
               class="hover-panel"
             >
-              <h4>References for {{ cveDetail?.id }}</h4>
+              <div class="panel-header">
+                <h4>References for {{ cveDetail?.id }}</h4>
+                <i class="icon icon-close" @click.stop="selectedVendor = null"></i>
+              </div>
               <div
-                v-for="(ref, rIndex) in hoverVendor.references"
+                v-for="(ref, rIndex) in selectedVendor?.references"
                 :key="rIndex"
                 class="ref-item"
               >
@@ -288,13 +292,11 @@ export default {
 }
 
 .about {
-  /* layout */
   display: flex;
   padding-bottom: 20px;
   flex-direction: column;
   align-items: flex-start;
   align-self: stretch;
-  /* style */
   border-bottom: dashed var(--border-width) var(--input-border);
 }
 
@@ -397,14 +399,16 @@ export default {
   border: solid var(--border-width) var(--input-border);
   border-radius: 4px;
   cursor: pointer;
+  user-select: none;
 }
-.vendor-tag:hover {
+.vendor-tag:hover, .vendor-tag.active {
   background-color: #d1d3e0;
 }
 .hover-panel {
   position: absolute;
-  top: 20px;
+  top: 100%;
   left: 0;
+  margin-top: 4px;
   background: var(--input-bg);
   border: solid var(--border-width) var(--input-border);
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
@@ -430,6 +434,28 @@ export default {
 
 .hover-panel a:hover {
   text-decoration: underline;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+
+  h4 {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .icon-close {
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--disabled-text);
+
+    &:hover {
+      color: var(--text-color);
+    }
+  }
 }
 
 .ref-item {

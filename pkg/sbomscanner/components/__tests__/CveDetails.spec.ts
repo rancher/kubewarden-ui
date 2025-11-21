@@ -254,36 +254,51 @@ describe('CveDetails.vue', () => {
     });
   });
 
-  describe('User Interaction', () => {
-    it('should show and hide vendor references on hover', async() => {
+  describe('User Interaction (Advisory Links)', () => {
+    it('should show references on vendor tag click and hide on subsequent click or close icon click', async() => {
       await flushPromises();
 
       expect(wrapper.find('.hover-panel').exists()).toBe(false);
 
-      const wrapperEl = wrapper.find('.vendor-tags-wrapper');
+      const vendorTags = wrapper.findAll('.vendor-tag');
+      const firstVendorTag = vendorTags[0];
+      const secondVendorTag = vendorTags[1];
+      const firstVendorData = { name: 'Suse', references: ['https://suse.com/security/cve/CVE-2023-1234'] };
 
-      await wrapperEl.trigger('mouseenter');
-      expect(wrapper.vm.inside).toBe(true);
-
-      const vendorTag = wrapper.find('.vendor-tag');
-
-      await vendorTag.trigger('mouseenter');
-      expect(wrapper.vm.hoverVendor).toEqual({
-        name:       'Suse',
-        references: ['https://suse.com/security/cve/CVE-2023-1234']
-      });
+      await firstVendorTag.trigger('click');
+      expect(wrapper.vm.selectedVendor).toEqual(firstVendorData);
 
       await wrapper.vm.$nextTick();
 
-      const hoverPanel = wrapper.find('.hover-panel');
+      let hoverPanel = wrapper.find('.hover-panel');
 
       expect(hoverPanel.exists()).toBe(true);
       expect(hoverPanel.find('h4').text()).toBe(`References for ${ mockCveId }`);
       expect(hoverPanel.find('.ref-url').attributes('href')).toBe('https://suse.com/security/cve/CVE-2023-1234');
 
-      await wrapperEl.trigger('mouseleave');
-      expect(wrapper.vm.inside).toBe(false);
-      expect(wrapper.vm.hoverVendor).toBeNull();
+      const secondVendorData = { name: 'Redhat', references: ['https://www.redhat.com/en/blog/press-release'] };
+
+      await secondVendorTag.trigger('click');
+      expect(wrapper.vm.selectedVendor).toEqual(secondVendorData);
+
+      await wrapper.vm.$nextTick();
+      hoverPanel = wrapper.find('.hover-panel');
+      expect(hoverPanel.exists()).toBe(true);
+      expect(hoverPanel.find('.ref-url').attributes('href')).toBe('https://www.redhat.com/en/blog/press-release');
+
+      const closeIcon = wrapper.find('.icon-close');
+
+      await closeIcon.trigger('click');
+      expect(wrapper.vm.selectedVendor).toBeNull();
+
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('.hover-panel').exists()).toBe(false);
+
+      await firstVendorTag.trigger('click');
+      expect(wrapper.vm.selectedVendor).toEqual(firstVendorData);
+
+      await firstVendorTag.trigger('click');
+      expect(wrapper.vm.selectedVendor).toBeNull();
 
       await wrapper.vm.$nextTick();
       expect(wrapper.find('.hover-panel').exists()).toBe(false);
