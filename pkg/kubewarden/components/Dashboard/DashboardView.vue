@@ -214,10 +214,10 @@ export default {
       return this.getPolicyGauges(this.namespacedPolicies);
     },
 
-    namespacesRows() {
+    namespacesStats() {
       return this.mapRow(this.admissionPolicyResults);
     },
-    clusterRows() {
+    clusterStats() {
       return this.mapRow(this.clusterPolicyResults);
     },
 
@@ -307,32 +307,22 @@ export default {
     mapRow(type) {
       if (!isEmpty(type)) {
         const total = type.length;
-        const getPercentage = (count) => {
-          return count ? Math.round((count / total) * 100) : 0;
-        };
+        const getPercentage = (count) => count ? Math.round((count / total) * 100) : 0;
 
         return type?.reduce((acc, item) => {
           const isActive = item?.result === 'pass';
           const isError = item?.result === 'fail';
-          const activeCount = acc[0].count + (isActive ? 1 : 0);
-          const failedCount = acc[1].count + (isError ? 1 : 0);
 
-          return [
-            {
-              label:   'Success',
-              count:   activeCount,
-              percent: getPercentage(activeCount),
-              color:   'success'
-            },
-            {
-              label:   'Failed',
-              count:   failedCount,
-              percent: getPercentage(failedCount),
-              color:   'error'
-            },
-          ];
-        }, [
-          {
+          acc.rows[0].count = acc.rows[0].count + isActive;
+          acc.rows[1].count = acc.rows[1].count + isError;
+          acc.rows[0].percent = getPercentage(acc.rows[0].count);
+          acc.rows[1].percent = getPercentage(acc.rows[1].count);
+          acc.mode.protect = acc.mode.protect + (item?.spec?.mode === 'protect' ? 1 : 0);
+          acc.mode.monitor = acc.mode.monitor + (item?.spec?.mode === 'monitor' ? 1 : 0);
+
+          return acc;
+        }, {
+          rows: [{
             label:   'Success',
             count:   0,
             percent: 0,
@@ -343,8 +333,13 @@ export default {
             count:   0,
             percent: 0,
             color:   'error'
-          }]
-        );
+          }],
+          mode: {
+            protect: 0,
+            monitor: 0
+          },
+          total
+        });
       }
     },
 
@@ -450,13 +445,13 @@ export default {
 
             <template v-if="index === 0">
               <p>Rules that apply only to a single, specific namespace</p>
-              <template v-if="namespacesRows">
-                <p>Policies 0 Protect + 5 Monitor</p>
+              <template v-if="namespacesStats">
+                <p>Policies {{ namespacesStats.mode.protect }} Protect + {{ namespacesStats.mode.monitor }} Monitor</p>
                 <StatusBar :segments="namespacedResultsGauges" />
                 <VerticalGap />
                 <StatusRow
                   class="status-row"
-                  v-for="(row, i) in namespacesRows"
+                  v-for="(row, i) in namespacesStats.rows"
                   data-testid="kw-dashboard-ap-gauge"
                   :key="i"
                   :color="row.color"
@@ -472,14 +467,14 @@ export default {
             </template>
 
             <template v-if="index === 1">
-              <template v-if="clusterRows">
-                <p>Policies 0 Protect + 5 Monitor</p>
+              <template v-if="clusterStats">
+                <p>Policies {{ clusterStats.mode.protect }} Protect + {{ clusterStats.mode.monitor }} Monitor</p>
                 <StatusBar :segments="globalGuages" />
                 <VerticalGap />
                 <StatusRow
                   data-testid="kw-dashboard-cap-gauge"
                   class="status-row"
-                  v-for="(row, i) in clusterRows"
+                  v-for="(row, i) in clusterStats.rows"
                   :key="i"
                   :color="row.color"
                   :label="row.label"
