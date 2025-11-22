@@ -1,7 +1,7 @@
 {
   "name": "sbomscanner",
   "description": "SBOMscanner UI extension for rancher manager",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "private": false,
   "icon": "https://raw.githubusercontent.com/neuvector/security/main/pkg/sbomscanner/sb-icon.svg",
   "rancher": {
