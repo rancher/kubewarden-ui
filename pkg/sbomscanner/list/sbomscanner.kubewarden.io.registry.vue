@@ -145,12 +145,30 @@ export default {
   },
   data() {
     const STATUS_OPTIONS = [
-      { value: 'any', label: this.t('imageScanner.general.any') },
-      { value: 'scheduled', label: this.t('imageScanner.enum.status.scheduled') },
-      { value: 'pending', label: this.t('imageScanner.enum.status.pending') },
-      { value: 'inprogress', label: this.t('imageScanner.enum.status.inprogress') },
-      { value: 'complete', label: this.t('imageScanner.enum.status.complete') },
-      { value: 'failed', label: this.t('imageScanner.enum.status.failed') },
+      {
+        value: 'any',
+        label: this.t('imageScanner.general.any')
+      },
+      {
+        value: 'scheduled',
+        label: this.t('imageScanner.enum.status.scheduled')
+      },
+      {
+        value: 'pending',
+        label: this.t('imageScanner.enum.status.pending')
+      },
+      {
+        value: 'inprogress',
+        label: this.t('imageScanner.enum.status.inprogress')
+      },
+      {
+        value: 'complete',
+        label: this.t('imageScanner.enum.status.complete')
+      },
+      {
+        value: 'failed',
+        label: this.t('imageScanner.enum.status.failed')
+      },
     ];
 
     return {
@@ -199,7 +217,7 @@ export default {
 
       const act = findBy(table.availableActions, 'action', 'promptRemove');
 
-      if ( act ) {
+      if (act) {
         table.setBulkActionOfInterest(act);
         table.applyTableAction(act);
       }
@@ -225,7 +243,10 @@ export default {
           }))),
         })
       };
-      const scanJobs = await this.$store.dispatch(`cluster/findPage`, { type: RESOURCE.SCAN_JOB, opt });
+      const scanJobs = await this.$store.dispatch(`cluster/findPage`, {
+        type: RESOURCE.SCAN_JOB,
+        opt
+      });
 
       return scanJobs;
     },

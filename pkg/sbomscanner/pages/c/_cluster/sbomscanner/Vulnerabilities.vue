@@ -75,9 +75,18 @@ export default {
   },
   data() {
     const filterImageOptions = [
-      { label: this.t('imageScanner.images.filters.image.allImages'), value: 'all' },
-      { label: this.t('imageScanner.images.filters.image.excludeBaseImages'), value: 'excludeBase' },
-      { label: this.t('imageScanner.images.filters.image.includeBaseImages'), value: 'includeBase' }
+      {
+        label: this.t('imageScanner.images.filters.image.allImages'),
+        value: 'all'
+      },
+      {
+        label: this.t('imageScanner.images.filters.image.excludeBaseImages'),
+        value: 'excludeBase'
+      },
+      {
+        label: this.t('imageScanner.images.filters.image.includeBaseImages'),
+        value: 'includeBase'
+      }
     ];
 
     return {

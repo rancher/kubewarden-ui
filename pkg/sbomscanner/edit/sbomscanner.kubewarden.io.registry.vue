@@ -44,7 +44,7 @@ export default {
       };
     }
 
-    if ( this.value.spec.scanInterval === null) {
+    if (this.value.spec.scanInterval === null) {
       this.value.spec.scanInterval = SCAN_INTERVALS.MANUAL;
     }
 
@@ -116,7 +116,7 @@ export default {
       get() {
         const currentInterval = this.value.spec.scanInterval;
 
-        if (!currentInterval || currentInterval === SCAN_INTERVALS.MANUAL ) {
+        if (!currentInterval || currentInterval === SCAN_INTERVALS.MANUAL) {
           return SCAN_INTERVALS.MANUAL;
         }
 

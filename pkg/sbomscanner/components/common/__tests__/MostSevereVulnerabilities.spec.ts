@@ -8,28 +8,60 @@ const mockReport = {
       {
         vulnerabilities: [
           {
-            cve: 'CVE-LOW', packageName: 'pkg-low', severity: 'low', cvss: {}, fixedVersions: []
+            cve:           'CVE-LOW',
+            packageName:   'pkg-low',
+            severity:      'low',
+            cvss:          {},
+            fixedVersions: []
           },
           {
-            cve: 'CVE-CRIT-1', packageName: 'pkg-crit-1', severity: 'critical', cvss: { nvd: { v3score: '9.8' } }, fixedVersions: ['1.1']
+            cve:           'CVE-CRIT-1',
+            packageName:   'pkg-crit-1',
+            severity:      'critical',
+            cvss:          { nvd: { v3score: '9.8' } },
+            fixedVersions: ['1.1']
           },
           {
-            cve: 'CVE-MED', packageName: 'pkg-med', severity: 'medium', cvss: { ghsa: { v3score: '5.0' } }, fixedVersions: null
+            cve:           'CVE-MED',
+            packageName:   'pkg-med',
+            severity:      'medium',
+            cvss:          { ghsa: { v3score: '5.0' } },
+            fixedVersions: null
           },
           {
-            cve: 'CVE-CRIT-2', packageName: 'pkg-crit-2', severity: 'critical', cvss: { nvd: { v3score: '7.5' } }, fixedVersions: []
+            cve:           'CVE-CRIT-2',
+            packageName:   'pkg-crit-2',
+            severity:      'critical',
+            cvss:          { nvd: { v3score: '7.5' } },
+            fixedVersions: []
           },
           {
-            cve: 'CVE-HIGH', packageName: 'pkg-high', severity: 'high', cvss: { redhat: { v3score: '8.0' } }, fixedVersions: ['2.0']
+            cve:           'CVE-HIGH',
+            packageName:   'pkg-high',
+            severity:      'high',
+            cvss:          { redhat: { v3score: '8.0' } },
+            fixedVersions: ['2.0']
           },
           {
-            cve: 'CVE-NONE', packageName: 'pkg-none', severity: 'none', cvss: {}, fixedVersions: []
+            cve:           'CVE-NONE',
+            packageName:   'pkg-none',
+            severity:      'none',
+            cvss:          {},
+            fixedVersions: []
           },
           {
-            cve: 'CVE-CRIT-3', packageName: 'pkg-crit-3', severity: 'critical', cvss: { nvd: { v3score: '9.0' } }, fixedVersions: []
+            cve:           'CVE-CRIT-3',
+            packageName:   'pkg-crit-3',
+            severity:      'critical',
+            cvss:          { nvd: { v3score: '9.0' } },
+            fixedVersions: []
           },
           {
-            cve: 'CVE-NULL-SEV', packageName: 'pkg-null-sev', severity: null, cvss: {}, fixedVersions: []
+            cve:           'CVE-NULL-SEV',
+            packageName:   'pkg-null-sev',
+            severity:      null,
+            cvss:          {},
+            fixedVersions: []
           },
         ]
       }
@@ -40,7 +72,11 @@ const mockReport = {
 const fallbackReport = {
   vulnerabilities: [
     {
-      cve: 'CVE-FB-1', packageName: 'pkg-fb-1', severity: 'high', cvss: { nvd: { v3score: '8.8' } }, fixedVersions: ['1.0']
+      cve:           'CVE-FB-1',
+      packageName:   'pkg-fb-1',
+      severity:      'high',
+      cvss:          { nvd: { v3score: '8.8' } },
+      fixedVersions: ['1.0']
     },
   ]
 };
@@ -49,7 +85,11 @@ const reportWithNoScore = {
   report: {
     results: [{
       vulnerabilities: [{
-        cve: 'CVE-NO-SCORE', packageName: 'pkg-no-score', severity: 'low', cvss: {}, fixedVersions: []
+        cve:           'CVE-NO-SCORE',
+        packageName:   'pkg-no-score',
+        severity:      'low',
+        cvss:          {},
+        fixedVersions: []
       }]
     }]
   }
@@ -87,7 +127,11 @@ describe('MostSevereVulnerabilities.vue', () => {
       expect(wrapper.vm.mostSevereVulnerabilities).toHaveLength(5);
       wrapper.vm.mostSevereVulnerabilities.forEach((v) => {
         expect(v).toEqual({
-          cveId: '', score: '', severity: null, package: '', fixAvailable: null
+          cveId:        '',
+          score:        '',
+          severity:     null,
+          package:      '',
+          fixAvailable: null
         });
       });
     });
@@ -139,7 +183,7 @@ describe('MostSevereVulnerabilities.vue', () => {
 
       expect(link.exists()).toBe(true);
       expect(link.text()).toBe('CVE-CRIT-1');
-      const expectedPath = `/c/c-12345/${PRODUCT_NAME}/${PAGE.VULNERABILITIES}/CVE-CRIT-1`;
+      const expectedPath = `/c/c-12345/${ PRODUCT_NAME }/${ PAGE.VULNERABILITIES }/CVE-CRIT-1`;
 
       expect(link.props('to')).toBe(expectedPath);
     });

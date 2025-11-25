@@ -3,7 +3,12 @@ import { createStore } from 'vuex';
 import VexManagement from '../VexManagement.vue';
 
 
-jest.mock('@sbomscanner/utils/permissions', () => ({ getPermissions: jest.fn(() => ({ canEdit: true, canDelete: true })) }));
+jest.mock('@sbomscanner/utils/permissions', () => ({
+  getPermissions: jest.fn(() => ({
+    canEdit:   true,
+    canDelete: true
+  }))
+}));
 // Define RESOURCE constants locally to avoid import issues
 const RESOURCE = { VEX_HUB: 'sbomscanner.kubewarden.io.vexhub' };
 
@@ -62,12 +67,16 @@ describe('VexManagement', () => {
           namespaced: true,
           getters:    {
             'all': () => (type: string) => {
-              if (type === RESOURCE.VEX_HUB) return mockVexHubs;
+              if (type === RESOURCE.VEX_HUB) {
+                return mockVexHubs;
+              }
 
               return [];
             },
             'schemaFor': () => (type: string) => {
-              if (type === RESOURCE.VEX_HUB) return mockSchema;
+              if (type === RESOURCE.VEX_HUB) {
+                return mockSchema;
+              }
 
               return null;
             }

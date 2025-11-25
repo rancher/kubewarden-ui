@@ -21,7 +21,10 @@ export default {
       required:  true,
       validator: (value) => value >= 0 && value <= 100,
     },
-    eventHandler: { type: Function, default: null },
+    eventHandler: {
+      type:    Function,
+      default: null
+    },
   },
   data() {
     return {
@@ -34,7 +37,9 @@ export default {
     calculateBlocks() {
       const el = this.$refs.bar;
 
-      if (!el) return;
+      if (!el) {
+        return;
+      }
       const width = el.offsetWidth;
       const blockWidth = 4;
       const total = Math.floor(width / blockWidth / 2);

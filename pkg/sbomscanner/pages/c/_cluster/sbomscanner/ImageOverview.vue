@@ -398,6 +398,7 @@ export default {
           message: 'Image scan report downloaded successfully'
         }, { root: true });
       } catch (e) {
+        console.warn(e);
         this.$store.dispatch('growl/error', {
           title:   'Error',
           message: 'Failed to download image scan report'
@@ -407,7 +408,10 @@ export default {
     async downloadSbom(res) {
       try {
         const target = (res && res.length ? res[0] : null);
-        const sbom = await this.$store.dispatch('cluster/find', { type: RESOURCE.SBOM, id: target.id });
+        const sbom = await this.$store.dispatch('cluster/find', {
+          type: RESOURCE.SBOM,
+          id:   target.id
+        });
         const spdxString = JSON.stringify(sbom.spdx, null, 2);
         const sbomBlob = new Blob([spdxString], { type: 'application/json;charset=utf-8' });
 
@@ -417,6 +421,7 @@ export default {
           message: 'SBOM downloaded successfully'
         }, { root: true });
       } catch (e) {
+        console.warn(e);
         this.$store.dispatch('growl/error', {
           title:   'Error',
           message: 'Failed to download SBOM'
@@ -426,7 +431,10 @@ export default {
     async downloadJson(res) {
       try {
         const target = (res && res.length ? res[0] : null);
-        const vulReport = await this.$store.dispatch('cluster/find', { type: RESOURCE.VULNERABILITY_REPORT, id: target.id });
+        const vulReport = await this.$store.dispatch('cluster/find', {
+          type: RESOURCE.VULNERABILITY_REPORT,
+          id:   target.id
+        });
         const jsonBlob = new Blob([JSON.stringify(vulReport.report, null, 2)], { type: 'application/json;charset=utf-8' });
 
         await saveAs(jsonBlob, `${ target.id }-vulnerabilities-report_${ day(new Date().getTime()).format('MMDDYYYY_HHmmss') }.json`);
@@ -435,6 +443,7 @@ export default {
           message: 'Vulnerability report downloaded successfully'
         }, { root: true });
       } catch (e) {
+        console.warn(e);
         this.$store.dispatch('growl/error', {
           title:   'Error',
           message: 'Failed to download vulnerability report'
@@ -444,7 +453,10 @@ export default {
     async downloadCsv(res) {
       try {
         const target = (res && res.length ? res[0] : null);
-        const vulReport = await this.$store.dispatch('cluster/find', { type: RESOURCE.VULNERABILITY_REPORT, id: target.id });
+        const vulReport = await this.$store.dispatch('cluster/find', {
+          type: RESOURCE.VULNERABILITY_REPORT,
+          id:   target.id
+        });
         let vulnerabilityList = [];
 
         vulReport.report.results.forEach((result) => {
@@ -461,6 +473,7 @@ export default {
           message: 'Image detail report downloaded successfully'
         }, { root: true });
       } catch (e) {
+        console.warn(e);
         this.$store.dispatch('growl/error', {
           title:   'Error',
           message: 'Failed to download image detail report'

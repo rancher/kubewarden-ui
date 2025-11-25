@@ -39,19 +39,18 @@ const mockRouter = { push: jest.fn() };
 const mockRoute = { params: { cluster: 'mock-cluster' } };
 
 // --- HELPER FOR MOUNT ---
-const factory = (options = {}) =>
-  mount(RegistriesOverview, {
-    global: {
-      mocks: {
-        $store:  mockStore,
-        $router: mockRouter,
-        $route:  mockRoute,
-        t:       mockT,
-        $t:      mockT,
-      },
+const factory = (options = {}) => mount(RegistriesOverview, {
+  global: {
+    mocks: {
+      $store:  mockStore,
+      $router: mockRouter,
+      $route:  mockRoute,
+      t:       mockT,
+      $t:      mockT,
     },
-    ...options,
-  });
+  },
+  ...options,
+});
 
 describe('RegistriesOverview.vue', () => {
   beforeEach(() => {
@@ -100,7 +99,6 @@ describe('RegistriesOverview.vue', () => {
     const addButton = wrapper.find('button[aria-label="Add new"]');
 
     expect(addButton.exists()).toBe(false);
-
   });
 
   it('navigates when clicking Add new button', async() => {
@@ -265,9 +263,14 @@ describe('RegistriesOverview.vue', () => {
     const result = wrapper.vm.getStatusResult({
       status: {
         conditions: [
-          { type: 'Complete', status: 'False' },
           {
-            type: 'InProgress', status: 'True', lastTransitionTime: '2024-10-01'
+            type:   'Complete',
+            status: 'False'
+          },
+          {
+            type:               'InProgress',
+            status:             'True',
+            lastTransitionTime: '2024-10-01'
           },
         ],
       },
@@ -316,7 +319,14 @@ describe('RegistriesOverview.vue', () => {
 
   it('getStatusResult returns Pending if no True condition found', () => {
     const wrapper = factory();
-    const result = wrapper.vm.getStatusResult({ status: { conditions: [{ type: 'Scheduled', status: 'False' }] } });
+    const result = wrapper.vm.getStatusResult({
+      status: {
+        conditions: [{
+          type:   'Scheduled',
+          status: 'False'
+        }]
+      }
+    });
 
     expect(result.type).toBe('Pending');
   });
@@ -333,32 +343,122 @@ describe('RegistriesOverview.vue', () => {
 
     expect(wrapper.vm.getPreviousStatus([
       {
-        statusResult: { type: 'InProgress', statusIndex: 1 } ,
-        conditions:   [{ type: 'Scheduled', status: 'False' }, { type: 'InProgress', status: 'True' }, { type: 'Complete', status: 'False' }, { type: 'Failed', status: 'False' }]
+        statusResult: {
+          type:        'InProgress',
+          statusIndex: 1
+        },
+        conditions:   [{
+          type:   'Scheduled',
+          status: 'False'
+        }, {
+          type:   'InProgress',
+          status: 'True'
+        }, {
+          type:   'Complete',
+          status: 'False'
+        }, {
+          type:   'Failed',
+          status: 'False'
+        }]
       },
       {
-        statusResult: { type: 'Failed', statusIndex: 3 },
-        conditions:   [{ type: 'Scheduled', status: 'False' }, { type: 'InProgress', status: 'False' }, { type: 'Complete', status: 'False' }, { type: 'Failed', status: 'True' }]
+        statusResult: {
+          type:        'Failed',
+          statusIndex: 3
+        },
+        conditions:   [{
+          type:   'Scheduled',
+          status: 'False'
+        }, {
+          type:   'InProgress',
+          status: 'False'
+        }, {
+          type:   'Complete',
+          status: 'False'
+        }, {
+          type:   'Failed',
+          status: 'True'
+        }]
       },
     ])).toBe('scheduled');
     expect(wrapper.vm.getPreviousStatus([
       {
-        statusResult: { type: 'Failed', statusIndex: 3 } ,
-        conditions:   [{ type: 'Scheduled', status: 'False' }, { type: 'InProgress', status: 'False' }, { type: 'Complete', status: 'False' }, { type: 'Failed', status: 'True' }]
+        statusResult: {
+          type:        'Failed',
+          statusIndex: 3
+        },
+        conditions:   [{
+          type:   'Scheduled',
+          status: 'False'
+        }, {
+          type:   'InProgress',
+          status: 'False'
+        }, {
+          type:   'Complete',
+          status: 'False'
+        }, {
+          type:   'Failed',
+          status: 'True'
+        }]
       },
       {
-        statusResult: { type: 'Failed', statusIndex: 3 },
-        conditions:   [{ type: 'Scheduled', status: 'False' }, { type: 'InProgress', status: 'False' }, { type: 'Complete', status: 'False' }, { type: 'Failed', status: 'True' }]
+        statusResult: {
+          type:        'Failed',
+          statusIndex: 3
+        },
+        conditions:   [{
+          type:   'Scheduled',
+          status: 'False'
+        }, {
+          type:   'InProgress',
+          status: 'False'
+        }, {
+          type:   'Complete',
+          status: 'False'
+        }, {
+          type:   'Failed',
+          status: 'True'
+        }]
       },
     ])).toBe('inprogress');
     expect(wrapper.vm.getPreviousStatus([
       {
-        statusResult: { type: 'Scheduled', statusIndex: 0 } ,
-        conditions:   [{ type: 'Scheduled', status: 'True' }, { type: 'InProgress', status: 'True' }, { type: 'Complete', status: 'False' }, { type: 'Failed', status: 'False' }]
+        statusResult: {
+          type:        'Scheduled',
+          statusIndex: 0
+        },
+        conditions:   [{
+          type:   'Scheduled',
+          status: 'True'
+        }, {
+          type:   'InProgress',
+          status: 'True'
+        }, {
+          type:   'Complete',
+          status: 'False'
+        }, {
+          type:   'Failed',
+          status: 'False'
+        }]
       },
       {
-        statusResult: { type: 'Failed', statusIndex: 3 },
-        conditions:   [{ type: 'Scheduled', status: 'False' }, { type: 'InProgress', status: 'False' }, { type: 'Complete', status: 'False' }, { type: 'Failed', status: 'True' }]
+        statusResult: {
+          type:        'Failed',
+          statusIndex: 3
+        },
+        conditions:   [{
+          type:   'Scheduled',
+          status: 'False'
+        }, {
+          type:   'InProgress',
+          status: 'False'
+        }, {
+          type:   'Complete',
+          status: 'False'
+        }, {
+          type:   'Failed',
+          status: 'True'
+        }]
       },
     ])).toBe('failed');
   });
@@ -377,7 +477,9 @@ describe('RegistriesOverview.vue', () => {
         spec:   { registry: 'r1' },
         status: {
           conditions: [{
-            type: 'Complete', status: 'True', lastTransitionTime: new Date().toISOString()
+            type:               'Complete',
+            status:             'True',
+            lastTransitionTime: new Date().toISOString()
           }],
           completionTime: new Date().toISOString(),
         },
@@ -402,7 +504,9 @@ describe('RegistriesOverview.vue', () => {
         spec:   { registry: 'r1' },
         status: {
           conditions: [{
-            type: 'Complete', status: 'True', lastTransitionTime: new Date(new Date().getTime() - 60).toISOString()
+            type:               'Complete',
+            status:             'True',
+            lastTransitionTime: new Date(new Date().getTime() - 60).toISOString()
           }],
           completionTime: new Date().toISOString(),
         },
@@ -455,7 +559,12 @@ describe('RegistriesOverview.vue', () => {
           creationTimestamp: new Date().toISOString(),
         },
         spec:   { registry: 'r1' },
-        status: { conditions: [{ type: 'Pending', status: 'True' }] },
+        status: {
+          conditions: [{
+            type:   'Pending',
+            status: 'True'
+          }]
+        },
       },
     ];
     const res = wrapper.vm.getSummaryData(mockJobs);
@@ -522,72 +631,96 @@ describe('getSummaryData → statusSummary aggregation', () => {
       // Pending
       {
         metadata: {
-          namespace: 'ns', name: 'reg1', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+          namespace:   'ns',
+          name:        'reg1',
+          annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
         },
         spec:   { registry: 'r1' },
         status: {
           conditions: [{
-            type: 'Pending', status: 'True', lastTransitionTime: new Date().toISOString()
+            type:               'Pending',
+            status:             'True',
+            lastTransitionTime: new Date().toISOString()
           }]
         }
       },
       // Complete
       {
         metadata: {
-          namespace: 'ns', name: 'reg2', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+          namespace:   'ns',
+          name:        'reg2',
+          annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
         },
         spec:   { registry: 'r2' },
         status: {
           conditions: [{
-            type: 'Complete', status: 'True', lastTransitionTime: new Date().toISOString()
+            type:               'Complete',
+            status:             'True',
+            lastTransitionTime: new Date().toISOString()
           }]
         }
       },
       // Failed
       {
         metadata: {
-          namespace: 'ns', name: 'reg3', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+          namespace:   'ns',
+          name:        'reg3',
+          annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
         },
         spec:   { registry: 'r3' },
         status: {
           conditions: [{
-            type: 'Failed', status: 'True', lastTransitionTime: new Date().toISOString()
+            type:               'Failed',
+            status:             'True',
+            lastTransitionTime: new Date().toISOString()
           }]
         }
       },
       // Pending
       {
         metadata: {
-          namespace: 'ns', name: 'reg4', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+          namespace:   'ns',
+          name:        'reg4',
+          annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
         },
         spec:   { registry: 'r4' },
         status: {
           conditions: [{
-            type: 'Pending', status: 'True', lastTransitionTime: new Date().toISOString()
+            type:               'Pending',
+            status:             'True',
+            lastTransitionTime: new Date().toISOString()
           }]
         }
       },
       // Inprogress
       {
         metadata: {
-          namespace: 'ns', name: 'reg5', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+          namespace:   'ns',
+          name:        'reg5',
+          annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
         },
         spec:   { registry: 'r5' },
         status: {
           conditions: [{
-            type: 'Inprogress', status: 'True', lastTransitionTime: new Date().toISOString()
+            type:               'Inprogress',
+            status:             'True',
+            lastTransitionTime: new Date().toISOString()
           }]
         }
       },
       // scheduled
       {
         metadata: {
-          namespace: 'ns', name: 'reg6', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+          namespace:   'ns',
+          name:        'reg6',
+          annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
         },
         spec:   { registry: 'r6' },
         status: {
           conditions: [{
-            type: 'Scheduled', status: 'True', lastTransitionTime: new Date().toISOString()
+            type:               'Scheduled',
+            status:             'True',
+            lastTransitionTime: new Date().toISOString()
           }]
         }
       },
@@ -610,12 +743,16 @@ describe('getSummaryData → statusSummary aggregation', () => {
     const mockJobs = [
       {
         metadata: {
-          namespace: 'ns', name: 'jX', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+          namespace:   'ns',
+          name:        'jX',
+          annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
         },
         spec:   { registry: 'rX' },
         status: {
           conditions: [{
-            type: 'UnknownType', status: 'True', lastTransitionTime: new Date().toISOString()
+            type:               'UnknownType',
+            status:             'True',
+            lastTransitionTime: new Date().toISOString()
           }]
         }
       },
@@ -637,34 +774,46 @@ describe('getSummaryData → statusSummary aggregation', () => {
     const mockJobs = [
       {
         metadata: {
-          namespace: 'ns', name: 'j1', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+          namespace:   'ns',
+          name:        'j1',
+          annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
         },
         spec:   { registry: 'r1' },
         status: {
           conditions: [{
-            type: 'Complete', status: 'True', lastTransitionTime: new Date().toISOString()
+            type:               'Complete',
+            status:             'True',
+            lastTransitionTime: new Date().toISOString()
           }]
         }
       },
       {
         metadata: {
-          namespace: 'ns', name: 'j2', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+          namespace:   'ns',
+          name:        'j2',
+          annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
         },
         spec:   { registry: 'r2' },
         status: {
           conditions: [{
-            type: 'WhoKnows', status: 'True', lastTransitionTime: new Date().toISOString()
+            type:               'WhoKnows',
+            status:             'True',
+            lastTransitionTime: new Date().toISOString()
           }]
         }
       },
       {
         metadata: {
-          namespace: 'ns', name: 'j3', annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
+          namespace:   'ns',
+          name:        'j3',
+          annotations: { 'sbomscanner.kubewarden.io/registry': '{}' }
         },
         spec:   { registry: 'r3' },
         status: {
           conditions: [{
-            type: 'Failed', status: 'True', lastTransitionTime: new Date().toISOString()
+            type:               'Failed',
+            status:             'True',
+            lastTransitionTime: new Date().toISOString()
           }]
         }
       },

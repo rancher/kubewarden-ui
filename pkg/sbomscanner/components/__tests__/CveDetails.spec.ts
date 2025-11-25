@@ -110,9 +110,18 @@ describe('CveDetails.vue', () => {
         'https://google.com/another',
       ];
       const expected = [
-        { name: 'Google', references: ['https://google.com/foo', 'https://google.com/another'] },
-        { name: 'Suse', references: ['https://www.suse.com/bar'] },
-        { name: 'Redhat', references: ['https://security.redhat.com/baz'] },
+        {
+          name:       'Google',
+          references: ['https://google.com/foo', 'https://google.com/another']
+        },
+        {
+          name:       'Suse',
+          references: ['https://www.suse.com/bar']
+        },
+        {
+          name:       'Redhat',
+          references: ['https://security.redhat.com/baz']
+        },
       ];
 
       expect(wrapper.vm.groupReferencesByDomain(urls)).toEqual(expected);
@@ -120,13 +129,24 @@ describe('CveDetails.vue', () => {
 
     it('convertCvssToSources should create correct source links', () => {
       const cvss = {
-        nvd: {}, redhat: {}, ghsa: {}
+        nvd:    {},
+        redhat: {},
+        ghsa:   {}
       };
       const cveId = 'CVE-TEST';
       const expected = [
-        { name: 'NVD', link: `${ NVD_BASE_URL }${ cveId }` },
-        { name: 'REDHAT', link: '' },
-        { name: 'GHSA', link: '' },
+        {
+          name: 'NVD',
+          link: `${ NVD_BASE_URL }${ cveId }`
+        },
+        {
+          name: 'REDHAT',
+          link: ''
+        },
+        {
+          name: 'GHSA',
+          link: ''
+        },
       ];
 
       expect(wrapper.vm.convertCvssToSources(cvss, cveId)).toEqual(expected);
@@ -167,14 +187,32 @@ describe('CveDetails.vue', () => {
       expect(cveMetaData.severity).toBe('Critical');
       expect(cveMetaData.title).toBe('A very bad vulnerability');
       expect(cveMetaData.sources).toEqual([
-        { name: 'NVD', link: `${ NVD_BASE_URL }${ mockCveId }` },
-        { name: 'REDHAT', link: '' },
-        { name: 'GHSA', link: '' },
+        {
+          name: 'NVD',
+          link: `${ NVD_BASE_URL }${ mockCveId }`
+        },
+        {
+          name: 'REDHAT',
+          link: ''
+        },
+        {
+          name: 'GHSA',
+          link: ''
+        },
       ]);
       expect(cveMetaData.advisoryVendors).toEqual([
-        { name: 'Suse', references: ['https://suse.com/security/cve/CVE-2023-1234'] },
-        { name: 'Redhat', references: ['https://www.redhat.com/en/blog/press-release'] },
-        { name: 'Nist', references: ['https://nvd.nist.gov/vuln/detail/CVE-2023-1234'] },
+        {
+          name:       'Suse',
+          references: ['https://suse.com/security/cve/CVE-2023-1234']
+        },
+        {
+          name:       'Redhat',
+          references: ['https://www.redhat.com/en/blog/press-release']
+        },
+        {
+          name:       'Nist',
+          references: ['https://nvd.nist.gov/vuln/detail/CVE-2023-1234']
+        },
       ]);
       expect(cveMetaData.cvssScores).toContainEqual({
         source: 'Nvd v3score',
@@ -263,7 +301,10 @@ describe('CveDetails.vue', () => {
       const vendorTags = wrapper.findAll('.vendor-tag');
       const firstVendorTag = vendorTags[0];
       const secondVendorTag = vendorTags[1];
-      const firstVendorData = { name: 'Suse', references: ['https://suse.com/security/cve/CVE-2023-1234'] };
+      const firstVendorData = {
+        name:       'Suse',
+        references: ['https://suse.com/security/cve/CVE-2023-1234']
+      };
 
       await firstVendorTag.trigger('click');
       expect(wrapper.vm.selectedVendor).toEqual(firstVendorData);
@@ -276,7 +317,10 @@ describe('CveDetails.vue', () => {
       expect(hoverPanel.find('h4').text()).toBe(`References for ${ mockCveId }`);
       expect(hoverPanel.find('.ref-url').attributes('href')).toBe('https://suse.com/security/cve/CVE-2023-1234');
 
-      const secondVendorData = { name: 'Redhat', references: ['https://www.redhat.com/en/blog/press-release'] };
+      const secondVendorData = {
+        name:       'Redhat',
+        references: ['https://www.redhat.com/en/blog/press-release']
+      };
 
       await secondVendorTag.trigger('click');
       expect(wrapper.vm.selectedVendor).toEqual(secondVendorData);

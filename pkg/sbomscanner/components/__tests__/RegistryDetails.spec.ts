@@ -9,13 +9,15 @@ import { getPermissions } from '../../utils/permissions';
 
 jest.mock('@sbomscanner/utils/permissions', () => ({ getPermissions: jest.fn(() => ({ canEdit: true })) }));
 describe('RegistryDetails.vue', () => {
-
   let storeMock: any;
   let tMock: any;
   const mockRouter = { push: jest.fn() };
 
   const registryMock = {
-    metadata: { name: 'my-reg', namespace: 'ns1' },
+    metadata: {
+      name:      'my-reg',
+      namespace: 'ns1'
+    },
     spec:     {
       uri:          'http://test.registry',
       repositories: ['repo1', 'repo2'],
@@ -41,7 +43,9 @@ describe('RegistryDetails.vue', () => {
     };
 
     tMock = jest.fn((str, vars) => {
-      if (vars?.i) return `Every ${vars.i}`;
+      if (vars?.i) {
+        return `Every ${ vars.i }`;
+      }
 
       return str;
     });
@@ -53,7 +57,9 @@ describe('RegistryDetails.vue', () => {
           $fetchState: { pending: false },
           $route:      {
             params: {
-              cluster: 'local', id: 'my-reg', ns: 'ns1'
+              cluster: 'local',
+              id:      'my-reg',
+              ns:      'ns1'
             }
           },
           $router: mockRouter,
@@ -160,5 +166,4 @@ describe('RegistryDetails.vue', () => {
     expect(repoMeta.value).toBe(0);
     expect(scheduleMeta?.value).toBe('');
   });
-
 });

@@ -59,7 +59,10 @@ export default class SbomscannerRancherIoVexhub extends SteveModel {
       // Ensure all actions are enabled
       const returnActions = reordered.map((action) => {
         if (action && action.enabled === false) {
-          return { ...action, enabled: true };
+          return {
+            ...action,
+            enabled: true
+          };
         }
 
         return action;
@@ -103,13 +106,19 @@ export default class SbomscannerRancherIoVexhub extends SteveModel {
             // Bulk operation
             await Promise.all(resources.map(async(resource) => {
               if (resource.spec) {
-                resource.spec = { ...(resource.spec || {}), enabled: false };
+                resource.spec = {
+                  ...(resource.spec || {}),
+                  enabled: false
+                };
                 await resource.save();
               }
             }));
           } else {
             // Single resource operation
-            this.spec = { ...(this.spec || {}), enabled: false };
+            this.spec = {
+              ...(this.spec || {}),
+              enabled: false
+            };
             await this.save();
           }
         }
@@ -127,13 +136,19 @@ export default class SbomscannerRancherIoVexhub extends SteveModel {
             // Bulk operation
             await Promise.all(resources.map(async(resource) => {
               if (resource.spec) {
-                resource.spec = { ...(resource.spec || {}), enabled: true };
+                resource.spec = {
+                  ...(resource.spec || {}),
+                  enabled: true
+                };
                 await resource.save();
               }
             }));
           } else {
             // Single resource operation
-            this.spec = { ...(this.spec || {}), enabled: true };
+            this.spec = {
+              ...(this.spec || {}),
+              enabled: true
+            };
             await this.save();
           }
         }

@@ -53,10 +53,22 @@ describe('Scanjob model', () => {
   it('returns Pending if no condition has status=True', () => {
     scanjob.status = {
       conditions: [
-        { status: 'False', type: 'Scheduled' },
-        { status: 'False', type: 'Pending' },
-        { status: 'False', type: 'Complete' },
-        { status: 'False', type: 'Failed' },
+        {
+          status: 'False',
+          type:   'Scheduled'
+        },
+        {
+          status: 'False',
+          type:   'Pending'
+        },
+        {
+          status: 'False',
+          type:   'Complete'
+        },
+        {
+          status: 'False',
+          type:   'Failed'
+        },
       ],
       imagesCount:        10,
       scannedImagesCount: 2
@@ -71,16 +83,24 @@ describe('Scanjob model', () => {
     scanjob.status = {
       conditions: [
         {
-          status: 'False', type: 'Scheduled', lastTransitionTime: '2025-10-23T12:16:10.000Z'
+          status:             'False',
+          type:               'Scheduled',
+          lastTransitionTime: '2025-10-23T12:16:10.000Z'
         },
         {
-          status: 'False', type: 'Pending', lastTransitionTime: '2025-10-24T12:16:10.000Z'
+          status:             'False',
+          type:               'Pending',
+          lastTransitionTime: '2025-10-24T12:16:10.000Z'
         },
         {
-          status: 'True', type: 'Complete', lastTransitionTime: '2025-10-26T12:16:10.000Z'
+          status:             'True',
+          type:               'Complete',
+          lastTransitionTime: '2025-10-26T12:16:10.000Z'
         },
         {
-          status: 'False', type: 'Failed', lastTransitionTime: '2025-10-25T12:16:10.000Z'
+          status:             'False',
+          type:               'Failed',
+          lastTransitionTime: '2025-10-25T12:16:10.000Z'
         },
       ],
       imagesCount:        10,
@@ -100,7 +120,10 @@ describe('Scanjob model', () => {
     scanjob.status = {
       conditions: [
         {
-          type: 'InProgress', status: 'True', lastTransitionTime: '2025-10-25T09:00:00Z', message: 'Scanning'
+          type:               'InProgress',
+          status:             'True',
+          lastTransitionTime: '2025-10-25T09:00:00Z',
+          message:            'Scanning'
         }
       ],
       imagesCount:        10,
@@ -116,7 +139,10 @@ describe('Scanjob model', () => {
     scanjob.status = {
       conditions: [
         {
-          type: 'Pending', status: 'True', lastTransitionTime: '2025-10-25T09:00:00Z', message: 'Still going'
+          type:               'Pending',
+          status:             'True',
+          lastTransitionTime: '2025-10-25T09:00:00Z',
+          message:            'Still going'
         }
       ],
       scannedImagesCount: 10
@@ -132,10 +158,16 @@ describe('Scanjob model', () => {
     scanjob.status = {
       conditions: [
         {
-          type: 'Pending', status: 'False', lastTransitionTime: '2025-10-25T09:00:00Z', message: 'Still going'
+          type:               'Pending',
+          status:             'False',
+          lastTransitionTime: '2025-10-25T09:00:00Z',
+          message:            'Still going'
         },
         {
-          type: 'Pending', status: 'True', lastTransitionTime: '2025-10-25T09:00:00Z', message: 'Still going'
+          type:               'Pending',
+          status:             'True',
+          lastTransitionTime: '2025-10-25T09:00:00Z',
+          message:            'Still going'
         }
       ],
     };

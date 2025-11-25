@@ -4,8 +4,14 @@ import RancherMetaProperty from '../RancherMetaProperty.vue';
 
 describe('RancherMeta.vue', () => {
   const mockProperties = [
-    { label: 'Prop 1', value: 'Value 1' },
-    { label: 'Prop 2', value: 'Value 2' },
+    {
+      label: 'Prop 1',
+      value: 'Value 1'
+    },
+    {
+      label: 'Prop 2',
+      value: 'Value 2'
+    },
   ];
 
   it('renders the correct number of RancherMetaProperty components', () => {

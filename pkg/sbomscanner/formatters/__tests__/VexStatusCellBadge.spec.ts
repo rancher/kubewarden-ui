@@ -4,8 +4,14 @@ import VexStatusBadge from '@sbomscanner/components/common/VexStatusBadge.vue';
 
 describe('VexStatusCellBadge.vue', () => {
   it.each([
-    { value: true, expected: true },
-    { value: false, expected: false },
+    {
+      value:    true,
+      expected: true
+    },
+    {
+      value:    false,
+      expected: false
+    },
   ])('should pass the value $value to the VexStatusBadge enabled prop', ({ value, expected }) => {
     const wrapper = shallowMount(VexStatusCellBadge, { props: { value } });
 

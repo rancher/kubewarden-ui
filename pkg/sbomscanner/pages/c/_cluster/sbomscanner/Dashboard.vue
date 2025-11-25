@@ -356,7 +356,7 @@ export default {
       };
     },
     getFailedImageCnt(scanjob) {
-      if (scanjob.status.conditions && scanjob.status.conditions.find((condition) => condition.error )) {
+      if (scanjob.status.conditions && scanjob.status.conditions.find((condition) => condition.error)) {
         return (scanjob.status.imagesCount || 0) - (scanjob.status.scannedImagesCount || 0);
       }
 

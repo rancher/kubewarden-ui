@@ -60,7 +60,10 @@ export async function refreshCharts(
         // store.dispatch("neuvector/updateRefreshingCharts", true);
         await store.dispatch('catalog/refresh');
       } catch (e) {
-        handleGrowl({ error: e as any, store });
+        handleGrowl({
+          error: e as any,
+          store
+        });
       } finally {
         // store.dispatch("neuvector/updateRefreshingCharts", false);
       }
@@ -85,9 +88,15 @@ export function getLatestVersion(store: any, versions: any[]) {
     const bSem = semver.coerce(b);
 
     // Handle nulls safely
-    if (!aSem && !bSem) return 0;
-    if (!aSem) return 1;
-    if (!bSem) return -1;
+    if (!aSem && !bSem) {
+      return 0;
+    }
+    if (!aSem) {
+      return 1;
+    }
+    if (!bSem) {
+      return -1;
+    }
 
     return semver.rcompare(aSem, bSem);
   });
@@ -99,7 +108,7 @@ export function getLatestStableVersion(versions: any[]): string | undefined {
   const allVersions = versions.map((v) => v.version);
   const stableVersions = versions.filter((v) => !v.version.includes('b'));
 
-  if ( isEmpty(stableVersions) && !isEmpty(allVersions) ) {
+  if (isEmpty(stableVersions) && !isEmpty(allVersions)) {
     return semver.rsort(allVersions)[0];
   }
 
@@ -107,11 +116,11 @@ export function getLatestStableVersion(versions: any[]): string | undefined {
     const versionA = a.version.split('.').map(Number);
     const versionB = b.version.split('.').map(Number);
 
-    for ( let i = 0; i < Math.max(versionA.length, versionB.length); i++ ) {
-      if ( versionA[i] === undefined || versionA[i] < versionB[i] ) {
+    for (let i = 0; i < Math.max(versionA.length, versionB.length); i++) {
+      if (versionA[i] === undefined || versionA[i] < versionB[i]) {
         return 1;
       }
-      if ( versionB[i] === undefined || versionA[i] > versionB[i] ) {
+      if (versionB[i] === undefined || versionA[i] > versionB[i]) {
         return -1;
       }
     }

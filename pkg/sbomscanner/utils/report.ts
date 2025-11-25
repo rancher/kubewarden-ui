@@ -1,6 +1,6 @@
 import { ImageVulnerability } from '@sbomscanner/types';
 
-export function imageDetailsToCSV(vuls: ImageVulnerability[]): Object[] {
+export function imageDetailsToCSV(vuls: ImageVulnerability[]): object[] {
   if (!vuls) {
     return [];
   }
@@ -53,7 +53,9 @@ export function downloadJSON(jsonContent: any, filename: string) {
 }
 
 export function getScore(cvss: any, severity: string): string {
-  if (!cvss || typeof cvss !== 'object' || !severity) return '';
+  if (!cvss || typeof cvss !== 'object' || !severity) {
+    return '';
+  }
 
   // Normalize severity for comparison
   const normalizedSeverity = severity.toLowerCase();
@@ -70,11 +72,13 @@ export function getScore(cvss: any, severity: string): string {
   // Get range for given severity
   const range = severityRanges[normalizedSeverity];
 
-  if (!range) return '';
+  if (!range) {
+    return '';
+  }
 
   // Search for score in cvss sources that fits the severity range
   for (const source of Object.values(cvss)) {
-    if (source && typeof source === 'object' && 'v3score' in source && source.v3score != null) {
+    if (source && typeof source === 'object' && 'v3score' in source && (source.v3score !== null || source.v3score !== undefined)) {
       const raw = (source as any).v3score;
       const score = typeof raw === 'number' ? raw : parseFloat(String(raw));
 
@@ -90,7 +94,7 @@ export function getScore(cvss: any, severity: string): string {
 
   // If no matching score found, return the first available score (fallback)
   for (const source of Object.values(cvss)) {
-    if (source && typeof source === 'object' && 'v3score' in source && source.v3score != null) {
+    if (source && typeof source === 'object' && 'v3score' in source && (source.v3score !== null || source.v3score !== undefined)) {
       return `${ source.v3score } (v3)`;
     }
   }
@@ -99,12 +103,14 @@ export function getScore(cvss: any, severity: string): string {
 }
 
 export function getHighestScore(cvss: any): string {
-  if (!cvss || typeof cvss !== 'object') return '';
+  if (!cvss || typeof cvss !== 'object') {
+    return '';
+  }
 
   let highestScore = 0;
 
   for (const source of Object.values(cvss)) {
-    if (source && typeof source === 'object' && 'v3score' in source && source.v3score != null) {
+    if (source && typeof source === 'object' && 'v3score' in source && source.v3score !== null) {
       const raw = (source as any).v3score;
       const score = typeof raw === 'number' ? raw : parseFloat(String(raw));
 
@@ -130,7 +136,9 @@ export function getSeverityNum(severity: string): number {
 }
 
 export function getScoreNum(scoreStr: string): number {
-  if (!scoreStr) return 0;
+  if (!scoreStr) {
+    return 0;
+  }
 
   const match = scoreStr.match(/([\d.]+)\s*\(v3\)/);
 

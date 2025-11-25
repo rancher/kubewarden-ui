@@ -15,7 +15,7 @@ jest.mock('@sbomscanner/utils/chart', () => ({
   refreshCharts:    jest.fn(),
   getLatestVersion: jest.fn(() => '1.0.0')
 }));
-let modules: Vuex.Modules<any, any> = {
+const modules: Vuex.Modules<any, any> = {
   'resource-fetch': {
     namespaced: true,
     getters:    { refreshFlag: () => false },
@@ -31,10 +31,16 @@ let modules: Vuex.Modules<any, any> = {
 
 let getters = {
   currentStore: () => (id: string) => {
-    return { id, name: 'mocked-store' };
+    return {
+      id,
+      name: 'mocked-store'
+    };
   },
   'management/byId': () => (id: string) => {
-    return { id, name: 'mocked-management' };
+    return {
+      id,
+      name: 'mocked-management'
+    };
   },
   currentCluster:      () => ({ id: 'cluster-1' }),
   // 'catalog/charts':    () => [],
@@ -43,7 +49,10 @@ let getters = {
   'cluster/schemaFor': () => false,
   'cluster/canList':   () => true,
   'catalog/chart':     () => ({
-    repoType: 'cluster', repoName: 'repo1', chartName: 'chart1', versions: ['1.0.0']
+    repoType:  'cluster',
+    repoName:  'repo1',
+    chartName: 'chart1',
+    versions:  ['1.0.0']
   }),
 };
 
@@ -58,10 +67,16 @@ describe('InstallView.vue', () => {
     goToStepMock = jest.fn();
     getters = {
       currentStore: () => (id: string) => {
-        return { id, name: 'mocked-store' };
+        return {
+          id,
+          name: 'mocked-store'
+        };
       },
       'management/byId': () => (id: string) => {
-        return { id, name: 'mocked-management' };
+        return {
+          id,
+          name: 'mocked-management'
+        };
       },
       currentCluster:      () => ({ id: 'cluster-1' }),
       // 'catalog/charts':    () => [],
@@ -70,7 +85,10 @@ describe('InstallView.vue', () => {
       'cluster/schemaFor': () => false,
       'cluster/canList':   () => true,
       'catalog/chart':     () => ({
-        repoType: 'cluster', repoName: 'repo1', chartName: 'chart1', versions: ['1.0.0']
+        repoType:  'cluster',
+        repoName:  'repo1',
+        chartName: 'chart1',
+        versions:  ['1.0.0']
       }),
     };
 
@@ -94,7 +112,10 @@ describe('InstallView.vue', () => {
         mocks:   {
           $fetchState: { pending: false },
           $router:     router,
-          $route:      { params: {}, query: {} },
+          $route:      {
+            params: {},
+            query:  {}
+          },
           $fetchType:  jest.fn().mockResolvedValue(undefined),
           $store:      store,
         },
@@ -217,21 +238,33 @@ describe('InstallView.vue', () => {
   it('returns chart object when sbomscannerRepo exists', async() => {
     const getters = {
       currentStore: () => (id: string) => {
-        return { id, name: 'mocked-store' };
+        return {
+          id,
+          name: 'mocked-store'
+        };
       },
       'catalog/chart':   () => jest.fn().mockReturnValue({ chartName: 'sbomscanner-controller' }),
       'management/byId': () => (id: string) => {
-        return { id, name: 'mocked-management' };
+        return {
+          id,
+          name: 'mocked-management'
+        };
       },
       'i18n/t': () => jest.fn((key) => key),
     };
-    const store = createStore({ getters, modules });
+    const store = createStore({
+      getters,
+      modules
+    });
     const wrapper = shallowMount(InstallView, {
       global: {
         plugins: [store],
         mocks:   {
           $store:      store,
-          $route:      { params: {}, query: {} },
+          $route:      {
+            params: {},
+            query:  {}
+          },
           $fetchState: { pending: false },
           t:           jest.fn((key) => key),
           $t:          jest.fn((key) => key),
@@ -254,21 +287,33 @@ describe('InstallView.vue', () => {
   it('returns null when sbomscannerRepo is null', async() => {
     const getters = {
       currentStore: () => (id: string) => {
-        return { id, name: 'mocked-store' };
+        return {
+          id,
+          name: 'mocked-store'
+        };
       },
       'catalog/chart':   () => jest.fn().mockReturnValue({ chartName: 'sbomscanner-controller' }),
       'management/byId': () => (id: string) => {
-        return { id, name: 'mocked-management' };
+        return {
+          id,
+          name: 'mocked-management'
+        };
       },
       'i18n/t': () => jest.fn((key) => key),
     };
-    const store = createStore({ getters, modules });
+    const store = createStore({
+      getters,
+      modules
+    });
     const wrapper = shallowMount(InstallView, {
       global: {
         plugins: [store],
         mocks:   {
           $store:      store,
-          $route:      { params: {}, query: {} },
+          $route:      {
+            params: {},
+            query:  {}
+          },
           $fetchState: { pending: false },
           t:           jest.fn((key) => key),
           $t:          jest.fn((key) => key),
@@ -281,6 +326,7 @@ describe('InstallView.vue', () => {
 
     await nextTick();
 
+    expect(result).toBeNull();
     expect(wrapper.vm.controllerChart4Sbomscanner).toBeNull();
     expect(wrapper.vm.$store.getters['catalog/chart']).not.toHaveBeenCalled();
   });
@@ -288,21 +334,33 @@ describe('InstallView.vue', () => {
   it('returns chart object when cnpgRepo exists', async() => {
     const getters = {
       currentStore: () => (id: string) => {
-        return { id, name: 'mocked-store' };
+        return {
+          id,
+          name: 'mocked-store'
+        };
       },
       'catalog/chart':   () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
       'management/byId': () => (id: string) => {
-        return { id, name: 'mocked-management' };
+        return {
+          id,
+          name: 'mocked-management'
+        };
       },
       'i18n/t': () => jest.fn((key) => key),
     };
-    const store = createStore({ getters, modules });
+    const store = createStore({
+      getters,
+      modules
+    });
     const wrapper = shallowMount(InstallView, {
       global: {
         plugins: [store],
         mocks:   {
           $store:      store,
-          $route:      { params: {}, query: {} },
+          $route:      {
+            params: {},
+            query:  {}
+          },
           $fetchState: { pending: false },
           t:           jest.fn((key) => key),
           $t:          jest.fn((key) => key),
@@ -325,21 +383,33 @@ describe('InstallView.vue', () => {
   it('returns null when cnpgRepo is null', async() => {
     const getters = {
       currentStore: () => (id: string) => {
-        return { id, name: 'mocked-store' };
+        return {
+          id,
+          name: 'mocked-store'
+        };
       },
       'catalog/chart':   () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
       'management/byId': () => (id: string) => {
-        return { id, name: 'mocked-management' };
+        return {
+          id,
+          name: 'mocked-management'
+        };
       },
       'i18n/t': () => jest.fn((key) => key),
     };
-    const store = createStore({ getters, modules });
+    const store = createStore({
+      getters,
+      modules
+    });
     const wrapper = shallowMount(InstallView, {
       global: {
         plugins: [store],
         mocks:   {
           $store:      store,
-          $route:      { params: {}, query: {} },
+          $route:      {
+            params: {},
+            query:  {}
+          },
           $fetchState: { pending: false },
           t:           jest.fn((key) => key),
           $t:          jest.fn((key) => key),
@@ -352,6 +422,7 @@ describe('InstallView.vue', () => {
 
     await nextTick();
 
+    expect(result).toBeNull();
     expect(wrapper.vm.controllerChart4Cnpg).toBeNull();
     expect(wrapper.vm.$store.getters['catalog/chart']).not.toHaveBeenCalled();
   });
@@ -436,23 +507,35 @@ describe('InstallView.vue', () => {
     const goToStep = jest.fn();
     const getters = {
       currentStore: () => (id: string) => {
-        return { id, name: 'mocked-store' };
+        return {
+          id,
+          name: 'mocked-store'
+        };
       },
       currentCluster:    () => ({ id: 'cluster-1' }),
       'catalog/chart':   () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
       'management/byId': () => (id: string) => {
-        return { id, name: 'mocked-management' };
+        return {
+          id,
+          name: 'mocked-management'
+        };
       },
       'i18n/t': () => jest.fn((key) => key),
     };
-    const store = createStore({ getters, modules });
+    const store = createStore({
+      getters,
+      modules
+    });
     const wrapper = shallowMount(InstallView, {
       global: {
         plugins: [store],
         mocks:   {
           $store:      store,
           $router:     router,
-          $route:      { params: {}, query: {} },
+          $route:      {
+            params: {},
+            query:  {}
+          },
           $fetchState: { pending: false },
           t:           jest.fn((key) => key),
           $t:          jest.fn((key) => key),
@@ -460,9 +543,12 @@ describe('InstallView.vue', () => {
       },
     });
 
-    await Object.defineProperty(wrapper.vm, 'controllerChart4Cnpg' , {
+    await Object.defineProperty(wrapper.vm, 'controllerChart4Cnpg', {
       get: () => ({
-        repoType: 'cluster', repoName: 'repo1', chartName: 'chart1', versions: ['1.0.0']
+        repoType:  'cluster',
+        repoName:  'repo1',
+        chartName: 'chart1',
+        versions:  ['1.0.0']
       })
     });
     await Object.defineProperty(wrapper.vm.$, 'refs', {
@@ -484,24 +570,36 @@ describe('InstallView.vue', () => {
     const mockSchema = { id: 'sbomscanner-schema' };
     const getters = {
       currentStore: () => (id: string) => {
-        return { id, name: 'mocked-store' };
+        return {
+          id,
+          name: 'mocked-store'
+        };
       },
       currentCluster:      () => ({ id: 'cluster-1' }),
       'cluster/schemaFor': () => jest.fn().mockReturnValue(mockSchema),
       'catalog/chart':     () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
       'management/byId':   () => (id: string) => {
-        return { id, name: 'mocked-management' };
+        return {
+          id,
+          name: 'mocked-management'
+        };
       },
       'i18n/t': () => jest.fn((key) => key),
     };
-    const store = createStore({ getters, modules });
+    const store = createStore({
+      getters,
+      modules
+    });
     const wrapper = shallowMount(InstallView, {
       global: {
         plugins: [store],
         mocks:   {
           $store:      store,
           $router:     router,
-          $route:      { params: {}, query: {} },
+          $route:      {
+            params: {},
+            query:  {}
+          },
           $fetchState: { pending: false },
           t:           jest.fn((key) => key),
           $t:          jest.fn((key) => key),
@@ -525,7 +623,10 @@ describe('InstallView.vue - schema computed tests', () => {
         plugins: [mockStore],
         mocks:   {
           $store:      mockStore,
-          $route:      { params: {}, query: {} },
+          $route:      {
+            params: {},
+            query:  {}
+          },
           $fetchState: { pending: false },
           $fetchType:  (type: string) => Promise.resolve(type),
           t:           (key: string) => key,
@@ -541,11 +642,17 @@ describe('InstallView.vue - schema computed tests', () => {
     mockStore = createStore({
       getters: {
         currentStore: () => (id: string) => {
-          return { id, name: 'mocked-store' };
+          return {
+            id,
+            name: 'mocked-store'
+          };
         },
         'cluster/schemaFor': () => jest.fn().mockReturnValue(mockSchema),
         'management/byId':   () => (id: string) => {
-          return { id, name: 'mocked-management' };
+          return {
+            id,
+            name: 'mocked-management'
+          };
         },
         'i18n/t': () => jest.fn((key) => key),
       },
@@ -565,11 +672,17 @@ describe('InstallView.vue - schema computed tests', () => {
     mockStore = createStore({
       getters: {
         currentStore: () => (id: string) => {
-          return { id, name: 'mocked-store' };
+          return {
+            id,
+            name: 'mocked-store'
+          };
         },
         'cluster/schemaFor': () => jest.fn().mockReturnValue(mockSchema),
         'management/byId':   () => (id: string) => {
-          return { id, name: 'mocked-management' };
+          return {
+            id,
+            name: 'mocked-management'
+          };
         },
         'i18n/t': () => jest.fn((key) => key),
       },
@@ -588,11 +701,17 @@ describe('InstallView.vue - schema computed tests', () => {
     mockStore = createStore({
       getters: {
         currentStore: () => (id: string) => {
-          return { id, name: 'mocked-store' };
+          return {
+            id,
+            name: 'mocked-store'
+          };
         },
         'cluster/schemaFor': () => jest.fn().mockReturnValue(null),
         'management/byId':   () => (id: string) => {
-          return { id, name: 'mocked-management' };
+          return {
+            id,
+            name: 'mocked-management'
+          };
         },
         'i18n/t': () => jest.fn((key) => key),
       },
@@ -611,14 +730,20 @@ describe('InstallView.vue - schema computed tests', () => {
     mockStore = createStore({
       getters: {
         currentStore: () => (id: string) => {
-          return { id, name: 'mocked-store' };
+          return {
+            id,
+            name: 'mocked-store'
+          };
         },
         'catalog/chart':     () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
         'cluster/schemaFor': () => jest.fn().mockReturnValue(mockSchema),
         'cluster/canList':   () => jest.fn().mockReturnValue(true),
 
         'management/byId': () => (id: string) => {
-          return { id, name: 'mocked-management' };
+          return {
+            id,
+            name: 'mocked-management'
+          };
         },
         'i18n/t': () => jest.fn((key) => key),
       },
@@ -646,13 +771,19 @@ describe('InstallView.vue - schema computed tests', () => {
     mockStore = createStore({
       getters: {
         currentStore: () => (id: string) => {
-          return { id, name: 'mocked-store' };
+          return {
+            id,
+            name: 'mocked-store'
+          };
         },
         'catalog/chart':     () => jest.fn().mockReturnValue({ chartName: 'cnpg-controller' }),
         'cluster/schemaFor': () => jest.fn().mockReturnValue(mockSchema),
         'cluster/canList':   () => jest.fn().mockReturnValue(true),
         'management/byId':   () => (id: string) => {
-          return { id, name: 'mocked-management' };
+          return {
+            id,
+            name: 'mocked-management'
+          };
         },
         'i18n/t': () => jest.fn((key) => key),
       },
@@ -674,7 +805,6 @@ describe('InstallView.vue - schema computed tests', () => {
     await new Promise((r) => setTimeout(r, 600));
     expect(wrapper.vm.installSteps[1].ready).toBe(true);
     expect(wrapper.vm.$refs.wizard.goToStep).toHaveBeenCalledWith(2, true);
-
   });
 
   it('advances to SBOMScanner step when sbomscannerRepo exists', async() => {
@@ -683,13 +813,19 @@ describe('InstallView.vue - schema computed tests', () => {
     mockStore = createStore({
       getters: {
         currentStore: () => (id: string) => {
-          return { id, name: 'mocked-store' };
+          return {
+            id,
+            name: 'mocked-store'
+          };
         },
         'catalog/chart':     () => jest.fn(),
         'cluster/schemaFor': () => jest.fn().mockReturnValue(mockSchema),
         'cluster/canList':   () => jest.fn().mockReturnValue(true),
         'management/byId':   () => (id: string) => {
-          return { id, name: 'mocked-management' };
+          return {
+            id,
+            name: 'mocked-management'
+          };
         },
         'i18n/t': () => jest.fn((key) => key),
       },
@@ -719,13 +855,19 @@ describe('InstallView.vue - schema computed tests', () => {
     mockStore = createStore({
       getters: {
         currentStore: () => (id: string) => {
-          return { id, name: 'mocked-store' };
+          return {
+            id,
+            name: 'mocked-store'
+          };
         },
         'catalog/chart':     () => jest.fn(),
         'cluster/schemaFor': () => jest.fn().mockReturnValue(mockSchema),
         'cluster/canList':   () => jest.fn().mockReturnValue(true),
         'management/byId':   () => (id: string) => {
-          return { id, name: 'mocked-management' };
+          return {
+            id,
+            name: 'mocked-management'
+          };
         },
         'i18n/t': () => jest.fn((key) => key),
       },
@@ -754,13 +896,19 @@ describe('InstallView.vue - schema computed tests', () => {
     mockStore = createStore({
       getters: {
         currentStore: () => (id: string) => {
-          return { id, name: 'mocked-store' };
+          return {
+            id,
+            name: 'mocked-store'
+          };
         },
         'catalog/chart':     () => jest.fn(),
         'cluster/schemaFor': () => jest.fn().mockReturnValue(mockSchema),
         'cluster/canList':   () => jest.fn().mockReturnValue(true),
         'management/byId':   () => (id: string) => {
-          return { id, name: 'mocked-management' };
+          return {
+            id,
+            name: 'mocked-management'
+          };
         },
         'i18n/t': () => jest.fn((key) => key),
       },
@@ -793,12 +941,18 @@ describe('InstallView.vue - schema computed tests', () => {
     const mockStore = createStore({
       getters: {
         currentStore: () => (id: string) => {
-          return { id, name: 'mocked-store' };
+          return {
+            id,
+            name: 'mocked-store'
+          };
         },
         'catalog/chart':   () => jest.fn(),
         'cluster/canList': () => jest.fn().mockReturnValue(true),
         'management/byId': () => (id: string) => {
-          return { id, name: 'mocked-management' };
+          return {
+            id,
+            name: 'mocked-management'
+          };
         },
         'i18n/t': () => jest.fn((key) => key),
       },
@@ -834,12 +988,18 @@ describe('InstallView.vue - schema computed tests', () => {
     mockStore = createStore({
       getters: {
         currentStore: () => (id: string) => {
-          return { id, name: 'mocked-store' };
+          return {
+            id,
+            name: 'mocked-store'
+          };
         },
         'catalog/chart':   () => jest.fn(),
         'cluster/canList': () => jest.fn(),
         'management/byId': () => (id: string) => {
-          return { id, name: 'mocked-management' };
+          return {
+            id,
+            name: 'mocked-management'
+          };
         },
         'i18n/t': () => jest.fn((key) => key),
       },
@@ -876,12 +1036,18 @@ describe('InstallView.vue - schema computed tests', () => {
     const mockStore = createStore({
       getters: {
         currentStore: () => (id: string) => {
-          return { id, name: 'mocked-store' };
+          return {
+            id,
+            name: 'mocked-store'
+          };
         },
         'catalog/chart':   () => jest.fn(),
         'cluster/canList': () => jest.fn().mockReturnValue(true),
         'management/byId': () => (id: string) => {
-          return { id, name: 'mocked-management' };
+          return {
+            id,
+            name: 'mocked-management'
+          };
         },
         'i18n/t': () => jest.fn((key) => key),
       },
@@ -916,12 +1082,18 @@ describe('InstallView.vue - schema computed tests', () => {
     const mockStore = createStore({
       getters: {
         currentStore: () => (id: string) => {
-          return { id, name: 'mocked-store' };
+          return {
+            id,
+            name: 'mocked-store'
+          };
         },
         'catalog/chart':   () => jest.fn(),
         'cluster/canList': () => jest.fn(),
         'management/byId': () => (id: string) => {
-          return { id, name: 'mocked-management' };
+          return {
+            id,
+            name: 'mocked-management'
+          };
         },
         'i18n/t': () => jest.fn((key) => key),
       },
@@ -952,28 +1124,40 @@ describe('chartRoute - InstallView router push', () => {
   const storeMock =  createStore({
     getters: {
       currentStore: () => (id: string) => {
-        return { id, name: 'mocked-store' };
+        return {
+          id,
+          name: 'mocked-store'
+        };
       },
       currentCluster:      () => ({ id: 'cluster-1' }),
       'cluster/schemaFor': () => jest.fn(),
       'cluster/canList':   () => jest.fn(),
       'management/byId':   () => (id: string) => {
-        return { id, name: 'mocked-management' };
+        return {
+          id,
+          name: 'mocked-management'
+        };
       },
       'i18n/t':        () => jest.fn((key) => key),
       'catalog/chart': () => jest.fn().mockReturnValue({ chartName: 'sbomscanner-controller' }),
     },
     modules
   });
-  const factory = (options: any = {}): VueWrapper<any> => {
+  const factory = (options: any = {}) => {
     return shallowMount(InstallView, {
       global: {
         mocks: {
-          $route:      { params: {}, query: {} },
+          $route:      {
+            params: {},
+            query:  {}
+          },
           $fetchState: { pending: false },
           $fetchType:  (type: string) => Promise.resolve(type),
           $router:     options.routerMock || { push: jest.fn() },
-          $store:      storeMock || { getters: {}, dispatch: jest.fn() },
+          $store:      storeMock || {
+            getters:  {},
+            dispatch: jest.fn()
+          },
           $t:          (k: string) => k,
           t:           (k: string) => k,
         },
@@ -991,9 +1175,12 @@ describe('chartRoute - InstallView router push', () => {
     });
 
 
-    await Object.defineProperty(wrapper.vm, 'controllerChart4Cnpg' , {
+    await Object.defineProperty(wrapper.vm, 'controllerChart4Cnpg', {
       get: () => ({
-        repoType: 'cluster', repoName: 'repo1', chartName: 'chart1', versions: ['1.0.0']
+        repoType:  'cluster',
+        repoName:  'repo1',
+        chartName: 'chart1',
+        versions:  ['1.0.0']
       })
     });
     await Object.defineProperty(wrapper.vm, 'hasCnpgSchema', { get: () => false });
@@ -1023,9 +1210,12 @@ describe('chartRoute - InstallView router push', () => {
 
     const wrapper = factory({ routerMock });
 
-    await Object.defineProperty(wrapper.vm, 'controllerChart4Cnpg' , {
+    await Object.defineProperty(wrapper.vm, 'controllerChart4Cnpg', {
       get: () => ({
-        repoType: 'cluster', repoName: 'repo1', chartName: 'chart1', versions: ['1.0.0']
+        repoType:  'cluster',
+        repoName:  'repo1',
+        chartName: 'chart1',
+        versions:  ['1.0.0']
       })
     });
     await Object.defineProperty(wrapper.vm, 'hasCnpgSchema', { get: () => false });
@@ -1051,9 +1241,12 @@ describe('chartRoute - InstallView router push', () => {
 
     const wrapper = factory({ routerMock });
 
-    await Object.defineProperty(wrapper.vm, 'controllerChart4Cnpg' , {
+    await Object.defineProperty(wrapper.vm, 'controllerChart4Cnpg', {
       get: () => ({
-        repoType: 'cluster', repoName: 'repo1', chartName: 'chart1', versions: ['1.0.0']
+        repoType:  'cluster',
+        repoName:  'repo1',
+        chartName: 'chart1',
+        versions:  ['1.0.0']
       })
     });
     await Object.defineProperty(wrapper.vm, 'hasCnpgSchema', { get: () => false });
@@ -1080,9 +1273,12 @@ describe('chartRoute - InstallView router push', () => {
     const routerMock = { push: jest.fn() };
     const wrapper = factory({ routerMock });
 
-    await Object.defineProperty(wrapper.vm, 'controllerChart4Sbomscanner' , {
+    await Object.defineProperty(wrapper.vm, 'controllerChart4Sbomscanner', {
       get: () => ({
-        repoType: 'cluster', repoName: 'repo1', chartName: 'chart1', versions: ['1.0.0']
+        repoType:  'cluster',
+        repoName:  'repo1',
+        chartName: 'chart1',
+        versions:  ['1.0.0']
       })
     });
     await Object.defineProperty(wrapper.vm, 'hasSbomscannerSchema', { get: () => false });
@@ -1112,9 +1308,12 @@ describe('chartRoute - InstallView router push', () => {
 
     const wrapper = factory({ routerMock });
 
-    await Object.defineProperty(wrapper.vm, 'controllerChart4Sbomscanner' , {
+    await Object.defineProperty(wrapper.vm, 'controllerChart4Sbomscanner', {
       get: () => ({
-        repoType: 'cluster', repoName: 'repo1', chartName: 'chart1', versions: ['1.0.0']
+        repoType:  'cluster',
+        repoName:  'repo1',
+        chartName: 'chart1',
+        versions:  ['1.0.0']
       })
     });
     await Object.defineProperty(wrapper.vm, 'hasSbomscannerSchema', { get: () => false });
@@ -1140,9 +1339,12 @@ describe('chartRoute - InstallView router push', () => {
 
     const wrapper = factory({ routerMock });
 
-    await Object.defineProperty(wrapper.vm, 'controllerChart4Sbomscanner' , {
+    await Object.defineProperty(wrapper.vm, 'controllerChart4Sbomscanner', {
       get: () => ({
-        repoType: 'cluster', repoName: 'repo1', chartName: 'chart1', versions: ['1.0.0']
+        repoType:  'cluster',
+        repoName:  'repo1',
+        chartName: 'chart1',
+        versions:  ['1.0.0']
       })
     });
     await Object.defineProperty(wrapper.vm, 'hasSbomscannerSchema', { get: () => false });

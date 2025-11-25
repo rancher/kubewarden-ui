@@ -5,7 +5,9 @@ describe('RancherMetaProperty.vue', () => {
   describe('when property.type is "text"', () => {
     it('should render both label and value', () => {
       const property = {
-        type: 'text', label: 'Label', value: 'Value'
+        type:  'text',
+        label: 'Label',
+        value: 'Value'
       };
       const wrapper = shallowMount(RancherMetaProperty, { propsData: { property } });
 
@@ -22,7 +24,9 @@ describe('RancherMetaProperty.vue', () => {
 
     it('should render only value if label is null', () => {
       const property = {
-        type: 'text', label: null, value: 'Value'
+        type:  'text',
+        label: null,
+        value: 'Value'
       };
       const wrapper = shallowMount(RancherMetaProperty, { propsData: { property } });
 
@@ -36,7 +40,9 @@ describe('RancherMetaProperty.vue', () => {
 
     it('should render only label if value is null', () => {
       const property = {
-        type: 'text', label: 'Label', value: null
+        type:  'text',
+        label: 'Label',
+        value: null
       };
       const wrapper = shallowMount(RancherMetaProperty, { propsData: { property } });
 
@@ -52,7 +58,9 @@ describe('RancherMetaProperty.vue', () => {
   describe('when property.type is "link"', () => {
     it('should render both label and link', () => {
       const property = {
-        type: 'link', label: 'Website', value: 'example.com'
+        type:  'link',
+        label: 'Website',
+        value: 'example.com'
       };
       const wrapper = shallowMount(RancherMetaProperty, { propsData: { property } });
 
@@ -68,7 +76,9 @@ describe('RancherMetaProperty.vue', () => {
 
     it('should render only link if label is null', () => {
       const property = {
-        type: 'link', label: null, value: 'example.com'
+        type:  'link',
+        label: null,
+        value: 'example.com'
       };
       const wrapper = shallowMount(RancherMetaProperty, { propsData: { property } });
 
@@ -79,7 +89,9 @@ describe('RancherMetaProperty.vue', () => {
 
     it('should render only label if value is null', () => {
       const property = {
-        type: 'link', label: 'Website', value: null
+        type:  'link',
+        label: 'Website',
+        value: null
       };
       const wrapper = shallowMount(RancherMetaProperty, { propsData: { property } });
 
@@ -92,7 +104,10 @@ describe('RancherMetaProperty.vue', () => {
   describe('when property.type is "tags"', () => {
     it('should render all tags', () => {
       const tags = ['Tag 1', 'Tag 2', 'Tag 3'];
-      const property = { type: 'tags', tags };
+      const property = {
+        type: 'tags',
+        tags
+      };
       const wrapper = shallowMount(RancherMetaProperty, { propsData: { property } });
 
       const tagElements = wrapper.findAll('.tag-text');
@@ -105,7 +120,10 @@ describe('RancherMetaProperty.vue', () => {
     });
 
     it('should render no tags for an empty array', () => {
-      const property = { type: 'tags', tags: [] };
+      const property = {
+        type: 'tags',
+        tags: []
+      };
       const wrapper = shallowMount(RancherMetaProperty, { propsData: { property } });
 
       expect(wrapper.findAll('.tag-text').length).toBe(0);

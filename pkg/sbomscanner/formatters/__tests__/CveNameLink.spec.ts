@@ -11,7 +11,10 @@ describe('CveNameLink.vue', () => {
   it('should render a link with the correct text and "to" prop', () => {
     const mockValue = 'CVE-2025-12345';
     const mockClusterId = 'c-m-xyz123';
-    const mockRow = { id: 'r-123', name: 'some-row' };
+    const mockRow = {
+      id:   'r-123',
+      name: 'some-row'
+    };
 
     const wrapper = shallowMount(CveNameLink, {
       propsData: {

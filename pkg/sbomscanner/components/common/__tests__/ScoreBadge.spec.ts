@@ -32,7 +32,12 @@ describe('ScoreBadge.vue', () => {
     });
 
     it('displays formatted score and type when both are provided', () => {
-      const wrapper = shallowMount(ScoreBadge, { props: { score: '8.1', scoreType: 'v3' } });
+      const wrapper = shallowMount(ScoreBadge, {
+        props: {
+          score:     '8.1',
+          scoreType: 'v3'
+        }
+      });
 
       expect(wrapper.text().trim()).toBe('8.1 (v3)');
     });

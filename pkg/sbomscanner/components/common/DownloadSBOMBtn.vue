@@ -47,6 +47,7 @@ export default {
           message: 'SBOM downloaded successfully'
         }, { root: true });
       } catch (error) {
+        console.warn(error);
         this.$store.dispatch('growl/error', {
           title:   'Error',
           message: 'Failed to download SBOM'

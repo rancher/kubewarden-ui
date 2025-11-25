@@ -7,11 +7,14 @@ jest.mock('@shell/plugins/steve/steve-class', () => {
     constructor() {
       this.t = jest.fn((s) => s);
       this.$dispatch = jest.fn();
-      this.$rootGetters = { 'i18n/t': (s: any, vars: any) => (vars ? `${s} ${JSON.stringify(vars)}` : s) };
+      this.$rootGetters = { 'i18n/t': (s: any, vars: any) => (vars ? `${ s } ${ JSON.stringify(vars) }` : s) };
       this.$rootState = { targetRoute: {} };
       this.$getters = { all: jest.fn() };
       this.canEdit = true;
-      this.metadata = { name: 'reg1', namespace: 'ns1' };
+      this.metadata = {
+        name:      'reg1',
+        namespace: 'ns1'
+      };
       this.id = 'ns1/reg1';
     }
 
@@ -124,7 +127,10 @@ describe('Registry model', () => {
       metadata: { namespace: 'ns1' },
       spec:     { registry: 'reg1' },
       status:   {
-        conditions:         [{ type, lastTransitionTime: new Date(time).toISOString() }],
+        conditions:         [{
+          type,
+          lastTransitionTime: new Date(time).toISOString()
+        }],
         scannedImagesCount: 2,
         imagesCount:        4,
         completionTime:     new Date(time + 1000).toISOString()
@@ -176,7 +182,10 @@ describe('Registry model', () => {
     });
 
     it('handles missing status arrays gracefully', () => {
-      registry.$getters.all.mockReturnValue([{ metadata: { namespace: 'ns1' }, spec: { registry: 'reg1' } }]);
+      registry.$getters.all.mockReturnValue([{
+        metadata: { namespace: 'ns1' },
+        spec:     { registry: 'reg1' }
+      }]);
       const rec = registry.scanRec;
 
       expect(rec.currStatus).toBe('pending');
@@ -217,7 +226,9 @@ describe('Registry model', () => {
             imagesCount:        4,
             completionTime:     new Date(time + 1000).toISOString(),
             conditions:         [{
-              type: 'Complete', status: true, lastTransitionTime: new Date(time - 10000).toISOString()
+              type:               'Complete',
+              status:             true,
+              lastTransitionTime: new Date(time - 10000).toISOString()
             }],
           },
           statusResult: {
@@ -279,26 +290,38 @@ describe('Registry model', () => {
   describe('getPreviousStatus()', () => {
     it('returns previous condition type if index < 3', () => {
       const conds = [{ type: 'A' }, { type: 'B' }];
-      const scan = [{ status: { conditions: conds }, statusResult: { statusIndex: 1 } }];
+      const scan = [{
+        status:       { conditions: conds },
+        statusResult: { statusIndex: 1 }
+      }];
 
       expect(registry.getPreviousStatus(scan)).toBe('a');
     });
 
     it('returns earlier condition if index >= 3', () => {
       const conds = [{ type: 'A' }, { type: 'B' }, { type: 'C' }];
-      const scan = [{ status: { conditions: conds }, statusResult: { statusIndex: 3 } }];
+      const scan = [{
+        status:       { conditions: conds },
+        statusResult: { statusIndex: 3 }
+      }];
 
       expect(registry.getPreviousStatus(scan)).toBe('b');
     });
 
     it('returns earlier condition if index >= 3 - Cover condition is undefined with statusIndex === 3', () => {
-      const scan = [{ status: {}, statusResult: { statusIndex: 3 } }];
+      const scan = [{
+        status:       {},
+        statusResult: { statusIndex: 3 }
+      }];
 
       expect(registry.getPreviousStatus(scan)).toBe('none');
     });
 
     it('returns earlier condition if index >= 3 - Cover condition is undefined with statusIndex === 2', () => {
-      const scan = [{ status: {}, statusResult: { statusIndex: 2 } }];
+      const scan = [{
+        status:       {},
+        statusResult: { statusIndex: 2 }
+      }];
 
       expect(registry.getPreviousStatus(scan)).toBe('none');
     });

@@ -60,9 +60,19 @@ describe('ImageDetails.vue', () => {
           $t:          mockT,
           t:           mockT,
           $store:      mockStore,
-          $route:      { params: { id: 'test-image-route', cluster: 'test-cluster' } },
+          $route:      {
+            params: {
+              id:      'test-image-route',
+              cluster: 'test-cluster'
+            }
+          },
         },
-        stubs: { RouterLink: { template: '<a><slot /></a>', props: ['to'] } }
+        stubs: {
+          RouterLink: {
+            template: '<a><slot /></a>',
+            props:    ['to']
+          }
+        }
       },
       data() {
         return { imageName: 'test-image' };
@@ -96,7 +106,12 @@ describe('ImageDetails.vue', () => {
           $store:      mockStore,
           $route:      { params: { cluster: 'test-cluster' } },
         },
-        stubs: { RouterLink: { template: '<a><slot /></a>', props: ['to'] } }
+        stubs: {
+          RouterLink: {
+            template: '<a><slot /></a>',
+            props:    ['to']
+          }
+        }
       },
       data() {
         return { imageName: 'test-image' };
@@ -135,7 +150,10 @@ describe('ImageDetails.vue', () => {
     const localStore = {
       getters: {
         'cluster/all': jest.fn().mockReturnValue([
-          { metadata: { name: 'fallback' }, imageMetadata: {} },
+          {
+            metadata:      { name: 'fallback' },
+            imageMetadata: {}
+          },
         ]),
       },
     };
@@ -147,9 +165,19 @@ describe('ImageDetails.vue', () => {
           $t:          mockT,
           t:           mockT,
           $store:      localStore,
-          $route:      { params: { id: 'fallback', cluster: 'test-cluster' } },
+          $route:      {
+            params: {
+              id:      'fallback',
+              cluster: 'test-cluster'
+            }
+          },
         },
-        stubs: { RouterLink: { template: '<a><slot /></a>', props: ['to'] } }
+        stubs: {
+          RouterLink: {
+            template: '<a><slot /></a>',
+            props:    ['to']
+          }
+        }
       },
       data() {
         return { imageName: 'fallback' };
@@ -164,7 +192,11 @@ describe('ImageDetails.vue', () => {
     wrapper.vm.loadedVulnerabilityReport = {
       report: {
         summary: {
-          critical: 1, high: 1, medium: 1, low: 1, unknown: 1
+          critical: 1,
+          high:     1,
+          medium:   1,
+          low:      1,
+          unknown:  1
         },
         results: [
           {
@@ -192,7 +224,11 @@ describe('ImageDetails.vue', () => {
     wrapper.vm.loadedVulnerabilityReport = {
       report: {
         summary: {
-          critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+          critical: 0,
+          high:     0,
+          medium:   0,
+          low:      0,
+          unknown:  0
         },
         results: [
           { vulnerabilities: [] },
@@ -293,7 +329,10 @@ describe('ImageDetails.vue', () => {
 
   it('calls loadImageData without errors', async() => {
     mockStore.getters['cluster/all']
-      .mockReturnValueOnce(() => [{ metadata: { name: 'test-image' }, imageMetadata: {} }])
+      .mockReturnValueOnce(() => [{
+        metadata:      { name: 'test-image' },
+        imageMetadata: {}
+      }])
       .mockReturnValueOnce(() => [])
       .mockReturnValueOnce(() => []);
 
@@ -317,7 +356,11 @@ describe('ImageDetails.vue', () => {
     wrapper.vm.loadedVulnerabilityReport = {
       report: {
         summary: {
-          critical: 1, high: 0, medium: 0, low: 0, unknown: 0
+          critical: 1,
+          high:     0,
+          medium:   0,
+          low:      0,
+          unknown:  0
         },
         results: [{ vulnerabilities: [{ }] }]
       }
@@ -329,7 +372,11 @@ describe('ImageDetails.vue', () => {
     wrapper.vm.loadedVulnerabilityReport = {
       report: {
         summary: {
-          critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+          critical: 0,
+          high:     0,
+          medium:   0,
+          low:      0,
+          unknown:  0
         },
         results: [{ vulnerabilities: [{ }] }]
       }

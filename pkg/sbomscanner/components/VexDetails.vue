@@ -87,7 +87,10 @@ export default {
   },
   methods: {
     async loadData() {
-      this.vexHub = await this.$store.dispatch('cluster/find', { type: RESOURCE.VEX_HUB, id: this.$route.params.id });
+      this.vexHub = await this.$store.dispatch('cluster/find', {
+        type: RESOURCE.VEX_HUB,
+        id:   this.$route.params.id
+      });
       this.vexHubMetadata = [
         {
           type:  'link',

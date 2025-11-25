@@ -33,11 +33,15 @@ export default class SBOM extends SteveModel {
 
   // Get parsed SPDX data
   get spdxData() {
-    if (!this.spec?.spdx) return null;
+    if (!this.spec?.spdx) {
+      return null;
+    }
 
     try {
       return typeof this.spec.spdx === 'string' ? JSON.parse(this.spec.spdx) : this.spec.spdx;
     } catch (error) {
+      console.warn(error);
+
       return null;
     }
   }
@@ -65,7 +69,9 @@ export default class SBOM extends SteveModel {
 
   // Get associated image
   get associatedImage() {
-    if (!this.spec?.image) return null;
+    if (!this.spec?.image) {
+      return null;
+    }
 
     const images = this.$getters['all'](this.$rootGetters['i18n/t']('imageScanner.resources.image'));
 

@@ -22,10 +22,22 @@ describe('ScoreCell.vue', () => {
   });
 
   it.each([
-    { score: null, severity: 'Low' },
-    { score: undefined, severity: 'Medium' },
-    { score: '', severity: 'Critical' },
-    { score: '   ', severity: 'High' },
+    {
+      score:    null,
+      severity: 'Low'
+    },
+    {
+      score:    undefined,
+      severity: 'Medium'
+    },
+    {
+      score:    '',
+      severity: 'Critical'
+    },
+    {
+      score:    '   ',
+      severity: 'High'
+    },
   ])('renders ScoreBadge with empty score and type when score is missing (%o)', (mockRow) => {
     const wrapper = shallowMount(ScoreCell, { props: { row: mockRow } });
 
@@ -40,7 +52,14 @@ describe('ScoreCell.vue', () => {
   });
 
   it('renders correctly inside container div with padding', () => {
-    const wrapper = shallowMount(ScoreCell, { props: { row: { score: '5.0 (v3)', severity: 'Low' } } });
+    const wrapper = shallowMount(ScoreCell, {
+      props: {
+        row: {
+          score:    '5.0 (v3)',
+          severity: 'Low'
+        }
+      }
+    });
 
     const div = wrapper.find('div');
 

@@ -208,22 +208,58 @@ export default {
         exploitability: 'any',
       },
       filterFixAvailableOptions: [
-        { label: this.t('imageScanner.imageDetails.any'), value: 'any' },
-        { label: this.t('imageScanner.imageDetails.available'), value: 'available' },
-        { label: this.t('imageScanner.imageDetails.notAvailable'), value: 'not-available' },
+        {
+          label: this.t('imageScanner.imageDetails.any'),
+          value: 'any'
+        },
+        {
+          label: this.t('imageScanner.imageDetails.available'),
+          value: 'available'
+        },
+        {
+          label: this.t('imageScanner.imageDetails.notAvailable'),
+          value: 'not-available'
+        },
       ],
       filterSeverityOptions: [
-        { label: this.t('imageScanner.imageDetails.any'), value: 'any' },
-        { label: this.t('imageScanner.enum.cve.critical'), value: 'critical' },
-        { label: this.t('imageScanner.enum.cve.high'), value: 'high' },
-        { label: this.t('imageScanner.enum.cve.medium'), value: 'medium' },
-        { label: this.t('imageScanner.enum.cve.low'), value: 'low' },
-        { label: this.t('imageScanner.enum.cve.none'), value: 'unknown' },
+        {
+          label: this.t('imageScanner.imageDetails.any'),
+          value: 'any'
+        },
+        {
+          label: this.t('imageScanner.enum.cve.critical'),
+          value: 'critical'
+        },
+        {
+          label: this.t('imageScanner.enum.cve.high'),
+          value: 'high'
+        },
+        {
+          label: this.t('imageScanner.enum.cve.medium'),
+          value: 'medium'
+        },
+        {
+          label: this.t('imageScanner.enum.cve.low'),
+          value: 'low'
+        },
+        {
+          label: this.t('imageScanner.enum.cve.none'),
+          value: 'unknown'
+        },
       ],
       filterExploitabilityOptions: [
-        { label: this.t('imageScanner.imageDetails.any'), value: 'any' },
-        { label: this.t('imageScanner.imageDetails.affected'), value: 'affected' },
-        { label: this.t('imageScanner.imageDetails.suppressed'), value: 'suppressed' },
+        {
+          label: this.t('imageScanner.imageDetails.any'),
+          value: 'any'
+        },
+        {
+          label: this.t('imageScanner.imageDetails.affected'),
+          value: 'affected'
+        },
+        {
+          label: this.t('imageScanner.imageDetails.suppressed'),
+          value: 'suppressed'
+        },
       ],
       PRODUCT_NAME,
       RESOURCE,
@@ -246,7 +282,9 @@ export default {
   computed: {
     // Get the current image resource from Steve API
     currentImage() {
-      if (!this.imageName) return null;
+      if (!this.imageName) {
+        return null;
+      }
 
       // Get all images and find the one with matching name
       const allImages = this.$store.getters['cluster/all'](RESOURCE.IMAGE) || [];
@@ -256,7 +294,9 @@ export default {
 
     // Display human-readable image name
     displayImageName() {
-      if (!this.currentImage) return this.imageName;
+      if (!this.currentImage) {
+        return this.imageName;
+      }
 
       return constructImageName(this.currentImage.imageMetadata) || this.imageName;
     },
@@ -273,7 +313,9 @@ export default {
 
     // Get image details from the current image resource
     imageDetails() {
-      if (!this.currentImage) return [];
+      if (!this.currentImage) {
+        return [];
+      }
 
       return [
         {
@@ -323,7 +365,11 @@ export default {
     severityDistribution() {
       if (!this.vulnerabilityReport) {
         return {
-          critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+          critical: 0,
+          high:     0,
+          medium:   0,
+          low:      0,
+          unknown:  0
         };
       }
 
@@ -386,7 +432,9 @@ export default {
     },
 
     totalVulnerabilities() {
-      if (!this.vulnerabilityReport) return 0;
+      if (!this.vulnerabilityReport) {
+        return 0;
+      }
 
       // Try to get vulnerabilities directly from the report data
       let vulnerabilities = [];
@@ -408,7 +456,9 @@ export default {
     },
 
     overallSeverity() {
-      if (!this.vulnerabilityReport) return 'none';
+      if (!this.vulnerabilityReport) {
+        return 'none';
+      }
 
       const distribution = this.severityDistribution;
       const severities = ['critical', 'high', 'medium', 'low', 'none'];
@@ -463,7 +513,9 @@ export default {
       // Score range filter
       if (this.filters.scoreMin || this.filters.scoreMax) {
         filtered = filtered.filter((v) => {
-          if (!v.score) return false;
+          if (!v.score) {
+            return false;
+          }
           const vulnScore = parseFloat(v.score.split(' ')[0]) || 0;
           const minScore = this.filters.scoreMin ? parseFloat(this.filters.scoreMin) : 0;
           const maxScore = this.filters.scoreMax ? parseFloat(this.filters.scoreMax) : 10;

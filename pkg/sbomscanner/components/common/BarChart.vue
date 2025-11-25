@@ -60,7 +60,9 @@ export default {
       return this.total > 0 ? (value / this.total) * 100 : 0;
     },
     filterByCategory(category) {
-      this.filterFn && this.filterFn(category);
+      if (this.filterFn) {
+        this.filterFn(category);
+      }
     }
   },
   computed: {

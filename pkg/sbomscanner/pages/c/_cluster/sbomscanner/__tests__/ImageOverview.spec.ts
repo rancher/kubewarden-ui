@@ -64,12 +64,18 @@ describe('ImageOverview.vue', () => {
       `,
     };
 
-    const store = { dispatch: jest.fn(() => Promise.resolve()), getters: {} };
+    const store = {
+      dispatch: jest.fn(() => Promise.resolve()),
+      getters:  {}
+    };
 
     const wrapper = mount(ImageOverview as any, {
       global: {
         mocks: {
-          $store: store, $t: t, t, $fetchState: { pending: false }
+          $store:      store,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         },
         stubs: {
           SortableTable: SortableTableWithSlots,
@@ -87,14 +93,20 @@ describe('ImageOverview.vue', () => {
     expect((btn.element as HTMLButtonElement).disabled).toBe(true);
 
     // simulate selection change -> button enabled
-    (wrapper.vm as any).onSelectionChange([ { id: 'sel1' } ]);
+    (wrapper.vm as any).onSelectionChange([{ id: 'sel1' }]);
     await nextTick();
     expect((btn.element as HTMLButtonElement).disabled).toBe(false);
 
     // now set grouped rowsByRepo to render sub-row slot
-    (wrapper.vm as any).rows = [ {
-      id: '1', imageMetadata: { repository: 'repo', registry: 'r' }, metadata: { name: 'n' }, report: { summary: { critical: 1 } }
-    } ];
+    (wrapper.vm as any).rows = [{
+      id:            '1',
+      imageMetadata: {
+        repository: 'repo',
+        registry:   'r'
+      },
+      metadata: { name: 'n' },
+      report:   { summary: { critical: 1 } }
+    }];
     (wrapper.vm as any).isGrouped = true;
     await nextTick();
 
@@ -106,22 +118,35 @@ describe('ImageOverview.vue', () => {
     const wrapper = mountComponent();
 
     // prepare a sample row matching expected shape
-    const rows = [ {
+    const rows = [{
       id:             'r1',
       imageReference: 'reg/repo:tag',
       imageMetadata:  {
-        registryURI: 'reg', repository: 'repo', tag: 'tag', digest: 'sha256:abc', registry: 'reg', platform: 'linux/amd64'
+        registryURI: 'reg',
+        repository:  'repo',
+        tag:         'tag',
+        digest:      'sha256:abc',
+        registry:    'reg',
+        platform:    'linux/amd64'
       },
       report: {
         summary: {
-          critical: 1, high: 0, medium: 0, low: 0, unknown: 0
+          critical: 1,
+          high:     0,
+          medium:   0,
+          low:      0,
+          unknown:  0
         }
       },
       scanResult: {
-        critical: 1, high: 0, medium: 0, low: 0, unknown: 0
+        critical: 1,
+        high:     0,
+        medium:   0,
+        low:      0,
+        unknown:  0
       },
       metadata: { name: 'img1' }
-    } ];
+    }];
 
     // Call method
     await (wrapper.vm as any).downloadCSVReport(rows, false);
@@ -138,21 +163,41 @@ describe('ImageOverview.vue', () => {
     const vulReports = [
       {
         id:            '1',
-        imageMetadata: { repository: 'repo1', registry: 'reg1' },
-        metadata:      { name: 'img-a', namespace: 'ns' },
+        imageMetadata: {
+          repository: 'repo1',
+          registry:   'reg1'
+        },
+        metadata:      {
+          name:      'img-a',
+          namespace: 'ns'
+        },
         report:        {
           summary: {
-            critical: 1, high: 2, medium: 0, low: 0, unknown: 0
+            critical: 1,
+            high:     2,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
         }
       },
       {
         id:            '2',
-        imageMetadata: { repository: 'repo1', registry: 'reg1' },
-        metadata:      { name: 'img-b', namespace: 'ns' },
+        imageMetadata: {
+          repository: 'repo1',
+          registry:   'reg1'
+        },
+        metadata:      {
+          name:      'img-b',
+          namespace: 'ns'
+        },
         report:        {
           summary: {
-            critical: 0, high: 1, medium: 0, low: 0, unknown: 0
+            critical: 0,
+            high:     1,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
         }
       }
@@ -176,18 +221,30 @@ describe('ImageOverview.vue', () => {
       {
         id:            '2',
         imageMetadata: {
-          repository: 'test-repo', registry: 'my-reg', registryURI: 'my-reg', tag: 'zulu'
+          repository:  'test-repo',
+          registry:    'my-reg',
+          registryURI: 'my-reg',
+          tag:         'zulu'
         },
-        metadata: { name: 'img-z', namespace: 'ns' },
-        report:   { summary: { critical: 1 } }
+        metadata: {
+          name:      'img-z',
+          namespace: 'ns'
+        },
+        report: { summary: { critical: 1 } }
       },
       {
         id:            '1',
         imageMetadata: {
-          repository: 'test-repo', registry: 'my-reg', registryURI: 'my-reg', tag: 'alpha'
+          repository:  'test-repo',
+          registry:    'my-reg',
+          registryURI: 'my-reg',
+          tag:         'alpha'
         },
-        metadata: { name: 'img-a', namespace: 'ns' },
-        report:   { summary: { critical: 1 } }
+        metadata: {
+          name:      'img-a',
+          namespace: 'ns'
+        },
+        report: { summary: { critical: 1 } }
       }
     ];
 
@@ -213,19 +270,35 @@ describe('ImageOverview.vue', () => {
 
     // create grouped rows: rows is array of repo records each with images array
     (wrapper.vm as any).isGrouped = true;
-    const grouped = [ {
-      images: [ {
+    const grouped = [{
+      images: [{
         imageMetadata: {
-          registryURI: 'r', repository: 'repo', tag: 't', digest: 'd', registry: 'r', platform: 'p'
-        }, scanResult: {
-          critical: 1, high: 0, medium: 0, low: 0, unknown: 0
-        }, report: {
+          registryURI: 'r',
+          repository:  'repo',
+          tag:         't',
+          digest:      'd',
+          registry:    'r',
+          platform:    'p'
+        },
+        scanResult: {
+          critical: 1,
+          high:     0,
+          medium:   0,
+          low:      0,
+          unknown:  0
+        },
+        report: {
           summary: {
-            critical: 1, high: 0, medium: 0, low: 0, unknown: 0
+            critical: 1,
+            high:     0,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
-        }, imageReference: 'r/repo:t'
-      } ]
-    } ];
+        },
+        imageReference: 'r/repo:t'
+      }]
+    }];
 
     // success path
     await (wrapper.vm as any).downloadCSVReport(grouped, true);
@@ -236,11 +309,18 @@ describe('ImageOverview.vue', () => {
     fileSaver.saveAs.mockImplementationOnce(() => {
       throw new Error('disk');
     });
-    const storeErr = { dispatch: jest.fn(() => Promise.resolve()), getters: {} };
+    const storeErr = {
+      dispatch: jest.fn(() => Promise.resolve()),
+      getters:  {}
+    };
     const wrapperErr = mountComponent({
       global: {
         mocks: {
-          $store: storeErr, $t: t, t, $rootGetters: {}, $fetchState: { pending: false }
+          $store:       storeErr,
+          $t:           t,
+          t,
+          $rootGetters: {},
+          $fetchState:  { pending: false }
         }
       }
     });
@@ -254,7 +334,10 @@ describe('ImageOverview.vue', () => {
     const store = {
       dispatch: jest.fn((action: string, payload: any) => {
         if (action === 'cluster/find') {
-          return Promise.resolve({ spdx: {}, metadata: { name: payload.id } });
+          return Promise.resolve({
+            spdx:     {},
+            metadata: { name: payload.id }
+          });
         }
 
         return Promise.resolve();
@@ -265,7 +348,10 @@ describe('ImageOverview.vue', () => {
     const wrapper = mountComponent({
       global: {
         mocks: {
-          $store: store, $t: t, t, $fetchState: { pending: false }
+          $store:      store,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
@@ -273,17 +359,17 @@ describe('ImageOverview.vue', () => {
     // find downloadSbom and call invoke
     const sbomAction = actions.find((a: any) => a.action === 'downloadSbom');
 
-    await sbomAction.invoke(null, [ { id: 's1' } ]);
+    await sbomAction.invoke(null, [{ id: 's1' }]);
     expect(store.dispatch).toHaveBeenCalled();
 
     const csvAction = actions.find((a: any) => a.action === 'downloadCsv');
 
-    await csvAction.invoke(null, [ { id: 'v1' } ]);
+    await csvAction.invoke(null, [{ id: 'v1' }]);
     expect(store.dispatch).toHaveBeenCalled();
 
     const jsonAction = actions.find((a: any) => a.action === 'downloadJson');
 
-    await jsonAction.invoke(null, [ { id: 'v2' } ]);
+    await jsonAction.invoke(null, [{ id: 'v2' }]);
     expect(store.dispatch).toHaveBeenCalled();
   });
 
@@ -294,32 +380,53 @@ describe('ImageOverview.vue', () => {
     (wrapper.vm as any).rows = [
       {
         imageMetadata: {
-          registryURI: 'r1', repository: 'repo', tag: 't1', registry: 'reg'
-        }, report: {
+          registryURI: 'r1',
+          repository:  'repo',
+          tag:         't1',
+          registry:    'reg'
+        },
+        report: {
           summary: {
-            critical: 1, high: 0, medium: 0, low: 0, unknown: 0
+            critical: 1,
+            high:     0,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
-        }, metadata: { namespace: 'ns' }
+        },
+        metadata: { namespace: 'ns' }
       },
       {
         imageMetadata: {
-          registryURI: 'r2', repository: 'other', tag: 't2', registry: 'reg'
-        }, report: {
+          registryURI: 'r2',
+          repository:  'other',
+          tag:         't2',
+          registry:    'reg'
+        },
+        report: {
           summary: {
-            critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+            critical: 0,
+            high:     0,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
-        }, metadata: { namespace: 'ns' }
+        },
+        metadata: { namespace: 'ns' }
       },
     ];
 
     // set debouncedFilters to apply a severity filter so only the first row matches
-    (wrapper.vm as any).debouncedFilters = { ...(wrapper.vm as any).debouncedFilters, severitySearch: 'critical' };
+    (wrapper.vm as any).debouncedFilters = {
+      ...(wrapper.vm as any).debouncedFilters,
+      severitySearch: 'critical'
+    };
     const result = (wrapper.vm as any).filteredRows;
 
     expect(result.rows.length).toBe(1);
 
     // test onSelectionChange
-    (wrapper.vm as any).onSelectionChange([ { id: 'x' } ]);
+    (wrapper.vm as any).onSelectionChange([{ id: 'x' }]);
     expect((wrapper.vm as any).selectedRows.length).toBe(1);
   });
 
@@ -330,26 +437,47 @@ describe('ImageOverview.vue', () => {
     (wrapper.vm as any).rows = [
       {
         imageMetadata: {
-          registryURI: 'rX', repository: 'myrepo', tag: 'ver1', registry: 'reg'
-        }, report: {
+          registryURI: 'rX',
+          repository:  'myrepo',
+          tag:         'ver1',
+          registry:    'reg'
+        },
+        report: {
           summary: {
-            critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+            critical: 0,
+            high:     0,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
-        }, metadata: { namespace: 'ns' }
+        },
+        metadata: { namespace: 'ns' }
       },
       {
         imageMetadata: {
-          registryURI: 'other', repository: 'repo2', tag: 'v2', registry: 'reg'
-        }, report: {
+          registryURI: 'other',
+          repository:  'repo2',
+          tag:         'v2',
+          registry:    'reg'
+        },
+        report: {
           summary: {
-            critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+            critical: 0,
+            high:     0,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
-        }, metadata: { namespace: 'ns' }
+        },
+        metadata: { namespace: 'ns' }
       },
     ];
 
     // set debouncedFilters.imageSearch to a substring of the constructed image name of the first row
-    (wrapper.vm as any).debouncedFilters = { ...(wrapper.vm as any).debouncedFilters, imageSearch: 'rx/myrepo:ver1' };
+    (wrapper.vm as any).debouncedFilters = {
+      ...(wrapper.vm as any).debouncedFilters,
+      imageSearch: 'rx/myrepo:ver1'
+    };
 
     const result = (wrapper.vm as any).filteredRows;
 
@@ -363,19 +491,36 @@ describe('ImageOverview.vue', () => {
 
     (wrapper.vm as any).isGrouped = true;
     // grouped repo with image that has imageMetadata.registryURI
-    const grouped = [ {
-      images: [ {
-        id:            'g1', imageMetadata: {
-          registryURI: 'regX', repository: 'repoG', tag: 'tG', digest: 'dg', registry: 'regX', platform: 'p'
-        }, scanResult: {
-          critical: 0, high: 0, medium: 0, low: 0, unknown: 0
-        }, report: {
+    const grouped = [{
+      images: [{
+        id:            'g1',
+        imageMetadata: {
+          registryURI: 'regX',
+          repository:  'repoG',
+          tag:         'tG',
+          digest:      'dg',
+          registry:    'regX',
+          platform:    'p'
+        },
+        scanResult: {
+          critical: 0,
+          high:     0,
+          medium:   0,
+          low:      0,
+          unknown:  0
+        },
+        report: {
           summary: {
-            critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+            critical: 0,
+            high:     0,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
-        }, imageReference: 'regX/repoG:tG'
-      } ]
-    } ];
+        },
+        imageReference: 'regX/repoG:tG'
+      }]
+    }];
 
     await (wrapper.vm as any).downloadCSVReport(grouped, true);
 
@@ -392,17 +537,29 @@ describe('ImageOverview.vue', () => {
     (wrapper.vm as any).rows = [
       {
         imageMetadata: {
-          registryURI: 'r1', repository: 'repoA', tag: 't', registry: 'regA'
-        }, report: {
+          registryURI: 'r1',
+          repository:  'repoA',
+          tag:         't',
+          registry:    'regA'
+        },
+        report: {
           summary: {
-            critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+            critical: 0,
+            high:     0,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
-        }, metadata: { namespace: 'nsA' }
+        },
+        metadata: { namespace: 'nsA' }
       },
     ];
 
     // set registrySearch to the exact namespace/registry format expected in code
-    (wrapper.vm as any).debouncedFilters = { ...(wrapper.vm as any).debouncedFilters, registrySearch: 'nsA/regA' };
+    (wrapper.vm as any).debouncedFilters = {
+      ...(wrapper.vm as any).debouncedFilters,
+      registrySearch: 'nsA/regA'
+    };
 
     const result = (wrapper.vm as any).filteredRows;
 
@@ -415,25 +572,48 @@ describe('ImageOverview.vue', () => {
     (wrapper.vm as any).rows = [
       {
         imageMetadata: {
-          registryURI: 'r2', repository: 'repoB', tag: 't2', registry: 'regB', platform: 'linux/amd64'
-        }, report: {
+          registryURI: 'r2',
+          repository:  'repoB',
+          tag:         't2',
+          registry:    'regB',
+          platform:    'linux/amd64'
+        },
+        report: {
           summary: {
-            critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+            critical: 0,
+            high:     0,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
-        }, metadata: { namespace: 'nsB' }
+        },
+        metadata: { namespace: 'nsB' }
       },
       {
         imageMetadata: {
-          registryURI: 'r3', repository: 'repoC', tag: 't3', registry: 'regC', platform: null
-        }, report: {
+          registryURI: 'r3',
+          repository:  'repoC',
+          tag:         't3',
+          registry:    'regC',
+          platform:    null
+        },
+        report: {
           summary: {
-            critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+            critical: 0,
+            high:     0,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
-        }, metadata: { namespace: 'nsC' }
+        },
+        metadata: { namespace: 'nsC' }
       },
     ];
 
-    (wrapper.vm as any).debouncedFilters = { ...(wrapper.vm as any).debouncedFilters, platformSearch: 'linux' };
+    (wrapper.vm as any).debouncedFilters = {
+      ...(wrapper.vm as any).debouncedFilters,
+      platformSearch: 'linux'
+    };
 
     const result = (wrapper.vm as any).filteredRows;
 
@@ -442,35 +622,54 @@ describe('ImageOverview.vue', () => {
   });
 
   test('downloadCSVReport handles papaparse throwing and dispatches error', async() => {
-
     // prepare a sample row matching expected shape
-    const rows = [ {
+    const rows = [{
       id:             'r2',
       imageReference: 'reg2/repo2:tag2',
       imageMetadata:  {
-        registryURI: 'reg2', repository: 'repo2', tag: 'tag2', digest: 'sha256:ddd', registry: 'reg2', platform: 'linux/amd64'
+        registryURI: 'reg2',
+        repository:  'repo2',
+        tag:         'tag2',
+        digest:      'sha256:ddd',
+        registry:    'reg2',
+        platform:    'linux/amd64'
       },
       report: {
         summary: {
-          critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+          critical: 0,
+          high:     0,
+          medium:   0,
+          low:      0,
+          unknown:  0
         }
       },
       scanResult: {
-        critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+        critical: 0,
+        high:     0,
+        medium:   0,
+        low:      0,
+        unknown:  0
       },
       metadata: { name: 'img2' }
-    } ];
+    }];
 
     // make papaparse throw to exercise catch path
     Papa.unparse.mockImplementationOnce(() => {
       throw new Error('parse-failed');
     });
 
-    const storeErr = { dispatch: jest.fn(() => Promise.resolve()), getters: {} };
+    const storeErr = {
+      dispatch: jest.fn(() => Promise.resolve()),
+      getters:  {}
+    };
     const wrapperErr = mountComponent({
       global: {
         mocks: {
-          $store: storeErr, $t: t, t, $rootGetters: {}, $fetchState: { pending: false }
+          $store:       storeErr,
+          $t:           t,
+          t,
+          $rootGetters: {},
+          $fetchState:  { pending: false }
         }
       }
     });
@@ -486,25 +685,46 @@ describe('ImageOverview.vue', () => {
     (wrapper.vm as any).rows = [
       {
         imageMetadata: {
-          registryURI: 'rA', repository: 'special', tag: 't', registry: 'regA'
-        }, report: {
+          registryURI: 'rA',
+          repository:  'special',
+          tag:         't',
+          registry:    'regA'
+        },
+        report: {
           summary: {
-            critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+            critical: 0,
+            high:     0,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
-        }, metadata: { namespace: 'nsA' }
+        },
+        metadata: { namespace: 'nsA' }
       },
       {
         imageMetadata: {
-          registryURI: 'rB', repository: 'other', tag: 't2', registry: 'regB'
-        }, report: {
+          registryURI: 'rB',
+          repository:  'other',
+          tag:         't2',
+          registry:    'regB'
+        },
+        report: {
           summary: {
-            critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+            critical: 0,
+            high:     0,
+            medium:   0,
+            low:      0,
+            unknown:  0
           }
-        }, metadata: { namespace: 'nsB' }
+        },
+        metadata: { namespace: 'nsB' }
       },
     ];
 
-    (wrapper.vm as any).debouncedFilters = { ...(wrapper.vm as any).debouncedFilters, repositorySearch: 'special' };
+    (wrapper.vm as any).debouncedFilters = {
+      ...(wrapper.vm as any).debouncedFilters,
+      repositorySearch: 'special'
+    };
 
     const result = (wrapper.vm as any).filteredRows;
 
@@ -517,7 +737,10 @@ describe('ImageOverview.vue', () => {
     const storeSuccess = {
       dispatch: jest.fn((action: string, payload: any) => {
         if (action === 'cluster/find') {
-          return Promise.resolve({ spdx: { foo: 'bar' }, metadata: { name: payload.id } });
+          return Promise.resolve({
+            spdx:     { foo: 'bar' },
+            metadata: { name: payload.id }
+          });
         }
 
         return Promise.resolve();
@@ -528,12 +751,15 @@ describe('ImageOverview.vue', () => {
     const wrapperSuccess = mountComponent({
       global: {
         mocks: {
-          $store: storeSuccess, $t: t, t, $fetchState: { pending: false }
+          $store:      storeSuccess,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
 
-    await (wrapperSuccess.vm as any).downloadSbom([ { id: 'sb1' } ]);
+    await (wrapperSuccess.vm as any).downloadSbom([{ id: 'sb1' }]);
     expect(fileSaver.saveAs).toHaveBeenCalled();
     expect(storeSuccess.dispatch).toHaveBeenCalledWith('growl/success', expect.any(Object), { root: true });
 
@@ -553,12 +779,15 @@ describe('ImageOverview.vue', () => {
     const wrapperError = mountComponent({
       global: {
         mocks: {
-          $store: storeError, $t: t, t, $fetchState: { pending: false }
+          $store:      storeError,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
 
-    await (wrapperError.vm as any).downloadSbom([ { id: 'sb2' } ]);
+    await (wrapperError.vm as any).downloadSbom([{ id: 'sb2' }]);
     expect(storeError.dispatch).toHaveBeenCalledWith('growl/error', expect.any(Object), { root: true });
   });
 
@@ -578,12 +807,15 @@ describe('ImageOverview.vue', () => {
     const wrapper = mountComponent({
       global: {
         mocks: {
-          $store: storeSuccess, $t: t, t, $fetchState: { pending: false }
+          $store:      storeSuccess,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
 
-    await (wrapper.vm as any).downloadJson([ { id: 'v1' } ]);
+    await (wrapper.vm as any).downloadJson([{ id: 'v1' }]);
     expect(fileSaver.saveAs).toHaveBeenCalled();
     expect(storeSuccess.dispatch).toHaveBeenCalledWith('growl/success', expect.any(Object), { root: true });
 
@@ -594,28 +826,40 @@ describe('ImageOverview.vue', () => {
         }
 
         return Promise.resolve();
-      }), getters: {}
+      }),
+      getters: {}
     };
     const wrapperErr = mountComponent({
       global: {
         mocks: {
-          $store: storeError, $t: t, t, $fetchState: { pending: false }
+          $store:      storeError,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
 
-    await (wrapperErr.vm as any).downloadJson([ { id: 'v2' } ]);
+    await (wrapperErr.vm as any).downloadJson([{ id: 'v2' }]);
     expect(storeError.dispatch).toHaveBeenCalledWith('growl/error', expect.any(Object), { root: true });
   });
 
   test('downloadCsv success and error flows', async() => {
     const vulReport = {
       report: {
-        results: [ {
-          vulnerabilities: [ {
-            cve: 'CVE-1', cvss: { nvd: { v3score: '7.2' } }, packageName: 'pkg', fixedVersions: ['1.0'], severity: 'high', suppressed: false, installedVersion: '1.0', purl: 'purl', description: 'd'
-          } ]
-        } ]
+        results: [{
+          vulnerabilities: [{
+            cve:              'CVE-1',
+            cvss:             { nvd: { v3score: '7.2' } },
+            packageName:      'pkg',
+            fixedVersions:    ['1.0'],
+            severity:         'high',
+            suppressed:       false,
+            installedVersion: '1.0',
+            purl:             'purl',
+            description:      'd'
+          }]
+        }]
       }
     };
 
@@ -627,12 +871,15 @@ describe('ImageOverview.vue', () => {
     const wrapper = mountComponent({
       global: {
         mocks: {
-          $store: storeSuccess, $t: t, t, $fetchState: { pending: false }
+          $store:      storeSuccess,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
 
-    await (wrapper.vm as any).downloadCsv([ { id: 'v-rep' } ]);
+    await (wrapper.vm as any).downloadCsv([{ id: 'v-rep' }]);
     expect(Papa.unparse).toHaveBeenCalled();
     expect(fileSaver.saveAs).toHaveBeenCalled();
     expect(storeSuccess.dispatch).toHaveBeenCalledWith('growl/success', expect.any(Object), { root: true });
@@ -644,34 +891,54 @@ describe('ImageOverview.vue', () => {
         }
 
         return Promise.resolve();
-      }), getters: {}
+      }),
+      getters: {}
     };
     const wrapperErr = mountComponent({
       global: {
         mocks: {
-          $store: storeError, $t: t, t, $fetchState: { pending: false }
+          $store:      storeError,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
 
-    await (wrapperErr.vm as any).downloadCsv([ { id: 'v-rep-2' } ]);
+    await (wrapperErr.vm as any).downloadCsv([{ id: 'v-rep-2' }]);
     expect(storeError.dispatch).toHaveBeenCalledWith('growl/error', expect.any(Object), { root: true });
   });
 
   test('fetch populates rows and registryCrds', async() => {
-    const rows = [ {
+    const rows = [{
       id:            'r1',
       imageMetadata: {
-        registryURI: 'r1', repository: 'repo1', tag: 't1', registry: 'reg1'
+        registryURI: 'r1',
+        repository:  'repo1',
+        tag:         't1',
+        registry:    'reg1'
       },
       report: {
         summary: {
-          critical: 0, high: 0, medium: 0, low: 0, unknown: 0
+          critical: 0,
+          high:     0,
+          medium:   0,
+          low:      0,
+          unknown:  0
         }
       },
-      metadata: { namespace: 'ns', name: 'img1' }
-    } ];
-    const regs = [ { metadata: { namespace: 'ns', name: 'reg' }, spec: { repositories: ['repo'] } } ];
+      metadata: {
+        namespace: 'ns',
+        name:      'img1'
+      }
+    }];
+    const regs = [{
+      metadata: {
+        namespace: 'ns',
+        name:      'reg'
+      },
+      spec: { repositories: ['repo'] }
+    }];
 
     const store: any = {
       _called:  false,
@@ -695,7 +962,10 @@ describe('ImageOverview.vue', () => {
     const wrapper = mountComponent({
       global: {
         mocks: {
-          $store: store, $t: t, t, $fetchState: { pending: false }
+          $store:      store,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
@@ -714,7 +984,7 @@ describe('ImageOverview.vue', () => {
 
     expect((wrapper.vm as any).selectedRows.length).toBe(0);
 
-    (wrapper.vm as any).onSelectionChange([ { id: 'a' } ]);
+    (wrapper.vm as any).onSelectionChange([{ id: 'a' }]);
     expect((wrapper.vm as any).selectedRows.length).toBe(1);
   });
 
@@ -723,7 +993,10 @@ describe('ImageOverview.vue', () => {
     const storeSuccess = {
       dispatch: jest.fn((action: string, payload: any) => {
         if (action === 'cluster/find') {
-          return Promise.resolve({ spdx: { foo: 'bar' }, metadata: { name: payload.id } });
+          return Promise.resolve({
+            spdx:     { foo: 'bar' },
+            metadata: { name: payload.id }
+          });
         }
 
         return Promise.resolve();
@@ -734,12 +1007,15 @@ describe('ImageOverview.vue', () => {
     const wrapperSuccess = mountComponent({
       global: {
         mocks: {
-          $store: storeSuccess, $t: t, t, $fetchState: { pending: false }
+          $store:      storeSuccess,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
 
-    await (wrapperSuccess.vm as any).downloadSbom([ { id: 'sb1' } ]);
+    await (wrapperSuccess.vm as any).downloadSbom([{ id: 'sb1' }]);
     expect(fileSaver.saveAs).toHaveBeenCalled();
     expect(storeSuccess.dispatch).toHaveBeenCalledWith('growl/success', expect.any(Object), { root: true });
 
@@ -759,12 +1035,15 @@ describe('ImageOverview.vue', () => {
     const wrapperError = mountComponent({
       global: {
         mocks: {
-          $store: storeError, $t: t, t, $fetchState: { pending: false }
+          $store:      storeError,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
 
-    await (wrapperError.vm as any).downloadSbom([ { id: 'sb2' } ]);
+    await (wrapperError.vm as any).downloadSbom([{ id: 'sb2' }]);
     expect(storeError.dispatch).toHaveBeenCalledWith('growl/error', expect.any(Object), { root: true });
   });
 
@@ -784,12 +1063,15 @@ describe('ImageOverview.vue', () => {
     const wrapper = mountComponent({
       global: {
         mocks: {
-          $store: storeSuccess, $t: t, t, $fetchState: { pending: false }
+          $store:      storeSuccess,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
 
-    await (wrapper.vm as any).downloadJson([ { id: 'v1' } ]);
+    await (wrapper.vm as any).downloadJson([{ id: 'v1' }]);
     expect(fileSaver.saveAs).toHaveBeenCalled();
     expect(storeSuccess.dispatch).toHaveBeenCalledWith('growl/success', expect.any(Object), { root: true });
 
@@ -800,28 +1082,40 @@ describe('ImageOverview.vue', () => {
         }
 
         return Promise.resolve();
-      }), getters: {}
+      }),
+      getters: {}
     };
     const wrapperErr = mountComponent({
       global: {
         mocks: {
-          $store: storeError, $t: t, t, $fetchState: { pending: false }
+          $store:      storeError,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
 
-    await (wrapperErr.vm as any).downloadJson([ { id: 'v2' } ]);
+    await (wrapperErr.vm as any).downloadJson([{ id: 'v2' }]);
     expect(storeError.dispatch).toHaveBeenCalledWith('growl/error', expect.any(Object), { root: true });
   });
 
   test('downloadCsv success and error flows', async() => {
     const vulReport = {
       report: {
-        results: [ {
-          vulnerabilities: [ {
-            cve: 'CVE-1', cvss: { nvd: { v3score: '7.2' } }, packageName: 'pkg', fixedVersions: ['1.0'], severity: 'high', suppressed: false, installedVersion: '1.0', purl: 'purl', description: 'd'
-          } ]
-        } ]
+        results: [{
+          vulnerabilities: [{
+            cve:              'CVE-1',
+            cvss:             { nvd: { v3score: '7.2' } },
+            packageName:      'pkg',
+            fixedVersions:    ['1.0'],
+            severity:         'high',
+            suppressed:       false,
+            installedVersion: '1.0',
+            purl:             'purl',
+            description:      'd'
+          }]
+        }]
       }
     };
 
@@ -833,12 +1127,15 @@ describe('ImageOverview.vue', () => {
     const wrapper = mountComponent({
       global: {
         mocks: {
-          $store: storeSuccess, $t: t, t, $fetchState: { pending: false }
+          $store:      storeSuccess,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
 
-    await (wrapper.vm as any).downloadCsv([ { id: 'v-rep' } ]);
+    await (wrapper.vm as any).downloadCsv([{ id: 'v-rep' }]);
     expect(Papa.unparse).toHaveBeenCalled();
     expect(fileSaver.saveAs).toHaveBeenCalled();
     expect(storeSuccess.dispatch).toHaveBeenCalledWith('growl/success', expect.any(Object), { root: true });
@@ -850,17 +1147,21 @@ describe('ImageOverview.vue', () => {
         }
 
         return Promise.resolve();
-      }), getters: {}
+      }),
+      getters: {}
     };
     const wrapperErr = mountComponent({
       global: {
         mocks: {
-          $store: storeError, $t: t, t, $fetchState: { pending: false }
+          $store:      storeError,
+          $t:          t,
+          t,
+          $fetchState: { pending: false }
         }
       }
     });
 
-    await (wrapperErr.vm as any).downloadCsv([ { id: 'v-rep-2' } ]);
+    await (wrapperErr.vm as any).downloadCsv([{ id: 'v-rep-2' }]);
     expect(storeError.dispatch).toHaveBeenCalledWith('growl/error', expect.any(Object), { root: true });
   });
 });

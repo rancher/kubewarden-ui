@@ -21,7 +21,10 @@ import InfoTooltip from '@sbomscanner/components/common/Tooltip';
 
 export default {
   name:       'DistributionChart',
-  components: { BarChart, InfoTooltip },
+  components: {
+    BarChart,
+    InfoTooltip
+  },
   props:      {
     title: {
       type:     String,

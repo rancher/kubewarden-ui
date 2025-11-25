@@ -10,7 +10,12 @@ jest.mock('@sbomscanner/types', () => ({
   PRODUCT_NAME: 'test-product'
 }));
 
-jest.mock('@sbomscanner/config/table-headers', () => ({ VEX_MANAGEMENT_TABLE: [{ name: 'name', label: 'Name' }] }));
+jest.mock('@sbomscanner/config/table-headers', () => ({
+  VEX_MANAGEMENT_TABLE: [{
+    name:  'name',
+    label: 'Name'
+  }]
+}));
 
 describe('VexHubList.vue', () => {
   let wrapper;
@@ -21,13 +26,20 @@ describe('VexHubList.vue', () => {
 
   const mockVexHubs = [
     {
-      id: 'hub1', spec: { enabled: true }, save: jest.fn()
+      id:   'hub1',
+      spec: { enabled: true },
+      save: jest.fn()
     },
     {
-      id: 'hub2', spec: { enabled: false }, save: jest.fn()
+      id:   'hub2',
+      spec: { enabled: false },
+      save: jest.fn()
     },
   ];
-  const mockSchema = { id: 'test.vexhub', attributes: { namespaced: false } };
+  const mockSchema = {
+    id:         'test.vexhub',
+    attributes: { namespaced: false }
+  };
 
   const mountComponent = () => {
     mockDispatch = jest.fn().mockResolvedValue(true);
@@ -122,10 +134,14 @@ describe('VexHubList.vue', () => {
     it('should update status using selected argument', async() => {
       const selectedArg = [
         {
-          id: 'hub3', spec: {}, save: jest.fn().mockResolvedValue({})
+          id:   'hub3',
+          spec: {},
+          save: jest.fn().mockResolvedValue({})
         },
         {
-          id: 'hub4', spec: { enabled: true }, save: jest.fn().mockResolvedValue({})
+          id:   'hub4',
+          spec: { enabled: true },
+          save: jest.fn().mockResolvedValue({})
         }
       ];
 
@@ -143,7 +159,9 @@ describe('VexHubList.vue', () => {
     it('should update status using selectedRows data property', async() => {
       const selectedData = [
         {
-          id: 'hub5', spec: {}, save: jest.fn().mockResolvedValue({})
+          id:   'hub5',
+          spec: {},
+          save: jest.fn().mockResolvedValue({})
         },
       ];
 
@@ -167,7 +185,9 @@ describe('VexHubList.vue', () => {
 
     it('should handle save errors gracefully (no throw)', async() => {
       const errorResource = {
-        id: 'hubError', spec: {}, save: jest.fn().mockRejectedValue('Save failed')
+        id:   'hubError',
+        spec: {},
+        save: jest.fn().mockRejectedValue('Save failed')
       };
 
       await wrapper.setData({ selectedRows: [errorResource] });

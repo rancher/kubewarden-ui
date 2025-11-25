@@ -158,6 +158,7 @@ export default {
 
         this.closeDownloadDropdown();
       } catch (error) {
+        console.warn(error);
         this.$store.dispatch('growl/error', {
           title:   'Error',
           message: 'Failed to download vulnerability report'

@@ -19,9 +19,12 @@ export function init($plugin: any, store: any) {
     name:       PAGE.DASHBOARD,
     namespaced: false,
     route:      {
-      name:   `c-cluster-${PRODUCT_NAME}-${PAGE.DASHBOARD}`,
+      name:   `c-cluster-${ PRODUCT_NAME }-${ PAGE.DASHBOARD }`,
       params: { product: PRODUCT_NAME },
-      meta:   { pkg: PRODUCT_NAME, product: PRODUCT_NAME }
+      meta:   {
+        pkg:     PRODUCT_NAME,
+        product: PRODUCT_NAME
+      }
     },
     overview: true
   });
@@ -31,12 +34,15 @@ export function init($plugin: any, store: any) {
     name:       PAGE.REGISTRIES,
     namespaced: false,
     route:      {
-      name:   `c-cluster-${PRODUCT_NAME}-${PAGE.REGISTRIES}`,
+      name:   `c-cluster-${ PRODUCT_NAME }-${ PAGE.REGISTRIES }`,
       params: {
         product:  PRODUCT_NAME,
         resource: RESOURCE.REGISTRY,
       },
-      meta: { pkg: PRODUCT_NAME, product: PRODUCT_NAME }
+      meta: {
+        pkg:     PRODUCT_NAME,
+        product: PRODUCT_NAME
+      }
     },
   });
 
@@ -45,9 +51,12 @@ export function init($plugin: any, store: any) {
     name:       PAGE.IMAGES,
     namespaced: false,
     route:      {
-      name:   `c-cluster-${PRODUCT_NAME}-${PAGE.IMAGES}`,
+      name:   `c-cluster-${ PRODUCT_NAME }-${ PAGE.IMAGES }`,
       params: { product: PRODUCT_NAME },
-      meta:   { pkg: PRODUCT_NAME, product: PRODUCT_NAME }
+      meta:   {
+        pkg:     PRODUCT_NAME,
+        product: PRODUCT_NAME
+      }
     }
   });
 
@@ -69,9 +78,12 @@ export function init($plugin: any, store: any) {
     name:       PAGE.VEX_MANAGEMENT,
     namespaced: false,
     route:      {
-      name:   `c-cluster-${PRODUCT_NAME}-${PAGE.VEX_MANAGEMENT}`,
+      name:   `c-cluster-${ PRODUCT_NAME }-${ PAGE.VEX_MANAGEMENT }`,
       params: { product: PRODUCT_NAME },
-      meta:   { pkg: PRODUCT_NAME, product: PRODUCT_NAME },
+      meta:   {
+        pkg:     PRODUCT_NAME,
+        product: PRODUCT_NAME
+      },
     },
   });
 
@@ -87,5 +99,4 @@ export function init($plugin: any, store: any) {
   ]);
   // Prepend spaces on group name, as Rancher 2.12 render group name align with sidemenu
   basicType([PAGE.REGISTRIES, PAGE.VEX_MANAGEMENT], '&nbsp;&nbsp;&nbsp;&nbsp;Advanced');
-
 }

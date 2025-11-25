@@ -33,36 +33,48 @@ export default class Image extends SteveModel {
 
   // Get the vulnerability report associated with this image
   get vulnerabilityReport() {
-    if (!this.metadata?.name) return null;
+    if (!this.metadata?.name) {
+      return null;
+    }
 
     try {
       const reports = this.$store.getters['cluster/all']('storage.sbomscanner.kubewarden.io.vulnerabilityreport');
 
-      if (!reports || reports.length === 0) return null;
+      if (!reports || reports.length === 0) {
+        return null;
+      }
 
       const found = reports.find((report) => report.metadata?.name === this.metadata.name
       );
 
       return found;
     } catch (error) {
+      console.warn(error);
+
       return null;
     }
   }
 
   // Get the SBOM associated with this image
   get sbom() {
-    if (!this.metadata?.name) return null;
+    if (!this.metadata?.name) {
+      return null;
+    }
 
     try {
       const sboms = this.$store.getters['cluster/all']('storage.sbomscanner.kubewarden.io.sbom');
 
-      if (!sboms || sboms.length === 0) return null;
+      if (!sboms || sboms.length === 0) {
+        return null;
+      }
 
       const found = sboms.find((sbom) => sbom.metadata?.name === this.metadata.name
       );
 
       return found;
     } catch (error) {
+      console.warn(error);
+
       return null;
     }
   }
@@ -71,13 +83,17 @@ export default class Image extends SteveModel {
   get vulnerabilityDetails() {
     const report = this.vulnerabilityReport;
 
-    if (!report?.spec?.report) return [];
+    if (!report?.spec?.report) {
+      return [];
+    }
 
     try {
       const reportData = typeof report.spec.report === 'string' ? JSON.parse(report.spec.report) : report.spec.report;
 
       return reportData.vulnerabilities || [];
     } catch (error) {
+      console.warn(error);
+
       return [];
     }
   }
@@ -88,7 +104,11 @@ export default class Image extends SteveModel {
 
     if (!report?.spec?.report) {
       return {
-        critical: 0, high: 0, medium: 0, low: 0, none: 0
+        critical: 0,
+        high:     0,
+        medium:   0,
+        low:      0,
+        none:     0
       };
     }
 
@@ -96,11 +116,21 @@ export default class Image extends SteveModel {
       const reportData = typeof report.spec.report === 'string' ? JSON.parse(report.spec.report) : report.spec.report;
 
       return reportData.summary?.severityDistribution || {
-        critical: 0, high: 0, medium: 0, low: 0, none: 0
+        critical: 0,
+        high:     0,
+        medium:   0,
+        low:      0,
+        none:     0
       };
     } catch (error) {
+      console.warn(error);
+
       return {
-        critical: 0, high: 0, medium: 0, low: 0, none: 0
+        critical: 0,
+        high:     0,
+        medium:   0,
+        low:      0,
+        none:     0
       };
     }
   }

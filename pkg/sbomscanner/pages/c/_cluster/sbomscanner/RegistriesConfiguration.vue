@@ -70,12 +70,30 @@ export default {
   },
   data() {
     const STATUS_OPTIONS = [
-      { value: 'any', label: this.t('imageScanner.general.any') },
-      { value: 'scheduled', label: this.t('imageScanner.enum.status.scheduled') },
-      { value: 'pending', label: this.t('imageScanner.enum.status.pending') },
-      { value: 'inprogress', label: this.t('imageScanner.enum.status.inprogress') },
-      { value: 'complete', label: this.t('imageScanner.enum.status.complete') },
-      { value: 'failed', label: this.t('imageScanner.enum.status.failed') },
+      {
+        value: 'any',
+        label: this.t('imageScanner.general.any')
+      },
+      {
+        value: 'scheduled',
+        label: this.t('imageScanner.enum.status.scheduled')
+      },
+      {
+        value: 'pending',
+        label: this.t('imageScanner.enum.status.pending')
+      },
+      {
+        value: 'inprogress',
+        label: this.t('imageScanner.enum.status.inprogress')
+      },
+      {
+        value: 'complete',
+        label: this.t('imageScanner.enum.status.complete')
+      },
+      {
+        value: 'failed',
+        label: this.t('imageScanner.enum.status.failed')
+      },
     ];
 
     return {
@@ -140,7 +158,7 @@ export default {
       const table = this.$refs.registryTable.$refs.table.$refs.table;
       const act = findBy(table.availableActions, 'action', 'promptRemove');
 
-      if ( act ) {
+      if (act) {
         table.setBulkActionOfInterest(act);
         table.applyTableAction(act);
       }
@@ -227,7 +245,6 @@ export default {
           currStatus:         rec[0].statusResult.type.toLowerCase(),
           lastTransitionTime: Math.max(new Date(rec[0].lastTransitionTime), new Date(rec[0].completionTime))
         });
-
       });
       // Sort and limit the registryStatusList to 5 most recent updates
       registryStatusList.sort((a, b) => new Date(b.lastTransitionTime) - new Date(a.lastTransitionTime)).slice(0, 5);
@@ -262,6 +279,8 @@ export default {
 
         return regObj.spec.uri || '';
       } catch (e) {
+        console.warn(e);
+
         return '';
       }
     },

@@ -26,10 +26,14 @@ describe('ScanErrorCell.vue', () => {
     const mockValue = {
       conditions: [
         {
-          status: 'False', type: 'Complete', message: 'All good'
+          status:  'False',
+          type:    'Complete',
+          message: 'All good'
         },
         {
-          status: 'True', type: 'Failed', message: 'Authentication error'
+          status:  'True',
+          type:    'Failed',
+          message: 'Authentication error'
         },
       ],
     };
@@ -52,7 +56,9 @@ describe('ScanErrorCell.vue', () => {
     const mockValue = {
       conditions: [
         {
-          status: 'True', type: 'FAILED', message: 'Auth error uppercase'
+          status:  'True',
+          type:    'FAILED',
+          message: 'Auth error uppercase'
         },
       ],
     };
@@ -67,10 +73,14 @@ describe('ScanErrorCell.vue', () => {
     const mockValue = {
       conditions: [
         {
-          status: 'True', type: 'Complete', message: 'All good'
+          status:  'True',
+          type:    'Complete',
+          message: 'All good'
         },
         {
-          status: 'False', type: 'Failed', message: 'Old error'
+          status:  'False',
+          type:    'Failed',
+          message: 'Old error'
         },
       ],
     };
@@ -90,10 +100,14 @@ describe('ScanErrorCell.vue', () => {
     const mockValue = {
       conditions: [
         {
-          status: 'False', type: 'Complete', message: 'All good'
+          status:  'False',
+          type:    'Complete',
+          message: 'All good'
         },
         {
-          status: 'False', type: 'Failed', message: 'Auth error'
+          status:  'False',
+          type:    'Failed',
+          message: 'Auth error'
         },
       ],
     };

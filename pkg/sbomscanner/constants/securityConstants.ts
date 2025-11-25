@@ -10,12 +10,30 @@ export const SCAN_INTERVALS = {
 };
 
 export const SCAN_INTERVAL_OPTIONS = [
-  { label: 'Every 1 hour', value: SCAN_INTERVALS.ONE_HOUR },
-  { label: 'Every 3 hours', value: SCAN_INTERVALS.THREE_HOURS },
-  { label: 'Every 6 hours', value: SCAN_INTERVALS.SIX_HOURS },
-  { label: 'Every 12 hours', value: SCAN_INTERVALS.TWELVE_HOURS },
-  { label: 'Every 24 hours', value: SCAN_INTERVALS.TWENTY_FOUR_HOURS },
-  { label: 'Manual Scan', value: SCAN_INTERVALS.MANUAL } // backend disables auto-scan
+  {
+    label: 'Every 1 hour',
+    value: SCAN_INTERVALS.ONE_HOUR
+  },
+  {
+    label: 'Every 3 hours',
+    value: SCAN_INTERVALS.THREE_HOURS
+  },
+  {
+    label: 'Every 6 hours',
+    value: SCAN_INTERVALS.SIX_HOURS
+  },
+  {
+    label: 'Every 12 hours',
+    value: SCAN_INTERVALS.TWELVE_HOURS
+  },
+  {
+    label: 'Every 24 hours',
+    value: SCAN_INTERVALS.TWENTY_FOUR_HOURS
+  },
+  {
+    label: 'Manual Scan',
+    value: SCAN_INTERVALS.MANUAL
+  } // backend disables auto-scan
 ];
 
 export const REGISTRY_TYPE = {
@@ -24,6 +42,12 @@ export const REGISTRY_TYPE = {
 };
 
 export const REGISTRY_TYPE_OPTIONS = [
-  { label: 'OCI Distribution', value: REGISTRY_TYPE.OCI_DISTRIBUTION },
-  { label: 'No Catalog', value: REGISTRY_TYPE.NO_CATALOG }
+  {
+    label: 'OCI Distribution',
+    value: REGISTRY_TYPE.OCI_DISTRIBUTION
+  },
+  {
+    label: 'No Catalog',
+    value: REGISTRY_TYPE.NO_CATALOG
+  }
 ];

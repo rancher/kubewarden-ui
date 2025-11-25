@@ -182,8 +182,8 @@ export const IMAGE_LIST_TABLE = [
     labelKey:  'imageScanner.images.listTable.headers.registry',
     value:     'imageMetadata.registry',
     formatter: 'RegistryCellLink',
-    sort:      ['metadata.namespace','imageMetadata.registry'],
-  },{
+    sort:      ['metadata.namespace', 'imageMetadata.registry'],
+  }, {
     name:     'repository',
     labelKey: 'imageScanner.images.listTable.headers.repository',
     value:    'imageMetadata.repository',
@@ -497,7 +497,7 @@ export const LAYER_BASED_TABLE = [
     labelKey:  'imageScanner.imageDetails.table.headers.vulnerabilities',
     value:     'vulnerabilities',
     formatter: 'IdentifiedCVEsCell',
-    sort:      ['vulnerabilities.critical','vulnerabilities.high','vulnerabilities.medium','vulnerabilities.low','vulnerabilities.unknown'],
+    sort:      ['vulnerabilities.critical', 'vulnerabilities.high', 'vulnerabilities.medium', 'vulnerabilities.low', 'vulnerabilities.unknown'],
     width:     300,
   },
   {

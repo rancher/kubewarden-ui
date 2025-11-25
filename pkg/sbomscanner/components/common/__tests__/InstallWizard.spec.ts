@@ -5,13 +5,19 @@ const $t = (key) => key;
 
 const mockSteps = [
   {
-    name: 'step1', label: 'Step 1', ready: true
+    name:  'step1',
+    label: 'Step 1',
+    ready: true
   },
   {
-    name: 'step2', label: 'Step 2', ready: false
+    name:  'step2',
+    label: 'Step 2',
+    ready: false
   },
   {
-    name: 'step3', label: 'Step 3', ready: false
+    name:  'step3',
+    label: 'Step 3',
+    ready: false
   },
 ];
 
@@ -69,9 +75,18 @@ describe('InstallWizard.vue', () => {
   describe('Method: isAvailable', () => {
     it('should correctly determine if a step is available', () => {
       const steps = [
-        { name: 's1', ready: true },
-        { name: 's2', ready: false },
-        { name: 's3', ready: false },
+        {
+          name:  's1',
+          ready: true
+        },
+        {
+          name:  's2',
+          ready: false
+        },
+        {
+          name:  's3',
+          ready: false
+        },
       ];
       const wrapper = factory({ steps });
 
@@ -82,9 +97,18 @@ describe('InstallWizard.vue', () => {
 
     it('should update availability when previous steps change', () => {
       const steps = [
-        { name: 's1', ready: false },
-        { name: 's2', ready: false },
-        { name: 's3', ready: false },
+        {
+          name:  's1',
+          ready: false
+        },
+        {
+          name:  's2',
+          ready: false
+        },
+        {
+          name:  's3',
+          ready: false
+        },
       ];
       const wrapper = factory({ steps });
 
@@ -103,9 +127,18 @@ describe('InstallWizard.vue', () => {
   describe('Method: goToStep', () => {
     it('should go to a step if confirmedReady is true, even if not available', () => {
       const steps = [
-        { name: 's1', ready: false },
-        { name: 's2', ready: false },
-        { name: 's3', ready: false },
+        {
+          name:  's1',
+          ready: false
+        },
+        {
+          name:  's2',
+          ready: false
+        },
+        {
+          name:  's3',
+          ready: false
+        },
       ];
       const wrapper = factory({ steps });
 
@@ -120,8 +153,14 @@ describe('InstallWizard.vue', () => {
 
     it('should go to a step if not confirmed but is available', () => {
       const steps = [
-        { name: 's1', ready: true },
-        { name: 's2', ready: false },
+        {
+          name:  's1',
+          ready: true
+        },
+        {
+          name:  's2',
+          ready: false
+        },
       ];
       const wrapper = factory({ steps });
 
@@ -135,8 +174,14 @@ describe('InstallWizard.vue', () => {
 
     it('should not go to a step if not confirmed and not available', () => {
       const steps = [
-        { name: 's1', ready: false },
-        { name: 's2', ready: false },
+        {
+          name:  's1',
+          ready: false
+        },
+        {
+          name:  's2',
+          ready: false
+        },
       ];
       const wrapper = factory({ steps });
 
@@ -172,8 +217,14 @@ describe('InstallWizard.vue', () => {
   describe('Method: next', () => {
     it('should advance to the next step if available', () => {
       const steps = [
-        { name: 's1', ready: true },
-        { name: 's2', ready: false },
+        {
+          name:  's1',
+          ready: true
+        },
+        {
+          name:  's2',
+          ready: false
+        },
       ];
       const wrapper = factory({ steps });
 
@@ -186,8 +237,14 @@ describe('InstallWizard.vue', () => {
 
     it('should not advance to the next step if not available', () => {
       const steps = [
-        { name: 's1', ready: false },
-        { name: 's2', ready: false },
+        {
+          name:  's1',
+          ready: false
+        },
+        {
+          name:  's2',
+          ready: false
+        },
       ];
       const wrapper = factory({ steps });
 
@@ -202,9 +259,18 @@ describe('InstallWizard.vue', () => {
   describe('DOM Interaction and State', () => {
     it('should apply active and disabled classes correctly', () => {
       const steps = [
-        { name: 's1', ready: true },
-        { name: 's2', ready: false },
-        { name: 's3', ready: false },
+        {
+          name:  's1',
+          ready: true
+        },
+        {
+          name:  's2',
+          ready: false
+        },
+        {
+          name:  's3',
+          ready: false
+        },
       ];
       const wrapper = factory({ steps });
       const stepsLi = wrapper.findAll('li.step');
@@ -220,9 +286,18 @@ describe('InstallWizard.vue', () => {
 
     it('should change active step on nav click', async() => {
       const steps = [
-        { name: 's1', ready: true },
-        { name: 's2', ready: false },
-        { name: 's3', ready: false },
+        {
+          name:  's1',
+          ready: true
+        },
+        {
+          name:  's2',
+          ready: false
+        },
+        {
+          name:  's3',
+          ready: false
+        },
       ];
       const wrapper = factory({ steps });
       const navItems = wrapper.findAll('.step .controls');

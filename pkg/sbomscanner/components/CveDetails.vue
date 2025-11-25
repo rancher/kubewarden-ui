@@ -58,7 +58,9 @@ export default {
               }
 
               return {
-                cve: cveId, cveMetaData, totalScanned: vulReports.length
+                cve:          cveId,
+                cveMetaData,
+                totalScanned: vulReports.length
               };
             }
           }
@@ -66,7 +68,9 @@ export default {
       }
 
       return {
-        cve: cveId, cveMetaData, totalScanned: vulReports.length
+        cve:          cveId,
+        cveMetaData,
+        totalScanned: vulReports.length
       };
     },
 
@@ -88,8 +92,8 @@ export default {
 
         // Capitalize first letter
         name = name.charAt(0).toUpperCase() + name.slice(1);
-        if ( !vendorMap.has(name) ) {
-          vendorMap.set( name, []);
+        if (!vendorMap.has(name)) {
+          vendorMap.set(name, []);
         }
         vendorMap.get(name).push(url);
       });

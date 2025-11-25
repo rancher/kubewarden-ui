@@ -31,7 +31,12 @@ describe('BlockPercentageBarAlt.vue', () => {
   });
 
   it('should render zero filled ticks for 0%', () => {
-    const wrapper = shallowMount(BlockPercentageBarAlt, { props: { percentage: 0, ticks: 30 } });
+    const wrapper = shallowMount(BlockPercentageBarAlt, {
+      props: {
+        percentage: 0,
+        ticks:      30
+      }
+    });
 
     expect(wrapper.vm.filledTicks).toBe(0);
     expect(wrapper.findAll('.percentage-bar-tick.filled')).toHaveLength(0);
@@ -39,7 +44,12 @@ describe('BlockPercentageBarAlt.vue', () => {
   });
 
   it('should render all ticks as filled for 100%', () => {
-    const wrapper = shallowMount(BlockPercentageBarAlt, { props: { percentage: 100, ticks: 30 } });
+    const wrapper = shallowMount(BlockPercentageBarAlt, {
+      props: {
+        percentage: 100,
+        ticks:      30
+      }
+    });
 
     expect(wrapper.vm.filledTicks).toBe(30);
     expect(wrapper.findAll('.percentage-bar-tick.filled')).toHaveLength(30);
@@ -47,7 +57,12 @@ describe('BlockPercentageBarAlt.vue', () => {
   });
 
   it('should render at least one filled tick if percentage is > 0', () => {
-    const wrapper = shallowMount(BlockPercentageBarAlt, { props: { percentage: 1, ticks: 50 } });
+    const wrapper = shallowMount(BlockPercentageBarAlt, {
+      props: {
+        percentage: 1,
+        ticks:      50
+      }
+    });
 
     expect(wrapper.vm.filledTicks).toBe(1);
     expect(wrapper.findAll('.percentage-bar-tick.filled')).toHaveLength(1);
@@ -55,7 +70,12 @@ describe('BlockPercentageBarAlt.vue', () => {
   });
 
   it('should update filled ticks when percentage prop changes', async() => {
-    const wrapper = shallowMount(BlockPercentageBarAlt, { props: { percentage: 50, ticks: 20 } });
+    const wrapper = shallowMount(BlockPercentageBarAlt, {
+      props: {
+        percentage: 50,
+        ticks:      20
+      }
+    });
 
     expect(wrapper.findAll('.percentage-bar-tick.filled')).toHaveLength(10);
 

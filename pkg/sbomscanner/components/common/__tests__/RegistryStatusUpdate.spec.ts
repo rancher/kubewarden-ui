@@ -51,7 +51,10 @@ describe('RegistryStatusUpdate.vue', () => {
             StatusBadge: true,
             RouterLink:  RouterLinkStub
           },
-          mocks: { $route: mockRoute, t: mockT }
+          mocks: {
+            $route: mockRoute,
+            t:      mockT
+          }
         }
       });
     });
@@ -114,7 +117,10 @@ describe('RegistryStatusUpdate.vue', () => {
             StatusBadge: true,
             RouterLink:  RouterLinkStub
           },
-          mocks: { $route: mockRoute, t: mockT }
+          mocks: {
+            $route: mockRoute,
+            t:      mockT
+          }
         }
       });
     });

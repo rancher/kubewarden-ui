@@ -68,7 +68,10 @@ describe('ScanButton.vue', () => {
   });
 
   it('should be enabled if selectedRegistries is not empty', () => {
-    mountComponent([{ name: 'reg1', namespace: 'ns1' }]);
+    mountComponent([{
+      name:      'reg1',
+      namespace: 'ns1'
+    }]);
     const button = wrapper.find('button');
 
     expect(button.attributes('disabled')).toBeUndefined();
@@ -84,8 +87,14 @@ describe('ScanButton.vue', () => {
 
   it('should dispatch cluster/create, save, show success, and reload for each registry on click', async() => {
     const registries = [
-      { name: 'reg1', namespace: 'ns1' },
-      { name: 'reg2', namespace: 'ns2' }
+      {
+        name:      'reg1',
+        namespace: 'ns1'
+      },
+      {
+        name:      'reg2',
+        namespace: 'ns2'
+      }
     ];
 
     mockSave.mockResolvedValue({}); // Simulate successful save
@@ -127,7 +136,10 @@ describe('ScanButton.vue', () => {
   });
 
   it('should dispatch growl/error and reload if save fails', async() => {
-    const registries = [{ name: 'reg-fail', namespace: 'ns-fail' }];
+    const registries = [{
+      name:      'reg-fail',
+      namespace: 'ns-fail'
+    }];
     const error = new Error('Save Failed');
 
     mockSave.mockRejectedValue(error); // Simulate failed save

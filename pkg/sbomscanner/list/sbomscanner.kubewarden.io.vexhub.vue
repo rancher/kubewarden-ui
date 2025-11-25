@@ -51,9 +51,14 @@ export default {
     async switchStatus(desired, selected) {
       const resources = selected && selected.length ? selected : (this.selectedRows || []);
 
-      if (!resources.length) return;
+      if (!resources.length) {
+        return;
+      }
       await Promise.all(resources.map(async(m) => {
-        m.spec = { ...(m.spec || {}), enabled: desired };
+        m.spec = {
+          ...(m.spec || {}),
+          enabled: desired
+        };
         await m.save();
       }));
       await this.$fetch();

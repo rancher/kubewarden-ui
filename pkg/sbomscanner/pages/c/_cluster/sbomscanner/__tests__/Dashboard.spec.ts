@@ -125,8 +125,14 @@ describe('Dashboard.vue full coverage', () => {
 
     await wrapper.setData({
       scanJobsCRD: [
-        makeScanJob({ namespace: 'ns1', registry: 'reg1' }),
-        makeScanJob({ namespace: 'ns1', registry: 'reg1' }),
+        makeScanJob({
+          namespace: 'ns1',
+          registry:  'reg1'
+        }),
+        makeScanJob({
+          namespace: 'ns1',
+          registry:  'reg1'
+        }),
       ],
     });
     const options = wrapper.vm.registryOptions;
@@ -140,12 +146,16 @@ describe('Dashboard.vue full coverage', () => {
 
     const jobWithError = {
       status: {
-        conditions: [{ error: true }], scannedImagesCount: 6, imagesCount: 10
+        conditions:         [{ error: true }],
+        scannedImagesCount: 6,
+        imagesCount:        10
       }
     };
     const jobWithoutError = {
       status: {
-        conditions: [{ error: false }], scannedImagesCount: 8, imagesCount: 8
+        conditions:         [{ error: false }],
+        scannedImagesCount: 8,
+        imagesCount:        8
       }
     };
 
@@ -157,10 +167,16 @@ describe('Dashboard.vue full coverage', () => {
     const wrapper = factory();
     const jobs = [
       makeScanJob({
-        conditions: [{ error: false }], scannedImagesCount: 5, imagesCount: 5, completionTime: 1761480970
+        conditions:         [{ error: false }],
+        scannedImagesCount: 5,
+        imagesCount:        5,
+        completionTime:     1761480970
       }),
       makeScanJob({
-        conditions: [{ error: true }], scannedImagesCount: 3, imagesCount: 10, completionTime: 1761480098
+        conditions:         [{ error: true }],
+        scannedImagesCount: 3,
+        imagesCount:        10,
+        completionTime:     1761480098
       }),
     ];
 
@@ -177,10 +193,14 @@ describe('Dashboard.vue full coverage', () => {
     const wrapper = factory();
     const jobs = [
       {
-        metadata: { namespace: 'default' }, spec: { registry: 'my-registry' }, status: { conditions: [{ error: false }] }
+        metadata: { namespace: 'default' },
+        spec:     { registry: 'my-registry' },
+        status:   { conditions: [{ error: false }] }
       },
       {
-        metadata: { namespace: 'default' }, spec: { registry: 'my-registry' }, status: { conditions: [{ error: true }] }
+        metadata: { namespace: 'default' },
+        spec:     { registry: 'my-registry' },
+        status:   { conditions: [{ error: true }] }
       },
     ];
 

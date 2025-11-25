@@ -139,7 +139,11 @@ describe('AmountBarBySeverity.vue', () => {
 
     it('should handle all-zero counts when calculating percentages', () => {
       const zeroAmounts = {
-        critical: 0, high: 0, medium: 0, low: 0, unknown: 0,
+        critical: 0,
+        high:     0,
+        medium:   0,
+        low:      0,
+        unknown:  0,
       };
       const wrapper = factory({
         cveAmount:   zeroAmounts,

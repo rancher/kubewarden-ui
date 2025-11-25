@@ -51,7 +51,10 @@ describe('Image model', () => {
 
     inst.metadata = { name: 'img-1' };
 
-    const reports = [ { metadata: { name: 'other' } }, { metadata: { name: 'img-1' }, spec: { report: '{}' } } ];
+    const reports = [{ metadata: { name: 'other' } }, {
+      metadata: { name: 'img-1' },
+      spec:     { report: '{}' }
+    }];
 
     inst.$store = { getters: { 'cluster/all': () => reports } };
 
@@ -81,7 +84,7 @@ describe('Image model', () => {
     inst.$store = { getters: { 'cluster/all': () => [] } };
     expect(inst.sbom).toBeNull();
 
-    const sboms = [ { metadata: { name: 'img-2' } } ];
+    const sboms = [{ metadata: { name: 'img-2' } }];
 
     inst.$store = { getters: { 'cluster/all': () => sboms } };
     expect(inst.sbom).toBeDefined();
@@ -107,18 +110,39 @@ describe('Image model', () => {
     expect(inst.vulnerabilityDetails).toEqual([]);
 
     // report as string: create a report in store that matches metadata.name
-    const rep = { vulnerabilities: [ { cve: 'CVE-1' } ] };
+    const rep = { vulnerabilities: [{ cve: 'CVE-1' }] };
 
     inst.metadata = { name: 'img-1' };
-    inst.$store = { getters: { 'cluster/all': () => [ { metadata: { name: 'img-1' }, spec: { report: JSON.stringify(rep) } } ] } };
+    inst.$store = {
+      getters: {
+        'cluster/all': () => [{
+          metadata: { name: 'img-1' },
+          spec:     { report: JSON.stringify(rep) }
+        }]
+      }
+    };
     expect(inst.vulnerabilityDetails.length).toBe(1);
 
     // report as object
-    inst.$store = { getters: { 'cluster/all': () => [ { metadata: { name: 'img-1' }, spec: { report: rep } } ] } };
+    inst.$store = {
+      getters: {
+        'cluster/all': () => [{
+          metadata: { name: 'img-1' },
+          spec:     { report: rep }
+        }]
+      }
+    };
     expect(inst.vulnerabilityDetails.length).toBe(1);
 
     // invalid JSON
-    inst.$store = { getters: { 'cluster/all': () => [ { metadata: { name: 'img-1' }, spec: { report: '{ bad json' } } ] } };
+    inst.$store = {
+      getters: {
+        'cluster/all': () => [{
+          metadata: { name: 'img-1' },
+          spec:     { report: '{ bad json' }
+        }]
+      }
+    };
     expect(inst.vulnerabilityDetails).toEqual([]);
   });
 
@@ -129,7 +153,11 @@ describe('Image model', () => {
     inst.metadata = undefined;
     inst.$store = { getters: { 'cluster/all': () => [] } };
     expect(inst.severityDistribution).toEqual({
-      critical: 0, high: 0, medium: 0, low: 0, none: 0
+      critical: 0,
+      high:     0,
+      medium:   0,
+      low:      0,
+      none:     0
     });
     expect(inst.totalVulnerabilities).toBe(0);
     expect(inst.overallSeverity).toBe('none');
@@ -138,13 +166,24 @@ describe('Image model', () => {
     const reportData = {
       summary: {
         severityDistribution: {
-          critical: 2, high: 1, medium: 0, low: 0, none: 0
+          critical: 2,
+          high:     1,
+          medium:   0,
+          low:      0,
+          none:     0
         }
       }
     };
 
     inst.metadata = { name: 'img-1' };
-    inst.$store = { getters: { 'cluster/all': () => [ { metadata: { name: 'img-1' }, spec: { report: JSON.stringify(reportData) } } ] } };
+    inst.$store = {
+      getters: {
+        'cluster/all': () => [{
+          metadata: { name: 'img-1' },
+          spec:     { report: JSON.stringify(reportData) }
+        }]
+      }
+    };
 
     let dist = inst.severityDistribution;
 
@@ -153,7 +192,14 @@ describe('Image model', () => {
     expect(inst.overallSeverity).toBe('critical');
 
     // also exercise when report is already an object
-    inst.$store = { getters: { 'cluster/all': () => [ { metadata: { name: 'img-1' }, spec: { report: reportData } } ] } };
+    inst.$store = {
+      getters: {
+        'cluster/all': () => [{
+          metadata: { name: 'img-1' },
+          spec:     { report: reportData }
+        }]
+      }
+    };
     dist = inst.severityDistribution;
     expect(dist.critical).toBe(2);
   });
@@ -213,7 +259,14 @@ describe('Image model', () => {
     // report has no vulnerabilities key
     const reportData = { some: 'data' };
 
-    inst.$store = { getters: { 'cluster/all': () => [ { metadata: { name: 'img-missing' }, spec: { report: JSON.stringify(reportData) } } ] } };
+    inst.$store = {
+      getters: {
+        'cluster/all': () => [{
+          metadata: { name: 'img-missing' },
+          spec:     { report: JSON.stringify(reportData) }
+        }]
+      }
+    };
 
     expect(inst.vulnerabilityDetails).toEqual([]);
   });
@@ -223,15 +276,37 @@ describe('Image model', () => {
 
     inst.metadata = { name: 'img-err' };
     // invalid JSON should return default distribution
-    inst.$store = { getters: { 'cluster/all': () => [ { metadata: { name: 'img-err' }, spec: { report: '{ bad json' } } ] } };
+    inst.$store = {
+      getters: {
+        'cluster/all': () => [{
+          metadata: { name: 'img-err' },
+          spec:     { report: '{ bad json' }
+        }]
+      }
+    };
     expect(inst.severityDistribution).toEqual({
-      critical: 0, high: 0, medium: 0, low: 0, none: 0
+      critical: 0,
+      high:     0,
+      medium:   0,
+      low:      0,
+      none:     0
     });
 
     // parsed JSON but missing summary should return default
-    inst.$store = { getters: { 'cluster/all': () => [ { metadata: { name: 'img-err' }, spec: { report: JSON.stringify({}) } } ] } };
+    inst.$store = {
+      getters: {
+        'cluster/all': () => [{
+          metadata: { name: 'img-err' },
+          spec:     { report: JSON.stringify({}) }
+        }]
+      }
+    };
     expect(inst.severityDistribution).toEqual({
-      critical: 0, high: 0, medium: 0, low: 0, none: 0
+      critical: 0,
+      high:     0,
+      medium:   0,
+      low:      0,
+      none:     0
     });
   });
 
@@ -241,7 +316,7 @@ describe('Image model', () => {
     inst.metadata = { name: 'img-no-match' };
 
     // reports include an item without metadata and one with non-matching metadata
-    const reports = [ { foo: 'bar' }, { metadata: { name: 'other' } } ];
+    const reports = [{ foo: 'bar' }, { metadata: { name: 'other' } }];
 
     inst.$store = { getters: { 'cluster/all': () => reports } };
 
@@ -255,7 +330,7 @@ describe('Image model', () => {
 
     inst.metadata = { name: 'img-nomatch' };
 
-    const sboms = [ { no: 'meta' }, { metadata: { name: 'other' } } ];
+    const sboms = [{ no: 'meta' }, { metadata: { name: 'other' } }];
 
     inst.$store = { getters: { 'cluster/all': () => sboms } };
 

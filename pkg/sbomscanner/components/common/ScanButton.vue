@@ -52,7 +52,9 @@ export default {
             message: e.message,
           });
         } finally {
-          this.reloadFn ? this.reloadFn() : null;
+          if (this.reloadFn) {
+            this.reloadFn();
+          }
         }
       });
     },

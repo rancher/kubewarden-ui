@@ -33,10 +33,17 @@ jest.mock('@shell/types/store/pagination.types', () => {
     }
   }
 
-  const PaginationParamFilter = { createMultipleFields: jest.fn((fields) => ({ createdFilter: true, fields })) };
+  const PaginationParamFilter = {
+    createMultipleFields: jest.fn((fields) => ({
+      createdFilter: true,
+      fields
+    }))
+  };
 
   return {
-    PaginationFilterField, FilterArgs, PaginationParamFilter
+    PaginationFilterField,
+    FilterArgs,
+    PaginationParamFilter
   };
 });
 
@@ -57,19 +64,18 @@ const mockRouter = { push: jest.fn() };
 
 const mockRoute = { params: { cluster: 'mock-cluster' } };
 
-const factory = (options = {}) =>
-  shallowMount(Registries, {
-    global: {
-      mocks: {
-        $store:  mockStore,
-        $router: mockRouter,
-        $route:  mockRoute,
-        t:       mockT,
-        $t:      mockT,
-      },
+const factory = (options = {}) => shallowMount(Registries, {
+  global: {
+    mocks: {
+      $store:  mockStore,
+      $router: mockRouter,
+      $route:  mockRoute,
+      t:       mockT,
+      $t:      mockT,
     },
-    ...options,
-  });
+  },
+  ...options,
+});
 
 describe('Registries.vue', () => {
   let wrapper: any;
@@ -154,14 +160,26 @@ describe('Registries.vue', () => {
   it('filters rows locally by all fields - currStatus is String', () => {
     const rows = [
       {
-        metadata: { name: 'test', namespace: 'default' },
-        spec:     { uri: 'ghcr.io', repositories: ['repo1', 'repo2'] },
-        scanRec:  { currStatus: 'complete' },
+        metadata: {
+          name:      'test',
+          namespace: 'default'
+        },
+        spec:     {
+          uri:          'ghcr.io',
+          repositories: ['repo1', 'repo2']
+        },
+        scanRec: { currStatus: 'complete' },
       },
       {
-        metadata: { name: 'test', namespace: 'default' },
-        spec:     { uri: 'ghcr.io', repositories: ['repo1', 'repo2'] },
-        scanRec:  { currStatus: 'failed' },
+        metadata: {
+          name:      'test',
+          namespace: 'default'
+        },
+        spec:     {
+          uri:          'ghcr.io',
+          repositories: ['repo1', 'repo2']
+        },
+        scanRec: { currStatus: 'failed' },
       },
     ];
 
@@ -181,14 +199,26 @@ describe('Registries.vue', () => {
   it('filters rows locally by all fields - partial string matching for name and namespace', () => {
     const rows = [
       {
-        metadata: { name: 'test', namespace: 'default' },
-        spec:     { uri: 'ghcr.io', repositories: ['repo1', 'repo2'] },
-        scanRec:  { currStatus: 'complete' },
+        metadata: {
+          name:      'test',
+          namespace: 'default'
+        },
+        spec:     {
+          uri:          'ghcr.io',
+          repositories: ['repo1', 'repo2']
+        },
+        scanRec: { currStatus: 'complete' },
       },
       {
-        metadata: { name: 'test1', namespace: 'default1' },
-        spec:     { uri: 'ghcr.io', repositories: ['repo1', 'repo2'] },
-        scanRec:  { currStatus: 'complete' },
+        metadata: {
+          name:      'test1',
+          namespace: 'default1'
+        },
+        spec:     {
+          uri:          'ghcr.io',
+          repositories: ['repo1', 'repo2']
+        },
+        scanRec: { currStatus: 'complete' },
       },
     ];
 
@@ -208,14 +238,26 @@ describe('Registries.vue', () => {
   it('filters rows locally by all fields - currStatus is Object', () => {
     const rows = [
       {
-        metadata: { name: 'test', namespace: 'default' },
-        spec:     { uri: 'ghcr.io', repositories: ['repo1', 'repo2'] },
-        scanRec:  { currStatus: { value: 'complete' } },
+        metadata: {
+          name:      'test',
+          namespace: 'default'
+        },
+        spec:     {
+          uri:          'ghcr.io',
+          repositories: ['repo1', 'repo2']
+        },
+        scanRec: { currStatus: { value: 'complete' } },
       },
       {
-        metadata: { name: 'test', namespace: 'default' },
-        spec:     { uri: 'ghcr.io', repositories: ['repo1', 'repo2'] },
-        scanRec:  { currStatus: { value: 'failed' } },
+        metadata: {
+          name:      'test',
+          namespace: 'default'
+        },
+        spec:     {
+          uri:          'ghcr.io',
+          repositories: ['repo1', 'repo2']
+        },
+        scanRec: { currStatus: { value: 'failed' } },
       },
     ];
 
@@ -282,9 +324,15 @@ describe('Registries.vue', () => {
     };
     const rows = [
       {
-        metadata: { name: 'test', namespace: 'default' },
-        spec:     { uri: 'ghcr.io', repositories: ['repo1', 'repo2'] },
-        scanRec:  { currStatus: 'failed' },
+        metadata: {
+          name:      'test',
+          namespace: 'default'
+        },
+        spec:     {
+          uri:          'ghcr.io',
+          repositories: ['repo1', 'repo2']
+        },
+        scanRec: { currStatus: 'failed' },
       },
     ];
     const result = wrapper.vm.filterRowsLocal(rows);
@@ -355,7 +403,9 @@ describe('Registries.vue', () => {
   it('fetchPageSecondaryResources returns undefined when page empty', async() => {
     const wrapper = factory();
     const res = await wrapper.vm.fetchPageSecondaryResources({
-      canPaginate: false, force: false, page: []
+      canPaginate: false,
+      force:       false,
+      page:        []
     });
 
     expect(res).toBeUndefined();
@@ -368,8 +418,15 @@ describe('Registries.vue', () => {
     const res = await wrapper.vm.fetchPageSecondaryResources({
       canPaginate: false,
       force:       false,
-      page:        [{ metadata: { namespace: 'ns1', name: 'n1' } }],
+      page:        [{
+        metadata: {
+          namespace: 'ns1',
+          name:      'n1'
+        }
+      }],
     });
+
+    console.info(res);
 
     expect(wrapper.vm.$store.dispatch).toHaveBeenCalledWith('cluster/findPage', expect.any(Object));
     // expect(res).toEqual([{ id: 'ns1/n1' }]);

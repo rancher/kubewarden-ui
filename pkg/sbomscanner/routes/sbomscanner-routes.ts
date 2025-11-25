@@ -17,18 +17,18 @@ import {
 
 const routes = [
   {
-    name:      `c-cluster-${ PRODUCT_NAME }-${PAGE.DASHBOARD}`,
-    path:      `/c/:cluster/${ PRODUCT_NAME }/${PAGE.DASHBOARD}`,
+    name:      `c-cluster-${ PRODUCT_NAME }-${ PAGE.DASHBOARD }`,
+    path:      `/c/:cluster/${ PRODUCT_NAME }/${ PAGE.DASHBOARD }`,
     component: Entry,
   },
   {
-    name:      `c-cluster-${PRODUCT_NAME}-${PAGE.IMAGES}`,
-    path:      `/c/:cluster/${PRODUCT_NAME}/${PAGE.IMAGES}`,
+    name:      `c-cluster-${ PRODUCT_NAME }-${ PAGE.IMAGES }`,
+    path:      `/c/:cluster/${ PRODUCT_NAME }/${ PAGE.IMAGES }`,
     component: ImageOverview,
   },
   {
-    name:      `c-cluster-${PRODUCT_NAME}-${PAGE.IMAGES}-id`,
-    path:      `/c/:cluster/${PRODUCT_NAME}/${PAGE.IMAGES}/:id`,
+    name:      `c-cluster-${ PRODUCT_NAME }-${ PAGE.IMAGES }-id`,
+    path:      `/c/:cluster/${ PRODUCT_NAME }/${ PAGE.IMAGES }/:id`,
     component: ImageDetails,
   },
   // {
@@ -37,28 +37,28 @@ const routes = [
   //   component: Vulnerabilities,
   // },
   {
-    name:      `c-cluster-${PRODUCT_NAME}-${PAGE.REGISTRIES}`,
-    path:      `/c/:cluster/${PRODUCT_NAME}/${PAGE.REGISTRIES}`,
+    name:      `c-cluster-${ PRODUCT_NAME }-${ PAGE.REGISTRIES }`,
+    path:      `/c/:cluster/${ PRODUCT_NAME }/${ PAGE.REGISTRIES }`,
     component: RegistriesConfiguration,
   },
   {
-    name:      `c-cluster-${PRODUCT_NAME}-${PAGE.REGISTRIES}-id`,
-    path:      `/c/:cluster/${PRODUCT_NAME}/${PAGE.REGISTRIES}/:ns/:id`,
+    name:      `c-cluster-${ PRODUCT_NAME }-${ PAGE.REGISTRIES }-id`,
+    path:      `/c/:cluster/${ PRODUCT_NAME }/${ PAGE.REGISTRIES }/:ns/:id`,
     component: RegistryDetails,
   },
   {
-    name:      `c-cluster-${PRODUCT_NAME}-${PAGE.VEX_MANAGEMENT}`,
-    path:      `/c/:cluster/${PRODUCT_NAME}/${PAGE.VEX_MANAGEMENT}`,
+    name:      `c-cluster-${ PRODUCT_NAME }-${ PAGE.VEX_MANAGEMENT }`,
+    path:      `/c/:cluster/${ PRODUCT_NAME }/${ PAGE.VEX_MANAGEMENT }`,
     component: VexManagement,
   },
   {
-    name:      `c-cluster-${PRODUCT_NAME}-${PAGE.VEX_MANAGEMENT}-id`,
-    path:      `/c/:cluster/${PRODUCT_NAME}/${PAGE.VEX_MANAGEMENT}/:id`,
+    name:      `c-cluster-${ PRODUCT_NAME }-${ PAGE.VEX_MANAGEMENT }-id`,
+    path:      `/c/:cluster/${ PRODUCT_NAME }/${ PAGE.VEX_MANAGEMENT }/:id`,
     component: VexDetails,
   },
   {
-    name:      `c-cluster-${PRODUCT_NAME}-${PAGE.VULNERABILITIES}-id`,
-    path:      `/c/:cluster/${PRODUCT_NAME}/${PAGE.VULNERABILITIES}/:id`,
+    name:      `c-cluster-${ PRODUCT_NAME }-${ PAGE.VULNERABILITIES }-id`,
+    path:      `/c/:cluster/${ PRODUCT_NAME }/${ PAGE.VULNERABILITIES }/:id`,
     component: CveDetails,
   },
   {
@@ -76,7 +76,7 @@ const routes = [
       // Redirect VexHub resource to custom VexManagement page
       if (to.params.resource === RESOURCE.VEX_HUB) {
         next({
-          name:   `c-cluster-${PRODUCT_NAME}-${PAGE.VEX_MANAGEMENT}`,
+          name:   `c-cluster-${ PRODUCT_NAME }-${ PAGE.VEX_MANAGEMENT }`,
           params: {
             cluster: to.params.cluster,
             product: PRODUCT_NAME

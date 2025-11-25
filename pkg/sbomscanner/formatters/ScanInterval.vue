@@ -31,15 +31,15 @@ export default {
       let result = '';
 
       if (hours && hours !== '0') {
-        result += `${hours}h`;
+        result += `${ hours }h`;
       }
 
       if (minutes && minutes !== '0') {
-        result += `${minutes}m`;
+        result += `${ minutes }m`;
       }
 
       if (seconds && seconds !== '0') {
-        result += `${seconds}s`;
+        result += `${ seconds }s`;
       }
 
       return result || this.value;

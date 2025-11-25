@@ -15,13 +15,34 @@ jest.mock('@shell/plugins/steve/steve-class', () => {
 
     get _availableActions() {
       return [
-        { action: 'edit', label: 'Edit' },
-        { action: 'view', label: 'View' },
-        { action: 'download', label: 'Download' },
-        { action: 'downloadYaml', label: 'Download YAML' },
-        { action: 'viewInApi', label: 'View in API' },
-        { action: 'goToClone', label: 'Clone' },
-        { action: 'promptRemove', label: 'Delete' },
+        {
+          action: 'edit',
+          label:  'Edit'
+        },
+        {
+          action: 'view',
+          label:  'View'
+        },
+        {
+          action: 'download',
+          label:  'Download'
+        },
+        {
+          action: 'downloadYaml',
+          label:  'Download YAML'
+        },
+        {
+          action: 'viewInApi',
+          label:  'View in API'
+        },
+        {
+          action: 'goToClone',
+          label:  'Clone'
+        },
+        {
+          action: 'promptRemove',
+          label:  'Delete'
+        },
       ];
     }
 
@@ -50,13 +71,34 @@ describe('SbomscannerRancherIoVexhub', () => {
   let superSpy;
 
   const baseActions = [
-    { action: 'edit', label: 'Edit' },
-    { action: 'view', label: 'View' },
-    { action: 'download', label: 'Download' },
-    { action: 'downloadYaml', label: 'Download YAML' },
-    { action: 'viewInApi', label: 'View in API' },
-    { action: 'goToClone', label: 'Clone' },
-    { action: 'promptRemove', label: 'Delete' },
+    {
+      action: 'edit',
+      label:  'Edit'
+    },
+    {
+      action: 'view',
+      label:  'View'
+    },
+    {
+      action: 'download',
+      label:  'Download'
+    },
+    {
+      action: 'downloadYaml',
+      label:  'Download YAML'
+    },
+    {
+      action: 'viewInApi',
+      label:  'View in API'
+    },
+    {
+      action: 'goToClone',
+      label:  'Clone'
+    },
+    {
+      action: 'promptRemove',
+      label:  'Delete'
+    },
   ];
 
   beforeEach(() => {
@@ -135,8 +177,14 @@ describe('SbomscannerRancherIoVexhub', () => {
       });
 
       it('invoke should set enabled to true and save (bulk)', async() => {
-        const res1 = { spec: { enabled: false }, save: jest.fn() };
-        const res2 = { spec: { enabled: false }, save: jest.fn() };
+        const res1 = {
+          spec: { enabled: false },
+          save: jest.fn()
+        };
+        const res2 = {
+          spec: { enabled: false },
+          save: jest.fn()
+        };
 
         await wrapper.toggle.invoke(null, [res1, res2]);
 
@@ -171,8 +219,14 @@ describe('SbomscannerRancherIoVexhub', () => {
       });
 
       it('invoke should set enabled to false and save (bulk)', async() => {
-        const res1 = { spec: { enabled: true }, save: jest.fn() };
-        const res2 = { spec: { enabled: true }, save: jest.fn() };
+        const res1 = {
+          spec: { enabled: true },
+          save: jest.fn()
+        };
+        const res2 = {
+          spec: { enabled: true },
+          save: jest.fn()
+        };
 
         await wrapper.toggle.invoke(null, [res1, res2]);
 
@@ -252,7 +306,9 @@ describe('SbomscannerRancherIoVexhub', () => {
 
       it('should ensure all actions are enabled', () => {
         const mockDisabledEditAction = {
-          action: 'edit', label: 'Edit', enabled: false
+          action:  'edit',
+          label:   'Edit',
+          enabled: false
         };
 
         superSpy._availableActions.mockReturnValue([

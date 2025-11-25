@@ -27,19 +27,43 @@ const LabeledSelectStub = {
 };
 
 const stubs = {
-  CruResource:       { name: 'CruResource', template: '<div><slot /></div>' },
+  CruResource:       {
+    name:     'CruResource',
+    template: '<div><slot /></div>'
+  },
   NameNsDescription: true,
   LabeledInput:      true,
-  Banner:            { name: 'Banner', template: '<div><slot /></div>' },
-  LabeledSelect:     LabeledSelectStub
+  Banner:            {
+    name:     'Banner',
+    template: '<div><slot /></div>'
+  },
+  LabeledSelect: LabeledSelectStub
 };
 
 const t = (key: string) => key;
 
 const mockSecrets = [
-  { metadata: { name: 'secret-1', namespace: 'default' }, _type: SECRET_TYPES.DOCKER_JSON },
-  { metadata: { name: 'secret-2', namespace: 'other' }, _type: SECRET_TYPES.DOCKER_JSON },
-  { metadata: { name: 'secret-3', namespace: 'default' }, _type: 'Opaque' },
+  {
+    metadata: {
+      name:      'secret-1',
+      namespace: 'default'
+    },
+    _type: SECRET_TYPES.DOCKER_JSON
+  },
+  {
+    metadata: {
+      name:      'secret-2',
+      namespace: 'other'
+    },
+    _type: SECRET_TYPES.DOCKER_JSON
+  },
+  {
+    metadata: {
+      name:      'secret-3',
+      namespace: 'default'
+    },
+    _type: 'Opaque'
+  },
 ];
 
 const mockStore = {
@@ -56,14 +80,20 @@ const mockRoute = { params: { cluster: 'c-123' } };
 const defaultProps = {
   mode:  'create',
   value: {
-    metadata: { name: '', namespace: 'default' },
-    spec:     undefined,
+    metadata: {
+      name:      '',
+      namespace: 'default'
+    },
+    spec: undefined,
   },
 };
 
 const createWrapper = (props: any, storeMock = mockStore) => {
   return shallowMount(CruRegistry, {
-    props:  { ...defaultProps, ...props },
+    props:  {
+      ...defaultProps,
+      ...props
+    },
     global: {
       mocks: {
         $store:  storeMock,
@@ -119,7 +149,10 @@ describe('CruRegistry', () => {
   describe('fetch', () => {
     it('should call dispatch to find secrets on creation', async() => {
       const dispatch = jest.fn().mockResolvedValue(mockSecrets);
-      const specificStore = { ...mockStore, dispatch };
+      const specificStore = {
+        ...mockStore,
+        dispatch
+      };
 
       wrapper = createWrapper({}, specificStore);
 
@@ -179,7 +212,10 @@ describe('CruRegistry', () => {
     beforeEach(async() => {
       wrapper = createWrapper({});
       validValue = {
-        metadata: { name: 'my-registry', namespace: 'default' },
+        metadata: {
+          name:      'my-registry',
+          namespace: 'default'
+        },
         spec:     {
           catalogType:  REGISTRY_TYPE.OCI_DISTRIBUTION,
           authSecret:   'my-secret',
@@ -253,7 +289,10 @@ describe('CruRegistry', () => {
       wrapper.vm.save = save;
       wrapper.setProps({
         value: {
-          metadata: { name: 'my-registry', namespace: 'default' },
+          metadata: {
+            name:      'my-registry',
+            namespace: 'default'
+          },
           spec:     {
             catalogType:  REGISTRY_TYPE.OCI_DISTRIBUTION,
             authSecret:   'my-secret',
@@ -296,9 +335,18 @@ describe('CruRegistry', () => {
 
   describe('methods: refreshList', () => {
     it('should set loading state and re-fetch secrets', async() => {
-      const newMockSecret = [{ metadata: { name: 'new-secret', namespace: 'default' }, _type: SECRET_TYPES.DOCKER_JSON }];
+      const newMockSecret = [{
+        metadata: {
+          name:      'new-secret',
+          namespace: 'default'
+        },
+        _type: SECRET_TYPES.DOCKER_JSON
+      }];
       const dispatch = jest.fn().mockResolvedValue(newMockSecret);
-      const specificStore = { ...mockStore, dispatch };
+      const specificStore = {
+        ...mockStore,
+        dispatch
+      };
 
       wrapper = createWrapper({}, specificStore);
 
@@ -324,7 +372,15 @@ describe('CruRegistry', () => {
   describe('Template', () => {
     it('should show info banner when authSecret is "create"', async() => {
       wrapper = createWrapper({});
-      await wrapper.setProps({ value: { ...wrapper.vm.value, spec: { ...wrapper.vm.value.spec, authSecret: 'create' } } });
+      await wrapper.setProps({
+        value: {
+          ...wrapper.vm.value,
+          spec: {
+            ...wrapper.vm.value.spec,
+            authSecret: 'create'
+          }
+        }
+      });
       await wrapper.vm.$nextTick();
       const banner = wrapper.findComponent({ name: 'Banner' });
 
@@ -333,7 +389,15 @@ describe('CruRegistry', () => {
 
     it('should NOT show info banner when authSecret is not "create"', async() => {
       wrapper = createWrapper({});
-      await wrapper.setProps({ value: { ...wrapper.vm.value, spec: { ...wrapper.vm.value.spec, authSecret: 'my-secret' } } });
+      await wrapper.setProps({
+        value: {
+          ...wrapper.vm.value,
+          spec: {
+            ...wrapper.vm.value.spec,
+            authSecret: 'my-secret'
+          }
+        }
+      });
       await wrapper.vm.$nextTick();
       const banner = wrapper.findComponent({ name: 'Banner' });
 
@@ -342,7 +406,15 @@ describe('CruRegistry', () => {
 
     it('should mark repositories as required when type is NO_CATALOG', async() => {
       wrapper = createWrapper({});
-      await wrapper.setProps({ value: { ...wrapper.vm.value, spec: { ...wrapper.vm.value.spec, catalogType: REGISTRY_TYPE.NO_CATALOG } } });
+      await wrapper.setProps({
+        value: {
+          ...wrapper.vm.value,
+          spec: {
+            ...wrapper.vm.value.spec,
+            catalogType: REGISTRY_TYPE.NO_CATALOG
+          }
+        }
+      });
       await wrapper.vm.$nextTick();
       const repoSelect = wrapper.find('[data-testid="registry-scanning-repository-names"]');
 
@@ -354,7 +426,15 @@ describe('CruRegistry', () => {
 
     it('should NOT mark repositories as required when type is OCI_DISTRIBUTION', async() => {
       wrapper = createWrapper({});
-      await wrapper.setProps({ value: { ...wrapper.vm.value, spec: { ...wrapper.vm.value.spec, catalogType: REGISTRY_TYPE.OCI_DISTRIBUTION } } });
+      await wrapper.setProps({
+        value: {
+          ...wrapper.vm.value,
+          spec: {
+            ...wrapper.vm.value.spec,
+            catalogType: REGISTRY_TYPE.OCI_DISTRIBUTION
+          }
+        }
+      });
       await wrapper.vm.$nextTick();
       const repoSelect = wrapper.find('[data-testid="registry-scanning-repository-names"]');
       const requiredAttr = repoSelect.attributes('required');

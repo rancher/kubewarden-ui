@@ -330,6 +330,7 @@ export default {
             });
           }
         } catch (error) {
+          console.warn(error);
           this.installSteps[0].ready = false;
           this.$refs.wizard?.goToStep(1);
         }
@@ -366,6 +367,7 @@ export default {
             });
           }
         } catch (error) {
+          console.warn(error);
           this.installSteps[1].ready = false;
           this.$refs.wizard?.goToStep(2);
         }

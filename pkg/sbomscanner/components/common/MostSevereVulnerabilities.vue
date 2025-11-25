@@ -75,7 +75,9 @@ export default {
   computed: {
     // Get most severe vulnerabilities
     mostSevereVulnerabilities() {
-      if (!this.vulnerabilityReport) return [];
+      if (!this.vulnerabilityReport) {
+        return [];
+      }
 
       // Try to get vulnerabilities directly from the report data
       let vulnerabilities = [];

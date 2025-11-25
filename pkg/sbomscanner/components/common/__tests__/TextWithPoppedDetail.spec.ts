@@ -37,19 +37,34 @@ describe('TextWithPoppedDetail.vue', () => {
 
   describe('getStatusDotClass', () => {
     it('should return "dot failed" when detail.type is "error"', () => {
-      wrapper = mountComponent({ detail: { ...mockDetail, type: 'error' } });
+      wrapper = mountComponent({
+        detail: {
+          ...mockDetail,
+          type: 'error'
+        }
+      });
       expect(wrapper.vm.getStatusDotClass).toBe('dot failed');
       expect(wrapper.find('.dot.failed').exists()).toBe(true);
     });
 
     it('should return an empty string when detail.type is not "error"', () => {
-      wrapper = mountComponent({ detail: { ...mockDetail, type: 'info' } });
+      wrapper = mountComponent({
+        detail: {
+          ...mockDetail,
+          type: 'info'
+        }
+      });
       expect(wrapper.vm.getStatusDotClass).toBe('');
       expect(wrapper.find('.dot').exists()).toBe(false);
     });
 
     it('should return an empty string when detail.type is not provided', () => {
-      wrapper = mountComponent({ detail: { title: 'No Type', message: 'No Type Msg' } });
+      wrapper = mountComponent({
+        detail: {
+          title:   'No Type',
+          message: 'No Type Msg'
+        }
+      });
       expect(wrapper.vm.getStatusDotClass).toBe('');
       expect(wrapper.find('.dot').exists()).toBe(false);
     });

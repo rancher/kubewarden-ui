@@ -184,7 +184,12 @@ describe('DownloadFullReportBtn.vue', () => {
 
       wrapper = shallowMount(DownloadFullReportBtn, {
         propsData: { ...props },
-        global:    { mocks: { $store: mockStore, t: (key) => key } },
+        global:    {
+          mocks: {
+            $store: mockStore,
+            t:      (key) => key
+          }
+        },
       });
 
       const mainButton = wrapper.find('.dropdown-main');

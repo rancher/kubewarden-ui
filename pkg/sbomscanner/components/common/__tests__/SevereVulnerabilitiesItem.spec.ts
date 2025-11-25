@@ -74,7 +74,9 @@ describe('SevereVulnerabilitiesItem.vue', () => {
     const zeroImpactVuln = {
       ...mockVulnerability,
       spec: {
-        ...mockVulnerability.spec, impactedImages: 0, impactedImages_count: 0
+        ...mockVulnerability.spec,
+        impactedImages:       0,
+        impactedImages_count: 0
       }
     };
 
@@ -88,7 +90,10 @@ describe('SevereVulnerabilitiesItem.vue', () => {
   it('calculates percentage as zero if totalImages is 0 and impacted > 0', () => {
     const zeroTotalVuln = {
       ...mockVulnerability,
-      spec: { ...mockVulnerability.spec, totalImages: 0 }
+      spec: {
+        ...mockVulnerability.spec,
+        totalImages: 0
+      }
     };
 
     mountComponent(zeroTotalVuln);
@@ -102,7 +107,9 @@ describe('SevereVulnerabilitiesItem.vue', () => {
     const zeroAllVuln = {
       ...mockVulnerability,
       spec: {
-        ...mockVulnerability.spec, impactedImages: 0, totalImages: 0
+        ...mockVulnerability.spec,
+        impactedImages: 0,
+        totalImages:    0
       }
     };
 

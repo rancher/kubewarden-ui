@@ -7,13 +7,16 @@ import InstallView from '@sbomscanner/components/InstallView';
 export default {
   name: 'InstallationWizard',
 
-  components: { Dashboard, InstallView },
+  components: {
+    Dashboard,
+    InstallView
+  },
 
   async fetch() {
-    if ( this.$store.getters['cluster/canList'](SERVICE) ) {
+    if (this.$store.getters['cluster/canList'](SERVICE)) {
       this.allServices = await this.$store.dispatch('cluster/findAll', { type: SERVICE }, { root: true });
     }
-    if ( this.$store.getters['cluster/canList'](SCHEMA) ) {
+    if (this.$store.getters['cluster/canList'](SCHEMA)) {
       this.allSchemas = await this.$store.dispatch('cluster/findAll', { type: SCHEMA }, { root: true });
     }
   },

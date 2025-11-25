@@ -4,7 +4,7 @@ import SBOM from '../sbomscanner.kubewarden.io.sbom';
 class MockSteveModel {
   [key: string]: any;
   get _availableActions() {
-    return [ { action: 'download' }, { action: 'editYaml' }, { action: 'clone' }, { action: 'downloadyaml' } ];
+    return [{ action: 'download' }, { action: 'editYaml' }, { action: 'clone' }, { action: 'downloadyaml' }];
   }
 }
 
@@ -39,7 +39,9 @@ describe('SBOM model', () => {
   test('spdxData parses string and object, and handles invalid JSON', () => {
     const inst = Object.create((SBOM as any).prototype);
     const obj = {
-      packages: [{ name: 'p1' }], documentDescribes: ['doc1'], creationInfo: { licenseListVersion: '1.0' }
+      packages:          [{ name: 'p1' }],
+      documentDescribes: ['doc1'],
+      creationInfo:      { licenseListVersion: '1.0' }
     };
 
     // object
@@ -88,7 +90,7 @@ describe('SBOM model', () => {
 
     inst2.spec = { image: 'img-1' };
     inst2.$rootGetters = { 'i18n/t': (k: string) => k };
-    const images = [ { metadata: { name: 'img-1' } }, { spec: { name: 'other' } } ];
+    const images = [{ metadata: { name: 'img-1' } }, { spec: { name: 'other' } }];
 
     inst2.$getters = { all: () => images };
     expect(inst2.associatedImage.metadata.name).toBe('img-1');
@@ -97,7 +99,7 @@ describe('SBOM model', () => {
 
     inst3.spec = { image: 'spec-img' };
     inst3.$rootGetters = { 'i18n/t': (k: string) => k };
-    const images2 = [ { spec: { name: 'spec-img' } } ];
+    const images2 = [{ spec: { name: 'spec-img' } }];
 
     inst3.$getters = { all: () => images2 };
     expect(inst3.associatedImage.spec.name).toBe('spec-img');
@@ -181,7 +183,12 @@ describe('SBOM model', () => {
   test('packageCount reflects packages length and licenseInfo reads creationInfo', () => {
     const inst = Object.create((SBOM as any).prototype);
 
-    inst.spec = { spdx: { packages: [{}, {}, {}], creationInfo: { licenseListVersion: '3.1' } } };
+    inst.spec = {
+      spdx: {
+        packages:     [{}, {}, {}],
+        creationInfo: { licenseListVersion: '3.1' }
+      }
+    };
 
     expect(inst.packages.length).toBe(3);
     expect(inst.packageCount).toBe(3);
@@ -193,7 +200,7 @@ describe('SBOM model', () => {
 
     inst.spec = { image: 'meta-img' };
     inst.$rootGetters = { 'i18n/t': (k: string) => k };
-    const images = [ { spec: { name: 'no' } }, { metadata: { name: 'meta-img' } } ];
+    const images = [{ spec: { name: 'no' } }, { metadata: { name: 'meta-img' } }];
 
     inst.$getters = { all: () => images };
 
@@ -207,7 +214,7 @@ describe('SBOM model', () => {
 
     inst2.spec = { image: 'spec-img' };
     inst2.$rootGetters = { 'i18n/t': (k: string) => k };
-    inst2.$getters = { all: () => [ { spec: { name: 'spec-img' } } ] };
+    inst2.$getters = { all: () => [{ spec: { name: 'spec-img' } }] };
 
     const found2 = inst2.associatedImage;
 

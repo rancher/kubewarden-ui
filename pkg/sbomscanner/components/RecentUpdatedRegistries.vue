@@ -20,7 +20,10 @@ import InfoTooltip from '@sbomscanner/components/common/Tooltip';
 
 export default {
   name:       'RecentUpdatedRegistries',
-  components: { RegistryStatusUpdate, InfoTooltip },
+  components: {
+    RegistryStatusUpdate,
+    InfoTooltip
+  },
   props:      {
     registryStatusList: {
       type:     Array,

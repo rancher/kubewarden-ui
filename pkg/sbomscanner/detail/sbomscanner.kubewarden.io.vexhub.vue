@@ -24,8 +24,8 @@ const defaultMastheadProps = computed(() => {
       resourceTo:        vexhub.listLocation,
       description:       t('imageScanner.vexManagement.detail.description'),
       badge:             {
-        color: vexhub.spec.enabled ? ('bg-success' as 'bg-success') : ('bg-error' as 'bg-error'),
-        label: t(`imageScanner.enum.status.${vexhub.spec.enabled ? 'enabled' : 'disabled'}`)
+        color: vexhub.spec.enabled ? ('bg-success' as const) : ('bg-error' as const),
+        label: t(`imageScanner.enum.status.${ vexhub.spec.enabled ? 'enabled' : 'disabled' }`)
       },
       actionMenuResource: vexhub,
       showViewOptions:    false
