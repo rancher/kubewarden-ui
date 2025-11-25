@@ -5,7 +5,9 @@ import { isEmpty } from '@shell/utils/object';
 import { Banner } from '@components/Banner';
 import Loading from '@shell/components/Loading';
 
-import { KUBEWARDEN_APPS, ARTIFACTHUB_PKG_ANNOTATION } from '@kubewarden/types';
+import { KUBEWARDEN_APPS } from '@kubewarden/constants';
+import { ARTIFACTHUB_PKG_ANNOTATION } from '@kubewarden/types';
+
 import Resource from './Resource';
 
 export default {

@@ -5,7 +5,8 @@ import { SCHEMA } from '@shell/config/types';
 import Loading from '@shell/components/Loading';
 
 import { namespacedGroups, namespacedSchemas } from '@kubewarden/modules/core';
-import { KUBEWARDEN, KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_APPS } from '@kubewarden/types';
+import { KUBEWARDEN, KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_APPS } from '@kubewarden/constants';
+
 import Rule from './Rule';
 
 export default {

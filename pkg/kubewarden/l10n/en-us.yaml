@@ -81,6 +81,9 @@ kubewarden:
         warning: 'An air-gapped installation has been detected, this will require intervention to enable access to Kubewarden images and policies. It is necessary to make them available from an OCI registry that is accessible to the cluster.'
         docs: |
           Follow the documentation to setup an OCI registry for further installation.
+  policy:
+    title: Policies
+    legacyAccordionTitle: Legacy Policies
   tabs:
     security-contexts:
       label: Security Contexts
@@ -518,7 +521,7 @@ asyncButton:
   grafanaDashboard:
     action: Add Grafana Dashboards
     success: Added
-    wating: Adding&hellip;
+    waiting: Adding&hellip;
   serviceMonitor:
     action: Add Service Monitor
     success: Added
@@ -540,3 +543,5 @@ typeLabel:
   policies.kubewarden.io.policyserver: Policy Servers
   policies.kubewarden.io.admissionpolicy: Admission Policies
   policies.kubewarden.io.clusteradmissionpolicy: Cluster Admission Policies
+  policies.kubewarden.io.clusteradmissionpolicygroup: Cluster Admission Policy Groups
+  policies.kubewarden.io.admissionpolicygroup: Admission Policy Groups

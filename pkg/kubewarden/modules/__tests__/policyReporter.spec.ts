@@ -1,7 +1,8 @@
 import { Store } from 'vuex';
 
 import * as policyReporterModule from '@kubewarden/modules/policyReporter';
-import { KUBEWARDEN, Severity, Result } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
+import { Severity, Result } from '@kubewarden/types';
 import { mockPolicyReport, mockClusterPolicyReport } from '@tests/unit/mocks/policyReports';
 import { mockControllerAppLegacy } from '@tests/unit/mocks/controllerApp';
 

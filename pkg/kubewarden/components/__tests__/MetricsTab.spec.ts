@@ -3,7 +3,8 @@ import { shallowMount } from '@vue/test-utils';
 import {
   CATALOG, CONFIG_MAP, MONITORING, NAMESPACE, SERVICE
 } from '@shell/config/types';
-import { KUBEWARDEN, KubewardenDashboardLabels } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
+import { KubewardenDashboardLabels } from '@kubewarden/types';
 import { KUBERNETES } from '@shell/config/labels-annotations';
 
 import KubewardenDashboard from '@kubewarden/components/MetricsTab.vue';
