@@ -1,21 +1,21 @@
 <script>
-import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
+import { mapGetters } from 'vuex';
 
 import { _CREATE } from '@shell/config/query-params';
-import { allHash } from '@shell/utils/promise';
 import CreateEditView from '@shell/mixins/create-edit-view';
-import { mapPref, GROUP_RESOURCES } from '@shell/store/prefs';
+import { GROUP_RESOURCES, mapPref } from '@shell/store/prefs';
+import { allHash } from '@shell/utils/promise';
 
 import { BadgeState } from '@components/BadgeState';
 import CountGauge from '@shell/components/CountGauge';
-import Loading from '@shell/components/Loading';
 import ResourceTabs from '@shell/components/form/ResourceTabs';
+import Loading from '@shell/components/Loading';
 import ResourceTable from '@shell/components/ResourceTable';
 import Tab from '@shell/components/Tabbed/Tab';
 
 import { RELATED_HEADERS } from '@kubewarden/config/table-headers';
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 
 import MetricsTab from '@kubewarden/components/MetricsTab';
 import TraceTable from '@kubewarden/components/TraceTable';

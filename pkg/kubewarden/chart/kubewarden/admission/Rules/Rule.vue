@@ -6,7 +6,7 @@ import { _CREATE } from '@shell/config/query-params';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 import { schemasForGroup } from '@kubewarden/modules/core';
 
 export default {

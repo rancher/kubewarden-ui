@@ -1,22 +1,22 @@
 <script>
-import isEmpty from 'lodash/isEmpty';
 import jsyaml from 'js-yaml';
+import isEmpty from 'lodash/isEmpty';
 
 import { _CREATE } from '@shell/config/query-params';
 
 import Tab from '@shell/components/Tabbed/Tab';
 
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 
 // Using this custom Questions component until `hide_input` changes are made to @shell version
 import Questions from '@kubewarden/components/Questions';
 
-import General from './General';
-import Rules from './Rules';
-import NamespaceSelector from './NamespaceSelector';
-import Settings from './Settings';
 import ContextAware from './ContextAware';
+import General from './General';
 import MatchConditions from './MatchConditions';
+import NamespaceSelector from './NamespaceSelector';
+import Rules from './Rules';
+import Settings from './Settings';
 
 export default {
   props: {

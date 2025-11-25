@@ -3,7 +3,7 @@ import { CATALOG, WORKLOAD_TYPES } from '@shell/config/types';
 
 import { Banner } from '@components/Banner';
 
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 import { isAirgap } from '@kubewarden/utils/determine-airgap';
 import { isAdminUser } from '@kubewarden/utils/permissions';
 

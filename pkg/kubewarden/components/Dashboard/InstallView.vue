@@ -1,9 +1,9 @@
 <script>
-import { mapGetters } from 'vuex';
 import debounce from 'lodash/debounce';
+import { mapGetters } from 'vuex';
 
+import { CHART, REPO, REPO_TYPE, VERSION } from '@shell/config/query-params';
 import { CATALOG } from '@shell/config/types';
-import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
 import ResourceFetch from '@shell/mixins/resource-fetch';
 
 import { Banner } from '@components/Banner';
@@ -11,10 +11,10 @@ import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
 import Markdown from '@shell/components/Markdown';
 
-import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPOS } from '@kubewarden/types';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPOS } from '@kubewarden/constants';
 import { getLatestVersion } from '@kubewarden/plugins/kubewarden-class';
-import { handleGrowl } from '@kubewarden/utils/handle-growl';
 import { refreshCharts } from '@kubewarden/utils/chart';
+import { handleGrowl } from '@kubewarden/utils/handle-growl';
 
 import InstallWizard from '@kubewarden/components/InstallWizard';
 

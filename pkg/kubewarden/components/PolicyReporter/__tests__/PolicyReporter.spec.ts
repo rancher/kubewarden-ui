@@ -4,7 +4,9 @@ import PolicyReporter from '@kubewarden/components/PolicyReporter/index.vue';
 
 import mockControllerDeployment from '@/tests/unit/mocks/controllerDeployment';
 import { mockControllerAppLegacy } from '@/tests/unit/mocks/controllerApp';
-import { KUBEWARDEN, WG_POLICY_K8S } from '@kubewarden/types';
+
+import { KUBEWARDEN } from '@kubewarden/constants';
+import { WG_POLICY_K8S } from '@kubewarden/types';
 
 // Create a mock for the 'cluster/schemaFor' getter that returns different values based on the input.
 const clusterSchemaFor = jest.fn((resourceType) => {

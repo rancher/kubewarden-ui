@@ -1,14 +1,14 @@
 <script>
-import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
+import { mapGetters } from 'vuex';
 
-import { CATALOG } from '@shell/config/types';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
-import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
+import { CHART, REPO, REPO_TYPE, VERSION } from '@shell/config/query-params';
+import { CATALOG } from '@shell/config/types';
 
 import { Banner } from '@components/Banner';
 
-import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/types';
+import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@kubewarden/constants';
 
 import { newPolicyReportCompatible } from '@kubewarden/modules/policyReporter';
 import { appVersionSatisfiesConstraint, checkUpgradeAvailable } from '@kubewarden/utils/chart';

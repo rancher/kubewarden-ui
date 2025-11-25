@@ -1,7 +1,9 @@
 import { NAME as NAME_HEADER } from '@shell/config/table-headers';
 
+import { KUBEWARDEN } from '@kubewarden/constants';
+import { PolicyServer } from '@kubewarden/types';
+
 import { createKubewardenRoute } from '@kubewarden/utils/custom-routing';
-import { KUBEWARDEN, PolicyServer } from '@kubewarden/types';
 
 export const ADMISSION_POLICY_STATE = {
   name:      'policyStatus',
@@ -349,6 +351,140 @@ export const POLICY_TABLE_HEADERS = [
     getValue:  (row: any) => row.annotations,
     formatter: 'PolicyTableFeatures',
     width:     150
+  },
+  {
+    name:      '',
+    label:     '',
+    value:     'row',
+    formatter: 'PolicyTableBadges',
+    width:     40
+  }
+];
 
+function expressionToHuman(expr: string) {
+  if (!expr) {
+    return '';
+  }
+
+  // Remove the trailing `()` after the function/policy name
+  let out = expr.replace(/(\w+)\(\)/g, '$1');
+
+  // Replace logical operators with something more user-friendly
+  out = out.replace(/\|\|/g, ' OR ');
+  out = out.replace(/\&\&/g, ' AND ');
+  out = out.replace(/\!/g, ' NOT ');
+
+  return out;
+}
+
+export const UNIFIED_POLICY_EXPRESSION = {
+  name:  'expression',
+  label: 'Expression',
+  // For group policies, spec.expression has the CEL text
+  // For standalone, there's no expression, so return ''
+  value: (row: any) => {
+    if (row.type === KUBEWARDEN.ADMISSION_POLICY || row.type === KUBEWARDEN.CLUSTER_ADMISSION_POLICY) {
+      return '-';
+    }
+
+    const expr = row.spec?.expression || '';
+
+    return expressionToHuman(expr);
+  },
+  sort: false,
+};
+
+export const UNIFIED_POLICY_STATUS = {
+  name:      'status',
+  label:     'Status',
+  value:     (row: any) => row.status?.policyStatus || 'unknown',
+  formatter: 'PolicyStatus',
+  sort:      false,
+};
+
+export const UNIFIED_POLICY_NAME = {
+  name:          'name',
+  labelKey:      'tableHeaders.name',
+  value:         (row: any) => row.metadata.name,
+  sort:          ['nameSort'],
+  formatter:     'LinkDetail',
+  canBeVariable: true,
+};
+
+export const UNIFIED_POLICY_MODE = {
+  name:      'mode',
+  label:     'Mode',
+  value:     (row: any) => row.isGroup ? row.spec?.mode : row.spec?.mode,
+  formatter: 'PolicyMode',
+  sort:      false,
+};
+
+export const UNIFIED_POLICY_RULES = {
+  name:      'rules',
+  label:     'Rules',
+  value:     (row: any) => row.spec?.rules,
+  formatter: 'PolicyResources',
+};
+
+export const UNIFIED_POLICY_SERVER = {
+  name:  'policyServer',
+  label: 'Policy Server',
+  value: (row: any) => row.spec?.policyServer || '',
+  sort:  'policyServer:desc',
+};
+
+export const UNIFIED_POLICY_AGE = {
+  name:      'age',
+  labelKey:  'tableHeaders.age',
+  value:     (row: any) => row.metadata?.creationTimestamp,
+  sort:      'creationTimestamp:desc',
+  search:    false,
+  formatter: 'LiveDate',
+  width:     100,
+  align:     'left'
+};
+
+export const UNIFIED_POLICY_HEADERS = [
+  UNIFIED_POLICY_STATUS,
+  UNIFIED_POLICY_NAME,
+  UNIFIED_POLICY_EXPRESSION,
+  UNIFIED_POLICY_MODE,
+  // UNIFIED_POLICY_SERVER,
+  UNIFIED_POLICY_AGE
+];
+
+export const GROUP_POLICY_TABLE_HEADERS = [
+  {
+    name:          'name',
+    labelKey:      'tableHeaders.name',
+    value:         (row: any) => row.name,
+    sort:          ['nameSort'],
+  },
+  {
+    name:     'module',
+    labelKey: 'kubewarden.group.detail.columns.module',
+    value:    (row: any) => row.module,
+    sort:     ['module'],
+  }
+];
+
+export const GROUP_OVERVIEW_TABLE_HEADERS = [
+  {
+    name:     'backgroundAudit',
+    labelKey: 'kubewarden.group.detail.columns.backgroundAudit',
+    value:    'spec.backgroundAudit',
+    sort:     ['backgroundAudit'],
+  },
+  {
+    name:     'mode',
+    labelKey: 'kubewarden.group.detail.columns.mode',
+    value:    'spec.mode',
+    sort:     ['mode'],
+  },
+  {
+    name:     'policyServer',
+    labelKey: 'kubewarden.group.detail.columns.policyServer',
+    value:    'spec.policyServer',
+    sort:     ['policyServer'],
   }
 ];

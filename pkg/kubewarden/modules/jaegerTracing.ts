@@ -1,8 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
 
-import {
-  KUBEWARDEN, JaegerConfig, PolicyTrace, PolicyTraceConfig, Tag
-} from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
+import { JaegerConfig, PolicyTrace, PolicyTraceConfig, Tag } from '@kubewarden/types';
 import { proxyUrl } from '@kubewarden/utils/service';
 
 /** TODO: Update the `any` types throughout this file */

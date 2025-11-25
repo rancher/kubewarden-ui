@@ -1,5 +1,5 @@
 import { jaegerTraces, jaegerPolicyName, convertTagsToObject } from '@kubewarden/modules/jaegerTracing';
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/constants';
 
 jest.mock('@kubewarden/utils/service', () => ({ proxyUrl: jest.fn().mockReturnValue('http://mocked-proxy:16686/') }));
 
