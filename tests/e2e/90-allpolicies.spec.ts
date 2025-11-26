@@ -59,6 +59,7 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'Persistent Volume Access Modes'                                : { settings: persistentVolumeAccessModes },
   'Persistent Volume Claim Snapshot'                              : { settings: persistentVolumeClaimSnapshot },
   'Priority class policy'                                         : { settings: generalArray },
+  'Probes validator policy'                                       : { skip: 'https://github.com/kubewarden/policy-server/issues/1329' },
   'Resource Quota Setting Is Missing'                             : { settings: resourceQuotaSettingIsMissing },
   'Resource Suspend Waiver'                                       : { settings: generalArray },
   'Selinux PSP'                                                   : { settings: setupSelinuxPSP },
