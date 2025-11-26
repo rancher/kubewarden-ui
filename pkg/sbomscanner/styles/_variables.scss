@@ -1,0 +1,32 @@
+// Base Color Palette
+$dark-red: #A30000;
+$red: #E03231;
+$orange: #FD8D0D;
+$yellow: #FADA38;
+$light-gray: #C3C6D5;
+$dark-gray: #4A4B53;
+$very-light-gray: #DDDEE7;
+$aqua: #0FCFF0;
+$blue: #3E98D3;
+$icon-disabled-gray: #E2E3EB;
+$green: #5D9A5D;
+
+// Badge Colors
+$critical-color: $dark-red;
+$high-color: $red;
+$medium-color: $orange;
+$low-color: $yellow;
+$na-color: $light-gray;
+$low-na-text: $dark-gray;
+
+// Status Colors 
+$pending-color: $light-gray;
+$scheduled-color: $aqua;
+$inprogress-color: $blue;
+$completed-color: $green;
+$failed-color: $red;
+
+// Theme-aware colors for 'zero' state
+$zero-color-light: $very-light-gray;
+$zero-color-dark: $dark-gray;
+$zero-text: var(--disabled-text); // This can remain a CSS var as it's likely theme-aware from Rancher

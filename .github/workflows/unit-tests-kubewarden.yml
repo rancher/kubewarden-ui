@@ -1,0 +1,50 @@
+name: Unit Tests - KubeWarden
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 21 * * *'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'pkg/kubewarden/**'
+
+jobs:
+  unit-test-kubewarden:
+    if: github.repository_owner == 'rancher'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Nodejs and npm
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        with:
+          node-version: '20'
+
+      - name: Setup yarn
+        run: npm install -g yarn
+
+      - name: Setup Nodejs with yarn caching
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        with:
+          node-version: '20'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Run tests
+        run: |
+          yarn test:ci:kubewarden
+          mkdir -p coverage-artifacts/coverage/kubewarden/unit
+          cp coverage/unit/kubewarden/coverage-final.json coverage-artifacts/coverage/kubewarden/coverage-unit.json
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{github.run_number}}-${{github.run_attempt}}-coverage-kubewarden
+          path: coverage-artifacts/coverage/kubewarden/**/*

@@ -13,10 +13,13 @@ module.exports = () => {
       originalChainWebpack(webpackConfig);
       // Add the @kubewarden alias pointing to the pkg/kubewarden folder
       webpackConfig.resolve.alias.set('@kubewarden', path.resolve(__dirname, 'pkg/kubewarden'));
+      // Add the @sbomscanner alias pointing to the pkg/sbomscanner folder
+      webpackConfig.resolve.alias.set('@sbomscanner', path.resolve(__dirname, 'pkg/sbomscanner'));
     };
   } else {
     vendorConfig.chainWebpack = (webpackConfig) => {
       webpackConfig.resolve.alias.set('@kubewarden', path.resolve(__dirname, 'pkg/kubewarden'));
+      webpackConfig.resolve.alias.set('@sbomscanner', path.resolve(__dirname, 'pkg/sbomscanner'));
     };
   }
 
