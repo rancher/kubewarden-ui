@@ -62,7 +62,7 @@ export class TableRow {
       }
     }
 
-    this.row = rows
+    this.row = rows.describe(`TableRow: ${this}`)
     this.name = this.column('Name')
     this.status = this.column('Status', 'State')
   }
@@ -78,7 +78,7 @@ export class TableRow {
   column(index: number): Locator
   column(name: string, ...altNames: string[]): Locator
   column(...args: (number|string)[]): Locator {
-    return this.row.locator(this.getByColumn(...args))
+    return this.row.locator(this.getByColumn(...args)).describe(`TableRow: ${this}, Column: ${args.join('|')}`)
   }
 
   /**
@@ -106,7 +106,7 @@ export class TableRow {
 
   @step
   async action(name: string) {
-    await this.row.getByTestId(/^sortable-table-\d+-action-button$/).click()
+    await this.row.getByTestId(/^sortable-table-\d+-action-button$/).describe(`TableRow: ${this}, Action: ${name}`).click()
     // Rancher 2.11+ uses both menuitem & listitem
     await this.ui.page.getByRole('listitem').or(this.ui.page.getByRole('menuitem'))
       .getByText(name, { exact: true }).click()
@@ -123,6 +123,6 @@ export class TableRow {
   }
 
   async open() {
-    await this.name.getByRole('link').click()
+    await this.name.getByRole('link').describe(`TableRow: ${this}`).click()
   }
 }

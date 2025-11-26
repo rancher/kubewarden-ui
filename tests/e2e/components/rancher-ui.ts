@@ -27,6 +27,7 @@ export class RancherUI {
     return this.page.getByRole('button', { name, exact: true })
       .or(this.page.locator('a.btn,button', { has: this.page.getByText(name, { exact: true }) }))
       .filter({ visible: true })
+      .describe(`Button: ${name}`)
   }
 
   // Labeled Input
@@ -35,6 +36,7 @@ export class RancherUI {
       .filter({ has: this.page.getByText(label, { exact: true }) })
       .locator('input')
       .filter({ visible: true })
+      .describe(`Input: ${label}`)
   }
 
   // Labeled Checkbox
@@ -42,11 +44,12 @@ export class RancherUI {
     return this.page.locator('label.checkbox-container')
       .filter({ hasText: label })
       .locator('span.checkbox-custom')
+      .describe(`Checkbox: ${label}`)
   }
 
   // Tab
   tab(name: string|RegExp) {
-    return this.page.getByRole('tab', { name, exact: true })
+    return this.page.getByRole('tab', { name, exact: true }).describe(`Tab: ${name}`)
   }
 
   // Radio group
@@ -56,11 +59,12 @@ export class RancherUI {
     return this.page.locator('.radio-group')
       .filter({ has: this.page.getByRole('heading', { name: groupLabel }) })
       .locator('xpath=./following-sibling::div')
+      .describe(`Radio group: ${label}`)
   }
 
   // Radio input (span)
   radio(label: string, name: string): Locator {
-    return this.radioGroup(label).getByRole('radio', { name })
+    return this.radioGroup(label).getByRole('radio', { name }).describe(`Radio: ${name} in ${label}`)
   }
 
   // (un)Labeled Select (ComboBox)
@@ -69,7 +73,7 @@ export class RancherUI {
       ? this.page.locator('div.labeled-select').filter({ hasText: label })
       : label.locator('div.unlabeled-select')
 
-    return base.getByRole('combobox', { name: 'Search for option' })
+    return base.getByRole('combobox', { name: 'Search for option' }).describe(`Select: ${label}`)
   }
 
   // Slide-in drawer or old config
