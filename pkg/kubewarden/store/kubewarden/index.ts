@@ -5,10 +5,10 @@ import {
   CatalogApp,
   CustomResourceDefinition,
   FleetGitRepo,
-  PolicyReport,
+  Report,
   PolicyTraceConfig,
-  ClusterPolicyReport,
-  PolicyReportSummary,
+  ClusterReport,
+  ReportSummary,
   ArtifactHubPackage,
   ArtifactHubPackageDetails,
 } from '@kubewarden/types';
@@ -27,10 +27,10 @@ export interface StateConfig {
   controllerApp: CatalogApp | null;
   kubewardenCrds: CustomResourceDefinition[];
   loadingReports: boolean;
-  policyReports: PolicyReport[];
-  clusterPolicyReports: ClusterPolicyReport[];
-  reportMap: Record<string, PolicyReport | ClusterPolicyReport>;
-  summaryMap: Record<string, PolicyReportSummary>;
+  reports: Report[];
+  clusterReports: ClusterReport[];
+  reportMap: Record<string, Report | ClusterReport>;
+  summaryMap: Record<string, ReportSummary>;
   policyTraces: PolicyTraceConfig[];
   refreshingCharts: boolean;
   packages: ArtifactHubPackage[];
@@ -52,8 +52,8 @@ const kubewardenFactory = (config: StateConfig): CoreStoreSpecifics => {
         controllerApp:          config.controllerApp,
         kubewardenCrds:         config.kubewardenCrds,
         loadingReports:         config.loadingReports,
-        policyReports:          config.policyReports,
-        clusterPolicyReports:   config.clusterPolicyReports,
+        reports:                config.reports,
+        clusterReports:         config.clusterReports,
         reportMap:              config.reportMap,
         summaryMap:             config.summaryMap,
         policyTraces:           config.policyTraces,
@@ -84,8 +84,8 @@ export default {
     controllerApp:          null,
     kubewardenCrds:         [],
     loadingReports:         false,
-    policyReports:          [],
-    clusterPolicyReports:   [],
+    reports:                [],
+    clusterReports:         [],
     reportMap:              {},
     summaryMap:             {},
     policyTraces:           [],

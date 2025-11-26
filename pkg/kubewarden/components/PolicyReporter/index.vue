@@ -14,7 +14,7 @@ import { Banner } from '@components/Banner';
 import { isAdminUser } from '@kubewarden/utils/permissions';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 import { rootKubewardenRoute } from '@kubewarden/utils/custom-routing';
-import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '@kubewarden/types';
+import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, OPEN_REPORTS } from '@kubewarden/types';
 
 export default {
   components: {
@@ -101,11 +101,11 @@ export default {
     },
 
     hasClusterPolicyReportSchema() {
-      return this.$store.getters['cluster/schemaFor'](WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
+      return this.$store.getters['cluster/schemaFor'](OPEN_REPORTS.CLUSTER_REPORT.TYPE);
     },
 
     hasPolicyReportSchema() {
-      return this.$store.getters['cluster/schemaFor'](WG_POLICY_K8S.POLICY_REPORT.TYPE);
+      return this.$store.getters['cluster/schemaFor'](OPEN_REPORTS.REPORT.TYPE);
     },
 
     reporterCrds() {

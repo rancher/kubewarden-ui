@@ -12,7 +12,7 @@ import { BadgeState } from '@components/BadgeState';
 import { Banner } from '@components/Banner';
 import SortableTable from '@shell/components/SortableTable';
 
-import { KUBEWARDEN, PolicyReport, PolicyReportResult, ClusterPolicyReport } from '@kubewarden/types';
+import { KUBEWARDEN, Report, ReportResult, ClusterReport } from '@kubewarden/types';
 import { POLICY_REPORTER_HEADERS } from '@kubewarden/config/table-headers';
 import {
   getFilteredReport,
@@ -26,7 +26,7 @@ let route: RouteLocationNormalizedLoaded | null = null;
 
 const t = store.getters['i18n/t'];
 
-const report = ref<PolicyReport | ClusterPolicyReport | null>(null);
+const report = ref<Report | ClusterReport | null>(null);
 const resource = ref<any>(null);
 const canGetKubewardenLinks = ref(false);
 const headers = ref(POLICY_REPORTER_HEADERS);
@@ -52,7 +52,7 @@ async function fetchReports() {
   fetchState.pending = false;
 }
 
-function getResourceValue(row: PolicyReportResult, val: string, needScope = false): string {
+function getResourceValue(row: ReportResult, val: string, needScope = false): string {
   if (isNamespaceResource.value && needScope) {
     if (row.scope && val in row.scope) {
       const value = row.scope[val as keyof typeof row.scope];
@@ -65,7 +65,7 @@ function getResourceValue(row: PolicyReportResult, val: string, needScope = fals
 
   if (!isEmpty(row)) {
     if (val in row) {
-      const value = row[val as keyof (PolicyReportResult)];
+      const value = row[val as keyof (ReportResult)];
 
       return typeof value === 'string' ? value : '-';
     }
@@ -74,7 +74,7 @@ function getResourceValue(row: PolicyReportResult, val: string, needScope = fals
   return '-';
 }
 
-function getPolicyLink(row: PolicyReportResult): RouteLocationRaw | undefined {
+function getPolicyLink(row: ReportResult): RouteLocationRaw | undefined {
   const link = getLinkForPolicy(store, row);
 
   if (link) {
@@ -82,7 +82,7 @@ function getPolicyLink(row: PolicyReportResult): RouteLocationRaw | undefined {
   }
 }
 
-function severityColor(row: PolicyReportResult) {
+function severityColor(row: ReportResult) {
   if (row.result && row.severity) {
     return colorForSeverity(row.severity);
   }
@@ -90,7 +90,7 @@ function severityColor(row: PolicyReportResult) {
   return 'bg-muted';
 }
 
-function statusColor(row: PolicyReportResult) {
+function statusColor(row: ReportResult) {
   if (row.result) {
     const color = colorForResult(row.result);
     const bgColor = color.includes('sizzle') ? `${ color }-bg` : color.replace(/text-/, 'bg-');

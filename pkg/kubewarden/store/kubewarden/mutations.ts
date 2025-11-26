@@ -2,16 +2,16 @@ import {
   ArtifactHubPackageDetails,
   ArtifactHubPackage,
   CatalogApp,
-  ClusterPolicyReport,
+  ClusterReport,
   CustomResourceDefinition,
-  PolicyReport,
+  Report,
   PolicyTrace,
   PolicyTraceConfig,
-  PolicyReportSummary
+  ReportSummary
 } from '@kubewarden/types';
 import { StateConfig } from './index';
 
-type ReportKeys = 'policyReports' | 'clusterPolicyReports';
+type ReportKeys = 'reports' | 'clusterReports';
 
 export default {
   updateAirGapped(state: StateConfig, val: boolean) {
@@ -100,9 +100,9 @@ export default {
   /**
    * Updates/Adds Policy Reports to state
    * @param state
-   * @param updatedReports `PolicyReport[] | ClusterPolicyReport[]`
+   * @param updatedReports `Report[] | ClusterReport[]`
    */
-  updateReportsBatch<T extends PolicyReport | ClusterPolicyReport>(
+  updateReportsBatch<T extends Report | ClusterReport>(
     state: StateConfig,
     { reportArrayKey, updatedReports }: { reportArrayKey: ReportKeys, updatedReports: T[] }
   ): void {
@@ -139,9 +139,9 @@ export default {
   /**
    * Updates/Adds Policy Report summaries to state
    * @param state
-   * @param newSummary `Record<string, PolicyReportSummary>`
+   * @param newSummary `Record<string, ReportSummary>`
    */
-  setSummaryMap(state: StateConfig, newSummary: Record<string, PolicyReportSummary>) {
+  setSummaryMap(state: StateConfig, newSummary: Record<string, ReportSummary>) {
     state.summaryMap = {
       ...state.summaryMap,
       ...newSummary
@@ -153,11 +153,11 @@ export default {
    * @param state
    * @param reportId
    */
-  removePolicyReportById(state: StateConfig, reportId: string) {
-    const idx = state.policyReports.findIndex((report) => report.id === reportId);
+  removeReportById(state: StateConfig, reportId: string) {
+    const idx = state.reports.findIndex((report) => report.id === reportId);
 
     if (idx !== -1) {
-      state.policyReports.splice(idx, 1);
+      state.reports.splice(idx, 1);
     }
   },
 

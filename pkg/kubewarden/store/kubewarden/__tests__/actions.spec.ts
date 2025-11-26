@@ -38,28 +38,28 @@ describe('Vuex Actions', () => {
     expect(commit).toHaveBeenCalledWith('updateLoadingReports', true);
   });
 
-  it('updatePolicyReports should commit "updateReportsBatch" with reportArrayKey "policyReports"', () => {
+  it('updateReports should commit "updateReportsBatch" with reportArrayKey "reports"', () => {
     const reports = [{
       id:      '1',
       results: []
     }];
 
-    actions.updatePolicyReports({ commit }, reports);
+    actions.updateReports({ commit }, reports);
     expect(commit).toHaveBeenCalledWith('updateReportsBatch', {
-      reportArrayKey: 'policyReports',
+      reportArrayKey: 'reports',
       updatedReports: reports
     });
   });
 
-  it('updateClusterPolicyReports should commit "updateReportsBatch" with reportArrayKey "clusterPolicyReports"', () => {
+  it('updateClusterReports should commit "updateReportsBatch" with reportArrayKey "clusterReports"', () => {
     const reports = [{
       id:      '2',
       results: []
     }];
 
-    actions.updateClusterPolicyReports({ commit }, reports);
+    actions.updateClusterReports({ commit }, reports);
     expect(commit).toHaveBeenCalledWith('updateReportsBatch', {
-      reportArrayKey: 'clusterPolicyReports',
+      reportArrayKey: 'clusterReports',
       updatedReports: reports
     });
   });

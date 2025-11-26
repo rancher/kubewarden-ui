@@ -1,14 +1,14 @@
 import {
   CatalogApp,
   CustomResourceDefinition,
-  PolicyReport,
-  ClusterPolicyReport,
+  Report,
+  ClusterReport,
   PolicyTraceConfig,
   PolicyTrace,
   // REGO_POLICIES_REPO,
   // ArtifactHubPackage,
   // ArtifactHubPackageDetails,
-  PolicyReportSummary
+  ReportSummary
 } from '@kubewarden/types';
 import { generateSummaryMap } from '@kubewarden/modules/policyReporter';
 
@@ -44,21 +44,21 @@ export default {
     commit('updateLoadingReports', val);
   },
 
-  updatePolicyReports({ commit }: any, updatedReports: PolicyReport[]) {
+  updateReports({ commit }: any, updatedReports: Report[]) {
     commit('updateReportsBatch', {
-      reportArrayKey: 'policyReports',
+      reportArrayKey: 'reports',
       updatedReports
     });
   },
-  updateClusterPolicyReports({ commit }: any, updatedReports: ClusterPolicyReport[]) {
+  updateClusterReports({ commit }: any, updatedReports: ClusterReport[]) {
     commit('updateReportsBatch', {
-      reportArrayKey: 'clusterPolicyReports',
+      reportArrayKey: 'clusterReports',
       updatedReports
     });
   },
 
   async regenerateSummaryMap({ state, commit }: any) {
-    const newSummary: Record<string, PolicyReportSummary> = generateSummaryMap(state);
+    const newSummary: Record<string, ReportSummary> = generateSummaryMap(state);
 
     commit('setSummaryMap', newSummary);
   },
