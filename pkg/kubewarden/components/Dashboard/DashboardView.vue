@@ -19,11 +19,12 @@ import Modes from './Modes';
 import Reports from './Reports';
 import ReportsGauge from './ReportsGauge';
 import PolicyServerCard from './PolicyServerCard';
+import PoliciesSummary from './PoliciesSummary';
+import EmptyPolicies from './EmptyPolicies';
 import { RcItemCard } from '@components/RcItemCard';
 import VerticalGap from '@shell/components/Resource/Detail/Card/VerticalGap.vue';
 import StatusBar from '@shell/components/Resource/Detail/StatusBar.vue';
 import StatusRow from '@shell/components/Resource/Detail/StatusRow.vue';
-import { RcButton } from '@rancher/components';
 
 export default {
   components: {
@@ -34,8 +35,9 @@ export default {
     Masthead,
     ReportsGauge,
     RcItemCard,
-    RcButton,
     PolicyServerCard,
+    PoliciesSummary,
+    EmptyPolicies,
     VerticalGap,
     StatusBar,
     StatusRow
@@ -323,13 +325,13 @@ export default {
           return acc;
         }, {
           rows: [{
-            label:   'Success',
+            label:   'kubewarden.dashboard.cards.generic.success',
             count:   0,
             percent: 0,
             color:   'success'
           },
           {
-            label:   'Failed',
+            label:   'kubewarden.dashboard.cards.generic.error',
             count:   0,
             percent: 0,
             color:   'error'
@@ -444,9 +446,9 @@ export default {
           <template #item-card-content>
 
             <template v-if="index === 0">
-              <p>Rules that apply only to a single, specific namespace</p>
+              <p>{{ t('kubewarden.dashboard.cards.namespaced.description') }}</p>
               <template v-if="namespacesStats">
-                <p>Policies {{ namespacesStats.mode.protect }} Protect + {{ namespacesStats.mode.monitor }} Monitor</p>
+                <PoliciesSummary :protect="namespacesStats.mode.protect" :monitor="namespacesStats.mode.monitor" />
                 <StatusBar :segments="namespacedResultsGauges" />
                 <VerticalGap />
                 <StatusRow
@@ -455,20 +457,17 @@ export default {
                   data-testid="kw-dashboard-ap-gauge"
                   :key="i"
                   :color="row.color"
-                  :label="row.label"
+                  :label="t(row.label)"
                   :count="row.count"
                   :percent="row.percent"
                 />
               </template>
-              <div v-else>
-                <p>No active namespaced policies defined</p>
-                <RcButton link>Add a new policy</RcButton>
-              </div>
+              <EmptyPolicies v-else :label="t('kubewarden.dashboard.cards.namespaced.empty')" />
             </template>
 
             <template v-if="index === 1">
               <template v-if="clusterStats">
-                <p>Policies {{ clusterStats.mode.protect }} Protect + {{ clusterStats.mode.monitor }} Monitor</p>
+                <PoliciesSummary :protect="clusterStats.mode.protect" :monitor="clusterStats.mode.monitor" />
                 <StatusBar :segments="globalGuages" />
                 <VerticalGap />
                 <StatusRow
@@ -477,15 +476,12 @@ export default {
                   v-for="(row, i) in clusterStats.rows"
                   :key="i"
                   :color="row.color"
-                  :label="row.label"
+                  :label="t(row.label)"
                   :count="row.count"
                   :percent="row.percent"
                 />
               </template>
-              <div v-else>
-                <p>No active cluster policies defined</p>
-                <RcButton link>Add a new policy</RcButton>
-              </div>
+              <EmptyPolicies v-else :label="t('kubewarden.dashboard.cards.cluster.empty')" />
             </template>
 
             <template v-else-if="index === 2">
