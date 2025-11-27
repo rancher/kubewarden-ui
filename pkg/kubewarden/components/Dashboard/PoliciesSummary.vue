@@ -8,8 +8,8 @@ const { t } = useI18n(store);
 defineProps<{
   protect: number;
   monitor: number;
-  protectLink: string | object;
-  monitorLink: string | object;
+  protectLink: object;
+  monitorLink: object;
 }>();
 </script>
 

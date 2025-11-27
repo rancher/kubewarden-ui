@@ -332,14 +332,14 @@ export default {
   <div v-else class="dashboard">
     <Masthead :controller-app="controllerApp" />
 
-    <!-- TEMPORARY CHECK -->
     <div class="get-started">
       <template
         v-for="(card, index) in DASHBOARD_HEADERS"
         :key="index"
       >
         <RcItemCard
-          :id="index"
+          :id="`card-${index}`"
+          :value="card"
           variant="small"
           :header="{
             title: { text: t(card.title) },
