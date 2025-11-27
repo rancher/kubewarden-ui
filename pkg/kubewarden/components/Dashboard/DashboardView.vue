@@ -216,19 +216,23 @@ export default {
       return this.getPolicyGauges(this.namespacedPolicies);
     },
 
-    namespacesStats() {
-      return this.mapRow(this.admissionPolicyResults);
-    },
-    clusterStats() {
-      return this.mapRow(this.clusterPolicyResults);
-    },
-
     namespacedResultsGauges() {
       return this.getPolicyResultGauges(this.admissionPolicyResults);
     },
 
     clusterResultsGauges() {
       return this.getPolicyResultGauges(this.clusterPolicyResults);
+    },
+
+    globalStats() {
+      return this.mapRow(this.globalPolicies);
+    },
+
+    namespacesStats() {
+      return this.mapRow(this.admissionPolicyResults);
+    },
+    clusterStats() {
+      return this.mapRow(this.clusterPolicyResults);
     },
 
     policyReports() {
