@@ -449,18 +449,20 @@ export default {
               <p>{{ t('kubewarden.dashboard.cards.namespaced.description') }}</p>
               <template v-if="namespacesStats">
                 <PoliciesSummary :protect="namespacesStats.mode.protect" :monitor="namespacesStats.mode.monitor" />
-                <StatusBar :segments="namespacedResultsGauges" />
-                <VerticalGap />
-                <StatusRow
-                  class="status-row"
-                  v-for="(row, i) in namespacesStats.rows"
-                  data-testid="kw-dashboard-ap-gauge"
-                  :key="i"
-                  :color="row.color"
-                  :label="t(row.label)"
-                  :count="row.count"
-                  :percent="row.percent"
-                />
+                <template v-if="showReports">
+                  <StatusBar :segments="namespacedResultsGauges" />
+                  <VerticalGap />
+                  <StatusRow
+                    class="status-row"
+                    v-for="(row, i) in namespacesStats.rows"
+                    data-testid="kw-dashboard-ap-gauge"
+                    :key="i"
+                    :color="row.color"
+                    :label="t(row.label)"
+                    :count="row.count"
+                    :percent="row.percent"
+                  />
+                </template>
               </template>
               <EmptyPolicies v-else :label="t('kubewarden.dashboard.cards.namespaced.empty')" />
             </template>
@@ -468,18 +470,20 @@ export default {
             <template v-if="index === 1">
               <template v-if="clusterStats">
                 <PoliciesSummary :protect="clusterStats.mode.protect" :monitor="clusterStats.mode.monitor" />
-                <StatusBar :segments="globalGuages" />
-                <VerticalGap />
-                <StatusRow
-                  data-testid="kw-dashboard-cap-gauge"
-                  class="status-row"
-                  v-for="(row, i) in clusterStats.rows"
-                  :key="i"
-                  :color="row.color"
-                  :label="t(row.label)"
-                  :count="row.count"
-                  :percent="row.percent"
-                />
+                <template v-if="showReports">
+                  <StatusBar :segments="globalGuages" />
+                  <VerticalGap />
+                  <StatusRow
+                    data-testid="kw-dashboard-cap-gauge"
+                    class="status-row"
+                    v-for="(row, i) in clusterStats.rows"
+                    :key="i"
+                    :color="row.color"
+                    :label="t(row.label)"
+                    :count="row.count"
+                    :percent="row.percent"
+                  />
+                </template>
               </template>
               <EmptyPolicies v-else :label="t('kubewarden.dashboard.cards.cluster.empty')" />
             </template>
