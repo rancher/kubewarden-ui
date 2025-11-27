@@ -39,7 +39,7 @@ defineProps<{
           class="policies-card__stats"
           v-for="(row, i) in stats.rows"
           :data-testid="dataTestId"
-          :key="i"
+          :key="`row-${i}`"
           :color="row.color"
           :label="t(row.label)"
           :count="row.count"
