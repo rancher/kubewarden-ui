@@ -8,7 +8,8 @@ const { t } = useI18n(store);
 defineProps<{
   protect: number;
   monitor: number;
-  link: string;
+  protectLink: string;
+  monitorLink: string;
 }>();
 </script>
 
@@ -16,11 +17,17 @@ defineProps<{
   <div class="policies-summary">
     <span>{{ t('kubewarden.generic.policies') }}</span>
     <div class="policies-summary__stats">
-      <span>{{ protect }} {{ t('kubewarden.generic.protect') }}</span>
+      <router-link
+        :to="protectLink"
+        v-if="protect > 0"
+      >{{ protect }} {{ t('kubewarden.generic.protect') }}</router-link>
+      <span v-else>{{ protect }} {{ t('kubewarden.generic.protect') }}</span>
       <span>+</span>
       <router-link
-        :to="link"
+        :to="monitorLink"
+        v-if="monitor > 0"
       >{{ monitor }} {{ t('kubewarden.generic.monitor') }}</router-link>
+      <span v-else>{{ monitor }} {{ t('kubewarden.generic.monitor') }}</span>
     </div>
   </div>
 </template>
