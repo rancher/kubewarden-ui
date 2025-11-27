@@ -452,7 +452,12 @@ export default {
             <template v-if="index === 0">
               <p>{{ t('kubewarden.dashboard.cards.namespaced.description') }}</p>
               <template v-if="namespacesStats">
-                <PoliciesSummary :protect="namespacesStats.mode.protect" :monitor="namespacesStats.mode.monitor" />
+                <PoliciesSummary
+                  :protect="namespacesStats.mode.protect"
+                  :monitor="namespacesStats.mode.monitor"
+                  :protectLink="card.modeLink({ q: 'protect' })"
+                  :monitorLink="card.modeLink({ q: 'monitor' })"
+                />
                 <template v-if="showReports">
                   <StatusBar :segments="namespacedResultsGauges" />
                   <VerticalGap />
@@ -473,7 +478,12 @@ export default {
 
             <template v-if="index === 1">
               <template v-if="clusterStats">
-                <PoliciesSummary :protect="clusterStats.mode.protect" :monitor="clusterStats.mode.monitor" />
+                <PoliciesSummary
+                  :protect="clusterStats.mode.protect"
+                  :monitor="clusterStats.mode.monitor"
+                  :protectLink="card.modeLink({ q: 'protect' })"
+                  :monitorLink="card.modeLink({ q: 'monitor' })"
+                />
                 <template v-if="showReports">
                   <StatusBar :segments="globalGuages" />
                   <VerticalGap />
