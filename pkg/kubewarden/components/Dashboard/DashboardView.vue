@@ -14,33 +14,19 @@ import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '@
 import { isPolicyServerResource } from '@kubewarden/modules/policyServer';
 
 import Masthead from './Masthead';
-import Card from './Card';
-import Modes from './Modes';
-import Reports from './Reports';
-import ReportsGauge from './ReportsGauge';
 import PolicyServerCard from './PolicyServerCard';
-import PoliciesSummary from './PoliciesSummary';
-import EmptyPolicies from './EmptyPolicies';
+import PoliciesCard from './PoliciesCard';
 import { RcItemCard } from '@components/RcItemCard';
 import VerticalGap from '@shell/components/Resource/Detail/Card/VerticalGap.vue';
-import StatusBar from '@shell/components/Resource/Detail/StatusBar.vue';
-import StatusRow from '@shell/components/Resource/Detail/StatusRow.vue';
 
 export default {
   components: {
-    Card,
-    Modes,
-    Reports,
     Loading,
     Masthead,
-    ReportsGauge,
     RcItemCard,
     PolicyServerCard,
-    PoliciesSummary,
-    EmptyPolicies,
-    VerticalGap,
-    StatusBar,
-    StatusRow
+    PoliciesCard,
+    VerticalGap
   },
 
   async fetch() {
@@ -204,28 +190,8 @@ export default {
       return this.$store.getters['cluster/all'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
     },
 
-    globalGuages() {
-      return this.getPolicyGauges(this.globalPolicies);
-    },
-
     namespacedPolicies() {
       return this.$store.getters['cluster/all'](KUBEWARDEN.ADMISSION_POLICY);
-    },
-
-    namespacedGuages() {
-      return this.getPolicyGauges(this.namespacedPolicies);
-    },
-
-    namespacedResultsGauges() {
-      return this.getPolicyResultGauges(this.admissionPolicyResults);
-    },
-
-    clusterResultsGauges() {
-      return this.getPolicyResultGauges(this.clusterPolicyResults);
-    },
-
-    globalStats() {
-      return this.mapRow(this.globalPolicies);
     },
 
     namespacesStats() {
@@ -310,12 +276,12 @@ export default {
   },
 
   methods: {
-    mapRow(type) {
-      if (!isEmpty(type)) {
-        const total = type.length;
+    mapRow(policies) {
+      if (!isEmpty(policies)) {
+        const total = policies.length;
         const getPercentage = (count) => count ? Math.round((count / total) * 100) : 0;
 
-        return type?.reduce((acc, item) => {
+        const stats = policies?.reduce((acc, item) => {
           const isActive = item?.result === 'pass';
           const isError = item?.result === 'fail';
 
@@ -329,16 +295,12 @@ export default {
           return acc;
         }, {
           rows: [{
-            label:   'kubewarden.dashboard.cards.generic.success',
             count:   0,
             percent: 0,
-            color:   'success'
           },
           {
-            label:   'kubewarden.dashboard.cards.generic.error',
             count:   0,
             percent: 0,
-            color:   'error'
           }],
           mode: {
             protect: 0,
@@ -346,82 +308,21 @@ export default {
           },
           total
         });
+
+        return {
+          rows: [{
+            ...stats.rows[0],
+            label:   'kubewarden.dashboard.cards.generic.success',
+            color:   'success'
+          }, {
+            ...stats.rows[1],
+            label:   'kubewarden.dashboard.cards.generic.error',
+            color:   'error'
+          }],
+          mode: stats.mode
+        };
       }
     },
-
-    getPolicyGauges(type) {
-      if (!isEmpty(type)) {
-        return type?.reduce((policy, neu) => {
-          return {
-            status: {
-              running: policy?.status?.running + (neu?.status?.policyStatus === 'active' ? 1 : 0),
-              stopped: policy?.status?.stopped + (neu?.status?.error ? 1 : 0),
-              pending: policy?.status?.pending + (neu?.status?.policyStatus === 'pending' ? 1 : 0),
-            },
-            mode: {
-              protect: policy?.mode?.protect + (neu?.spec?.mode === 'protect' ? 1 : 0),
-              monitor: policy?.mode?.monitor + (neu?.spec?.mode === 'monitor' ? 1 : 0)
-            },
-            total: policy?.total + 1
-          };
-        }, {
-          status: {
-            running: 0,
-            stopped: 0,
-            pending: 0
-          },
-          mode:   {
-            protect: 0,
-            monitor: 0
-          },
-          total: 0
-        });
-      }
-
-      return {
-        status: {
-          running: 0,
-          stopped: 0,
-          pending: 0
-        },
-        mode:   {
-          protect: 0,
-          monitor: 0
-        },
-        total: 0
-      };
-    },
-
-    getPolicyResultGauges(type) {
-      if (!isEmpty(type)) {
-        return type?.reduce((res, neu) => {
-          return {
-            status: {
-              success: res?.status?.success + (neu?.result === 'pass' ? 1 : 0),
-              fail:    res?.status?.fail + (neu?.result === 'fail' ? 1 : 0),
-              error:   res?.status?.error + (neu?.result === 'error' ? 1 : 0)
-            },
-            total: res?.total + 1
-          };
-        }, {
-          status: {
-            success: 0,
-            fail:    0,
-            error:   0
-          },
-          total: 0
-        });
-      }
-
-      return {
-        status: {
-          success: 0,
-          fail:    0,
-          error:   0
-        },
-        total: 0
-      };
-    }
   }
 };
 </script>
@@ -448,115 +349,43 @@ export default {
         >
           <template #item-card-actions></template>
           <template #item-card-content>
-
+            <!-- Namespace card -->
             <template v-if="index === 0">
               <p>{{ t('kubewarden.dashboard.cards.namespaced.description') }}</p>
-              <template v-if="namespacesStats">
-                <PoliciesSummary
-                  :protect="namespacesStats.mode.protect"
-                  :monitor="namespacesStats.mode.monitor"
-                  :protectLink="card.modeLink({ q: 'protect' })"
-                  :monitorLink="card.modeLink({ q: 'monitor' })"
-                />
-                <template v-if="showReports">
-                  <StatusBar :segments="namespacedResultsGauges" />
-                  <VerticalGap />
-                  <StatusRow
-                    class="status-row"
-                    v-for="(row, i) in namespacesStats.rows"
-                    data-testid="kw-dashboard-ap-gauge"
-                    :key="i"
-                    :color="row.color"
-                    :label="t(row.label)"
-                    :count="row.count"
-                    :percent="row.percent"
-                  />
-                </template>
-              </template>
-              <EmptyPolicies v-else :label="t('kubewarden.dashboard.cards.namespaced.empty')" />
+              <VerticalGap />
+              <PoliciesCard
+                :stats="namespacesStats"
+                :show-reports="showReports"
+                :empty-label="t('kubewarden.dashboard.cards.namespaced.empty')"
+                :protect-link="card.modeLink({ q: 'protect' })"
+                :monitor-link="card.modeLink({ q: 'monitor' })"
+                data-test-id="kw-dashboard-ap-gauge"
+              />
             </template>
 
+            <!-- Cluster card -->
             <template v-if="index === 1">
-              <template v-if="clusterStats">
-                <PoliciesSummary
-                  :protect="clusterStats.mode.protect"
-                  :monitor="clusterStats.mode.monitor"
-                  :protectLink="card.modeLink({ q: 'protect' })"
-                  :monitorLink="card.modeLink({ q: 'monitor' })"
-                />
-                <template v-if="showReports">
-                  <StatusBar :segments="globalGuages" />
-                  <VerticalGap />
-                  <StatusRow
-                    data-testid="kw-dashboard-cap-gauge"
-                    class="status-row"
-                    v-for="(row, i) in clusterStats.rows"
-                    :key="i"
-                    :color="row.color"
-                    :label="t(row.label)"
-                    :count="row.count"
-                    :percent="row.percent"
-                  />
-                </template>
-              </template>
-              <EmptyPolicies v-else :label="t('kubewarden.dashboard.cards.cluster.empty')" />
+              <VerticalGap />
+              <PoliciesCard
+                :stats="clusterStats"
+                :show-reports="showReports"
+                :empty-label="t('kubewarden.dashboard.cards.cluster.empty')"
+                :protect-link="card.modeLink({ q: 'protect' })"
+                :monitor-link="card.modeLink({ q: 'monitor' })"
+                data-test-id="kw-dashboard-cap-gauge"
+              />
             </template>
 
+            <!-- Policy Servers list card -->
             <template v-else-if="index === 2">
               <span v-if="index === 2">
+                <VerticalGap />
                 <PolicyServerCard :policyServers="policyServersWithStatusAndModes" :card="card" />
               </span>
             </template>
           </template>
         </RcItemCard>
       </template>
-    </div>
-
-    <div class="get-started">
-      <div
-        v-for="(card, index) in DASHBOARD_HEADERS"
-        :key="index"
-        class="card-container"
-      >
-        <Card v-if="card.isEnabled" :card="card">
-          <template #count>
-            <span v-if="index === 0" class="count">{{ namespacedPolicies.length || 0 }}</span>
-            <span v-if="index === 1" class="count">{{ globalPolicies.length || 0 }}</span>
-            <span v-if="index === 2" class="count">{{ allPolicyServers.length || 0 }}</span>
-          </template>
-
-          <template #content>
-            <span v-if="index === 0">
-              <Modes :gauges="namespacedGuages" :mode-link="card.modeLink" />
-              <template v-if="showReports">
-                <Reports :gauges="namespacedResultsGauges" :show-reporter-link="showReporterLink" />
-                <ReportsGauge
-                  data-testid="kw-dashboard-ap-gauge"
-                  resource-name="Active"
-                  :reports="namespacedResultsGauges"
-                  :used-as-resource-name="true"
-                />
-              </template>
-            </span>
-
-            <span v-if="index === 1">
-              <Modes :gauges="globalGuages" :mode-link="card.modeLink" />
-              <template v-if="showReports">
-                <Reports :gauges="clusterResultsGauges" :show-reporter-link="showReporterLink" />
-                <ReportsGauge
-                  data-testid="kw-dashboard-cap-gauge"
-                  resource-name="Active"
-                  :reports="clusterResultsGauges"
-                />
-              </template>
-            </span>
-
-            <span v-if="index === 2">
-              <PolicyServerCard :policyServers="policyServersWithStatusAndModes" :card="card" />
-            </span>
-          </template>
-        </Card>
-      </div>
     </div>
   </div>
 </template>
@@ -571,11 +400,5 @@ export default {
     grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
     grid-gap: 20px;
   }
-}
-.status-row {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
 }
 </style>
