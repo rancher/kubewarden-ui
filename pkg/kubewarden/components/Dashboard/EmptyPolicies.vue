@@ -9,6 +9,7 @@ const { t } = useI18n(store);
 
 defineProps<{
   label: string;
+  to: string | object;
 }>();
 </script>
 
@@ -16,6 +17,8 @@ defineProps<{
   <div>
     <p>{{ label }}</p>
     <VerticalGap />
-    <RcButton link>{{ t('kubewarden.dashboard.cards.generic.new') }}</RcButton>
+    <router-link :to="to">
+      <RcButton link >{{ t('kubewarden.dashboard.cards.generic.new') }}</RcButton>
+    </router-link>
   </div>
 </template>

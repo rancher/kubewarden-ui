@@ -172,6 +172,10 @@ export const DASHBOARD_HEADERS = [
       name:   'c-cluster-product-resource',
       params: { resource: KUBEWARDEN.ADMISSION_POLICY }
     }),
+    createLink:  createKubewardenRoute({
+      name:   'c-cluster-product-resource-create',
+      params: { resource: KUBEWARDEN.ADMISSION_POLICY }
+    }),
     linkText:    'kubewarden.dashboard.headers.admissionPolicy.linkText',
     description: 'kubewarden.dashboard.headers.admissionPolicy.description',
     slotTitle:   'kubewarden.dashboard.headers.admissionPolicy.slotTitle',
@@ -190,6 +194,10 @@ export const DASHBOARD_HEADERS = [
     },
     link:        createKubewardenRoute({
       name:   'c-cluster-product-resource',
+      params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }
+    }),
+    createLink:  createKubewardenRoute({
+      name:   'c-cluster-product-resource-create',
       params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }
     }),
     linkText:    'kubewarden.dashboard.headers.clusterAdmissionPolicy.linkText',

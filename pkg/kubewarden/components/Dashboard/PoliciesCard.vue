@@ -19,6 +19,7 @@ defineProps<{
   emptyLabel: string;
   protectLink: object;
   monitorLink: object;
+  createLink: object;
   dataTestId: string;
 }>();
 </script>
@@ -48,7 +49,11 @@ defineProps<{
         />
       </template>
     </template>
-    <EmptyPolicies v-else :label="emptyLabel" />
+    <EmptyPolicies
+      v-else
+      :label="emptyLabel"
+      :to="createLink"
+    />
   </div>
 </template>
 
