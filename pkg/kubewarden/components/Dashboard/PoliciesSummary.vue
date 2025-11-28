@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useStore } from 'vuex';
 import { useI18n } from '@shell/composables/useI18n';
+import SubtleLink from '@shell/components/SubtleLink.vue';
 
 const store = useStore();
 const { t } = useI18n(store);
@@ -17,16 +18,16 @@ defineProps<{
   <div class="policies-summary">
     <span>{{ t('kubewarden.generic.policies') }}</span>
     <div class="policies-summary__stats">
-      <router-link
-        :to="protectLink"
+      <SubtleLink
         v-if="protect > 0"
-      >{{ protect }} {{ t('kubewarden.generic.protect') }}</router-link>
+        :to="protectLink"
+      >{{ protect }} {{ t('kubewarden.generic.protect') }}</SubtleLink>
       <span v-else>{{ protect }} {{ t('kubewarden.generic.protect') }}</span>
       <span>+</span>
-      <router-link
+      <SubtleLink
         :to="monitorLink"
         v-if="monitor > 0"
-      >{{ monitor }} {{ t('kubewarden.generic.monitor') }}</router-link>
+      >{{ monitor }} {{ t('kubewarden.generic.monitor') }}</SubtleLink>
       <span v-else>{{ monitor }} {{ t('kubewarden.generic.monitor') }}</span>
     </div>
   </div>
