@@ -14,19 +14,19 @@ import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '@
 import { isPolicyServerResource } from '@kubewarden/modules/policyServer';
 
 import Masthead from './Masthead';
-import PolicyServerCard from './PolicyServerCard';
 import PoliciesCard from './PoliciesCard';
 import { RcItemCard } from '@components/RcItemCard';
 import VerticalGap from '@shell/components/Resource/Detail/Card/VerticalGap.vue';
+import ResourceRow from '@shell/components/Resource/Detail/ResourceRow.vue';
 
 export default {
   components: {
     Loading,
     Masthead,
     RcItemCard,
-    PolicyServerCard,
     PoliciesCard,
-    VerticalGap
+    VerticalGap,
+    ResourceRow
   },
 
   async fetch() {
@@ -148,14 +148,14 @@ export default {
         });
 
         const totalPods   = podsForThisServer.length;
-        let overallStatus = 'stopped'; // default
+        let color = 'error'; // default
 
         if (runningCount === totalPods && totalPods > 0) {
-          overallStatus = 'running';
+          color = 'success';
         } else if (pendingCount > 0) {
-          overallStatus = 'pending';
+          color = 'warning';
         } else if (errorCount > 0) {
-          overallStatus = 'error';
+          color = 'error';
         }
 
         // Counts how many policies (namespaced + cluster) reference this server
@@ -174,14 +174,19 @@ export default {
         });
 
         return {
-          ...server,
-          _status:       overallStatus,
-          _totalPods:    totalPods,
-          _runningCount: runningCount,
-          _pendingCount: pendingCount,
-          _errorCount:   errorCount,
-          _monitorCount: monitorCount,
-          _protectCount: protectCount
+          label:  name,
+          to:     server.detailLocation,
+          color,
+          counts: [
+            {
+              count: protectCount,
+              label: 'Protect'
+            },
+            {
+              count: monitorCount,
+              label: 'Monitor'
+            }
+          ]
         };
       });
     },
@@ -396,12 +401,20 @@ export default {
               />
             </template>
 
-            <!-- Policy Servers list card -->
+            <!-- Servers list card -->
             <template v-else-if="index === 2">
-              <span v-if="index === 2">
+              <template v-if="index === 2">
                 <VerticalGap />
-                <PolicyServerCard :policyServers="policyServersWithStatusAndModes" :card="card" />
-              </span>
+                <ResourceRow
+                  class="dashboard__servers"
+                  v-for="(row, i) in policyServersWithStatusAndModes"
+                  :key="`resource-row-${index}-${i}`"
+                  :label="row.label"
+                  :color="row.color"
+                  :to="row.to"
+                  :counts="row.counts"
+                />
+              </template>
             </template>
           </template>
         </RcItemCard>
@@ -419,6 +432,11 @@ export default {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
     grid-gap: 20px;
+  }
+
+  &__servers {
+    display: flex;
+    width: 100%;
   }
 }
 </style>
