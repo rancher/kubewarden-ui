@@ -376,6 +376,7 @@ export default {
                 :empty-label="t('kubewarden.dashboard.cards.namespaced.empty')"
                 :protect-link="card.modeLink({ q: 'protect' })"
                 :monitor-link="card.modeLink({ q: 'monitor' })"
+                :create-link="card.createLink"
                 data-test-id="kw-dashboard-ap-gauge"
               />
             </template>
@@ -390,6 +391,7 @@ export default {
                 :empty-label="t('kubewarden.dashboard.cards.cluster.empty')"
                 :protect-link="card.modeLink({ q: 'protect' })"
                 :monitor-link="card.modeLink({ q: 'monitor' })"
+                :create-link="card.createLink"
                 data-test-id="kw-dashboard-cap-gauge"
               />
             </template>
