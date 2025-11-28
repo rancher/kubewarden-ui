@@ -13,18 +13,19 @@ const store = useStore();
 const { t } = useI18n(store);
 
 defineProps<{
+  results: any;
   stats: any;
   showReports: boolean;
   emptyLabel: string;
-  protectLink: string;
-  monitorLink: string;
+  protectLink: object;
+  monitorLink: object;
   dataTestId: string;
 }>();
 </script>
 
 <template>
   <div class="policies-card">
-    <template v-if="stats">
+    <template v-if="results">
       <PoliciesSummary
         :protect="stats.mode.protect"
         :monitor="stats.mode.monitor"
@@ -33,11 +34,11 @@ defineProps<{
       />
       <VerticalGap />
       <template v-if="showReports">
-        <StatusBar :segments="stats.rows" />
+        <StatusBar :segments="results.rows" />
         <VerticalGap />
         <StatusRow
-          class="policies-card__stats"
-          v-for="(row, i) in stats.rows"
+          class="policies-card__results"
+          v-for="(row, i) in results.rows"
           :data-testid="dataTestId"
           :key="`row-${i}`"
           :color="row.color"
@@ -55,7 +56,7 @@ defineProps<{
 .policies-card {
   width: 100%;
 
-  &__stats {
+  &__results {
     width: 100%;
     display: flex;
     flex-direction: row;

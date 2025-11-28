@@ -159,7 +159,7 @@ export default {
         }
 
         // Counts how many policies (namespaced + cluster) reference this server
-        const allPolicies = [...this.namespacedPolicies, ...this.globalPolicies];
+        const allPolicies = [...this.namespacedPolicies, ...this.clusterPolicies];
         const polsForThisServer = allPolicies.filter((p) => p.spec?.policyServer === name);
 
         let monitorCount = 0;
@@ -186,7 +186,7 @@ export default {
       });
     },
 
-    globalPolicies() {
+    clusterPolicies() {
       return this.$store.getters['cluster/all'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
     },
 
@@ -194,10 +194,19 @@ export default {
       return this.$store.getters['cluster/all'](KUBEWARDEN.ADMISSION_POLICY);
     },
 
-    namespacesStats() {
+    namespacedStats() {
+      return this.mapRow(this.namespacedPolicies);
+    },
+
+    clusterStats() {
+      return this.mapRow(this.clusterPolicies);
+    },
+
+    namespacesResults() {
       return this.mapRow(this.admissionPolicyResults);
     },
-    clusterStats() {
+
+    clusterResults() {
       return this.mapRow(this.clusterPolicyResults);
     },
 
@@ -285,14 +294,21 @@ export default {
           const isActive = item?.result === 'pass';
           const isError = item?.result === 'fail';
 
-          acc.rows[0].count = acc.rows[0].count + isActive;
-          acc.rows[1].count = acc.rows[1].count + isError;
-          acc.rows[0].percent = getPercentage(acc.rows[0].count);
-          acc.rows[1].percent = getPercentage(acc.rows[1].count);
-          acc.mode.protect = acc.mode.protect + (item?.spec?.mode === 'protect' ? 1 : 0);
-          acc.mode.monitor = acc.mode.monitor + (item?.spec?.mode === 'monitor' ? 1 : 0);
-
-          return acc;
+          return {
+            rows: [{
+              count:   acc.rows[0].count + isActive,
+              percent: getPercentage(acc.rows[0].count + isActive),
+            },
+            {
+              count:   acc.rows[1].count + isError,
+              percent: getPercentage(acc.rows[1].count + isError),
+            }],
+            mode: {
+              protect: acc.mode.protect + (item?.spec?.mode === 'protect' ? 1 : 0),
+              monitor: acc.mode.monitor + (item?.spec?.mode === 'monitor' ? 1 : 0)
+            },
+            total
+          };
         }, {
           rows: [{
             count:   0,
@@ -354,7 +370,8 @@ export default {
               <p>{{ t('kubewarden.dashboard.cards.namespaced.description') }}</p>
               <VerticalGap />
               <PoliciesCard
-                :stats="namespacesStats"
+                :results="namespacesResults"
+                :stats="namespacedStats"
                 :show-reports="showReports"
                 :empty-label="t('kubewarden.dashboard.cards.namespaced.empty')"
                 :protect-link="card.modeLink({ q: 'protect' })"
@@ -367,6 +384,7 @@ export default {
             <template v-if="index === 1">
               <VerticalGap />
               <PoliciesCard
+                :results="clusterResults"
                 :stats="clusterStats"
                 :show-reports="showReports"
                 :empty-label="t('kubewarden.dashboard.cards.cluster.empty')"
