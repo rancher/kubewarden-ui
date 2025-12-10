@@ -155,7 +155,7 @@ for (const PolicyPage of pageTypes) {
     // Delete custom PS & NS, policy is deleted too
     await psPage.delete(ps.name)
     await polPage.goto()
-    await expect(page.getByRole('cell', { name: 'Status' })).toBeVisible()
+    await expect(page.getByRole('columnheader', { name: 'Status' })).toBeVisible()
     await expect(row.row).not.toBeVisible()
     if (isAP(polPage)) await shell.run(`kubectl delete ns ${p.namespace}`)
   })
