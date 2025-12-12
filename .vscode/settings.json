@@ -1,4 +1,10 @@
 {
+  "eslint.format.enable": true,
+  "eslint.run": "onSave",
+  "eslint.validate": ["vue","html","javascript","typescript"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
   "files.exclude": {
     ".ackrc": true,
     ".dockerignore": true,
@@ -22,9 +28,6 @@
   "search.exclude": {
     "**/bower_components": true,
     "**/*.code-search": true
-  },
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
   },
   "typescript.tsdk": "node_modules/typescript/lib"
 }
