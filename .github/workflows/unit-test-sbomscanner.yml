@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Unit Tests - SBOMScanner
 
 on:
   workflow_dispatch:
@@ -7,9 +7,11 @@ on:
   pull_request:
     branches:
       - main
-
+    paths:
+      - 'pkg/sbomscanner/**'
+      
 jobs:
-  unit-test:
+  unit-test-sbomscanner:
     if: github.repository_owner == 'rancher'
     runs-on: ubuntu-latest
     steps:
@@ -22,7 +24,7 @@ jobs:
         uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
           node-version: '20'
-
+          
       - name: Setup yarn
         run: npm install -g yarn
 
@@ -35,14 +37,14 @@ jobs:
       - name: Install dependencies
         run: yarn
 
-      - name: Run tests
+      - name: Run tests and collect coverage
         run: |
-          yarn test:ci
-          mkdir -p coverage-artifacts/coverage/unit
-          cp coverage/unit/coverage-final.json coverage-artifacts/coverage/coverage-unit.json
+          yarn test:ci:sbomscanner
+          mkdir -p coverage-artifacts/coverage/sbomscanner/unit
+          cp coverage/unit/sbomscanner/coverage-final.json coverage-artifacts/coverage/sbomscanner/coverage-unit.json
 
       - name: Upload coverage
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ${{github.run_number}}-${{github.run_attempt}}-coverage
-          path: coverage-artifacts/**/*
+          name: ${{github.run_number}}-${{github.run_attempt}}-coverage-sbomscanner
+          path: coverage-artifacts/coverage/sbomscanner/**/*
