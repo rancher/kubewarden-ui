@@ -233,7 +233,8 @@ jobs:
         K3S: ${{ env.K3S_VERSION }}
         WORKER_COUNT: 1
         CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
-        K3D_REGISTRY_CONFIG: ${{secrets.K3D_REGISTRY_CONFIG}}
+        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
 
     # ==================================================================================================
     # Setup playwright ENV and run tests
