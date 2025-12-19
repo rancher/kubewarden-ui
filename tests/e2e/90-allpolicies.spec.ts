@@ -53,8 +53,7 @@ async function setupHighRiskServiceAccount(ui: RancherUI) {
 }
 
 async function setupPriorityClassPolicy(ui: RancherUI) {
-  await ui.button('Add').click()
-  await ui.page.getByPlaceholder('e.g. bar').fill('low-priority')
+  await fillGroup(ui, 'Allowed priority classes', ['low-priority'])
 }
 
 async function setupPvcScValidator(ui: RancherUI) {
