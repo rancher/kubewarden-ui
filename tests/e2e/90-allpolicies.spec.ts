@@ -58,7 +58,7 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'PVC StorageClass Validator'                                    : { settings: generalArray },
   'Persistent Volume Access Modes'                                : { settings: persistentVolumeAccessModes },
   'Persistent Volume Claim Snapshot'                              : { settings: persistentVolumeClaimSnapshot },
-  'Priority class policy'                                         : { settings: generalArray },
+  'Priority class policy'                                         : { settings: priorityClassPolicy },
   'Probes validator policy'                                       : { skip: 'https://github.com/kubewarden/policy-server/issues/1329' },
   'Resource Quota Setting Is Missing'                             : { settings: resourceQuotaSettingIsMissing },
   'Resource Suspend Waiver'                                       : { settings: generalArray },
@@ -88,6 +88,10 @@ async function setupHighRiskServiceAccount(ui: RancherUI) {
   await fillGroup(ui, 'Resources', ['roles', 'rolebindings'])
   await fillGroup(ui, 'Verbs', ['*'])
   await ui.input('namespace').fill('default')
+}
+
+async function priorityClassPolicy(ui: RancherUI) {
+  await fillGroup(ui, 'Allowed priority classes', ['low-priority'])
 }
 
 async function affinityNodeSelector(ui: RancherUI) {
