@@ -49,7 +49,7 @@ export class RancherExtensionsPage extends BasePage {
      * @param name Case insensitive exact match of plugin name
      * @returns plugin Locator
      */
-  getExtension(name: string|RegExp) {
+  getByName(name: string|RegExp) {
     return RancherUI.isVersion('>=2.13')
       ? this.page.locator('.item-card', { has: this.page.getByRole('heading', { name, exact: true }) })
       : this.page.locator('.plugin', { has: this.page.locator('.plugin-name').getByText(name, { exact: true }) })
@@ -66,7 +66,7 @@ export class RancherExtensionsPage extends BasePage {
   async install(name: string, options?: { version?: string }) {
     await this.selectTab('Available')
 
-    const plugin = this.getExtension(name)
+    const plugin = this.getByName(name)
     if (RancherUI.isVersion('>=2.13')) {
       await plugin.getByTestId('item-card-header-action-menu').click()
       await plugin.getByRole('menuitem', { name: 'Install' }).click()

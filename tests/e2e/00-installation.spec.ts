@@ -76,8 +76,8 @@ test('Install UI extension', async({ page, ui }) => {
     await test.step('Add official repository', async() => {
       await extensions.addRancherRepos({ rancher: true, partners: false })
       await ui.retry(async() => {
-        await extensions.selectTab('All')
-        await expect(page.locator('.plugin', { hasText: 'Kubewarden' })).toBeVisible({ timeout: 30_000 })
+        await extensions.selectTab('Available')
+        await expect(extensions.getByName('kubewarden')).toBeVisible({ timeout: 30_000 })
       }, 'Not showing kubewarden extension')
     })
   }
