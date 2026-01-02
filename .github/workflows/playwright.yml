@@ -241,7 +241,7 @@ jobs:
     # Setup playwright ENV and run tests
     # https://rancher.github.io/dashboard/testing/e2e-test#setup-for-local-tests
 
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       if: env.KUBEWARDEN == 'source'
       with:
         node-version: ${{ (github.event.pull_request.base.ref == 'release-1.6' || github.event.pull_request.base.ref == 'release-2.1') && '16' || '20' }}
@@ -253,7 +253,7 @@ jobs:
         git diff --exit-code yarn.lock
         VERSION=0.0.1 yarn build-pkg kubewarden
 
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
         node-version: '20'
 
