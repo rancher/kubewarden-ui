@@ -43,7 +43,7 @@ async function globalSetup(config: FullConfig) {
   // PRs: hardcoded default, github variables are not passed to PRs from forks
   // Fleet: latest released OTEL (*) to check for future failures
   // Other workflows: github action variable or hardcoded default
-  process.env.OTEL_OPERATOR ||= '0.97.1'
+  process.env.OTEL_OPERATOR ||= '0.102.0'
 }
 
 export default globalSetup
