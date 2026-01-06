@@ -118,16 +118,6 @@ onMounted(async() => {
 
   generateYaml();
 
-  // If creating a ClusterAdmissionPolicy, ensure default matchExpressions
-  if (props.mode === _CREATE && props.chartValues?.policy?.kind === 'ClusterAdmissionPolicy') {
-    if (!props.chartValues?.policy?.spec?.namespaceSelector) {
-      props.chartValues.policy.spec.namespaceSelector = {};
-    }
-    props.chartValues.policy.spec.namespaceSelector.matchExpressions = [
-      RANCHER_NS_MATCH_EXPRESSION
-    ];
-  }
-
   fetchPending.value = false;
 });
 </script>
