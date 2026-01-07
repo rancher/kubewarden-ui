@@ -23,7 +23,6 @@ import {
   KUBEWARDEN_CHARTS,
   VALUES_STATE,
   YAML_OPTIONS,
-  RANCHER_NS_MATCH_EXPRESSION
 } from '@kubewarden/types';
 
 interface Props {
@@ -117,6 +116,13 @@ onMounted(async() => {
   }
 
   generateYaml();
+
+  // If creating a ClusterAdmissionPolicy, ensure default matchExpressions
+  if (props.mode === _CREATE && props.chartValues?.policy?.kind === 'ClusterAdmissionPolicy') {
+    if (!props.chartValues?.policy?.spec?.namespaceSelector) {
+      props.chartValues.policy.spec.namespaceSelector = {};
+    }
+  }
 
   fetchPending.value = false;
 });
