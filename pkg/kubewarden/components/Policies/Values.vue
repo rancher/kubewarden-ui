@@ -23,6 +23,7 @@ import {
   KUBEWARDEN_CHARTS,
   VALUES_STATE,
   YAML_OPTIONS,
+  RANCHER_NS_MATCH_EXPRESSION
 } from '@kubewarden/types';
 
 interface Props {
@@ -122,6 +123,9 @@ onMounted(async() => {
     if (!props.chartValues?.policy?.spec?.namespaceSelector) {
       props.chartValues.policy.spec.namespaceSelector = {};
     }
+    props.chartValues.policy.spec.namespaceSelector.matchExpressions = [
+      RANCHER_NS_MATCH_EXPRESSION
+    ];
   }
 
   fetchPending.value = false;
