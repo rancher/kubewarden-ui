@@ -20,6 +20,7 @@
       "@shell/*": ["./node_modules/@rancher/shell/*"],
       "@components/*": ["./node_modules/@rancher/components/*"],
       "@kubewarden/*": ["./pkg/kubewarden/*"],
+      "@sbomscanner/*": ["./pkg/sbomscanner/*"],
       "@tests/*": ["./tests/*"]
     },
     "typeRoots": [
@@ -38,6 +39,14 @@
       "shell"
     ]
   },
-  "include": ["./pkg/kubewarden/**/*.ts", "./pkg/kubewarden/**/*.tsx", "./pkg/kubewarden/**/*.vue"],
+  "include": [
+    "./pkg/kubewarden/**/*.ts",
+    "./pkg/kubewarden/**/*.tsx",
+    "./pkg/kubewarden/**/*.vue",
+
+    "./pkg/sbomscanner/**/*.ts",
+    "./pkg/sbomscanner/**/*.tsx",
+    "./pkg/sbomscanner/**/*.vue",
+  ],
   "exclude": ["node_modules", "tests", "**/*.spec.ts", "**/*.test.ts", "jest.*.ts"]
 }
