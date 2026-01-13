@@ -49,7 +49,9 @@ export class RancherUI {
 
   // Tab
   tab(name: string|RegExp) {
-    return this.page.getByRole('tab', { name, exact: true }).describe(`Tab: ${name}`)
+    // Modify string parameter to handle (N) suffix (UI >= 4.0.4)
+    if (typeof name === 'string') name = new RegExp(`^${name}( \\(\\d+\\))?$`)
+    return this.page.getByRole('tab', { name }).describe(`Tab: ${name}`)
   }
 
   // Radio group
