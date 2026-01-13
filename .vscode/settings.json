@@ -1,34 +1,33 @@
 {
+  "eslint.format.enable": true,
+  "eslint.run": "onSave",
+  "eslint.validate": ["vue","html","javascript","typescript"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
   "files.exclude": {
     ".ackrc": true,
     ".dockerignore": true,
     ".drone.yml": true,
-    ".editorconfig": true,
     ".eslintcache": true,
     ".eslintignore": false,
     ".eslintrc.js": false,
     ".nuxt*": true,
     ".nyc_output": true,
-    ".vscode": false,
     "assets": false,
     "babel.config.js": false,
     "charts": false,
     "extensions": false,
     "jsconfig.json": true,
     "LICENSE": true,
-    "node_modules": true,
     "pkg/**/.shell": true,
     "pkg/**/node_modules": true,
     "yarn-error.log": true,
     "CODEOWNERS": true
   },
   "search.exclude": {
-    "**/node_modules": true,
     "**/bower_components": true,
     "**/*.code-search": true
-  },
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
   },
   "typescript.tsdk": "node_modules/typescript/lib"
 }
