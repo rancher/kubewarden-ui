@@ -6,18 +6,18 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
-    directory: "/tests"
+    directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 10
-  # Disabling based on discussion with Giuseppe Leo
-  # - package-ecosystem: "npm"
-  #   directory: "/"
-  #   schedule:
-  #     interval: "weekly"
-  #     day: "monday"
-  #   open-pull-requests-limit: 10
+  # Limited to rancher-shell by Giuseppe Leo
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    allow:
+      - dependency-name: "@rancher/shell"
   - package-ecosystem: "npm"
     directory: "/tests"
     schedule:
