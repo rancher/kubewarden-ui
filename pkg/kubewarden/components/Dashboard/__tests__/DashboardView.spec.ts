@@ -7,9 +7,8 @@ import { KUBEWARDEN } from '@kubewarden/types';
 import { DASHBOARD_HEADERS } from '@kubewarden/config/table-headers';
 
 import DashboardView from '@kubewarden/components/Dashboard/DashboardView.vue';
-import Card from '@kubewarden/components/Dashboard/Card.vue';
+import PoliciesCard from '@kubewarden/components/Dashboard/PoliciesCard.vue';
 import Masthead from '@kubewarden/components/Dashboard/Masthead.vue';
-import PolicyServerCard from '@kubewarden/components/Dashboard/PolicyServerCard.vue';
 
 import mockControllerChart from '@tests/unit/mocks/controllerChart';
 import mockPolicyServers from '@tests/unit/mocks/policyServers';
@@ -65,7 +64,10 @@ describe('component: DashboardView', () => {
     },
   };
 
-  const commonStubs = { 'router-link': { template: '<span />' } };
+  const commonStubs = {
+    'router-link': { template: '<span />' },
+    RcItemCard:    true
+  };
 
   const createWrapper = (overrides?: any) => {
     return mount(DashboardView, {
@@ -95,7 +97,7 @@ describe('component: DashboardView', () => {
     commonMocks.$fetchState.pending = false;
 
     const wrapper = createWrapper();
-    const cardComponents = wrapper.findAllComponents(Card);
+    const cardComponents = wrapper.findAllComponents(PoliciesCard);
 
     expect(cardComponents.length).toBe(DASHBOARD_HEADERS.length);
   });
@@ -105,7 +107,7 @@ describe('component: DashboardView', () => {
 
     const wrapper = createWrapper();
 
-    const cards = wrapper.findAllComponents(Card);
+    const cards = wrapper.findAllComponents(PoliciesCard);
 
     expect(cards.length).toBe(DASHBOARD_HEADERS.length);
 
@@ -124,7 +126,7 @@ describe('component: DashboardView', () => {
 
   it('renders correct policy-server data', () => {
     const wrapper = createWrapper();
-    const policyServerCardComponent = wrapper.findComponent(PolicyServerCard);
+    const policyServerCardComponent = wrapper.findComponent(PoliciesCard);
 
     const serversProp = policyServerCardComponent.props('policyServers');
 

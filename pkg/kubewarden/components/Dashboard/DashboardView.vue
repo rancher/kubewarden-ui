@@ -13,8 +13,8 @@ import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '@
 
 import { isPolicyServerResource } from '@kubewarden/modules/policyServer';
 
-import Masthead from './Masthead';
-import PoliciesCard from './PoliciesCard';
+import Masthead from '@kubewarden/components/Dashboard/Masthead.vue';
+import PoliciesCard from '@kubewarden/components/Dashboard/PoliciesCard.vue';
 import { RcItemCard } from '@components/RcItemCard';
 import VerticalGap from '@shell/components/Resource/Detail/Card/VerticalGap.vue';
 import ResourceRow from '@shell/components/Resource/Detail/ResourceRow.vue';
