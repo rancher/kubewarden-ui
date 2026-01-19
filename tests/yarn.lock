@@ -24,7 +24,7 @@
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.7.1.tgz#3ce3af1a5524ef327d2da9e4fd8b6d95c8d70528"
   integrity sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==
 
-ajv@^8.0.0, ajv@^8.12.0:
+ajv@^8.0.0:
   version "8.13.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.13.0.tgz#a3939eaec9fb80d217ddf0c3376948c023f28c91"
   integrity sha512-PRA911Blj99jR5RMeTunVbNXMF6Lp4vZXnk5GQjcnUWUTsrXtekg/pnmFFI2u/I36Y/2bITGS30GZCXei6uNkA==
@@ -33,6 +33,16 @@ ajv@^8.0.0, ajv@^8.12.0:
     json-schema-traverse "^1.0.0"
     require-from-string "^2.0.2"
     uri-js "^4.4.1"
+
+ajv@^8.17.1:
+  version "8.17.1"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.17.1.tgz#37d9a5c776af6bc92d7f4f9510eba4c0a60d11a6"
+  integrity sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==
+  dependencies:
+    fast-deep-equal "^3.1.3"
+    fast-uri "^3.0.1"
+    json-schema-traverse "^1.0.0"
+    require-from-string "^2.0.2"
 
 ansi-regex@^5.0.1:
   version "5.0.1"
@@ -70,13 +80,13 @@ axios-retry@^4.5.0:
   dependencies:
     is-retry-allowed "^2.2.0"
 
-axios@^1.8.2:
-  version "1.8.4"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.8.4.tgz#78990bb4bc63d2cae072952d374835950a82f447"
-  integrity sha512-eBSYY4Y68NNlHbHBMdeDmKNtDgXWhQsJcGqzO3iLUM0GraQFSS9cVgPX5I9b3lbdFKyYoAEGAZF1DwhTaljNAw==
+axios@^1.13.2:
+  version "1.13.2"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.2.tgz#9ada120b7b5ab24509553ec3e40123521117f687"
+  integrity sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==
   dependencies:
     follow-redirects "^1.15.6"
-    form-data "^4.0.0"
+    form-data "^4.0.4"
     proxy-from-env "^1.1.0"
 
 call-bind-apply-helpers@^1.0.1, call-bind-apply-helpers@^1.0.2:
@@ -138,7 +148,7 @@ dunder-proto@^1.0.1:
     es-errors "^1.3.0"
     gopd "^1.2.0"
 
-env-schema@^5.2.0:
+env-schema@^5.2.1:
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/env-schema/-/env-schema-5.2.1.tgz#7af7d5464690f18c862c21f9b1fe662d3ae6485a"
   integrity sha512-gWMNrQ3dVHAZcCx7epiFwgXcyfBh4heD/6+OK3bEbke3uL+KqwYA9nUOwzJyRZh1cJOFcwdPuY1n0GKSFlSWAg==
@@ -179,24 +189,31 @@ fast-deep-equal@^3.1.3:
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz#3a7d56b559d6cbc3eb512325244e619a65c6c525"
   integrity sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==
 
+fast-uri@^3.0.1:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.0.tgz#66eecff6c764c0df9b762e62ca7edcfb53b4edfa"
+  integrity sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==
+
 follow-redirects@^1.15.6:
   version "1.15.9"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.9.tgz#a604fa10e443bf98ca94228d9eebcc2e8a2c8ee1"
   integrity sha512-gew4GsXizNgdoRyqmyfMHyAmXsZDk6mHkSxZFCzW9gwlbtOW44CDtYavM+y+72qD/Vq2l550kMF52DT8fOLJqQ==
 
-form-data@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.0.tgz#93919daeaf361ee529584b9b31664dc12c9fa452"
-  integrity sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==
-  dependencies:
-    asynckit "^0.4.0"
-    combined-stream "^1.0.8"
-    mime-types "^2.1.12"
-
 form-data@^4.0.4:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.4.tgz#784cdcce0669a9d68e94d11ac4eea98088edd2c4"
   integrity sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==
+  dependencies:
+    asynckit "^0.4.0"
+    combined-stream "^1.0.8"
+    es-set-tostringtag "^2.1.0"
+    hasown "^2.0.2"
+    mime-types "^2.1.12"
+
+form-data@^4.0.5:
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.5.tgz#b49e48858045ff4cbf6b03e1805cebcad3679053"
+  integrity sha512-8RipRLol37bNs2bhoV67fiTEvdTrbMUYcFTiy3+wuuOnUog2QBHCZWXDRijWQfAkhBj2Uf5UnVaiWwA5vdd82w==
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
@@ -314,7 +331,7 @@ mime-db@1.52.0:
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.52.0.tgz#bbabcdc02859f4987301c856e3387ce5ec43bf70"
   integrity sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==
 
-mime-types@^2.1.12, mime-types@^2.1.33:
+mime-types@^2.1.12, mime-types@^2.1.35:
   version "2.1.35"
   resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.35.tgz#381a871b62a734450660ae3deee44813f70d959a"
   integrity sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==
@@ -326,14 +343,14 @@ playwright-core@1.57.0:
   resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.57.0.tgz#3dcc9a865af256fa9f0af0d67fc8dd54eecaebf5"
   integrity sha512-agTcKlMw/mjBWOnD6kFZttAAGHgi/Nw0CZ2o6JqWSbMlI219lAFLZZCyqByTsvVAJq5XA5H8cA6PrvBRpBWEuQ==
 
-playwright-qase-reporter@^2.1.6:
-  version "2.1.6"
-  resolved "https://registry.yarnpkg.com/playwright-qase-reporter/-/playwright-qase-reporter-2.1.6.tgz#cd59af5f0a5c36ac1102b1562eaebaf850a1d9e9"
-  integrity sha512-tlQ1VYuhrOFwrQhSKMFttu/cAgktooc29vFeClnhV235D0ErTSrApw1lrf942457wydvKEsl6ztIUegjsMWppQ==
+playwright-qase-reporter@^2.1.7:
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/playwright-qase-reporter/-/playwright-qase-reporter-2.1.7.tgz#56f9529e35931f677562b7a85c0cdd8083868474"
+  integrity sha512-iN/AeCN9GXjZ7665NqW8I85frcVgFmj381zz7x53rjjNiRqYtj1UcRqrSr91L59lekbrALyke6lAcmn+3+hx/Q==
   dependencies:
     chalk "^4.1.2"
-    qase-javascript-commons "~2.4.2"
-    uuid "^9.0.0"
+    qase-javascript-commons "~2.4.16"
+    uuid "^9.0.1"
 
 playwright@1.57.0:
   version "1.57.0"
@@ -354,40 +371,40 @@ punycode@^2.1.0:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-qase-api-client@~1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/qase-api-client/-/qase-api-client-1.0.1.tgz#56ae2fff26d4a186830ba212f24030808df24685"
-  integrity sha512-FvnLYACvLWwMczrplW8mI79FnQuHycWzvvYyWd86ECN4DvNLV3CR/5gpZQYb2c+FTHGa96bau+dvRC1f8jjQvQ==
+qase-api-client@~1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/qase-api-client/-/qase-api-client-1.1.1.tgz#9d809158d3707cf0d4cd2990b711c2e2b635369f"
+  integrity sha512-H/zSGwYmghOvxtGAbEg5AtDuyoHNGgB4zgnWhZIQpnnsY9D8242PPX0lDqyobm1w//A7imnLvzXHGDrOPeacrw==
   dependencies:
-    axios "^1.8.2"
+    axios "^1.13.2"
     axios-retry "^4.5.0"
 
-qase-api-v2-client@~1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/qase-api-v2-client/-/qase-api-v2-client-1.0.1.tgz#3f8440d85931f4b7d8ab035e179ad7e3800b4a06"
-  integrity sha512-jeTXIw9eb4Gc3EAAM04zrRjbkBU52LtwYlpzJxABIr0GxLuJddgiw4kHvEc7HSIzvVfuX8CmxdHYhPiOG19c3g==
+qase-api-v2-client@~1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/qase-api-v2-client/-/qase-api-v2-client-1.0.4.tgz#f8d62b3d329873197c3b28868f8be730f99902c4"
+  integrity sha512-Z9R/mc0sYcgRndTEJ632x46+Ra0g5LCJvE2/VoJnm9w9WhV6No/IzA51SubdRldjcdEGlLeERIhxRce+IJRqCw==
   dependencies:
-    axios "^1.8.2"
+    axios "^1.13.2"
     axios-retry "^4.5.0"
 
-qase-javascript-commons@~2.4.2:
-  version "2.4.3"
-  resolved "https://registry.yarnpkg.com/qase-javascript-commons/-/qase-javascript-commons-2.4.3.tgz#dee59e5b897e26bade28c53b3287746c1a3815b4"
-  integrity sha512-o6NDTELhx5/MsjxolMAlfZdUyEOMNe25wRRtEGBiDu7bwuVj7vW1cbmwC6P28xpyeDjeTPJ8trxXmiekH4Ba2w==
+qase-javascript-commons@~2.4.16:
+  version "2.4.16"
+  resolved "https://registry.yarnpkg.com/qase-javascript-commons/-/qase-javascript-commons-2.4.16.tgz#5c9f3deeec92ac55ff80a4aaeb9ef23400e26693"
+  integrity sha512-GP6JVPxB9CCnVqRCGgDB0lKTq2qpTVkjHryEnk+ra3s4JHKrL4/IPSd5MZWMqReFINebcNqDs1EE5GvJZa6t+A==
   dependencies:
-    ajv "^8.12.0"
+    ajv "^8.17.1"
     async-mutex "~0.5.0"
     chalk "^4.1.2"
-    env-schema "^5.2.0"
-    form-data "^4.0.4"
+    env-schema "^5.2.1"
+    form-data "^4.0.5"
     lodash.get "^4.4.2"
     lodash.merge "^4.6.2"
     lodash.mergewith "^4.6.2"
-    mime-types "^2.1.33"
-    qase-api-client "~1.0.1"
-    qase-api-v2-client "~1.0.1"
+    mime-types "^2.1.35"
+    qase-api-client "~1.1.1"
+    qase-api-v2-client "~1.0.4"
     strip-ansi "^6.0.1"
-    uuid "^9.0.0"
+    uuid "^9.0.1"
 
 require-from-string@^2.0.2:
   version "2.0.2"
@@ -425,7 +442,7 @@ uri-js@^4.4.1:
   dependencies:
     punycode "^2.1.0"
 
-uuid@^9.0.0:
+uuid@^9.0.1:
   version "9.0.1"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
   integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
