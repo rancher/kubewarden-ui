@@ -291,58 +291,56 @@ export default {
 
   methods: {
     mapRow(policies) {
-      if (!isEmpty(policies)) {
-        const total = policies.length;
-        const getPercentage = (count) => count ? Math.round((count / total) * 100) : 0;
+      const total = policies.length;
+      const getPercentage = (count) => count ? Math.round((count / total) * 100) : 0;
 
-        const stats = policies?.reduce((acc, item) => {
-          const isActive = item?.result === 'pass';
-          const isError = item?.result === 'fail';
-
-          return {
-            rows: [{
-              count:   acc.rows[0].count + isActive,
-              percent: getPercentage(acc.rows[0].count + isActive),
-            },
-            {
-              count:   acc.rows[1].count + isError,
-              percent: getPercentage(acc.rows[1].count + isError),
-            }],
-            mode: {
-              protect: acc.mode.protect + (item?.spec?.mode === 'protect' ? 1 : 0),
-              monitor: acc.mode.monitor + (item?.spec?.mode === 'monitor' ? 1 : 0)
-            },
-            total
-          };
-        }, {
-          rows: [{
-            count:   0,
-            percent: 0,
-          },
-          {
-            count:   0,
-            percent: 0,
-          }],
-          mode: {
-            protect: 0,
-            monitor: 0
-          },
-          total
-        });
+      const stats = policies?.reduce((acc, item) => {
+        const isActive = item?.result === 'pass';
+        const isError = item?.result === 'fail';
 
         return {
           rows: [{
-            ...stats.rows[0],
-            label:   'kubewarden.dashboard.cards.generic.success',
-            color:   'success'
-          }, {
-            ...stats.rows[1],
-            label:   'kubewarden.dashboard.cards.generic.error',
-            color:   'error'
+            count:   acc.rows[0].count + isActive,
+            percent: getPercentage(acc.rows[0].count + isActive),
+          },
+          {
+            count:   acc.rows[1].count + isError,
+            percent: getPercentage(acc.rows[1].count + isError),
           }],
-          mode: stats.mode
+          mode: {
+            protect: acc.mode.protect + (item?.spec?.mode === 'protect' ? 1 : 0),
+            monitor: acc.mode.monitor + (item?.spec?.mode === 'monitor' ? 1 : 0)
+          },
+          total
         };
-      }
+      }, {
+        rows: [{
+          count:   0,
+          percent: 0,
+        },
+        {
+          count:   0,
+          percent: 0,
+        }],
+        mode: {
+          protect: 0,
+          monitor: 0
+        },
+        total
+      });
+
+      return {
+        rows: [{
+          ...stats.rows[0],
+          label:   'kubewarden.dashboard.cards.generic.success',
+          color:   'success'
+        }, {
+          ...stats.rows[1],
+          label:   'kubewarden.dashboard.cards.generic.error',
+          color:   'error'
+        }],
+        mode: stats.mode
+      };
     },
   }
 };
@@ -372,7 +370,6 @@ export default {
           <template #item-card-content>
             <!-- Namespace card -->
             <template v-if="index === 0">
-              <p>{{ t('kubewarden.dashboard.cards.namespaced.description') }}</p>
               <VerticalGap />
               <PoliciesCard
                 :results="namespacesResults"

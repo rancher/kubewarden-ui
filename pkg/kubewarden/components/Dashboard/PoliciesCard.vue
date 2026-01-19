@@ -7,21 +7,23 @@ import StatusBar from '@shell/components/Resource/Detail/StatusBar.vue';
 import StatusRow from '@shell/components/Resource/Detail/StatusRow.vue';
 
 import PoliciesSummary from './PoliciesSummary.vue';
-import EmptyPolicies from './EmptyPolicies.vue';
+import ReportSummary from './ReportSummary.vue';
+import { computed } from 'vue';
 
 const store = useStore();
 const { t } = useI18n(store);
 
-defineProps<{
+const props = defineProps<{
   results: any;
   stats: any;
   showReports: boolean;
-  emptyLabel: string;
   protectLink: object;
   monitorLink: object;
   createLink: object;
   dataTestId: string;
 }>();
+
+const reportsCount = computed(() => props.results ? props.results.rows[0].count + props.results.rows[1].count : 0);
 </script>
 
 <template>
@@ -32,11 +34,18 @@ defineProps<{
         :monitor="stats.mode.monitor"
         :protectLink="protectLink"
         :monitorLink="monitorLink"
+        :createLink="createLink"
       />
       <VerticalGap />
-      <template v-if="showReports">
-        <StatusBar :segments="results.rows" />
+      <ReportSummary
+        :reports="reportsCount"
+      />
+      <VerticalGap />
+
+      <!-- Reports chart -->
+      <template v-if="!!reportsCount && showReports">
         <VerticalGap />
+        <StatusBar :segments="results.rows" />
         <StatusRow
           class="policies-card__results"
           v-for="(row, i) in results.rows"
@@ -49,11 +58,6 @@ defineProps<{
         />
       </template>
     </template>
-    <EmptyPolicies
-      v-else
-      :label="emptyLabel"
-      :to="createLink"
-    />
   </div>
 </template>
 

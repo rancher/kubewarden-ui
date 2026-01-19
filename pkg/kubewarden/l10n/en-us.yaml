@@ -16,6 +16,7 @@ kubewarden:
     policies: Policies
     protect: Protect
     monitor: Monitor
+    reports: Reports
   dashboard:
     title: Dashboard
     install: Install
@@ -85,17 +86,22 @@ kubewarden:
         docs: |
           Follow the documentation to setup an OCI registry for further installation.
     cards:
-      generic: 
-        new: Add a new Policy
+      generic:
+        reports:
+          total: '{count} Total Reports'
+          empty: No reports available
+        policies:
+          empty: No policies available
+          new: Add Policy
         success: Success
         error: Failed
       namespaced: 
         title: Namespaced Policies
         description: Rules that apply only to a single, specific namespace
-        empty: No active namespaced policies defined
+        empty: No policies available
       cluster: 
         title: Cluster Policies
-        empty: No active cluster policies defined
+        empty: No policies available
       server: 
         title: Policy Servers
   tabs:
