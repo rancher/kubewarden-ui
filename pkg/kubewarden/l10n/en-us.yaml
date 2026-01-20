@@ -88,11 +88,11 @@ kubewarden:
     cards:
       generic:
         reports:
-          total: '{count} Total Reports'
+          total: '{count} reports in total'
           empty: No reports available
         policies:
           empty: No policies available
-          new: Add Policy
+          new: add policy
         success: Success
         error: Failed
       namespaced: 
