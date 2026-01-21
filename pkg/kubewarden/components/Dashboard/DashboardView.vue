@@ -237,7 +237,7 @@ export default {
         return out;
       }
 
-      return null;
+      return [];
     },
 
     clusterPolicyResults() {
@@ -263,7 +263,7 @@ export default {
         return out;
       }
 
-      return null;
+      return [];
     },
 
     showReports() {
