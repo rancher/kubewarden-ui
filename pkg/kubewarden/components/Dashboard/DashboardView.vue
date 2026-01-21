@@ -369,6 +369,7 @@ export default {
           :content="{}"
         >
           <template #item-card-actions></template>
+          <!-- Cards Content -->
           <template #item-card-content>
             <!-- Namespace card -->
             <template v-if="index === 0">
@@ -402,28 +403,26 @@ export default {
 
             <!-- Servers list card -->
             <template v-else-if="index === 2">
-              <template v-if="index === 2">
+              <template v-if="policyServersWithStatusAndModes.length > 0">
                 <VerticalGap />
-                <template v-if="policyServersWithStatusAndModes > 0">
-                  <ResourceRow
-                    class="dashboard__servers"
-                    v-for="(row, i) in policyServersWithStatusAndModes"
-                    :key="`resource-row-${index}-${i}`"
-                    :label="row.label"
-                    :color="row.color"
-                    :to="row.to"
-                    :counts="row.counts"
-                  />
-                </template>
-
-                <EmptyRow
-                  v-else
+                <ResourceRow
                   class="dashboard__servers"
-                  :to="card.createLink"
-                  linkText="kubewarden.dashboard.cards.server.new"
-                  emptyText="kubewarden.dashboard.cards.server.empty"
+                  v-for="(row, i) in policyServersWithStatusAndModes"
+                  :key="`resource-row-${index}-${i}`"
+                  :label="row.label"
+                  :color="row.color"
+                  :to="row.to"
+                  :counts="row.counts"
                 />
               </template>
+
+              <EmptyRow
+                v-else
+                class="dashboard__servers"
+                :to="card.createLink"
+                linkText="kubewarden.dashboard.cards.server.new"
+                emptyText="kubewarden.dashboard.cards.server.empty"
+              />
             </template>
           </template>
         </RcItemCard>
