@@ -18,6 +18,7 @@ import PoliciesCard from '@kubewarden/components/Dashboard/PoliciesCard.vue';
 import { RcItemCard } from '@components/RcItemCard';
 import VerticalGap from '@shell/components/Resource/Detail/Card/VerticalGap.vue';
 import ResourceRow from '@shell/components/Resource/Detail/ResourceRow.vue';
+import EmptyRow from '@kubewarden/components/Dashboard/EmptyRow.vue';
 
 export default {
   components: {
@@ -26,7 +27,8 @@ export default {
     RcItemCard,
     PoliciesCard,
     VerticalGap,
-    ResourceRow
+    ResourceRow,
+    EmptyRow
   },
 
   async fetch() {
@@ -180,11 +182,11 @@ export default {
           counts: [
             {
               count: protectCount,
-              label: 'Protect'
+              label: 'protect'
             },
             {
               count: monitorCount,
-              label: 'Monitor'
+              label: 'monitor'
             }
           ]
         };
@@ -402,14 +404,24 @@ export default {
             <template v-else-if="index === 2">
               <template v-if="index === 2">
                 <VerticalGap />
-                <ResourceRow
+                <template v-if="policyServersWithStatusAndModes > 0">
+                  <ResourceRow
+                    class="dashboard__servers"
+                    v-for="(row, i) in policyServersWithStatusAndModes"
+                    :key="`resource-row-${index}-${i}`"
+                    :label="row.label"
+                    :color="row.color"
+                    :to="row.to"
+                    :counts="row.counts"
+                  />
+                </template>
+
+                <EmptyRow
+                  v-else
                   class="dashboard__servers"
-                  v-for="(row, i) in policyServersWithStatusAndModes"
-                  :key="`resource-row-${index}-${i}`"
-                  :label="row.label"
-                  :color="row.color"
-                  :to="row.to"
-                  :counts="row.counts"
+                  :to="card.createLink"
+                  linkText="kubewarden.dashboard.cards.server.new"
+                  emptyText="kubewarden.dashboard.cards.server.empty"
                 />
               </template>
             </template>

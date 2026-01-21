@@ -87,23 +87,27 @@ kubewarden:
           Follow the documentation to setup an OCI registry for further installation.
     cards:
       generic:
+        protect: protect
+        monitor: monitor
         reports:
           total: '{count} reports in total'
           empty: No reports available
         policies:
-          empty: No policies available
-          new: add policy
+          empty: No policies available.
+          new: Add policy
         success: Success
         error: Failed
       namespaced: 
         title: Namespaced Policies
         description: Rules that apply only to a single, specific namespace
-        empty: No policies available
+        empty: No policies available.
       cluster: 
         title: Cluster Policies
-        empty: No policies available
+        empty: No policies available.
       server: 
         title: Policy Servers
+        new: Add policy server
+        empty: No policy servers available.
   tabs:
     security-contexts:
       label: Security Contexts

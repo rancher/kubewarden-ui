@@ -2,6 +2,7 @@
 import { useStore } from 'vuex';
 import { useI18n } from '@shell/composables/useI18n';
 import SubtleLink from '@shell/components/SubtleLink.vue';
+import EmptyRow from '@kubewarden/components/Dashboard/EmptyRow.vue';
 
 const store = useStore();
 const { t } = useI18n(store);
@@ -25,23 +26,23 @@ defineProps<{
         <SubtleLink
           v-if="protect > 0"
           :to="protectLink"
-        >{{ protect }} {{ t('kubewarden.generic.protect') }}</SubtleLink>
-        <span v-else>{{ protect }} {{ t('kubewarden.generic.protect') }}</span>
+        >{{ protect }} {{ t('kubewarden.dashboard.cards.generic.protect') }}</SubtleLink>
+        <span v-else>{{ protect }} {{ t('kubewarden.dashboard.cards.generic.protect') }}</span>
         <span>+</span>
         <SubtleLink
           :to="monitorLink"
           v-if="monitor > 0"
-        >{{ monitor }} {{ t('kubewarden.generic.monitor') }}</SubtleLink>
-        <span v-else>{{ monitor }} {{ t('kubewarden.generic.monitor') }}</span>
+        >{{ monitor }} {{ t('kubewarden.dashboard.cards.generic.monitor') }}</SubtleLink>
+        <span v-else>{{ monitor }} {{ t('kubewarden.dashboard.cards.generic.monitor') }}</span>
       </template>
 
       <!-- No policies -->
       <template v-else>
-        <span class="policies-summary__stats policies-summary__stats--disabled">{{ t('kubewarden.dashboard.cards.generic.policies.empty') }}</span>
-        <span>-</span>
-        <SubtleLink
+        <EmptyRow
           :to="createLink"
-        >{{ t('kubewarden.dashboard.cards.generic.policies.new') }}</SubtleLink>
+          linkText="kubewarden.dashboard.cards.generic.policies.new"
+          emptyText="kubewarden.dashboard.cards.generic.policies.empty"
+        />
       </template>
     </div>
   </div>

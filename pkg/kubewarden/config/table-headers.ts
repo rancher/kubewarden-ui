@@ -157,6 +157,7 @@ export const POLICY_HEADERS = [
 ];
 
 export const DASHBOARD_HEADERS = [
+  // Admission/Namespaced Policy Card
   {
     isEnabled:   true,
     isLoaded:    true,
@@ -181,6 +182,7 @@ export const DASHBOARD_HEADERS = [
     slotTitle:   'kubewarden.dashboard.headers.admissionPolicy.slotTitle',
     title:       'kubewarden.dashboard.headers.admissionPolicy.title'
   },
+  // Cluster Admission Policy Card
   {
     isEnabled:   true,
     isLoaded:    true,
@@ -205,6 +207,7 @@ export const DASHBOARD_HEADERS = [
     slotTitle:   'kubewarden.dashboard.headers.clusterAdmissionPolicy.slotTitle',
     title:       'kubewarden.dashboard.headers.clusterAdmissionPolicy.title'
   },
+  // Server Card
   {
     isEnabled:   true,
     isLoaded:    true,
@@ -234,6 +237,10 @@ export const DASHBOARD_HEADERS = [
         }
       });
     },
+    createLink:  createKubewardenRoute({
+      name:   'c-cluster-product-resource-create',
+      params: { resource: KUBEWARDEN.POLICY_SERVER }
+    }),
     description: 'kubewarden.dashboard.headers.policyServer.description',
     slotTitle:   'kubewarden.dashboard.headers.policyServer.slotTitle',
     title:       'kubewarden.dashboard.headers.policyServer.title'

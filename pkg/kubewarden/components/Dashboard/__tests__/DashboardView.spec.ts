@@ -113,7 +113,7 @@ describe('component: DashboardView', () => {
 
     // The third card in the array is index 2
     const policyServersCard = cards[2];
-    const policyServerCardComponent = policyServersCard.findComponent(PolicyServerCard);
+    const policyServerCardComponent = policyServersCard.findComponent(PoliciesCard);
 
     expect(policyServerCardComponent.exists()).toBe(true);
 
@@ -132,5 +132,88 @@ describe('component: DashboardView', () => {
 
     expect(serversProp[0]._status).toBe('running');
     expect(serversProp[1]._status).toBe('pending');
+  });
+
+  it('loads correctly namespace policies', () => {
+    const wrapper = createWrapper();
+    const expectation = {
+      'mode': {
+        'monitor': 0,
+        'protect': 0
+      },
+      'rows': [{
+        'color':   'success',
+        'count':   0,
+        'label':   'kubewarden.dashboard.cards.generic.success',
+        'percent': 0
+      }, {
+        'color':   'error',
+        'count':   0,
+        'label':   'kubewarden.dashboard.cards.generic.error',
+        'percent': 0
+      }]
+    };
+
+    expect(wrapper.vm.namespacedStats).toEqual(expectation);
+  });
+
+  fit('loads correctly namespace reports', () => {
+    const wrapper = createWrapper();
+    const expectation = [];
+
+    expect(wrapper.vm.namespacesResults).toEqual(expectation);
+  });
+
+  it('loads correctly cluster policies', () => {
+    const wrapper = createWrapper();
+    const expectation = {
+      'mode': {
+        'monitor': 0,
+        'protect': 0
+      },
+      'rows': [{
+        'color':   'success',
+        'count':   0,
+        'label':   'kubewarden.dashboard.cards.generic.success',
+        'percent': 0
+      }, {
+        'color':   'error',
+        'count':   0,
+        'label':   'kubewarden.dashboard.cards.generic.error',
+        'percent': 0
+      }]
+    };
+
+    expect(wrapper.vm.clusterStats).toEqual(expectation);
+  });
+
+  it('loads correctly cluster reports', () => {
+    const wrapper = createWrapper();
+    const expectation = {
+      'mode': {
+        'monitor': 0,
+        'protect': 0
+      },
+      'rows': [{
+        'color':   'success',
+        'count':   0,
+        'label':   'kubewarden.dashboard.cards.generic.success',
+        'percent': 0
+      }, {
+        'color':   'error',
+        'count':   0,
+        'label':   'kubewarden.dashboard.cards.generic.error',
+        'percent': 0
+      }]
+    };
+
+    expect(wrapper.vm.clusterResults).toEqual(expectation);
+  });
+
+  it('loads correctly policy servers', () => {
+    const expectation = [];
+    const wrapper = createWrapper();
+
+    expect(wrapper.vm.policyServersWithStatusAndModes).toEqual(expectation);
   });
 });
