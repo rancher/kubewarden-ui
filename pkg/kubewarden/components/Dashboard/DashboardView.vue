@@ -368,7 +368,6 @@ export default {
           }"
           :content="{}"
         >
-          <template #item-card-actions></template>
           <!-- Cards Content -->
           <template #item-card-content>
             <!-- Namespace card -->
