@@ -46,10 +46,10 @@ on:
       mode:
         description: Installation mode
         type: choice
-        default: 'base'
+        default: 'manual'
         required: true
         options:
-        - base
+        - manual
         - fleet
         - upgrade
       testbase:
@@ -105,7 +105,7 @@ jobs:
       fail-fast: false
       matrix:
         rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.8", "2.9", "2.10"]') || fromJSON(format('["{0}"]', inputs.rancher || github.event.pull_request.base.ref )) }}
-        mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["base", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'base')) }}
+        mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["manual", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'manual')) }}
         exclude:
           # Run all modes on 2.10 since it's latest prime version
           - rancher: ${{ github.event_name == 'schedule' && '2.8' }}
