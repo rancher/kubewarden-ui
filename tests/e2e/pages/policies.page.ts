@@ -24,9 +24,10 @@ export const apList = ['Custom Policy',
   'Rbac Prohibit Watch On Secrets', 'Rbac Prohibit Wildcard On Secrets', 'Rbac Prohibit Wildcards on Policy Rule Resources', 'Rbac Prohibit Wildcards on Policy Rule Verbs',
   'Readonly Root Filesystem PSP', 'Resource Quota Setting Is Missing', 'Resource Reconcile Interval Must Be Set Between Lower and Upper Bound', 'Resource Suspend Waiver',
   'Safe Annotations', 'Safe Labels', 'Seccomp PSP', 'Selinux PSP', 'Share PID namespace', 'Sysctl PSP', 'Trusted Repos', 'Unique Ingress host', 'Unique service selector',
-  'User Group PSP', 'Verify Image Signatures', 'Volumes PSP', 'volumeMounts', 'High Risk Service Account', 'Annotations', 'Labels', 'image-cve', 'Probes validator policy'] as const
+  'User Group PSP', 'Verify Image Signatures', 'Volumes PSP', 'volumeMounts', 'High Risk Service Account', 'Annotations', 'Labels', 'image-cve', 'Probes validator policy',
+  'Rancher Project quotas namespace validator'] as const
 
-export const capList = [...apList, 'PSA Label Enforcer', 'Istio Injected Namespaces', 'Persistent Volume Access Modes'] as const
+export const capList = [...apList, 'PSA Label Enforcer', 'Istio Injected Namespaces', 'Persistent Volume Access Modes', 'Rancher Project propagate labels'] as const
 
 export type policyTitle = typeof capList[number]
 export type PolicyKind = 'AdmissionPolicy' | 'ClusterAdmissionPolicy'
