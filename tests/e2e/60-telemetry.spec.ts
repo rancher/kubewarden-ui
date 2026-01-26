@@ -87,7 +87,7 @@ test.describe('Tracing', () => {
       }
     })
     // Wait until kubewarden controller restarts policyserver
-    await shell.retry(`kubectl logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container --since-time ${now} | grep -F "Everything is ready."`)
+    await shell.retry(`kubectl logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container --since-time ${now} 2>/dev/null | grep -F "Everything is ready."`)
   })
 
   test('Check traces are visible', async({ ui, nav, shell }) => {
@@ -100,7 +100,10 @@ test.describe('Tracing', () => {
     await test.step('Check default PS', async() => {
       // Check logs on policy server
       await nav.pservers('default', 'Tracing')
-      await expect(logline).toBeVisible()
+      await ui.retry(async() => {
+        await expect(logline).toBeVisible()
+      }, 'Jaeger might take a moment to process the trace')
+
       // Check logs on (recommended) policy
       await nav.capolicies('no-privileged-pod', 'Tracing')
       await expect(logline).toBeVisible()
