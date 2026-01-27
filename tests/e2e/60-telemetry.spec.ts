@@ -100,7 +100,10 @@ test.describe('Tracing', () => {
     await shell.privpod({ name: 'tracing-privpod' })
     // Check logs on policy server
     await nav.pserver('default', 'Tracing')
-    await expect(logline).toBeVisible()
+    await ui.retry(async() => {
+      await expect(logline).toBeVisible()
+    }, 'Jaeger might take a moment to process the trace')
+
     // Check logs on the (recommended) policy
     await nav.capolicy('no-privileged-pod', 'Tracing')
     await expect(logline).toBeVisible()
