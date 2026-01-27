@@ -4,7 +4,7 @@ const Loading = { template: '<span />' };
 
 import { CATALOG, POD } from '@shell/config/types';
 
-import { KUBEWARDEN } from '@kubewarden/types';
+import { KUBEWARDEN, WG_POLICY_K8S } from '@kubewarden/types';
 import { DASHBOARD_HEADERS } from '@kubewarden/config/table-headers';
 
 import DashboardView from '@kubewarden/components/Dashboard/DashboardView.vue';
@@ -12,6 +12,169 @@ import DashboardView from '@kubewarden/components/Dashboard/DashboardView.vue';
 import mockControllerChart from '@tests/unit/mocks/controllerChart';
 import mockPolicyServers from '@tests/unit/mocks/policyServers';
 import { mockControllerAppLegacy } from '@tests/unit/mocks/controllerApp';
+
+// Mock admission policies
+const mockAdmissionPolicies = [{
+  'id':         'default/namespaced-policy-1',
+  'type':       'policies.kubewarden.io.admissionpolicy',
+  'apiVersion': 'policies.kubewarden.io/v1',
+  'kind':       'AdmissionPolicy',
+  'metadata':   {
+    'name':      'namespaced-policy-1',
+    'namespace': 'default',
+    'state':     {
+      'error':         false,
+      'message':       'Resource is current',
+      'name':          'active',
+      'transitioning': false
+    },
+  },
+  'spec': {
+    'backgroundAudit': true,
+    'mode':            'protect',
+    'module':          'ghcr.io/kubewarden/policies/example:v1.0.0',
+    'mutating':        false,
+    'policyServer':    'default',
+    'rules':           [],
+  },
+  'status': {
+    'mode':         'protect',
+    'policyStatus': 'active'
+  },
+  'result': 'pass'
+}, {
+  'id':         'default/namespaced-policy-2',
+  'type':       'policies.kubewarden.io.admissionpolicy',
+  'apiVersion': 'policies.kubewarden.io/v1',
+  'kind':       'AdmissionPolicy',
+  'metadata':   {
+    'name':      'namespaced-policy-2',
+    'namespace': 'default',
+    'state':     {
+      'error':         false,
+      'message':       'Resource is current',
+      'name':          'active',
+      'transitioning': false
+    },
+  },
+  'spec': {
+    'backgroundAudit': true,
+    'mode':            'monitor',
+    'module':          'ghcr.io/kubewarden/policies/example:v1.0.0',
+    'mutating':        false,
+    'policyServer':    'default',
+    'rules':           [],
+  },
+  'status': {
+    'mode':         'monitor',
+    'policyStatus': 'active'
+  },
+  'result': 'fail'
+}];
+
+const mockClusterAdmissionPolicies = [{
+  'id':         'cluster-policy-1',
+  'type':       'policies.kubewarden.io.clusteradmissionpolicy',
+  'apiVersion': 'policies.kubewarden.io/v1',
+  'kind':       'ClusterAdmissionPolicy',
+  'metadata':   {
+    'name':  'cluster-policy-1',
+    'state': {
+      'error':         false,
+      'message':       'Resource is current',
+      'name':          'active',
+      'transitioning': false
+    },
+  },
+  'spec': {
+    'backgroundAudit': true,
+    'mode':            'protect',
+    'module':          'ghcr.io/kubewarden/policies/example:v1.0.0',
+    'mutating':        false,
+    'policyServer':    'default',
+    'rules':           [],
+  },
+  'status': {
+    'mode':         'protect',
+    'policyStatus': 'active'
+  },
+  'result': 'pass'
+}, {
+  'id':         'cluster-policy-2',
+  'type':       'policies.kubewarden.io.clusteradmissionpolicy',
+  'apiVersion': 'policies.kubewarden.io/v1',
+  'kind':       'ClusterAdmissionPolicy',
+  'metadata':   {
+    'name':  'cluster-policy-2',
+    'state': {
+      'error':         false,
+      'message':       'Resource is current',
+      'name':          'active',
+      'transitioning': false
+    },
+  },
+  'spec': {
+    'backgroundAudit': true,
+    'mode':            'monitor',
+    'module':          'ghcr.io/kubewarden/policies/example:v1.0.0',
+    'mutating':        false,
+    'policyServer':    'default',
+    'rules':           [],
+  },
+  'status': {
+    'mode':         'monitor',
+    'policyStatus': 'active'
+  },
+  'result': 'fail'
+}];
+
+// Mock policy reports
+const mockPolicyReports = [{
+  'type':       'wgpolicyk8s.io.policyreport',
+  'apiVersion': 'wgpolicyk8s.io/v1alpha2',
+  'kind':       'PolicyReport',
+  'metadata':   {
+    'name':      'polr-ns-default',
+    'namespace': 'default',
+  },
+  'results': [
+    {
+      'policy':  'namespaced-policy-1',
+      'result':  'pass',
+      'message': 'Pass',
+      'spec':    { 'mode': 'protect' }
+    },
+    {
+      'policy':  'namespaced-policy-2',
+      'result':  'fail',
+      'message': 'Fail',
+      'spec':    { 'mode': 'monitor' }
+    }
+  ]
+}];
+
+const mockClusterPolicyReports = [{
+  'type':       'wgpolicyk8s.io.clusterpolicyreport',
+  'apiVersion': 'wgpolicyk8s.io/v1alpha2',
+  'kind':       'ClusterPolicyReport',
+  'metadata':   {
+    'name': 'clusterpolicyreport-default',
+  },
+  'results': [
+    {
+      'policy':  'cluster-policy-1',
+      'result':  'pass',
+      'message': 'Pass',
+      'spec':    { 'mode': 'protect' }
+    },
+    {
+      'policy':  'cluster-policy-2',
+      'result':  'fail',
+      'message': 'Fail',
+      'spec':    { 'mode': 'monitor' }
+    }
+  ]
+}];
 
 // Create a mock for the 'cluster/all' getter that returns different values based on the input.
 const clusterAllMock = jest.fn((resourceType) => {
@@ -42,26 +205,41 @@ const clusterAllMock = jest.fn((resourceType) => {
 
   case KUBEWARDEN.POLICY_SERVER:
     return mockPolicyServers;
+  case KUBEWARDEN.ADMISSION_POLICY:
+    return mockAdmissionPolicies;
+  case KUBEWARDEN.CLUSTER_ADMISSION_POLICY:
+    return mockClusterAdmissionPolicies;
+  case WG_POLICY_K8S.POLICY_REPORT.TYPE:
+    return mockPolicyReports;
+  case WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE:
+    return mockClusterPolicyReports;
   default:
     return [];
   }
 });
 
 describe('component: DashboardView', () => {
-  const commonMocks = {
-    $fetchState: { pending: false },
-    $store:      {
-      getters: {
-        currentCluster:                  () => 'current_cluster',
-        'i18n/t':                        jest.fn(),
-        'catalog/chart':                 mockControllerChart,
-        'catalog/charts':                [mockControllerChart],
-        'cluster/all':                   clusterAllMock,
-        'cluster/canList':               jest.fn(() => true),
-        'prefs/get':                     jest.fn(),
+  let commonMocks;
+
+  beforeEach(() => {
+    // Reset mocks before each test
+    clusterAllMock.mockClear();
+
+    commonMocks = {
+      $fetchState: { pending: false },
+      $store:      {
+        getters: {
+          currentCluster:                  () => 'current_cluster',
+          'i18n/t':                        jest.fn(),
+          'catalog/chart':                 mockControllerChart,
+          'catalog/charts':                [mockControllerChart],
+          'cluster/all':                   clusterAllMock,
+          'cluster/canList':               jest.fn(() => true),
+          'prefs/get':                     jest.fn(),
+        },
       },
-    },
-  };
+    };
+  });
 
   const commonStubs = {
     'router-link': { template: '<span />' },
@@ -77,10 +255,21 @@ describe('component: DashboardView', () => {
   };
 
   const createWrapper = (overrides?: any) => {
+    // Create a fresh copy of mocks for each wrapper to avoid mutation issues
+    const freshMocks = {
+      $fetchState: { ...commonMocks.$fetchState },
+      $store:      {
+        getters: {
+          ...commonMocks.$store.getters,
+          'cluster/all': clusterAllMock, // Ensure we use the fresh mock
+        },
+      },
+    };
+
     return mount(DashboardView, {
       global: {
         mocks: {
-          ...commonMocks,
+          ...freshMocks,
           $t: jest.fn(), // Stub useI18n composable to avoid setup error
         },
         stubs: commonStubs,
@@ -270,15 +459,31 @@ describe('component: DashboardView', () => {
   it('loads correctly policy servers', () => {
     const expectation = [
       {
-        'label':  'test2',
-        'color':  'error',
+        'label':  'default',
+        'to':     undefined,
+        'color':  'success',
         'counts': [
           {
-            'count': 1,
+            'count': 2,
             'label': 'protect'
           },
           {
-            'count': 1,
+            'count': 2,
+            'label': 'monitor'
+          }
+        ]
+      },
+      {
+        'label':  'other',
+        'to':     undefined,
+        'color':  'warning',
+        'counts': [
+          {
+            'count': 0,
+            'label': 'protect'
+          },
+          {
+            'count': 0,
             'label': 'monitor'
           }
         ]
