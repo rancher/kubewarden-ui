@@ -13,22 +13,22 @@ import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '@
 
 import { isPolicyServerResource } from '@kubewarden/modules/policyServer';
 
-import Masthead from './Masthead';
-import Card from './Card';
-import Modes from './Modes';
-import Reports from './Reports';
-import ReportsGauge from './ReportsGauge';
-import PolicyServerCard from './PolicyServerCard';
+import Masthead from '@kubewarden/components/Dashboard/Masthead.vue';
+import PoliciesCard from '@kubewarden/components/Dashboard/PoliciesCard.vue';
+import { RcItemCard } from '@components/RcItemCard';
+import VerticalGap from '@shell/components/Resource/Detail/Card/VerticalGap.vue';
+import ResourceRow from '@shell/components/Resource/Detail/ResourceRow.vue';
+import EmptyRow from '@kubewarden/components/Dashboard/EmptyRow.vue';
 
 export default {
   components: {
-    Card,
-    Modes,
-    Reports,
     Loading,
     Masthead,
-    ReportsGauge,
-    PolicyServerCard
+    RcItemCard,
+    PoliciesCard,
+    VerticalGap,
+    ResourceRow,
+    EmptyRow
   },
 
   async fetch() {
@@ -71,7 +71,7 @@ export default {
 
     return {
       DASHBOARD_HEADERS,
-      colorStops
+      colorStops,
     };
   },
 
@@ -150,18 +150,18 @@ export default {
         });
 
         const totalPods   = podsForThisServer.length;
-        let overallStatus = 'stopped'; // default
+        let color = 'error'; // default
 
         if (runningCount === totalPods && totalPods > 0) {
-          overallStatus = 'running';
+          color = 'success';
         } else if (pendingCount > 0) {
-          overallStatus = 'pending';
+          color = 'warning';
         } else if (errorCount > 0) {
-          overallStatus = 'error';
+          color = 'error';
         }
 
         // Counts how many policies (namespaced + cluster) reference this server
-        const allPolicies = [...this.namespacedPolicies, ...this.globalPolicies];
+        const allPolicies = [...this.namespacedPolicies, ...this.clusterPolicies];
         const polsForThisServer = allPolicies.filter((p) => p.spec?.policyServer === name);
 
         let monitorCount = 0;
@@ -176,40 +176,45 @@ export default {
         });
 
         return {
-          ...server,
-          _status:       overallStatus,
-          _totalPods:    totalPods,
-          _runningCount: runningCount,
-          _pendingCount: pendingCount,
-          _errorCount:   errorCount,
-          _monitorCount: monitorCount,
-          _protectCount: protectCount
+          label:  name,
+          to:     server.detailLocation,
+          color,
+          counts: [
+            {
+              count: protectCount,
+              label: 'protect'
+            },
+            {
+              count: monitorCount,
+              label: 'monitor'
+            }
+          ]
         };
       });
     },
 
-    globalPolicies() {
+    clusterPolicies() {
       return this.$store.getters['cluster/all'](KUBEWARDEN.CLUSTER_ADMISSION_POLICY);
-    },
-
-    globalGuages() {
-      return this.getPolicyGauges(this.globalPolicies);
     },
 
     namespacedPolicies() {
       return this.$store.getters['cluster/all'](KUBEWARDEN.ADMISSION_POLICY);
     },
 
-    namespacedGuages() {
-      return this.getPolicyGauges(this.namespacedPolicies);
+    namespacedStats() {
+      return this.mapRow(this.namespacedPolicies);
     },
 
-    namespacedResultsGauges() {
-      return this.getPolicyResultGauges(this.admissionPolicyResults);
+    clusterStats() {
+      return this.mapRow(this.clusterPolicies);
     },
 
-    clusterResultsGauges() {
-      return this.getPolicyResultGauges(this.clusterPolicyResults);
+    namespacesResults() {
+      return this.mapRow(this.admissionPolicyResults);
+    },
+
+    clusterResults() {
+      return this.mapRow(this.clusterPolicyResults);
     },
 
     policyReports() {
@@ -234,7 +239,7 @@ export default {
         return out;
       }
 
-      return null;
+      return [];
     },
 
     clusterPolicyResults() {
@@ -260,7 +265,7 @@ export default {
         return out;
       }
 
-      return null;
+      return [];
     },
 
     showReports() {
@@ -283,83 +288,62 @@ export default {
       }
 
       return false;
-    }
+    },
   },
 
   methods: {
-    getPolicyGauges(type) {
-      if (!isEmpty(type)) {
-        return type?.reduce((policy, neu) => {
-          return {
-            status: {
-              running: policy?.status?.running + (neu?.status?.policyStatus === 'active' ? 1 : 0),
-              stopped: policy?.status?.stopped + (neu?.status?.error ? 1 : 0),
-              pending: policy?.status?.pending + (neu?.status?.policyStatus === 'pending' ? 1 : 0),
-            },
-            mode: {
-              protect: policy?.mode?.protect + (neu?.spec?.mode === 'protect' ? 1 : 0),
-              monitor: policy?.mode?.monitor + (neu?.spec?.mode === 'monitor' ? 1 : 0)
-            },
-            total: policy?.total + 1
-          };
-        }, {
-          status: {
-            running: 0,
-            stopped: 0,
-            pending: 0
-          },
-          mode:   {
-            protect: 0,
-            monitor: 0
-          },
-          total: 0
-        });
-      }
+    mapRow(policies) {
+      const total = policies.length;
+      const getPercentage = (count) => count ? Math.round((count / total) * 100) : 0;
 
-      return {
-        status: {
-          running: 0,
-          stopped: 0,
-          pending: 0
+      const stats = policies?.reduce((acc, item) => {
+        const isActive = item?.result === 'pass';
+        const isError = item?.result === 'fail';
+
+        return {
+          rows: [{
+            count:   acc.rows[0].count + isActive,
+            percent: getPercentage(acc.rows[0].count + isActive),
+          },
+          {
+            count:   acc.rows[1].count + isError,
+            percent: getPercentage(acc.rows[1].count + isError),
+          }],
+          mode: {
+            protect: acc.mode.protect + (item?.spec?.mode === 'protect' ? 1 : 0),
+            monitor: acc.mode.monitor + (item?.spec?.mode === 'monitor' ? 1 : 0)
+          },
+          total
+        };
+      }, {
+        rows: [{
+          count:   0,
+          percent: 0,
         },
-        mode:   {
+        {
+          count:   0,
+          percent: 0,
+        }],
+        mode: {
           protect: 0,
           monitor: 0
         },
-        total: 0
-      };
-    },
-
-    getPolicyResultGauges(type) {
-      if (!isEmpty(type)) {
-        return type?.reduce((res, neu) => {
-          return {
-            status: {
-              success: res?.status?.success + (neu?.result === 'pass' ? 1 : 0),
-              fail:    res?.status?.fail + (neu?.result === 'fail' ? 1 : 0),
-              error:   res?.status?.error + (neu?.result === 'error' ? 1 : 0)
-            },
-            total: res?.total + 1
-          };
-        }, {
-          status: {
-            success: 0,
-            fail:    0,
-            error:   0
-          },
-          total: 0
-        });
-      }
+        total
+      });
 
       return {
-        status: {
-          success: 0,
-          fail:    0,
-          error:   0
-        },
-        total: 0
+        rows: [{
+          ...stats.rows[0],
+          label:   'kubewarden.dashboard.cards.generic.success',
+          color:   'success'
+        }, {
+          ...stats.rows[1],
+          label:   'kubewarden.dashboard.cards.generic.error',
+          color:   'error'
+        }],
+        mode: stats.mode
       };
-    }
+    },
   }
 };
 </script>
@@ -370,50 +354,78 @@ export default {
     <Masthead :controller-app="controllerApp" />
 
     <div class="get-started">
-      <div
+      <template
         v-for="(card, index) in DASHBOARD_HEADERS"
         :key="index"
-        class="card-container"
       >
-        <Card v-if="card.isEnabled" :card="card">
-          <template #count>
-            <span v-if="index === 0" class="count">{{ namespacedPolicies.length || 0 }}</span>
-            <span v-if="index === 1" class="count">{{ globalPolicies.length || 0 }}</span>
-            <span v-if="index === 2" class="count">{{ allPolicyServers.length || 0 }}</span>
-          </template>
+        <RcItemCard
+          :id="`card-${index}`"
+          :value="card"
+          variant="small"
+          :header="{
+            title: { text: t(card.title) },
+            statuses: [],
+          }"
+          :content="{}"
+        >
+          <!-- Cards Content -->
+          <template #item-card-content>
+            <!-- Namespace card -->
+            <template v-if="index === 0">
+              <VerticalGap />
+              <PoliciesCard
+                :results="namespacesResults"
+                :stats="namespacedStats"
+                :show-reports="showReports"
+                :empty-label="t('kubewarden.dashboard.cards.namespaced.empty')"
+                :protect-link="card.modeLink({ q: 'protect' })"
+                :monitor-link="card.modeLink({ q: 'monitor' })"
+                :create-link="card.createLink"
+                data-test-id="kw-dashboard-ap-gauge"
+              />
+            </template>
 
-          <template #content>
-            <span v-if="index === 0">
-              <Modes :gauges="namespacedGuages" :mode-link="card.modeLink" />
-              <template v-if="showReports">
-                <Reports :gauges="namespacedResultsGauges" :show-reporter-link="showReporterLink" />
-                <ReportsGauge
-                  data-testid="kw-dashboard-ap-gauge"
-                  resource-name="Active"
-                  :reports="namespacedResultsGauges"
-                  :used-as-resource-name="true"
+            <!-- Cluster card -->
+            <template v-if="index === 1">
+              <VerticalGap />
+              <PoliciesCard
+                :results="clusterResults"
+                :stats="clusterStats"
+                :show-reports="showReports"
+                :empty-label="t('kubewarden.dashboard.cards.cluster.empty')"
+                :protect-link="card.modeLink({ q: 'protect' })"
+                :monitor-link="card.modeLink({ q: 'monitor' })"
+                :create-link="card.createLink"
+                data-test-id="kw-dashboard-cap-gauge"
+              />
+            </template>
+
+            <!-- Servers list card -->
+            <template v-else-if="index === 2">
+              <template v-if="policyServersWithStatusAndModes.length > 0">
+                <VerticalGap />
+                <ResourceRow
+                  class="dashboard__servers"
+                  v-for="(row, i) in policyServersWithStatusAndModes"
+                  :key="`resource-row-${index}-${i}`"
+                  :label="row.label"
+                  :color="row.color"
+                  :to="row.to"
+                  :counts="row.counts"
                 />
               </template>
-            </span>
 
-            <span v-if="index === 1">
-              <Modes :gauges="globalGuages" :mode-link="card.modeLink" />
-              <template v-if="showReports">
-                <Reports :gauges="clusterResultsGauges" :show-reporter-link="showReporterLink" />
-                <ReportsGauge
-                  data-testid="kw-dashboard-cap-gauge"
-                  resource-name="Active"
-                  :reports="clusterResultsGauges"
-                />
-              </template>
-            </span>
-
-            <span v-if="index === 2">
-              <PolicyServerCard :policyServers="policyServersWithStatusAndModes" :card="card" />
-            </span>
+              <EmptyRow
+                v-else
+                class="dashboard__servers"
+                :to="card.createLink"
+                linkText="kubewarden.dashboard.cards.server.new"
+                emptyText="kubewarden.dashboard.cards.server.empty"
+              />
+            </template>
           </template>
-        </Card>
-      </div>
+        </RcItemCard>
+      </template>
     </div>
   </div>
 </template>
@@ -427,35 +439,11 @@ export default {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
     grid-gap: 20px;
-
-    .card-container {
-      padding: 0;
-      margin: 0;
-    }
   }
-}
 
-:deep(.consumption-gauge) {
-  h4, .numbers {
-    font-size: 12px;
-    margin-bottom: 0;
+  &__servers {
+    display: flex;
+    width: 100%;
   }
-}
-
-.count {
-  font-size: 36px;
-  color: var(--text-color);
-  margin-right: 1rem;
-}
-
-.modes, .events {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-}
-
-.action {
-  justify-content: center;
-  width: 100%;
 }
 </style>
