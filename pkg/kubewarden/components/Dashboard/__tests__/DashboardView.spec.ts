@@ -134,19 +134,19 @@ describe('component: DashboardView', () => {
     const wrapper = createWrapper();
     const expectation = {
       'mode': {
-        'monitor': 0,
-        'protect': 0
+        'monitor': 1,
+        'protect': 1
       },
       'rows': [{
         'color':   'success',
-        'count':   0,
+        'count':   1,
         'label':   'kubewarden.dashboard.cards.generic.success',
-        'percent': 0
+        'percent': 50
       }, {
         'color':   'error',
-        'count':   0,
+        'count':   1,
         'label':   'kubewarden.dashboard.cards.generic.error',
-        'percent': 0
+        'percent': 50
       }]
     };
 
@@ -157,19 +157,19 @@ describe('component: DashboardView', () => {
     const wrapper = createWrapper();
     const expectation = {
       'mode': {
-        'monitor': 0,
-        'protect': 0
+        'monitor': 1,
+        'protect': 1
       },
       'rows': [{
         'color':   'success',
-        'count':   0,
+        'count':   1,
         'label':   'kubewarden.dashboard.cards.generic.success',
-        'percent': 0
+        'percent': 50
       }, {
         'color':   'error',
-        'count':   0,
+        'count':   1,
         'label':   'kubewarden.dashboard.cards.generic.error',
-        'percent': 0
+        'percent': 50
       }]
     };
 
@@ -225,19 +225,19 @@ describe('component: DashboardView', () => {
     }]);
     const expectation = {
       'mode': {
-        'monitor': 0,
-        'protect': 0
+        'monitor': 1,
+        'protect': 1
       },
       'rows': [{
         'color':   'success',
-        'count':   0,
+        'count':   1,
         'label':   'kubewarden.dashboard.cards.generic.success',
-        'percent': 0
+        'percent': 50
       }, {
         'color':   'error',
-        'count':   0,
+        'count':   1,
         'label':   'kubewarden.dashboard.cards.generic.error',
-        'percent': 0
+        'percent': 50
       }]
     };
 
@@ -248,19 +248,19 @@ describe('component: DashboardView', () => {
     const wrapper = createWrapper();
     const expectation = {
       'mode': {
-        'monitor': 0,
-        'protect': 0
+        'monitor': 1,
+        'protect': 1
       },
       'rows': [{
         'color':   'success',
-        'count':   0,
+        'count':   1,
         'label':   'kubewarden.dashboard.cards.generic.success',
-        'percent': 0
+        'percent': 50
       }, {
         'color':   'error',
-        'count':   0,
+        'count':   1,
         'label':   'kubewarden.dashboard.cards.generic.error',
-        'percent': 0
+        'percent': 50
       }]
     };
 
@@ -274,11 +274,11 @@ describe('component: DashboardView', () => {
         'color':  'error',
         'counts': [
           {
-            'count': 0,
+            'count': 1,
             'label': 'protect'
           },
           {
-            'count': 0,
+            'count': 1,
             'label': 'monitor'
           }
         ]
