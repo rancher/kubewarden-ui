@@ -90,7 +90,7 @@ export class Navigation {
 
     // Wait for page before next step
     if (groupName == 'Admission Policy Management') {
-      const heading = childName || /^(Kubewarden|Welcome to Kubewarden)$/
+      const heading = childName || /^(Admission Policy Management|Admission Policy Management)$/
       if (childName != 'Policy Reporter') {
         await expect(this.page.getByRole('heading', { name: heading })).toBeVisible()
       }
