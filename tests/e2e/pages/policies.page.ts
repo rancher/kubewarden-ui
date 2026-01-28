@@ -25,7 +25,7 @@ export const apList = ['Custom Policy',
   'Readonly Root Filesystem PSP', 'Resource Quota Setting Is Missing', 'Resource Reconcile Interval Must Be Set Between Lower and Upper Bound', 'Resource Suspend Waiver',
   'Safe Annotations', 'Safe Labels', 'Seccomp PSP', 'Selinux PSP', 'Share PID namespace', 'Sysctl PSP', 'Trusted Repos', 'Unique Ingress host', 'Unique service selector',
   'User Group PSP', 'Verify Image Signatures', 'Volumes PSP', 'volumeMounts', 'High Risk Service Account', 'Annotations', 'Labels', 'image-cve', 'Probes validator policy',
-  'Rancher Project quotas namespace validator'] as const
+  'Rancher Project quotas namespace validator', 'Kyverno DSL policy'] as const
 
 export const capList = [...apList, 'PSA Label Enforcer', 'Istio Injected Namespaces', 'Persistent Volume Access Modes', 'Rancher Project propagate labels'] as const
 
