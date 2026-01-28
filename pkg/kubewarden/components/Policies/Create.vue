@@ -170,8 +170,8 @@ export default ({
     },
 
     packageValues() {
-      if (this.type?.repository?.url) {
-        return this.packages?.find((p) => p.repository?.url === this.type.repository.url);
+      if (this.type?.package_id) {
+        return this.packages?.find((p) => p.package_id === this.type?.package_id);
       }
 
       return null;
@@ -390,7 +390,7 @@ export default ({
         return;
       }
 
-      const policyDetails = this.packages.find((pkg) => pkg.repository?.url === this.type?.repository?.url);
+      const policyDetails = this.packages.find((pkg) => pkg.package_id === this.type?.package_id);
       const packageQuestions = this.value.parsePackageMetadata(policyDetails?.data?.[DATA_ANNOTATIONS.QUESTIONS]);
       const packageAnnotation = `${ policyDetails?.repository?.name }/${ policyDetails?.name }/${ policyDetails?.version }`;
       /** Return spec from package if annotation exists */

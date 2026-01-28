@@ -32,7 +32,7 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'CEL Policy'                 : { skip: 'https://github.com/kubewarden/cel-policy/issues/12' },
   'High Risk Service Account'  : { settings: setupHighRiskServiceAccount },
   'image-cve'                  : { skip: 'https://github.com/kubewarden/image-cve-policy/issues/82' },
-  'Probes validator policy'    : { skip: 'https://github.com/kubewarden/policy-server/issues/1329' },
+  'Probes validator policy'    : { skip: 'https://github.com/kubewarden/policies/issues/132' },
   volumeMounts                 : { settings: setupVolumeMounts },
 }
 
