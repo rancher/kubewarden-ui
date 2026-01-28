@@ -45,10 +45,10 @@ on:
       mode:
         description: Installation mode
         type: choice
-        default: 'base'
+        default: 'manual'
         required: true
         options:
-        - base
+        - manual
         - fleet
         - upgrade
       testbase:
@@ -103,7 +103,7 @@ jobs:
       fail-fast: false
       matrix:
         rancher: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["2.8", "2.9", "2.10-0"]') || fromJSON(format('["{0}"]', inputs.rancher || 'released')) }}
-        mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["base", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'base')) }}
+        mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["manual", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'manual')) }}
         exclude:
           # Run all modes on 2.9 since it's latest prime version
           - rancher: ${{ github.event_name == 'schedule' && '2.8' }}
@@ -282,8 +282,8 @@ jobs:
         [[ "$TESTPOLICIES" != "true" ]] && GFILTER="$EXCLUDE" # Limit number of tested policies
 
         # List tests and execute
-        echo yarn playwright test ${TFILTER:-} ${GFILTER:+-gv "$GFILTER"} -x
-        yarn playwright test ${TFILTER:-} ${GFILTER:+-gv "$GFILTER"} -x | tee qase-report.log
+        echo yarn playwright test ${TFILTER:-} ${GFILTER:+--grep-invert "$GFILTER"} -x
+        yarn playwright test ${TFILTER:-} ${GFILTER:+--grep-invert "$GFILTER"} -x | tee qase-report.log
       env:
         MODE: ${{ matrix.mode }}
         # Override OTEL operator version by github variable
