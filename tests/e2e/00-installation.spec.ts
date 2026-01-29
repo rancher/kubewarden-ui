@@ -31,6 +31,7 @@ test.beforeAll(async({ request }) => {
 
   // Override prime -> github to fix temporary github runners - issue#<number>
   conf.ui_from = conf.ui_from === 'prime' ? 'github' : conf.ui_from
+  conf.ui_from = conf.ui_from === 'source' ? 'github' : conf.ui_from
 
   // Default to manual mode, unless fleet or upgrade is requested
   conf.kw_mode ||= 'manual'
