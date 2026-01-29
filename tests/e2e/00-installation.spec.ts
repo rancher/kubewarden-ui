@@ -29,6 +29,9 @@ test.beforeAll(async({ request }) => {
     .then(() => 'source' as const)
     .catch(() => RancherUI.isPrime ? 'prime' : 'github')
 
+  // Override prime -> github to fix temporary github runners - issue#1412
+  conf.ui_from = conf.ui_from === 'prime' ? 'github' : conf.ui_from
+
   // Default to manual mode, unless fleet or upgrade is requested
   conf.kw_mode ||= 'manual'
 
