@@ -1,4 +1,5 @@
 # Kubewarden Extension for Rancher Manager
+x
 
 An extension for Rancher Manager which allows you to interact with Kubewarden.
 
