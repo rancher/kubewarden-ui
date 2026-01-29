@@ -12,6 +12,9 @@ import cleanHtmlDirective from '@shell/directives/clean-html';
 import trimWhitespaceDirective from '@shell/directives/trim-whitespace';
 import '@shell/plugins/replaceall';
 
+
+jest.spyOn(console, 'warn').mockImplementation((warning) => warning.includes('[Vue warn]') ? null : console.log(warning));
+
 // Create a Vue application instance
 const vueApp = createApp({});
 
