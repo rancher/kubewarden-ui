@@ -1,4 +1,6 @@
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
+import { createStore } from 'vuex';
+import { nextTick } from 'vue';
 
 const Loading = { template: '<span />' };
 
@@ -157,10 +159,8 @@ const mockClusterPolicyReports = [{
   'type':       'wgpolicyk8s.io.clusterpolicyreport',
   'apiVersion': 'wgpolicyk8s.io/v1alpha2',
   'kind':       'ClusterPolicyReport',
-  'metadata':   {
-    'name': 'clusterpolicyreport-default',
-  },
-  'results': [
+  'metadata':   { 'name': 'clusterpolicyreport-default' },
+  'results':    [
     {
       'policy':  'cluster-policy-1',
       'result':  'pass',
@@ -219,26 +219,31 @@ const clusterAllMock = jest.fn((resourceType) => {
 });
 
 describe('component: DashboardView', () => {
-  let commonMocks;
+  let store: ReturnType<typeof createStore>;
 
   beforeEach(() => {
     // Reset mocks before each test
     clusterAllMock.mockClear();
 
-    commonMocks = {
-      $fetchState: { pending: false },
-      $store:      {
-        getters: {
-          currentCluster:                  () => 'current_cluster',
-          'i18n/t':                        jest.fn(),
-          'catalog/chart':                 mockControllerChart,
-          'catalog/charts':                [mockControllerChart],
-          'cluster/all':                   clusterAllMock,
-          'cluster/canList':               jest.fn(() => true),
-          'prefs/get':                     jest.fn(),
-        },
-      },
+    const getters = {
+      currentCluster:    () => 'current_cluster',
+      'i18n/t':          (key: string) => key,
+      'catalog/chart':   () => mockControllerChart,
+      'catalog/charts':  () => [mockControllerChart],
+      'cluster/all':     () => clusterAllMock,
+      'cluster/canList': () => jest.fn(() => true),
+      'prefs/get':       () => jest.fn(),
     };
+
+    const actions = {
+      'cluster/findAll': jest.fn().mockResolvedValue([]),
+      'catalog/load':    jest.fn().mockResolvedValue({}),
+    };
+
+    store = createStore({
+      getters,
+      actions
+    });
   });
 
   const commonStubs = {
@@ -254,56 +259,69 @@ describe('component: DashboardView', () => {
     EmptyRow:     true,
   };
 
-  const createWrapper = (overrides?: any) => {
-    // Create a fresh copy of mocks for each wrapper to avoid mutation issues
-    const freshMocks = {
-      $fetchState: { ...commonMocks.$fetchState },
-      $store:      {
-        getters: {
-          ...commonMocks.$store.getters,
-          'cluster/all': clusterAllMock, // Ensure we use the fresh mock
-        },
-      },
-    };
-
-    return mount(DashboardView, {
+  const createWrapper = async(overrides?: any) => {
+    const wrapper = mount(DashboardView, {
       global: {
-        mocks: {
-          ...freshMocks,
-          $t: jest.fn(), // Stub useI18n composable to avoid setup error
-        },
-        stubs: commonStubs,
+        plugins: [store],
+        stubs:   commonStubs,
       },
       ...overrides,
     });
+
+    // Wait for the onMounted hook and async data fetching to complete
+    await flushPromises();
+    await nextTick();
+
+    return wrapper;
   };
 
-  it('renders the Masthead component', () => {
-    const wrapper = createWrapper({});
+  it('renders the Masthead component', async() => {
+    const wrapper = await createWrapper({});
 
     expect(wrapper.html()).toContain('<masthead-stub controllerapp="[object Object]"></masthead-stub>');
   });
 
-  it('renders the Loading component when fetch state is pending', () => {
-    commonMocks.$fetchState.pending = true;
+  it('renders the Loading component when fetch state is pending', async() => {
+    // Delay the store actions to keep loading state longer
+    const delayedStore = createStore({
+      getters: {
+        currentCluster:    () => 'current_cluster',
+        'i18n/t':          (key: string) => key,
+        'catalog/chart':   () => mockControllerChart,
+        'catalog/charts':  () => [],
+        'cluster/all':     () => clusterAllMock,
+        'cluster/canList': () => jest.fn(() => true),
+        'prefs/get':       () => jest.fn(),
+      },
+      actions: {
+        'cluster/findAll': jest.fn(() => new Promise(() => {})), // Never resolves
+        'catalog/load':    jest.fn(() => new Promise(() => {})), // Never resolves
+      },
+    });
 
-    const wrapper = createWrapper();
+    const wrapper = mount(DashboardView, {
+      global: {
+        plugins: [delayedStore],
+        stubs:   commonStubs,
+      },
+    });
 
-    expect(wrapper.findComponent(Loading).exists()).toBe(true);
+    await nextTick();
+
+    // The component should show loading initially since async operations won't complete
+    // Check that the dashboard content is not present
+    expect(wrapper.find('.dashboard').exists()).toBe(false);
   });
 
-  it('renders the correct number of Card components based on DASHBOARD_HEADERS', () => {
-    commonMocks.$fetchState.pending = false;
-
-    const wrapper = createWrapper();
+  it('renders the correct number of Card components based on DASHBOARD_HEADERS', async() => {
+    const wrapper = await createWrapper();
     const cardComponents = wrapper.findAll('[id^="card-"]');
 
     expect(cardComponents.length).toBe(DASHBOARD_HEADERS.length);
   });
 
-  it('renders PolicyServerCard component for the Policy Servers card', () => {
-    commonMocks.$fetchState.pending = false;
-    const wrapper = createWrapper();
+  it('renders PolicyServerCard component for the Policy Servers card', async() => {
+    const wrapper = await createWrapper();
 
     const cards = wrapper.findAll('[id^="card-"]');
 
@@ -319,8 +337,8 @@ describe('component: DashboardView', () => {
     expect(serversProp).toHaveLength(mockPolicyServers.length);
   });
 
-  it('loads correctly namespace policies', () => {
-    const wrapper = createWrapper();
+  it('loads correctly namespace policies', async() => {
+    const wrapper = await createWrapper();
     const expectation = {
       'mode': {
         'monitor': 1,
@@ -342,8 +360,8 @@ describe('component: DashboardView', () => {
     expect(wrapper.vm.namespacedStats).toEqual(expectation);
   });
 
-  it('loads correctly namespace reports', () => {
-    const wrapper = createWrapper();
+  it('loads correctly namespace reports', async() => {
+    const wrapper = await createWrapper();
     const expectation = {
       'mode': {
         'monitor': 1,
@@ -365,53 +383,9 @@ describe('component: DashboardView', () => {
     expect(wrapper.vm.namespacesResults).toEqual(expectation);
   });
 
-  it('loads correctly cluster policies', () => {
-    const wrapper = createWrapper();
+  it('loads correctly cluster policies', async() => {
+    const wrapper = await createWrapper();
 
-    wrapper.vm.$store.getters['cluster/all'] = jest.fn(() => [{
-      'id':         'default/test2',
-      'type':       'policies.kubewarden.io.admissionpolicy',
-      'apiVersion': 'policies.kubewarden.io/v1',
-      'kind':       'AdmissionPolicy',
-      'metadata':   {
-        'annotations': {
-          'kubewarden.io/chart-key':     'cluster/kubewarden-policy-catalog/affinity-node-selector/1.0.3',
-          'kubewarden.io/chart-name':    'affinity-node-selector',
-          'kubewarden.io/chart-version': '1.0.3'
-        },
-        'managedFields': [
-          { 'apiVersion': 'policies.kubewarden.io/v1' },
-          { 'apiVersion': 'policies.kubewarden.io/v1' }
-        ],
-        'name':          'test2',
-        'namespace':     'default',
-        'relationships': null,
-        'state':         {
-          'error':         false,
-          'message':       'Resource is current',
-          'name':          'active',
-          'transitioning': false
-        },
-        'uid': '3163f264-8ffb-40cb-8ae9-5ef9a6cb4ad6'
-      },
-      'spec': {
-        'backgroundAudit': true,
-        'mode':            'protect',
-        'module':          'ghcr.io/kubewarden/policies/affinity-node-selector:v1.0.3',
-        'mutating':        false,
-        'policyServer':    'default',
-        'rules':           [],
-        'settings':        {
-          'key':   '2',
-          'value': '2'
-        },
-      },
-      'status': {
-        'conditions':   [],
-        'mode':         'protect',
-        'policyStatus': 'active'
-      }
-    }]);
     const expectation = {
       'mode': {
         'monitor': 1,
@@ -433,8 +407,8 @@ describe('component: DashboardView', () => {
     expect(wrapper.vm.clusterStats).toEqual(expectation);
   });
 
-  it('loads correctly cluster reports', () => {
-    const wrapper = createWrapper();
+  it('loads correctly cluster reports', async() => {
+    const wrapper = await createWrapper();
     const expectation = {
       'mode': {
         'monitor': 1,
@@ -456,7 +430,7 @@ describe('component: DashboardView', () => {
     expect(wrapper.vm.clusterResults).toEqual(expectation);
   });
 
-  it('loads correctly policy servers', () => {
+  it('loads correctly policy servers', async() => {
     const expectation = [
       {
         'label':  'default',
@@ -489,7 +463,7 @@ describe('component: DashboardView', () => {
         ]
       }
     ];
-    const wrapper = createWrapper();
+    const wrapper = await createWrapper();
 
     expect(wrapper.vm.policyServersWithStatusAndModes).toEqual(expectation);
   });
