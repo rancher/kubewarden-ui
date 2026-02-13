@@ -10,9 +10,7 @@ import { RancherUI } from './components/rancher-ui'
 import { Common } from './components/common'
 
 // source (yarn dev) | github (add github repo) | prime (just install)
-let ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'github')
-// Override prime -> github to fix temporary github runners - issue#1412
-ORIGIN = ORIGIN === 'prime' ? 'github' : ORIGIN
+const ORIGIN = process.env.ORIGIN || (process.env.API ? 'source' : 'github')
 expect(ORIGIN).toMatch(/^(source|github|prime)$/)
 
 const MODE = process.env.MODE || 'manual'
