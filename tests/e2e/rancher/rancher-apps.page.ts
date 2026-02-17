@@ -187,7 +187,7 @@ export class RancherAppsPage extends BasePage {
         if (chart.version) {
           const versionPane = this.page.getByRole('heading', { name: 'Chart Versions', exact: true }).locator('..')
           const showMore = versionPane.getByText('Show More', { exact: true })
-          const chartVersion = versionPane.getByText(chart.version, { exact: true })
+          const chartVersion = versionPane.getByText(chart.version, { exact: true }).first()
 
           await expect(versionPane).toBeVisible()
           // Expand versions
