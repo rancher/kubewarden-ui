@@ -168,8 +168,6 @@ export class KubewardenPage extends BasePage {
     }
     await apps.updateApp('rancher-kubewarden-defaults', { navigate: false })
 
-    // UI shows no installed apps if navigation is too fast
-    await this.page.waitForTimeout(3000)
     // Check resources are online
     await this.nav.explorer('Apps', 'Installed Apps')
     for (const chart of ['controller', 'crds', 'defaults'] as const) {
