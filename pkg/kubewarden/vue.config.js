@@ -14,12 +14,14 @@ module.exports = () => {
     }
     // Add the @kubewarden alias to point to the pkg/kubewarden directory.
     config.resolve.alias['@kubewarden'] = path.resolve(__dirname);
+    config.devtool = 'source-map';
   };
 
   // Create an override for __tests__ directories.
   const kwChainWebpack = (config) => {
     config.plugin('ignore-tests')
       .use(webpack.IgnorePlugin, [{ resourceRegExp: /[\\/]__tests__[\\/]/ }]);
+    config.devtool('source-map');
   };
 
   const mergedChainWebpack = (config) => {
@@ -31,7 +33,8 @@ module.exports = () => {
 
   // Merge our custom chainWebpack and configureWebpack with the vendor config.
   return Object.assign({}, vendorConfig, {
-    chainWebpack:     mergedChainWebpack,
-    configureWebpack: customConfigureWebpack,
+    chainWebpack:         mergedChainWebpack,
+    configureWebpack:     customConfigureWebpack,
+    productionSourceMap:  true,
   });
 };
