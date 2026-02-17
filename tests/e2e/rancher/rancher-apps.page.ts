@@ -266,6 +266,9 @@ export class RancherAppsPage extends BasePage {
 
     await this.updateBtn.click()
     await this.waitHelmSuccess(name, { timeout: options?.timeout })
+
+    // List of installed apps is empty if we navigate right after update
+    await this.page.waitForTimeout(3000)
   }
 
   @step
