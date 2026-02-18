@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useStore } from 'vuex';
 import { useI18n } from '@shell/composables/useI18n';
-import SubtleLink from '@shell/components/SubtleLink.vue';
+import SubtleLink from '@kubewarden/components/SubtleLink.vue';
 import EmptyRow from '@kubewarden/components/Dashboard/EmptyRow.vue';
 
 const store = useStore();
