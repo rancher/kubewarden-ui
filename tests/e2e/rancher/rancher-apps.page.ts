@@ -186,12 +186,16 @@ export class RancherAppsPage extends BasePage {
     if (options?.navigate !== false) {
       await this.nav.explorer('Apps', 'Charts')
       await expect(this.page.getByRole('heading', { name: 'Charts', exact: true })).toBeVisible()
+      // Handle infinite list scrolling
+      if (!await card.isVisible()) {
+        await this.page.getByTestId('charts-filter-input').fill(chart.title)
+      }
       await card.click()
 
       if (chart.version) {
         const versionPane = this.page.getByRole('heading', { name: 'Chart Versions', exact: true }).locator('..')
         const showMore = versionPane.getByText('Show More', { exact: true })
-        const chartVersion = versionPane.getByText(chart.version, { exact: true })
+        const chartVersion = versionPane.getByText(chart.version, { exact: true }).first()
 
         await expect(versionPane).toBeVisible()
         // Expand versions
@@ -237,7 +241,8 @@ export class RancherAppsPage extends BasePage {
       await this.nav.explorer('Apps', 'Installed Apps')
       await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
 
-      await this.ui.tableRow(name).action('Edit/Upgrade')
+      // Edit/Upgrade -> Edit/Change version (Rancher 2.14+)
+      await this.ui.tableRow(name).action(/^\s*Edit/)
       await expect(this.page.getByRole('heading', { name })).toBeVisible()
     }
 

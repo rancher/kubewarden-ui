@@ -105,7 +105,7 @@ export class TableRow {
   }
 
   @step
-  async action(name: string) {
+  async action(name: string|RegExp) {
     await this.row.getByTestId(/^sortable-table-\d+-action-button$/).describe(`TableRow: ${this}, Action: ${name}`).click()
     // Rancher 2.11+ uses both menuitem & listitem
     await this.ui.page.getByRole('listitem').or(this.ui.page.getByRole('menuitem'))
