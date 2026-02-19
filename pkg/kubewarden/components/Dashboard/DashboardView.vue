@@ -18,7 +18,7 @@ import Masthead from '@kubewarden/components/Dashboard/Masthead.vue';
 import PoliciesCard from '@kubewarden/components/Dashboard/PoliciesCard.vue';
 import { RcItemCard } from '@components/RcItemCard';
 import VerticalGap from '@shell/components/Resource/Detail/Card/VerticalGap.vue';
-import ResourceRow from '@shell/components/Resource/Detail/ResourceRow.vue';
+import ResourceRow from '@kubewarden/components/ResourceRow.vue';
 import EmptyRow from '@kubewarden/components/Dashboard/EmptyRow.vue';
 
 const store = useStore();
