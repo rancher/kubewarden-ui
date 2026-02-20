@@ -9,7 +9,7 @@ import { allHash } from '@shell/utils/promise';
 import Loading from '@shell/components/Loading';
 
 import { DASHBOARD_HEADERS } from '@kubewarden/config/table-headers';
-import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '@kubewarden/types';
+import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, OPEN_REPORTS } from '@kubewarden/types';
 
 import { isPolicyServerResource } from '@kubewarden/modules/policyServer';
 
@@ -34,8 +34,8 @@ export default {
   async fetch() {
     const hash = {};
     const types = [
-      WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE,
-      WG_POLICY_K8S.POLICY_REPORT.TYPE,
+      OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE,
+      OPEN_REPORTS.POLICY_REPORT.TYPE,
       KUBEWARDEN.ADMISSION_POLICY,
       KUBEWARDEN.CLUSTER_ADMISSION_POLICY,
       KUBEWARDEN.POLICY_SERVER,
@@ -214,16 +214,16 @@ export default {
 
     policyReports() {
       return {
-        [WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE]: this.$store.getters['cluster/all'](WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE),
-        [WG_POLICY_K8S.POLICY_REPORT.TYPE]:         this.$store.getters['cluster/all'](WG_POLICY_K8S.POLICY_REPORT.TYPE)
+        [OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE]: this.$store.getters['cluster/all'](OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE),
+        [OPEN_REPORTS.POLICY_REPORT.TYPE]:         this.$store.getters['cluster/all'](OPEN_REPORTS.POLICY_REPORT.TYPE)
       };
     },
 
     admissionPolicyResults() {
-      if (!isEmpty(this.policyReports[WG_POLICY_K8S.POLICY_REPORT.TYPE])) {
+      if (!isEmpty(this.policyReports[OPEN_REPORTS.POLICY_REPORT.TYPE])) {
         let out = [];
 
-        this.policyReports[WG_POLICY_K8S.POLICY_REPORT.TYPE].filter((report) => {
+        this.policyReports[OPEN_REPORTS.POLICY_REPORT.TYPE].filter((report) => {
           const results = report?.results?.filter((result) => result?.policy.includes('namespaced-'));
 
           if (!isEmpty(results)) {
@@ -239,8 +239,8 @@ export default {
 
     clusterPolicyResults() {
       if (!isEmpty(this.policyReports)) {
-        const pr = this.policyReports[WG_POLICY_K8S.POLICY_REPORT.TYPE];
-        const cpr = this.policyReports[WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE];
+        const pr = this.policyReports[OPEN_REPORTS.POLICY_REPORT.TYPE];
+        const cpr = this.policyReports[OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE];
         let out = [];
 
         if (!isEmpty(cpr)) {
