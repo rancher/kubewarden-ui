@@ -96,3 +96,6 @@ export interface PolicyReport {
 export interface ClusterPolicyReport extends PolicyReport {
   scope: Scope;
 }
+
+export type Report = PolicyReport;
+export type ClusterReport = ClusterPolicyReport;
