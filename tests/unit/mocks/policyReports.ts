@@ -26,9 +26,9 @@ export const mockPolicyReportResult: PolicyReportResult = {
 };
 
 export const mockPolicyReport: PolicyReport = {
-  apiVersion: 'policy.k8s.io/v1beta1',
+  apiVersion: 'openreports.io/v1alpha1',
   id:         'policyreport-123',
-  kind:       'PolicyReport',
+  kind:       'Report',
   metadata:   {
     labels:            { 'app.kubernetes.io/managed-by': 'kubewarden' },
     creationTimestamp: new Date(),
@@ -54,9 +54,9 @@ export const mockPolicyReport: PolicyReport = {
 };
 
 export const mockClusterPolicyReport: ClusterPolicyReport = {
-  apiVersion: 'policy.k8s.io/v1beta1',
+  apiVersion: 'openreports.io/v1alpha1',
   id:         'clusterpolicyreport-123',
-  kind:       'ClusterPolicyReport',
+  kind:       'ClusterReport',
   metadata:   {
     labels:            { 'app.kubernetes.io/managed-by': 'kubewarden' },
     creationTimestamp: new Date(),
