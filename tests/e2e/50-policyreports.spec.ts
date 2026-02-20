@@ -1,6 +1,7 @@
 import { test, expect } from './rancher/rancher-test'
 import { Policy, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { PolicyReporterPage } from './pages/policyreporter.page'
+import { KubewardenPage } from './pages/kubewarden.page'
 
 const testNs = 'audit-unsafe-ns'
 const testPod = 'audit-pod-privileged'
@@ -78,6 +79,13 @@ test('Check reports on resources details page', async({ ui, nav }) => {
   await ui.tableRow(testNs).open()
   await ui.tab('Compliance').click()
   await expect(ui.tableRow({ Policy: policyLabels }).column('Status')).toHaveText('fail')
+})
+
+test('Check reports on home page', async({ page, nav }) => {
+  await nav.kubewarden()
+  const kwPage = new KubewardenPage(page)
+  const reports = kwPage.getPolicySummary('Cluster Policies', 'Reports')
+  await expect(reports).toContainText(/[1-9]\d* reports in total/)
 })
 
 test('Cleanup & check results are gone', async({ page, ui, nav, shell }) => {
