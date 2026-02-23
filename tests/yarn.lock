@@ -34,10 +34,10 @@ ajv@^8.0.0:
     require-from-string "^2.0.2"
     uri-js "^4.4.1"
 
-ajv@^8.17.1:
-  version "8.17.1"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.17.1.tgz#37d9a5c776af6bc92d7f4f9510eba4c0a60d11a6"
-  integrity sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==
+ajv@^8.18.0:
+  version "8.18.0"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.18.0.tgz#8864186b6738d003eb3a933172bb3833e10cefbc"
+  integrity sha512-PlXPeEWMXMZ7sPYOHqmDyCJzcfNrUr3fGNKtezX14ykXOEIvyK81d+qydx89KY5O71FKMPaQ2vBfBFI5NHR63A==
   dependencies:
     fast-deep-equal "^3.1.3"
     fast-uri "^3.0.1"
@@ -343,13 +343,13 @@ playwright-core@1.58.2:
   resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.58.2.tgz#ac5f5b4b10d29bcf934415f0b8d133b34b0dcb13"
   integrity sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==
 
-playwright-qase-reporter@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/playwright-qase-reporter/-/playwright-qase-reporter-2.2.0.tgz#02f348bf71e647dbb6c1bb3072f7fedf7191e5bf"
-  integrity sha512-xLRiND5jbJzD7v2cQCQ14x6y6rD+Xik2dLdMBjtcr1KHvwaA0xg8OCOFWasQhk3IspDXwjDKsGExuIv8rT2Z+A==
+playwright-qase-reporter@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/playwright-qase-reporter/-/playwright-qase-reporter-2.2.1.tgz#a5a1b335bb033eefb467138568f83ba7249fcfcc"
+  integrity sha512-JD2vN18Bu/39vhJURz2nIbALHSqqUN6kii6TKKuxd8q4O0eM3zxVwgKap4lB+fTWNT/rVO0Bu3nirE0TANeCbg==
   dependencies:
     chalk "^4.1.2"
-    qase-javascript-commons "~2.5.0"
+    qase-javascript-commons "~2.5.3"
     uuid "^9.0.1"
 
 playwright@1.58.2:
@@ -387,12 +387,12 @@ qase-api-v2-client@~1.0.4:
     axios "^1.13.2"
     axios-retry "^4.5.0"
 
-qase-javascript-commons@~2.5.0:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/qase-javascript-commons/-/qase-javascript-commons-2.5.1.tgz#440c7562bdd2e662f3cfe30ee2dd041e605a5f9a"
-  integrity sha512-MTglFT64XC3BE7rkOjUUoFW4GJeBOch8Ighm/28Df50jV3XYstL0ShgvN7a2RhaxNd8+UTaLQjz3IIwGzWUeYQ==
+qase-javascript-commons@~2.5.3:
+  version "2.5.3"
+  resolved "https://registry.yarnpkg.com/qase-javascript-commons/-/qase-javascript-commons-2.5.3.tgz#7ee7aaa0902cf4186a557273a3893e49d1238d9f"
+  integrity sha512-R6ieEBsBqGXBQ0IiSenPF9QEkNvrBp14IbCcHjdyIgAFkGIPGHf6RM2GSst1bZh3YO47TF84dApUlQBHh68oeA==
   dependencies:
-    ajv "^8.17.1"
+    ajv "^8.18.0"
     async-mutex "~0.5.0"
     chalk "^4.1.2"
     env-schema "^5.2.1"
