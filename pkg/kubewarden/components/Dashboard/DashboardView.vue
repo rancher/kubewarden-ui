@@ -368,13 +368,15 @@ onMounted(async() => {
                 />
               </template>
 
-              <EmptyRow
-                v-else
-                class="dashboard__servers"
-                :to="card.createLink"
-                linkText="kubewarden.dashboard.cards.server.new"
-                emptyText="kubewarden.dashboard.cards.server.empty"
-              />
+              <template v-else>
+                <VerticalGap />
+                <EmptyRow
+                  class="dashboard__servers"
+                  :to="card.createLink"
+                  linkText="kubewarden.dashboard.cards.server.new"
+                  emptyText="kubewarden.dashboard.cards.server.empty"
+                />
+              </template>
             </template>
           </template>
         </RcItemCard>
