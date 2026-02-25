@@ -13,5 +13,4 @@ export * from './types/policy';
 export * from './types/policy-reporter';
 export * from './types/rancher';
 export * from './types/service';
-export * from './types/wgpolicyk8s.io';
 export * from './types/openreports.io';
