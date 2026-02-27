@@ -29,5 +29,8 @@
     "**/bower_components": true,
     "**/*.code-search": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "cSpell.words": [
+    "kubewarden"
+  ]
 }

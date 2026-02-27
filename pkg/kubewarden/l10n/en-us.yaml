@@ -13,6 +13,10 @@ kubewarden:
       tracingDashboard: Tracing Dashboard
   generic:
     name: Name
+    policies: Policies
+    protect: Protect
+    monitor: Monitor
+    reports: Reports
   dashboard:
     title: Dashboard
     install: Install
@@ -81,6 +85,29 @@ kubewarden:
         warning: 'An air-gapped installation has been detected, this will require intervention to enable access to Kubewarden images and policies. It is necessary to make them available from an OCI registry that is accessible to the cluster.'
         docs: |
           Follow the documentation to setup an OCI registry for further installation.
+    cards:
+      generic:
+        protect: protect
+        monitor: monitor
+        reports:
+          total: '{count} reports in total'
+          empty: No reports available
+        policies:
+          empty: No policies available.
+          new: Add policy
+        success: Success
+        error: Failed
+      namespaced: 
+        title: Namespaced Policies
+        description: Rules that apply only to a single, specific namespace
+        empty: No policies available.
+      cluster: 
+        title: Cluster Policies
+        empty: No policies available.
+      server: 
+        title: Policy Servers
+        new: Add policy server
+        empty: No policy servers available.
   tabs:
     security-contexts:
       label: Security Contexts
