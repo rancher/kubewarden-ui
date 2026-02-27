@@ -218,8 +218,7 @@ test.describe('Metrics', () => {
       const frame = page.frameLocator('iframe')
 
       for (const metric of metrics) {
-        // byTestId for Rancher >2.9, byLabel for old versions
-        const panel = frame.getByTestId(metric).or(frame.getByLabel(metric))
+        const panel = frame.getByTestId(metric)
         // Accepted metrics should be >0, rejected could be 0
         const number = metric.source.includes('accepted') ? /^[1-9][0-9.]*%?$/ : /^[0-9.]+%?$/
         await expect(panel.getByText(number)).toBeVisible({ timeout: 7 * 60_000 })
