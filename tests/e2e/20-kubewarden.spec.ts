@@ -14,10 +14,10 @@ test('Check initial state', async({ page, ui, nav }) => {
     await expect(head.getByText(/App Version:\s+v[1-9][0-9.]+[0-9]/)).toBeVisible()
 
     // Recommended policies stats
-    await expect(kwPage.getCount(('Namespaced Policies'))).toHaveText('0')
-    await expect(kwPage.getCount(('Cluster Policies'))).toHaveText('6')
-    await expect(kwPage.getCount(('Policy Servers'))).toHaveText('1')
-    await expect(kwPage.getPolicyServer('default')).toContainText('0 Protect / 6 Monitor')
+    await expect(kwPage.getStats('Namespaced Policies')).toHaveText('No policies available.')
+    await expect(kwPage.getStats('Cluster Policies')).toHaveText('0 protect+6 monitor')
+    await expect(kwPage.getStats('Policy Servers')).toContainText('0 protect + 6 monitor')
+    expect(await kwPage.getCount('Policy Servers')).toBe(1)
   })
 
   await test.step('Policy Servers Landing Page', async() => {
@@ -51,7 +51,7 @@ test('Check initial state', async({ page, ui, nav }) => {
   })
 })
 
-test('Stats reflect resource changes', async({ ui, page, nav }) => {
+test('Stats reflect resource changes', async({ page, nav }) => {
   const kwPage = new KubewardenPage(page)
   const psPage = new PolicyServersPage(page)
   const apPage = new AdmissionPoliciesPage(page)
@@ -62,43 +62,35 @@ test('Stats reflect resource changes', async({ ui, page, nav }) => {
 
   // Get initial counts
   await nav.kubewarden()
-  const psCount = await kwPage.getCount('Policy Servers').textContent() || 'Empty'
-  const apCount = await kwPage.getCount('Namespaced Policies').textContent() || 'Empty'
-  const capCount = await kwPage.getCount('Cluster Policies').textContent() || 'Empty'
+  const apCount = await kwPage.getCount('Namespaced Policies')
+  const capCount = await kwPage.getCount('Cluster Policies', { mode: 'protect' })
 
-  await test.step('Policy Server counter++', async() => {
-    await page.getByRole('heading', { name: 'Policy Servers' }).click()
-    await ui.button('Create').click()
-    await psPage.create(ps, { navigate: false })
+  await test.step('Add Policy Server', async() => {
+    await psPage.create(ps)
     await nav.kubewarden()
-    await expect(kwPage.getCount('Policy Servers')).toHaveText((+psCount + 1).toString())
-    await expect(kwPage.getPolicyServer(ps.name)).toContainText('0 Protect / 0 Monitor')
+    await expect(kwPage.getPolicyServer(ps.name)).toContainText('0 protect + 0 monitor')
   })
 
-  await test.step('Namespaced Policy counter++', async() => {
-    await page.getByRole('heading', { name: 'Namespaced Policies' }).click()
-    await ui.button('Create').click()
+  await test.step('Add Namespaced Policy', async() => {
+    await kwPage.getPane('Namespaced Policies').getByRole('link', { name: 'Add policy' }).click()
     await apPage.create(policy, { navigate: false })
     await nav.kubewarden()
-    await expect(kwPage.getCount('Namespaced Policies')).toHaveText((+apCount + 1).toString())
-    await expect(kwPage.getPolicyServer(ps.name)).toContainText('1 Protect / 0 Monitor')
+    await expect(kwPage.getStats('Namespaced Policies')).toHaveText((+apCount + 1).toString() + ' protect+0 monitor')
+    await expect(kwPage.getPolicyServer(ps.name)).toContainText('1 protect + 0 monitor')
   })
 
-  await test.step('Cluster Policy counter++', async() => {
-    await page.getByRole('heading', { name: 'Cluster Policies' }).click()
-    await ui.button('Create').click()
-    await capPage.create(policy, { navigate: false })
+  await test.step('Add Cluster Policy', async() => {
+    await capPage.create(policy)
     await nav.kubewarden()
-    await expect(kwPage.getCount('Cluster Policies')).toHaveText((+capCount + 1).toString())
-    await expect(kwPage.getPolicyServer(ps.name)).toContainText('2 Protect / 0 Monitor')
+    await expect(kwPage.getStats('Cluster Policies')).toHaveText((+capCount + 1).toString() + ' protect+6 monitor')
+    await expect(kwPage.getPolicyServer(ps.name)).toContainText('2 protect + 0 monitor')
   })
 
   await test.step('Stats after deleting resources ', async() => {
     await psPage.delete(ps.name)
     await nav.kubewarden()
-    await expect(kwPage.getCount('Namespaced Policies')).toHaveText(apCount)
-    await expect(kwPage.getCount('Cluster Policies')).toHaveText(capCount)
-    await expect(kwPage.getCount('Policy Servers')).toHaveText(psCount)
+    await expect(kwPage.getStats('Namespaced Policies')).toHaveText('No policies available.')
+    await expect(kwPage.getStats('Cluster Policies')).toHaveText('0 protect+6 monitor')
     await expect(kwPage.getPolicyServer(ps.name)).not.toBeVisible()
   })
 })
