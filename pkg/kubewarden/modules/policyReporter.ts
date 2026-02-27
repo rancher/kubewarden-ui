@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import semver from 'semver';
 import { NAMESPACE } from '@shell/config/types';
 import {
-  KUBEWARDEN, Severity, Result, PolicyReport, ClusterPolicyReport, PolicyReportResult, PolicyReportSummary, WG_POLICY_K8S
+  KUBEWARDEN, Severity, Result, PolicyReport, ClusterPolicyReport, PolicyReportResult, PolicyReportSummary, OPEN_REPORTS
 } from '@kubewarden/types';
 import * as coreTypes from '@kubewarden/core/core-resources';
 import { createKubewardenRoute } from '@kubewarden/utils/custom-routing';
@@ -39,11 +39,11 @@ export async function getReports<T extends PolicyReport | ClusterPolicyReport>(
   const reportTypes: string[] = [];
 
   if (isClusterLevel) {
-    reportTypes.push(WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE);
+    reportTypes.push(OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE);
   }
 
   if (resourceType || !isClusterLevel) {
-    reportTypes.push(WG_POLICY_K8S.POLICY_REPORT.TYPE);
+    reportTypes.push(OPEN_REPORTS.POLICY_REPORT.TYPE);
   }
 
   // Map over the report types to get (or create) the promise for each
@@ -70,7 +70,7 @@ export async function getReports<T extends PolicyReport | ClusterPolicyReport>(
       if (!isEmpty(reports)) {
         // Cache the reports right away so subsequent calls don’t trigger a new fetch
         // (even though the store will eventually be updated asynchronously).
-        const updateAction = reportType === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE ? 'kubewarden/updateClusterPolicyReports' : 'kubewarden/updatePolicyReports';
+        const updateAction = reportType === OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE ? 'kubewarden/updateClusterPolicyReports' : 'kubewarden/updatePolicyReports';
 
         await processReportsInBatches(store, reports, updateAction);
       }
