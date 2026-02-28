@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
-import { type YAMLPatch } from '../components/rancher-ui'
+import { RancherUI, type YAMLPatch } from '../components/rancher-ui'
 import { Shell } from '../components/kubectl-shell'
 import { step } from './rancher-test'
 import { BasePage } from './basepage'
@@ -67,6 +67,15 @@ export class RancherAppsPage extends BasePage {
     await expect(this.stepTitle).toContainText(version)
   }
 
+  async setRepoType(type: 'Git' | 'OCI' | 'Helm') {
+    const name = type + ' Repository'
+    if (RancherUI.isVersion('>=2.14')) {
+      await this.page.getByRole('heading', { name, exact: true }).click()
+    } else {
+      await this.page.getByRole('radio', { name: type === 'Helm' ? 'http(s) URL' : name }).check()
+    }
+  }
+
   /**
    * Add helm charts repository to local cluster
    * @param name
@@ -80,15 +89,15 @@ export class RancherAppsPage extends BasePage {
     await this.ui.input('Name *').fill(repo.name)
     if (repo.url.endsWith('.git')) {
       // Git repository
-      await this.page.getByRole('radio', { name: 'Git repository' }).check()
+      await this.setRepoType('Git')
       await this.ui.input('Git Repo URL *').fill(repo.url)
     } else if (repo.url.startsWith('oci://')) {
       // OCI repository
-      await this.page.getByRole('radio', { name: 'OCI repository' }).check()
+      await this.setRepoType('OCI')
       await this.ui.input('OCI Repository Host URL *').fill(repo.url)
     } else {
       // HTTP repository
-      await this.page.getByRole('radio', { name: 'http(s) URL' }).check()
+      await this.setRepoType('Helm')
       await this.ui.input('Index URL *').fill(repo.url)
     }
     if (repo.httpAuth) {
