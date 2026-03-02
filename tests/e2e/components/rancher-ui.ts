@@ -171,7 +171,7 @@ export class RancherUI {
   }
 
   @step
-  async importYaml(yaml: YAMLPatch) {
+  async importYaml(yaml: YAMLPatch, options?: { wait?: boolean }) {
     // Open import dialog
     const dialog = this.page.getByRole('dialog')
     await this.page.locator('header').locator('button').filter({ has: this.page.locator('i.icon-upload') }).click()
@@ -183,9 +183,11 @@ export class RancherUI {
     await expect(dialog.getByRole('heading', { name: /^Applied \d+ Resources?$/ })).toBeVisible()
 
     // Wait until all resources are active
-    await dialog.getByTestId('sortable-cell-0-0').waitFor()
-    for (const e of await dialog.getByTestId(/sortable-cell-\d+-0/).all()) {
-      await expect(e).toHaveText('Active', { timeout: 60_000 })
+    if (options?.wait) {
+      await dialog.getByTestId('sortable-cell-0-0').waitFor()
+      for (const e of await dialog.getByTestId(/sortable-cell-\d+-0/).all()) {
+        await expect(e).toHaveText('Active', { timeout: 60_000 })
+      }
     }
 
     // Close dialog
