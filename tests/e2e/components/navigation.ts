@@ -3,13 +3,14 @@ import { step } from '../rancher/rancher-test'
 import { RancherUI } from './rancher-ui'
 import { RancherCommonPage } from '../rancher/rancher-common.page'
 
-type ExpGroup = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Admission Policy Management'
+type ExpGroup = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Admission Policy Management' | 'SBOMScanner'
 type ExpItemMap = {
   'Cluster'                    : 'Projects/Namespaces' | 'Nodes' | 'Cluster and Project Members' | 'Events'
   'Workloads'                  : 'CronJobs' | 'DaemonSets' | 'Deployments' | 'Jobs' | 'StatefulSets' | 'Pods'
   'Apps'                       : 'Charts' | 'Installed Apps' | 'Repositories' | 'Recent Operations'
   'Storage'                    : 'PersistentVolumes' | 'StorageClasses' | 'ConfigMaps' | 'PersistentVolumeClaims' | 'Secrets'
   'Admission Policy Management': 'Policy Servers' | 'Cluster Admission Policies' | 'Admission Policies' | 'Policy Reporter'
+  'SBOMScanner'                : 'Images' | 'Vex Management' | 'Registries configuration'
 }
 
 // Rancher v2.12 renamed Advanced to Resources
@@ -64,7 +65,7 @@ export class Navigation {
       const expandBtn = groupBlock.locator('i.icon-chevron-down,i.icon-chevron-right')
       // Can't detect with expandBtn.isVisible, conflict in: icon-down = closed (2.7) = open (2.8)
       await expect(groupBlock).toBeVisible()
-      if (!await groupBlock.getByRole('list').isVisible()) {
+      if (!await groupBlock.getByRole('list').first().isVisible()) {
         await expandBtn.click()
       }
     }
@@ -162,5 +163,22 @@ export class Navigation {
     await this.explorer('Admission Policy Management', 'Admission Policies')
     if (name) await this.ui.tableRow(name).open()
     if (tab) await this.ui.tab(tab).click()
+  }
+
+  // ==================================================================================================
+  // SBOMScanner specific helpers
+
+  @step
+  async sbomScanner(childName?: ExpItemMap['SBOMScanner']) {
+    // Navigation does not support 2nd level items (Advanced > Registries)
+    if (childName === 'Vex Management')
+      await this.goto(`dashboard/c/local/imageScanner/sbomscanner.kubewarden.io.vexhub`)
+    else if (childName === 'Registries configuration')
+      await this.goto(`dashboard/c/local/imageScanner/sbomscanner.kubewarden.io.registry`)
+    else
+      await this.explorer('SBOMScanner', childName)
+
+    const heading = childName || /^(Dashboard|Install SBOMScanner)/
+    await expect(this.page.locator('div.title').getByText(heading)).toBeVisible()
   }
 }
