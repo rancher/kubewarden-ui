@@ -4,16 +4,16 @@ import PolicyReporter from '@kubewarden/components/PolicyReporter/index.vue';
 
 import mockControllerDeployment from '@/tests/unit/mocks/controllerDeployment';
 import { mockControllerAppLegacy } from '@/tests/unit/mocks/controllerApp';
-import { KUBEWARDEN, WG_POLICY_K8S } from '@kubewarden/types';
+import { KUBEWARDEN, OPEN_REPORTS } from '@kubewarden/types';
 
 // Create a mock for the 'cluster/schemaFor' getter that returns different values based on the input.
 const clusterSchemaFor = jest.fn((resourceType) => {
   switch (resourceType) {
   case KUBEWARDEN.POLICY_SERVER:
     return true;
-  case WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE:
+  case OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE:
     return true;
-  case WG_POLICY_K8S.POLICY_REPORT.TYPE:
+  case OPEN_REPORTS.POLICY_REPORT.TYPE:
     return true;
   default:
     return false;
@@ -148,7 +148,7 @@ describe('component: PolicyReporter', () => {
 
     mockCloneAppWithNewVersion.spec.chart.metadata.appVersion = kwVersions.new;
 
-    // Mock the 'cluster/schemaFor' getter to return false for WG_POLICY_K8S resources.
+    // Mock the 'cluster/schemaFor' getter to return false for OpenReports resources.
     const wrapper = createWrapper({
       global: {
         mocks: {
@@ -157,7 +157,7 @@ describe('component: PolicyReporter', () => {
             getters: {
               ...commonMocks.$store.getters,
               'cluster/schemaFor': jest.fn((resourceType) => {
-                if (resourceType === WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE || resourceType === WG_POLICY_K8S.POLICY_REPORT.TYPE) {
+                if (resourceType === OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE || resourceType === OPEN_REPORTS.POLICY_REPORT.TYPE) {
                   return false;
                 }
 

@@ -87,7 +87,7 @@ test('Cleanup & check results are gone', async({ page, ui, nav, shell }) => {
   await ui.tableRow(policyLabels).delete()
   await shell.runBatch(
     `kubectl delete ns ${testNs}`,
-    'kubectl delete cpolr,polr -A --all'
+    'kubectl delete reps,creps -A --all'
   )
 
   await nav.kubewarden('Policy Reporter')
