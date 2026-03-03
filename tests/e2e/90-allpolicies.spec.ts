@@ -70,14 +70,14 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
 }
 
 async function generalArray(ui: RancherUI) {
-  await ui.button('Add').click()
+  await ui.button(/^Add( a new row)?/).click()
   await ui.page.getByPlaceholder('e.g. bar').fill('item')
 }
 
 async function fillGroup(ui: RancherUI, group: string|RegExp, values: string[]) {
   const row = ui.page.locator('div.row.question').filter({ has: ui.page.getByText(group, { exact: true }) }).last()
   for (const val of values) {
-    await row.getByRole('button', { name: 'Add' }).click()
+    await row.getByRole('button', { name: /^Add( a new row)?/ }).click()
     await row.getByPlaceholder('e.g. bar').last().fill(val)
   }
 }
@@ -161,7 +161,7 @@ async function setupContainerResources(ui: RancherUI) {
 }
 
 async function setupTrustedRepos(ui: RancherUI) {
-  await ui.button('Add').first().click()
+  await ui.button(/^Add( a new row)?/).first().click()
   await ui.page.getByRole('textbox').last().fill('registry.my-corp.com')
 }
 
