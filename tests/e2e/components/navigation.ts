@@ -88,6 +88,13 @@ export class Navigation {
     if (this.isblank()) await this.cluster()
     await this.sideNavHandler(groupName, childName)
 
+    if ((groupName === 'Apps' && childName === 'Installed Apps')
+      || (groupName === 'Workloads' && childName === 'CronJobs')) {
+      await this.ui.retry(async() => {
+        await this.ui.tableRow(0).waitFor({ timeout: 7_000 })
+      }, 'Table is empty')
+    }
+
     // Wait for page before next step
     if (groupName == 'Admission Policy Management') {
       const heading = childName || /^(Kubewarden|Welcome to Kubewarden)$/
