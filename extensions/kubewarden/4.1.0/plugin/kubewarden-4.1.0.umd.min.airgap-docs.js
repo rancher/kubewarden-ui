@@ -1,0 +1,2 @@
+(("undefined"!==typeof self?self:this)["webpackChunkkubewarden_4_1_0"]=("undefined"!==typeof self?self:this)["webpackChunkkubewarden_4_1_0"]||[]).push([[537],{54003:function(e,n,s){e.exports=s.p+"assets/airgap-installation.md"}}]);
+//# sourceMappingURL=kubewarden-4.1.0.umd.min.airgap-docs.js.map
