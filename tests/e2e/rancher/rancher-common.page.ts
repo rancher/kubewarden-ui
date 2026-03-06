@@ -7,6 +7,22 @@ export class RancherCommonPage extends BasePage {
     throw new Error('Method not implemented.')
   }
 
+  /**
+   * Wait for PUT call response to prevent race condition:
+   * Initial state:     data: [developer: false, pre-release: false]
+   * Enable developer:   req: [developer: true,  pre-release: false]
+   * Enable pre-release: req: [developer: false, pre-release: true]
+   * Final state:       data: [developer: false, pre-release: true]
+   * https://github.com/rancher/dashboard/issues/16874
+   */
+  private async waitPut(action: () => Promise<void>) {
+    const response = this.page.waitForResponse(
+      res => res.url().includes('/v1/userpreferences/') && res.request().method() === 'PUT'
+    )
+    await action()
+    await response
+  }
+
   async isLoggedIn() {
     const password = this.ui.input('Password')
     const userMenu = this.page.getByTestId('nav_header_showUserMenu')
@@ -46,7 +62,7 @@ export class RancherCommonPage extends BasePage {
     const nsOption = filter.startsWith('#')
       ? nsMenu.locator(filter)
       : nsMenu.locator('div.ns-option').filter({ has: this.page.getByText(filter, { exact: true }) })
-    await nsOption.click()
+    await this.waitPut(() => nsOption.click())
     await expect(nsOption.locator('i.icon-checkmark')).toBeVisible()
 
     // Close menu (Escape)
@@ -54,18 +70,17 @@ export class RancherCommonPage extends BasePage {
   }
 
   async setHelmCharts(option: 'Show Releases Only' | 'Include Prerelease Versions') {
-    const btn = this.ui.button(option)
-    await btn.click()
-    await expect(btn).toContainClass('bg-primary')
-    await this.page.waitForTimeout(100)
+    await this.waitPut(() => this.ui.button(option).click())
   }
 
   /**
-     * Change user preferences
-     * @param checked Switch developer features on | off
-     */
+   * Change user preferences
+   * @param checked Switch developer features on | off
+   */
   async setExtensionDeveloperFeatures(enabled: boolean) {
-    await expect(this.page.getByRole('heading', { name: 'Advanced Features' })).toBeVisible()
-    await this.ui.checkbox('Enable Extension developer features').setChecked(enabled)
+    const devCheckbox = this.ui.checkbox('Enable Extension developer features')
+    if (enabled !== await devCheckbox.isChecked()) {
+      await this.waitPut(() => devCheckbox.setChecked(enabled))
+    }
   }
 }
