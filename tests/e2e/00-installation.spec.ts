@@ -11,6 +11,7 @@ import { Common } from './components/common'
 import semver from 'semver'
 
 const conf = {
+  src_url: 'http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js',
   // Install UI extension from: source (yarn dev), github (github tag), prime (official)
   ui_from: (process.env.ORIGIN || undefined) as 'source'|'github'|'prime'|undefined,
   // How to install Kubewarden: manual (from UI extension), fleet, upgrade (previous version)
@@ -25,9 +26,10 @@ if (conf.kw_mode) expect(conf.kw_mode).toMatch(/^(manual|fleet|upgrade)$/)
 // Configure defaults after env is loaded
 test.beforeAll(async({ request }) => {
   // Use local build (yarn serve), prime (if available) or github
-  conf.ui_from ||= await request.head('http://127.0.0.1:4500/')
-    .then(() => 'source' as const)
-    .catch(() => RancherUI.isPrime ? 'prime' : 'github')
+  const fallback = RancherUI.isPrime ? 'prime' : 'github'
+  conf.ui_from ||= await request.head(conf.src_url)
+    .then(r => r.ok() ? 'source' as const : fallback)
+    .catch(() => fallback)
 
   // Default to manual mode, unless fleet or upgrade is requested
   conf.kw_mode ||= 'manual'
@@ -94,7 +96,7 @@ test('Install UI extension', async({ page, ui }) => {
   await test.step('Install or developer load extension', async() => {
     await extensions.goto()
     if (conf.ui_from === 'source') {
-      await extensions.developerLoad('http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js')
+      await extensions.developerLoad(conf.src_url)
     } else {
       await extensions.install('kubewarden', { version: process.env.UIVERSION?.replace(/^kubewarden-/, '') })
     }
