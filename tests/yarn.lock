@@ -343,13 +343,13 @@ playwright-core@1.58.2:
   resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.58.2.tgz#ac5f5b4b10d29bcf934415f0b8d133b34b0dcb13"
   integrity sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==
 
-playwright-qase-reporter@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/playwright-qase-reporter/-/playwright-qase-reporter-2.2.1.tgz#a5a1b335bb033eefb467138568f83ba7249fcfcc"
-  integrity sha512-JD2vN18Bu/39vhJURz2nIbALHSqqUN6kii6TKKuxd8q4O0eM3zxVwgKap4lB+fTWNT/rVO0Bu3nirE0TANeCbg==
+playwright-qase-reporter@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/playwright-qase-reporter/-/playwright-qase-reporter-2.2.2.tgz#aba2be9a14505ea16d6a0f544823c6281c2d4503"
+  integrity sha512-x50/TEEPWYKo1iPDkUiRpYT1VNDTprF06iY48E4XxzIqrBnmzFG/HVW5GjDG0s+w+Z/x5ESG1K3S0P/F9I/7DA==
   dependencies:
     chalk "^4.1.2"
-    qase-javascript-commons "~2.5.3"
+    qase-javascript-commons "~2.5.6"
     uuid "^9.0.1"
 
 playwright@1.58.2:
@@ -387,10 +387,10 @@ qase-api-v2-client@~1.0.4:
     axios "^1.13.2"
     axios-retry "^4.5.0"
 
-qase-javascript-commons@~2.5.3:
-  version "2.5.3"
-  resolved "https://registry.yarnpkg.com/qase-javascript-commons/-/qase-javascript-commons-2.5.3.tgz#7ee7aaa0902cf4186a557273a3893e49d1238d9f"
-  integrity sha512-R6ieEBsBqGXBQ0IiSenPF9QEkNvrBp14IbCcHjdyIgAFkGIPGHf6RM2GSst1bZh3YO47TF84dApUlQBHh68oeA==
+qase-javascript-commons@~2.5.6:
+  version "2.5.6"
+  resolved "https://registry.yarnpkg.com/qase-javascript-commons/-/qase-javascript-commons-2.5.6.tgz#15dd39beb768526cad6d11201a3809ce0a3c1cd6"
+  integrity sha512-6UWUXHyHzPEQmog6to2aojvqfe0tfN8dNDCusAJ+1ho1Y0zZvr1nuhglH7ntDvfcUvihu8zCf4yXqxMYFBqhfw==
   dependencies:
     ajv "^8.18.0"
     async-mutex "~0.5.0"
