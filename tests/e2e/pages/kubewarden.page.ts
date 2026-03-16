@@ -5,6 +5,7 @@ import { Shell } from '../components/kubectl-shell'
 import { step } from '../rancher/rancher-test'
 
 type Pane = 'Policy Servers' | 'Namespaced Policies' | 'Cluster Policies'
+// type PaneFilter = 'Policies' | 'Reports' | string | RegExp
 
 export interface AppVersion {
   app        : string
@@ -33,17 +34,51 @@ export class KubewardenPage extends BasePage {
   }
 
   getPane(name: Pane) {
-    return this.page.locator('div.card-container').filter({
-      has: this.page.getByRole('heading', { name, exact: true })
-    })
-  }
-
-  getCount(pane: Pane) {
-    return this.getPane(pane).locator('span.count')
+    return this.page.locator('div.item-card')
+      .filter({ has: this.page.getByRole('heading', { name, exact: true }) })
   }
 
   getPolicyServer(name: string|RegExp) {
-    return this.getPane('Policy Servers').getByRole('listitem').filter({ has: this.page.getByRole('link', { name: name, exact: true }) })
+    return this.getPane('Policy Servers')
+      .locator('div.resource-row')
+      .filter({ has: this.page.getByRole('link', { name, exact: true }) })
+  }
+
+  getPolicySummary(pane: Pane, type: 'Policies' | 'Reports') {
+    return this.getPane(pane)
+      .locator('div.policies-summary')
+      .filter({ has: this.page.getByText(type, { exact: true }) })
+  }
+
+  getStats(pane: Pane, options?: { server?: string | RegExp, type?: 'Policies' | 'Reports' }) {
+    const el = pane === 'Policy Servers'
+      ? this.getPolicyServer(options?.server ?? 'default')
+      : this.getPolicySummary(pane, options?.type ?? 'Policies')
+
+    const matcher = options?.type === 'Reports' ? /^\d+ reports/ : /^\d+ protect\s*\+\s*\d+ monitor/
+    return el.getByText(matcher).or(el.getByText(/No [a-z]+ available/))
+  }
+
+  async getCount(pane: Pane, options?: { server?: string | RegExp, type?: 'Policies' | 'Reports', mode?: 'monitor' | 'protect' }) {
+    // Special handling for policy servers count
+    if (pane === 'Policy Servers' && !options?.server) {
+      return await this.getPane('Policy Servers').locator('div.resource-row').count()
+    }
+
+    const stats = this.getStats(pane, options)
+    await expect(stats).toBeVisible()
+
+    if (await stats.getByText(/^No (policies|reports) available/).isVisible()) return 0
+
+    if (options?.type === 'Reports') {
+      return parseInt((await stats.getByText(/^\d+ reports$/).textContent())!, 10)
+    }
+    const mCount = parseInt((await stats.getByText(/^\d+ monitor$/).textContent())!, 10)
+    const pCount = parseInt((await stats.getByText(/^\d+ protect$/).textContent())!, 10)
+
+    if (options?.mode === 'monitor') return mCount
+    if (options?.mode === 'protect') return pCount
+    return mCount + pCount
   }
 
   @step
