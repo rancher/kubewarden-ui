@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test'
+import { step } from '../rancher/rancher-test'
 import { BasePage } from './basepage'
 import { RancherUI } from '../components/rancher-ui'
 
@@ -48,8 +49,9 @@ export class RancherCommonPage extends BasePage {
      *
      * @param filter Use #id or exact name of the filter
      */
+  @step
   async setNamespaceFilter(filter: string) {
-    await expect(this.page.getByRole('heading', { name: 'Cluster Dashboard' })).toBeVisible()
+    await expect(this.page.getByTestId('namespaces-filter')).toBeVisible()
 
     const nsMenu = this.page.getByTestId('namespaces-menu')
     const nsDropdown = this.page.getByTestId('namespaces-dropdown')
