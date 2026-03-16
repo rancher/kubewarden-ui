@@ -60,7 +60,7 @@ export class RancherCommonPage extends BasePage {
     await nsDropdown.locator('i.icon-chevron-down').click()
 
     // Clean current and set requested filters
-    await nsMenu.locator('.ns-controls > .ns-clear').click()
+    await this.waitPut(() => nsMenu.locator('.ns-controls > .ns-clear').click())
     const nsOption = filter.startsWith('#')
       ? nsMenu.locator(filter)
       : nsMenu.locator('div.ns-option').filter({ has: this.page.getByText(filter, { exact: true }) })
