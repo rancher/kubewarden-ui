@@ -3,6 +3,7 @@ import { RancherAppsPage } from '../rancher/rancher-apps.page'
 import { BasePage } from '../rancher/basepage'
 import { Shell } from '../components/kubectl-shell'
 import { step } from '../rancher/rancher-test'
+import { YAMLPatch } from '../components/rancher-ui'
 
 type Pane = 'Policy Servers' | 'Namespaced Policies' | 'Cluster Policies'
 
@@ -67,7 +68,7 @@ export class KubewardenPage extends BasePage {
     }
 
     @step
-    async installKubewarden(options?: { version?: string }) {
+    async installKubewarden(options?: { version?: string, yamlPatch?: YAMLPatch }) {
       // ==================================================================================================
       // Requirements Dialog
       const welcomeStep = this.page.getByText('Kubewarden is a policy engine for Kubernetes.')
@@ -129,6 +130,12 @@ export class KubewardenPage extends BasePage {
       await schedule.fill('*/1 * * * *')
       await this.ui.checkbox('Enable Policy Reporter').check()
 
+      if (options?.yamlPatch) {
+        await this.ui.openView('Edit YAML')
+        await this.ui.editYaml(options.yamlPatch)
+        await this.ui.openView('Compare Changes')
+      }
+
       // Start installation
       await apps.installBtn.click()
       await apps.waitHelmSuccess('rancher-kubewarden-crds', { keepLog: true })
@@ -172,7 +179,7 @@ export class KubewardenPage extends BasePage {
       // Check resources are online
       await this.nav.explorer('Apps', 'Installed Apps')
       for (const chart of ['controller', 'crds', 'defaults']) {
-        await apps.checkChart(`rancher-kubewarden-${chart}`, to ? to[chart] : undefined)
+        await apps.checkChart(`rancher-kubewarden-${chart}`, to ? to[chart as keyof AppVersion] : undefined)
       }
       await shell.waitPods()
     }

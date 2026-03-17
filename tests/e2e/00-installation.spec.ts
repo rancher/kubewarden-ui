@@ -90,7 +90,10 @@ test('Install Kubewarden', async({ page, ui, nav }) => {
   test.skip(MODE === 'fleet')
 
   const kwPage = new KubewardenPage(page)
-  await kwPage.installKubewarden({ version: MODE === 'upgrade' ? upMap[0].controller : undefined })
+  await kwPage.installKubewarden({
+    version: MODE === 'upgrade' ? upMap[0].controller : undefined,
+    yamlPatch: (y) => { y.auditScanner.reportCRDsKind = 'policyreport' }
+  })
 
   // Check UI is active
   await nav.explorer('Kubewarden')
@@ -117,6 +120,13 @@ test('Install Kubewarden', async({ page, ui, nav }) => {
     // Handle PolicyServer Installer Dialog
     await psPage.installDefault({ recommended: true, mode: 'monitor' })
   })
+
+  // Switch to policyreport (openreports are not supported in rancher 2.10)
+  const apps = new RancherAppsPage(page)
+  await apps.updateApp('rancher-kubewarden-crds', { yamlPatch: (y) => {
+    y.installOpenReportsCRDs = false
+    y.installPolicyReportCRDs = true
+  } })
 })
 
 test('Install Kubewarden by Fleet', async({ page, ui }) => {
@@ -200,7 +210,7 @@ test('Upgrade Kubewarden', async({ page, nav }) => {
   // Check we installed old versions
   await nav.explorer('Apps', 'Installed Apps')
   for (const chart of ['controller', 'crds', 'defaults']) {
-    await apps.checkChart(`rancher-kubewarden-${chart}`, upMap[0][chart])
+    await apps.checkChart(`rancher-kubewarden-${chart}`, upMap[0][chart as keyof AppVersion])
   }
 
   // Keep track of last upgraded version
