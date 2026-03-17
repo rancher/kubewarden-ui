@@ -3,7 +3,7 @@
   "version": "4.1.0",
   "private": false,
   "scripts": {
-    "build-pkg": "./node_modules/@rancher/shell/scripts/build-pkg.sh",
+    "build-pkg": "./scripts/build-pkg-wrapper.sh",
     "serve-pkgs": "./node_modules/@rancher/shell/scripts/serve-pkgs",
     "parse-tag-name": "./node_modules/@rancher/shell/scripts/extension/parse-tag-name",
     "publish-pkgs": "./node_modules/@rancher/shell/scripts/extension/publish",
