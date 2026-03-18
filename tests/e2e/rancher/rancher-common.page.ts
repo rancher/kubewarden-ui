@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test'
+import { step } from '../rancher/rancher-test'
 import { BasePage } from './basepage'
 import { RancherUI } from '../components/rancher-ui'
 
@@ -48,8 +49,9 @@ export class RancherCommonPage extends BasePage {
      *
      * @param filter Use #id or exact name of the filter
      */
+  @step
   async setNamespaceFilter(filter: string) {
-    await expect(this.page.getByRole('heading', { name: 'Cluster Dashboard' })).toBeVisible()
+    await expect(this.page.getByTestId('namespaces-filter')).toBeVisible()
 
     const nsMenu = this.page.getByTestId('namespaces-menu')
     const nsDropdown = this.page.getByTestId('namespaces-dropdown')
@@ -58,7 +60,7 @@ export class RancherCommonPage extends BasePage {
     await nsDropdown.locator('i.icon-chevron-down').click()
 
     // Clean current and set requested filters
-    await nsMenu.locator('.ns-controls > .ns-clear').click()
+    await this.waitPut(() => nsMenu.locator('.ns-controls > .ns-clear').click())
     const nsOption = filter.startsWith('#')
       ? nsMenu.locator(filter)
       : nsMenu.locator('div.ns-option').filter({ has: this.page.getByText(filter, { exact: true }) })
