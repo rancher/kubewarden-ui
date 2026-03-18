@@ -2764,15 +2764,15 @@
     "@rancher/icons" "^2.0.54"
     lodash.debounce "4.0.8"
 
-"@rancher/icons@2.0.54", "@rancher/icons@^2.0.54":
-  version "2.0.54"
-  resolved "https://registry.npmjs.org/@rancher/icons/-/icons-2.0.54.tgz#7e8d4baeac36a483f18f4ce4043809371c4f0117"
-  integrity sha512-Fc5xpT/yuOJJin7ChxAdB6aoG1bREgisktnePUPXpY9nIMHSHYT/Ov8GsC3yLLgoqgpm450nMvPICUO3AYcPdQ==
+"@rancher/icons@2.0.55", "@rancher/icons@^2.0.54":
+  version "2.0.55"
+  resolved "https://registry.yarnpkg.com/@rancher/icons/-/icons-2.0.55.tgz#394159bddbf786c17a12bc38e59b88346b30dcf4"
+  integrity sha512-hPcmsvfYNO36dJ7/lb3JbJC5BOnHbwBylic7HRqhSCSIcFlFaKnRt9aB/hvv3ip0Wo6J5yVEv2o7oXGErXkWFw==
 
-"@rancher/shell@^3.0.8":
-  version "3.0.8"
-  resolved "https://registry.npmjs.org/@rancher/shell/-/shell-3.0.8.tgz#8b2462bb8422992207ddca3dbac0c5cf76597771"
-  integrity sha512-Pyv2Je2bvDvnYwmmMonxM38C+JJL20ke1AvyNbDRBMmw3IhJdQV4wN/QawfHhJi85NXfLvQ4K9dQQA9vJEt3bQ==
+"@rancher/shell@^3.0.9":
+  version "3.0.9"
+  resolved "https://registry.yarnpkg.com/@rancher/shell/-/shell-3.0.9.tgz#35ca323d20d06108ae0c431a0e87e9692a249b13"
+  integrity sha512-93i13Wr5ZFPVG86fmIAq6k3MLcoglP1F2udiCg2+t3aK1+4IIsHt4BDyL4NKhpZOOwQRd1fzVIwN+Mwi15VxnA==
   dependencies:
     "@aws-sdk/client-ec2" "3.863.0"
     "@aws-sdk/client-eks" "3.879.0"
@@ -2784,7 +2784,7 @@
     "@babel/preset-typescript" "7.16.7"
     "@novnc/novnc" "1.2.0"
     "@popperjs/core" "2.11.8"
-    "@rancher/icons" "2.0.54"
+    "@rancher/icons" "2.0.55"
     "@smithy/fetch-http-handler" "5.1.1"
     "@types/is-url" "1.2.30"
     "@types/node" "20.10.8"
@@ -2813,7 +2813,7 @@
     cookie-universal "2.2.2"
     core-js "3.45.0"
     cron-validator "1.4.0"
-    cronstrue "2.53.0"
+    cronstrue "3.9.0"
     cross-env "7.0.3"
     css-loader "6.7.3"
     csv-loader "3.0.3"
@@ -2822,7 +2822,7 @@
     d3 "7.3.0"
     d3-selection "3.0.0"
     dayjs "1.11.18"
-    defu "5.0.1"
+    defu "6.1.4"
     diff2html "3.4.24"
     dompurify "3.2.5"
     element-matches "^0.1.2"
@@ -2857,7 +2857,7 @@
     jsonpath-plus "10.3.0"
     jsrsasign "11.0.0"
     jszip "3.10.1"
-    lodash "4.17.21"
+    lodash "4.17.23"
     marked "4.0.17"
     node-polyfill-webpack-plugin "3.0.0"
     nodemon "2.0.22"
@@ -6352,10 +6352,10 @@ cron-validator@1.4.0:
   resolved "https://registry.npmjs.org/cron-validator/-/cron-validator-1.4.0.tgz#77ed4277b086c22e74ee65640f8456747afd4885"
   integrity sha512-wGcJ9FCy65iaU6egSH8b5dZYJF7GU/3Jh06wzaT9lsa5dbqExjljmu+0cJ8cpKn+vUyZa/EM4WAxeLR6SypJXw==
 
-cronstrue@2.53.0:
-  version "2.53.0"
-  resolved "https://registry.npmjs.org/cronstrue/-/cronstrue-2.53.0.tgz#5bbcd7483636b99379480f624faef5056f3efbd8"
-  integrity sha512-CkAcaI94xL8h6N7cGxgXfR5D7oV2yVtDzB9vMZP8tIgPyEv/oc/7nq9rlk7LMxvc3N+q6LKZmNLCVxJRpyEg8A==
+cronstrue@3.9.0:
+  version "3.9.0"
+  resolved "https://registry.yarnpkg.com/cronstrue/-/cronstrue-3.9.0.tgz#a3c3ae3e218235a123c80de8db95a93e45a9d8ba"
+  integrity sha512-T3S35zmD0Ai2B4ko6+mEM+k9C6tipe2nB9RLiGT6QL2Wn0Vsn2cCZAC8Oeuf4CaE00GZWVdpYitbpWCNlIWqdA==
 
 cross-env@7.0.3:
   version "7.0.3"
@@ -7046,10 +7046,10 @@ define-properties@^1.1.3, define-properties@^1.2.1:
     has-property-descriptors "^1.0.0"
     object-keys "^1.1.1"
 
-defu@5.0.1:
-  version "5.0.1"
-  resolved "https://registry.npmjs.org/defu/-/defu-5.0.1.tgz#a034278f9b032bf0845d261aa75e9ad98da878ac"
-  integrity sha512-EPS1carKg+dkEVy3qNTqIdp2qV7mUP08nIsupfwQpz++slCVRw7qbQyWvSTig+kFPwz2XXp5/kIIkH+CwrJKkQ==
+defu@6.1.4:
+  version "6.1.4"
+  resolved "https://registry.yarnpkg.com/defu/-/defu-6.1.4.tgz#4e0c9cf9ff68fe5f3d7f2765cc1a012dfdcb0479"
+  integrity sha512-mEQCMmwJu317oSz8CwdIOdwf3xMif1ttiM8LTufzc3g6kR+9Pe236twL8j3IYT1F7GfRgGcW6MWxzZjLIkuHIg==
 
 delaunator@5:
   version "5.0.1"
@@ -11036,10 +11036,10 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.npmjs.org/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==
 
-lodash@4.17.21, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.7.0:
-  version "4.17.21"
-  resolved "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
-  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+lodash@4.17.23, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.7.0:
+  version "4.17.23"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.23.tgz#f113b0378386103be4f6893388c73d0bde7f2c5a"
+  integrity sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==
 
 log-symbols@^4.0.0, log-symbols@^4.1.0:
   version "4.1.0"
