@@ -90,8 +90,8 @@ export class Navigation {
     await this.sideNavHandler(groupName, childName)
 
     // Handle known cases of empty tables
-    if (groupName === 'Apps' && childName === 'Installed Apps') {
-      const row = this.ui.tableRow('rancher').row
+    if (childName === 'Installed Apps' || childName === 'CronJobs') {
+      const row = this.ui.tableRow(/^(rancher|audit-scanner)$/).row
       await expect(row).toBeVisible().catch(async() => {
         test.info().annotations.push({ type: 'Table is empty', description: 'Resetting namespace filter' })
         const rancher = new RancherCommonPage(this.page)
