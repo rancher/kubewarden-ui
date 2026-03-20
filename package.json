@@ -38,7 +38,7 @@
     "ts-jest": "^29.4.6"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24.0.0"
   },
   "resolutions": {
     "@achrinza/node-ipc": "9.2.10"
