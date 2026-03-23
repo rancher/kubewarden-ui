@@ -238,7 +238,7 @@ jobs:
     - uses: actions/setup-node@v6.3.0
       if: env.KUBEWARDEN == 'source'
       with:
-        node-version: ${{ (github.event.pull_request.base.ref == 'release-1.6' || github.event.pull_request.base.ref == 'release-2.1') && '16' || '20' }}
+        node-version: ${{ (github.event.pull_request.base.ref == 'release-1.6' || github.event.pull_request.base.ref == 'release-2.1') && '16' || '24' }}
 
     - name: Build Kubewarden extension
       if: env.KUBEWARDEN == 'source'
@@ -249,7 +249,7 @@ jobs:
 
     - uses: actions/setup-node@v6.3.0
       with:
-        node-version: '20'
+        node-version: '24'
 
     - name: Install playwright
       working-directory: tests

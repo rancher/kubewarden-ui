@@ -16,7 +16,7 @@ jobs:
       - name: Setup Nodejs and npm
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Setup yarn
         run: npm install -g yarn
@@ -24,7 +24,7 @@ jobs:
       - name: Setup Nodejs with yarn caching
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: '20'
+          node-version: '24'
           cache: yarn
 
       - name: Install dependencies
