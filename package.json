@@ -1,6 +1,6 @@
 {
   "name": "ui",
-  "version": "4.0.3",
+  "version": "4.1.0",
   "private": false,
   "scripts": {
     "build-pkg": "./node_modules/@rancher/shell/scripts/build-pkg.sh",
@@ -18,7 +18,7 @@
   "dependencies": {
     "@kubernetes/client-node": "^1.3.0",
     "@rancher/components": "^0.3.0-alpha.2",
-    "@rancher/shell": "^3.0.8"
+    "@rancher/shell": "^3.0.10"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^4.2.0",
@@ -38,6 +38,9 @@
     "ts-jest": "^29.4.6"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24.0.0"
+  },
+  "resolutions": {
+    "@achrinza/node-ipc": "9.2.10"
   }
 }

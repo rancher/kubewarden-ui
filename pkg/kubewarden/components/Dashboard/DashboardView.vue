@@ -10,7 +10,7 @@ import { allHash } from '@shell/utils/promise';
 import Loading from '@shell/components/Loading';
 
 import { DASHBOARD_HEADERS } from '@kubewarden/config/table-headers';
-import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, WG_POLICY_K8S } from '@kubewarden/types';
+import { KUBEWARDEN, KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, OPEN_REPORTS } from '@kubewarden/types';
 
 import { isPolicyServerResource } from '@kubewarden/modules/policyServer';
 
@@ -266,8 +266,8 @@ onMounted(async() => {
 
     const hash: Record<string, Promise<any>> = {};
     const types = [
-      WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE,
-      WG_POLICY_K8S.POLICY_REPORT.TYPE,
+      OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE,
+      OPEN_REPORTS.POLICY_REPORT.TYPE,
       KUBEWARDEN.ADMISSION_POLICY,
       KUBEWARDEN.CLUSTER_ADMISSION_POLICY,
       KUBEWARDEN.POLICY_SERVER,

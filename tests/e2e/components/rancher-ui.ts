@@ -103,6 +103,14 @@ export class RancherUI {
       ? this.page.getByRole('option').nth(option)
       : this.page.getByRole('option', { name: option, exact: true })
     await optionItem.click()
+
+    // Select is removed if I choose "New Namespace" option
+    if (await select.isVisible()) {
+      // Clicking optionItem that is already selected does not close menu (policy questions)
+      if (await select.getAttribute('aria-expanded') === 'true') {
+        await select.click()
+      }
+    }
   }
 
   // ==================================================================================================

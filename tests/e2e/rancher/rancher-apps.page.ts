@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
-import { type YAMLPatch } from '../components/rancher-ui'
+import { RancherUI, type YAMLPatch } from '../components/rancher-ui'
 import { Shell } from '../components/kubectl-shell'
 import { step } from './rancher-test'
 import { BasePage } from './basepage'
@@ -67,6 +67,15 @@ export class RancherAppsPage extends BasePage {
     await expect(this.stepTitle).toContainText(version)
   }
 
+  async setRepoType(type: 'Git' | 'OCI' | 'Helm') {
+    const name = type + ' Repository'
+    if (RancherUI.isVersion('>=2.14')) {
+      await this.page.getByRole('heading', { name, exact: true }).click()
+    } else {
+      await this.page.getByRole('radio', { name: type === 'Helm' ? 'http(s) URL' : name }).check()
+    }
+  }
+
   /**
    * Add helm charts repository to local cluster
    * @param name
@@ -80,15 +89,15 @@ export class RancherAppsPage extends BasePage {
     await this.ui.input('Name *').fill(repo.name)
     if (repo.url.endsWith('.git')) {
       // Git repository
-      await this.page.getByRole('radio', { name: 'Git repository' }).check()
+      await this.setRepoType('Git')
       await this.ui.input('Git Repo URL *').fill(repo.url)
     } else if (repo.url.startsWith('oci://')) {
       // OCI repository
-      await this.page.getByRole('radio', { name: 'OCI repository' }).check()
+      await this.setRepoType('OCI')
       await this.ui.input('OCI Repository Host URL *').fill(repo.url)
     } else {
       // HTTP repository
-      await this.page.getByRole('radio', { name: 'http(s) URL' }).check()
+      await this.setRepoType('Helm')
       await this.ui.input('Index URL *').fill(repo.url)
     }
     if (repo.httpAuth) {
@@ -186,12 +195,16 @@ export class RancherAppsPage extends BasePage {
     if (options?.navigate !== false) {
       await this.nav.explorer('Apps', 'Charts')
       await expect(this.page.getByRole('heading', { name: 'Charts', exact: true })).toBeVisible()
+      // Handle infinite list scrolling
+      if (!await card.isVisible()) {
+        await this.page.getByTestId('charts-filter-input').fill(chart.title)
+      }
       await card.click()
 
       if (chart.version) {
         const versionPane = this.page.getByRole('heading', { name: 'Chart Versions', exact: true }).locator('..')
         const showMore = versionPane.getByText('Show More', { exact: true })
-        const chartVersion = versionPane.getByText(chart.version, { exact: true })
+        const chartVersion = versionPane.getByText(chart.version, { exact: true }).first()
 
         await expect(versionPane).toBeVisible()
         // Expand versions
@@ -237,7 +250,8 @@ export class RancherAppsPage extends BasePage {
       await this.nav.explorer('Apps', 'Installed Apps')
       await expect(this.page.getByRole('heading', { name: 'Installed Apps' })).toBeVisible()
 
-      await this.ui.tableRow(name).action('Edit/Upgrade')
+      // Edit/Upgrade -> Edit/Change version (Rancher 2.14+)
+      await this.ui.tableRow(name).action(/^\s*Edit/)
       await expect(this.page.getByRole('heading', { name })).toBeVisible()
     }
 
@@ -266,6 +280,9 @@ export class RancherAppsPage extends BasePage {
 
     await this.updateBtn.click()
     await this.waitHelmSuccess(name, { timeout: options?.timeout })
+
+    // List of installed apps is empty if we navigate right after update
+    await this.page.waitForTimeout(3000)
   }
 
   @step

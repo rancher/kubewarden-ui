@@ -1,5 +1,6 @@
 import semver from 'semver'
 import yaml from 'js-yaml'
+import { uniqBy } from 'lodash'
 import { AppVersion } from '../pages/kubewarden.page'
 import { RancherUI } from './rancher-ui'
 
@@ -34,9 +35,13 @@ export class Common {
       }
     }
 
-    // Filter only complete entries
-    return Object.values(versionMap)
-      .filter((entry): entry is AppVersion => !!entry.controller && !!entry.crds && !!entry.defaults)
-      .sort((a, b) => semver.compare(a.app.replace(/^v/, ''), b.app.replace(/^v/, '')))
+    return uniqBy(
+      Object.values(versionMap)
+        // Filter out incomplete entries
+        .filter((e): e is AppVersion => !!e.controller && !!e.crds && !!e.defaults)
+        .sort((a, b) => semver.rcompare(a.app, b.app)),
+      // Unique minor version (skip 1.32.0 if 1.32.1 is available)
+      v => `${semver.major(v.app)}.${semver.minor(v.app)}`
+    ).reverse()
   }
 }

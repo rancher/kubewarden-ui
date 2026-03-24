@@ -1,6 +1,7 @@
-import { expect, Page } from '@playwright/test'
+import { expect, Page, test } from '@playwright/test'
 import { step } from '../rancher/rancher-test'
 import { RancherUI } from './rancher-ui'
+import { RancherCommonPage } from '../rancher/rancher-common.page'
 
 type ExpGroup = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Admission Policy Management'
 type ExpItemMap = {
@@ -87,6 +88,17 @@ export class Navigation {
   async explorer<T extends ExpGroup>(groupName: T, childName?: ExpItemMap[T]) {
     if (this.isblank()) await this.cluster()
     await this.sideNavHandler(groupName, childName)
+
+    // Handle known cases of empty tables
+    if (childName === 'Installed Apps' || childName === 'CronJobs') {
+      const row = this.ui.tableRow(/^(rancher|audit-scanner)$/).row
+      await expect(row).toBeVisible().catch(async() => {
+        test.info().annotations.push({ type: 'Table is empty', description: 'Resetting namespace filter' })
+        const rancher = new RancherCommonPage(this.page)
+        await rancher.setNamespaceFilter('All Namespaces')
+        await expect(row).toBeVisible()
+      })
+    }
 
     // Wait for page before next step
     if (groupName == 'Admission Policy Management') {
