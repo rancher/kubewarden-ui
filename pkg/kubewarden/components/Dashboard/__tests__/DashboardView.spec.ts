@@ -6,7 +6,7 @@ const Loading = { template: '<span />' };
 
 import { CATALOG, POD } from '@shell/config/types';
 
-import { KUBEWARDEN, WG_POLICY_K8S } from '@kubewarden/types';
+import { KUBEWARDEN, OPEN_REPORTS } from '@kubewarden/types';
 import { DASHBOARD_HEADERS } from '@kubewarden/config/table-headers';
 
 import DashboardView from '@kubewarden/components/Dashboard/DashboardView.vue';
@@ -209,9 +209,9 @@ const clusterAllMock = jest.fn((resourceType) => {
     return mockAdmissionPolicies;
   case KUBEWARDEN.CLUSTER_ADMISSION_POLICY:
     return mockClusterAdmissionPolicies;
-  case WG_POLICY_K8S.POLICY_REPORT.TYPE:
+  case OPEN_REPORTS.POLICY_REPORT.TYPE:
     return mockPolicyReports;
-  case WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE:
+  case OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE:
     return mockClusterPolicyReports;
   default:
     return [];
