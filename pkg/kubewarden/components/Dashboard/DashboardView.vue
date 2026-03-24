@@ -71,16 +71,16 @@ const clusterPolicies = computed(() => store.getters['cluster/all'](KUBEWARDEN.C
 const namespacedPolicies = computed(() => store.getters['cluster/all'](KUBEWARDEN.ADMISSION_POLICY));
 const policyReports = computed(() => {
   return {
-    [WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE]: store.getters['cluster/all'](WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE),
-    [WG_POLICY_K8S.POLICY_REPORT.TYPE]:         store.getters['cluster/all'](WG_POLICY_K8S.POLICY_REPORT.TYPE)
+    [OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE]: store.getters['cluster/all'](OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE),
+    [OPEN_REPORTS.POLICY_REPORT.TYPE]:         store.getters['cluster/all'](OPEN_REPORTS.POLICY_REPORT.TYPE)
   };
 });
 
 const admissionPolicyResults = computed(() => {
-  if (!isEmpty(policyReports.value[WG_POLICY_K8S.POLICY_REPORT.TYPE])) {
+  if (!isEmpty(policyReports.value[OPEN_REPORTS.POLICY_REPORT.TYPE])) {
     let out: any[] = [];
 
-    policyReports.value[WG_POLICY_K8S.POLICY_REPORT.TYPE].filter((report: any) => {
+    policyReports.value[OPEN_REPORTS.POLICY_REPORT.TYPE].filter((report: any) => {
       const results = report?.results?.filter((result: any) => result?.policy.includes('namespaced-'));
 
       if (!isEmpty(results)) {
@@ -96,8 +96,8 @@ const admissionPolicyResults = computed(() => {
 
 const clusterPolicyResults = computed(() => {
   if (!isEmpty(policyReports.value)) {
-    const pr = policyReports.value[WG_POLICY_K8S.POLICY_REPORT.TYPE];
-    const cpr = policyReports.value[WG_POLICY_K8S.CLUSTER_POLICY_REPORT.TYPE];
+    const pr = policyReports.value[OPEN_REPORTS.POLICY_REPORT.TYPE];
+    const cpr = policyReports.value[OPEN_REPORTS.CLUSTER_POLICY_REPORT.TYPE];
     let out: any[] = [];
 
     if (!isEmpty(cpr)) {
