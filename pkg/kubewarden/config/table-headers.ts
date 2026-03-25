@@ -157,6 +157,7 @@ export const POLICY_HEADERS = [
 ];
 
 export const DASHBOARD_HEADERS = [
+  // Admission/Namespaced Policy Card
   {
     isEnabled:   true,
     isLoaded:    true,
@@ -172,11 +173,16 @@ export const DASHBOARD_HEADERS = [
       name:   'c-cluster-product-resource',
       params: { resource: KUBEWARDEN.ADMISSION_POLICY }
     }),
+    createLink:  createKubewardenRoute({
+      name:   'c-cluster-product-resource-create',
+      params: { resource: KUBEWARDEN.ADMISSION_POLICY }
+    }),
     linkText:    'kubewarden.dashboard.headers.admissionPolicy.linkText',
     description: 'kubewarden.dashboard.headers.admissionPolicy.description',
     slotTitle:   'kubewarden.dashboard.headers.admissionPolicy.slotTitle',
     title:       'kubewarden.dashboard.headers.admissionPolicy.title'
   },
+  // Cluster Admission Policy Card
   {
     isEnabled:   true,
     isLoaded:    true,
@@ -192,11 +198,16 @@ export const DASHBOARD_HEADERS = [
       name:   'c-cluster-product-resource',
       params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }
     }),
+    createLink:  createKubewardenRoute({
+      name:   'c-cluster-product-resource-create',
+      params: { resource: KUBEWARDEN.CLUSTER_ADMISSION_POLICY }
+    }),
     linkText:    'kubewarden.dashboard.headers.clusterAdmissionPolicy.linkText',
     description: 'kubewarden.dashboard.headers.clusterAdmissionPolicy.description',
     slotTitle:   'kubewarden.dashboard.headers.clusterAdmissionPolicy.slotTitle',
     title:       'kubewarden.dashboard.headers.clusterAdmissionPolicy.title'
   },
+  // Server Card
   {
     isEnabled:   true,
     isLoaded:    true,
@@ -226,6 +237,10 @@ export const DASHBOARD_HEADERS = [
         }
       });
     },
+    createLink:  createKubewardenRoute({
+      name:   'c-cluster-product-resource-create',
+      params: { resource: KUBEWARDEN.POLICY_SERVER }
+    }),
     description: 'kubewarden.dashboard.headers.policyServer.description',
     slotTitle:   'kubewarden.dashboard.headers.policyServer.slotTitle',
     title:       'kubewarden.dashboard.headers.policyServer.title'
