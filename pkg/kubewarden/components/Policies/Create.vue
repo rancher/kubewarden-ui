@@ -31,6 +31,7 @@ import {
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 import { removeEmptyAttrs } from '@kubewarden/utils/object';
 import { trimTrailingSlash } from '@kubewarden/utils/string';
+import { parsePolicyModule, buildModuleString } from '@kubewarden/modules/policyChart';
 
 import PolicyReadmePanel from './PolicyReadmePanel';
 import PolicyTable from './PolicyTable';
@@ -106,6 +107,9 @@ export default ({
       typeModule:             null,
       version:                null,
       errorFetchingPolicy:    false,
+
+      // OCI module info set after chart is selected (passed to Values as prop)
+      policyModuleInfo: null,
 
       chartValues: {
         policy:    {},
@@ -272,6 +276,8 @@ export default ({
       return null;
     }
   },
+
+  watch: {},
 
   methods: {
     async addRepository(btnCb) {
@@ -474,22 +480,21 @@ export default ({
 
         const policyQuestions = this.selectedPolicyDetails?.questions;
         const policyAnnotations = toRaw(this.selectedPolicyDetails?.chart?.annotations);
+        const moduleInfo = parsePolicyModule(toRaw(this.selectedPolicyDetails));
 
-        if (!policyAnnotations) {
-          throw new Error('Policy annotations are missing');
+        if (!moduleInfo) {
+          throw new Error('Policy module information is missing (no values.yaml or annotations found)');
         }
 
-        let registry = policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REGISTRY];
-        let policyModule = `${ policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REPOSITORY] }:${ policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.TAG] }`;
+        // Store module info for Values to consume (enables override inputs)
+        const effectiveRegistry = (this.systemDefaultRegistry?.value && this.systemDefaultRegistry.value !== this.systemDefaultRegistry.default) ? this.systemDefaultRegistry.value : moduleInfo.registry;
 
-        // Override annotation by rancher system-default-registry if user changed default value (expected in airgap)
-        if (this.systemDefaultRegistry?.value && this.systemDefaultRegistry.value !== this.systemDefaultRegistry.default) {
-          registry = this.systemDefaultRegistry.value;
-        }
+        this.policyModuleInfo = {
+          ...moduleInfo,
+          registry: effectiveRegistry,
+        };
 
-        if (registry) {
-          policyModule = `${ registry }/${ policyModule }`;
-        }
+        const policyModule = buildModuleString(effectiveRegistry, moduleInfo.repository, moduleInfo.tag);
 
         const updatedPolicy = {
           apiVersion: this.value.apiVersion,
@@ -498,13 +503,13 @@ export default ({
           spec:       {
             module:   policyModule,
             mode:     'monitor', // Default to monitor mode
-            mutating: policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.MUTATION] === 'true' || false,
-            rules:    this.parseObj(policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.RULES]) || []
+            mutating: policyAnnotations?.[KUBEWARDEN_CATALOG_ANNOTATIONS.MUTATION] === 'true' || false,
+            rules:    this.parseObj(policyAnnotations?.[KUBEWARDEN_CATALOG_ANNOTATIONS.RULES]) || []
           }
         };
 
         if (this.chartType === KUBEWARDEN.CLUSTER_ADMISSION_POLICY) {
-          Object.assign(updatedPolicy.spec, { contextAwareResources: this.parseObj(policyAnnotations[KUBEWARDEN_CATALOG_ANNOTATIONS.CONTEXT_AWARE_RESOURCES]) || [] });
+          Object.assign(updatedPolicy.spec, { contextAwareResources: this.parseObj(policyAnnotations?.[KUBEWARDEN_CATALOG_ANNOTATIONS.CONTEXT_AWARE_RESOURCES]) || [] });
         }
 
         merge(defaultPolicy, updatedPolicy);
@@ -543,6 +548,7 @@ export default ({
             'typeModule',
             'version',
             'hasCustomPolicy',
+            'policyModuleInfo',
           ];
 
           initialState.forEach((i) => {
@@ -679,6 +685,7 @@ export default ({
           :mode="mode"
           :custom-policy="customPolicy"
           :error-fetching-policy="errorFetchingPolicy"
+          :module-info="policyModuleInfo"
           @editor="$event => yamlOption = $event"
           @updateYamlValues="$event => yamlValues = $event"
         />

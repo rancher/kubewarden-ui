@@ -25,6 +25,7 @@ import {
   YAML_OPTIONS,
   RANCHER_NS_MATCH_EXPRESSION
 } from '@kubewarden/types';
+import { PolicyModuleInfo } from '@kubewarden/modules/policyChart';
 
 interface Props {
   mode: string;
@@ -33,6 +34,7 @@ interface Props {
   value: Record<string, any>;
   yamlValues: string;
   errorFetchingPolicy: boolean;
+  moduleInfo?: PolicyModuleInfo | null;
 }
 
 const props = defineProps<Props>();
@@ -162,6 +164,7 @@ onMounted(async() => {
                 :mode="mode"
                 :custom-policy="customPolicy"
                 :error-fetching-policy="errorFetchingPolicy"
+                :module-info="moduleInfo"
               />
             </template>
           </Tabbed>

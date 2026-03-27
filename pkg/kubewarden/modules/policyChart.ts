@@ -1,4 +1,89 @@
-import { PolicyChart, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
+import {
+  PolicyChart, VersionInfo,
+  KUBEWARDEN_CATALOG_ANNOTATIONS, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS
+} from '@kubewarden/types';
+
+export interface PolicyModuleInfo {
+  registry:   string;
+  repository: string;
+  tag:        string;
+  source:     'values' | 'annotations';
+}
+
+export interface ParsedPolicyModule {
+  registry:   string;
+  repository: string;
+  tag:        string;
+}
+
+/**
+
+ * Matches a full OCI reference: [registry/]repository:tag
+ * Capture group 1 = registry (optional), group 2 = repository, group 3 = tag.
+ */
+const OCI_REF_RE = /^(?:((?:[a-zA-Z0-9-]+\.)+[a-zA-Z0-9-]+(?::\d+)?|localhost(?::\d+)?)\/)?((?:[^:]+\/)*[^:/]+):([^:/]+)$/;
+
+/**
+ * Extracts OCI module info from a policy's VersionInfo.
+ * Checks values.yaml first then falls back to Chart.yaml annotations (legacy format)
+ */
+export function parsePolicyModule(versionInfo: VersionInfo): PolicyModuleInfo | null {
+  const values      = versionInfo?.values;
+  const annotations = versionInfo?.chart?.annotations;
+
+  // New format: values.yaml ships module.repository (pure path, no registry prefix) + module.tag.
+  // The registry is always at global.cattle.systemDefaultRegistry.
+  if (values?.module?.repository && values?.module?.tag) {
+    return {
+      registry:   values?.global?.cattle?.systemDefaultRegistry || '',
+      repository: values.module.repository as string,
+      tag:        values.module.tag as string,
+      source:     'values',
+    };
+  }
+
+  // Legacy format: Chart.yaml annotations
+  if (annotations?.[KUBEWARDEN_CATALOG_ANNOTATIONS.REPOSITORY] && annotations?.[KUBEWARDEN_CATALOG_ANNOTATIONS.TAG]) {
+    return {
+      registry:   annotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REGISTRY] || '',
+      repository: annotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REPOSITORY],
+      tag:        annotations[KUBEWARDEN_CATALOG_ANNOTATIONS.TAG],
+      source:     'annotations',
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Assembles the full OCI module string: "[registry/]repository:tag"
+ */
+export function buildModuleString(registry: string, repository: string, tag: string): string {
+  const base = `${ repository }:${ tag }`;
+
+  return registry ? `${ registry }/${ base }` : base;
+}
+
+/**
+ * Splits a persisted OCI module string into registry, repository and tag.
+ */
+export function parseModuleString(module: string): ParsedPolicyModule | null {
+  if (!module) {
+    return null;
+  }
+
+  const match = OCI_REF_RE.exec(module);
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    registry:   match[1] || '',
+    repository: match[2],
+    tag:        match[3],
+  };
+}
 
 /**
  * Extracts resource kinds from a list of policy charts with the `kubewarden/resources` annotation.

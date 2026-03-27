@@ -12,6 +12,7 @@ import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 
 import { KUBEWARDEN, KUBEWARDEN_APPS } from '@kubewarden/types';
+import { buildModuleString } from '@kubewarden/modules/policyChart';
 
 export default {
   name: 'General',
@@ -34,7 +35,11 @@ export default {
     value: {
       type:     Object,
       required: true
-    }
+    },
+    moduleInfo: {
+      type:    Object,
+      default: null
+    },
   },
 
   components: {
@@ -82,14 +87,40 @@ export default {
     return {
       policy,
       initialPolicyMode: null,
-      isNamespaceNew:    false
+      isNamespaceNew:    false,
+
+      // OCI module override fields — populated from moduleInfo when values.yaml is present
+      policyRegistry:   '',
+      policyRepository: '',
+      policyTag:        '',
     };
   },
 
   watch: {
     isNamespaceNew(neu) {
       this.value.isNamespaceNew = neu;
-    }
+    },
+
+    moduleInfo: {
+      immediate: true,
+      handler(info) {
+        if (info) {
+          this.policyRegistry   = info.registry   ?? '';
+          this.policyRepository = info.repository ?? '';
+          this.policyTag        = info.tag        ?? '';
+        }
+      }
+    },
+
+    policyRegistry()   {
+      this.syncModule();
+    },
+    policyRepository() {
+      this.syncModule();
+    },
+    policyTag()        {
+      this.syncModule();
+    },
   },
 
   created() {
@@ -129,6 +160,10 @@ export default {
       return this.chartType === KUBEWARDEN.CLUSTER_ADMISSION_POLICY;
     },
 
+    hasValuesModule() {
+      return this.moduleInfo?.source === 'values';
+    },
+
     modeDisabled() {
       // Kubewarden doesn't allow switching a policy from 'protect' to 'monitor'
       if (!this.isCreate) {
@@ -164,6 +199,24 @@ export default {
       }
 
       return false;
+    }
+  },
+
+  methods: {
+    syncModule() {
+      if (!this.hasValuesModule || !this.policy?.spec) {
+        return;
+      }
+
+      const registry = this.policyRegistry?.trim() || '';
+      const repository = this.policyRepository?.trim() || '';
+      const tag = this.policyTag?.trim() || '';
+
+      if (!repository || !tag) {
+        return;
+      }
+
+      this.policy.spec.module = buildModuleString(registry, repository, tag);
     }
   }
 };
@@ -213,6 +266,33 @@ export default {
             :required="true"
           />
         </div>
+        <template v-if="hasValuesModule">
+          <div class="col span-4">
+            <LabeledInput
+              v-model:value="policyRegistry"
+              data-testid="kw-policy-general-registry-input"
+              :mode="mode"
+              :label="t('kubewarden.policies.module.registry')"
+              :placeholder="t('kubewarden.policies.module.registryPlaceholder')"
+            />
+          </div>
+          <div class="col span-5">
+            <LabeledInput
+              v-model:value="policyRepository"
+              data-testid="kw-policy-general-repository-input"
+              :mode="mode"
+              :label="t('kubewarden.policies.module.repository')"
+            />
+          </div>
+          <div class="col span-3">
+            <LabeledInput
+              v-model:value="policyTag"
+              data-testid="kw-policy-general-tag-input"
+              :mode="mode"
+              :label="t('kubewarden.policies.module.tag')"
+            />
+          </div>
+        </template>
       </div>
       <div class="row mb-20">
         <div class="col span-6">
