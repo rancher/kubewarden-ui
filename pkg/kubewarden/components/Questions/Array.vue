@@ -37,6 +37,7 @@ export default {
         :mode="mode"
         :protip="false"
         :disabled="disabled"
+        :add-label="t('generic.add')"
         @update:value="update"
       />
     </div>
