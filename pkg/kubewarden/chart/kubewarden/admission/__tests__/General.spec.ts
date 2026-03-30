@@ -152,4 +152,88 @@ describe('component: General', () => {
 
     expect(wrapper.vm.policy.spec.module).toBe('registry.internal:5000/kubewarden/pod-privileged:v2.0.0');
   });
+
+  it('should render the timeoutEvalSeconds input with correct attributes', () => {
+    const wrapper = shallowMount(General, {
+      props:  {
+        targetNamespace: 'default',
+        value:           { policy: userGroupPolicy }
+      },
+      global:   {
+        provide: { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
+        mocks:   {
+          $fetchState: { pending: false },
+          $store:      {
+            getters: {
+              currentStore:        () => 'current_store',
+              'current_store/all': jest.fn(),
+              'i18n/t':            jest.fn()
+            },
+          }
+        },
+        stubs: {
+          NameNsDescription: { template: '<span />' },
+          RadioGroup:        { template: '<span />' },
+          LabeledTooltip:    { template: '<span />' }
+        }
+      },
+      computed: {
+        policyServerOptions: () => ['default'],
+        isGlobal:            () => true,
+        isCreate:            () => true,
+        hasValuesModule:     () => false,
+        showModeBanner:      () => false,
+        modeDisabled:        () => false
+      }
+    });
+
+    const input = wrapper.find('[data-testid="kw-policy-general-timeout-eval-seconds-input"]');
+
+    expect(input.exists()).toBe(true);
+    expect(input.attributes('type')).toBe('number');
+    expect(input.attributes('min')).toBe('2');
+    expect(input.attributes('max')).toBe('30');
+  });
+
+  it('should bind timeoutEvalSeconds to policy.spec.timeoutEvalSeconds', async() => {
+    const wrapper = shallowMount(General, {
+      props:  {
+        targetNamespace: 'default',
+        value:           { policy: userGroupPolicy }
+      },
+      global:   {
+        provide: { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
+        mocks:   {
+          $fetchState: { pending: false },
+          $store:      {
+            getters: {
+              currentStore:        () => 'current_store',
+              'current_store/all': jest.fn(),
+              'i18n/t':            jest.fn()
+            },
+          }
+        },
+        stubs: {
+          NameNsDescription: { template: '<span />' },
+          RadioGroup:        { template: '<span />' },
+          LabeledTooltip:    { template: '<span />' }
+        }
+      },
+      computed: {
+        policyServerOptions: () => ['default'],
+        isGlobal:            () => true,
+        isCreate:            () => true,
+        hasValuesModule:     () => false,
+        showModeBanner:      () => false,
+        modeDisabled:        () => false
+      }
+    });
+
+    await wrapper.setData({ policy: { spec: { timeoutEvalSeconds: 15 } } });
+
+    const input = wrapper.find('[data-testid="kw-policy-general-timeout-eval-seconds-input"]');
+
+    expect(input.exists()).toBe(true);
+    expect((wrapper.vm as any).policy.spec.timeoutEvalSeconds).toBe(15);
+  });
 });

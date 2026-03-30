@@ -327,6 +327,21 @@ export default {
           />
         </div>
       </div>
+      <div class="row mb-20">
+        <div class="col span-6">
+          <LabeledInput
+            v-model:value="policy.spec.timeoutEvalSeconds"
+            data-testid="kw-policy-general-timeout-eval-seconds-input"
+            type="number"
+            :min="2"
+            :max="30"
+            :mode="mode"
+            label="timeoutEvalSeconds"
+            :placeholder="t('kubewarden.policyConfig.timeoutEvalSeconds.label')"
+            :tooltip="t('kubewarden.policyConfig.timeoutEvalSeconds.description')"
+          />
+        </div>
+      </div>
     </template>
   </div>
 </template>
