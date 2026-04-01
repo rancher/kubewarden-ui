@@ -10,6 +10,8 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+    cooldown:
+      default-days: 7
   # Limited to rancher-shell by Giuseppe Leo
   - package-ecosystem: "npm"
     directory: "/"
@@ -18,6 +20,8 @@ updates:
       day: "monday"
     allow:
       - dependency-name: "@rancher/shell"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "npm"
     directory: "/tests"
     schedule:
@@ -26,3 +30,5 @@ updates:
       time: "06:00"
       timezone: "Europe/Prague"
     labels: ["dependencies", "area/qa"]
+    cooldown:
+      default-days: 7
