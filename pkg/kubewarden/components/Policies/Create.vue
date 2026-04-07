@@ -277,9 +277,86 @@ export default ({
     }
   },
 
-  watch: {},
+  watch: {
+    yamlOption(neu, old) {
+      if (neu === VALUES_STATE.FORM && old === VALUES_STATE.YAML && !this.customPolicy && this.selectedPolicyDetails) {
+        // Sync chartValues.policy.spec.module from any YAML edits the user made
+        if (this.yamlValues) {
+          try {
+            const parsed = jsyaml.load(this.yamlValues);
+
+            if (parsed?.spec?.module) {
+              this.chartValues.policy.spec.module = parsed.spec.module;
+            }
+          } catch {
+            // ignore YAML parse errors
+          }
+        }
+
+        // Re-resolve policyModuleInfo so the registry/repository/tag inputs
+        // reflect the current spec.module when the form is shown again
+        this.resolvePolicyModuleInfo();
+      }
+    }
+  },
 
   methods: {
+    /**
+     * Re-resolve policyModuleInfo from the current spec.module string, using the
+     * chart's canonical repository:tag as an anchor so registries without dots are
+     * handled correctly. Called when switching from YAML editor back to form view.
+     */
+    resolvePolicyModuleInfo() {
+      const chartInfo = parsePolicyModule(toRaw(this.selectedPolicyDetails));
+
+      if (!chartInfo) {
+        return;
+      }
+
+      const savedModule = this.chartValues?.policy?.spec?.module || '';
+
+      if (!savedModule) {
+        return;
+      }
+
+      const expectedSuffix = `${ chartInfo.repository }:${ chartInfo.tag }`;
+
+      if (savedModule === expectedSuffix) {
+        this.policyModuleInfo = { ...chartInfo };
+
+        return;
+      }
+
+      if (savedModule.endsWith(`/${ expectedSuffix }`)) {
+        const registry = savedModule.slice(0, -(expectedSuffix.length + 1));
+
+        this.policyModuleInfo = {
+          ...chartInfo,
+          registry: registry || chartInfo.registry
+        };
+
+        return;
+      }
+
+      // Repository or tag was also changed — split on last ':' (tag) and first '/' (registry)
+      const lastColon = savedModule.lastIndexOf(':');
+
+      if (lastColon > 0 && lastColon < savedModule.length - 1) {
+        const repoWithRegistry = savedModule.slice(0, lastColon);
+        const tag              = savedModule.slice(lastColon + 1);
+        const firstSlash       = repoWithRegistry.indexOf('/');
+        const registry         = firstSlash >= 0 ? repoWithRegistry.slice(0, firstSlash) : '';
+        const repository       = firstSlash >= 0 ? repoWithRegistry.slice(firstSlash + 1) : repoWithRegistry;
+
+        this.policyModuleInfo = {
+          registry,
+          repository,
+          tag,
+          source: chartInfo.source,
+        };
+      }
+    },
+
     async addRepository(btnCb) {
       try {
         const repoObj = await this.$store.dispatch('cluster/create', {

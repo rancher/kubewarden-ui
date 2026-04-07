@@ -9,7 +9,7 @@ import { set } from '@shell/utils/object';
 import Loading from '@shell/components/Loading.vue';
 
 import {
-  Chart, Version, VersionInfo, KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_CATALOG_ANNOTATIONS
+  Chart, Version, VersionInfo, KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_CATALOG_ANNOTATIONS, VALUES_STATE
 } from '@kubewarden/types';
 import { PolicyModuleInfo, parseModuleString, parsePolicyModule, buildModuleString } from '@kubewarden/modules/policyChart';
 
@@ -223,6 +223,16 @@ function showReadme() {
   readmePanel.value?.show();
 }
 
+/**
+ * Switching from YAML editor to form view, re-resolve module info for the policy
+ * @param versionInfo
+ */
+function onEditorChange(state: string) {
+  if (state === VALUES_STATE.FORM && selectedPolicyDetails.value) {
+    moduleInfo.value = resolveModuleInfo(toRaw(selectedPolicyDetails.value) as VersionInfo);
+  }
+}
+
 onBeforeMount(async() => {
   const isReposLoaded = store.getters['catalog/repos']?.length > 0;
 
@@ -284,6 +294,7 @@ onMounted(async() => {
         :mode="props.mode"
         :error-fetching-policy="errorFetchingPolicy"
         :module-info="moduleInfo"
+        @editor="onEditorChange"
         @updateYamlValues="val => emit('updateYamlValues', val)"
       />
     </div>
