@@ -8,24 +8,24 @@ import kubewardenRoutes from './routes/kubewarden-routes';
 import kubewardenStore from './store/kubewarden';
 
 // Init the package
-export default function($plugin: any) {
+export default function($extension: any) {
   // Auto-import model, detail, edit from the folders
-  importTypes($plugin);
+  importTypes($extension);
 
   // Provide plugin metadata from package.json
-  $plugin.metadata = require('./package.json');
+  $extension.metadata = require('./package.json');
 
   // Load product
-  $plugin.addProduct(require('./config/kubewarden'));
+  $extension.addProduct(require('./config/kubewarden'));
 
   // Add Vuex store
-  $plugin.addDashboardStore(kubewardenStore.config.namespace, kubewardenStore.specifics, kubewardenStore.config);
+  $extension.addDashboardStore(kubewardenStore.config.namespace, kubewardenStore.specifics, kubewardenStore.config);
 
   // Routes
-  $plugin.addRoutes(kubewardenRoutes);
+  $extension.addRoutes(kubewardenRoutes);
 
   /** Panels */
-  $plugin.addPanel(
+  $extension.addPanel(
     PanelLocation.RESOURCE_LIST,
     {
       path: [{
@@ -36,7 +36,7 @@ export default function($plugin: any) {
     { component: () => import('./components/PolicyReporter/ReporterPanel.vue') }
   );
 
-  $plugin.addPanel(
+  $extension.addPanel(
     PanelLocation.RESOURCE_LIST,
     {
       resource: [
@@ -55,7 +55,7 @@ export default function($plugin: any) {
 
   /** Columns */
   // Policy Reports for Project Namespaces
-  $plugin.addTableColumn(
+  $extension.addTableColumn(
     TableColumnLocation.RESOURCE,
     {
       path: [{
@@ -73,7 +73,7 @@ export default function($plugin: any) {
   );
 
   // Policy Reports for namespaced resources
-  $plugin.addTableColumn(
+  $extension.addTableColumn(
     TableColumnLocation.RESOURCE,
     {
       resource: [
@@ -97,7 +97,7 @@ export default function($plugin: any) {
   );
 
   /** Tabs */
-  $plugin.addTab(
+  $extension.addTab(
     TabLocation.RESOURCE_DETAIL,
     {
       resource: [

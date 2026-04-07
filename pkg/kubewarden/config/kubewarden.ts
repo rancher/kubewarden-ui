@@ -4,14 +4,14 @@ import {
 } from '@kubewarden/types';
 import { POLICY_SERVER_HEADERS, POLICY_HEADERS } from './table-headers';
 
-export function init($plugin: any, store: any) {
+export function init($extension: any, store: any) {
   const {
     product,
     basicType,
     weightType,
     virtualType,
     headers
-  } = $plugin.DSL(store, $plugin.name);
+  } = $extension.DSL(store, $extension.name);
 
   const {
     POLICY_SERVER,
