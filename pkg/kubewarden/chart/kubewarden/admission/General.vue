@@ -217,6 +217,10 @@ export default {
       }
 
       this.policy.spec.module = buildModuleString(registry, repository, tag);
+    },
+
+    onTimeoutEvalSecondsInput(value) {
+      this.policy.spec.timeoutEvalSeconds = value !== '' ? parseInt(value, 10) : undefined;
     }
   }
 };
@@ -339,7 +343,7 @@ export default {
             label="timeoutEvalSeconds"
             :placeholder="t('kubewarden.policyConfig.timeoutEvalSeconds.label')"
             :tooltip="t('kubewarden.policyConfig.timeoutEvalSeconds.description')"
-            @input="policy.spec.timeoutEvalSeconds = $event !== '' ? parseInt($event, 10) : undefined"
+            @update:value="onTimeoutEvalSecondsInput"
           />
         </div>
       </div>

@@ -480,7 +480,7 @@ export default ({
           // Remove keys that are not in the new spec
           Object.keys(this.value.spec).forEach((key) => {
             if (!(key in out.spec)) {
-              this.$delete(this.value.spec, key);
+              delete this.value.spec[key];
             }
           });
 

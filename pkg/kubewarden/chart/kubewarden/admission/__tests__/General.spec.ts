@@ -273,7 +273,7 @@ describe('component: General', () => {
 
     const input = wrapper.findComponent(LabeledInput);
 
-    await input.vm.$emit('input', '10');
+    await input.vm.$emit('update:value', '10');
     await wrapper.vm.$nextTick();
 
     expect(typeof (wrapper.vm as any).policy.spec.timeoutEvalSeconds).toBe('number');
@@ -317,7 +317,7 @@ describe('component: General', () => {
 
     const input = wrapper.findComponent(LabeledInput);
 
-    await input.vm.$emit('input', '');
+    await input.vm.$emit('update:value', '');
     await wrapper.vm.$nextTick();
 
     expect((wrapper.vm as any).policy.spec.timeoutEvalSeconds).toBeUndefined();
