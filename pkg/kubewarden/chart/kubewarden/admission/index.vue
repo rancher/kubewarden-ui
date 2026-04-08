@@ -36,6 +36,10 @@ export default {
       type:     Object,
       required: true
     },
+    moduleInfo: {
+      type:    Object,
+      default: null
+    },
   },
 
   components: {
@@ -147,6 +151,7 @@ export default {
         :mode="mode"
         :target-namespace="targetNamespace"
         :is-custom="isCustom"
+        :module-info="moduleInfo"
       />
     </Tab>
 

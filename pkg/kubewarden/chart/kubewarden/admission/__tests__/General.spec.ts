@@ -41,6 +41,7 @@ describe('component: General', () => {
         policyServers:       () => ps,
         policyServerOptions: () => ['default', 'custom-ps'],
         isGlobal:            () => true,
+        hasValuesModule:     () => false,
         showModeBanner:      () => false,
         modeDisabled:        () => false
       }
@@ -79,6 +80,7 @@ describe('component: General', () => {
         policyServerOptions: () => ['default', 'custom-ps'],
         isGlobal:            () => true,
         isCreate:            () => true,
+        hasValuesModule:     () => false,
         showModeBanner:      () => false,
         modeDisabled:        () => false
       }
@@ -88,5 +90,66 @@ describe('component: General', () => {
     await wrapper.setData({ policy: { spec: { mode: 'protect' } } });
 
     expect(radio?.props().value).toStrictEqual('protect' as string);
+  });
+
+  it('should sync values-based OCI fields back into spec.module', async() => {
+    const wrapper = shallowMount(General, {
+      props:  {
+        targetNamespace: 'default',
+        value:           {
+          policy: {
+            ...userGroupPolicy,
+            spec: {
+              ...userGroupPolicy.spec,
+              module: 'ghcr.io/kubewarden/old-policy:v1'
+            }
+          }
+        },
+        moduleInfo: {
+          registry:   'ghcr.io',
+          repository: 'kubewarden/pod-privileged',
+          tag:        'v1.0.0',
+          source:     'values'
+        }
+      },
+      global: {
+        provide: { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
+        mocks:   {
+          $fetchState: { pending: false },
+          $store:      {
+            getters: {
+              currentStore:        () => 'current_store',
+              'current_store/all': jest.fn(),
+              'i18n/t':            jest.fn()
+            },
+          }
+        },
+        stubs: {
+          NameNsDescription: { template: '<span />' },
+          RadioGroup:        { template: '<span />' },
+          LabeledTooltip:    { template: '<span />' },
+          LabeledInput:      { template: '<span />' }
+        }
+      },
+      computed: {
+        isCreate:            () => true,
+        policyServers:       () => [],
+        policyServerOptions: () => [],
+        isGlobal:            () => true,
+        hasValuesModule:     () => true,
+        showModeBanner:      () => false,
+        modeDisabled:        () => false
+      }
+    });
+
+    await wrapper.setData({
+      policyRegistry:   'registry.internal:5000',
+      policyRepository: 'kubewarden/pod-privileged',
+      policyTag:        'v2.0.0'
+    });
+
+    wrapper.vm.syncModule();
+
+    expect(wrapper.vm.policy.spec.module).toBe('registry.internal:5000/kubewarden/pod-privileged:v2.0.0');
   });
 });

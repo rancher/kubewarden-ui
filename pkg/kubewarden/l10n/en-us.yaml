@@ -184,6 +184,11 @@ kubewarden:
     official: Official Rancher Policy
     airgap:
       banner: 'An air-gapped installation is detected, you will be unable to use the policies listed within the ArtifactHub catalog. You are still able to deploy a custom policy by referencing a WebAssembly module that is accessible to this cluster.'
+    module:
+      registry: Registry
+      registryPlaceholder: 'e.g. ghcr.io'
+      repository: Repository
+      tag: Tag
   utils:
     attributes:
       label: Attributes

@@ -9,8 +9,9 @@ import { set } from '@shell/utils/object';
 import Loading from '@shell/components/Loading.vue';
 
 import {
-  Chart, Version, VersionInfo, KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_CATALOG_ANNOTATIONS
+  Chart, Version, VersionInfo, KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_CATALOG_ANNOTATIONS, VALUES_STATE
 } from '@kubewarden/types';
+import { PolicyModuleInfo, parseModuleString, parsePolicyModule, buildModuleString } from '@kubewarden/modules/policyChart';
 
 import PolicyReadmePanel from './PolicyReadmePanel.vue';
 import Values from './Values.vue';
@@ -30,6 +31,7 @@ const chartValues = ref<any>(null);
 const yamlValues = ref('');
 const shortDescription = ref('');
 const policyReadme = ref<any>(null);
+const moduleInfo = ref<PolicyModuleInfo | null>(null);
 
 const fetchPending = ref(true);
 const errorFetchingPolicy = ref(false);
@@ -80,12 +82,12 @@ async function loadFromAnnotations(chartKey: string, chartName: string, chartVer
 
 async function loadFromModule() {
   const module = props.value.spec?.module;
+  const parsedModule = parseModuleString(module);
 
-  if (!module) {
+  if (!module || !parsedModule) {
     return;
   }
 
-  const [repo, tag] = module.split(':');
   const charts: Chart[] = store.getters['catalog/charts'].filter((c: Chart) => c.chartType === 'kubewarden-policy');
 
   let matchingChart = null;
@@ -98,14 +100,24 @@ async function loadFromModule() {
     }
 
     for (const version of chart.versions) {
-      const annos = version.annotations || {};
-      const registryFromAnnotations = annos[KUBEWARDEN_CATALOG_ANNOTATIONS.REGISTRY] || systemDefaultRegistry?.value;
-      const repositoryFromAnnotations = annos[KUBEWARDEN_CATALOG_ANNOTATIONS.REPOSITORY];
-      const tagFromAnnotations = annos[KUBEWARDEN_CATALOG_ANNOTATIONS.TAG];
+      const annotations = version.annotations || {};
+      const repositoryFromAnnotations = annotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REPOSITORY];
+      const tagFromAnnotations = annotations[KUBEWARDEN_CATALOG_ANNOTATIONS.TAG];
 
-      const assembledRepo = `${ registryFromAnnotations }/${ repositoryFromAnnotations }`;
+      if (!repositoryFromAnnotations || !tagFromAnnotations) {
+        continue;
+      }
 
-      if (assembledRepo === repo && tagFromAnnotations === tag) {
+      const candidates = [
+        buildModuleString(annotations[KUBEWARDEN_CATALOG_ANNOTATIONS.REGISTRY] || '', repositoryFromAnnotations, tagFromAnnotations),
+        buildModuleString(systemDefaultRegistry?.value || '', repositoryFromAnnotations, tagFromAnnotations),
+        buildModuleString('', repositoryFromAnnotations, tagFromAnnotations)
+      ];
+
+      if (
+        candidates.includes(module) ||
+        (repositoryFromAnnotations === parsedModule.repository && tagFromAnnotations === parsedModule.tag)
+      ) {
         matchingChart = chart;
         matchingVersion = version;
 
@@ -131,10 +143,74 @@ async function loadFromModule() {
   }
 }
 
+/**
+ * Resolve module info for the policy, prioritizing chart info, then the saved spec.module.
+ * When chart info is available we use its repository:tag as an unambiguous anchor to extract
+ * the registry from spec.module — no hostname heuristics needed, so registries without dots
+ * (e.g. "myregistry" or "1") are handled correctly.
+ * @param versionInfo
+ */
+function resolveModuleInfo(versionInfo: VersionInfo): PolicyModuleInfo | null {
+  const chartModuleInfo = parsePolicyModule(versionInfo);
+  const savedModule     = props.value?.spec?.module || '';
+
+  if (!chartModuleInfo) {
+    // No chart info — fall back to hostname-based detection of the saved module string
+    const savedModuleInfo = parseModuleString(savedModule);
+
+    return savedModuleInfo ? {
+      ...savedModuleInfo,
+      source: 'annotations'
+    } : null;
+  }
+
+  // Use the chart's canonical repository:tag as an anchor to peel the registry off
+  // the front of spec.module without any hostname guessing.
+  const expectedSuffix = `${ chartModuleInfo.repository }:${ chartModuleInfo.tag }`;
+
+  if (savedModule === expectedSuffix) {
+    // Saved without a registry — keep the chart's default registry
+    return { ...chartModuleInfo };
+  }
+
+  if (savedModule.endsWith(`/${ expectedSuffix }`)) {
+    // Saved with a registry prefix; everything before the final "/<repo>:<tag>" is the registry
+    const savedRegistry = savedModule.slice(0, -(expectedSuffix.length + 1));
+
+    return {
+      ...chartModuleInfo,
+      registry: savedRegistry || chartModuleInfo.registry
+    };
+  }
+
+  // User changed repository or tag from the chart defaults — anchor no longer matches.
+  // Split at first '/' (registry boundary) and last ':' (tag boundary) unconditionally,
+  // so registries without dots (e.g. "1" or "111111") are preserved correctly.
+  const lastColon = savedModule.lastIndexOf(':');
+
+  if (lastColon > 0 && lastColon < savedModule.length - 1) {
+    const repoWithRegistry = savedModule.slice(0, lastColon);
+    const tag              = savedModule.slice(lastColon + 1);
+    const firstSlash       = repoWithRegistry.indexOf('/');
+    const registry         = firstSlash >= 0 ? repoWithRegistry.slice(0, firstSlash) : '';
+    const repository       = firstSlash >= 0 ? repoWithRegistry.slice(firstSlash + 1) : repoWithRegistry;
+
+    return {
+      registry,
+      repository,
+      tag,
+      source: chartModuleInfo.source,
+    };
+  }
+
+  return chartModuleInfo;
+}
+
 function processChartDetails(versionInfo: VersionInfo) {
   selectedPolicyDetails.value = versionInfo;
   shortDescription.value = versionInfo?.chart?.description || '';
   policyReadme.value = versionInfo?.readme;
+  moduleInfo.value = resolveModuleInfo(versionInfo);
 
   if (versionInfo.questions) {
     set(chartValues.value, 'questions', versionInfo.questions);
@@ -145,6 +221,16 @@ const readmePanel = ref<InstanceType<typeof PolicyReadmePanel> | null>(null);
 
 function showReadme() {
   readmePanel.value?.show();
+}
+
+/**
+ * Switching from YAML editor to form view, re-resolve module info for the policy
+ * @param versionInfo
+ */
+function onEditorChange(state: string) {
+  if (state === VALUES_STATE.FORM && selectedPolicyDetails.value) {
+    moduleInfo.value = resolveModuleInfo(toRaw(selectedPolicyDetails.value) as VersionInfo);
+  }
 }
 
 onBeforeMount(async() => {
@@ -207,6 +293,8 @@ onMounted(async() => {
         :yaml-values="yamlValues"
         :mode="props.mode"
         :error-fetching-policy="errorFetchingPolicy"
+        :module-info="moduleInfo"
+        @editor="onEditorChange"
         @updateYamlValues="val => emit('updateYamlValues', val)"
       />
     </div>
