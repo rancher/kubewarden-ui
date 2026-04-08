@@ -5,6 +5,7 @@ import { KUBEWARDEN } from '@kubewarden/types';
 import General from '@kubewarden/chart/kubewarden/admission/General.vue';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
+import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 
 import { userGroupPolicy } from '@tests/unit/mocks/policyConfig';
@@ -235,5 +236,90 @@ describe('component: General', () => {
 
     expect(input.exists()).toBe(true);
     expect((wrapper.vm as any).policy.spec.timeoutEvalSeconds).toBe(15);
+  });
+
+  it('should coerce timeoutEvalSeconds to an integer when input fires a string', async() => {
+    const wrapper = shallowMount(General, {
+      props:  {
+        targetNamespace: 'default',
+        value:           { policy: userGroupPolicy }
+      },
+      global:   {
+        provide: { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
+        mocks:   {
+          $fetchState: { pending: false },
+          $store:      {
+            getters: {
+              currentStore:        () => 'current_store',
+              'current_store/all': jest.fn(),
+              'i18n/t':            jest.fn()
+            },
+          }
+        },
+        stubs: {
+          NameNsDescription: { template: '<span />' },
+          RadioGroup:        { template: '<span />' },
+          LabeledTooltip:    { template: '<span />' }
+        }
+      },
+      computed: {
+        policyServerOptions: () => ['default'],
+        isGlobal:            () => true,
+        isCreate:            () => true,
+        showModeBanner:      () => false,
+        modeDisabled:        () => false
+      }
+    });
+
+    const input = wrapper.findComponent(LabeledInput);
+
+    await input.vm.$emit('input', '10');
+    await wrapper.vm.$nextTick();
+
+    expect(typeof (wrapper.vm as any).policy.spec.timeoutEvalSeconds).toBe('number');
+    expect((wrapper.vm as any).policy.spec.timeoutEvalSeconds).toBe(10);
+  });
+
+  it('should set timeoutEvalSeconds to undefined when input is cleared', async() => {
+    const wrapper = shallowMount(General, {
+      props:  {
+        targetNamespace: 'default',
+        value:           { policy: userGroupPolicy }
+      },
+      global:   {
+        provide: { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
+        mocks:   {
+          $fetchState: { pending: false },
+          $store:      {
+            getters: {
+              currentStore:        () => 'current_store',
+              'current_store/all': jest.fn(),
+              'i18n/t':            jest.fn()
+            },
+          }
+        },
+        stubs: {
+          NameNsDescription: { template: '<span />' },
+          RadioGroup:        { template: '<span />' },
+          LabeledTooltip:    { template: '<span />' }
+        }
+      },
+      computed: {
+        policyServerOptions: () => ['default'],
+        isGlobal:            () => true,
+        isCreate:            () => true,
+        showModeBanner:      () => false,
+        modeDisabled:        () => false
+      }
+    });
+
+    await wrapper.setData({ policy: { spec: { timeoutEvalSeconds: 10 } } });
+
+    const input = wrapper.findComponent(LabeledInput);
+
+    await input.vm.$emit('input', '');
+    await wrapper.vm.$nextTick();
+
+    expect((wrapper.vm as any).policy.spec.timeoutEvalSeconds).toBeUndefined();
   });
 });

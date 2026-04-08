@@ -330,7 +330,7 @@ export default {
       <div class="row mb-20">
         <div class="col span-6">
           <LabeledInput
-            v-model:value="policy.spec.timeoutEvalSeconds"
+            :value="policy.spec.timeoutEvalSeconds"
             data-testid="kw-policy-general-timeout-eval-seconds-input"
             type="number"
             :min="2"
@@ -339,6 +339,7 @@ export default {
             label="timeoutEvalSeconds"
             :placeholder="t('kubewarden.policyConfig.timeoutEvalSeconds.label')"
             :tooltip="t('kubewarden.policyConfig.timeoutEvalSeconds.description')"
+            @input="policy.spec.timeoutEvalSeconds = $event !== '' ? parseInt($event, 10) : undefined"
           />
         </div>
       </div>
