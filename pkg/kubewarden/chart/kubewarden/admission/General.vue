@@ -199,7 +199,7 @@ export default {
       }
 
       return false;
-    }
+    },
   },
 
   methods: {
@@ -220,7 +220,15 @@ export default {
     },
 
     onTimeoutEvalSecondsInput(value) {
-      this.policy.spec.timeoutEvalSeconds = value !== '' ? parseInt(value, 10) : undefined;
+      if (value === '') {
+        this.policy.spec.timeoutEvalSeconds = undefined;
+
+        return;
+      }
+
+      const parsed = parseInt(value, 10);
+
+      this.policy.spec.timeoutEvalSeconds = parsed;
     }
   }
 };
@@ -337,8 +345,6 @@ export default {
             :value="policy.spec.timeoutEvalSeconds"
             data-testid="kw-policy-general-timeout-eval-seconds-input"
             type="number"
-            :min="2"
-            :max="30"
             :mode="mode"
             label="timeoutEvalSeconds"
             :placeholder="t('kubewarden.policyConfig.timeoutEvalSeconds.label')"

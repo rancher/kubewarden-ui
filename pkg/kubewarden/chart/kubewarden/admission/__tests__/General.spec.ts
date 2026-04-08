@@ -192,8 +192,6 @@ describe('component: General', () => {
 
     expect(input.exists()).toBe(true);
     expect(input.attributes('type')).toBe('number');
-    expect(input.attributes('min')).toBe('2');
-    expect(input.attributes('max')).toBe('30');
   });
 
   it('should bind timeoutEvalSeconds to policy.spec.timeoutEvalSeconds', async() => {

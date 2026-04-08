@@ -474,22 +474,25 @@ export default ({
           out = this.chartValues?.policy ? this.chartValues.policy : jsyaml.load(this.yamlValues);
         }
 
-        removeEmptyAttrs(out); // Clean up empty values from questions
+        // Deep-clone before stripping empty attrs so chartValues is not mutated
+        const cleanOut = JSON.parse(JSON.stringify(out));
+
+        removeEmptyAttrs(cleanOut); // Clean up empty values from questions
 
         if (this.finishAttempts > 0) {
           // Remove keys that are not in the new spec
           Object.keys(this.value.spec).forEach((key) => {
-            if (!(key in out.spec)) {
+            if (!(key in cleanOut.spec)) {
               delete this.value.spec[key];
             }
           });
 
           // Then, set or update the remaining keys
-          Object.keys(out.spec).forEach((key) => {
-            this.value.spec.key = out.spec[key];
+          Object.keys(cleanOut.spec).forEach((key) => {
+            this.value.spec[key] = cleanOut.spec[key];
           });
         } else {
-          merge(this.value, out);
+          merge(this.value, cleanOut);
         }
 
         // If create new namespace option is selected, create the ns before saving the policy
