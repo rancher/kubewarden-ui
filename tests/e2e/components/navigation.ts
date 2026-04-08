@@ -1,25 +1,40 @@
-import { expect, Page, test } from '@playwright/test'
+import { expect, Page, Locator, test } from '@playwright/test'
 import { step } from '../rancher/rancher-test'
 import { RancherUI } from './rancher-ui'
 import { RancherCommonPage } from '../rancher/rancher-common.page'
 
-type ExpGroup = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Admission Policy Management' | 'SBOMScanner'
-type ExpItemMap = {
+// Explorer navigation
+type ENav = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Admission Policy Management' | 'SBOMScanner'
+type ENavMap = {
   'Cluster'                    : 'Projects/Namespaces' | 'Nodes' | 'Cluster and Project Members' | 'Events'
   'Workloads'                  : 'CronJobs' | 'DaemonSets' | 'Deployments' | 'Jobs' | 'StatefulSets' | 'Pods'
   'Apps'                       : 'Charts' | 'Installed Apps' | 'Repositories' | 'Recent Operations'
   'Storage'                    : 'PersistentVolumes' | 'StorageClasses' | 'ConfigMaps' | 'PersistentVolumeClaims' | 'Secrets'
   'Admission Policy Management': 'Policy Servers' | 'Cluster Admission Policies' | 'Admission Policies' | 'Policy Reporter'
-  'SBOMScanner'                : 'Images' | 'Workloads Scan' | 'Registries configuration' | 'VEX Management'
+  'SBOMScanner'                : 'Images' | 'Advanced'
 }
+// Expandable items in ENavMap that have a third navigation level
+type ENavSubMap = {
+  SBOMScanner: {
+    Advanced: 'Workloads Scan' | 'VEX Management' | 'Registries configuration'
+  }
+}
+// Returns valid sub-items for a given group and child
+type ENavChild<T extends ENav, C extends ENavMap[T]> =
+  T extends keyof ENavSubMap
+    ? C extends keyof ENavSubMap[T]
+      ? ENavSubMap[T][C]
+      : never
+    : never
 
+// Fleet navigation
 // Rancher v2.12 renamed Advanced to Resources
-type FleetGroup = '' | 'Advanced' | 'Resources'
-type FleetItemMap = {
-  ''         : 'Dashboard' | 'Git Repos' | 'App Bundles' | 'Clusters' | 'Cluster Groups' | 'Workspaces'
-  'Advanced' : 'Workspaces' | 'BundleNamespaceMappings' | 'Bundles' | 'Cluster Registration Tokens' | 'GitRepoRestrictions'
-  'Resources': 'Git Repos' | 'Helm Ops' | 'BundleNamespaceMappings' | 'Bundles' | 'Cluster Registration Tokens' | 'GitRepoRestrictions'
+type FNav = 'Dashboard' | 'Git Repos' | 'App Bundles' | 'Clusters' | 'Cluster Groups' | 'Workspaces' | 'Advanced' | 'Resources'
+type FNavMap = {
+  Advanced : 'Workspaces' | 'BundleNamespaceMappings' | 'Bundles' | 'Cluster Registration Tokens' | 'GitRepoRestrictions'
+  Resources: 'Git Repos' | 'Helm Ops' | 'BundleNamespaceMappings' | 'Bundles' | 'Cluster Registration Tokens' | 'GitRepoRestrictions'
 }
+type FNavChild<T extends FNav> = T extends keyof FNavMap ? FNavMap[T] : never
 
 export interface Cluster {
   id  : string
@@ -55,42 +70,46 @@ export class Navigation {
     }, 'User menu occasionally does not open', { reload: false })
   }
 
-  private async sideNavHandler(groupName: string, childName?: string) {
-    const groupHeader = this.page.getByRole('heading', { name: groupName, exact: true })
-    let groupBlock = this.page.locator('nav.side-nav').locator('.accordion')
-    if (groupName) groupBlock = groupBlock.filter({ has: groupHeader })
-
-    // Expand group if needed
-    if (groupName && childName) {
-      const expandBtn = groupBlock.locator('i.icon-chevron-down,i.icon-chevron-right')
-      // Can't detect with expandBtn.isVisible, conflict in: icon-down = closed (2.7) = open (2.8)
-      await expect(groupBlock).toBeVisible()
-      if (!await groupBlock.getByRole('list').first().isVisible()) {
-        await expandBtn.click()
+  private async sideNavHandler(groupName: string, childName?: string, subChildName?: string) {
+    const expand = async(block: Locator) => {
+      await expect(block).toBeVisible()
+      if (!await block.getByRole('list').first().isVisible()) {
+        await block.locator('i.icon-chevron-right').click()
       }
     }
-    // Click menu item
-    if (childName) {
-      await groupBlock.getByText(childName, { exact: true }).click()
-    } else {
-      await groupBlock.locator(groupHeader).click()
+    const groupBlock = this.page.locator('nav.side-nav .accordion', { has: this.page.getByText(groupName, { exact: true }) })
+
+    if (!childName) {
+      await groupBlock.getByText(groupName, { exact: true }).click()
+      return
     }
 
-    // 2nd level children not implemented
+    await expand(groupBlock)
+    const childBlock = groupBlock.getByRole('listitem').filter({ has: this.page.getByText(childName, { exact: true }) })
+
+    if (subChildName) await expand(childBlock)
+    await childBlock.getByText(subChildName || childName, { exact: true }).click()
   }
 
   @step
-  async fleet<T extends FleetGroup>(groupName?: T, childName?: FleetItemMap[T]) {
+  async fleet<T extends FNav>(groupName?: T, childName?: FNavChild<T>) {
     await this.mainNav('Continuous Delivery')
-    if (groupName !== undefined) await this.sideNavHandler(groupName, childName)
+    if (!groupName) return
+
+    // Backwards compatibility overrides
+    if (RancherUI.isVersion('<=2.11')) {
+      if (childName == 'Git Repos') return await this.sideNavHandler('Git Repos')
+      if (groupName == 'Resources') return await this.sideNavHandler('Advanced', childName)
+    }
+    await this.sideNavHandler(groupName, childName)
   }
 
   @step
-  async explorer<T extends ExpGroup>(groupName: T, childName?: ExpItemMap[T]) {
+  async explorer<T extends ENav, C extends ENavMap[T]>(groupName: T, childName?: C, subChildName?: ENavChild<T, C>) {
     if (this.isblank()) await this.cluster()
-    await this.sideNavHandler(groupName, childName)
+    await this.sideNavHandler(groupName, childName, subChildName)
 
-    // Handle known cases of empty tables
+    // Handle empty tables - https://github.com/rancher/rancher/issues/54281
     if (childName === 'Installed Apps' || childName === 'CronJobs') {
       const row = this.ui.tableRow(/^(rancher|audit-scanner)$/).row
       await expect(row).toBeVisible().catch(async() => {
@@ -136,8 +155,8 @@ export class Navigation {
   // ==================================================================================================
   // Kubewarden specific helpers
 
-  @step // Overview
-  async kubewarden(childName?: ExpItemMap['Admission Policy Management']) {
+  @step // Dashboard
+  async kubewarden(childName?: ENavMap['Admission Policy Management']) {
     await this.explorer('Admission Policy Management', childName)
   }
 
@@ -169,16 +188,13 @@ export class Navigation {
   // SBOMScanner specific helpers
 
   @step
-  async sbomScanner(childName?: ExpItemMap['SBOMScanner']) {
-    // Navigation does not support 2nd level items (Advanced > Registries)
-    if (childName === 'VEX Management')
-      await this.goto(`dashboard/c/local/imageScanner/sbomscanner.kubewarden.io.vexhub`)
-    else if (childName === 'Workloads Scan')
-      await this.goto(`dashboard/c/local/imageScanner/sbomscanner.kubewarden.io.workloadscanconfiguration`)
-    else if (childName === 'Registries configuration')
-      await this.goto(`dashboard/c/local/imageScanner/sbomscanner.kubewarden.io.registry`)
-    else
+  async sbomScanner(childName?: ENavMap['SBOMScanner'] | ENavChild<'SBOMScanner', ENavMap['SBOMScanner']>) {
+    // Shortcut to Advanced sub-items
+    if (childName === 'VEX Management' || childName === 'Workloads Scan' || childName === 'Registries configuration') {
+      await this.explorer('SBOMScanner', 'Advanced', childName)
+    } else {
       await this.explorer('SBOMScanner', childName)
+    }
 
     const heading = childName || /^(Dashboard|Install SBOMScanner)/
     await expect(this.page.locator('div.title').getByText(heading)).toBeVisible()

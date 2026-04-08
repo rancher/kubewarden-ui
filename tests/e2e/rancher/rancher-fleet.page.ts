@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test'
-import { RancherUI, type YAMLPatch } from '../components/rancher-ui'
+import { type YAMLPatch } from '../components/rancher-ui'
 import { test, step, expect } from './rancher-test'
 import { BasePage } from './basepage'
 
@@ -39,13 +39,9 @@ export class RancherFleetPage extends BasePage {
     this.updateBtn = this.ui.button('Update')
   }
 
-  get navGroup() {
-    return RancherUI.isVersion('>=2.12') ? 'Resources' : ''
-  }
-
   async goto(): Promise<void> {
-    // await this.nav.fleet('', 'Dashboard')
-    await this.nav.goto('dashboard/c/local/fleet')
+    await this.nav.fleet()
+    // await this.nav.goto('dashboard/c/local/fleet')
   }
 
   async selectWorkspace(workspace: string) {
@@ -139,7 +135,7 @@ export class RancherFleetPage extends BasePage {
   }
 
   async addGitRepo(repo: GitRepo, options?: { timeout?: number }) {
-    await this.nav.fleet(this.navGroup, 'Git Repos')
+    await this.nav.fleet('Resources', 'Git Repos')
     await this.ui.button('Add Repository').first().click()
 
     await this.addBundle(repo, async() => {
@@ -164,7 +160,7 @@ export class RancherFleetPage extends BasePage {
 
   @step
   async deleteGitRepo(name: string) {
-    await this.nav.fleet(this.navGroup, 'Git Repos')
+    await this.nav.fleet('Resources', 'Git Repos')
     await this.ui.tableRow(name).delete()
   }
 }
