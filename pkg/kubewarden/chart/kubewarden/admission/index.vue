@@ -81,6 +81,35 @@ export default {
       return !isEmpty(this.chartValues?.questions?.questions);
     },
 
+    generalTabError() {
+      return !this.chartValues?.policy?.metadata?.name;
+    },
+
+    rulesTabError() {
+      const rules = this.chartValues?.policy?.spec?.rules;
+
+      if (!Array.isArray(rules) || isEmpty(rules)) {
+        return true;
+      }
+
+      const required = ['apiVersions', 'operations', 'resources'];
+
+      return !rules.some((rule) => required.every((k) => !isEmpty(rule[k])));
+    },
+
+    questionsTabError() {
+      const rawQuestions = this.chartValues?.questions?.questions;
+      const questions = Array.isArray(rawQuestions) ? rawQuestions : [];
+      const settings = this.chartValues?.policy?.spec?.settings || {};
+      const required = questions.filter((q) => q.required).map((q) => q.variable);
+
+      if (!required.length) {
+        return false;
+      }
+
+      return required.some((k) => isEmpty(settings[k]) && typeof settings[k] !== 'boolean' && typeof settings[k] !== 'number');
+    },
+
     isCreate() {
       return this.mode === _CREATE;
     },
@@ -144,7 +173,7 @@ export default {
 
 <template>
   <div>
-    <Tab name="general" :label="t('kubewarden.policyConfig.tabs.general')" :weight="99">
+    <Tab name="general" :label="t('kubewarden.policyConfig.tabs.general')" :weight="99" :error="generalTabError">
       <General
         v-model:value="chartValues"
         data-testid="kw-policy-config-general-tab"
@@ -168,7 +197,7 @@ export default {
 
     <!-- Values as questions -->
     <template v-if="hasQuestions">
-      <Tab name="Settings" label="Settings" :weight="98">
+      <Tab name="Settings" label="Settings" :weight="98" :error="questionsTabError">
         <Questions
           v-model:value="chartValues.policy.spec.settings"
           data-testid="kw-policy-config-questions-tab"
@@ -196,7 +225,7 @@ export default {
       <MatchConditions v-model:value="chartValues" :active-tab="activeTab" :mode="mode" @update:matchConditions="updateMatchConditions" />
     </Tab>
 
-    <Tab name="rules" :label="t('kubewarden.policyConfig.tabs.rules')" :weight="94">
+    <Tab name="rules" :label="t('kubewarden.policyConfig.tabs.rules')" :weight="94" :error="rulesTabError">
       <Rules v-model:value="chartValues" data-testid="kw-policy-config-rules-tab" :mode="mode" />
     </Tab>
   </div>
