@@ -4,11 +4,13 @@ import { sortBy } from '@shell/utils/sort';
 
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import ResourceTable from '@shell/components/ResourceTable';
+import { RcButton } from '@components/RcButton';
 
 export default {
   components: {
     LabeledSelect,
-    ResourceTable
+    ResourceTable,
+    RcButton
   },
 
   props: {
@@ -126,14 +128,13 @@ export default {
         class="filter__mode"
         label="Search by Mode"
       />
-      <button
+      <RcButton
         ref="btn"
-        class="btn, btn-sm, role-primary"
-        type="button"
+        primary
         @click="resetFilter"
       >
         {{ t('kubewarden.utils.resetFilter') }}
-      </button>
+      </RcButton>
     </div>
 
     <ResourceTable
@@ -151,6 +152,7 @@ export default {
   flex-direction: row;
   justify-content: flex-end;
   align-self: flex-end;
+  align-items: end;
 
   & > * {
     margin: 10px;
