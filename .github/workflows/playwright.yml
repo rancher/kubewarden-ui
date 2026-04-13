@@ -267,7 +267,7 @@ jobs:
 
         # List tests and execute
         echo yarn playwright test ${TFILTER:-} ${GFILTER:+--grep-invert "$GFILTER"} -x
-        yarn playwright test ${TFILTER:-} ${GFILTER:+--grep-invert "$GFILTER"} -x | tee qase-report.log
+        yarn playwright test ${TFILTER:-} ${GFILTER:+--grep-invert "$GFILTER"} -x
       env:
         MODE: ${{ matrix.mode }}
         # Override OTEL operator version by github variable
@@ -279,43 +279,6 @@ jobs:
         QASE_TESTOPS_API_TOKEN: ${{ secrets.QASE_APITOKEN }}
         QASE_TESTOPS_RUN_TITLE: "Run[${{github.event_name}}]: UI[${{ env.KUBEWARDEN }}] - MODE[${{ matrix.mode }}] - RANCHER[${{ matrix.rancher }}] "
         QASE_TESTOPS_RUN_DESCRIPTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-    # ==================================================================================================
-    # QASE Integration
-
-    # Delete previous run if we have new one
-    - name: Delete previous QASE run
-      if: ${{ env.QASE == 'true' && !cancelled() && github.run_attempt > 1 }}
-      run: |
-        gh run download ${{ github.run_id }} -n QASE_RUN_ID-${{ matrix.rancher }}-${{ matrix.mode }} ||:
-        if [ -f QASE_RUN_ID.txt ]; then
-          qid=$(< QASE_RUN_ID.txt)
-          curl --request DELETE --url https://api.qase.io/v1/run/KUBEWARDEN/$qid --header 'Token: ${{secrets.QASE_APITOKEN_MKRAVEC}}' --header 'accept: application/json'
-        fi
-      env:
-        GH_TOKEN: ${{ github.token }}
-
-    # Delete current run if it was canceled
-    - name: Find current QASE run
-      if: ${{ env.QASE == 'true' && always() && hashFiles('tests/qase-report.log') != '' }}
-      run: |
-        grep -Eom1 'qase:.* [Rr]un.* [0-9]+' tests/qase-report.log | awk '{print $NF}' | tee QASE_RUN_ID.txt
-
-    - name: Delete current QASE run if job was canceled
-      if: ${{ env.QASE == 'true' && cancelled() && hashFiles('tests/qase-report.log') != '' }}
-      run: |
-        qid=$(< QASE_RUN_ID.txt)
-        curl --request DELETE --url https://api.qase.io/v1/run/KUBEWARDEN/$qid --header 'Token: ${{secrets.QASE_APITOKEN_MKRAVEC}}' --header 'accept: application/json'
-
-    # Set current run ID
-    - name: Upload current QASE_RUN_ID
-      if: ${{ env.QASE == 'true' && !cancelled() }}
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-      with:
-        name: QASE_RUN_ID-${{ matrix.rancher }}-${{ matrix.mode }}
-        path: QASE_RUN_ID.txt
-        overwrite: true
-        if-no-files-found: ignore
 
     # ==================================================================================================
     # Artifacts & Summary
