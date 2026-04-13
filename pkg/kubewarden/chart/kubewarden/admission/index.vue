@@ -197,7 +197,7 @@ export default {
 
     <!-- Values as questions -->
     <template v-if="hasQuestions">
-      <Tab name="Settings" label="Settings" :weight="98" :error="questionsTabError">
+      <Tab name="Settings" :label="t('kubewarden.policyConfig.tabs.settings')" :weight="98" :error="questionsTabError">
         <Questions
           v-model:value="chartValues.policy.spec.settings"
           data-testid="kw-policy-config-questions-tab"
