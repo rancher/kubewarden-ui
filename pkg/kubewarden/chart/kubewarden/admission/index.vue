@@ -93,8 +93,10 @@ export default {
       }
 
       const required = ['apiVersions', 'operations', 'resources'];
+      const ruleIsComplete = (rule) => required.every((k) => !isEmpty(rule[k]));
+      const hasIncompleteRule = rules.some((rule) => !ruleIsComplete(rule));
 
-      return !rules.some((rule) => required.every((k) => !isEmpty(rule[k])));
+      return hasIncompleteRule;
     },
 
     questionsTabError() {
@@ -107,7 +109,14 @@ export default {
         return false;
       }
 
-      return required.some((k) => isEmpty(settings[k]) && typeof settings[k] !== 'boolean' && typeof settings[k] !== 'number');
+      const hasEmptyRequired = required.some((requirement) => {
+        const settingValue = settings[requirement];
+        const isEmptySetting = isEmpty(settingValue) && typeof settingValue !== 'boolean' && typeof settingValue !== 'number';
+
+        return isEmptySetting;
+      });
+
+      return hasEmptyRequired;
     },
 
     isCreate() {
