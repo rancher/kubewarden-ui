@@ -130,7 +130,7 @@ export default {
       />
       <RcButton
         ref="btn"
-        primary
+        variant="primary"
         @click="resetFilter"
       >
         {{ t('kubewarden.utils.resetFilter') }}
