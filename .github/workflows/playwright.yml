@@ -220,7 +220,7 @@ jobs:
       run: TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG k3d-install
 
     - name: Install Rancher
-      uses: kubewarden/kubewarden-end-to-end-tests@608f37145df61f9221e2dd35c1ddd12567e7b0a1 # main
+      uses: kubewarden/kubewarden-end-to-end-tests@487a416015f675ee63bbae749e0d8d039f8e4be2 # main
       with:
         make: rancher
       env:
