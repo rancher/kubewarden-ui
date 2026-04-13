@@ -244,7 +244,7 @@ jobs:
       run: |
         yarn install --ignore-engines
         git diff --exit-code yarn.lock
-        yarn add url-loader --ignore-engines
+        yarn add url-loader file-loader --ignore-engines
         VERSION=0.0.1 yarn build-pkg kubewarden
 
     - name: Install playwright
