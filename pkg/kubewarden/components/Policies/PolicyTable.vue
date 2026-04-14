@@ -325,7 +325,7 @@ function isContextAware(chart: PolicyChart): boolean {
 
       <RcButton
         data-testid="kw-table-filter-refresh"
-        primary
+        variant="primary"
         class="filter__reset"
         @click="refresh"
       >
