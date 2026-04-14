@@ -82,7 +82,7 @@ export default {
     },
 
     generalTabError() {
-      return !this.chartValues?.policy?.metadata?.name;
+      return !this.chartValues?.policy?.metadata?.name || !this.chartValues?.policy?.spec?.module;
     },
 
     rulesTabError() {
