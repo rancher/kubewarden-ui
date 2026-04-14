@@ -212,7 +212,9 @@ export default {
       const repository = this.policyRepository?.trim() || '';
       const tag = this.policyTag?.trim() || '';
 
-      if (!repository || !tag) {
+      if (!registry || !repository || !tag) {
+        this.policy.spec.module = '';
+
         return;
       }
 
@@ -274,6 +276,7 @@ export default {
               :mode="mode"
               :label="t('kubewarden.policies.module.registry')"
               :placeholder="t('kubewarden.policies.module.registryPlaceholder')"
+              :required="true"
             />
           </div>
           <div class="col span-5">
@@ -282,6 +285,7 @@ export default {
               data-testid="kw-policy-general-repository-input"
               :mode="mode"
               :label="t('kubewarden.policies.module.repository')"
+              :required="true"
             />
           </div>
           <div class="col span-3">
@@ -290,6 +294,7 @@ export default {
               data-testid="kw-policy-general-tag-input"
               :mode="mode"
               :label="t('kubewarden.policies.module.tag')"
+              :required="true"
             />
           </div>
         </template>
