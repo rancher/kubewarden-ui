@@ -213,8 +213,6 @@ export default {
       const tag = this.policyTag?.trim() || '';
 
       if (!registry || !repository || !tag) {
-        this.policy.spec.module = '';
-
         return;
       }
 
