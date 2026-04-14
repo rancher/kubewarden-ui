@@ -71,8 +71,10 @@ on:
       - release-2.1 # rancher 2.9
       - release-3.1 # rancher 2.10
     paths:
-      - pkg/kubewarden/**
-      - package.json
+      - 'pkg/kubewarden/**'
+      - 'package.json'
+      - 'tests/**'
+      - '!tests/unit/**'
 
   workflow_run:
     workflows: ["Build and Release Extension Charts"]
@@ -251,6 +253,10 @@ jobs:
       run: |
         yarn install
         yarn playwright install chromium  # --with-deps not supported on opensuse
+
+    - name: Typecheck
+      if: github.event_name == 'pull_request'
+      run: npx tsc -p tests/tsconfig.json --noEmit
 
     - name: Execute tests
       timeout-minutes: 120
