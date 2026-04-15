@@ -121,6 +121,12 @@ export default {
     policyTag()        {
       this.syncModule();
     },
+
+    hasValuesModule(neu) {
+      if (!neu) {
+        this.$emit('module-validation', false);
+      }
+    },
   },
 
   created() {
@@ -204,7 +210,13 @@ export default {
 
   methods: {
     syncModule() {
-      if (!this.hasValuesModule || !this.policy?.spec) {
+      if (!this.policy?.spec) {
+        return;
+      }
+
+      if (!this.hasValuesModule) {
+        this.$emit('module-validation', false);
+
         return;
       }
 
@@ -212,11 +224,9 @@ export default {
       const repository = this.policyRepository?.trim() || '';
       const tag = this.policyTag?.trim() || '';
 
-      if (!registry || !repository || !tag) {
-        return;
-      }
-
       this.policy.spec.module = buildModuleString(registry, repository, tag);
+
+      this.$emit('module-validation', !registry || !repository || !tag);
     }
   }
 };

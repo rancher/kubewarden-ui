@@ -120,6 +120,7 @@ export default ({
       hasCustomPolicy: false,
       yamlOption:      VALUES_STATE.FORM,
       finishAttempts:  0,
+      moduleFieldsMissing: false,
 
       // Steps
       stepPolicies: {
@@ -168,7 +169,7 @@ export default ({
         return true;
       }
 
-      return !!this.chartValues?.policy?.spec?.module && this.hasRequired;
+      return !!this.chartValues?.policy?.spec?.module && this.hasRequired && !this.moduleFieldsMissing;
     },
 
     systemDefaultRegistry() {
@@ -338,23 +339,34 @@ export default ({
         return;
       }
 
-      // Repository or tag was also changed — split on last ':' (tag) and first '/' (registry)
+      // Repository or tag was also changed. Be tolerant of partial values
+      // (e.g. empty tag: "repo:") so form fields are preserved on YAML -> form.
       const lastColon = savedModule.lastIndexOf(':');
+      const repoWithRegistry = lastColon >= 0 ? savedModule.slice(0, lastColon) : savedModule;
+      const tag              = lastColon >= 0 ? savedModule.slice(lastColon + 1) : '';
 
-      if (lastColon > 0 && lastColon < savedModule.length - 1) {
-        const repoWithRegistry = savedModule.slice(0, lastColon);
-        const tag              = savedModule.slice(lastColon + 1);
-        const firstSlash       = repoWithRegistry.indexOf('/');
-        const registry         = firstSlash >= 0 ? repoWithRegistry.slice(0, firstSlash) : '';
-        const repository       = firstSlash >= 0 ? repoWithRegistry.slice(firstSlash + 1) : repoWithRegistry;
+      let registry = '';
+      let repository = repoWithRegistry;
 
-        this.policyModuleInfo = {
-          registry,
-          repository,
-          tag,
-          source: chartInfo.source,
-        };
+      // Prefer chart repository as an anchor to avoid hostname heuristics.
+      if (repoWithRegistry === chartInfo.repository) {
+        repository = chartInfo.repository;
+      } else if (repoWithRegistry.endsWith(`/${ chartInfo.repository }`)) {
+        registry = repoWithRegistry.slice(0, -(chartInfo.repository.length + 1));
+        repository = chartInfo.repository;
+      } else {
+        const firstSlash = repoWithRegistry.indexOf('/');
+
+        registry = firstSlash >= 0 ? repoWithRegistry.slice(0, firstSlash) : '';
+        repository = firstSlash >= 0 ? repoWithRegistry.slice(firstSlash + 1) : repoWithRegistry;
       }
+
+      this.policyModuleInfo = {
+        registry,
+        repository,
+        tag,
+        source: chartInfo.source,
+      };
     },
 
     async addRepository(btnCb) {
@@ -765,6 +777,7 @@ export default ({
           :module-info="policyModuleInfo"
           @editor="$event => yamlOption = $event"
           @updateYamlValues="$event => yamlValues = $event"
+          @module-validation="$event => moduleFieldsMissing = $event"
         />
       </template>
 

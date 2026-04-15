@@ -39,7 +39,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const store = useStore();
-const emit = defineEmits(['editor', 'updateYamlValues']);
+const emit = defineEmits(['editor', 'updateYamlValues', 'module-validation']);
 
 const fetchPending = ref(true);
 
@@ -58,6 +58,11 @@ const isEdit = computed(() => props.mode === _EDIT);
 watch(yamlOption, (neu, old) => {
   switch (neu) {
   case VALUES_STATE.FORM:
+    if (old === VALUES_STATE.YAML) {
+      // Flush the latest editor text before parent handles YAML -> form sync.
+      emit('updateYamlValues', currentYamlValues.value);
+    }
+
     showForm.value = true;
     emit('editor', neu);
     break;
@@ -165,6 +170,7 @@ onMounted(async() => {
                 :custom-policy="customPolicy"
                 :error-fetching-policy="errorFetchingPolicy"
                 :module-info="moduleInfo"
+                @module-validation="$event => emit('module-validation', $event)"
               />
             </template>
           </Tabbed>
