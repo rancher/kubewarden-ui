@@ -12,6 +12,7 @@ import { ensureRegex } from '@shell/utils/string';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { Checkbox } from '@components/Form/Checkbox';
+import { RcButton } from '@components/RcButton';
 
 import { PolicyChart, KUBEWARDEN, KUBEWARDEN_POLICY_ANNOTATIONS, LEGACY_POLICY_ANNOTATIONS } from '@kubewarden/types';
 import { POLICY_TABLE_HEADERS } from '@kubewarden/config/table-headers';
@@ -322,14 +323,14 @@ function isContextAware(chart: PolicyChart): boolean {
         :placeholder="t('kubewarden.generic.name')"
       />
 
-      <button
+      <RcButton
         data-testid="kw-table-filter-refresh"
-        class="btn role-tertiary filter__reset"
-        type="button"
+        variant="primary"
+        class="filter__reset"
         @click="refresh"
       >
-        <p>{{ t('kubewarden.utils.resetFilter') }}</p>
-      </button>
+        {{ t('kubewarden.utils.resetFilter') }}
+      </RcButton>
     </div>
 
     <!-- ACTIONS -->
@@ -387,6 +388,7 @@ function isContextAware(chart: PolicyChart): boolean {
   grid-template-areas:
     "attributes search reset";
   gap: 1rem;
+  align-items: end;
 
   & > * {
     margin: 0.5rem 0;
@@ -402,11 +404,6 @@ function isContextAware(chart: PolicyChart): boolean {
 
   &__reset {
     grid-area: reset;
-
-    p {
-      line-height: 1.5;
-      white-space: wrap;
-    }
   }
 }
 
