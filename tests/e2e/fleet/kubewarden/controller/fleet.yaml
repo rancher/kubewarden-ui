@@ -30,12 +30,25 @@ helm:
 
 diff:
   comparePatches:
-  - apiVersion: opentelemetry.io/v1alpha1
-    kind: OpenTelemetryCollector
-    name: kubewarden
-    namespace: cattle-kubewarden-system
-    operations:
-    - {"op": "remove", "path": "/spec"}
+    - apiVersion: opentelemetry.io/v1alpha1
+      kind: OpenTelemetryCollector
+      name: kubewarden
+      namespace: cattle-kubewarden-system
+      operations:
+        - {"op": "remove", "path": "/spec"}
+
+    - apiVersion: admissionregistration.k8s.io/v1
+      kind: MutatingWebhookConfiguration
+      name: kubewarden-controller-mutating-webhook-configuration
+      jsonPointers:
+      operations:
+        - {"op": "remove", "path":"/webhooks"}
+
+    - apiVersion: admissionregistration.k8s.io/v1
+      kind: ValidatingWebhookConfiguration
+      name: kubewarden-controller-validating-webhook-configuration
+      operations:
+        - {"op": "remove", "path":"/webhooks"}
 
 labels:
   app: rancher-kubewarden-controller

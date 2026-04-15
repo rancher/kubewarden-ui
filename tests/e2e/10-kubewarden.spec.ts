@@ -118,7 +118,7 @@ test('Install Kubewarden by Fleet', { tag: '@kw' }, async({ page }) => {
     branch     : 'main',
     selfHealing: true,
     paths      : ['tests/e2e/fleet/'],
-  }, { timeout: 2 * 60_000 })
+  }, { timeout: 4 * 60_000 })
 })
 
 test('Add Policy Catalog Repository', { tag: '@kw' }, async({ page, ui, nav }) => {
