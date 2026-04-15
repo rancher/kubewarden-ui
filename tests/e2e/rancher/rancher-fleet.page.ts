@@ -150,6 +150,8 @@ export class RancherFleetPage extends BasePage {
         if (repo.paths) {
           for (const path of repo.paths) {
             await this.ui.button(/Add Path/).click()
+            // Input is cleared short after creation
+            await this.page.waitForTimeout(200)
             await this.page.getByPlaceholder('e.g. /directory/in/your/repo').fill(path)
           }
           // Wait for generated fields

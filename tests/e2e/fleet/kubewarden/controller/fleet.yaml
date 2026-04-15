@@ -27,8 +27,6 @@ helm:
             endpoint: "jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317"
             tls:
               insecure: true
-    auditScanner:
-      policyReporter: true
 
 diff:
   comparePatches:
