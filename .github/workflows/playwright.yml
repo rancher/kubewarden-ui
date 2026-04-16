@@ -139,7 +139,6 @@ jobs:
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'p2.10' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'p2.11' }}
           - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'p2.12' }}
-          - rancher: ${{ startsWith(github.event.workflow_run.head_branch, 'kubewarden-4.') && 'c2.14' }}
 
 
     # Run schedule workflows only on original repo, not forks
@@ -262,18 +261,17 @@ jobs:
       timeout-minutes: 120
       working-directory: tests
       run: |
-        # Policy tests are hitting artifacthub rate limits
-        # Filter to exclude policies except those starting with random letter
-        EXCLUDE=$(yarn playwright test "\/90-" --reporter=list --list | grep -o 'install: .' | cut -d' ' -f2 | sort -fRu | sed 1d | paste -sd '')
-        EXCLUDE="90-.*install: [$EXCLUDE]"
-
         TFILTER="\/00"                                        # Always run installation tests
-        [[ "$TESTBASE" == "true" ]] && TFILTER+=" \/[1-9]"    # Schedule everything else as base test
-        [[ "$TESTPOLICIES" != "true" ]] && GFILTER="$EXCLUDE" # Limit number of tested policies
+        [[ "$TESTBASE" == "true" ]] && TFILTER+=" \/[1-69]"   # Schedule everything as base test
 
-        # List tests and execute
-        echo yarn playwright test ${TFILTER:-} ${GFILTER:+--grep-invert "$GFILTER"} -x
-        yarn playwright test ${TFILTER:-} ${GFILTER:+--grep-invert "$GFILTER"} -x
+        # Policy tests are hitting artifacthub rate limits
+        # Filter out all policies except those starting with random letter
+        if [[ "$TESTPOLICIES" != "true" ]]; then
+          ex=$(yarn playwright test "\/90-" --reporter=list --list | grep -o 'install: .' | cut -d' ' -f2 | sort -fRu | sed 1d | paste -sd '')
+          GREPI="90-.*install: [$ex]"
+        fi
+
+        yarn playwright test ${TFILTER:-} ${GREPI:+--grep-invert "$GREPI"} -x
       env:
         MODE: ${{ matrix.mode }}
         # Override OTEL operator version by github variable

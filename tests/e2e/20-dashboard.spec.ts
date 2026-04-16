@@ -2,8 +2,43 @@ import { test, expect } from './rancher/rancher-test'
 import { PolicyServersPage } from './pages/policyservers.page'
 import { Policy, AdmissionPoliciesPage, ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { KubewardenPage } from './pages/kubewarden.page'
+import { RancherAppsPage } from './rancher/rancher-apps.page'
 
-test('Check initial state', async({ page, ui, nav }) => {
+test('Check kubewarden resources', async({ page, nav, shell }) => {
+  await test.step('Check kubewarden apps', async() => {
+    const apps = new RancherAppsPage(page)
+    await nav.explorer('Apps', 'Installed Apps')
+    for (const chart of ['controller', 'crds', 'defaults']) {
+      await apps.checkChart(`rancher-kubewarden-${chart}`)
+    }
+    await shell.waitPods()
+  })
+
+  await test.step('Check kubewarden logs', async() => {
+    await nav.cluster()
+
+    // Kubewarden pod labels
+    const labels = [
+      'app=kubewarden-policy-server-default',
+      'app.kubernetes.io/name=kubewarden-controller',
+      'app.kubernetes.io/name=policy-reporter',
+      'app.kubernetes.io/name=ui']
+
+    // Ignore known errors
+    const ignore = [
+      'Reconciler.*object has been modified',
+      // 'policy_server:.*(TufError|Sigstore)', // Fix in https://github.com/kubewarden/kwctl/issues/753
+    ].join('|')
+
+    // Check for ERROR text in logs
+    await shell.runBatch(...labels.map(
+      label => `k logs -n cattle-kubewarden-system -l '${label}' --tail -1
+     | grep ERROR | grep -vE '${ignore}'
+     | tee /dev/stderr | wc -l | grep -x 0`))
+  })
+})
+
+test('Check landing pages', async({ page, ui, nav }) => {
   await test.step('Kubewarden Landing page', async() => {
     const kwPage = new KubewardenPage(page)
 

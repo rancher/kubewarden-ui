@@ -1,5 +1,4 @@
 import { test, expect } from './rancher/rancher-test'
-import { RancherCommonPage } from './rancher/rancher-common.page'
 import { RancherExtensionsPage } from './rancher/rancher-extensions.page'
 import { AppVersion, KubewardenPage } from './pages/kubewarden.page'
 import { PolicyServersPage } from './pages/policyservers.page'
@@ -45,32 +44,7 @@ test.beforeAll(async({ request }) => {
   }
 })
 
-test('Initial rancher setup', async({ page, ui, nav }) => {
-  const rancher = new RancherCommonPage(page)
-
-  await test.step('Global setup', async() => {
-    await page.goto('/')
-    // Handle first-login, then reuse session for access
-    if (!await rancher.isLoggedIn()) {
-      await rancher.handleFirstLogin('sa')
-    }
-    // Wait for local cluster to be Active
-    await ui.tableRow('local').toBeActive()
-    await nav.userNav('Preferences')
-    // Enable extension developer features
-    await rancher.setExtensionDeveloperFeatures(true)
-    // Enable RC Helm Charts
-    await rancher.setHelmCharts('Include Prerelease Versions')
-  })
-
-  await test.step('Cluster setup', async() => {
-    await nav.cluster()
-    // Disable namespace filter
-    await rancher.setNamespaceFilter('All Namespaces')
-  })
-})
-
-test('Install UI extension', async({ page, ui }) => {
+test('Install UI extension', { tag: '@kw' }, async({ page, ui }) => {
   const extensions = new RancherExtensionsPage(page)
   await extensions.goto()
 
@@ -103,7 +77,7 @@ test('Install UI extension', async({ page, ui }) => {
   })
 })
 
-test('Install Kubewarden', async({ page, ui, nav }) => {
+test('Install Kubewarden', { tag: '@kw' }, async({ page, ui, nav }) => {
   test.skip(conf.kw_mode === 'fleet')
 
   const kwPage = new KubewardenPage(page)
@@ -133,7 +107,7 @@ test('Install Kubewarden', async({ page, ui, nav }) => {
   })
 })
 
-test('Install Kubewarden by Fleet', async({ page }) => {
+test('Install Kubewarden by Fleet', { tag: '@kw' }, async({ page }) => {
   test.skip(conf.kw_mode !== 'fleet')
   test.slow()
 
@@ -147,7 +121,7 @@ test('Install Kubewarden by Fleet', async({ page }) => {
   }, { timeout: 2 * 60_000 })
 })
 
-test('Add Policy Catalog Repository', async({ page, ui, nav }) => {
+test('Add Policy Catalog Repository', { tag: '@kw' }, async({ page, ui, nav }) => {
   const cap = new ClusterAdmissionPoliciesPage(page)
   await nav.capolicies()
 
@@ -197,39 +171,5 @@ test('Upgrade Kubewarden', async({ page, nav }) => {
     // Check there are no more upgrades
     await expect(kwPage.currentApp).toContainText(`App Version: ${last.app}`)
     await expect(kwPage.upgradeApp).not.toBeVisible()
-  })
-})
-
-test('Check kubewarden resources', async({ page, nav, shell }) => {
-  await test.step('Check kubewarden apps', async() => {
-    const apps = new RancherAppsPage(page)
-    await nav.explorer('Apps', 'Installed Apps')
-    for (const chart of ['controller', 'crds', 'defaults']) {
-      await apps.checkChart(`rancher-kubewarden-${chart}`)
-    }
-    await shell.waitPods()
-  })
-
-  await test.step('Check kubewarden logs', async() => {
-    await nav.cluster()
-
-    // Kubewarden pod labels
-    const labels = [
-      'app=kubewarden-policy-server-default',
-      'app.kubernetes.io/name=kubewarden-controller',
-      'app.kubernetes.io/name=policy-reporter',
-      'app.kubernetes.io/name=ui']
-
-    // Ignore known errors
-    const ignore = [
-      'Reconciler.*object has been modified',
-      // 'policy_server:.*(TufError|Sigstore)', // Fix in https://github.com/kubewarden/kwctl/issues/753
-    ].join('|')
-
-    // Check for ERROR text in logs
-    await shell.runBatch(...labels.map(
-      label => `k logs -n cattle-kubewarden-system -l '${label}' --tail -1
-     | grep ERROR | grep -vE '${ignore}'
-     | tee /dev/stderr | wc -l | grep -x 0`))
   })
 })
