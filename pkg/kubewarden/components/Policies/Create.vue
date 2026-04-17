@@ -117,9 +117,9 @@ export default ({
       },
       yamlValues: '',
 
-      hasCustomPolicy: false,
-      yamlOption:      VALUES_STATE.FORM,
-      finishAttempts:  0,
+      hasCustomPolicy:     false,
+      yamlOption:          VALUES_STATE.FORM,
+      finishAttempts:      0,
       moduleFieldsMissing: false,
 
       // Steps
@@ -165,7 +165,7 @@ export default ({
 
     /** Allow create if either editing in yaml view or module and required rules/settings have been met */
     canFinish() {
-      if (this.yamlOption === VALUES_STATE.YAML) {
+      if (this.yamlOption === VALUES_STATE.YAML || this.yamlOption === VALUES_STATE.DIFF) {
         return true;
       }
 
@@ -280,7 +280,13 @@ export default ({
 
   watch: {
     yamlOption(neu, old) {
-      if (neu === VALUES_STATE.FORM && old === VALUES_STATE.YAML && !this.customPolicy && this.selectedPolicyDetails) {
+      const shouldSyncModuleFromYaml =
+        neu === VALUES_STATE.FORM &&
+        old !== VALUES_STATE.FORM &&
+        !this.customPolicy &&
+        this.selectedPolicyDetails;
+
+      if (shouldSyncModuleFromYaml) {
         // Sync chartValues.policy.spec.module from any YAML edits the user made
         if (this.yamlValues) {
           try {
@@ -480,7 +486,7 @@ export default ({
       try {
         let out;
 
-        if (this.yamlOption === VALUES_STATE.YAML) {
+        if (this.yamlOption === VALUES_STATE.YAML || this.yamlOption === VALUES_STATE.DIFF) {
           out = jsyaml.load(this.yamlValues);
         } else {
           out = this.chartValues?.policy ? this.chartValues.policy : jsyaml.load(this.yamlValues);

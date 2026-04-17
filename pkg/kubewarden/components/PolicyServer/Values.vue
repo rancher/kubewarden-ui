@@ -47,8 +47,10 @@ export default {
   async created() {
     const valuesYaml = this.generateYaml();
 
+    this.formYamlValues = valuesYaml;
     this.currentYamlValues = valuesYaml;
     this.originalYamlValues = valuesYaml;
+    this.previousYamlValues = valuesYaml;
 
     try {
       await this.loadValuesComponent();
@@ -62,6 +64,8 @@ export default {
       YAML_OPTIONS,
       currentYamlValues:   '',
       originalYamlValues:  '',
+      previousYamlValues:  '',
+      formYamlValues:      '',
       showForm:            true,
       configValues:        null,
       showQuestions:       true,
@@ -74,14 +78,44 @@ export default {
   },
 
   watch: {
+    chartValues: {
+      deep: true,
+      handler() {
+        this.formYamlValues = this.generateYaml();
+      }
+    },
+
+    preYamlOption(neu) {
+      if (
+        neu === VALUES_STATE.FORM &&
+        this.yamlOption !== VALUES_STATE.FORM &&
+        this.currentYamlValues !== this.previousYamlValues &&
+        this.$refs.cancelModal
+      ) {
+        this.$refs.cancelModal.show();
+      } else {
+        this.yamlOption = neu;
+      }
+    },
+
     yamlOption(neu, old) {
       switch (neu) {
       case VALUES_STATE.FORM:
+        // Returning to form discards YAML edits and restores the last form snapshot.
+        this.currentYamlValues = this.previousYamlValues;
+        this.preYamlOption = VALUES_STATE.FORM;
+
         this.showForm = true;
         break;
+
       case VALUES_STATE.YAML:
-        if (old === VALUES_STATE.FORM) {
-          this.currentYamlValues = this.generateYaml();
+      case VALUES_STATE.DIFF:
+        if (old === VALUES_STATE.FORM || !old) {
+          this.currentYamlValues = this.formYamlValues || this.buildYamlFromForm();
+          this.previousYamlValues = this.currentYamlValues;
+        }
+
+        if (neu === VALUES_STATE.DIFF) {
           this.updateYamlValues();
         }
 
@@ -92,8 +126,28 @@ export default {
   },
 
   computed: {
+    formYamlOptions() {
+      return this.YAML_OPTIONS.map((option) => {
+        if (option.value === VALUES_STATE.DIFF) {
+          return {
+            ...option,
+            disabled: !this.canDiff
+          };
+        }
+
+        return option;
+      });
+    },
+
     editorMode() {
-      return EDITOR_MODES.EDIT_CODE;
+      return this.yamlOption === VALUES_STATE.DIFF ? EDITOR_MODES.DIFF_CODE : EDITOR_MODES.EDIT_CODE;
+    },
+
+    canDiff() {
+      const lhs = this.originalYamlValues || '';
+      const rhs = this.yamlOption === VALUES_STATE.FORM ? (this.formYamlValues || '') : (this.currentYamlValues || '');
+
+      return lhs !== rhs;
     },
 
     isCreate() {
@@ -115,6 +169,10 @@ export default {
       const modifiedYAML = filteredLines.join('\n');
 
       return modifiedYAML;
+    },
+
+    buildYamlFromForm() {
+      return this.generateYaml();
     },
 
     async loadValuesComponent() {
@@ -143,6 +201,17 @@ export default {
 
     handleValidationPassed(val) {
       this.$emit('validation-passed', val);
+    },
+
+    confirmBackToForm() {
+      // User confirmed "Back to Form" from YAML/Compare.
+      this.preYamlOption = VALUES_STATE.FORM;
+      this.yamlOption = VALUES_STATE.FORM;
+    },
+
+    cancelBackToForm() {
+      // User chose to stay in YAML/Compare.
+      this.preYamlOption = this.yamlOption;
     }
   }
 };
@@ -153,9 +222,9 @@ export default {
   <div v-else class="scroll__container">
     <div v-if="isCreate || isEdit" class="step__values__controls">
       <ButtonGroup
-        v-model:value="yamlOption"
+        v-model:value="preYamlOption"
         data-testid="kw-policy-server-config-yaml-option"
-        :options="YAML_OPTIONS"
+        :options="formYamlOptions"
         inactive-class="bg-disabled btn-sm"
         active-class="bg-primary btn-sm"
       />
@@ -186,7 +255,7 @@ export default {
           :scrolling="true"
           :initial-yaml-values="originalYamlValues"
           :editor-mode="editorMode"
-          :hide-preview-buttons="true"
+          :hide-preview-buttons="false"
           @onChanges="updateYamlValues"
         />
       </template>
@@ -196,8 +265,8 @@ export default {
         data-testid="kw-policy-server-config-yaml-cancel"
         :is-cancel-modal="false"
         :is-form="true"
-        @cancel-cancel="preYamlOption = yamlOption"
-        @confirm-cancel="yamlOption = preYamlOption"
+        @cancel-cancel="cancelBackToForm"
+        @confirm-cancel="confirmBackToForm"
       />
     </div>
   </div>

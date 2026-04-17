@@ -128,6 +128,7 @@ export const OPERATION_MAP = {
 export enum VALUES_STATE {
   FORM = 'FORM',
   YAML = 'YAML',
+  DIFF = 'DIFF',
 }
 /* eslint-enable no-unused-vars */
 
@@ -139,6 +140,10 @@ export const YAML_OPTIONS = [
   {
     labelKey: 'catalog.install.section.valuesYaml',
     value:    VALUES_STATE.YAML,
+  },
+  {
+    labelKey: 'catalog.install.section.diff',
+    value:    VALUES_STATE.DIFF,
   }
 ];
 

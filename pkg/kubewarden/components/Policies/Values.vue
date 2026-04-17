@@ -10,8 +10,7 @@ import { useStore } from 'vuex';
 import { defineAsyncComponent, toRaw } from 'vue';
 
 import { _CREATE, _EDIT } from '@shell/config/query-params';
-import { SCHEMA } from '@shell/config/types';
-import { createYaml, saferDump } from '@shell/utils/create-yaml';
+import { saferDump } from '@shell/utils/create-yaml';
 
 import ButtonGroup from '@shell/components/ButtonGroup';
 import Loading from '@shell/components/Loading';
@@ -22,10 +21,10 @@ import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
 import {
   KUBEWARDEN_CHARTS,
   VALUES_STATE,
-  YAML_OPTIONS,
   RANCHER_NS_MATCH_EXPRESSION
 } from '@kubewarden/types';
 import { PolicyModuleInfo } from '@kubewarden/modules/policyChart';
+import { shouldShowBackToFormModal, useYamlCompareState } from '@kubewarden/composables/useYamlCompare';
 
 interface Props {
   mode: string;
@@ -45,31 +44,68 @@ const fetchPending = ref(true);
 
 const currentYamlValues = ref('');
 const originalYamlValues = ref('');
+const formYamlValues = ref('');
 const showForm = ref(true);
 const valuesComponent = ref<any>(null);
 const preYamlOption = ref(VALUES_STATE.FORM);
 const yamlOption = ref(VALUES_STATE.FORM);
+const previousYamlValues = ref('');
 const version = ref<any>(null);
+const cancelModal = ref<any>(null);
 
-const editorMode = computed(() => EDITOR_MODES.EDIT_CODE);
 const isCreate = computed(() => props.mode === _CREATE);
 const isEdit = computed(() => props.mode === _EDIT);
+const { editorMode, canDiff, formYamlOptions } = useYamlCompareState({
+  yamlOption,
+  originalYamlValues,
+  formYamlValues,
+  currentYamlValues,
+});
+
+watch(preYamlOption, (neu) => {
+  const showBackToFormModal = shouldShowBackToFormModal(
+    neu,
+    yamlOption.value,
+    currentYamlValues.value,
+    previousYamlValues.value,
+    !!cancelModal.value
+  );
+
+  if (showBackToFormModal) {
+    cancelModal.value.show();
+  } else {
+    yamlOption.value = neu;
+  }
+});
+
+watch(() => props.chartValues?.policy, () => {
+  formYamlValues.value = buildYamlFromForm();
+}, {
+  deep:      true,
+  immediate: true
+});
 
 watch(yamlOption, (neu, old) => {
   switch (neu) {
   case VALUES_STATE.FORM:
-    if (old === VALUES_STATE.YAML) {
-      // Flush the latest editor text before parent handles YAML -> form sync.
-      emit('updateYamlValues', currentYamlValues.value);
-    }
+    // Returning to form discards YAML edits and restores the last form snapshot.
+    currentYamlValues.value = previousYamlValues.value;
+    preYamlOption.value = VALUES_STATE.FORM;
 
     showForm.value = true;
     emit('editor', neu);
     break;
+
   case VALUES_STATE.YAML:
-    // Switching to YAML view from form
-    if (old === VALUES_STATE.FORM) {
-      currentYamlValues.value = saferDump(props.chartValues.policy);
+  case VALUES_STATE.DIFF:
+    // Entering YAML/Compare from form takes a fresh snapshot.
+    if (old === VALUES_STATE.FORM || !old) {
+      currentYamlValues.value = formYamlValues.value || buildYamlFromForm();
+      previousYamlValues.value = currentYamlValues.value;
+    }
+
+    if (neu === VALUES_STATE.DIFF) {
+      // Ensure parent yaml mirror is up to date before showing diff.
       updateYamlValues();
     }
 
@@ -80,17 +116,17 @@ watch(yamlOption, (neu, old) => {
 });
 
 function generateYaml() {
-  const schemas = store.getters['cluster/all'](SCHEMA);
-
-  const rawPolicy = toRaw(props.chartValues.policy);
-  // Fallback to props.value if there is no policy
-  const cloned = rawPolicy ? structuredClone(rawPolicy) : props.value;
-
   if (props.yamlValues?.length) {
     currentYamlValues.value = props.yamlValues;
   } else {
-    currentYamlValues.value = createYaml(schemas, props.value?.type, cloned);
+    currentYamlValues.value = formYamlValues.value || buildYamlFromForm();
   }
+}
+
+function buildYamlFromForm() {
+  const rawPolicy = toRaw(props.chartValues.policy) || props.value;
+
+  return saferDump(rawPolicy);
 }
 
 function loadValuesComponent() {
@@ -110,6 +146,17 @@ function updateYamlValues() {
   emit('updateYamlValues', currentYamlValues.value);
 }
 
+function confirmBackToForm() {
+  // User confirmed "Back to Form" from YAML/Compare.
+  preYamlOption.value = VALUES_STATE.FORM;
+  yamlOption.value = VALUES_STATE.FORM;
+}
+
+function cancelBackToForm() {
+  // User chose to stay in YAML/Compare.
+  preYamlOption.value = yamlOption.value;
+}
+
 onMounted(async() => {
   // Attempt to fetch chart version info
   try {
@@ -124,6 +171,8 @@ onMounted(async() => {
   }
 
   generateYaml();
+  originalYamlValues.value = currentYamlValues.value;
+  previousYamlValues.value = currentYamlValues.value;
 
   // If creating a ClusterAdmissionPolicy, ensure default matchExpressions
   if (props.mode === _CREATE && props.chartValues?.policy?.kind === 'ClusterAdmissionPolicy') {
@@ -144,9 +193,9 @@ onMounted(async() => {
   <div v-else>
     <div v-if="isCreate || isEdit" class="step__values__controls">
       <ButtonGroup
-        v-model:value="yamlOption"
+        v-model:value="preYamlOption"
         data-testid="kw-policy-config-yaml-option"
-        :options="YAML_OPTIONS"
+        :options="formYamlOptions"
         inactive-class="bg-disabled btn-sm"
         active-class="bg-primary btn-sm"
       />
@@ -186,7 +235,7 @@ onMounted(async() => {
             :scrolling="true"
             :initial-yaml-values="originalYamlValues"
             :editor-mode="editorMode"
-            :hide-preview-buttons="true"
+            :hide-preview-buttons="false"
             @onChanges="updateYamlValues"
           />
         </template>
@@ -196,8 +245,8 @@ onMounted(async() => {
           data-testid="kw-policy-config-yaml-cancel"
           :is-cancel-modal="false"
           :is-form="true"
-          @cancel-cancel="preYamlOption = yamlOption"
-          @confirm-cancel="yamlOption = preYamlOption"
+          @cancel-cancel="cancelBackToForm"
+          @confirm-cancel="confirmBackToForm"
         />
       </div>
     </div>
