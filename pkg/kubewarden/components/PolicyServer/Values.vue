@@ -12,9 +12,15 @@ import ButtonGroup from '@shell/components/ButtonGroup';
 import Loading from '@shell/components/Loading';
 import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
-import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
+import YamlEditor from '@shell/components/YamlEditor';
 
 import { VALUES_STATE, YAML_OPTIONS } from '@kubewarden/types';
+import {
+  buildFormYamlOptions,
+  getYamlEditorMode,
+  hasYamlDiff,
+  shouldShowBackToFormModal
+} from '@kubewarden/composables/useYamlCompare';
 
 export default {
   name: 'Values',
@@ -86,12 +92,15 @@ export default {
     },
 
     preYamlOption(neu) {
-      if (
-        neu === VALUES_STATE.FORM &&
-        this.yamlOption !== VALUES_STATE.FORM &&
-        this.currentYamlValues !== this.previousYamlValues &&
-        this.$refs.cancelModal
-      ) {
+      const showBackToFormModal = shouldShowBackToFormModal(
+        neu,
+        this.yamlOption,
+        this.currentYamlValues,
+        this.previousYamlValues,
+        !!this.$refs.cancelModal
+      );
+
+      if (showBackToFormModal) {
         this.$refs.cancelModal.show();
       } else {
         this.yamlOption = neu;
@@ -127,27 +136,20 @@ export default {
 
   computed: {
     formYamlOptions() {
-      return this.YAML_OPTIONS.map((option) => {
-        if (option.value === VALUES_STATE.DIFF) {
-          return {
-            ...option,
-            disabled: !this.canDiff
-          };
-        }
-
-        return option;
-      });
+      return buildFormYamlOptions(this.YAML_OPTIONS, this.canDiff);
     },
 
     editorMode() {
-      return this.yamlOption === VALUES_STATE.DIFF ? EDITOR_MODES.DIFF_CODE : EDITOR_MODES.EDIT_CODE;
+      return getYamlEditorMode(this.yamlOption);
     },
 
     canDiff() {
-      const lhs = this.originalYamlValues || '';
-      const rhs = this.yamlOption === VALUES_STATE.FORM ? (this.formYamlValues || '') : (this.currentYamlValues || '');
-
-      return lhs !== rhs;
+      return hasYamlDiff(
+        this.originalYamlValues,
+        this.yamlOption,
+        this.formYamlValues,
+        this.currentYamlValues
+      );
     },
 
     isCreate() {

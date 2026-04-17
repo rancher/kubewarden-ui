@@ -16,7 +16,7 @@ import ButtonGroup from '@shell/components/ButtonGroup';
 import Loading from '@shell/components/Loading';
 import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
-import YamlEditor, { EDITOR_MODES } from '@shell/components/YamlEditor';
+import YamlEditor from '@shell/components/YamlEditor';
 
 import {
   KUBEWARDEN_CHARTS,
