@@ -11,5 +11,23 @@ helm:
     jaeger:
       create: true
 
+diff:
+  comparePatches:
+    - apiVersion: admissionregistration.k8s.io/v1
+      kind: MutatingWebhookConfiguration
+      name: jaeger-operator-mutating-webhook-configuration
+      jsonPointers:
+        - /webhooks/0/clientConfig/caBundle
+        - /webhooks/0/rules
+        - /webhooks/1/clientConfig/caBundle
+        - /webhooks/1/rules
+
+    - apiVersion: admissionregistration.k8s.io/v1
+      kind: ValidatingWebhookConfiguration
+      name: jaeger-operator-validating-webhook-configuration
+      jsonPointers:
+        - /webhooks/0/clientConfig/caBundle
+        - /webhooks/0/rules
+
 labels:
   name: jaeger-operator
