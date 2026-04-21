@@ -3,6 +3,7 @@ import {
   ref,
   onMounted,
   watch,
+  nextTick,
   computed,
   markRaw
 } from 'vue';
@@ -17,6 +18,7 @@ import Loading from '@shell/components/Loading';
 import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor from '@shell/components/YamlEditor';
+import YamlFullDiff from '@kubewarden/components/YamlFullDiff.vue';
 
 import {
   KUBEWARDEN_CHARTS,
@@ -24,7 +26,11 @@ import {
   RANCHER_NS_MATCH_EXPRESSION
 } from '@kubewarden/types';
 import { PolicyModuleInfo } from '@kubewarden/modules/policyChart';
-import { shouldShowBackToFormModal, useYamlCompareState } from '@kubewarden/composables/useYamlCompare';
+import {
+  getCurrentYamlState,
+  shouldShowBackToFormModal,
+  useYamlCompareState
+} from '@kubewarden/composables/useYamlCompare';
 
 interface Props {
   mode: string;
@@ -50,6 +56,8 @@ const valuesComponent = ref<any>(null);
 const preYamlOption = ref(VALUES_STATE.FORM);
 const yamlOption = ref(VALUES_STATE.FORM);
 const previousYamlValues = ref('');
+const yamlSnapshotsInitialized = ref(false);
+const isBootstrappingDefaults = ref(true);
 const version = ref<any>(null);
 const cancelModal = ref<any>(null);
 
@@ -61,6 +69,8 @@ const { editorMode, canDiff, formYamlOptions } = useYamlCompareState({
   formYamlValues,
   currentYamlValues,
 });
+
+defineExpose({ canDiff });
 
 watch(preYamlOption, (neu) => {
   const showBackToFormModal = shouldShowBackToFormModal(
@@ -79,7 +89,10 @@ watch(preYamlOption, (neu) => {
 });
 
 watch(() => props.chartValues?.policy, () => {
-  formYamlValues.value = buildYamlFromForm();
+  const nextFormYaml = buildYamlFromForm();
+
+  formYamlValues.value = nextFormYaml;
+  syncMountDefaultsIntoBaseline(nextFormYaml);
 }, {
   deep:      true,
   immediate: true
@@ -100,7 +113,12 @@ watch(yamlOption, (neu, old) => {
   case VALUES_STATE.DIFF:
     // Entering YAML/Compare from form takes a fresh snapshot.
     if (old === VALUES_STATE.FORM || !old) {
-      currentYamlValues.value = formYamlValues.value || buildYamlFromForm();
+      currentYamlValues.value = getCurrentYamlState(
+        VALUES_STATE.FORM,
+        formYamlValues.value,
+        currentYamlValues.value,
+        buildYamlFromForm()
+      );
       previousYamlValues.value = currentYamlValues.value;
     }
 
@@ -119,7 +137,12 @@ function generateYaml() {
   if (props.yamlValues?.length) {
     currentYamlValues.value = props.yamlValues;
   } else {
-    currentYamlValues.value = formYamlValues.value || buildYamlFromForm();
+    currentYamlValues.value = getCurrentYamlState(
+      VALUES_STATE.FORM,
+      formYamlValues.value,
+      currentYamlValues.value,
+      buildYamlFromForm()
+    );
   }
 }
 
@@ -127,6 +150,34 @@ function buildYamlFromForm() {
   const rawPolicy = toRaw(props.chartValues.policy) || props.value;
 
   return saferDump(rawPolicy);
+}
+
+function syncMountDefaultsIntoBaseline(nextFormYaml: string) {
+  if (!yamlSnapshotsInitialized.value) {
+    return;
+  }
+
+  if (!isBootstrappingDefaults.value) {
+    return;
+  }
+
+  if (yamlOption.value !== VALUES_STATE.FORM) {
+    return;
+  }
+
+  const baselineYaml = originalYamlValues.value || '';
+  const isYamlPristine =
+    currentYamlValues.value === baselineYaml &&
+    previousYamlValues.value === baselineYaml;
+
+  if (!isYamlPristine || !nextFormYaml || baselineYaml === nextFormYaml) {
+    return;
+  }
+
+  // Keep compare baseline aligned with mount-time form defaults so only user changes appear in diff.
+  originalYamlValues.value = nextFormYaml;
+  currentYamlValues.value = nextFormYaml;
+  previousYamlValues.value = nextFormYaml;
 }
 
 function loadValuesComponent() {
@@ -173,6 +224,7 @@ onMounted(async() => {
   generateYaml();
   originalYamlValues.value = currentYamlValues.value;
   previousYamlValues.value = currentYamlValues.value;
+  yamlSnapshotsInitialized.value = true;
 
   // If creating a ClusterAdmissionPolicy, ensure default matchExpressions
   if (props.mode === _CREATE && props.chartValues?.policy?.kind === 'ClusterAdmissionPolicy') {
@@ -184,6 +236,8 @@ onMounted(async() => {
     ];
   }
 
+  await nextTick();
+  isBootstrappingDefaults.value = false;
   fetchPending.value = false;
 });
 </script>
@@ -227,7 +281,15 @@ onMounted(async() => {
 
         <!-- Otherwise, show the YAML editor -->
         <template v-else-if="(isCreate || isEdit) && !showForm">
+          <YamlFullDiff
+            v-if="yamlOption === VALUES_STATE.DIFF"
+            data-testid="kw-policy-config-yaml-diff"
+            class="step__values__content"
+            :orig="originalYamlValues"
+            :neu="currentYamlValues"
+          />
           <YamlEditor
+            v-else
             ref="yaml"
             v-model:value="currentYamlValues"
             data-testid="kw-policy-config-yaml-editor"

@@ -13,10 +13,12 @@ import Loading from '@shell/components/Loading';
 import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor from '@shell/components/YamlEditor';
+import YamlFullDiff from '@kubewarden/components/YamlFullDiff.vue';
 
 import { VALUES_STATE, YAML_OPTIONS } from '@kubewarden/types';
 import {
   buildFormYamlOptions,
+  getCurrentYamlState,
   getYamlEditorMode,
   hasYamlDiff,
   shouldShowBackToFormModal
@@ -47,7 +49,8 @@ export default {
     Loading,
     ResourceCancelModal,
     Tabbed,
-    YamlEditor
+    YamlEditor,
+    YamlFullDiff
   },
 
   async created() {
@@ -67,6 +70,7 @@ export default {
 
   data() {
     return {
+      VALUES_STATE,
       YAML_OPTIONS,
       currentYamlValues:   '',
       originalYamlValues:  '',
@@ -120,7 +124,12 @@ export default {
       case VALUES_STATE.YAML:
       case VALUES_STATE.DIFF:
         if (old === VALUES_STATE.FORM || !old) {
-          this.currentYamlValues = this.formYamlValues || this.buildYamlFromForm();
+          this.currentYamlValues = getCurrentYamlState(
+            VALUES_STATE.FORM,
+            this.formYamlValues,
+            this.currentYamlValues,
+            this.buildYamlFromForm()
+          );
           this.previousYamlValues = this.currentYamlValues;
         }
 
@@ -148,7 +157,8 @@ export default {
         this.originalYamlValues,
         this.yamlOption,
         this.formYamlValues,
-        this.currentYamlValues
+        this.currentYamlValues,
+        this.buildYamlFromForm()
       );
     },
 
@@ -249,7 +259,15 @@ export default {
         </Tabbed>
       </template>
       <template v-else-if="(isCreate || isEdit) && !showForm">
+        <YamlFullDiff
+          v-if="yamlOption === VALUES_STATE.DIFF"
+          data-testid="kw-policy-server-config-yaml-diff"
+          class="step__values__content"
+          :orig="originalYamlValues"
+          :neu="currentYamlValues"
+        />
         <YamlEditor
+          v-else
           ref="yaml"
           v-model:value="currentYamlValues"
           data-testid="kw-policy-server-config-yaml-editor"

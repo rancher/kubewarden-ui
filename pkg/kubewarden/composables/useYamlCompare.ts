@@ -5,22 +5,28 @@ import { EDITOR_MODES } from '@shell/components/YamlEditor';
 
 type YamlOption = typeof YAML_OPTIONS[number];
 
-export function getComparedYaml(
+export function getCurrentYamlState(
   yamlOption: VALUES_STATE,
   formYaml: string,
-  currentYaml: string
+  currentYaml: string,
+  fallbackFormYaml = ''
 ): string {
-  return yamlOption === VALUES_STATE.FORM ? (formYaml || '') : (currentYaml || '');
+  if (yamlOption === VALUES_STATE.FORM) {
+    return formYaml || fallbackFormYaml || '';
+  }
+
+  return currentYaml || '';
 }
 
 export function hasYamlDiff(
   originalYaml: string,
   yamlOption: VALUES_STATE,
   formYaml: string,
-  currentYaml: string
+  currentYaml: string,
+  fallbackFormYaml = ''
 ): boolean {
   const originalSnapshotYaml = originalYaml || '';
-  const currentComparedYaml = getComparedYaml(yamlOption, formYaml, currentYaml);
+  const currentComparedYaml = getCurrentYamlState(yamlOption, formYaml, currentYaml, fallbackFormYaml);
 
   return originalSnapshotYaml !== currentComparedYaml;
 }
