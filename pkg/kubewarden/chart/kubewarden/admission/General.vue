@@ -1,6 +1,4 @@
 <script>
-import isEmpty from 'lodash/isEmpty';
-
 import { _CREATE } from '@shell/config/query-params';
 import { set } from '@shell/utils/object';
 
@@ -11,8 +9,9 @@ import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 
-import { KUBEWARDEN, KUBEWARDEN_APPS } from '@kubewarden/types';
+import { KUBEWARDEN } from '@kubewarden/types';
 import { buildModuleString } from '@kubewarden/modules/policyChart';
+import { applyCreatePolicyDefaults } from '@kubewarden/modules/policyDefaults';
 
 export default {
   name: 'General',
@@ -56,16 +55,8 @@ export default {
       await this.$store.dispatch('cluster/findAll', { type: KUBEWARDEN.POLICY_SERVER });
     }
 
-    if (this.isCreate && !isEmpty(this.policy.spec)) {
-      set(this.policy.spec, 'mode', 'protect');
-    }
-
-    if (this.isCreate && !isEmpty(this.policyServers)) {
-      const defaultPolicyServer = this.policyServers.find((ps) => {
-        return ps.metadata.annotations?.['meta.helm.sh/release-name'] === KUBEWARDEN_APPS.RANCHER_DEFAULTS;
-      });
-
-      this.policy.spec.policyServer = defaultPolicyServer?.id;
+    if (this.isCreate) {
+      applyCreatePolicyDefaults(this.policy, this.policyServers);
     }
   },
 

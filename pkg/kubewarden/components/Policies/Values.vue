@@ -3,7 +3,6 @@ import {
   ref,
   onMounted,
   watch,
-  nextTick,
   computed,
   markRaw
 } from 'vue';
@@ -14,11 +13,11 @@ import { _CREATE, _EDIT } from '@shell/config/query-params';
 import { saferDump } from '@shell/utils/create-yaml';
 
 import ButtonGroup from '@shell/components/ButtonGroup';
+import FileDiff from '@shell/components/FileDiff';
 import Loading from '@shell/components/Loading';
 import ResourceCancelModal from '@shell/components/ResourceCancelModal';
 import Tabbed from '@shell/components/Tabbed';
 import YamlEditor from '@shell/components/YamlEditor';
-import YamlFullDiff from '@kubewarden/components/YamlFullDiff.vue';
 
 import {
   KUBEWARDEN_CHARTS,
@@ -86,7 +85,7 @@ watch(preYamlOption, (neu) => {
   } else {
     yamlOption.value = neu;
   }
-});
+}, { flush: 'sync' });
 
 watch(() => props.chartValues?.policy, () => {
   const nextFormYaml = buildYamlFromForm();
@@ -95,7 +94,8 @@ watch(() => props.chartValues?.policy, () => {
   syncMountDefaultsIntoBaseline(nextFormYaml);
 }, {
   deep:      true,
-  immediate: true
+  immediate: true,
+  flush:     'sync'
 });
 
 watch(yamlOption, (neu, old) => {
@@ -208,7 +208,7 @@ function cancelBackToForm() {
   preYamlOption.value = yamlOption.value;
 }
 
-onMounted(async() => {
+onMounted(() => {
   // Attempt to fetch chart version info
   try {
     version.value = store.getters['catalog/version']({
@@ -236,7 +236,6 @@ onMounted(async() => {
     ];
   }
 
-  await nextTick();
   isBootstrappingDefaults.value = false;
   fetchPending.value = false;
 });
@@ -281,12 +280,14 @@ onMounted(async() => {
 
         <!-- Otherwise, show the YAML editor -->
         <template v-else-if="(isCreate || isEdit) && !showForm">
-          <YamlFullDiff
+          <FileDiff
             v-if="yamlOption === VALUES_STATE.DIFF"
             data-testid="kw-policy-config-yaml-diff"
             class="step__values__content"
+            :filename="'.yaml'"
             :orig="originalYamlValues"
             :neu="currentYamlValues"
+            :footer-space="80"
           />
           <YamlEditor
             v-else

@@ -1,4 +1,5 @@
 import { _EDIT } from '@shell/config/query-params';
+import { resolveQuestionDefault, shouldApplyQuestionDefault } from '@kubewarden/modules/policyDefaults';
 
 export default {
   props: {
@@ -68,14 +69,11 @@ export default {
   },
 
   created() {
-    let def = this.question.default;
+    const defaultValue = resolveQuestionDefault(this.question);
+    const shouldApply = shouldApplyQuestionDefault(this.value, defaultValue);
 
-    if (this.question.type === 'boolean' && typeof def === 'string') {
-      def = def === 'true';
-    }
-
-    if (this.value === undefined && def !== undefined) {
-      this.$emit('update:value', def);
+    if (shouldApply) {
+      this.$emit('update:value', defaultValue);
     }
   },
 };

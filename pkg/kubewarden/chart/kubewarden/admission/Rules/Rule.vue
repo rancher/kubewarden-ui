@@ -58,12 +58,8 @@ export default {
   components: { LabeledSelect },
 
   fetch() {
-    if (this.isCreate && isEmpty(this.value?.apiGroups)) {
-      if (!Array.isArray(this.value.apiGroups)) {
-        this.value.apiGroups = [];
-      }
-
-      this.value.apiGroups.push('*');
+    if (this.isCreate && this.value?.apiGroups === undefined) {
+      this.value.apiGroups = ['*'];
     }
   },
 

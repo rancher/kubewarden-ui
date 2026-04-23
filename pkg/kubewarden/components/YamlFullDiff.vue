@@ -55,6 +55,8 @@ export default {
 
       const orig = this.orig || '';
       const neu = this.neu || '';
+
+      // Force full-document diff context so compare mirrors the complete YAML editor content.
       const context = Math.max(orig.split('\n').length, neu.split('\n').length) + 10;
       const patch = createPatch(this.filename, orig, neu, '', '', { context });
       const configuration = {
@@ -87,67 +89,5 @@ export default {
 .root {
   max-width: 100%;
   overflow: auto;
-}
-
-:deep() .d2h-wrapper {
-  .d2h-file-header {
-    display: none;
-  }
-
-  .d2h-file-wrapper {
-    border-color: var(--diff-border);
-  }
-
-  .d2h-diff-table {
-    font-family: Menlo,Consolas,monospace;
-    font-size: 13px;
-  }
-
-  .d2h-emptyplaceholder, .d2h-code-side-emptyplaceholder {
-    border-color: var(--diff-linenum-border);
-    background-color: var(--diff-empty-placeholder);
-  }
-
-  .d2h-code-linenumber,
-  .d2h-code-side-linenumber {
-    background-color: var(--diff-linenum-bg);
-    color: var(--diff-linenum);
-    border-color: var(--diff-linenum-border);
-    border-left: 0;
-  }
-
-  .d2h-code-line del,.d2h-code-side-line del {
-    background-color: var(--diff-line-del-bg);
-  }
-
-  .d2h-code-line ins,.d2h-code-side-line ins {
-    background-color: var(--diff-line-ins-bg);
-  }
-
-  .d2h-del {
-    background-color: var(--diff-del-bg);
-    border-color: var(--diff-del-border);
-    color: var(--body-text);
-  }
-
-  .d2h-ins {
-    background-color: var(--diff-ins-bg);
-    border-color: var(--diff-ins-border);
-    color: var(--body-text);
-  }
-
-  .d2h-info {
-    background-color: var(--diff-header-bg);
-    color: var(--diff-header);
-    border-color: var(--diff-header-border);
-  }
-
-  .d2h-file-diff .d2h-del.d2h-change {
-    background-color: var(--diff-chg-del);
-  }
-
-  .d2h-file-diff .d2h-ins.d2h-change {
-    background-color: var(--diff-chg-ins);
-  }
 }
 </style>

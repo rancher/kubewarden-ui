@@ -1,7 +1,11 @@
 import { computed, type Ref } from 'vue';
 
 import { VALUES_STATE, YAML_OPTIONS } from '@kubewarden/types';
-import { EDITOR_MODES } from '@shell/components/YamlEditor';
+
+const EDITOR_MODES = {
+  EDIT_CODE: 'EDIT_CODE',
+  DIFF_CODE: 'DIFF_CODE'
+} as const;
 
 type YamlOption = typeof YAML_OPTIONS[number];
 
