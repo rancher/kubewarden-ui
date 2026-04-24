@@ -64,7 +64,7 @@ test('Install UI extension', { tag: '@sbom' }, async({ page, ui }) => {
       const apps = new RancherAppsPage(page)
       await page.getByTestId('extensions-page-menu').click()
       await page.getByText('Manage Repositories', { exact: true }).click()
-      await apps.addRepository({ name: 'sbomscanner-extension-github', url: 'https://neuvector.github.io/security-ui-exts/' })
+      await apps.addRepository({ name: 'sbomscanner-extension-github', url: 'https://rancher.github.io/security-ui-exts/' })
     })
   }
 
