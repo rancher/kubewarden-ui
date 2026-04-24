@@ -1,12 +1,12 @@
 <script>
-import { defineAsyncComponent, markRaw } from 'vue';
+import { defineAsyncComponent, markRaw, toRaw } from 'vue';
 import merge from 'lodash/merge';
+import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
 import jsyaml from 'js-yaml';
 
 import { _CREATE, _EDIT } from '@shell/config/query-params';
-import { SCHEMA } from '@shell/config/types';
-import { createYaml } from '@shell/utils/create-yaml';
+import { saferDump } from '@shell/utils/create-yaml';
 
 import ButtonGroup from '@shell/components/ButtonGroup';
 import FileDiff from '@shell/components/FileDiff';
@@ -83,6 +83,8 @@ export default {
       valuesComponent:     null,
       preYamlOption:       VALUES_STATE.FORM,
       yamlOption:          VALUES_STATE.FORM,
+      yamlSnapshotsInitialized: false,
+      isBootstrappingDefaults:  true,
       values:              this.chartValues
     };
   },
@@ -91,7 +93,10 @@ export default {
     chartValues: {
       deep: true,
       handler() {
-        this.formYamlValues = this.generateYaml();
+        const nextFormYaml = this.generateYaml();
+
+        this.formYamlValues = nextFormYaml;
+        this.syncMountDefaultsIntoBaseline(nextFormYaml);
       }
     },
 
@@ -123,6 +128,9 @@ export default {
 
       case VALUES_STATE.YAML:
       case VALUES_STATE.DIFF:
+        // Past this point, treat changes as user intent only.
+        this.isBootstrappingDefaults = false;
+
         if (old === VALUES_STATE.FORM || !old) {
           this.currentYamlValues = getCurrentYamlState(
             VALUES_STATE.FORM,
@@ -173,18 +181,91 @@ export default {
 
   methods: {
     generateYaml() {
-      const schemas = this.$store.getters['cluster/all'](SCHEMA);
-      const yaml = createYaml(schemas, this.value?.type, this.chartValues);
+      const rawValues = toRaw(this.chartValues) || this.value;
 
-      const lines = yaml.split('\n');
-      const filteredLines = lines.filter((line) => !line.includes('Error loading schema for array'));
-      const modifiedYAML = filteredLines.join('\n');
-
-      return modifiedYAML;
+      return saferDump(rawValues);
     },
 
     buildYamlFromForm() {
       return this.generateYaml();
+    },
+
+    isPolicyServerMountDefaultDelta(baselineYaml, nextFormYaml) {
+      let baselineObj;
+      let nextObj;
+
+      try {
+        baselineObj = jsyaml.load(baselineYaml) || {};
+        nextObj = jsyaml.load(nextFormYaml) || {};
+      } catch (e) {
+        return false;
+      }
+
+      const normalize = (obj) => {
+        const out = structuredClone(obj || {});
+
+        if (out?.spec) {
+          delete out.spec.image;
+          delete out.spec.securityContexts;
+        }
+
+        return out;
+      };
+
+      if (!isEqual(normalize(baselineObj), normalize(nextObj))) {
+        return false;
+      }
+
+      const securityContexts = nextObj?.spec?.securityContexts;
+
+      if (!securityContexts) {
+        return true;
+      }
+
+      const container = securityContexts.container || {};
+      const pod = securityContexts.pod || {};
+      const isPlainObject = (val) => val && typeof val === 'object' && !Array.isArray(val);
+
+      return (
+        isPlainObject(container.capabilities || {}) &&
+        isPlainObject(container.seLinuxOptions || {}) &&
+        isPlainObject(container.seccompProfile || {}) &&
+        isPlainObject(container.windowsOptions || {}) &&
+        isPlainObject(pod.seLinuxOptions || {}) &&
+        isPlainObject(pod.seccompProfile || {}) &&
+        isPlainObject(pod.windowsOptions || {}) &&
+        Array.isArray(pod.supplementalGroups || []) &&
+        Array.isArray(pod.sysctls || [])
+      );
+    },
+
+    syncMountDefaultsIntoBaseline(nextFormYaml) {
+      if (!this.yamlSnapshotsInitialized || !this.isBootstrappingDefaults) {
+        return;
+      }
+
+      if (this.yamlOption !== VALUES_STATE.FORM) {
+        return;
+      }
+
+      const baselineYaml = this.originalYamlValues || '';
+      const isYamlPristine =
+        this.currentYamlValues === baselineYaml &&
+        this.previousYamlValues === baselineYaml;
+
+      if (!isYamlPristine || !nextFormYaml || baselineYaml === nextFormYaml) {
+        return;
+      }
+
+      if (!this.isPolicyServerMountDefaultDelta(baselineYaml, nextFormYaml)) {
+        this.isBootstrappingDefaults = false;
+
+        return;
+      }
+
+      this.originalYamlValues = nextFormYaml;
+      this.currentYamlValues = nextFormYaml;
+      this.previousYamlValues = nextFormYaml;
     },
 
     async loadValuesComponent() {
@@ -225,6 +306,10 @@ export default {
       // User chose to stay in YAML/Compare.
       this.preYamlOption = this.yamlOption;
     }
+  },
+
+  mounted() {
+    this.yamlSnapshotsInitialized = true;
   }
 };
 </script>
