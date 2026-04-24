@@ -6,6 +6,9 @@ import Values from '@kubewarden/components/PolicyServer/Values.vue';
 jest.mock('@shell/utils/create-yaml', () => ({
   createYaml: (_schemas: any, _type: string, values: any) => {
     return `image:\n  repository: ${ values?.image?.repository || '' }\n  tag: ${ values?.image?.tag || '' }\n`;
+  },
+  saferDump: (values: any) => {
+    return `image:\n  repository: ${ values?.image?.repository || '' }\n  tag: ${ values?.image?.tag || '' }\n`;
   }
 }));
 

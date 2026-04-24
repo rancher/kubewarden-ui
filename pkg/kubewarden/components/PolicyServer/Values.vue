@@ -1,6 +1,7 @@
 <script>
 import { defineAsyncComponent, markRaw, toRaw } from 'vue';
 import merge from 'lodash/merge';
+import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
 import jsyaml from 'js-yaml';
@@ -72,20 +73,20 @@ export default {
     return {
       VALUES_STATE,
       YAML_OPTIONS,
-      currentYamlValues:   '',
-      originalYamlValues:  '',
-      previousYamlValues:  '',
-      formYamlValues:      '',
-      showForm:            true,
-      configValues:        null,
-      showQuestions:       true,
-      showValuesComponent: false,
-      valuesComponent:     null,
-      preYamlOption:       VALUES_STATE.FORM,
-      yamlOption:          VALUES_STATE.FORM,
+      currentYamlValues:        '',
+      originalYamlValues:       '',
+      previousYamlValues:       '',
+      formYamlValues:           '',
+      showForm:                 true,
+      configValues:             null,
+      showQuestions:            true,
+      showValuesComponent:      false,
+      valuesComponent:          null,
+      preYamlOption:            VALUES_STATE.FORM,
+      yamlOption:               VALUES_STATE.FORM,
       yamlSnapshotsInitialized: false,
       isBootstrappingDefaults:  true,
-      values:              this.chartValues
+      values:                   this.chartValues
     };
   },
 
@@ -197,12 +198,12 @@ export default {
       try {
         baselineObj = jsyaml.load(baselineYaml) || {};
         nextObj = jsyaml.load(nextFormYaml) || {};
-      } catch (e) {
+      } catch {
         return false;
       }
 
       const normalize = (obj) => {
-        const out = structuredClone(obj || {});
+        const out = cloneDeep(obj || {});
 
         if (out?.spec) {
           delete out.spec.image;

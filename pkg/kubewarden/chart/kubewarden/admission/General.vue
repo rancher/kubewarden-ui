@@ -70,8 +70,12 @@ export default {
     }
 
     // fix for https://github.com/rancher/kubewarden-ui/issues/672
-    // enforce `default` as namespace for creation of AP's
-    if (this.mode === _CREATE && this.chartType === KUBEWARDEN.ADMISSION_POLICY) {
+    // default namespace for AP create only when not already preselected
+    if (
+      this.mode === _CREATE &&
+      this.chartType === KUBEWARDEN.ADMISSION_POLICY &&
+      !policy?.metadata?.namespace
+    ) {
       set(policy.metadata, 'namespace', 'default');
     }
 

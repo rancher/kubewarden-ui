@@ -6,6 +6,9 @@ import {
   computed,
   markRaw
 } from 'vue';
+import cloneDeep from 'lodash/cloneDeep';
+import isEqual from 'lodash/isEqual';
+import jsyaml from 'js-yaml';
 import { useStore } from 'vuex';
 import { defineAsyncComponent, toRaw } from 'vue';
 
@@ -30,6 +33,10 @@ import {
   shouldShowBackToFormModal,
   useYamlCompareState
 } from '@kubewarden/composables/useYamlCompare';
+import {
+  resolveQuestionDefault,
+  shouldApplyQuestionDefault
+} from '@kubewarden/modules/policyDefaults';
 
 interface Props {
   mode: string;
@@ -111,6 +118,9 @@ watch(yamlOption, (neu, old) => {
 
   case VALUES_STATE.YAML:
   case VALUES_STATE.DIFF:
+    // Past this point, treat changes as user intent only.
+    isBootstrappingDefaults.value = false;
+
     // Entering YAML/Compare from form takes a fresh snapshot.
     if (old === VALUES_STATE.FORM || !old) {
       currentYamlValues.value = getCurrentYamlState(
@@ -174,10 +184,111 @@ function syncMountDefaultsIntoBaseline(nextFormYaml: string) {
     return;
   }
 
+  if (!isKnownMountDefaultDelta(baselineYaml, nextFormYaml)) {
+    // Stop bootstrap syncing once non-default mutations appear.
+    isBootstrappingDefaults.value = false;
+
+    return;
+  }
+
   // Keep compare baseline aligned with mount-time form defaults so only user changes appear in diff.
   originalYamlValues.value = nextFormYaml;
   currentYamlValues.value = nextFormYaml;
   previousYamlValues.value = nextFormYaml;
+}
+
+function buildQuestionDefaults() {
+  const defaults: Record<string, any> = {};
+  const questions = props.chartValues?.questions?.questions;
+
+  if (!Array.isArray(questions)) {
+    return defaults;
+  }
+
+  const setDeep = (obj: Record<string, any>, path: string, value: any) => {
+    const keys = path.split('.');
+    let current = obj;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+
+      if (!current[key] || typeof current[key] !== 'object') {
+        current[key] = {};
+      }
+
+      current = current[key];
+    }
+
+    current[keys[keys.length - 1]] = value;
+  };
+
+  for (const q of questions) {
+    const variable = q?.variable;
+    const defaultValue = resolveQuestionDefault(q);
+
+    if (!variable) {
+      continue;
+    }
+
+    if (!shouldApplyQuestionDefault(undefined, defaultValue)) {
+      continue;
+    }
+
+    setDeep(defaults, variable, defaultValue);
+  }
+
+  return defaults;
+}
+
+function isKnownMountDefaultDelta(baselineYaml: string, nextFormYaml: string) {
+  let baselineObj: Record<string, any>;
+  let nextObj: Record<string, any>;
+
+  try {
+    baselineObj = (jsyaml.load(baselineYaml) || {}) as Record<string, any>;
+    nextObj = (jsyaml.load(nextFormYaml) || {}) as Record<string, any>;
+  } catch {
+    return false;
+  }
+
+  const questionDefaults = buildQuestionDefaults();
+
+  const normalize = (obj: Record<string, any>) => {
+    const out = cloneDeep(obj || {});
+    const ns = out?.metadata?.namespace;
+
+    // Treat admission create defaults ('', undefined, and 'default') as equivalent.
+    if (ns === 'default' || ns === '' || ns === undefined || ns === null) {
+      out.metadata = out.metadata || {};
+      out.metadata.namespace = '';
+    }
+
+    // Treat default question-derived settings as mount-time defaults.
+    const settings = out?.spec?.settings;
+
+    if (isEqual(settings || {}, questionDefaults)) {
+      out.spec = out.spec || {};
+      out.spec.settings = {};
+    }
+
+    // Treat the default ClusterAdmissionPolicy namespace selector as mount-time default.
+    const matchExpressions = out?.spec?.namespaceSelector?.matchExpressions;
+
+    if (
+      Array.isArray(matchExpressions) &&
+      (matchExpressions.length === 0 || isEqual(matchExpressions, [RANCHER_NS_MATCH_EXPRESSION]))
+    ) {
+      delete out.spec.namespaceSelector.matchExpressions;
+
+      if (Object.keys(out.spec.namespaceSelector).length === 0) {
+        delete out.spec.namespaceSelector;
+      }
+    }
+
+    return out;
+  };
+
+  return isEqual(normalize(baselineObj), normalize(nextObj));
 }
 
 function loadValuesComponent() {
@@ -236,7 +347,6 @@ onMounted(() => {
     ];
   }
 
-  isBootstrappingDefaults.value = false;
   fetchPending.value = false;
 });
 </script>

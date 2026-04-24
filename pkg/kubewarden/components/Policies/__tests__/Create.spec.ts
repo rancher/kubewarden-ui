@@ -6,7 +6,13 @@ import Create from '@kubewarden/components/Policies/Create.vue';
 
 // A minimal VersionInfo-like object whose parsePolicyModule() returns known values
 const mockVersionInfo = {
-  chart:  { annotations: { 'kubewarden/registry': 'ghcr.io', 'kubewarden/repository': 'kubewarden/policies/cap-hostname', 'kubewarden/tag': 'v1.0.0' } },
+  chart:  {
+    annotations: {
+      'kubewarden/registry':   'ghcr.io',
+      'kubewarden/repository': 'kubewarden/policies/cap-hostname',
+      'kubewarden/tag':        'v1.0.0'
+    }
+  },
   values: {
     module: {
       repository: 'kubewarden/policies/cap-hostname',
@@ -16,18 +22,18 @@ const mockVersionInfo = {
 };
 
 const mockStoreGetters = {
-  currentStore:                     () => 'cluster',
-  'cluster/schemaFor':              () => null,
-  'cluster/canList':                () => false,
-  'type-map/isSpoofed':             () => false,
-  'catalog/repos':                  [],
-  'catalog/charts':                 [],
-  'management/byId':                () => null,
-  'kubewarden/airGapped':           false,
+  currentStore:                        () => 'cluster',
+  'cluster/schemaFor':                 () => null,
+  'cluster/canList':                   () => false,
+  'type-map/isSpoofed':                () => false,
+  'catalog/repos':                     [],
+  'catalog/charts':                    [],
+  'management/byId':                   () => null,
+  'kubewarden/airGapped':              false,
   'kubewarden/hideBannerOfficialRepo': true,
   'kubewarden/hideBannerPolicyRepo':   true,
   'kubewarden/hideBannerAirgapPolicy': true,
-  'i18n/t':                         (key: string) => key,
+  'i18n/t':                            (key: string) => key,
 };
 
 const mockStore = {
@@ -45,12 +51,19 @@ function createWrapper(overrides: any = {}) {
       mode: 'create',
     },
     global: {
-      provide: { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY, realMode: 'create' },
+      provide: {
+        chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY,
+        realMode:  'create'
+      },
       mocks:   {
         $store:      mockStore,
         $fetchState: { pending: false },
-        $route:      { params: {}, query: {}, hash: '' },
-        $router:     { replace: jest.fn() },
+        $route:      {
+          params: {},
+          query:  {},
+          hash:   ''
+        },
+        $router: { replace: jest.fn() },
       },
       stubs: {
         Loading:           { template: '<span />' },
@@ -153,7 +166,12 @@ describe('component: Create', () => {
       const wrapper = createWrapper();
 
       (wrapper.vm as any).selectedPolicyDetails = mockVersionInfo;
-      (wrapper.vm as any).policyModuleInfo = { registry: 'original', repository: 'repo', tag: 'tag', source: 'values' };
+      (wrapper.vm as any).policyModuleInfo = {
+        registry:   'original',
+        repository: 'repo',
+        tag:        'tag',
+        source:     'values'
+      };
       (wrapper.vm as any).chartValues = { policy: { spec: { module: 'repo:tag' } } };
       (wrapper.vm as any).yamlValues = 'spec:\n  module: other/repo:newtag\n';
 
@@ -169,7 +187,12 @@ describe('component: Create', () => {
 
       (wrapper.vm as any).selectedPolicyDetails = mockVersionInfo;
       (wrapper.vm as any).selectedPolicyChart = 'custom'; // makes customPolicy computed = true
-      (wrapper.vm as any).policyModuleInfo = { registry: 'original', repository: 'repo', tag: 'tag', source: 'values' };
+      (wrapper.vm as any).policyModuleInfo = {
+        registry:   'original',
+        repository: 'repo',
+        tag:        'tag',
+        source:     'values'
+      };
       (wrapper.vm as any).chartValues = { policy: { spec: { module: 'repo:tag' } } };
       (wrapper.vm as any).yamlValues = 'spec:\n  module: 11111/22222:333333\n';
 
