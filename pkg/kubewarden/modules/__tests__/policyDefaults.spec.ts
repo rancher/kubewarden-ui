@@ -5,7 +5,7 @@ import {
 } from '@kubewarden/modules/policyDefaults';
 
 describe('modules: policyDefaults', () => {
-  it('preserves existing mode and policyServer values for create flow', () => {
+  it('always sets protect mode and preserves explicit policyServer for create flow', () => {
     const policy = {
       spec: {
         mode:         'monitor',
@@ -26,7 +26,7 @@ describe('modules: policyDefaults', () => {
 
     applyCreatePolicyDefaults(policy, policyServers);
 
-    expect(policy.spec.mode).toBe('monitor');
+    expect(policy.spec.mode).toBe('protect');
     expect(policy.spec.policyServer).toBe('');
   });
 

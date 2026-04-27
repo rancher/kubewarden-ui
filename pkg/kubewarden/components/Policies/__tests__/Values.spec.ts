@@ -86,6 +86,22 @@ function createClusterAdmissionPolicyValues() {
   };
 }
 
+function createClusterAdmissionPolicyValuesWithMode(mode: 'monitor' | 'protect') {
+  const out = createClusterAdmissionPolicyValues();
+
+  out.policy.spec.mode = mode;
+
+  return out;
+}
+
+function createClusterAdmissionPolicyValuesWithEmptyMode() {
+  const out = createClusterAdmissionPolicyValues();
+
+  out.policy.spec.mode = '' as any;
+
+  return out;
+}
+
 function createClusterAdmissionPolicyYaml() {
   return [
     'apiVersion: policies.kubewarden.io/v1',
@@ -189,6 +205,72 @@ describe('component: Policies Values compare flow', () => {
 
     expect((wrapper.vm as any).canDiff).toBe(false);
     expect((wrapper.vm as any).originalYamlValues).toContain('kubernetes.io/metadata.name');
+  });
+
+  it('does not mark compare as changed when create default mode is normalized from monitor to protect', async() => {
+    const wrapper = mount(Values, {
+      props: {
+        mode:                'create',
+        chartValues:         createClusterAdmissionPolicyValuesWithMode('monitor'),
+        customPolicy:        false,
+        value:               {
+          type:            'policies.kubewarden.io.clusteradmissionpolicy',
+          haveComponent:   () => false,
+          importComponent: () => null,
+        },
+        yamlValues:          createClusterAdmissionPolicyYaml(),
+        errorFetchingPolicy: false,
+        moduleInfo:          null,
+      },
+      global: {
+        stubs: {
+          ButtonGroup:         { template: '<div />' },
+          FileDiff:            { template: '<div />' },
+          Loading:             { template: '<div />' },
+          ResourceCancelModal: { template: '<div />' },
+          Tabbed:              { template: '<div><slot /></div>' },
+          YamlEditor:          { template: '<div />' },
+        }
+      }
+    });
+
+    await wrapper.setProps({ chartValues: createClusterAdmissionPolicyValuesWithMode('protect') });
+    await flushPromises();
+
+    expect((wrapper.vm as any).canDiff).toBe(false);
+  });
+
+  it('does not mark compare as changed when create default mode is normalized from empty string to protect', async() => {
+    const wrapper = mount(Values, {
+      props: {
+        mode:                'create',
+        chartValues:         createClusterAdmissionPolicyValuesWithEmptyMode(),
+        customPolicy:        false,
+        value:               {
+          type:            'policies.kubewarden.io.clusteradmissionpolicy',
+          haveComponent:   () => false,
+          importComponent: () => null,
+        },
+        yamlValues:          createClusterAdmissionPolicyYaml(),
+        errorFetchingPolicy: false,
+        moduleInfo:          null,
+      },
+      global: {
+        stubs: {
+          ButtonGroup:         { template: '<div />' },
+          FileDiff:            { template: '<div />' },
+          Loading:             { template: '<div />' },
+          ResourceCancelModal: { template: '<div />' },
+          Tabbed:              { template: '<div><slot /></div>' },
+          YamlEditor:          { template: '<div />' },
+        }
+      }
+    });
+
+    await wrapper.setProps({ chartValues: createClusterAdmissionPolicyValuesWithMode('protect') });
+    await flushPromises();
+
+    expect((wrapper.vm as any).canDiff).toBe(false);
   });
 
   it('starts with compare disabled when nothing changed', async() => {

@@ -258,7 +258,9 @@ export default {
         return;
       }
 
-      if (!this.isPolicyServerMountDefaultDelta(baselineYaml, nextFormYaml)) {
+      const known = this.isPolicyServerMountDefaultDelta(baselineYaml, nextFormYaml);
+
+      if (!known) {
         this.isBootstrappingDefaults = false;
 
         return;

@@ -29,9 +29,7 @@ export function applyCreatePolicyDefaults(policy: PolicyLike, policyServers: Pol
     return;
   }
 
-  if (policy.spec.mode === undefined) {
-    policy.spec.mode = 'protect';
-  }
+  policy.spec.mode = 'protect';
 
   if (isEmpty(policyServers)) {
     return;

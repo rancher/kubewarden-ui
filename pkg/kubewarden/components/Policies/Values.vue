@@ -184,7 +184,9 @@ function syncMountDefaultsIntoBaseline(nextFormYaml: string) {
     return;
   }
 
-  if (!isKnownMountDefaultDelta(baselineYaml, nextFormYaml)) {
+  const known = isKnownMountDefaultDelta(baselineYaml, nextFormYaml);
+
+  if (!known) {
     // Stop bootstrap syncing once non-default mutations appear.
     isBootstrappingDefaults.value = false;
 
@@ -257,6 +259,24 @@ function isKnownMountDefaultDelta(baselineYaml: string, nextFormYaml: string) {
     const out = cloneDeep(obj || {});
     const ns = out?.metadata?.namespace;
 
+    // In create flow, mode can start as monitor in source yaml and be normalized
+    // to protect by form defaults during mount; treat this as an init default.
+    if (props.mode === _CREATE) {
+      const mode = out?.spec?.mode;
+      const normalizedMode = typeof mode === 'string' ? mode.toLowerCase() : mode;
+
+      if (
+        normalizedMode === 'monitor' ||
+        normalizedMode === 'protect' ||
+        mode === '' ||
+        mode === undefined ||
+        mode === null
+      ) {
+        out.spec = out.spec || {};
+        delete out.spec.mode;
+      }
+    }
+
     // Treat admission create defaults ('', undefined, and 'default') as equivalent.
     if (ns === 'default' || ns === '' || ns === undefined || ns === null) {
       out.metadata = out.metadata || {};
@@ -288,7 +308,10 @@ function isKnownMountDefaultDelta(baselineYaml: string, nextFormYaml: string) {
     return out;
   };
 
-  return isEqual(normalize(baselineObj), normalize(nextObj));
+  const normalizedBaseline = normalize(baselineObj);
+  const normalizedNext = normalize(nextObj);
+
+  return isEqual(normalizedBaseline, normalizedNext);
 }
 
 function loadValuesComponent() {
