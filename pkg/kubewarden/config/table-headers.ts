@@ -1,4 +1,4 @@
-import { NAME as NAME_HEADER } from '@shell/config/table-headers';
+import { NAME as NAME_HEADER, NAMESPACE as NAMESPACE_HEADER } from '@shell/config/table-headers';
 
 import { createKubewardenRoute } from '@kubewarden/utils/custom-routing';
 import { KUBEWARDEN, PolicyServer } from '@kubewarden/types';
@@ -132,6 +132,34 @@ export const POLICY_SERVER_HEADERS = [
 export const POLICY_HEADERS = [
   ADMISSION_POLICY_STATE,
   NAME_HEADER,
+  ADMISSION_POLICY_MODE,
+  {
+    name:   'capPolicyServer',
+    label:  'Policy Server',
+    value:  'spec.policyServer',
+    sort:   'spec.policyServer:desc',
+    search: true
+  },
+  ADMISSION_POLICY_RESOURCES,
+  ADMISSION_POLICY_OPERATIONS,
+  ADMISSION_POLICY_SOURCE,
+  {
+    name:      'age',
+    labelKey:  'tableHeaders.age',
+    value:     'creationTimestamp',
+    getValue:  (row: any) => row.creationTimestamp,
+    sort:      'creationTimestamp:desc',
+    search:    false,
+    formatter: 'LiveDate',
+    width:     100,
+    align:     'left'
+  }
+];
+
+export const ADMISSION_POLICY_HEADERS = [
+  ADMISSION_POLICY_STATE,
+  NAME_HEADER,
+  NAMESPACE_HEADER,
   ADMISSION_POLICY_MODE,
   {
     name:   'capPolicyServer',

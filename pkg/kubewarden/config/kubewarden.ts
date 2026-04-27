@@ -2,7 +2,7 @@ import { rootKubewardenRoute } from '@kubewarden/utils/custom-routing';
 import {
   KUBEWARDEN, KUBEWARDEN_DASHBOARD, POLICY_REPORTER_PRODUCT, KUBEWARDEN_PRODUCT_NAME, OPEN_REPORTS
 } from '@kubewarden/types';
-import { POLICY_SERVER_HEADERS, POLICY_HEADERS } from './table-headers';
+import { POLICY_SERVER_HEADERS, POLICY_HEADERS, ADMISSION_POLICY_HEADERS } from './table-headers';
 
 export function init($extension: any, store: any) {
   const {
@@ -63,6 +63,6 @@ export function init($extension: any, store: any) {
   weightType(ADMISSION_POLICY, 96, true);
 
   headers(POLICY_SERVER, POLICY_SERVER_HEADERS);
-  headers(ADMISSION_POLICY, POLICY_HEADERS);
+  headers(ADMISSION_POLICY, ADMISSION_POLICY_HEADERS);
   headers(CLUSTER_ADMISSION_POLICY, POLICY_HEADERS);
 }
