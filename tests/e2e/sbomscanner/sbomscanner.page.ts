@@ -17,6 +17,11 @@ export interface VexHub {
   enabled?: boolean
 }
 
+export interface WorkloadScanConfig {
+  enabled?: boolean
+  rules?  : { key: string, value: string }[]
+}
+
 export class SbomScannerPage extends BasePage {
   async goto(): Promise<void> {
     await this.nav.sbomScanner()
@@ -127,5 +132,25 @@ export class SbomScannerPage extends BasePage {
   async deleteVexHub(name: string) {
     await this.nav.sbomScanner('VEX Management')
     await this.ui.tableRow(name).delete()
+  }
+
+  @step
+  async setWorkloadScan(config: WorkloadScanConfig) {
+    const rules = config?.rules ?? []
+    await this.nav.sbomScanner('Workloads Scan')
+    if (config?.enabled !== undefined) {
+      await this.ui.checkbox('Enabled').setChecked(config.enabled)
+    }
+    await expect(this.ui.checkbox('Enabled')).toBeChecked() // Default is enabled, so the form is visible
+
+    for (let i = 0; i < rules.length; i++) {
+      await this.ui.button('Add Rule').click()
+      await this.page.locator('div.namespace-selector-row').getByTestId(`input-match-expression-key-control-${i}`).fill(rules[i].key)
+      await this.page.locator('div.namespace-selector-row').getByTestId(`input-match-expression-values-control-${i}`).fill(rules[i].value)
+    }
+    await this.ui.button('Add Platform').click()
+    await this.page.waitForTimeout(300)
+    await this.ui.button('Create').click()
+    await expect(this.page.getByRole('heading', { name: /^Workloads Scan.*Active$/ })).toBeVisible()
   }
 }

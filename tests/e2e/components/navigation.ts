@@ -197,6 +197,7 @@ export class Navigation {
     }
 
     const heading = childName || /^(Dashboard|Install SBOMScanner)/
-    await expect(this.page.locator('div.title').getByText(heading)).toBeVisible()
+    const element = this.page.locator('h1.page-title').or(this.page.locator('div.title'))
+    await expect(element.getByText(heading)).toBeVisible()
   }
 }
