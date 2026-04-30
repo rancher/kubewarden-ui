@@ -118,24 +118,6 @@ subjects:
 `)
   })
 
-  test.skip('Configure WorkloadScan', async({ ui, nav }) => {
-    await nav.cluster()
-    await ui.importYaml(`
-apiVersion: sbomscanner.kubewarden.io/v1alpha1
-kind: WorkloadScanConfiguration
-metadata:
-  name: default
-spec:
-  # artifactsNamespace: sbomscanner / cattle-sbomscanner-system
-  namespaceSelector:
-    matchLabels:
-      sbomscanner.kubewarden.io/workloadscan: "true"
-  platforms:
-    - arch: amd64
-      os: linux
-`)
-  })
-
   test('Create test policy', async({ page }) => {
     const cvePolicy : Policy = {
       title    : 'image-cve',
@@ -156,10 +138,14 @@ spec:
     await polPage.create(cvePolicy, { wait: true })
   })
 
-  test('Create WorkloadScan', async({ page, ui, nav }) => {
-    await nav.sbomScanner('Workloads Scan')
-    await ui.button('Create').click()
-    await expect(page.getByRole('heading', { name: /^Workload Scan.*Active$/ })).toBeVisible()
+  test('Create WorkloadScan', async({ page }) => {
+    const sbomPage = new SbomScannerPage(page)
+    await sbomPage.setWorkloadScan({
+      enabled: true,
+      rules   : [
+        { key: 'kubernetes.io/metadata.name', value: 'cattle-kubewarden-system' },
+      ]
+    })
   })
 
   test('Create test deployment', async({ page, shell }) => {
