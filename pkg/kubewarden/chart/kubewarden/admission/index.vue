@@ -57,8 +57,9 @@ export default {
 
   data() {
     return {
-      activeTab:   null,
-      chartValues: null
+      activeTab:           null,
+      chartValues:         null,
+      moduleFieldsMissing: false
     };
   },
 
@@ -82,7 +83,7 @@ export default {
     },
 
     generalTabError() {
-      return !this.chartValues?.policy?.metadata?.name || !this.chartValues?.policy?.spec?.module;
+      return !this.chartValues?.policy?.metadata?.name || !this.chartValues?.policy?.spec?.module || this.moduleFieldsMissing;
     },
 
     rulesTabError() {
@@ -161,6 +162,11 @@ export default {
   },
 
   methods: {
+    onModuleValidation(missing) {
+      this.moduleFieldsMissing = missing;
+      this.$emit('module-validation', missing);
+    },
+
     settingsChanged(event) {
       this.chartValues.policy.spec.settings = jsyaml.load(event);
     },
@@ -190,6 +196,7 @@ export default {
         :target-namespace="targetNamespace"
         :is-custom="isCustom"
         :module-info="moduleInfo"
+        @module-validation="onModuleValidation"
       />
     </Tab>
 

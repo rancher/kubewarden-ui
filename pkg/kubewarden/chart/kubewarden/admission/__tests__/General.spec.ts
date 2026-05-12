@@ -152,4 +152,172 @@ describe('component: General', () => {
 
     expect(wrapper.vm.policy.spec.module).toBe('registry.internal:5000/kubewarden/pod-privileged:v2.0.0');
   });
+
+  it('in view mode splits spec.module into 3 fields', () => {
+    const wrapper = shallowMount(General, {
+      props:  {
+        targetNamespace: 'default',
+        value:           {
+          policy: {
+            ...userGroupPolicy,
+            spec: {
+              ...userGroupPolicy.spec,
+              module: 'ghcr.io/kubewarden/pod-privileged:v1.2.3'
+            }
+          }
+        },
+        moduleInfo: {
+          registry:   'ghcr.io',
+          repository: 'kubewarden/pod-privileged',
+          tag:        'v1.2.3',
+          source:     'values'
+        }
+      },
+      global: {
+        provide: { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
+        mocks:   {
+          $fetchState: { pending: false },
+          $store:      {
+            getters: {
+              currentStore:        () => 'current_store',
+              'current_store/all': jest.fn(),
+              'i18n/t':            jest.fn()
+            },
+          }
+        },
+        stubs: {
+          NameNsDescription: { template: '<span />' },
+          RadioGroup:        { template: '<span />' },
+          LabeledTooltip:    { template: '<span />' },
+          LabeledInput:      { template: '<span />' }
+        }
+      },
+      computed: {
+        isCreate:            () => false,
+        policyServers:       () => [],
+        policyServerOptions: () => [],
+        isGlobal:            () => true,
+        hasValuesModule:     () => true,
+        showModeBanner:      () => false,
+        modeDisabled:        () => false
+      }
+    });
+
+    expect(wrapper.vm.policyRegistry).toBe('ghcr.io');
+    expect(wrapper.vm.policyRepository).toBe('kubewarden/pod-privileged');
+    expect(wrapper.vm.policyTag).toBe('v1.2.3');
+  });
+
+  it('after user clears registry, remount keeps it empty (not restored from moduleInfo)', () => {
+    // Simulates: user clears registry → syncModule writes repo:tag → YAML toggle → remount
+    const wrapper = shallowMount(General, {
+      props:  {
+        targetNamespace: 'default',
+        value:           {
+          policy: {
+            ...userGroupPolicy,
+            spec: {
+              ...userGroupPolicy.spec,
+              // spec.module was rebuilt by syncModule after user cleared registry
+              module: 'kubewarden/pod-privileged:v1.2.3'
+            }
+          }
+        },
+        moduleInfo: {
+          registry:   'ghcr.io',
+          repository: 'kubewarden/pod-privileged',
+          tag:        'v1.2.3',
+          source:     'values'
+        }
+      },
+      global: {
+        provide: { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
+        mocks:   {
+          $fetchState: { pending: false },
+          $store:      {
+            getters: {
+              currentStore:        () => 'current_store',
+              'current_store/all': jest.fn(),
+              'i18n/t':            jest.fn()
+            },
+          }
+        },
+        stubs: {
+          NameNsDescription: { template: '<span />' },
+          RadioGroup:        { template: '<span />' },
+          LabeledTooltip:    { template: '<span />' },
+          LabeledInput:      { template: '<span />' }
+        }
+      },
+      computed: {
+        isCreate:            () => false,
+        policyServers:       () => [],
+        policyServerOptions: () => [],
+        isGlobal:            () => true,
+        hasValuesModule:     () => true,
+        showModeBanner:      () => false,
+        modeDisabled:        () => false
+      }
+    });
+
+    expect(wrapper.vm.policyRegistry).toBe('');
+    expect(wrapper.vm.policyRepository).toBe('kubewarden/pod-privileged');
+    expect(wrapper.vm.policyTag).toBe('v1.2.3');
+  });
+
+  it('after user types non-hostname registry, remount preserves it in registry (not moved to repository)', () => {
+    // Simulates: user types 'asdasd' → syncModule writes asdasd/repo:tag → YAML toggle → remount
+    const wrapper = shallowMount(General, {
+      props:  {
+        targetNamespace: 'default',
+        value:           {
+          policy: {
+            ...userGroupPolicy,
+            spec: {
+              ...userGroupPolicy.spec,
+              module: 'asdasd/kubewarden/pod-privileged:v1.2.3'
+            }
+          }
+        },
+        moduleInfo: {
+          registry:   'ghcr.io',
+          repository: 'kubewarden/pod-privileged',
+          tag:        'v1.2.3',
+          source:     'values'
+        }
+      },
+      global: {
+        provide: { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY },
+        mocks:   {
+          $fetchState: { pending: false },
+          $store:      {
+            getters: {
+              currentStore:        () => 'current_store',
+              'current_store/all': jest.fn(),
+              'i18n/t':            jest.fn()
+            },
+          }
+        },
+        stubs: {
+          NameNsDescription: { template: '<span />' },
+          RadioGroup:        { template: '<span />' },
+          LabeledTooltip:    { template: '<span />' },
+          LabeledInput:      { template: '<span />' }
+        }
+      },
+      computed: {
+        isCreate:            () => false,
+        policyServers:       () => [],
+        policyServerOptions: () => [],
+        isGlobal:            () => true,
+        hasValuesModule:     () => true,
+        showModeBanner:      () => false,
+        modeDisabled:        () => false
+      }
+    });
+
+    expect(wrapper.vm.policyRegistry).toBe('asdasd');
+    expect(wrapper.vm.policyRepository).toBe('kubewarden/pod-privileged');
+    expect(wrapper.vm.policyTag).toBe('v1.2.3');
+  });
 });

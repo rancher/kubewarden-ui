@@ -12,7 +12,7 @@ import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 
 import { KUBEWARDEN, KUBEWARDEN_APPS } from '@kubewarden/types';
-import { buildModuleString } from '@kubewarden/modules/policyChart';
+import { buildModuleString, parseModuleString } from '@kubewarden/modules/policyChart';
 
 export default {
   name: 'General',
@@ -104,22 +104,38 @@ export default {
     moduleInfo: {
       immediate: true,
       handler(info) {
-        if (info) {
-          this.policyRegistry   = info.registry   ?? '';
-          this.policyRepository = info.repository ?? '';
-          this.policyTag        = info.tag        ?? '';
+        const module = this.policy?.spec?.module || '';
+
+        if (!module) {
+          // No module stored yet — seed fields from chart metadata defaults.
+          if (info) {
+            this.policyRegistry   = info.registry   ?? '';
+            this.policyRepository = info.repository ?? '';
+            this.policyTag        = info.tag        ?? '';
+          }
+
+          return;
         }
+
+        // Module is set: always derive the three fields from spec.module,
+        // using moduleInfo.repository as an anchor to correctly identify the registry
+        // prefix even when it is not a valid hostname (e.g. user typed 'asdasd').
+        const fields = this._splitModuleWithContext(module, info);
+
+        this.policyRegistry   = fields.registry;
+        this.policyRepository = fields.repository;
+        this.policyTag        = fields.tag;
       }
     },
 
-    policyRegistry()   {
-      this.syncModule();
-    },
-    policyRepository() {
-      this.syncModule();
-    },
-    policyTag()        {
-      this.syncModule();
+    policyRegistry()   { this.syncModule(); },
+    policyRepository() { this.syncModule(); },
+    policyTag()        { this.syncModule(); },
+
+    hasValuesModule(neu) {
+      if (!neu) {
+        this.$emit('module-validation', false);
+      }
     },
   },
 
@@ -203,8 +219,84 @@ export default {
   },
 
   methods: {
+    /**
+     * Splits an OCI module string into registry/repository/tag using moduleInfo.repository
+     * as an anchor so that non-hostname registry values (e.g. 'asdasd') are preserved
+     * correctly across YAML editor round-trips.
+     */
+    _splitModuleWithContext(module, info) {
+      if (!module) {
+        return {
+          registry:   '',
+          repository: '',
+          tag:        ''
+        };
+      }
+
+      // 1. Use known repository path as an anchor to extract whatever precedes it as registry.
+      //    This runs before the standard parse so that non-hostname prefixes like 'asdasd'
+      //    are preserved in the registry field rather than absorbed into repository.
+      if (info?.repository) {
+        const withPrefix = `/${ info.repository }:`;
+        const prefixIdx  = module.indexOf(withPrefix);
+
+        if (prefixIdx > 0) {
+          // There is a non-empty registry prefix before the known repository path.
+          return {
+            registry:   module.slice(0, prefixIdx),
+            repository: info.repository,
+            tag:        module.slice(prefixIdx + withPrefix.length),
+          };
+        }
+
+        const noPrefix = `${ info.repository }:`;
+
+        if (module.startsWith(noPrefix)) {
+          // No registry prefix — the module is repository:tag directly.
+          return {
+            registry:   '',
+            repository: info.repository,
+            tag:        module.slice(noPrefix.length),
+          };
+        }
+      }
+
+      // 2. Standard parse handles valid hostname registries (ghcr.io, docker.io, …)
+      const parsed = parseModuleString(module);
+
+      if (parsed) {
+        return parsed;
+      }
+
+      // 3. Last-resort: treat last colon as tag separator, first slash as registry/repo split.
+      const colonIdx = module.lastIndexOf(':');
+      const tag      = colonIdx > 0 ? module.slice(colonIdx + 1) : '';
+      const rest     = colonIdx > 0 ? module.slice(0, colonIdx) : module;
+      const slashIdx = rest.indexOf('/');
+
+      if (slashIdx > 0) {
+        return {
+          registry:   rest.slice(0, slashIdx),
+          repository: rest.slice(slashIdx + 1),
+          tag,
+        };
+      }
+
+      return {
+        registry:   '',
+        repository: rest,
+        tag,
+      };
+    },
+
     syncModule() {
-      if (!this.hasValuesModule || !this.policy?.spec) {
+      if (!this.policy?.spec) {
+        return;
+      }
+
+      if (!this.hasValuesModule) {
+        this.$emit('module-validation', false);
+
         return;
       }
 
@@ -212,11 +304,9 @@ export default {
       const repository = this.policyRepository?.trim() || '';
       const tag = this.policyTag?.trim() || '';
 
-      if (!repository || !tag) {
-        return;
-      }
-
       this.policy.spec.module = buildModuleString(registry, repository, tag);
+
+      this.$emit('module-validation', !registry || !repository || !tag);
     }
   }
 };
@@ -274,6 +364,7 @@ export default {
               :mode="mode"
               :label="t('kubewarden.policies.module.registry')"
               :placeholder="t('kubewarden.policies.module.registryPlaceholder')"
+              :required="true"
             />
           </div>
           <div class="col span-5">
@@ -282,6 +373,7 @@ export default {
               data-testid="kw-policy-general-repository-input"
               :mode="mode"
               :label="t('kubewarden.policies.module.repository')"
+              :required="true"
             />
           </div>
           <div class="col span-3">
@@ -290,6 +382,7 @@ export default {
               data-testid="kw-policy-general-tag-input"
               :mode="mode"
               :label="t('kubewarden.policies.module.tag')"
+              :required="true"
             />
           </div>
         </template>
