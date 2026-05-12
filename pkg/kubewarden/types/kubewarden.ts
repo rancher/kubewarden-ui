@@ -137,6 +137,7 @@ export interface Policy {
     settings?: any;
     sideEffects?: string;
     timeoutSeconds?: number;
+    timeoutEvalSeconds?: number;
   };
   status?: {
     conditions: Array<V1Condition>;

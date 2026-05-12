@@ -313,6 +313,9 @@ kubewarden:
     backgroundAudit:
       label: Background Audit
       tooltip: 'Indicates whether a policy should be used or skipped when performing audit checks. If false, the policy cannot produce meaningful evaluation results during audit checks and will be skipped. The default is "true".'
+    timeoutEvalSeconds:
+      label: Specifies the timeout for the policy evaluation
+      description: After the timeout passes, the policy evaluation call will fail based on the failure policy. The value must not exceed the webhook timeoutSeconds.
     ignoreRancherNamespaces:
       label: Ignore Rancher Namespaces
       tooltip: Certain policies will break core services of Rancher, this will add a default list of namespaces to ignore.

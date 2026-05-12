@@ -199,7 +199,7 @@ export default {
       }
 
       return false;
-    }
+    },
   },
 
   methods: {
@@ -217,6 +217,18 @@ export default {
       }
 
       this.policy.spec.module = buildModuleString(registry, repository, tag);
+    },
+
+    onTimeoutEvalSecondsInput(value) {
+      if (value === '') {
+        this.policy.spec.timeoutEvalSeconds = undefined;
+
+        return;
+      }
+
+      const parsed = parseInt(value, 10);
+
+      this.policy.spec.timeoutEvalSeconds = parsed;
     }
   }
 };
@@ -324,6 +336,20 @@ export default {
             :label="t('kubewarden.policyConfig.backgroundAudit.label')"
             :labels="['On', 'Off']"
             :tooltip="t('kubewarden.policyConfig.backgroundAudit.tooltip')"
+          />
+        </div>
+      </div>
+      <div class="row mb-20">
+        <div class="col span-6">
+          <LabeledInput
+            :value="policy.spec.timeoutEvalSeconds"
+            data-testid="kw-policy-general-timeout-eval-seconds-input"
+            type="number"
+            :mode="mode"
+            label="timeoutEvalSeconds"
+            :placeholder="t('kubewarden.policyConfig.timeoutEvalSeconds.label')"
+            :tooltip="t('kubewarden.policyConfig.timeoutEvalSeconds.description')"
+            @update:value="onTimeoutEvalSecondsInput"
           />
         </div>
       </div>
