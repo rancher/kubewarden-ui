@@ -62,8 +62,11 @@ export class RancherAppsPage extends BasePage {
   }
 
   async swapUrlVersion(version: string) {
-    const url = this.page.url()
-    await this.page.goto(url.replace(/version=[0-9.]+(-rc[0-9]|-beta[0-9])?/, `version=${version}`))
+    const url = new URL(this.page.url())
+    expect(url.searchParams.get('version')).not.toBeNull()
+    url.searchParams.set('version', version)
+
+    await this.page.goto(url.toString())
     await expect(this.stepTitle).toContainText(version)
   }
 
