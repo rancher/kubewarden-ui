@@ -86,7 +86,7 @@ test('Check landing pages', async({ page, ui, nav }) => {
   })
 })
 
-test('Stats reflect resource changes', async({ page, nav }) => {
+test('Stats reflect resource changes', async({ page, nav, ui }) => {
   const kwPage = new KubewardenPage(page)
   const psPage = new PolicyServersPage(page)
   const apPage = new AdmissionPoliciesPage(page)
@@ -123,6 +123,11 @@ test('Stats reflect resource changes', async({ page, nav }) => {
 
   await test.step('Stats after deleting resources ', async() => {
     await psPage.delete(ps.name)
+    await nav.apolicies()
+    await ui.tableRow(policy.name).delete()
+    await nav.capolicies()
+    await ui.tableRow(policy.name).delete()
+
     await nav.kubewarden()
     await expect(kwPage.getStats('Namespaced Policies')).toHaveText('No policies available.')
     await expect(kwPage.getStats('Cluster Policies')).toHaveText('0 protect+6 monitor')
