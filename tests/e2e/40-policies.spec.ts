@@ -152,11 +152,11 @@ for (const PolicyPage of pageTypes) {
     await shell.waitPolicyState(p, polPage.kind)
     await shell.privpod({ ns: p.namespace, status: 1 })
 
-    // Delete custom PS & NS, policy is deleted too
+    // Delete custom PS, Policy state changes to Scheduled
     await psPage.delete(ps.name)
     await polPage.goto()
-    await expect(page.getByRole('columnheader', { name: 'Status' })).toBeVisible()
-    await expect(row.row).not.toBeVisible()
+    await row.toHaveState('Scheduled')
+    await row.delete()
     if (isAP(polPage)) await shell.run(`kubectl delete ns ${p.namespace}`)
   })
 }

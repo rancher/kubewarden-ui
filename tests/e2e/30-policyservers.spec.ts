@@ -64,11 +64,9 @@ test('Policy Servers', async({ page, ui, nav }) => {
   await test.step('Delete policy server', async() => {
     await psRow.delete()
     await apPage.goto()
-    await expect(page.locator('table.sortable-table')).toBeVisible()
-    await expect(apRow.row).not.toBeVisible()
+    await ui.tableRow(policy.name).delete()
     await capPage.goto()
-    await expect(page.locator('table.sortable-table')).toBeVisible()
-    await expect(capRow.row).not.toBeVisible()
+    await ui.tableRow(policy.name).delete()
   })
 })
 
