@@ -2,6 +2,9 @@ name: Playwright Tests
 
 run-name: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || '' }}
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
