@@ -86,8 +86,11 @@ export class RancherAppsPage extends BasePage {
    */
   @step
   async addRepository(repo: Repo) {
+    // Renamed Create -> Add Repository in rancher 2.15
+    const createBtn = this.ui.button(/Create|Add Repository/)
+
     await this.nav.explorer('Apps', 'Repositories')
-    await this.ui.button('Create').click()
+    await createBtn.click()
 
     await this.ui.input('Name *').fill(repo.name)
     if (repo.url.endsWith('.git')) {
@@ -111,7 +114,7 @@ export class RancherAppsPage extends BasePage {
       await this.ui.input('Password').fill(repo.httpAuth.password)
     }
 
-    await this.ui.button('Create').click()
+    await createBtn.click()
     // Transitions: Active ?> In Progress ?> [Active|InProgress] - https://github.com/rancher/dashboard/issues/10079
     const repoRow = await this.ui.tableRow(repo.name).waitFor()
     // Wait out first Active state
