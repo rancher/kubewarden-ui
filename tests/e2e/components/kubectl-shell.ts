@@ -168,7 +168,7 @@ export class Shell {
   async runBatch(...commands: string[]) {
     await this.open()
     for (const cmd of commands) {
-      await this.run(cmd, { inPlace: true })
+      await this.run(cmd, { inPlace: true, timeout: 2 * 60_000 })
     }
     await this.close()
   }
