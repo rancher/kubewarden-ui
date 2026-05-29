@@ -83,6 +83,33 @@ describe('removeEmptyAttrs', () => {
     expect(cleanedObj).toEqual(null);
   });
 
+  it('should preserve empty-string entries inside arrays (e.g. apiGroups: [""] for core/v1)', () => {
+    const obj = {
+      spec: {
+        rules: [
+          {
+            apiGroups:   [''],
+            apiVersions: ['v1'],
+            resources:   ['pods'],
+            operations:  ['CREATE', 'UPDATE'],
+          },
+          {
+            apiGroups:   ['apps'],
+            apiVersions: ['v1'],
+            resources:   ['deployments'],
+            operations:  ['CREATE'],
+          },
+        ],
+      },
+    };
+    const cleanedObj = removeEmptyAttrs(obj);
+
+    expect(cleanedObj).toEqual(obj);
+    expect(cleanedObj.spec.rules[0].apiGroups).toEqual(['']);
+    // Ensure no sparse holes were introduced (which would JSON-serialize as null)
+    expect(JSON.parse(JSON.stringify(cleanedObj))).toEqual(obj);
+  });
+
   it('should remove only the empty memory object while preserving non-empty cpu object', () => {
     const obj = {
       settings: {
