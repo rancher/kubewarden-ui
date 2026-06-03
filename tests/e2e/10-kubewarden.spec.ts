@@ -53,7 +53,7 @@ test('Install UI extension', { tag: '@kw' }, async({ page, ui }) => {
       await extensions.addRancherRepos({ rancher: true, partners: false })
       await ui.retry(async() => {
         await extensions.selectTab('Available')
-        await expect(extensions.getByName('kubewarden')).toBeVisible({ timeout: 30_000 })
+        await expect(extensions.getByName('SUSE Security Admission Controller')).toBeVisible({ timeout: 30_000 })
       }, 'Not showing kubewarden extension')
     })
   }
@@ -72,7 +72,7 @@ test('Install UI extension', { tag: '@kw' }, async({ page, ui }) => {
     if (conf.ui_from === 'source') {
       await extensions.developerLoad(conf.src_url)
     } else {
-      await extensions.install('kubewarden', { version: process.env.UIVERSION?.replace(/^kubewarden-/, '') })
+      await extensions.install(/kubewarden|SUSE Security Admission Controller/, { version: process.env.UIVERSION?.replace(/^kubewarden-/, '') })
     }
   })
 })
