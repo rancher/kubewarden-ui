@@ -63,7 +63,7 @@ export class RancherExtensionsPage extends BasePage {
      * @param name Exact name of the extension
      * @param version exact version to be installed. Defaults to pre-selected one (latest)
      */
-  async install(name: string, options?: { version?: string }) {
+  async install(name: string|RegExp, options?: { version?: string }) {
     await this.selectTab('Available')
 
     const plugin = this.getByName(name)
