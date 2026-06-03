@@ -159,7 +159,8 @@ export class KubewardenPage extends BasePage {
     // Rancher Application Values
     await expect(this.ui.checkbox('Enable Background Audit check ')).toBeChecked()
     const schedule = this.ui.input('Schedule')
-    await expect(schedule).toHaveValue('0 * * * *')
+    // Value was fixed in Kubewarden 1.36.0, previous versions (current -3) have old value
+    await expect(schedule).toHaveValue(process.env.MODE == 'upgrade' ? '*/60 * * * *' : '0 * * * *')
     await schedule.fill('*/1 * * * *')
     await this.ui.checkbox('Enable Policy Reporter').check()
 
