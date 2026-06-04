@@ -41,7 +41,7 @@ const clusterAllMock = (resourceType: string) => {
             [KUBERNETES.MANAGED_NAME]: 'opentelemetry-operator'
           }
         },
-        spec: { ports: [{ port: 8080 }] }
+        spec: { ports: [{ port: 8443 }] }
       }
     ];
   default:
