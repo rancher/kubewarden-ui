@@ -60,7 +60,7 @@ const clusterAllMock = jest.fn((resourceType) => {
         name:   'service-1',
         labels: { [KUBERNETES.MANAGED_NAME]: 'opentelemetry-operator' }
       },
-      spec: { ports: [{ port: 8080 }] }
+      spec: { ports: [{ port: 8443 }] }
     }];
   default:
     return [];

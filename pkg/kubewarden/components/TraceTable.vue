@@ -201,7 +201,7 @@ export default {
           const ports = svc?.spec?.ports;
 
           if (ports.length) {
-            return ports.find((p) => p.port === 8080);
+            return ports.find((p) => p.port === 8443 || p.port === 8080);
           }
         });
       }
