@@ -1,7 +1,9 @@
 {
   "extends": [
     "config:base",
-    ":disableDependencyDashboard"
+    ":disableDependencyDashboard",
+    "helpers:pinGitHubActionDigests",
+    "schedule:earlyMondays"
   ],
   "ignoreDeps": [
     "./dashboard",
