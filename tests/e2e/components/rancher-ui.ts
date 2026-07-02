@@ -145,10 +145,10 @@ export class RancherUI {
     // Load yaml from code editor
     await expect(this.codeMirror).toBeVisible()
     const lines = await this.codeMirror.locator('pre.CodeMirror-line').allTextContents()
-    const cmYaml = jsyaml.load(lines.join('\n')
+    const cmText = lines.join('\n')
       .replace(/\u00A0/g, ' ') // replace &nbsp; with space
       .replace(/\u200B/g, '') // remove ZERO WIDTH SPACE last line
-    ) || {}
+    const cmYaml = cmText.trim() ? (jsyaml.load(cmText) || {}) : {}
 
     // Edit yaml
     if (typeof patch === 'function') {
