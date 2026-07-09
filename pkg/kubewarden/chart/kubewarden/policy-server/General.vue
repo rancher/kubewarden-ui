@@ -174,7 +174,7 @@ watchEffect(() => {
 watchEffect(() => {
   if (!controllerApp.value && allApps.value.length) {
     const controller = allApps.value.find(
-      (a) => a.spec?.chart?.metadata?.name === 'kubewarden-controller'
+      (a) => a.spec?.chart?.metadata?.name === 'admission-controller'
     );
 
     if (controller) {
