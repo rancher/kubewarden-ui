@@ -77,7 +77,7 @@ test.describe('Tracing', () => {
     await telPage.toBeIncomplete('config')
     await telPage.configBtn.click()
     const now = new Date().toISOString()
-    await appsPage.updateApp('rancher-kubewarden-controller', {
+    await appsPage.updateApp('rancher-admission-controller', {
       navigate : false,
       questions: async() => {
         await ui.tab(/^(Open)?Telemetry/).click()
@@ -123,7 +123,7 @@ test.describe('Tracing', () => {
     test.skip(process.env.MODE === 'fleet')
 
     // Clean up
-    await appsPage.updateApp('rancher-kubewarden-controller', {
+    await appsPage.updateApp('rancher-admission-controller', {
       questions: async() => {
         await ui.tab(/^(Open)?Telemetry/).click()
         await ui.checkbox('Enable Tracing').uncheck()
@@ -190,7 +190,7 @@ test.describe('Metrics', () => {
     await test.step('Enable metrics in controller', async() => {
       await telPage.toBeIncomplete('config')
       await telPage.configBtn.click()
-      await appsPage.updateApp('rancher-kubewarden-controller', {
+      await appsPage.updateApp('rancher-admission-controller', {
         navigate : false,
         questions: async() => {
           await ui.tab(/^(Open)?Telemetry/).click()
@@ -239,7 +239,7 @@ test.describe('Metrics', () => {
 
   test('Uninstall metrics', async({ ui, nav, shell }) => {
     // Disable metrics
-    await appsPage.updateApp('rancher-kubewarden-controller', {
+    await appsPage.updateApp('rancher-admission-controller', {
       questions: async() => {
         await ui.tab(/^(Open)?Telemetry/).click()
         await ui.checkbox('Enable Metrics').uncheck()
