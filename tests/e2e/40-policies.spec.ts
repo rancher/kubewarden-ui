@@ -218,7 +218,7 @@ test('Recommended policies', async({ page, ui, nav }) => {
     await ui.tableRow('no-privileged-pod').action('Edit Policy Settings')
 
     const apps = new RancherAppsPage(page)
-    await apps.updateApp('rancher-kubewarden-defaults', {
+    await apps.updateApp('rancher-admission-controller', {
       navigate : false,
       questions: async() => {
         await ui.tab('no-privileged-pod policy settings').click()

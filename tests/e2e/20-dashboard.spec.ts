@@ -8,9 +8,7 @@ test('Check kubewarden resources', async({ page, nav, shell }) => {
   await test.step('Check kubewarden apps', async() => {
     const apps = new RancherAppsPage(page)
     await nav.explorer('Apps', 'Installed Apps')
-    for (const chart of ['controller', 'crds', 'defaults']) {
-      await apps.checkChart(`rancher-kubewarden-${chart}`)
-    }
+    await apps.checkChart('rancher-admission-controller')
     await shell.waitPods()
   })
 
@@ -20,9 +18,9 @@ test('Check kubewarden resources', async({ page, nav, shell }) => {
     // Kubewarden pod labels
     const labels = [
       'app=kubewarden-policy-server-default',
-      'app.kubernetes.io/name=kubewarden-controller',
+      'app.kubernetes.io/name=admission-controller',
       'app.kubernetes.io/name=policy-reporter',
-      'app.kubernetes.io/name=ui']
+      'app.kubernetes.io/name=policy-reporter-ui']
 
     // Ignore known errors
     const ignore = [

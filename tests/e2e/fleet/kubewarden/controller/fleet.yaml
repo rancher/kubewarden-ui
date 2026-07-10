@@ -3,8 +3,8 @@ defaultNamespace: cattle-kubewarden-system
 
 helm:
   version: '*-0'  # 2.0.5
-  releaseName: rancher-kubewarden-controller
-  chart: kubewarden-controller
+  releaseName: rancher-admission-controller
+  chart: admission-controller
   repo: https://charts.kubewarden.io
   # valuesFiles:
   #   - values.yaml
@@ -27,6 +27,8 @@ helm:
             endpoint: "jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317"
             tls:
               insecure: true
+    recommendedPolicies:
+      enabled: true
 
 diff:
   comparePatches:
@@ -51,12 +53,9 @@ diff:
         - {"op": "remove", "path":"/webhooks"}
 
 labels:
-  app: rancher-kubewarden-controller
+  app: rancher-admission-controller
 
 dependsOn:
-  - selector:
-      matchLabels:
-        app: rancher-kubewarden-crds
   - selector:
       matchLabels:
         name: opentelemetry

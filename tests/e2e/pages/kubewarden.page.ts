@@ -145,7 +145,7 @@ export class KubewardenPage extends BasePage {
     // Redirection to rancher app installer
     await expect(appInstallStep).toBeVisible()
     await installBtn.click()
-    await expect(this.page).toHaveURL(/.*\/apps\/charts\/install.*chart=kubewarden-controller/)
+    await expect(this.page).toHaveURL(/.*\/apps\/charts\/install.*chart=admission-controller/)
 
     // ==================================================================================================
     // Rancher Application Metadata
@@ -164,10 +164,16 @@ export class KubewardenPage extends BasePage {
     await schedule.fill('*/1 * * * *')
     await this.ui.checkbox('Enable Policy Reporter').check()
 
+    // Recommended Policies
+    const enableRP = this.ui.checkbox('Enable recommended policies')
+    await this.ui.tab('Recommended Policies').click()
+    await expect(enableRP).not.toBeChecked()
+    await enableRP.check()
+    await expect(this.ui.select('Execution mode of the recommended policies ')).toContainText('monitor')
+
     // Start installation
     await apps.installBtn.click()
-    await apps.waitHelmSuccess('rancher-kubewarden-crds', { keepLog: true })
-    await apps.waitHelmSuccess('rancher-kubewarden-controller', { timeout: 4 * 60_000 })
+    await apps.waitHelmSuccess('rancher-admission-controller', { timeout: 4 * 60_000 })
   }
 
   @step
@@ -188,7 +194,7 @@ export class KubewardenPage extends BasePage {
     if (from?.controller || to?.controller) {
       await expect(apps.stepTitle).toContainText(`${from?.controller || ''} > ${to?.controller || ''}`)
     }
-    await apps.updateApp('rancher-kubewarden-controller', { navigate: false, timeout: 4 * 60_000 })
+    await apps.updateApp('rancher-admission-controller', { navigate: false, timeout: 4 * 60_000 })
     // 4.1.0 Error: error while loading policies from "/config/policies.yml": data did not match any variant of untagged enum PolicyOrPolicyGroup
     // 5.0.0 Probe port change from https to http
     if (!to?.controller?.startsWith('4.1') && !to?.controller?.startsWith('5.0')) {

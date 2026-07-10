@@ -77,7 +77,7 @@ test.describe('Tracing', () => {
     await telPage.toBeIncomplete('config')
     await telPage.configBtn.click()
     const now = new Date().toISOString()
-    await appsPage.updateApp('rancher-kubewarden-controller', {
+    await appsPage.updateApp('rancher-admission-controller', {
       navigate : false,
       questions: async() => {
         await ui.tab(/^(Open)?Telemetry/).click()
@@ -123,7 +123,7 @@ test.describe('Tracing', () => {
     test.skip(process.env.MODE === 'fleet')
 
     // Clean up
-    await appsPage.updateApp('rancher-kubewarden-controller', {
+    await appsPage.updateApp('rancher-admission-controller', {
       questions: async() => {
         await ui.tab(/^(Open)?Telemetry/).click()
         await ui.checkbox('Enable Tracing').uncheck()
@@ -190,7 +190,7 @@ test.describe('Metrics', () => {
     await test.step('Enable metrics in controller', async() => {
       await telPage.toBeIncomplete('config')
       await telPage.configBtn.click()
-      await appsPage.updateApp('rancher-kubewarden-controller', {
+      await appsPage.updateApp('rancher-admission-controller', {
         navigate : false,
         questions: async() => {
           await ui.tab(/^(Open)?Telemetry/).click()
@@ -200,6 +200,8 @@ test.describe('Metrics', () => {
       // Wait until kubewarden controller restarts policyserver
       const now = new Date().toISOString()
       await shell.retry(`kubectl logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container --since-time ${now} | grep -F "Everything is ready."`)
+      // Create metrics stats
+      await shell.privpod({ name: 'tracing-privpod' })
     })
   })
 
@@ -239,7 +241,7 @@ test.describe('Metrics', () => {
 
   test('Uninstall metrics', async({ ui, nav, shell }) => {
     // Disable metrics
-    await appsPage.updateApp('rancher-kubewarden-controller', {
+    await appsPage.updateApp('rancher-admission-controller', {
       questions: async() => {
         await ui.tab(/^(Open)?Telemetry/).click()
         await ui.checkbox('Enable Metrics').uncheck()
