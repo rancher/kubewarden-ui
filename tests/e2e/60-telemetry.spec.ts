@@ -200,6 +200,8 @@ test.describe('Metrics', () => {
       // Wait until kubewarden controller restarts policyserver
       const now = new Date().toISOString()
       await shell.retry(`kubectl logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container --since-time ${now} | grep -F "Everything is ready."`)
+      // Create metrics stats
+      await shell.privpod({ name: 'tracing-privpod' })
     })
   })
 
