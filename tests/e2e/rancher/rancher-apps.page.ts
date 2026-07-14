@@ -48,8 +48,8 @@ export class RancherAppsPage extends BasePage {
 
   constructor(page: Page) {
     super(page)
-    this.step1 = page.getByRole('heading', { name: 'Install: Step 1' })
-    this.step2 = page.getByRole('heading', { name: 'Install: Step 2' })
+    this.step1 = page.getByRole('heading', { name: 'Install: Step 1' }).or(this.page.getByRole('tab', { name: 'Metadata', selected: true })).first()
+    this.step2 = page.getByRole('heading', { name: 'Install: Step 2' }).or(this.page.getByRole('tab', { name: 'Values', selected: true })).first()
     this.stepTitle = page.locator('div.top.choice-banner>.title')
     this.nextBtn = this.ui.button('Next')
     this.installBtn = this.ui.button(/Install|Install this version/)
