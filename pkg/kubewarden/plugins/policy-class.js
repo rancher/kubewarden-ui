@@ -50,7 +50,7 @@ export default class PolicyModel extends KubewardenModel {
       const query = {
         [REPO_TYPE]: 'cluster',
         [REPO]:      'kubewarden-charts',
-        [CHART]:     'kubewarden-defaults',
+        [CHART]:     'admission-controller',
         [VERSION]:   version
       };
 
@@ -66,7 +66,7 @@ export default class PolicyModel extends KubewardenModel {
 
   get isKubewardenDefaultPolicy() {
     const labels = this.metadata?.labels;
-    const isManagedByHelm = labels?.[KUBERNETES.MANAGED_BY] === 'Helm';
+    const isManagedByHelm = labels?.[KUBERNETES.MANAGED_BY] === 'kubewarden-controller';
     const isKubewardenDefaults = labels?.[KUBERNETES.MANAGED_NAME] === KUBEWARDEN_CHARTS.DEFAULTS;
     const isPartOfKubewarden = labels?.['app.kubernetes.io/part-of'] === KUBEWARDEN_PRODUCT_NAME;
 

@@ -14,8 +14,6 @@ import { newPolicyReportCompatible } from '@kubewarden/modules/policyReporter';
 import { appVersionSatisfiesConstraint, checkUpgradeAvailable } from '@kubewarden/utils/chart';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 
-import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
-
 export default {
   props: {
     controllerApp: {
@@ -24,10 +22,7 @@ export default {
     }
   },
 
-  components: {
-    Banner,
-    DefaultsBanner
-  },
+  components: { Banner },
 
   computed: {
     ...mapGetters(['currentCluster']),
@@ -246,7 +241,6 @@ export default {
       </div>
     </div>
 
-    <DefaultsBanner v-if="!hideBannerDefaults" />
   </div>
 </template>
 

@@ -27,13 +27,13 @@ export const KUBEWARDEN_REPOS = {
 };
 
 export const KUBEWARDEN_CHARTS = {
-  CONTROLLER:       'kubewarden-controller',
-  DEFAULTS:         'kubewarden-defaults',
+  CONTROLLER:       'admission-controller',
+  DEFAULTS:         'admission-controller',
 };
 
 export const KUBEWARDEN_APPS = {
-  RANCHER_CONTROLLER: 'rancher-kubewarden-controller',
-  RANCHER_DEFAULTS:   'rancher-kubewarden-defaults'
+  RANCHER_CONTROLLER: 'rancher-admission-controller',
+  RANCHER_DEFAULTS:   'rancher-admission-controller'
 };
 
 export const KUBEWARDEN_LABELS = { POLICY_SERVER: 'kubewarden/policy-server' };

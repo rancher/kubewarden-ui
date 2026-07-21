@@ -11,7 +11,7 @@ interface Version {
 }
 
 export default <Chart>{
-  chartName: 'kubewarden-controller',
+  chartName: 'admission-controller',
   repoType:  'cluster',
   repoName:  'kubewarden-charts',
   versions:  [
