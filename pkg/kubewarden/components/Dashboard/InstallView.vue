@@ -10,11 +10,17 @@ import { Banner } from '@components/Banner';
 import AsyncButton from '@shell/components/AsyncButton';
 import Loading from '@shell/components/Loading';
 import Markdown from '@shell/components/Markdown';
+import SelectOrCreateAuthSecret from '@shell/components/form/SelectOrCreateAuthSecret';
+import NameNsDescription from '@shell/components/form/NameNsDescription';
+import { LabeledInput } from '@components/Form/LabeledInput';
+import { Checkbox } from '@components/Form/Checkbox';
+import { AUTH_TYPE, SECRET, NAMESPACE } from '@shell/config/types';
 
 import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPOS } from '@kubewarden/types';
 import { getLatestVersion } from '@kubewarden/plugins/kubewarden-class';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 import { refreshCharts } from '@kubewarden/utils/chart';
+import FileSelector from '@shell/components/form/FileSelector';
 
 import InstallWizard from '@kubewarden/components/InstallWizard';
 
@@ -29,9 +35,14 @@ export default {
   components: {
     AsyncButton,
     Banner,
+    Checkbox,
     InstallWizard,
+    LabeledInput,
     Loading,
-    Markdown
+    Markdown,
+    NameNsDescription,
+    SelectOrCreateAuthSecret,
+    FileSelector
   },
 
   mixins: [ResourceFetch],
@@ -40,12 +51,17 @@ export default {
     this.debouncedRefreshCharts = debounce((init = false) => {
       refreshCharts({
         store:     this.$store,
-        chartName: KUBEWARDEN_CHARTS.DEFAULTS,
+        chartName: KUBEWARDEN_CHARTS.CHART,
         init
       });
     }, 500);
 
     this.reloadReady = false;
+
+    if (this.$store.getters['cluster/canList'](SECRET)) {
+      await this.$fetchType(SECRET);
+      this.allSecrets = this.$store.getters['cluster/all'](SECRET) || [];
+    }
 
     if (!this.hasSchema) {
       if (this.$store.getters['cluster/canList'](CATALOG.CLUSTER_REPO)) {
@@ -53,8 +69,9 @@ export default {
       }
 
       if (this.controllerChart) {
-        this.initStepIndex = 1;
+        this.initStepIndex = 2;
         this.installSteps[0].ready = true;
+        this.installSteps[1].ready = true;
       }
 
       if (!this.kubewardenRepo || !this.controllerChart) {
@@ -65,6 +82,11 @@ export default {
 
   data() {
     const installSteps = [
+      {
+        name:  'globalRepoAuth',
+        label: 'Repository Auth',
+        ready: false,
+      },
       {
         name:  'repository',
         label: 'Repository',
@@ -79,11 +101,20 @@ export default {
 
     return {
       installSteps,
-      debouncedRefreshCharts: null,
-      reloadReady:            false,
-      install:                false,
-      initStepIndex:          0,
-      docs:                   { airgap: '' },
+      debouncedRefreshCharts:       null,
+      reloadReady:                  false,
+      install:                      false,
+      initStepIndex:                0,
+      docs:                         { airgap: '' },
+      appcoAuthSecret:              null,
+      appcoNamespace:               'kubewarden-system',
+      appcoCaBundle:                '',
+      appcoInsecurePlainHttp:       false,
+      appcoInsecureSkipTLSVerify:   false,
+      allSecrets:                   [],
+      repoNamespace:                'kubewarden-system',
+      secretCreateHook:             null,
+      duplicatedImagePullSecretKey: null,
     };
   },
 
@@ -100,12 +131,9 @@ export default {
   watch: {
     controllerChart() {
       this.installSteps[0].ready = true;
+      this.installSteps[1].ready = true;
 
-      if (this.isAirgap) {
-        this.debouncedRefreshCharts();
-      }
-
-      this.$refs.wizard?.goToStep(2);
+      this.$refs.wizard?.goToStep(3);
     }
   },
 
@@ -120,15 +148,6 @@ export default {
     isAirgap() {
       return this.$store.getters['kubewarden/airGapped'];
     },
-
-    /**
-     * [!IMPORTANT]
-     * TODO:
-     * THIS IS BROKEN
-     * When installing, if you add the repo and leave the page
-     * then come back, the controllerChart will be null, but so will
-     * the kubewardenRepo. This is because the repo is not saved to the store?
-     */
 
     controllerChart() {
       if (this.kubewardenRepo) {
@@ -150,16 +169,289 @@ export default {
 
     shellEnabled() {
       return !!this.currentCluster?.links?.shell;
+    },
+
+    imagePullSecretAuthType() {
+      return AUTH_TYPE._BASIC;
+    },
+
+    appcoNamespaceValue() {
+      return { metadata: { namespace: this.appcoNamespace } };
     }
   },
 
   methods: {
+    registerBeforeHook(hookFunction, hookName, hookPriority) {
+      this.secretCreateHook = hookFunction;
+      this.secretCreateHookName = hookName;
+      this.secretCreateHookPriority = hookPriority;
+    },
+
+    async continueWithGlobalRepoAuth() {
+      if (!this.appcoAuthSecret && this.secretCreateHook) {
+        await this.secretCreateHook();
+      }
+
+      this.installSteps[0].ready = true;
+      this.$refs.wizard?.goToStep(2);
+    },
+
+    getSecretKey(secret) {
+      const name = secret?.metadata?.name;
+      const namespace = secret?.metadata?.namespace || 'default';
+
+      if (!name) {
+        return '';
+      }
+
+      return `${ namespace }/${ name }`;
+    },
+
+    findAuthSecretByName(secretName) {
+      if (!secretName) {
+        return null;
+      }
+
+      return this.allSecrets?.find((secret) => secret?.metadata?.name === secretName) || null;
+    },
+
+    isAlreadyExistsError(error) {
+      return error?.status === 409 || error?.code === 409 || `${ error?.message || '' }`.toLowerCase().includes('already exists');
+    },
+
+    buildDockerConfigJson(secret) {
+      if (secret?.data?.['.dockerconfigjson']) {
+        return { data: { '.dockerconfigjson': secret.data['.dockerconfigjson'] } };
+      }
+
+      if (secret?.stringData?.['.dockerconfigjson']) {
+        return { stringData: { '.dockerconfigjson': secret.stringData['.dockerconfigjson'] } };
+      }
+
+      const decodeBase64 = (value) => {
+        try {
+          return value ? atob(value) : '';
+        } catch {
+          return value || '';
+        }
+      };
+
+      const username = decodeBase64(secret?.data?.username) || secret?.stringData?.username || '';
+      const password = decodeBase64(secret?.data?.password) || secret?.stringData?.password || '';
+
+      const registryUrl = 'oci://dp.apps.rancher.io/charts';
+      const registryHost = registryUrl ? (() => {
+        try {
+          return new URL(registryUrl).host;
+        } catch {
+          return registryUrl;
+        }
+      })() : '';
+
+      const config = {
+        auths: {
+          [registryHost]: {
+            username,
+            password,
+            auth: btoa(`${ username }:${ password }`),
+          }
+        }
+      };
+
+      return { data: { '.dockerconfigjson': btoa(JSON.stringify(config)) } };
+    },
+
+    sanitizeSecretForCreate(secret, namespace) {
+      const { data, stringData } = this.buildDockerConfigJson(secret);
+
+      return {
+        type:      SECRET,
+        _type:     'kubernetes.io/dockerconfigjson',
+        metadata:  {
+          name: secret?.metadata?.name,
+          namespace,
+        },
+        data,
+        stringData,
+        immutable: secret?.immutable,
+      };
+    },
+
+    sanitizeImagePullSecretForCreate(secret, namespace) {
+      const { data, stringData } = this.buildDockerConfigJson(secret);
+
+      return {
+        type:      SECRET,
+        _type:     'kubernetes.io/dockerconfigjson',
+        metadata:  {
+          name: `${ secret?.metadata?.name || 'kw' }-image-pull-secret`,
+          namespace,
+        },
+        data,
+        stringData,
+        immutable: secret?.immutable,
+      };
+    },
+
+    resolveNamespace(namespace) {
+      return `${ namespace || '' }`.trim() || 'default';
+    },
+
+    async ensureNamespace(namespace) {
+      const targetNamespace = this.resolveNamespace(namespace);
+
+      const namespaceResource = await this.$store.dispatch('cluster/create', {
+        type:     NAMESPACE,
+        metadata: { name: targetNamespace },
+      });
+
+      try {
+        await namespaceResource.save();
+      } catch (error) {
+        if (!this.isAlreadyExistsError(error)) {
+          throw error;
+        }
+      }
+    },
+
+    async duplicateAuthSecret(secret, namespace) {
+      if (!secret?.metadata?.name) {
+        return;
+      }
+
+      const secretKey = this.getSecretKey(secret);
+      const targetNamespace = this.resolveNamespace(namespace);
+      const duplicationKey = `${ secretKey }->${ targetNamespace }`;
+
+      if (this.duplicatedAuthSecretKey === duplicationKey) {
+        return;
+      }
+
+      const duplicatedSecret = await this.$store.dispatch('cluster/create', this.sanitizeSecretForCreate(secret, targetNamespace));
+
+      try {
+        await duplicatedSecret.save();
+      } catch (error) {
+        if (!this.isAlreadyExistsError(error)) {
+          throw error;
+        }
+      }
+
+      this.duplicatedAuthSecretKey = duplicationKey;
+    },
+
+    async duplicateImagePullSecret(secret, namespace) {
+      if (!secret?.metadata?.name) {
+        return;
+      }
+
+      const secretKey = this.getSecretKey(secret);
+      const targetNamespace = this.resolveNamespace(namespace);
+      const duplicationKey = `${ secretKey }->${ targetNamespace }-image-pull-secret`;
+
+      if (this.duplicatedImagePullSecretKey === duplicationKey) {
+        return;
+      }
+
+      const duplicatedSecret = await this.$store.dispatch('cluster/create', this.sanitizeImagePullSecretForCreate(secret, targetNamespace));
+
+      try {
+        await duplicatedSecret.save();
+      } catch (error) {
+        if (!this.isAlreadyExistsError(error)) {
+          throw error;
+        }
+      }
+
+      this.duplicatedImagePullSecretKey = duplicationKey;
+    },
+
+    getAuthSecretName(authSecret) {
+      if (!authSecret) {
+        return '';
+      }
+
+      if (typeof authSecret === 'string') {
+        return authSecret;
+      }
+
+      return authSecret?.metadata?.name || authSecret?.name || '';
+    },
+
+    getAuthSecretNamespace(authSecret) {
+      if (!authSecret) {
+        return '';
+      }
+
+      if (typeof authSecret !== 'string') {
+        return authSecret?.metadata?.namespace || authSecret?.namespace || 'default';
+      }
+
+      const selectedSecret = this.findAuthSecretByName(authSecret);
+
+      return selectedSecret?.metadata?.namespace || 'default';
+    },
+
+    getAuthSecretRef(authSecret) {
+      const name = this.getAuthSecretName(authSecret);
+
+      if (!name) {
+        return null;
+      }
+
+      return {
+        name,
+        namespace: this.getAuthSecretNamespace(authSecret),
+      };
+    },
+
+    async ensureAuthSecret(namespace = 'default') {
+      if (this.appcoAuthSecret) {
+        const secretName = this.getAuthSecretName(this.appcoAuthSecret);
+        const selectedSecret = this.findAuthSecretByName(secretName);
+
+        if (selectedSecret) {
+          await this.duplicateAuthSecret(selectedSecret, namespace);
+
+          return this.getAuthSecretRef(selectedSecret);
+        }
+
+        return this.getAuthSecretRef(this.appcoAuthSecret);
+      }
+
+      if (!this.secretCreateHook) {
+        return null;
+      }
+
+      const secret = await this.secretCreateHook();
+
+      await this.duplicateAuthSecret(secret, namespace);
+
+      this.appcoAuthSecret = secret;
+
+      return this.getAuthSecretRef(secret);
+    },
+
     async addRepository(btnCb) {
       try {
+        const targetNamespace = this.resolveNamespace(this.appcoNamespace);
+
+        await this.ensureNamespace(targetNamespace);
+
+        const authSecretRef = await this.ensureAuthSecret(targetNamespace);
+        const authSecret = this.appcoAuthSecret || this.findAuthSecretByName(authSecretRef?.name);
+
+        await this.duplicateImagePullSecret(authSecret, targetNamespace);
         const repoObj = await this.$store.dispatch('cluster/create', {
           type:     CATALOG.CLUSTER_REPO,
           metadata: { name: KUBEWARDEN_REPOS.CHARTS_REPO_NAME },
-          spec:     { url: KUBEWARDEN_REPOS.CHARTS },
+          spec:     {
+            url:                   KUBEWARDEN_REPOS.SUSE_SECURITY_ADMISSION_CONTROLLER,
+            clientSecret:          authSecretRef,
+            caBundle:              this.appcoCaBundle || undefined,
+            insecurePlainHttp:     this.appcoInsecurePlainHttp,
+            insecureSkipTLSVerify: this.appcoInsecureSkipTLSVerify,
+          },
         });
 
         try {
@@ -169,20 +461,31 @@ export default {
             error: e,
             store: this.$store
           });
-          btnCb(false);
+          if (btnCb) {
+            btnCb(false);
+          }
 
           return;
         }
 
         if (!this.controllerChart) {
-          this.debouncedRefreshCharts();
+          this.debouncedRefreshCharts(true);
         }
+
+        if (btnCb) {
+          btnCb(true);
+        }
+
+        this.installSteps[1].ready = true;
+        this.$refs.wizard?.goToStep(3);
       } catch (e) {
         handleGrowl({
           error: e,
           store: this.$store
         });
-        btnCb(false);
+        if (btnCb) {
+          btnCb(false);
+        }
       }
     },
 
@@ -211,7 +514,8 @@ export default {
           [REPO_TYPE]: repoType,
           [REPO]:      repoName,
           [CHART]:     chartName,
-          [VERSION]:   latestChartVersion
+          [VERSION]:   latestChartVersion,
+          [NAMESPACE]: this.appcoNamespace,
         };
 
         this.$router.push({
@@ -234,7 +538,11 @@ export default {
 
     reload() {
       this.$router.go();
-    }
+    },
+
+    onFileSelected(value) {
+      this.appcoCaBundle = value;
+    },
   }
 };
 </script>
@@ -274,13 +582,82 @@ export default {
 
       <!-- Non Air-Gapped -->
       <template v-else>
-        <InstallWizard ref="wizard" :init-step-index="initStepIndex" :steps="installSteps" data-testid="kw-install-wizard">
-          <template #repository>
-            <h2 class="mt-20 mb-10" data-testid="kw-repo-title">
-              {{ t("kubewarden.dashboard.prerequisites.repository.title") }}
+        <InstallWizard ref="wizard" style="width: 100%;" :init-step-index="initStepIndex" :steps="installSteps" data-testid="kw-install-wizard">
+          <template #globalRepoAuth>
+            <h2 class="mt-20 mb-10" data-testid="kw-repo-auth-title">
+              {{ t('kubewarden.dashboard.appInstall.auth.title') }}
             </h2>
             <p class="mb-20">
-              {{ t("kubewarden.dashboard.prerequisites.repository.description") }}
+              {{ t('kubewarden.dashboard.appInstall.auth.description') }}
+            </p>
+            <SelectOrCreateAuthSecret
+              class="mt-16 create-secret-banner"
+              v-model:value="appcoAuthSecret"
+              :mode="'create'"
+              data-testid="kw-appco-auth-secret"
+              :register-before-hook="registerBeforeHook"
+              :namespace="'default'"
+              :pre-select="{ selected: imagePullSecretAuthType }"
+              :limit-to-namespace="false"
+              :in-store="'cluster'"
+              :allow-ssh="false"
+              :allow-none="false"
+              :allow-basic="true"
+              :generate-name="'appco-auth-'"
+              :cache-secrets="true"
+              :fixed-http-basic-auth="true"
+              :filter-basic-auth="'appco-auth-'"
+              @inputauthval="() => {}"
+            />
+
+            <div class="ca-bundle-section mt-16">
+              <LabeledInput
+                  v-model:value="appcoCaBundle"
+                  type="multiline"
+                  :label="t('kubewarden.dashboard.appInstall.auth.caBundle.label')"
+                  style="max-height: 110px; overflow-y: auto;"
+                  :placeholder="t('kubewarden.dashboard.appInstall.auth.caBundle.placeholder')"
+              />
+              <div class="mt-16">
+                <FileSelector class="btn btn-sm role-tertiary" :label="t('generic.readFromFile')" @selected="onFileSelected" />
+              </div>
+            </div>
+
+            <div class="row create-secret-banner mb-16 mt-20">
+              <Checkbox
+                v-model:value="appcoInsecurePlainHttp"
+                data-testid="kw-appco-insecure-plain-http"
+                label-key="kubewarden.dashboard.appInstall.auth.insecurePlainHttp"
+              />
+              <Checkbox
+                v-model:value="appcoInsecureSkipTLSVerify"
+                data-testid="kw-appco-insecure-skip-tls"
+                label-key="kubewarden.dashboard.appInstall.auth.insecureSkipTLSVerify"
+              />
+            </div>
+
+            <div class="namespaces-section mt-20 mb-20">
+              <NameNsDescription
+                :value="appcoNamespaceValue"
+                :mode="'create'"
+                data-testid="kw-appco-namespace"
+                :name-hidden="true"
+                :description-hidden="true"
+                @update:value="appcoNamespace = $event?.metadata?.namespace || appcoNamespace"
+              />
+            </div>
+
+            <button class="btn role-primary mt-20" data-testid="kw-appco-auth-continue" @click="continueWithGlobalRepoAuth">
+              {{ t('kubewarden.dashboard.appInstall.auth.continue') }}
+            </button>
+          </template>
+
+          <template #repository>
+            <h2 class="mt-20 mb-10" data-testid="kw-repo-title">
+              {{ t('kubewarden.dashboard.appInstall.repository.title') }}
+            </h2>
+            <p class="mb-20">
+              {{ t('kubewarden.dashboard.appInstall.repository.description') }}
             </p>
 
             <AsyncButton mode="kubewardenRepository" data-testid="kw-repo-add-button" @click="addRepository" />
@@ -349,5 +726,28 @@ export default {
   & .airgap-align {
     justify-content: start;
   }
+
+  /* NameNsDescription keeps narrow span classes internally even when name/description are hidden. */
+  :deep([data-testid='kw-appco-namespace'] .row.mb-20 > .col.span-3) {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .create-secret-banner, .ca-bundle-section, .namespaces-section {
+    width: 100%
+  }
+
+  /* 8-Point Grid Spacing Classes */
+  .mt-6 { margin-top: 6px; }
+  .mt-8  { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-24 { margin-top: 24px; }
+  .mt-32 { margin-top: 32px; }
+
+  .mb-8  { margin-bottom: 8px; }
+  .mb-10 { margin-bottom: 10px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-24 { margin-bottom: 24px; }
+
 }
 </style>
