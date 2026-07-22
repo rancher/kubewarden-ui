@@ -80,7 +80,11 @@ test('Install Kubewarden', { tag: '@kw' }, async({ page, ui, nav }) => {
   test.skip(conf.kw_mode === 'fleet')
 
   const kwPage = new KubewardenPage(page)
-  await kwPage.installKubewarden({ version: conf.kw_mode === 'upgrade' ? conf.upMap[0].controller : undefined })
+  if (process.env.APPCO) {
+    await kwPage.installAppCo()
+  } else {
+    await kwPage.installKubewarden({ version: conf.kw_mode === 'upgrade' ? conf.upMap[0].controller : undefined })
+  }
 
   // Check UI is active
   await nav.kubewarden()
