@@ -3,6 +3,7 @@ import yaml from 'js-yaml'
 import { uniqBy } from 'lodash'
 import { AppVersion } from '../pages/kubewarden.page'
 import { RancherUI } from './rancher-ui'
+import { execFileSync } from 'child_process'
 
 /**
  * Common helper functions and constants
@@ -43,5 +44,30 @@ export class Common {
       // Unique minor version (skip 1.32.0 if 1.32.1 is available)
       v => `${semver.major(v.app)}.${semver.minor(v.app)}`
     ).reverse()
+  }
+
+  /**
+   *
+   * @param name Filter MR title by product name
+   * @returns MR chart, registry and tag for the currently open MR
+   */
+  static async fetchAppCoMr(name: string) {
+    const title = name ?? 'SUSE Security Admission Controller'
+    const chartsRepo = 'https://gitlab.suse.de/orchid/suse-products-recipes/suse-security/charts'
+    const rpmsRepo = 'https://gitlab.suse.de/orchid/suse-products-recipes/suse-security/rpms-containers'
+
+    const firstMr = (repo: string) => JSON.parse(
+      execFileSync('glab', ['mr', 'list', '-R', repo, '--search', title, '-F', 'json'], { encoding: 'utf-8' })
+    )[0]
+
+    const chartMr = firstMr(chartsRepo)
+    const mrc = chartMr.iid
+    const mri = firstMr(rpmsRepo).iid
+
+    const mrChart = `oci://registry.suse.de/devel/jasmine/charts/suse-security/mr-${mrc}/charts/suse-security-admission-controller`
+    const mrReg = `registry.suse.de/devel/jasmine/containers/suse-security/mr-${mri}`
+    const mrTag = chartMr.title.match(/\d+\.\d+\.\d+/)[0]
+
+    return { mrChart, mrReg, mrTag }
   }
 }
