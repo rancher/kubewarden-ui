@@ -27,7 +27,10 @@ export const KUBEWARDEN_REPOS = {
   POLICY_CATALOG_REPO_NAME:           'kubewarden-policy-catalog',
 };
 
-export const KUBEWARDEN_CHARTS = { CONTROLLER: 'suse-security-admission-controller' };
+export const KUBEWARDEN_CHARTS = {
+  CONTROLLER: 'suse-security-admission-controller',
+  DEFAULTS:         'kubewarden-defaults',
+};
 
 export const KUBEWARDEN_APPS = {
   RANCHER_CONTROLLER: 'rancher-suse-security-admission-controller',

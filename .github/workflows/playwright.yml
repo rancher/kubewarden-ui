@@ -214,7 +214,7 @@ jobs:
     # Create k3d cluster and install rancher
     # Use local kuberlr to avoid version skew
 
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         ref: ${{ steps.find-branch.outputs.ref }}
 
@@ -222,7 +222,7 @@ jobs:
       run: TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG k3d-install
 
     - name: Install Rancher
-      uses: kubewarden/kubewarden-end-to-end-tests@50f4cf0f4f05df8328dfd1f5c36dd25bff148415 # main
+      uses: kubewarden/kubewarden-end-to-end-tests@2f6179e7730dc829724bd79d8ec39ffae7418d0c # main
       with:
         make: rancher
       env:
@@ -237,7 +237,7 @@ jobs:
     # Setup playwright ENV and run tests
     # https://rancher.github.io/dashboard/testing/e2e-test#setup-for-local-tests
 
-    - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version: '24'
 

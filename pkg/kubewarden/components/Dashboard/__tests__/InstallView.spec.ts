@@ -168,7 +168,7 @@ describe('component: InstallView', () => {
       query:  {
         'repo-type':  'cluster',
         repo:        'kubewarden-charts',
-        chart:       'kubewarden-controller',
+        chart:       'suse-security-admission-controller',
         version:     '2.0.5',
         namespace:   'kubewarden-system'
       }
@@ -214,7 +214,7 @@ describe('component: InstallView', () => {
       query:  {
         'repo-type':  'cluster',
         repo:        'kubewarden-charts',
-        chart:       'kubewarden-controller',
+        chart:       'suse-security-admission-controller',
         version:     '2.0.6-rc1',
         namespace:   'kubewarden-system'
       }

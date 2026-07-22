@@ -4,14 +4,14 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "@playwright/test": "~1.60.0",
+    "@playwright/test": "~1.61.1",
     "@types/js-yaml": "^4.0.9",
     "@types/lodash": "^4.17.24",
     "@types/semver": "^7.7.1",
-    "js-yaml": "^4.2.0",
+    "js-yaml": "^5.2.1",
     "lodash": "^4.18.1",
-    "playwright-qase-reporter": "^2.5.5",
-    "semver": "^7.8.4"
+    "playwright-qase-reporter": "^2.5.6",
+    "semver": "^7.8.5"
   },
   "engines": {
     "node": ">=24"
