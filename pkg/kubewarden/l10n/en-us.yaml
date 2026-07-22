@@ -2,6 +2,9 @@ product:
   # This is used as the display name of the product in the UI SideNav
   kubewarden: Admission Policy Management
 
+generic:
+  readFromFile: Read from file
+
 kubewarden:
   title: Kubewarden
   unavailability:
@@ -65,9 +68,24 @@ kubewarden:
       button: Install Kubewarden
       stepTitle: Kubewarden Install
       reload: Unable to fetch Kubewarden Helm chart - reload required.
+      repository:
+        title: Repository
+        description: You will need the SUSE Security Admission Controller Helm repository (oci://dp.apps.rancher.io/charts/suse-security-admission-controller) to install the controller chart.
+      auth:
+        title: AppCo Registry Auth
+        description: Select or create the AppCo HTTP secret, then configure the namespace and connection options.
+        continue: Continue
+        namespace: Namespace
+        caBundle:
+          label: CA Cert Bundle
+          placeholder: "You can enter this manually or import it from a file using the button below."
+        insecurePlainHttp: Insecure plain HTTP
+        insecureSkipTLSVerify: Skip TLS verification
       versionError:
         title: Chart Version not found.
         message: Unable to determine the latest stable version of the kubewarden-controller chart. Please make sure the Helm repository is configured correctly.
+  selectOrCreateAuthSecret:
+    namespace: Namespace
     prerequisites:
       title: Prerequisites
       certManager:
