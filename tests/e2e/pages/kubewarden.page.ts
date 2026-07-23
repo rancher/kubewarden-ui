@@ -3,6 +3,7 @@ import { RancherAppsPage } from '../rancher/rancher-apps.page'
 import { BasePage } from '../rancher/basepage'
 import { Shell } from '../components/kubectl-shell'
 import { step } from '../rancher/rancher-test'
+import { Common } from '../components/common'
 
 type Pane = 'Policy Servers' | 'Namespaced Policies' | 'Cluster Policies'
 // type PaneFilter = 'Policies' | 'Reports' | string | RegExp
@@ -145,7 +146,7 @@ export class KubewardenPage extends BasePage {
     // Redirection to rancher app installer
     await expect(appInstallStep).toBeVisible()
     await installBtn.click()
-    await expect(this.page).toHaveURL(/.*\/apps\/charts\/install.*chart=kubewarden-controller/)
+    await expect(this.page).toHaveURL(/.*\/apps\/charts\/install.*chart=admission-controller/)
 
     // ==================================================================================================
     // Rancher Application Metadata
@@ -164,10 +165,64 @@ export class KubewardenPage extends BasePage {
     await schedule.fill('*/1 * * * *')
     await this.ui.checkbox('Enable Policy Reporter').check()
 
+    // Recommended Policies
+    const enableRP = this.ui.checkbox('Enable recommended policies')
+    await this.ui.tab('Recommended Policies').click()
+    await expect(enableRP).not.toBeChecked()
+    await enableRP.check()
+    await expect(this.ui.select('Execution mode of the recommended policies ')).toContainText('monitor')
+
     // Start installation
     await apps.installBtn.click()
-    await apps.waitHelmSuccess('rancher-kubewarden-crds', { keepLog: true })
-    await apps.waitHelmSuccess('rancher-kubewarden-controller', { timeout: 4 * 60_000 })
+    await apps.waitHelmSuccess('rancher-admission-controller', { timeout: 4 * 60_000 })
+  }
+
+  @step
+  async installAppCo() {
+    // mrChart: oci://registry.suse.de/devel/jasmine/charts/suse-security/mr-30/charts/suse-security-admission-controller
+    // mrReg: registry.suse.de/devel/jasmine/containers/suse-security/mr-38
+    const { mrChart, mrReg, mrTag } = await Common.fetchAppCoMr('SUSE Security Admission Controller')
+
+    const appsPage = new RancherAppsPage(this.page)
+    await appsPage.addRepository({
+      name       : 'appco-ibs',
+      url        : mrChart,
+      skipTLS    : true,
+      annotations: { 'catalog.cattle.io/suse-application-collection': 'true' },
+      // httpAuth   : { username: process.env.APPCO_ID || '', password: process.env.APPCO_PW || '' },
+    })
+
+    // Add secret in nodejs shell to not log creadentials
+    const shell = new Shell(this.page)
+    await shell.runExec(`kubectl create secret docker-registry application-collection -n cattle-kubewarden-system \
+        --docker-server=dp.apps.rancher.io \
+        --docker-username=${process.env.APPCO_ID} \
+        --docker-password=${process.env.APPCO_PW}`)
+
+    // Use Kubewarden installer
+    await this.nav.kubewarden()
+    await this.ui.button('Install Kubewarden').click()
+    await expect(this.page.getByRole('heading', { name: 'Kubewarden App Install', exact: true })).toBeVisible()
+
+    await this.ui.button('Install Kubewarden').click()
+    // Bug workaround - missing name / namespace
+    await appsPage.swapUrlParams({ namespace: 'cattle-kubewarden-system', name: 'rancher-admission-controller' })
+
+    await appsPage.installChart({
+      title: 'suse-security-admission-controller',
+      check: 'suse-security-admission-controller',
+    }, { navigate : false, yamlPatch: (y) => {
+      // For images that are not part of MR (policy-reporter, ..)
+      y.global.imagePullSecrets[0] = 'application-collection'
+      // Point to ephemeral MR registry
+      y.image.registry = mrReg
+      y.policyServer.image.registry = mrReg
+      y.auditScanner.image.registry = mrReg
+      // Customize installation
+      y.recommendedPolicies.enabled = true
+      y.auditScanner.policyReporter = true
+      y.auditScanner.cronJob.schedule = '*/1 * * * *'
+    } })
   }
 
   @step
@@ -188,7 +243,7 @@ export class KubewardenPage extends BasePage {
     if (from?.controller || to?.controller) {
       await expect(apps.stepTitle).toContainText(`${from?.controller || ''} > ${to?.controller || ''}`)
     }
-    await apps.updateApp('rancher-kubewarden-controller', { navigate: false, timeout: 4 * 60_000 })
+    await apps.updateApp('rancher-admission-controller', { navigate: false, timeout: 4 * 60_000 })
     // 4.1.0 Error: error while loading policies from "/config/policies.yml": data did not match any variant of untagged enum PolicyOrPolicyGroup
     // 5.0.0 Probe port change from https to http
     if (!to?.controller?.startsWith('4.1') && !to?.controller?.startsWith('5.0')) {

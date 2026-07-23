@@ -1,7 +1,6 @@
 import { test, expect } from './rancher/rancher-test'
 import { RancherExtensionsPage } from './rancher/rancher-extensions.page'
 import { AppVersion, KubewardenPage } from './pages/kubewarden.page'
-import { PolicyServersPage } from './pages/policyservers.page'
 import { ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherFleetPage } from './rancher/rancher-fleet.page'
@@ -81,30 +80,17 @@ test('Install Kubewarden', { tag: '@kw' }, async({ page, ui, nav }) => {
   test.skip(conf.kw_mode === 'fleet')
 
   const kwPage = new KubewardenPage(page)
-  await kwPage.installKubewarden({ version: conf.kw_mode === 'upgrade' ? conf.upMap[0].controller : undefined })
+  if (process.env.APPCO) {
+    await kwPage.installAppCo()
+  } else {
+    await kwPage.installKubewarden({ version: conf.kw_mode === 'upgrade' ? conf.upMap[0].controller : undefined })
+  }
 
   // Check UI is active
   await nav.kubewarden()
   await ui.retry(async() => {
     await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
   }, 'Kubewarden installation not detected')
-
-  await test.step('Install default policyserver', async() => {
-    const psPage = new PolicyServersPage(page)
-
-    // Banner is visible on Overview page
-    await kwPage.goto()
-    await expect(psPage.noDefaultPsBanner).toBeVisible()
-    // Banner is visible on Policy Servers page
-    await psPage.goto()
-    await expect(psPage.noDefaultPsBanner).toBeVisible()
-
-    await ui.button('Install Chart').click()
-    await expect(page).toHaveURL(/.*\/apps\/charts\/install.*chart=kubewarden-defaults/)
-
-    // Handle PolicyServer Installer Dialog
-    await psPage.installDefault({ recommended: true, mode: 'monitor' })
-  })
 })
 
 test('Install Kubewarden by Fleet', { tag: '@kw' }, async({ page }) => {

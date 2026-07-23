@@ -13,8 +13,9 @@ export interface Repo {
     username: string
     password: string
   }
-  // Git specific
-  branch?: string
+  branch?     : string // Git specific
+  skipTLS?    : boolean // OCI specific
+  annotations?: Record<string, string>
 }
 
 export interface Chart {
@@ -61,6 +62,15 @@ export class RancherAppsPage extends BasePage {
     await this.nav.goto('dashboard/c/local/apps/charts')
   }
 
+  async swapUrlParams(params: Record<string, string>) {
+    await expect(this.page).toHaveURL(/.*\/apps\/charts\/install.*chart=/)
+    const url = new URL(this.page.url())
+    for (const [key, value] of Object.entries(params)) {
+      url.searchParams.set(key, value)
+    }
+    await this.page.goto(url.toString())
+  }
+
   async swapUrlVersion(version: string) {
     const url = new URL(this.page.url())
     expect(url.searchParams.get('version')).not.toBeNull()
@@ -70,8 +80,8 @@ export class RancherAppsPage extends BasePage {
     await expect(this.stepTitle).toContainText(version)
   }
 
-  async setRepoType(type: 'Git' | 'OCI' | 'Helm') {
-    const name = type + ' Repository'
+  async setRepoType(type: 'Git' | 'OCI' | 'Helm' | 'AppCo') {
+    const name = type === 'AppCo' ? 'SUSE App Collection' : type + ' Repository'
     if (RancherUI.isVersion('>=2.14')) {
       await this.page.getByRole('heading', { name, exact: true }).click()
     } else {
@@ -101,19 +111,30 @@ export class RancherAppsPage extends BasePage {
       // OCI repository
       await this.setRepoType('OCI')
       await this.ui.input('OCI Repository Host URL *').fill(repo.url)
-    } else {
-      // HTTP repository
+      if (repo.skipTLS !== undefined)
+        await this.ui.checkbox('Skip TLS Verifications').setChecked(repo.skipTLS)
+    } else if (repo.url.startsWith('http')) {
+      // HTTP(s) repository
       await this.setRepoType('Helm')
       await this.ui.input('Index URL *').fill(repo.url)
+    } else {
+      // Application Collection repository
+      await this.setRepoType('AppCo')
     }
     if (repo.httpAuth) {
       // Auth takes a moment to load values
       await expect(this.ui.select('Authentication')).toContainText('None')
-      await this.ui.selectOption('Authentication', 'Create a HTTP Basic Auth Secret')
+      await this.ui.selectOption('Authentication', 'Create an HTTP Basic Auth Secret')
       await this.ui.input('Username').fill(repo.httpAuth.username)
       await this.ui.input('Password').fill(repo.httpAuth.password)
     }
-
+    if (repo.annotations) {
+      for (const [key, value] of Object.entries(repo.annotations)) {
+        await this.ui.button('Add Annotation').click()
+        await this.page.getByPlaceholder('e.g. foo').last().fill(key)
+        await this.page.getByPlaceholder('e.g. bar').last().fill(value)
+      }
+    }
     await createBtn.click()
     // Transitions: Active ?> In Progress ?> [Active|InProgress] - https://github.com/rancher/dashboard/issues/10079
     const repoRow = await this.ui.tableRow(repo.name).waitFor()
