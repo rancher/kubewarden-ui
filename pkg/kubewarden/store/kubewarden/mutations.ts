@@ -31,7 +31,7 @@ export default {
   },
 
   /**
-   * Updates/Adds Kubewarden Controller App into state
+   * Updates/Adds Admission Policy Manager Controller App into state
    * @param state
    * @param app `CatalogApp`
    */
@@ -46,7 +46,7 @@ export default {
   },
 
   /**
-   * Removes Kubewarden Controller App by ID
+   * Removes Admission Policy Manager Controller App by ID
    * @param state
    * @param app `CatalogApp`
    */
