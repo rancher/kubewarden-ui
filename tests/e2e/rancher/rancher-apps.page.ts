@@ -25,6 +25,11 @@ export interface Chart {
   version?  : string
   namespace?: string
   project?  : string
+  secret?   : {
+    existing?: string
+    username?: string
+    password?: string
+  }
 }
 
 const appCoRepo: Repo = {
@@ -255,6 +260,16 @@ export class RancherAppsPage extends BasePage {
     }
     if (chart.project) {
       await this.ui.selectOption('Install into Project', chart.project)
+    }
+    if (chart.secret) {
+      await expect(this.ui.select('Image Pull Secret')).toContainText('Create a new Image Pull Secret')
+      if (chart.secret.existing) {
+        await this.ui.selectOption('Image Pull Secret', chart.secret.existing)
+      } else if (chart.secret.username && chart.secret.password) {
+        await this.ui.selectOption('Image Pull Secret', /Create a new Image Pull Secret/)
+        await this.ui.input('Username').fill(chart.secret.username)
+        await this.ui.input('Password').fill(chart.secret.password)
+      }
     }
     await this.nextBtn.click()
 
