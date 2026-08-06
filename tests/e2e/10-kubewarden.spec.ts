@@ -12,6 +12,8 @@ const conf = {
   src_url: 'http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js',
   // Install UI extension from: source (yarn dev), github (github tag), prime (official)
   ui_from: (process.env.ORIGIN || undefined) as 'source'|'github'|'prime'|undefined,
+  // Install Kubewarden from: github (cncf), gitlab (mr), prime (official)
+  kw_from: (process.env.APPCO || undefined) as 'github'|'gitlab'|'prime'|undefined,
   // How to install Kubewarden: manual (from UI extension), fleet, upgrade (previous version)
   kw_mode: (process.env.MODE || undefined) as 'manual'|'fleet'|'upgrade'|undefined,
   // Fetch Kubewarden versions from github for upgrade test
@@ -20,6 +22,11 @@ const conf = {
 
 if (conf.ui_from) expect(conf.ui_from).toMatch(/^(source|github|prime)$/)
 if (conf.kw_mode) expect(conf.kw_mode).toMatch(/^(manual|fleet|upgrade)$/)
+if (conf.kw_from) expect(conf.kw_from).toMatch(/^(github|gitlab|prime)$/)
+if (conf.kw_from !== 'github') {
+  expect(process.env.APPCO_ID).toBeDefined()
+  expect(process.env.APPCO_PW).toBeDefined()
+}
 
 // Configure defaults after env is loaded
 test.beforeAll(async({ request }) => {
@@ -31,6 +38,8 @@ test.beforeAll(async({ request }) => {
 
   // Default to manual mode, unless fleet or upgrade is requested
   conf.kw_mode ||= 'manual'
+  // Default to installation from AppCo
+  conf.kw_from ||= 'gitlab'
 
   if (conf.kw_mode === 'upgrade') {
     conf.upMap = (await Common.fetchVersionMap()).splice(-3)
@@ -80,10 +89,12 @@ test('Install Kubewarden', { tag: '@kw' }, async({ page, ui, nav }) => {
   test.skip(conf.kw_mode === 'fleet')
 
   const kwPage = new KubewardenPage(page)
-  if (process.env.APPCO) {
-    await kwPage.installAppCo()
+  if (process.env.APPCO == 'github') {
+    await kwPage.installGithub({ version: conf.kw_mode === 'upgrade' ? conf.upMap[0].controller : undefined })
+  } else if (process.env.APPCO == 'gitlab') {
+    await kwPage.installGitlab()
   } else {
-    await kwPage.installKubewarden({ version: conf.kw_mode === 'upgrade' ? conf.upMap[0].controller : undefined })
+    await kwPage.installAppco()
   }
 
   // Check UI is active
