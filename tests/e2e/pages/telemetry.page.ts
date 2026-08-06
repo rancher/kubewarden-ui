@@ -53,7 +53,7 @@ export class TelemetryPage extends BasePage {
       monitoring    : getLine(this.metricsTab, /^The Rancher Monitoring app/),
       servicemonitor: getLine(this.metricsTab, /^(A|The) Service Monitor/),
       configmap     : getLine(this.metricsTab, /^Grafana Dashboards/),
-      config        : getLine(page, /^(Tracing|The Kubewarden Controller) must be (enabled and )?configured/)
+      config        : getLine(page, /^(Tracing|The (Kubewarden|SUSE Security Admission) Controller) must be (enabled and )?configured/)
     }
     this.configBtn = this.lines.config.getByRole('button', { name: /^(Edit|Update) Config$/ })
   }

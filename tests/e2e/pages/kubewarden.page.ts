@@ -181,10 +181,7 @@ export class KubewardenPage extends BasePage {
   async installAppco() {
     // Use Kubewarden installer
     await this.nav.kubewarden()
-    await this.ui.button('Install Kubewarden').click()
-
-    const appsPage = new RancherAppsPage(this.page)
-    const shell = new Shell(this.page)
+    await this.ui.button('Install SUSE Security Admission Controller').click()
 
     // AppCo Registry Auth
     await this.ui.input('Username').fill(process.env.APPCO_ID || '')
@@ -193,12 +190,10 @@ export class KubewardenPage extends BasePage {
     await this.page.waitForTimeout(500) // Secret is being created
 
     // Add Repository & start installation
-    await this.ui.button('Add Kubewarden Repository').click()
-    await this.ui.button('Install Kubewarden').click()
+    await this.ui.button('Add Admission Controller Repository').click()
+    await this.ui.button('Install SUSE Security Admission Controller').click()
 
-    // Bug workaround - missing name / namespace
-    await appsPage.swapUrlParams({ namespace: 'cattle-kubewarden-system', name: 'rancher-admission-controller' })
-
+    const appsPage = new RancherAppsPage(this.page)
     await appsPage.installChart({
       title : 'suse-security-admission-controller',
       check : 'suse-security-admission-controller',
@@ -212,10 +207,10 @@ export class KubewardenPage extends BasePage {
 
   //   : oci://registry.suse.de/devel/jasmine/charts/charts/suse-security-admission-controller:1.0.0
   @step
-  async installGitlab(version?: string) {
+  async installGitlab() {
     // mrChart: oci://registry.suse.de/devel/jasmine/charts/suse-security/mr-30/charts/suse-security-admission-controller
     // mrReg: registry.suse.de/devel/jasmine/containers/suse-security/mr-38
-    const { mrChart, mrReg, mrTag } = await Common.fetchAppCoMr(version)
+    const { mrChart, mrReg, mrTag } = await Common.fetchAppCoMr()
     // const mrChart = 'oci://registry.suse.de/devel/jasmine/charts' // /charts/suse-security-admission-controller
     // const mrReg = 'registry.suse.de/devel/jasmine/containers'
     // const mrTag = undefined // 'mr-38'
@@ -234,8 +229,8 @@ export class KubewardenPage extends BasePage {
     const shell = new Shell(this.page)
 
     // Creation does not annotate - rancher bug
-    await this.page.waitForTimeout(100) // Prevent "object has been modified" error
-    await shell.runExec('kubectl annotate clusterrepos.catalog.cattle.io appco-ibs catalog.cattle.io/suse-application-collection=true')
+    await this.page.waitForTimeout(500) // Prevent "object has been modified" error
+    await shell.run('kubectl annotate clusterrepos.catalog.cattle.io appco-ibs catalog.cattle.io/suse-application-collection=true')
 
     // Add secret in nodejs shell to not log creadentials
     await shell.runExec('kubectl create ns cattle-kubewarden-system')

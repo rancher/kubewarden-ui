@@ -43,8 +43,8 @@ test('Check landing pages', async({ page, ui, nav }) => {
     await nav.kubewarden()
     // Header contains version
     const head = page.locator('div.head')
-    await expect(head.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
-    await expect(head.getByText(/App Version:\s+v[1-9][0-9.]+[0-9]/)).toBeVisible()
+    await expect(head.getByRole('heading', { name: /^Welcome to (Kubewarden|Admission Policy Management)/ })).toBeVisible()
+    await expect(head.getByText(/App Version:\s+[1-9][0-9.]+[0-9]/)).toBeVisible()
 
     // Recommended policies stats
     await expect(kwPage.getStats('Namespaced Policies')).toHaveText('No policies available.')

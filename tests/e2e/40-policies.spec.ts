@@ -220,10 +220,11 @@ test('Recommended policies', async({ page, ui, nav }) => {
     const apps = new RancherAppsPage(page)
     await apps.updateApp('rancher-admission-controller', {
       navigate : false,
-      questions: async() => {
-        await ui.tab('no-privileged-pod policy settings').click()
-        await ui.checkbox('Skip init containers').check()
-      }
+      yamlPatch: (y) => { y.recommendedPolicies.podPrivilegedPolicy.settings.skip_init_containers = true },
+      // questions: async() => {
+      //   await ui.tab('no-privileged-pod policy settings').click()
+      //   await ui.checkbox('Skip init containers').check()
+      // }
     })
 
     const capPage = new ClusterAdmissionPoliciesPage(page)

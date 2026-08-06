@@ -100,7 +100,7 @@ test('Install Kubewarden', { tag: '@kw' }, async({ page, ui, nav }) => {
   // Check UI is active
   await nav.kubewarden()
   await ui.retry(async() => {
-    await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /^Welcome to (Kubewarden|Admission Policy Management)/ })).toBeVisible()
   }, 'Kubewarden installation not detected')
 })
 

@@ -79,12 +79,17 @@ test.describe('Tracing', () => {
     const now = new Date().toISOString()
     await appsPage.updateApp('rancher-admission-controller', {
       navigate : false,
-      questions: async() => {
-        await ui.tab(/^(Open)?Telemetry/).click()
-        await ui.checkbox('Enable Tracing').check()
-        await ui.input('Jaeger endpoint configuration').fill('jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317')
-        await ui.checkbox('Jaeger endpoint insecure TLS configuration').check()
-      }
+      yamlPatch: {
+        'telemetry.tracing'                            : true,
+        'telemetry.sidecar.tracing.jaeger.endpoint'    : 'jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317',
+        'telemetry.sidecar.tracing.jaeger.tls.insecure': true
+      },
+      // questions: async() => {
+      //   await ui.tab(/^(Open)?Telemetry/).click()
+      //   await ui.checkbox('Enable Tracing').check()
+      //   await ui.input('Jaeger endpoint configuration').fill('jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317')
+      //   await ui.checkbox('Jaeger endpoint insecure TLS configuration').check()
+      // }
     })
     // Wait until kubewarden controller restarts policyserver
     await shell.retry(`kubectl logs -l app=kubewarden-policy-server-default -n cattle-kubewarden-system -c otc-container --since-time ${now} 2>/dev/null | grep -F "Everything is ready."`)
@@ -124,10 +129,11 @@ test.describe('Tracing', () => {
 
     // Clean up
     await appsPage.updateApp('rancher-admission-controller', {
-      questions: async() => {
-        await ui.tab(/^(Open)?Telemetry/).click()
-        await ui.checkbox('Enable Tracing').uncheck()
-      }
+      yamlPatch: (y) => { y.telemetry.tracing = false },
+      // questions: async() => {
+      //   await ui.tab(/^(Open)?Telemetry/).click()
+      //   await ui.checkbox('Enable Tracing').uncheck()
+      // }
     })
     if (RancherUI.hasAppCollection) {
       await appsPage.deleteApp('jaeger-operator')
@@ -192,10 +198,11 @@ test.describe('Metrics', () => {
       await telPage.configBtn.click()
       await appsPage.updateApp('rancher-admission-controller', {
         navigate : false,
-        questions: async() => {
-          await ui.tab(/^(Open)?Telemetry/).click()
-          await ui.checkbox('Enable Metrics').check()
-        }
+        yamlPatch: (y) => { y.telemetry.metrics = true },
+        // questions: async() => {
+        //   await ui.tab(/^(Open)?Telemetry/).click()
+        //   await ui.checkbox('Enable Metrics').check()
+        // }
       })
       // Wait until kubewarden controller restarts policyserver
       const now = new Date().toISOString()
@@ -242,10 +249,11 @@ test.describe('Metrics', () => {
   test('Uninstall metrics', async({ ui, nav, shell }) => {
     // Disable metrics
     await appsPage.updateApp('rancher-admission-controller', {
-      questions: async() => {
-        await ui.tab(/^(Open)?Telemetry/).click()
-        await ui.checkbox('Enable Metrics').uncheck()
-      }
+      yamlPatch: (y) => { y.telemetry.metrics = false },
+      // questions: async() => {
+      //   await ui.tab(/^(Open)?Telemetry/).click()
+      //   await ui.checkbox('Enable Metrics').uncheck()
+      // }
     })
     // Uninstall monitoring
     await appsPage.deleteApp('rancher-monitoring')
@@ -264,8 +272,9 @@ test.describe('Metrics', () => {
 })
 
 test.describe('Teardown', () => {
-  test('Delete custom PolicyServer', async({ page }) => {
+  test('Delete custom PolicyServer & Policy', async({ page }) => {
     await new PolicyServersPage(page).delete('custom-ps')
+    await new AdmissionPoliciesPage(page).delete('no-privileged-custom')
   })
 
   test('Uninstall OpenTelemetry', async({ page, nav }) => {
