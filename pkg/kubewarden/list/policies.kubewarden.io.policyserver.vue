@@ -7,11 +7,8 @@ import ResourceTable from '@shell/components/ResourceTable';
 
 import { KUBEWARDEN_APPS } from '@kubewarden/types';
 
-import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
-
 export default {
   components: {
-    DefaultsBanner,
     Loading,
     ResourceTable
   },
@@ -64,7 +61,6 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else>
-    <DefaultsBanner v-if="!hideBannerDefaults" />
     <ResourceTable
       :schema="schema"
       :rows="rows"

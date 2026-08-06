@@ -37,14 +37,6 @@ describe('component: Masthead', () => {
     });
   };
 
-  it('renders defaults banner when default app is not found', () => {
-    const wrapper = createWrapper();
-
-    const banner = wrapper.findComponent(DefaultsBanner);
-
-    expect(banner.exists()).toBe(true);
-  });
-
   it('renders the Upgradable button when an upgrade is available', () => {
     const oldControllerApp = {
       spec: {

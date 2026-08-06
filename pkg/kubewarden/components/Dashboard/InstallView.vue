@@ -3,7 +3,13 @@ import { mapGetters } from 'vuex';
 import debounce from 'lodash/debounce';
 
 import { CATALOG } from '@shell/config/types';
-import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
+import {
+  REPO_TYPE,
+  REPO,
+  CHART,
+  NAME,
+  VERSION,
+} from '@shell/config/query-params';
 import ResourceFetch from '@shell/mixins/resource-fetch';
 
 import { Banner } from '@components/Banner';
@@ -12,15 +18,15 @@ import Loading from '@shell/components/Loading';
 import Markdown from '@shell/components/Markdown';
 import SelectOrCreateAuthSecret from '@shell/components/form/SelectOrCreateAuthSecret';
 import NameNsDescription from '@shell/components/form/NameNsDescription';
-import { LabeledInput } from '@components/Form/LabeledInput';
-import { Checkbox } from '@components/Form/Checkbox';
+// import { LabeledInput } from '@components/Form/LabeledInput';
+// import { Checkbox } from '@components/Form/Checkbox';
 import { AUTH_TYPE, SECRET, NAMESPACE } from '@shell/config/types';
 
-import { KUBEWARDEN_CHARTS, KUBEWARDEN_REPOS } from '@kubewarden/types';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_NAMESPACE, KUBEWARDEN_OCI_REGISTRY, KUBEWARDEN_REPOS } from '@kubewarden/types';
 import { getLatestVersion } from '@kubewarden/plugins/kubewarden-class';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 import { refreshCharts } from '@kubewarden/utils/chart';
-import FileSelector from '@shell/components/form/FileSelector';
+// import FileSelector from '@shell/components/form/FileSelector';
 
 import InstallWizard from '@kubewarden/components/InstallWizard';
 
@@ -35,14 +41,14 @@ export default {
   components: {
     AsyncButton,
     Banner,
-    Checkbox,
+    // Checkbox,
     InstallWizard,
-    LabeledInput,
+    // LabeledInput,
     Loading,
     Markdown,
     NameNsDescription,
     SelectOrCreateAuthSecret,
-    FileSelector
+    // FileSelector
   },
 
   mixins: [ResourceFetch],
@@ -107,12 +113,12 @@ export default {
       initStepIndex:                0,
       docs:                         { airgap: '' },
       appcoAuthSecret:              null,
-      appcoNamespace:               'kubewarden-system',
+      appcoNamespace:               KUBEWARDEN_NAMESPACE,
       appcoCaBundle:                '',
       appcoInsecurePlainHttp:       false,
       appcoInsecureSkipTLSVerify:   false,
       allSecrets:                   [],
-      repoNamespace:                'kubewarden-system',
+      repoNamespace:                KUBEWARDEN_NAMESPACE,
       secretCreateHook:             null,
       duplicatedImagePullSecretKey: null,
     };
@@ -239,7 +245,7 @@ export default {
       const username = decodeBase64(secret?.data?.username) || secret?.stringData?.username || '';
       const password = decodeBase64(secret?.data?.password) || secret?.stringData?.password || '';
 
-      const registryUrl = 'oci://dp.apps.rancher.io/charts';
+      const registryUrl = KUBEWARDEN_OCI_REGISTRY;
       const registryHost = registryUrl ? (() => {
         try {
           return new URL(registryUrl).host;
@@ -469,7 +475,7 @@ export default {
         }
 
         if (!this.controllerChart) {
-          this.debouncedRefreshCharts(true);
+          this.debouncedRefreshCharts();
         }
 
         if (btnCb) {
@@ -515,6 +521,7 @@ export default {
           [REPO]:      repoName,
           [CHART]:     chartName,
           [VERSION]:   latestChartVersion,
+          [NAME]:      KUBEWARDEN_CHARTS.INSTALLATION_NAME,
           [NAMESPACE]: this.appcoNamespace,
         };
 
@@ -610,7 +617,7 @@ export default {
               @inputauthval="() => {}"
             />
 
-            <div class="ca-bundle-section mt-16">
+            <!-- <div class="ca-bundle-section mt-16">
               <LabeledInput
                   v-model:value="appcoCaBundle"
                   type="multiline"
@@ -621,9 +628,9 @@ export default {
               <div class="mt-16">
                 <FileSelector class="btn btn-sm role-tertiary" :label="t('generic.readFromFile')" @selected="onFileSelected" />
               </div>
-            </div>
+            </div> -->
 
-            <div class="row create-secret-banner mb-16 mt-20">
+            <!-- <div class="row create-secret-banner mb-16 mt-20">
               <Checkbox
                 v-model:value="appcoInsecurePlainHttp"
                 data-testid="kw-appco-insecure-plain-http"
@@ -634,7 +641,7 @@ export default {
                 data-testid="kw-appco-insecure-skip-tls"
                 label-key="kubewarden.dashboard.appInstall.auth.insecureSkipTLSVerify"
               />
-            </div>
+            </div> -->
 
             <div class="namespaces-section mt-20 mb-20">
               <NameNsDescription

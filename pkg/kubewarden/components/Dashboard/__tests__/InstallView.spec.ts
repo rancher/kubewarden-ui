@@ -4,7 +4,7 @@ import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 
 import controllerChart from '@tests/unit/mocks/controllerChart';
 import kubewardenRepo from '@tests/unit/mocks/kubewardenRepo';
-import { KUBEWARDEN_CHARTS } from '@kubewarden/types';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_NAMESPACE } from '@kubewarden/types';
 
 import InstallView from '@kubewarden/components/Dashboard/InstallView.vue';
 
@@ -155,6 +155,8 @@ describe('component: InstallView', () => {
     // Spy on the $router.push method
     const routerPushSpy = jest.spyOn(wrapper.vm.$router, 'push');
 
+    routerPushSpy.mockClear();
+
     // Find the button and trigger a click event
     const button = wrapper.find('[data-testid="kw-app-install-button"]');
 
@@ -170,7 +172,8 @@ describe('component: InstallView', () => {
         repo:        'kubewarden-charts',
         chart:       'suse-security-admission-controller',
         version:     '2.0.5',
-        namespace:   'kubewarden-system'
+        name:        KUBEWARDEN_CHARTS.INSTALLATION_NAME,
+        namespace:   KUBEWARDEN_NAMESPACE
       }
     });
   });
@@ -201,6 +204,8 @@ describe('component: InstallView', () => {
     // Spy on the $router.push method
     const routerPushSpy = jest.spyOn(wrapper.vm.$router, 'push');
 
+    routerPushSpy.mockClear();
+
     // Find the button and trigger a click event
     const button = wrapper.find('[data-testid="kw-app-install-button"]');
 
@@ -216,7 +221,8 @@ describe('component: InstallView', () => {
         repo:        'kubewarden-charts',
         chart:       'suse-security-admission-controller',
         version:     '2.0.6-rc1',
-        namespace:   'kubewarden-system'
+        name:        KUBEWARDEN_CHARTS.INSTALLATION_NAME,
+        namespace:   KUBEWARDEN_NAMESPACE
       }
     });
   });

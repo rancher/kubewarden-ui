@@ -23,7 +23,6 @@ import {
 import { findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
 
 import ResourceLabeledSelect from '@shell/components/form/ResourceLabeledSelect';
-import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 import Loading from '@shell/components/Loading';
@@ -52,14 +51,6 @@ const allApps = computed<CatalogApp[]>(() => store.getters['cluster/all'](CATALO
 const allRepos = computed<ClusterRepo[]>(() => store.getters['cluster/all'](CATALOG.CLUSTER_REPO));
 const controllerApp = computed<CatalogApp>(() => store.getters['kubewarden/controllerApp']);
 const fleetBundles = computed<FleetBundle[]>(() => store.getters['management/all'](FLEET.BUNDLE));
-
-const showVersionBanner = computed(() => {
-  if (isFleet.value) {
-    return isCreate.value && defaultImage.value && !latestChartVersion.value;
-  }
-
-  return isCreate.value && defaultImage.value && !defaultsChart?.value && !latestChartVersion.value;
-});
 
 const policyClassPaginateSettings = {
   requestSettings: (opts: any) => {
@@ -202,16 +193,6 @@ watchEffect(() => {
     </div>
 
     <div id="image-container">
-      <div class="row">
-        <div v-if="showVersionBanner" class="col span-12">
-          <Banner
-            class="mb-20 mt-0"
-            color="warning"
-            :label="t('kubewarden.policyServerConfig.defaultImage.versionWarning')"
-          />
-        </div>
-      </div>
-
       <div class="row" data-testid="ps-config-image-inputs">
         <div class="col span-6">
           <RadioGroup
