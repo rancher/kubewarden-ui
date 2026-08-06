@@ -215,9 +215,9 @@ export class KubewardenPage extends BasePage {
       // For images that are not part of MR (policy-reporter, ..)
       y.global.imagePullSecrets[0] = 'application-collection'
       // Point to ephemeral MR registry
-      y.image.registry = mrReg
-      y.policyServer.image.registry = mrReg
-      y.auditScanner.image.registry = mrReg
+      if (mrReg) y.image.registry = mrReg
+      if (mrReg) y.policyServer.image.registry = mrReg
+      if (mrReg) y.auditScanner.image.registry = mrReg
       // Customize installation
       y.recommendedPolicies.enabled = true
       y.auditScanner.policyReporter = true

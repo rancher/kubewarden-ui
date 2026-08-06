@@ -51,8 +51,8 @@ export class Common {
    * @param name Filter MR title by product name
    * @returns MR chart, registry and tag for the currently open MR
    */
-  static async fetchAppCoMr(name: string) {
-    const title = name ?? 'SUSE Security Admission Controller'
+  static async fetchAppCoMr() {
+    const title = 'SUSE Security Admission Controller'
     const chartsRepo = 'https://gitlab.suse.de/orchid/suse-products-recipes/suse-security/charts'
     const rpmsRepo = 'https://gitlab.suse.de/orchid/suse-products-recipes/suse-security/rpms-containers'
 
@@ -61,11 +61,15 @@ export class Common {
     )[0]
 
     const chartMr = firstMr(chartsRepo)
-    const mrc = chartMr.iid
-    const mri = firstMr(rpmsRepo).iid
+    const mrc = chartMr?.iid
+    const mri = firstMr(rpmsRepo)?.iid
 
-    const mrChart = `oci://registry.suse.de/devel/jasmine/charts/suse-security/mr-${mrc}/charts/suse-security-admission-controller`
-    const mrReg = `registry.suse.de/devel/jasmine/containers/suse-security/mr-${mri}`
+    const mrChart = mrc
+      ? `oci://registry.suse.de/devel/jasmine/charts/suse-security/mr-${mrc}/charts/suse-security-admission-controller`
+      : 'oci://registry.suse.de/devel/jasmine/charts/charts/suse-security-admission-controller'
+    const mrReg = mri
+      ? `registry.suse.de/devel/jasmine/containers/suse-security/mr-${mri}`
+      : 'registry.suse.de/devel/jasmine/containers'
     const mrTag = chartMr.title.match(/\d+\.\d+\.\d+/)[0]
 
     return { mrChart, mrReg, mrTag }
