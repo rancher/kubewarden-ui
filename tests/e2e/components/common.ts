@@ -70,7 +70,7 @@ export class Common {
     const mrReg = mri
       ? `registry.suse.de/devel/jasmine/containers/suse-security/mr-${mri}`
       : 'registry.suse.de/devel/jasmine/containers'
-    const mrTag = chartMr.title.match(/\d+\.\d+\.\d+/)[0]
+    const mrTag = chartMr?.title.match(/\d+\.\d+\.\d+/)[0]
 
     return { mrChart, mrReg, mrTag }
   }

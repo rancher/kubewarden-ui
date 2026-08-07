@@ -1,9 +1,10 @@
 import { expect, test, Locator, Page } from '@playwright/test'
-import { RancherAppsPage } from '../rancher/rancher-apps.page'
+import { RancherAppsPage, Repo } from '../rancher/rancher-apps.page'
 import { BasePage } from '../rancher/basepage'
 import { Shell } from '../components/kubectl-shell'
 import { step } from '../rancher/rancher-test'
 import { Common } from '../components/common'
+import { RancherStoragePage, Secret } from '../rancher/rancher-storage.page'
 
 type Pane = 'Policy Servers' | 'Namespaced Policies' | 'Cluster Policies'
 // type PaneFilter = 'Policies' | 'Reports' | string | RegExp
@@ -179,15 +180,27 @@ export class KubewardenPage extends BasePage {
 
   @step
   async installAppco() {
+    const authSecret : Secret = {
+      type     : 'HTTP Basic Auth',
+      namespace: 'cattle-system',
+      name     : 'appco-auth-clusterrepo',
+      username : process.env.APPCO_ID || '',
+      password : process.env.APPCO_PW || ''
+    }
+
     // Use Kubewarden installer
     await this.nav.kubewarden()
     await this.ui.button('Install SUSE Security Admission Controller').click()
 
     // AppCo Registry Auth
-    await this.ui.input('Username').fill(process.env.APPCO_ID || '')
-    await this.ui.input('Password').fill(process.env.APPCO_PW || '')
+    const secPage = new RancherStoragePage(this.page)
+    await secPage.createSecretInShell(authSecret)
+    // await this.ui.input('Username').fill(process.env.APPCO_ID || '')
+    // await this.ui.input('Password').fill(process.env.APPCO_PW || '')
+
+    await this.ui.selectOption('Authentication', new RegExp(`^${authSecret.name}`))
     await this.ui.button('Continue').click()
-    await this.page.waitForTimeout(500) // Secret is being created
+    // await this.page.waitForTimeout(500) // Secret is being created
 
     // Add Repository & start installation
     await this.ui.button('Add Admission Controller Repository').click()
@@ -195,9 +208,9 @@ export class KubewardenPage extends BasePage {
 
     const appsPage = new RancherAppsPage(this.page)
     await appsPage.installChart({
-      title : 'suse-security-admission-controller',
-      check : 'suse-security-admission-controller',
-      secret: { username: process.env.APPCO_ID, password: process.env.APPCO_PW },
+      title: 'suse-security-admission-controller',
+      check: 'suse-security-admission-controller',
+      // imagePullSecret: Generated from registry auth by rancher app installer
     }, { navigate : false, yamlPatch: (y) => {
       y.recommendedPolicies.enabled = true
       y.auditScanner.policyReporter = true
@@ -205,55 +218,60 @@ export class KubewardenPage extends BasePage {
     } })
   }
 
-  //   : oci://registry.suse.de/devel/jasmine/charts/charts/suse-security-admission-controller:1.0.0
+  // mrChart: oci://registry.suse.de/devel/jasmine/charts/charts/suse-security-admission-controller
+  // mrReg: registry.suse.de/devel/jasmine/containers
   @step
   async installGitlab() {
-    // mrChart: oci://registry.suse.de/devel/jasmine/charts/suse-security/mr-30/charts/suse-security-admission-controller
-    // mrReg: registry.suse.de/devel/jasmine/containers/suse-security/mr-38
     const { mrChart, mrReg, mrTag } = await Common.fetchAppCoMr()
-    // const mrChart = 'oci://registry.suse.de/devel/jasmine/charts' // /charts/suse-security-admission-controller
-    // const mrReg = 'registry.suse.de/devel/jasmine/containers'
-    // const mrTag = undefined // 'mr-38'
+    test.info().annotations.push({ type: 'INFO', description: `AppCo Chart: ${mrChart}` })
+    test.info().annotations.push({ type: 'INFO', description: `AppCo Registry: ${mrReg}` })
+    test.info().annotations.push({ type: 'INFO', description: `AppCo Tag: ${mrTag}` })
 
-    console.log(`Installing AppCo MR: ${mrTag} - ${mrChart} - ${mrReg}`)
+    // Generated pull secret would use wrong domain based on repository url
+    const pullSecret: Secret = {
+      type     : 'Registry',
+      namespace: 'cattle-kubewarden-system',
+      name     : 'appco-auth-image-pull',
+      domain   : 'dp.apps.rancher.io',
+      username : process.env.APPCO_ID || '',
+      password : process.env.APPCO_PW || ''
+    }
 
+    // Repo has fake auth so app-installer would set global.imagePullSecret
+    const repo: Repo = {
+      name      : 'admission-controller-gitlab',
+      url       : mrChart,
+      skipTLS   : true,
+      authSecret: { username: 'user', password: 'pass' },
+    }
+
+    const secPage = new RancherStoragePage(this.page)
+    await secPage.createSecretInShell(pullSecret)
+
+    // Add & annotate repository
     const appsPage = new RancherAppsPage(this.page)
-    await appsPage.addRepository({
-      name       : 'appco-ibs',
-      url        : mrChart,
-      skipTLS    : true,
-      annotations: { 'catalog.cattle.io/suse-application-collection': 'true' },
-      // httpAuth   : { username: process.env.APPCO_ID || '', password: process.env.APPCO_PW || '' },
-    })
+    await appsPage.addRepository(repo)
+    // await this.page.waitForTimeout(500) // Prevent "object has been modified" error
+    // Annotation is protected and would be discarded by UI
+    await new Shell(this.page).run(`kubectl annotate clusterrepos.catalog.cattle.io ${repo.name} catalog.cattle.io/suse-application-collection=true`)
 
-    const shell = new Shell(this.page)
+    // await this.ui.button('STOP').click({ timeout: 1000 })
 
-    // Creation does not annotate - rancher bug
-    await this.page.waitForTimeout(500) // Prevent "object has been modified" error
-    await shell.run('kubectl annotate clusterrepos.catalog.cattle.io appco-ibs catalog.cattle.io/suse-application-collection=true')
-
-    // Add secret in nodejs shell to not log creadentials
-    await shell.runExec('kubectl create ns cattle-kubewarden-system')
-    await shell.runExec(`kubectl create secret docker-registry application-collection -n cattle-kubewarden-system \
-        --docker-server=dp.apps.rancher.io \
-        --docker-username=${process.env.APPCO_ID} \
-        --docker-password=${process.env.APPCO_PW}`)
-
-    // Use Kubewarden installer
+    // Start installation (Auth & Repo steps are skipped)
     await this.nav.kubewarden()
-    await this.ui.button('Install Kubewarden').click()
-    await expect(this.page.getByRole('heading', { name: 'Kubewarden App Install', exact: true })).toBeVisible()
+    await this.ui.button('Install SUSE Security Admission Controller').click()
 
-    await this.ui.button('Install Kubewarden').click()
-    // Bug workaround - missing name / namespace
-    await appsPage.swapUrlParams({ namespace: 'cattle-kubewarden-system', name: 'rancher-admission-controller' })
+    await expect(this.page.getByRole('heading', { name: 'SUSE Security Admission Controller App Install', exact: true })).toBeVisible()
+    await this.ui.button('Install SUSE Security Admission Controller').click()
 
     await appsPage.installChart({
-      title: 'suse-security-admission-controller',
-      check: 'suse-security-admission-controller',
+      title          : 'suse-security-admission-controller',
+      check          : 'suse-security-admission-controller',
+      imagePullSecret: { existing: new RegExp(pullSecret.name) }
     }, { navigate : false, yamlPatch: (y) => {
       // For images that are not part of MR (policy-reporter, ..)
-      y.global.imagePullSecrets[0] = 'application-collection'
+      // Value is set automatically if Repo has auth & has appco annotation
+      // y.global.imagePullSecrets[0] = '...'
       // Point to ephemeral MR registry
       if (mrReg) y.image.registry = mrReg
       if (mrReg) y.policyServer.image.registry = mrReg
