@@ -69,7 +69,7 @@ export default {
         if (
           this.isClone &&
           this.value.isKubewardenDefaultPolicy &&
-          this.value?.metadata?.labels?.['app.kubernetes.io/name'] === 'kubewarden-defaults'
+          this.value?.metadata?.labels?.['app.kubernetes.io/name'] === 'ssac'
         ) {
           delete this.value?.metadata?.labels?.['app.kubernetes.io/name'];
         }

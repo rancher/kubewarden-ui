@@ -603,7 +603,7 @@ export default {
               :mode="'create'"
               data-testid="kw-appco-auth-secret"
               :register-before-hook="registerBeforeHook"
-              :namespace="'default'"
+              :namespace="'cattle-system'"
               :pre-select="{ selected: imagePullSecretAuthType }"
               :limit-to-namespace="false"
               :in-store="'cluster'"

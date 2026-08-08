@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import { CATALOG } from '@shell/config/types';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
-import { REPO_TYPE, REPO, CHART, VERSION } from '@shell/config/query-params';
+import { REPO_TYPE, REPO, CHART, VERSION, NAME, NAMESPACE } from '@shell/config/query-params';
 
 import { Banner } from '@components/Banner';
 
@@ -13,6 +13,7 @@ import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@ku
 import { newPolicyReportCompatible } from '@kubewarden/modules/policyReporter';
 import { appVersionSatisfiesConstraint, checkUpgradeAvailable } from '@kubewarden/utils/chart';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
+import { KUBEWARDEN_NAMESPACE } from '@kubewarden/types';
 
 export default {
   props: {
@@ -124,7 +125,9 @@ export default {
             [REPO_TYPE]: repoType,
             [REPO]:      repoName,
             [CHART]:     name,
-            [VERSION]:   version
+            [VERSION]:   version,
+            [NAME]:      KUBEWARDEN_CHARTS.INSTALLATION_NAME,
+            [NAMESPACE]: KUBEWARDEN_NAMESPACE,
           };
 
           this.$router.push({

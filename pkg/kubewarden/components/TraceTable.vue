@@ -1,7 +1,6 @@
 <script>
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
-import semver from 'semver';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -136,37 +135,31 @@ export default {
         return null;
       }
 
-      const version = this.controllerApp?.spec?.chart?.metadata?.version;
       const telemetry = this.controllerApp?.values?.telemetry;
-
-      if (semver.gte(version, '4.0.0-0')) {
-        const tracingIsUndefinedOrBoolean =
+      const tracingIsUndefinedOrBoolean =
           telemetry?.tracing === undefined || typeof telemetry?.tracing === 'boolean';
-        const endpointIsDefined = !!telemetry?.sidecar?.tracing?.jaeger?.endpoint;
+      const endpointIsDefined = !!telemetry?.sidecar?.tracing?.jaeger?.endpoint;
 
-        if (telemetry?.mode === 'custom') {
-          this.handleTracingChecklist('unsupportedTelemetrySpec', true);
+      if (telemetry?.mode === 'custom') {
+        this.handleTracingChecklist('unsupportedTelemetrySpec', true);
 
-          return null;
-        }
-        if (!tracingIsUndefinedOrBoolean) {
-          this.handleTracingChecklist('outdatedTelemetrySpec', true);
-
-          return null;
-        }
-        if (telemetry?.tracing === true && !endpointIsDefined) {
-          this.handleTracingChecklist('incompleteTelemetrySpec', true);
-
-          return null;
-        }
-        if (telemetry?.tracing !== true) {
-          return null;
-        }
-
-        return telemetry?.sidecar?.tracing;
-      } else {
-        return telemetry?.tracing?.enabled;
+        return null;
       }
+      if (!tracingIsUndefinedOrBoolean) {
+        this.handleTracingChecklist('outdatedTelemetrySpec', true);
+
+        return null;
+      }
+      if (telemetry?.tracing === true && !endpointIsDefined) {
+        this.handleTracingChecklist('incompleteTelemetrySpec', true);
+
+        return null;
+      }
+      if (telemetry?.tracing !== true) {
+        return null;
+      }
+
+      return telemetry?.sidecar?.tracing;
     },
 
     jaegerServices() {

@@ -122,7 +122,7 @@ describe('PolicyModel', () => {
   describe('isKubewardenDefaultPolicy', () => {
     it('returns true when labels match Helm management, defaults, and part-of', () => {
       instance.metadata.labels = {
-        [KUBERNETES.MANAGED_BY]:     'Helm',
+        [KUBERNETES.MANAGED_BY]:     'kubewarden-controller',
         [KUBERNETES.MANAGED_NAME]:   KUBEWARDEN_CHARTS.DEFAULTS,
         'app.kubernetes.io/part-of': KUBEWARDEN_PRODUCT_NAME
       };
@@ -131,7 +131,7 @@ describe('PolicyModel', () => {
 
     it('returns false when one label does not match', () => {
       instance.metadata.labels = {
-        [KUBERNETES.MANAGED_BY]:     'Helm',
+        [KUBERNETES.MANAGED_BY]:     'kubewarden-controller',
         [KUBERNETES.MANAGED_NAME]:   'not-default',
         'app.kubernetes.io/part-of': KUBEWARDEN_PRODUCT_NAME
       };
@@ -164,7 +164,7 @@ describe('PolicyModel', () => {
   describe('source', () => {
     it('returns "kubewarden-defaults" when policy is default, not deployed with fleet, and not applied', () => {
       instance.metadata.labels = {
-        [KUBERNETES.MANAGED_BY]:     'Helm',
+        [KUBERNETES.MANAGED_BY]:     'kubewarden-controller',
         [KUBERNETES.MANAGED_NAME]:   KUBEWARDEN_CHARTS.DEFAULTS,
         'app.kubernetes.io/part-of': KUBEWARDEN_PRODUCT_NAME
       };
@@ -179,7 +179,7 @@ describe('PolicyModel', () => {
       };
       // Even if default labels are present, deployment with fleet takes precedence.
       instance.metadata.labels = {
-        [KUBERNETES.MANAGED_BY]:     'Helm',
+        [KUBERNETES.MANAGED_BY]:     'kubewarden-controller',
         [KUBERNETES.MANAGED_NAME]:   KUBEWARDEN_CHARTS.DEFAULTS,
         'app.kubernetes.io/part-of': KUBEWARDEN_PRODUCT_NAME
       };

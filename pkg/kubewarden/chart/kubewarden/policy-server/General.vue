@@ -93,7 +93,7 @@ async function fetchData() {
           });
 
           if (chartInfo) {
-            const registry = chartInfo.values?.common?.cattle?.systemDefaultRegistry || 'ghcr.io';
+            const registry = chartInfo.values?.global.imageRegistry || 'dp.apps.rancher.io';;
             const psImage = chartInfo.values?.policyServer?.image?.repository;
             const psTag = chartInfo.values?.policyServer?.image?.tag;
 
@@ -138,7 +138,8 @@ watchEffect(() => {
     const OFFICIAL_CHART_REPOS = [
       KUBEWARDEN_REPOS.CHARTS,
       KUBEWARDEN_REPOS.CHARTS_REPO,
-      KUBEWARDEN_REPOS.CHARTS_REPO_GIT
+      KUBEWARDEN_REPOS.CHARTS_REPO_GIT,
+      KUBEWARDEN_REPOS.CHARTS_REPO_OCI,
     ];
     const OFFICIAL_CATALOG_REPOS = [
       KUBEWARDEN_REPOS.POLICY_CATALOG,
@@ -156,7 +157,7 @@ watchEffect(() => {
     defaultsChart.value = store.getters['catalog/chart']({
       repoName:  kubewardenChartsRepo.value.metadata?.name,
       repoType:  'cluster',
-      chartName: KUBEWARDEN_CHARTS.DEFAULTS,
+      chartName: KUBEWARDEN_CHARTS.CONTROLLER,
     });
   }
 }
@@ -165,7 +166,7 @@ watchEffect(() => {
 watchEffect(() => {
   if (!controllerApp.value && allApps.value.length) {
     const controller = allApps.value.find(
-      (a) => a.spec?.chart?.metadata?.name === 'kubewarden-controller'
+      (a) => a.spec?.chart?.metadata?.name === 'suse-security-admission-controller'
     );
 
     if (controller) {

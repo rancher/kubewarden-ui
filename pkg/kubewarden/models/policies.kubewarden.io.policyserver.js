@@ -20,7 +20,7 @@ export const DEFAULT_POLICY_SERVER = {
         value: 'info'
       }
     ],
-    image:              'ghcr.io/kubewarden/policy-server:latest',
+    image:              'oci://dp.apps.rancher.io/charts/suse-security-admission-controller:latest',
     replicas:           1,
     serviceAccountName: '',
     verificationConfig: '',
