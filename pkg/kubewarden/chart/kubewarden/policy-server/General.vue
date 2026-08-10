@@ -93,7 +93,7 @@ async function fetchData() {
           });
 
           if (chartInfo) {
-            const registry = chartInfo.values?.global.imageRegistry || 'dp.apps.rancher.io';;
+            const registry = chartInfo.values?.global.imageRegistry || 'dp.apps.rancher.io';
             const psImage = chartInfo.values?.policyServer?.image?.repository;
             const psTag = chartInfo.values?.policyServer?.image?.tag;
 
