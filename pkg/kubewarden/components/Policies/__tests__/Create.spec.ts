@@ -6,11 +6,11 @@ import Create from '@kubewarden/components/Policies/Create.vue';
 
 // A minimal VersionInfo-like object whose parsePolicyModule() returns known values
 const mockVersionInfo = {
-  chart:  { 
+  chart:  {
     annotations: {
-      'kubewarden/registry': 'ghcr.io',
+      'kubewarden/registry':   'ghcr.io',
       'kubewarden/repository': 'kubewarden/policies/cap-hostname',
-      'kubewarden/tag': 'v1.0.0',
+      'kubewarden/tag':        'v1.0.0',
     }
   },
   values: {
@@ -43,36 +43,41 @@ const mockStore = {
 
 function createWrapper(overrides: any = {}) {
   return shallowMount(Create,
-  {
-    props: {
-      value: {
-        metadata: { 
-          annotations: {}
+    {
+      props: {
+        value: {
+          metadata: { annotations: {} },
+          spec:     {},
         },
-        spec:     {},
+        mode: 'create',
       },
-      mode: 'create',
-    },
-    global: {
-      provide: { chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY, realMode: 'create' },
-      mocks:   {
-        $store:      mockStore,
-        $fetchState: { pending: false },
-        $route:      { params: {}, query: {}, hash: '' },
-        $router:     { replace: jest.fn() },
+      global: {
+        provide: {
+          chartType: KUBEWARDEN.CLUSTER_ADMISSION_POLICY,
+          realMode:  'create'
+        },
+        mocks:   {
+          $store:      mockStore,
+          $fetchState: { pending: false },
+          $route:      {
+            params: {},
+            query:  {},
+            hash:   ''
+          },
+          $router: { replace: jest.fn() },
+        },
+        stubs: {
+          Loading:           { template: '<span />' },
+          Wizard:            { template: '<span />' },
+          PolicyTable:       { template: '<span />' },
+          PolicyReadmePanel: { template: '<span />' },
+          Values:            { template: '<span />' },
+          Banner:            { template: '<span />' },
+          AsyncButton:       { template: '<span />' },
+        },
       },
-      stubs: {
-        Loading:           { template: '<span />' },
-        Wizard:            { template: '<span />' },
-        PolicyTable:       { template: '<span />' },
-        PolicyReadmePanel: { template: '<span />' },
-        Values:            { template: '<span />' },
-        Banner:            { template: '<span />' },
-        AsyncButton:       { template: '<span />' },
-      },
-    },
-    ...overrides,
-  });
+      ...overrides,
+    });
 }
 
 describe('component: Create', () => {
@@ -140,13 +145,7 @@ describe('component: Create', () => {
       const wrapper = createWrapper();
 
       (wrapper.vm as any).selectedPolicyDetails = mockVersionInfo;
-      (wrapper.vm as any).chartValues = {
-        policy: { 
-          spec: {
-            module: 'kubewarden/policies/cap-hostname:v1.0.0'
-          }
-        }
-      };
+      (wrapper.vm as any).chartValues = { policy: { spec: { module: 'kubewarden/policies/cap-hostname:v1.0.0' } } };
       (wrapper.vm as any).yamlValues = 'spec:\n  module: 11111/22222:333333\n';
 
       // Simulate transition from YAML → FORM
@@ -168,19 +167,13 @@ describe('component: Create', () => {
       const wrapper = createWrapper();
 
       (wrapper.vm as any).selectedPolicyDetails = mockVersionInfo;
-      (wrapper.vm as any).policyModuleInfo = { 
-        registry: 'original',
+      (wrapper.vm as any).policyModuleInfo = {
+        registry:   'original',
         repository: 'repo',
-        tag: 'tag',
-        source: 'values'
+        tag:        'tag',
+        source:     'values'
       };
-      (wrapper.vm as any).chartValues = {
-        policy: {
-          spec: {
-            module: 'repo:tag'
-          }
-        }
-      };
+      (wrapper.vm as any).chartValues = { policy: { spec: { module: 'repo:tag' } } };
       (wrapper.vm as any).yamlValues = 'spec:\n  module: other/repo:newtag\n';
 
       (wrapper.vm as any).yamlOption = VALUES_STATE.YAML;
@@ -195,7 +188,12 @@ describe('component: Create', () => {
 
       (wrapper.vm as any).selectedPolicyDetails = mockVersionInfo;
       (wrapper.vm as any).selectedPolicyChart = 'custom'; // makes customPolicy computed = true
-      (wrapper.vm as any).policyModuleInfo = { registry: 'original', repository: 'repo', tag: 'tag', source: 'values' };
+      (wrapper.vm as any).policyModuleInfo = {
+        registry:   'original',
+        repository: 'repo',
+        tag:        'tag',
+        source:     'values'
+      };
       (wrapper.vm as any).chartValues = { policy: { spec: { module: 'repo:tag' } } };
       (wrapper.vm as any).yamlValues = 'spec:\n  module: 11111/22222:333333\n';
 
