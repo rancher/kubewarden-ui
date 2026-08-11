@@ -4,17 +4,23 @@ defaultNamespace: cattle-kubewarden-system
 helm:
   version: '*-0'  # 2.0.5
   releaseName: rancher-admission-controller
-  chart: admission-controller
-  repo: https://charts.kubewarden.io
+  # chart: admission-controller
+  repo: oci://dp.apps.rancher.io/charts/suse-security-admission-controller
   # valuesFiles:
   #   - values.yaml
   values:
     # image:
-    #   tag: latest
+      # tag: latest
+      # registry: mrReg
+    # policyServer:
+      # image:
+        # registry: mrReg
     auditScanner:
       policyReporter: true
       cronJob:
         schedule: "*/1 * * * *" # every minute
+      # image:
+        # registry: mrReg
     telemetry:
       mode: sidecar
       tracing: true
@@ -29,6 +35,9 @@ helm:
               insecure: true
     recommendedPolicies:
       enabled: true
+
+  valuesFrom:
+
 
 diff:
   comparePatches:
