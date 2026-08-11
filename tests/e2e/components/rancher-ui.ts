@@ -78,18 +78,6 @@ export class RancherUI {
     return base.getByRole('combobox', { name: 'Search for option' }).describe(`Select: ${label}`)
   }
 
-  // Slide-in drawer or old config
-  async showConfiguration() {
-    const configBtn = RancherUI.isVersion('>=2.12') ? 'Show Configuration' : 'Config'
-    await this.button(configBtn).click()
-  }
-
-  // Handling for second "Close" button on policy readme
-  async hideConfiguration() {
-    if (RancherUI.isVersion('>=2.12'))
-      await this.button(/^Close.*Configuration drawer$/).last().click()
-  }
-
   // Select option from (un)labeled Select
   async selectOption(label: string|Locator, option: string | RegExp | number) {
     const select = (typeof label === 'string')
@@ -97,6 +85,8 @@ export class RancherUI {
       : (await label.getAttribute('role') === 'combobox')
           ? label
           : this.select(label)
+
+    await expect(select.getByText('Loading...', { exact: true })).not.toBeVisible()
     await select.click()
 
     const optionItem = typeof option === 'number'
@@ -111,6 +101,18 @@ export class RancherUI {
         await select.click()
       }
     }
+  }
+
+  // Slide-in drawer or old config
+  async showConfiguration() {
+    const configBtn = RancherUI.isVersion('>=2.12') ? 'Show Configuration' : 'Config'
+    await this.button(configBtn).click()
+  }
+
+  // Handling for second "Close" button on policy readme
+  async hideConfiguration() {
+    if (RancherUI.isVersion('>=2.12'))
+      await this.button(/^Close.*Configuration drawer$/).last().click()
   }
 
   // ==================================================================================================
