@@ -13,14 +13,14 @@ export const controllerAppValuesLegacy: any = {
 };
 
 export const mockControllerAppLegacy: CatalogApp = {
-  id:         'cattle-kubewarden-system/rancher-kubewarden-controller',
+  id:         'cattle-kubewarden-system/rancher-suse-security-admission-controller',
   type:       'app',
   apiVersion: 'catalog.cattle.io/v1',
   kind:       'App',
   metadata:   {
     annotations:       {},
     labels:            {},
-    name:              'rancher-kubewarden-controller',
+    name:              'rancher-suse-security-admission-controller',
     namespace:         'cattle-kubewarden-system'
   },
   spec: {
@@ -34,7 +34,7 @@ export const mockControllerAppLegacy: CatalogApp = {
           'catalog.cattle.io/os':                  'linux',
           'catalog.cattle.io/provides-gvr':        'policyservers.policies.kubewarden.io/v1',
           'catalog.cattle.io/rancher-version':     '>= 2.6.0-0 <= 2.8.100-0',
-          'catalog.cattle.io/release-name':        'rancher-kubewarden-controller',
+          'catalog.cattle.io/release-name':        'rancher-suse-security-admission-controller',
           'catalog.cattle.io/requests-cpu':        '250m',
           'catalog.cattle.io/requests-memory':     '50Mi',
           'catalog.cattle.io/type':                'cluster-tool',
@@ -45,14 +45,14 @@ export const mockControllerAppLegacy: CatalogApp = {
         },
         apiVersion:  'v2',
         appVersion:  'v1.11.0',
-        name:       'kubewarden-controller',
+        name:       'security-admission-controller',
         type:       'application',
         version:    '2.0.9'
       },
       values: {}
     },
     info:      { status: 'deployed' },
-    name:      'rancher-kubewarden-controller',
+    name:      'rancher-suse-security-admission-controller',
     namespace: 'cattle-kubewarden-system',
     values:    {}
   },
@@ -118,7 +118,7 @@ export const mockControllerApp: CatalogApp = {
           'catalog.cattle.io/os':                  'linux',
           'catalog.cattle.io/provides-gvr':        'policyservers.policies.kubewarden.io/v1',
           'catalog.cattle.io/rancher-version':     '>= 2.6.0-0 <= 2.11.100-0',
-          'catalog.cattle.io/release-name':        'rancher-kubewarden-controller',
+          'catalog.cattle.io/release-name':        'rancher-suse-security-admission-controller',
           'catalog.cattle.io/requests-cpu':        '250m',
           'catalog.cattle.io/requests-memory':     '50Mi',
           'catalog.cattle.io/type':                'cluster-tool',
@@ -152,12 +152,12 @@ export const mockControllerApp: CatalogApp = {
             url:   'https://github.com/orgs/kubewarden/teams/maintainers'
           }
         ],
-        name:    'kubewarden-controller',
+        name:    'suse-security-admission-controller',
         type:    'application',
         version: '4.1.0'
       }
     },
-    name:      'rancher-kubewarden-controller',
+    name:      'rancher-suse-security-admission-controller',
     namespace: 'cattle-kubewarden-system',
   },
   values: { ...controllerAppValues }

@@ -4,6 +4,7 @@ import { SHOW_PRE_RELEASE } from '@shell/store/prefs';
 
 import controllerChart from '@tests/unit/mocks/controllerChart';
 import kubewardenRepo from '@tests/unit/mocks/kubewardenRepo';
+import { KUBEWARDEN_CHARTS, KUBEWARDEN_NAMESPACE } from '@kubewarden/types';
 
 import InstallView from '@kubewarden/components/Dashboard/InstallView.vue';
 
@@ -15,9 +16,12 @@ describe('component: InstallView', () => {
         currentCluster:                  () => 'current_cluster',
         currentStore:                    () => 'cluster',
         'kubewarden/hideBannerDefaults': jest.fn(),
-        'i18n/t':                        jest.fn(),
+        'i18n/t':                        jest.fn((key) => key),
         'catalog/chart':                 jest.fn(),
-        'catalog/charts':                [controllerChart],
+        'catalog/charts':                [{
+          chartName: KUBEWARDEN_CHARTS.CONTROLLER,
+          repoName:  kubewardenRepo.id,
+        }],
         'catalog/repos':                 [kubewardenRepo],
         'cluster/all':                   jest.fn(),
         'cluster/canList':               () => true,
@@ -31,11 +35,15 @@ describe('component: InstallView', () => {
   };
 
   const commonStubs = {
-    InstallWizard: false,
-    Banner:        false,
-    Loading:       { template: '<span />' },
-    CopyCode:      { template: '<span />' },
-    AsyncButton:   { template: '<span />' },
+    InstallWizard:            false,
+    Banner:                   false,
+    Checkbox:                 { template: '<span />' },
+    Loading:                  { template: '<span />' },
+    CopyCode:                 { template: '<span />' },
+    AsyncButton:              { template: '<span />' },
+    LabeledInput:             { template: '<span />' },
+    NameNsDescription:        { template: '<span />' },
+    SelectOrCreateAuthSecret: { template: '<span />' },
   };
 
   const createWrapper = (overrides?: any) => {
@@ -70,6 +78,15 @@ describe('component: InstallView', () => {
 
     await wrapper.vm.$nextTick();
 
+    expect(wrapper.find('[data-testid="kw-repo-auth-title"]').exists()).toBe(true);
+
+    const continueButton = wrapper.find('[data-testid="kw-appco-auth-continue"]');
+
+    expect(continueButton.exists()).toBe(true);
+
+    await continueButton.trigger('click');
+    await wrapper.vm.$nextTick();
+
     expect(wrapper.find('[data-testid="kw-repo-title"]').exists()).toBe(true);
   });
 
@@ -86,7 +103,7 @@ describe('component: InstallView', () => {
 
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.find('[data-testid="kw-app-install-title"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="kw-repo-title"]').exists()).toBe(true);
   });
 
   it('renders reload button when controller chart is not installed and reload is ready', async() => {
@@ -94,7 +111,7 @@ describe('component: InstallView', () => {
     const wrapper = createWrapper({
       data() {
         return {
-          initStepIndex: 1,
+          initStepIndex: 2,
           reloadReady:   true
         };
       }
@@ -123,7 +140,7 @@ describe('component: InstallView', () => {
     const wrapper = createWrapper({
       data() {
         return {
-          initStepIndex: 1,
+          initStepIndex: 2,
           reloadReady:   true
         };
       }
@@ -135,17 +152,16 @@ describe('component: InstallView', () => {
 
     await wrapper.vm.$nextTick();
 
-    // Find the button and trigger a click event
-    const button = wrapper.find('[data-testid="kw-app-install-button"]');
-
-    button.trigger('click');
-    await wrapper.vm.$nextTick();
-
     // Spy on the $router.push method
     const routerPushSpy = jest.spyOn(wrapper.vm.$router, 'push');
 
+    routerPushSpy.mockClear();
+
     // Find the button and trigger a click event
+    const button = wrapper.find('[data-testid="kw-app-install-button"]');
+
     await button.trigger('click');
+    await wrapper.vm.$nextTick();
 
     // Verify the expected route was pushed to the router
     expect(routerPushSpy).toHaveBeenCalledWith({
@@ -154,8 +170,10 @@ describe('component: InstallView', () => {
       query:  {
         'repo-type':  'cluster',
         repo:        'kubewarden-charts',
-        chart:       'kubewarden-controller',
-        version:     '2.0.5'
+        chart:       'suse-security-admission-controller',
+        version:     '2.0.5',
+        name:        KUBEWARDEN_CHARTS.INSTALLATION_NAME,
+        namespace:   KUBEWARDEN_NAMESPACE
       }
     });
   });
@@ -173,7 +191,7 @@ describe('component: InstallView', () => {
 
     const wrapper = createWrapper({
       data() {
-        return { initStepIndex: 1 };
+        return { initStepIndex: 2 };
       }
     });
 
@@ -183,17 +201,16 @@ describe('component: InstallView', () => {
 
     await wrapper.vm.$nextTick();
 
-    // Find the button and trigger a click event
-    const button = wrapper.find('[data-testid="kw-app-install-button"]');
-
-    button.trigger('click');
-    await wrapper.vm.$nextTick();
-
     // Spy on the $router.push method
     const routerPushSpy = jest.spyOn(wrapper.vm.$router, 'push');
 
+    routerPushSpy.mockClear();
+
     // Find the button and trigger a click event
+    const button = wrapper.find('[data-testid="kw-app-install-button"]');
+
     await button.trigger('click');
+    await wrapper.vm.$nextTick();
 
     // Verify the expected route was pushed to the router
     expect(routerPushSpy).toHaveBeenCalledWith({
@@ -202,8 +219,10 @@ describe('component: InstallView', () => {
       query:  {
         'repo-type':  'cluster',
         repo:        'kubewarden-charts',
-        chart:       'kubewarden-controller',
-        version:     '2.0.6-rc1'
+        chart:       'suse-security-admission-controller',
+        version:     '2.0.6-rc1',
+        name:        KUBEWARDEN_CHARTS.INSTALLATION_NAME,
+        namespace:   KUBEWARDEN_NAMESPACE
       }
     });
   });

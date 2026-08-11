@@ -101,9 +101,11 @@ describe('PolicyModel', () => {
       const route = instance.kubewardenDefaultsRoute;
       const expectedQuery = {
         [REPO_TYPE]: 'cluster',
-        [REPO]:      'kubewarden-charts',
-        [CHART]:     'kubewarden-defaults',
-        [VERSION]:   '1.2.3'
+        [REPO]:      'admission-controller-charts',
+        [CHART]:     'suse-security-admission-controller',
+        [VERSION]:   '1.2.3',
+        name:        'rancher-admission-controller',
+        namespace:   'cattle-kubewarden-system'
       };
 
       expect(route).toEqual({
@@ -122,7 +124,7 @@ describe('PolicyModel', () => {
   describe('isKubewardenDefaultPolicy', () => {
     it('returns true when labels match Helm management, defaults, and part-of', () => {
       instance.metadata.labels = {
-        [KUBERNETES.MANAGED_BY]:     'Helm',
+        [KUBERNETES.MANAGED_BY]:     'kubewarden-controller',
         [KUBERNETES.MANAGED_NAME]:   KUBEWARDEN_CHARTS.DEFAULTS,
         'app.kubernetes.io/part-of': KUBEWARDEN_PRODUCT_NAME
       };
@@ -131,7 +133,7 @@ describe('PolicyModel', () => {
 
     it('returns false when one label does not match', () => {
       instance.metadata.labels = {
-        [KUBERNETES.MANAGED_BY]:     'Helm',
+        [KUBERNETES.MANAGED_BY]:     'kubewarden-controller',
         [KUBERNETES.MANAGED_NAME]:   'not-default',
         'app.kubernetes.io/part-of': KUBEWARDEN_PRODUCT_NAME
       };
@@ -162,14 +164,14 @@ describe('PolicyModel', () => {
   });
 
   describe('source', () => {
-    it('returns "kubewarden-defaults" when policy is default, not deployed with fleet, and not applied', () => {
+    it('returns "Helm chart" when policy is default, not deployed with fleet, and not applied', () => {
       instance.metadata.labels = {
-        [KUBERNETES.MANAGED_BY]:     'Helm',
+        [KUBERNETES.MANAGED_BY]:     'kubewarden-controller',
         [KUBERNETES.MANAGED_NAME]:   KUBEWARDEN_CHARTS.DEFAULTS,
         'app.kubernetes.io/part-of': KUBEWARDEN_PRODUCT_NAME
       };
       instance.metadata.annotations = {}; // not deployed with fleet, not applied
-      expect(instance.source).toBe('kubewarden-defaults');
+      expect(instance.source).toBe('Helm chart');
     });
 
     it('returns "Fleet" when deployed with fleet and not applied', () => {
@@ -179,7 +181,7 @@ describe('PolicyModel', () => {
       };
       // Even if default labels are present, deployment with fleet takes precedence.
       instance.metadata.labels = {
-        [KUBERNETES.MANAGED_BY]:     'Helm',
+        [KUBERNETES.MANAGED_BY]:     'kubewarden-controller',
         [KUBERNETES.MANAGED_NAME]:   KUBEWARDEN_CHARTS.DEFAULTS,
         'app.kubernetes.io/part-of': KUBEWARDEN_PRODUCT_NAME
       };

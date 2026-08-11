@@ -14,25 +14,30 @@ export const KUBEWARDEN_PRODUCT_GROUP = 'policies.kubewarden.io';
 export const CHART_NAME = 'rancher-kubewarden';
 
 export const KUBEWARDEN_DASHBOARD = 'dashboard';
+export const KUBEWARDEN_NAMESPACE = 'cattle-kubewarden-system';
+export const KUBEWARDEN_OCI_REGISTRY = 'oci://dp.apps.rancher.io/charts';
 
 export const KUBEWARDEN_REPOS = {
-  CHARTS:                   'https://charts.kubewarden.io',
-  CHARTS_REPO:              'https://github.com/kubewarden/helm-charts',
-  CHARTS_REPO_GIT:          'https://github.com/kubewarden/helm-charts.git',
-  CHARTS_REPO_NAME:         'kubewarden-charts',
-  POLICY_CATALOG:           'https://kubewarden.github.io/policy-catalog',
-  POLICY_CATALOG_REPO:      'https://github.com/kubewarden/policy-catalog',
-  POLICY_CATALOG_REPO_GIT:  'https://github.com/kubewarden/policy-catalog.git',
-  POLICY_CATALOG_REPO_NAME: 'kubewarden-policy-catalog',
+  CHARTS:                             'https://charts.kubewarden.io',
+  CHARTS_REPO:                        'https://github.com/kubewarden/helm-charts',
+  CHARTS_REPO_GIT:                    'https://github.com/kubewarden/helm-charts.git',
+  CHARTS_REPO_OCI:                    'oci://dp.apps.rancher.io/charts/suse-security-admission-controller',
+  CHARTS_REPO_NAME:                   'admission-controller-charts',
+  SUSE_SECURITY_ADMISSION_CONTROLLER: 'oci://dp.apps.rancher.io/charts/suse-security-admission-controller',
+  POLICY_CATALOG:                     'https://kubewarden.github.io/policy-catalog',
+  POLICY_CATALOG_REPO:                'https://github.com/kubewarden/policy-catalog',
+  POLICY_CATALOG_REPO_GIT:            'https://github.com/kubewarden/policy-catalog.git',
+  POLICY_CATALOG_REPO_NAME:           'kubewarden-policy-catalog',
 };
 
 export const KUBEWARDEN_CHARTS = {
-  CONTROLLER:       'kubewarden-controller',
-  DEFAULTS:         'kubewarden-defaults',
+  CONTROLLER:        'suse-security-admission-controller',
+  DEFAULTS:          'ssac',
+  INSTALLATION_NAME: 'rancher-admission-controller',
 };
 
 export const KUBEWARDEN_APPS = {
-  RANCHER_CONTROLLER: 'rancher-kubewarden-controller',
+  RANCHER_CONTROLLER: 'rancher-suse-security-admission-controller',
   RANCHER_DEFAULTS:   'rancher-kubewarden-defaults'
 };
 

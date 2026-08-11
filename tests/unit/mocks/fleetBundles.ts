@@ -21,7 +21,7 @@ export const fleetBundles: FleetBundle[] = [
     spec: {
       defaultNamespace: 'kubewarden',
       dependsOn:        [
-        { selector: { matchLabels: { app: 'kubewarden-controller' } } }
+        { selector: { matchLabels: { app: 'suse-security-admission-controller' } } }
       ],
       helm: {
         chart:       'kubewarden-defaults',

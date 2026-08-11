@@ -2,7 +2,6 @@
 import { mapGetters } from 'vuex';
 import isEmpty from 'lodash/isEmpty';
 import debounce from 'lodash/debounce';
-import semver from 'semver';
 
 import {
   CATALOG, CONFIG_MAP, MONITORING, NAMESPACE, SERVICE
@@ -193,41 +192,33 @@ export default {
         return null;
       }
 
-      const version = this.controllerApp?.spec?.chart?.metadata?.version;
       const telemetry = this.controllerApp?.values?.telemetry;
+      // sidecar.metrics is only meaningful if telemetry.metrics === true.
+      const metricsIsUndefinedOrBoolean = telemetry?.metrics === undefined || typeof telemetry?.metrics === 'boolean';
 
-      if (semver.gte(version, '4.0.0-0')) {
-        // In version 4+, telemetry.metrics should be boolean or undefined (treated as false).
-        // sidecar.metrics is only meaningful if telemetry.metrics === true.
-        const metricsIsUndefinedOrBoolean = telemetry?.metrics === undefined || typeof telemetry?.metrics === 'boolean';
+      // Check for unsupported 'custom' mode
+      if (telemetry?.mode === 'custom') {
+        this.handleMetricsChecklist('unsupportedTelemetrySpec', true);
 
-        // Check for unsupported 'custom' mode
-        if (telemetry?.mode === 'custom') {
-          this.handleMetricsChecklist('unsupportedTelemetrySpec', true);
-
-          return null;
-        }
-
-        // If metrics is not undefined or boolean, it's outdated
-        if (!metricsIsUndefinedOrBoolean) {
-          this.handleMetricsChecklist('outdatedTelemetrySpec', true);
-
-          return null;
-        }
-
-        // If telemetry.metrics is undefined or false, treat it as false.
-        // sidecar config is irrelevant in that case, and not considered outdated.
-        if (telemetry?.metrics !== true) {
-          // metrics is off, no sidecar config needed
-          return null;
-        }
-
-        // If we get here, telemetry.metrics === true and portIsDefined === true
-        return telemetry?.metrics;
-      } else {
-        // Old schema: just return telemetry.metrics.enabled
-        return telemetry?.metrics?.enabled;
+        return null;
       }
+
+      // If metrics is not undefined or boolean, it's outdated
+      if (!metricsIsUndefinedOrBoolean) {
+        this.handleMetricsChecklist('outdatedTelemetrySpec', true);
+
+        return null;
+      }
+
+      // If telemetry.metrics is undefined or false, treat it as false.
+      // sidecar config is irrelevant in that case, and not considered outdated.
+      if (telemetry?.metrics !== true) {
+        // metrics is off, no sidecar config needed
+        return null;
+      }
+
+      // If we get here, telemetry.metrics === true and portIsDefined === true
+      return telemetry?.metrics;
     },
 
     monitoringApp() {

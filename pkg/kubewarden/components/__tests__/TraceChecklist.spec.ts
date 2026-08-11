@@ -1,5 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 
+import { CATALOG } from '@shell/config/labels-annotations';
+
 import TraceChecklist from '@kubewarden/components/TraceChecklist.vue';
 
 describe('TraceChecklist.vue', () => {
@@ -134,17 +136,21 @@ describe('TraceChecklist.vue', () => {
 
   it('navigates correctly via controllerAppRoute when controllerApp is provided', async() => {
     const mockAnnotations = {
-      'catalog.cattle.io/catalog-namespace': 'mockNamespace',
-      'catalog.cattle.io/release-name':      'mockReleaseName',
-      'catalog.cattle.io/upstream-version':  'mockVersion',
-      'catalog.cattle.io/source-repo-name':  'mockRepoName',
-      'catalog.cattle.io/source-repo-type':  'mockRepoType'
+      [CATALOG.SOURCE_REPO_NAME]: 'mockRepoName',
+      [CATALOG.SOURCE_REPO_TYPE]: 'mockRepoType'
     };
     const mockMetadata = {
       annotations: mockAnnotations,
-      name:        'mockChartName'
+      name:        'mockChartName',
+      version:     'mockVersion'
     };
-    const mockControllerApp = { spec: { chart: { metadata: mockMetadata } } };
+    const mockControllerApp = {
+      metadata: {
+        name:      'mockReleaseName',
+        namespace: 'mockNamespace'
+      },
+      spec: { chart: { metadata: mockMetadata } }
+    };
 
     const wrapper = createWrapper({ props: { controllerApp: mockControllerApp } });
 
@@ -163,9 +169,9 @@ describe('TraceChecklist.vue', () => {
     expect(pushArg.query).toEqual({
       'chart':     'mockChartName',
       'name':      'mockReleaseName',
-      'namespace': undefined,
-      'repo':      undefined,
-      'repo-type': undefined,
+      'namespace': 'mockNamespace',
+      'repo':      'mockRepoName',
+      'repo-type': 'mockRepoType',
       'version':   'mockVersion',
     });
   });

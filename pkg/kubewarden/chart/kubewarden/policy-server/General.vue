@@ -23,7 +23,6 @@ import {
 import { findCompatibleDefaultsChart } from '@kubewarden/utils/chart';
 
 import ResourceLabeledSelect from '@shell/components/form/ResourceLabeledSelect';
-import { Banner } from '@components/Banner';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { RadioGroup } from '@components/Form/Radio';
 import Loading from '@shell/components/Loading';
@@ -52,14 +51,6 @@ const allApps = computed<CatalogApp[]>(() => store.getters['cluster/all'](CATALO
 const allRepos = computed<ClusterRepo[]>(() => store.getters['cluster/all'](CATALOG.CLUSTER_REPO));
 const controllerApp = computed<CatalogApp>(() => store.getters['kubewarden/controllerApp']);
 const fleetBundles = computed<FleetBundle[]>(() => store.getters['management/all'](FLEET.BUNDLE));
-
-const showVersionBanner = computed(() => {
-  if (isFleet.value) {
-    return isCreate.value && defaultImage.value && !latestChartVersion.value;
-  }
-
-  return isCreate.value && defaultImage.value && !defaultsChart?.value && !latestChartVersion.value;
-});
 
 const policyClassPaginateSettings = {
   requestSettings: (opts: any) => {
@@ -102,7 +93,7 @@ async function fetchData() {
           });
 
           if (chartInfo) {
-            const registry = chartInfo.values?.common?.cattle?.systemDefaultRegistry || 'ghcr.io';
+            const registry = chartInfo.values?.global.imageRegistry || 'dp.apps.rancher.io';
             const psImage = chartInfo.values?.policyServer?.image?.repository;
             const psTag = chartInfo.values?.policyServer?.image?.tag;
 
@@ -147,7 +138,8 @@ watchEffect(() => {
     const OFFICIAL_CHART_REPOS = [
       KUBEWARDEN_REPOS.CHARTS,
       KUBEWARDEN_REPOS.CHARTS_REPO,
-      KUBEWARDEN_REPOS.CHARTS_REPO_GIT
+      KUBEWARDEN_REPOS.CHARTS_REPO_GIT,
+      KUBEWARDEN_REPOS.CHARTS_REPO_OCI,
     ];
     const OFFICIAL_CATALOG_REPOS = [
       KUBEWARDEN_REPOS.POLICY_CATALOG,
@@ -165,7 +157,7 @@ watchEffect(() => {
     defaultsChart.value = store.getters['catalog/chart']({
       repoName:  kubewardenChartsRepo.value.metadata?.name,
       repoType:  'cluster',
-      chartName: KUBEWARDEN_CHARTS.DEFAULTS,
+      chartName: KUBEWARDEN_CHARTS.CONTROLLER,
     });
   }
 }
@@ -174,7 +166,7 @@ watchEffect(() => {
 watchEffect(() => {
   if (!controllerApp.value && allApps.value.length) {
     const controller = allApps.value.find(
-      (a) => a.spec?.chart?.metadata?.name === 'kubewarden-controller'
+      (a) => a.spec?.chart?.metadata?.name === 'suse-security-admission-controller'
     );
 
     if (controller) {
@@ -202,16 +194,6 @@ watchEffect(() => {
     </div>
 
     <div id="image-container">
-      <div class="row">
-        <div v-if="showVersionBanner" class="col span-12">
-          <Banner
-            class="mb-20 mt-0"
-            color="warning"
-            :label="t('kubewarden.policyServerConfig.defaultImage.versionWarning')"
-          />
-        </div>
-      </div>
-
       <div class="row" data-testid="ps-config-image-inputs">
         <div class="col span-6">
           <RadioGroup

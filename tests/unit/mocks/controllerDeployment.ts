@@ -1,33 +1,33 @@
 import { V1Deployment } from '@kubernetes/client-node';
 
 export default <V1Deployment>{
-  id:    'cattle-kubewarden-system/rancher-kubewarden-controller',
+  id:    'cattle-kubewarden-system/rancher-suse-security-admission-controller',
   type:  'apps.deployment',
   links: {
-    remove: 'https://localhost:8005/v1/apps.deployments/cattle-kubewarden-system/rancher-kubewarden-controller',
-    self:   'https://localhost:8005/v1/apps.deployments/cattle-kubewarden-system/rancher-kubewarden-controller',
-    update: 'https://localhost:8005/v1/apps.deployments/cattle-kubewarden-system/rancher-kubewarden-controller',
-    view:   'https://localhost:8005/apis/apps/v1/namespaces/cattle-kubewarden-system/deployments/rancher-kubewarden-controller'
+    remove: 'https://localhost:8005/v1/apps.deployments/cattle-kubewarden-system/rancher-suse-security-admission-controller',
+    self:   'https://localhost:8005/v1/apps.deployments/cattle-kubewarden-system/rancher-suse-security-admission-controller',
+    update: 'https://localhost:8005/v1/apps.deployments/cattle-kubewarden-system/rancher-suse-security-admission-controller',
+    view:   'https://localhost:8005/apis/apps/v1/namespaces/cattle-kubewarden-system/deployments/rancher-suse-security-admission-controller'
   },
   apiVersion: 'apps/v1',
   kind:       'Deployment',
   metadata:   {
     annotations: {
       'deployment.kubernetes.io/revision': '1',
-      'meta.helm.sh/release-name':         'rancher-kubewarden-controller',
+      'meta.helm.sh/release-name':         'rancher-suse-security-admission-controller',
       'meta.helm.sh/release-namespace':    'cattle-kubewarden-system'
     },
     generation: 1,
     labels:     {
       'app.kubernetes.io/component':  'controller',
-      'app.kubernetes.io/instance':   'rancher-kubewarden-controller',
+      'app.kubernetes.io/instance':   'rancher-suse-security-admission-controller',
       'app.kubernetes.io/managed-by': 'Helm',
-      'app.kubernetes.io/name':       'kubewarden-controller',
+      'app.kubernetes.io/name':       'suse-security-admission-controller',
       'app.kubernetes.io/part-of':    'kubewarden',
       'app.kubernetes.io/version':    'v1.21.0',
-      'helm.sh/chart':                'kubewarden-controller-4.1.0'
+      'helm.sh/chart':                'suse-security-admission-controller-4.1.0'
     },
-    name:      'rancher-kubewarden-controller',
+    name:      'rancher-suse-security-admission-controller',
     namespace: 'cattle-kubewarden-system',
   },
   spec: {
@@ -36,8 +36,8 @@ export default <V1Deployment>{
     revisionHistoryLimit:    10,
     selector:                {
       matchLabels: {
-        'app.kubernetes.io/instance': 'rancher-kubewarden-controller',
-        'app.kubernetes.io/name':     'kubewarden-controller'
+        'app.kubernetes.io/instance': 'rancher-suse-security-admission-controller',
+        'app.kubernetes.io/name':     'suse-security-admission-controller'
       }
     },
     strategy: {
@@ -51,12 +51,12 @@ export default <V1Deployment>{
       metadata: {
         labels: {
           'app.kubernetes.io/component':  'controller',
-          'app.kubernetes.io/instance':   'rancher-kubewarden-controller',
+          'app.kubernetes.io/instance':   'rancher-suse-security-admission-controller',
           'app.kubernetes.io/managed-by': 'Helm',
-          'app.kubernetes.io/name':       'kubewarden-controller',
+          'app.kubernetes.io/name':       'suse-security-admission-controller',
           'app.kubernetes.io/part-of':    'kubewarden',
           'app.kubernetes.io/version':    'v1.21.0',
-          'helm.sh/chart':                'kubewarden-controller-4.1.0'
+          'helm.sh/chart':                'suse-security-admission-controller-4.1.0'
         }
       },
       spec: {
@@ -65,14 +65,14 @@ export default <V1Deployment>{
             args: [
               '--leader-elect',
               '--deployments-namespace=cattle-kubewarden-system',
-              '--webhook-service-name=rancher-kubewarden-controller-webhook-service',
+              '--webhook-service-name=rancher-suse-security-admission-controller-webhook-service',
               '--always-accept-admission-reviews-on-deployments-namespace',
               '--zap-log-level=info'
             ],
             command: [
               '/manager'
             ],
-            image:           'ghcr.io/kubewarden/kubewarden-controller:v1.21.0',
+            image:           'ghcr.io/kubewarden/suse-security-admission-controller:v1.21.0',
             imagePullPolicy: 'IfNotPresent',
             livenessProbe:   {
               failureThreshold: 3,
@@ -132,8 +132,8 @@ export default <V1Deployment>{
         restartPolicy:                 'Always',
         schedulerName:                 'default-scheduler',
         securityContext:               { runAsNonRoot: true },
-        serviceAccount:                'rancher-kubewarden-controller',
-        serviceAccountName:            'rancher-kubewarden-controller',
+        serviceAccount:                'rancher-suse-security-admission-controller',
+        serviceAccountName:            'rancher-suse-security-admission-controller',
         terminationGracePeriodSeconds: 10,
         volumes:                       [
           {

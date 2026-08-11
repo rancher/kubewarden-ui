@@ -7,14 +7,12 @@ import { KUBEWARDEN_APPS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME } from '@ku
 import { kwDefaultsHelmChartSettings } from '@kubewarden/modules/policies';
 
 import PolicyList from '@kubewarden/components/Policies/PolicyList';
-import DefaultsBanner from '@kubewarden/components/DefaultsBanner';
 
 export default {
   components: {
     Banner,
     Loading,
     PolicyList,
-    DefaultsBanner
   },
 
   props: {
@@ -85,10 +83,6 @@ export default {
       class="type-banner mb-20 mt-0"
       color="info"
       :label="t('kubewarden.clusterAdmissionPolicy.description')"
-    />
-    <DefaultsBanner
-      v-if="!kwDefaultsHelmChartSettingsCompatible"
-      mode="upgrade"
     />
 
     <PolicyList data-testid="kw-cap-policy-list" :resource="resource" :rows="rows" :schema="schema" />
