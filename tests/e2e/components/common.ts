@@ -53,8 +53,9 @@ export class Common {
    */
   static async fetchAppCoMr() {
     const title = 'SUSE Security Admission Controller'
-    const chartsRepo = 'https://gitlab.suse.de/orchid/suse-products-recipes/suse-security/charts'
-    const rpmsRepo = 'https://gitlab.suse.de/orchid/suse-products-recipes/suse-security/rpms-containers'
+    const chartsRepo = 'oci://registry.suse.de/devel/jasmine/charts/charts/suse-security-admission-controller'
+    const rpmsRepo = 'registry.suse.de/devel/jasmine/containers'
+    return { mrChart: chartsRepo, mrReg: rpmsRepo, undefined }
 
     const firstMr = (repo: string) => JSON.parse(
       execFileSync('glab', ['mr', 'list', '-R', repo, '--search', title, '-F', 'json'], { encoding: 'utf-8' })
