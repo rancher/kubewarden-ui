@@ -1,7 +1,6 @@
 import { test, expect } from './rancher/rancher-test'
 import { RancherExtensionsPage } from './rancher/rancher-extensions.page'
 import { AppVersion, KubewardenPage } from './pages/kubewarden.page'
-import { PolicyServersPage } from './pages/policyservers.page'
 import { ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherFleetPage } from './rancher/rancher-fleet.page'
@@ -13,6 +12,8 @@ const conf = {
   src_url: 'http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js',
   // Install UI extension from: source (yarn dev), github (github tag), prime (official)
   ui_from: (process.env.ORIGIN || undefined) as 'source'|'github'|'prime'|undefined,
+  // Install Kubewarden from: github (community), gitlab (mr), prime (official)
+  kw_from: (process.env.KW || undefined) as 'github'|'gitlab'|'prime'|undefined,
   // How to install Kubewarden: manual (from UI extension), fleet, upgrade (previous version)
   kw_mode: (process.env.MODE || undefined) as 'manual'|'fleet'|'upgrade'|undefined,
   // Fetch Kubewarden versions from github for upgrade test
@@ -21,6 +22,11 @@ const conf = {
 
 if (conf.ui_from) expect(conf.ui_from).toMatch(/^(source|github|prime)$/)
 if (conf.kw_mode) expect(conf.kw_mode).toMatch(/^(manual|fleet|upgrade)$/)
+if (conf.kw_from) expect(conf.kw_from).toMatch(/^(github|gitlab|prime)$/)
+if (conf.kw_from !== 'github') {
+  expect(process.env.APPCO_USERNAME).toBeDefined()
+  expect(process.env.APPCO_PASSWORD).toBeDefined()
+}
 
 // Configure defaults after env is loaded
 test.beforeAll(async({ request }) => {
@@ -32,6 +38,8 @@ test.beforeAll(async({ request }) => {
 
   // Default to manual mode, unless fleet or upgrade is requested
   conf.kw_mode ||= 'manual'
+  // Default to installation from GitLab (MR)
+  conf.kw_from ||= 'prime'
 
   if (conf.kw_mode === 'upgrade') {
     conf.upMap = (await Common.fetchVersionMap()).splice(-3)
@@ -81,30 +89,19 @@ test('Install Kubewarden', { tag: '@kw' }, async({ page, ui, nav }) => {
   test.skip(conf.kw_mode === 'fleet')
 
   const kwPage = new KubewardenPage(page)
-  await kwPage.installKubewarden({ version: conf.kw_mode === 'upgrade' ? conf.upMap[0].controller : undefined })
+  if (conf.kw_from == 'github') {
+    await kwPage.installGithub({ version: conf.kw_mode === 'upgrade' ? conf.upMap[0].controller : undefined })
+  } else if (conf.kw_from == 'gitlab') {
+    await kwPage.installGitlab()
+  } else {
+    await kwPage.installAppco()
+  }
 
   // Check UI is active
   await nav.kubewarden()
   await ui.retry(async() => {
-    await expect(page.getByRole('heading', { name: 'Welcome to Kubewarden' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /^Welcome to (Kubewarden|Admission Policy Management)/ })).toBeVisible()
   }, 'Kubewarden installation not detected')
-
-  await test.step('Install default policyserver', async() => {
-    const psPage = new PolicyServersPage(page)
-
-    // Banner is visible on Overview page
-    await kwPage.goto()
-    await expect(psPage.noDefaultPsBanner).toBeVisible()
-    // Banner is visible on Policy Servers page
-    await psPage.goto()
-    await expect(psPage.noDefaultPsBanner).toBeVisible()
-
-    await ui.button('Install Chart').click()
-    await expect(page).toHaveURL(/.*\/apps\/charts\/install.*chart=kubewarden-defaults/)
-
-    // Handle PolicyServer Installer Dialog
-    await psPage.installDefault({ recommended: true, mode: 'monitor' })
-  })
 })
 
 test('Install Kubewarden by Fleet', { tag: '@kw' }, async({ page }) => {

@@ -49,7 +49,7 @@ export class PolicyReporterPage extends BasePage {
 
   async runJob() {
     await this.nav.explorer('Workloads', 'CronJobs')
-    await this.ui.tableRow('audit-scanner').action('Run Now')
-    await this.ui.tableRow(/audit-scanner-[0-9]+/).waitFor({ state: 'Completed' })
+    await this.ui.tableRow(/audit-scanner|ssac/).action('Run Now')
+    await this.ui.tableRow(/(audit-scanner|ssac)-[0-9]+/).waitFor({ state: 'Completed' })
   }
 }

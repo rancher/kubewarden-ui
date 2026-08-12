@@ -111,7 +111,7 @@ export class Navigation {
 
     // Handle empty tables - https://github.com/rancher/rancher/issues/54281
     if (childName === 'Installed Apps' || childName === 'CronJobs') {
-      const row = this.ui.tableRow(/^(rancher|audit-scanner)$/).row
+      const row = this.ui.tableRow(/^(rancher|audit-scanner|ssac)$/).row
       await expect(row).toBeVisible().catch(async() => {
         test.info().annotations.push({ type: 'Table is empty', description: 'Resetting namespace filter' })
         const rancher = new RancherCommonPage(this.page)
@@ -122,7 +122,7 @@ export class Navigation {
 
     // Wait for page before next step
     if (groupName == 'Admission Policy Management') {
-      const heading = childName || /^(Kubewarden|Welcome to Kubewarden)$/
+      const heading = childName || /^(Kubewarden|SUSE Security Admission Controller|Welcome to (Kubewarden|Admission Policy Management))$/
       if (childName != 'Policy Reporter') {
         await expect(this.page.getByRole('heading', { name: heading })).toBeVisible()
       }

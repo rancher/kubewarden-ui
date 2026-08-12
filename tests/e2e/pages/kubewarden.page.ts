@@ -1,8 +1,10 @@
 import { expect, test, Locator, Page } from '@playwright/test'
-import { RancherAppsPage } from '../rancher/rancher-apps.page'
+import { RancherAppsPage, Repo } from '../rancher/rancher-apps.page'
 import { BasePage } from '../rancher/basepage'
 import { Shell } from '../components/kubectl-shell'
 import { step } from '../rancher/rancher-test'
+import { Common } from '../components/common'
+import { RancherStoragePage, Secret } from '../rancher/rancher-storage.page'
 
 type Pane = 'Policy Servers' | 'Namespaced Policies' | 'Cluster Policies'
 // type PaneFilter = 'Policies' | 'Reports' | string | RegExp
@@ -101,7 +103,7 @@ export class KubewardenPage extends BasePage {
   }
 
   @step
-  async installKubewarden(options?: { version?: string }) {
+  async installGithub(options?: { version?: string }) {
     // ==================================================================================================
     // Requirements Dialog
     const welcomeStep = this.page.getByText('Kubewarden is a policy engine for Kubernetes.')
@@ -145,7 +147,7 @@ export class KubewardenPage extends BasePage {
     // Redirection to rancher app installer
     await expect(appInstallStep).toBeVisible()
     await installBtn.click()
-    await expect(this.page).toHaveURL(/.*\/apps\/charts\/install.*chart=kubewarden-controller/)
+    await expect(this.page).toHaveURL(/.*\/apps\/charts\/install.*chart=admission-controller/)
 
     // ==================================================================================================
     // Rancher Application Metadata
@@ -164,10 +166,114 @@ export class KubewardenPage extends BasePage {
     await schedule.fill('*/1 * * * *')
     await this.ui.checkbox('Enable Policy Reporter').check()
 
+    // Recommended Policies
+    const enableRP = this.ui.checkbox('Enable recommended policies')
+    await this.ui.tab('Recommended Policies').click()
+    await expect(enableRP).not.toBeChecked()
+    await enableRP.check()
+    await expect(this.ui.select('Execution mode of the recommended policies ')).toContainText('monitor')
+
     // Start installation
     await apps.installBtn.click()
-    await apps.waitHelmSuccess('rancher-kubewarden-crds', { keepLog: true })
-    await apps.waitHelmSuccess('rancher-kubewarden-controller', { timeout: 4 * 60_000 })
+    await apps.waitHelmSuccess('rancher-admission-controller', { timeout: 4 * 60_000 })
+  }
+
+  @step
+  async installAppco() {
+    const authSecret : Secret = {
+      type     : 'HTTP Basic Auth',
+      namespace: 'cattle-system',
+      name     : 'appco-auth-clusterrepo',
+      username : process.env.APPCO_USERNAME || '',
+      password : process.env.APPCO_PASSWORD || ''
+    }
+
+    // Use Kubewarden installer
+    await this.nav.kubewarden()
+    await this.ui.button('Install SUSE Security Admission Controller').click()
+
+    // AppCo Registry Auth
+    new RancherStoragePage(this.page).createSecretInShell(authSecret)
+    await this.ui.selectOption('Authentication', new RegExp(`^${authSecret.name}`))
+    await this.ui.button('Continue').click()
+
+    // Add Repository & start installation
+    await this.ui.button('Add Admission Controller Repository').click()
+    await this.ui.button('Install SUSE Security Admission Controller').click()
+
+    const appsPage = new RancherAppsPage(this.page)
+    await appsPage.installChart({
+      title: 'suse-security-admission-controller',
+      check: 'suse-security-admission-controller',
+      // imagePullSecret: Generated from registry auth by rancher app installer
+    }, { navigate : false, yamlPatch: (y) => {
+      y.recommendedPolicies.enabled = true
+      y.auditScanner.policyReporter = true
+      y.auditScanner.cronJob.schedule = '*/1 * * * *'
+    } })
+  }
+
+  @step
+  async installGitlab() {
+    const { mrChart, mrReg, mrTag } = await Common.fetchAppCoMr()
+    test.info().annotations.push({ type: 'INFO', description: `AppCo Chart: ${mrChart}` })
+    test.info().annotations.push({ type: 'INFO', description: `AppCo Registry: ${mrReg}` })
+    test.info().annotations.push({ type: 'INFO', description: `AppCo Tag: ${mrTag}` })
+
+    // Generated pull secret would use wrong domain based on repository url
+    const pullSecret: Secret = {
+      type     : 'Registry',
+      namespace: 'cattle-kubewarden-system',
+      name     : 'appco-auth-image-pull',
+      domain   : 'dp.apps.rancher.io',
+      username : process.env.APPCO_USERNAME || '',
+      password : process.env.APPCO_PASSWORD || ''
+    }
+
+    // Repo has fake auth so app-installer would set global.imagePullSecret
+    const repo: Repo = {
+      name      : 'admission-controller-gitlab',
+      url       : mrChart,
+      skipTLS   : true,
+      authSecret: { username: 'fake', password: 'pass' },
+    }
+
+    const secPage = new RancherStoragePage(this.page)
+    await secPage.createSecretInShell(pullSecret)
+
+    // Add & annotate repository
+    const appsPage = new RancherAppsPage(this.page)
+    await appsPage.addRepository(repo)
+    await this.page.waitForTimeout(1000) // Prevent "object has been modified" error
+    // Annotation is protected and would be discarded by UI
+    await new Shell(this.page).run(`kubectl annotate clusterrepos.catalog.cattle.io ${repo.name} catalog.cattle.io/suse-application-collection=true`)
+
+    // Start installation (Auth & Repo steps are skipped)
+    await this.nav.kubewarden()
+    await this.ui.button('Install SUSE Security Admission Controller').click()
+
+    await this.ui.retry(async() => {
+      await expect(this.page.getByRole('heading', { name: 'SUSE Security Admission Controller App Install', exact: true })).toBeVisible()
+    }, 'Installer does not always detect repository')
+    await this.ui.button('Install SUSE Security Admission Controller').click()
+
+    await appsPage.installChart({
+      title          : 'suse-security-admission-controller',
+      check          : 'suse-security-admission-controller',
+      imagePullSecret: { existing: new RegExp(pullSecret.name) }
+    }, { navigate : false, yamlPatch: (y) => {
+      // For images that are not part of MR (policy-reporter, ..)
+      // Value is set automatically if Repo has auth & has appco annotation
+      // y.global.imagePullSecrets[0] = '...'
+      // Point to ephemeral MR registry
+      if (mrReg) y.image.registry = mrReg
+      if (mrReg) y.policyServer.image.registry = mrReg
+      if (mrReg) y.auditScanner.image.registry = mrReg
+      // Customize installation
+      y.recommendedPolicies.enabled = true
+      y.auditScanner.policyReporter = true
+      y.auditScanner.cronJob.schedule = '*/1 * * * *'
+    } })
   }
 
   @step
@@ -188,7 +294,7 @@ export class KubewardenPage extends BasePage {
     if (from?.controller || to?.controller) {
       await expect(apps.stepTitle).toContainText(`${from?.controller || ''} > ${to?.controller || ''}`)
     }
-    await apps.updateApp('rancher-kubewarden-controller', { navigate: false, timeout: 4 * 60_000 })
+    await apps.updateApp('rancher-admission-controller', { navigate: false, timeout: 4 * 60_000 })
     // 4.1.0 Error: error while loading policies from "/config/policies.yml": data did not match any variant of untagged enum PolicyOrPolicyGroup
     // 5.0.0 Probe port change from https to http
     if (!to?.controller?.startsWith('4.1') && !to?.controller?.startsWith('5.0')) {
