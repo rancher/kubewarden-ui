@@ -1,6 +1,7 @@
 import { expect, Locator } from '@playwright/test'
 import { step } from '../rancher/rancher-test'
 import { RancherUI } from './rancher-ui'
+import { RancherCommonPage } from '../rancher/rancher-common.page'
 
 export class TableRow {
   readonly row   : Locator
@@ -97,6 +98,10 @@ export class TableRow {
   }
 
   async toHaveState(state: string, timeout = 2 * 60_000) {
+    // Handle empty tables - https://github.com/rancher/rancher/issues/54281
+    await expect(this.row).toBeVisible({ timeout: 5000 }).catch(async() => {
+      await new RancherCommonPage(this.ui.page).setNamespaceFilter('All Namespaces')
+    })
     await expect(this.status).toHaveText(state, { timeout })
   }
 
