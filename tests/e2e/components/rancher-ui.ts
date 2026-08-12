@@ -124,6 +124,20 @@ export class RancherUI {
   // ==================================================================================================
   // Helper functions
 
+  /**
+   * Set or modify url parameters
+   * @param params new url parameters
+   * @param url wait for url before changing it (after redirect)
+   */
+  async swapUrlParams(params: Record<string, string>, url?: string|RegExp) {
+    if (url) await expect(this.page).toHaveURL(url)
+    const newUrl = new URL(this.page.url())
+    for (const [key, value] of Object.entries(params)) {
+      newUrl.searchParams.set(key, value)
+    }
+    await this.page.goto(newUrl.toString())
+  }
+
   async openView(view: 'Edit Options' | 'Edit YAML' | 'Edit as YAML' | 'Compare Changes') {
     // Give generated fields time to get registered
     await this.page.waitForTimeout(200)

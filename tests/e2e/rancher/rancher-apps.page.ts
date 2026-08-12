@@ -61,12 +61,9 @@ export class RancherAppsPage extends BasePage {
     await this.nav.goto('dashboard/c/local/apps/charts')
   }
 
+  // Modify installed app version
   async swapUrlVersion(version: string) {
-    const url = new URL(this.page.url())
-    expect(url.searchParams.get('version')).not.toBeNull()
-    url.searchParams.set('version', version)
-
-    await this.page.goto(url.toString())
+    await this.ui.swapUrlParams({ version: version }, /.*\/apps\/charts\/install.*chart=/)
     await expect(this.stepTitle).toContainText(version)
   }
 
