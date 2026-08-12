@@ -1,20 +1,27 @@
 # https://fleet.rancher.io/ref-fleet-yaml
 defaultNamespace: cattle-kubewarden-system
-
+# helmSecretName: ..authSecret
 helm:
   version: '*-0'  # 2.0.5
-  releaseName: rancher-kubewarden-controller
-  chart: kubewarden-controller
+  releaseName: rancher-admission-controller
+  chart: admission-controller
   repo: https://charts.kubewarden.io
+  # repo: oci://dp.apps.rancher.io/charts/suse-security-admission-controller
   # valuesFiles:
   #   - values.yaml
   values:
     # image:
-    #   tag: latest
+      # tag: latest
+      # registry: mrReg
+    # policyServer:
+      # image:
+        # registry: mrReg
     auditScanner:
       policyReporter: true
       cronJob:
         schedule: "*/1 * * * *" # every minute
+      # image:
+        # registry: mrReg
     telemetry:
       mode: sidecar
       tracing: true
@@ -27,6 +34,11 @@ helm:
             endpoint: "jaeger-operator-jaeger-collector.jaeger.svc.cluster.local:4317"
             tls:
               insecure: true
+    recommendedPolicies:
+      enabled: true
+
+  valuesFrom:
+
 
 diff:
   comparePatches:
@@ -51,12 +63,9 @@ diff:
         - {"op": "remove", "path":"/webhooks"}
 
 labels:
-  app: rancher-kubewarden-controller
+  app: rancher-admission-controller
 
 dependsOn:
-  - selector:
-      matchLabels:
-        app: rancher-kubewarden-crds
   - selector:
       matchLabels:
         name: opentelemetry
