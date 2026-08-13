@@ -4,7 +4,9 @@ import isEmpty from 'lodash/isEmpty';
 
 import { CATALOG } from '@shell/config/types';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
-import { REPO_TYPE, REPO, CHART, VERSION, NAME, NAMESPACE } from '@shell/config/query-params';
+import {
+  REPO_TYPE, REPO, CHART, VERSION, NAME, NAMESPACE
+} from '@shell/config/query-params';
 
 import { Banner } from '@components/Banner';
 
@@ -23,7 +25,7 @@ export default {
     }
   },
 
-  components: { Banner},
+  components: { Banner },
 
   computed: {
     ...mapGetters(['currentCluster']),

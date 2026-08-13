@@ -78,18 +78,6 @@ export class RancherUI {
     return base.getByRole('combobox', { name: 'Search for option' }).describe(`Select: ${label}`)
   }
 
-  // Slide-in drawer or old config
-  async showConfiguration() {
-    const configBtn = RancherUI.isVersion('>=2.12') ? 'Show Configuration' : 'Config'
-    await this.button(configBtn).click()
-  }
-
-  // Handling for second "Close" button on policy readme
-  async hideConfiguration() {
-    if (RancherUI.isVersion('>=2.12'))
-      await this.button(/^Close.*Configuration drawer$/).last().click()
-  }
-
   // Select option from (un)labeled Select
   async selectOption(label: string|Locator, option: string | RegExp | number) {
     const select = (typeof label === 'string')
@@ -97,6 +85,8 @@ export class RancherUI {
       : (await label.getAttribute('role') === 'combobox')
           ? label
           : this.select(label)
+
+    await expect(select.locator('xpath=../..').locator('i.icon-spinner')).toBeHidden()
     await select.click()
 
     const optionItem = typeof option === 'number'
@@ -113,6 +103,18 @@ export class RancherUI {
     }
   }
 
+  // Slide-in drawer or old config
+  async showConfiguration() {
+    const configBtn = RancherUI.isVersion('>=2.12') ? 'Show Configuration' : 'Config'
+    await this.button(configBtn).click()
+  }
+
+  // Handling for second "Close" button on policy readme
+  async hideConfiguration() {
+    if (RancherUI.isVersion('>=2.12'))
+      await this.button(/^Close.*Configuration drawer$/).last().click()
+  }
+
   // ==================================================================================================
   // Table Handler
   tableRow(arg: number | string | RegExp | { [key: string]: string | RegExp }, options?: { group?: string }): TableRow {
@@ -121,6 +123,20 @@ export class RancherUI {
 
   // ==================================================================================================
   // Helper functions
+
+  /**
+   * Set or modify url parameters
+   * @param params new url parameters
+   * @param url wait for url before changing it (after redirect)
+   */
+  async swapUrlParams(params: Record<string, string>, url?: string|RegExp) {
+    if (url) await expect(this.page).toHaveURL(url)
+    const newUrl = new URL(this.page.url())
+    for (const [key, value] of Object.entries(params)) {
+      newUrl.searchParams.set(key, value)
+    }
+    await this.page.goto(newUrl.toString())
+  }
 
   async openView(view: 'Edit Options' | 'Edit YAML' | 'Edit as YAML' | 'Compare Changes') {
     // Give generated fields time to get registered

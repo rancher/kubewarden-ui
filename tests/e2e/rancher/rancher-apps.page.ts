@@ -7,29 +7,36 @@ import { BasePage } from './basepage'
 
 export interface Repo {
   // type: 'http'|'git'|'oci'
-  name     : string
-  url      : string
-  httpAuth?: {
-    username: string
-    password: string
+  name       : string
+  url        : string
+  authSecret?: {
+    existing?: string|RegExp
+    username?: string
+    password?: string
   }
-  // Git specific
-  branch?: string
+  branch?     : string // Git specific
+  skipTLS?    : boolean // OCI specific
+  annotations?: Record<string, string>
 }
 
 export interface Chart {
-  title     : string // Exact chart title displayed in Rancher
-  check     : string // Used to check for helm success, chart name or tgz
-  name?     : string // Desired chart name
-  version?  : string
-  namespace?: string
-  project?  : string
+  title           : string // Exact chart title displayed in Rancher
+  check           : string // Used to check for helm success, chart name or tgz
+  name?           : string // Desired chart name
+  version?        : string
+  namespace?      : string
+  project?        : string
+  imagePullSecret?: {
+    existing?: string|RegExp
+    username?: string
+    password?: string
+  }
 }
 
 const appCoRepo: Repo = {
-  name    : 'application-collection',
-  url     : 'oci://dp.apps.rancher.io/charts',
-  httpAuth: (() => {
+  name      : 'application-collection',
+  url       : 'oci://dp.apps.rancher.io/charts',
+  authSecret: (() => {
     const auth = process.env.APP_COLLECTION_AUTH
     if (auth) {
       const [username, password] = auth.split(':')
@@ -61,17 +68,14 @@ export class RancherAppsPage extends BasePage {
     await this.nav.goto('dashboard/c/local/apps/charts')
   }
 
+  // Modify installed app version
   async swapUrlVersion(version: string) {
-    const url = new URL(this.page.url())
-    expect(url.searchParams.get('version')).not.toBeNull()
-    url.searchParams.set('version', version)
-
-    await this.page.goto(url.toString())
+    await this.ui.swapUrlParams({ version: version }, /.*\/apps\/charts\/install.*chart=/)
     await expect(this.stepTitle).toContainText(version)
   }
 
-  async setRepoType(type: 'Git' | 'OCI' | 'Helm') {
-    const name = type + ' Repository'
+  async setRepoType(type: 'Git' | 'OCI' | 'Helm' | 'AppCo') {
+    const name = type === 'AppCo' ? 'SUSE App Collection' : type + ' Repository'
     if (RancherUI.isVersion('>=2.14')) {
       await this.page.getByRole('heading', { name, exact: true }).click()
     } else {
@@ -101,19 +105,35 @@ export class RancherAppsPage extends BasePage {
       // OCI repository
       await this.setRepoType('OCI')
       await this.ui.input('OCI Repository Host URL *').fill(repo.url)
-    } else {
-      // HTTP repository
+      if (repo.skipTLS !== undefined)
+        await this.ui.checkbox('Skip TLS Verifications').setChecked(repo.skipTLS)
+    } else if (repo.url.startsWith('http')) {
+      // HTTP(s) repository
       await this.setRepoType('Helm')
       await this.ui.input('Index URL *').fill(repo.url)
-    }
-    if (repo.httpAuth) {
-      // Auth takes a moment to load values
-      await expect(this.ui.select('Authentication')).toContainText('None')
-      await this.ui.selectOption('Authentication', 'Create a HTTP Basic Auth Secret')
-      await this.ui.input('Username').fill(repo.httpAuth.username)
-      await this.ui.input('Password').fill(repo.httpAuth.password)
+    } else {
+      // Application Collection repository
+      await this.setRepoType('AppCo')
     }
 
+    if (repo.authSecret) {
+      if (repo.authSecret.existing) {
+        await this.ui.selectOption('Authentication', repo.authSecret.existing)
+      } else if (repo.authSecret.username && repo.authSecret.password) {
+        await this.ui.selectOption('Authentication', 'Create an HTTP Basic Auth Secret')
+        await this.ui.input('Username').fill(repo.authSecret.username)
+        await this.ui.input('Password').fill(repo.authSecret.password)
+      }
+    }
+    if (repo.annotations) {
+      for (const [key, value] of Object.entries(repo.annotations)) {
+        await this.ui.button('Add Annotation').click()
+        await this.page.getByPlaceholder('e.g. foo').last().fill(key)
+        await this.page.getByPlaceholder('e.g. bar').last().fill(value)
+      }
+    }
+    // Give generated fields time to get registered
+    await this.page.waitForTimeout(200)
     await createBtn.click()
     // Transitions: Active ?> In Progress ?> [Active|InProgress] - https://github.com/rancher/dashboard/issues/10079
     const repoRow = await this.ui.tableRow(repo.name).waitFor()
@@ -176,9 +196,9 @@ export class RancherAppsPage extends BasePage {
     await shell.open()
     // Secret to pull images from app collection
     if (ns !== 'default') await shell.run(`kubectl create ns ${ns}`, shellOpts)
-    await shell.run(`kubectl create secret docker-registry application-collection -n ${ns} --docker-server=dp.apps.rancher.io --docker-username=${appCoRepo.httpAuth?.username} --docker-password=${appCoRepo.httpAuth?.password}`, shellOpts)
+    await shell.run(`kubectl create secret docker-registry application-collection -n ${ns} --docker-server=dp.apps.rancher.io --docker-username=${appCoRepo.authSecret?.username} --docker-password=${appCoRepo.authSecret?.password}`, shellOpts)
     // Login to app collection to access helm chart
-    await shell.run(`helm registry login ${appCoRepo.url.split('://')[1]} -u ${appCoRepo.httpAuth?.username} -p ${appCoRepo.httpAuth?.password}`, shellOpts)
+    await shell.run(`helm registry login ${appCoRepo.url.split('://')[1]} -u ${appCoRepo.authSecret?.username} -p ${appCoRepo.authSecret?.password}`, shellOpts)
 
     // Chart-specific setup
     if (chart.name === 'jaeger-operator') {
@@ -235,6 +255,17 @@ export class RancherAppsPage extends BasePage {
     if (chart.project) {
       await this.ui.selectOption('Install into Project', chart.project)
     }
+    if (chart.imagePullSecret) {
+      // Alternative: A new Image Pull Secret <name>-image-pull-secret will be generated from the Repository secret <name>
+      await this.ui.checkbox('Manually select an Image Pull Secret').check()
+      if (chart.imagePullSecret.existing) {
+        await this.ui.selectOption('Image Pull Secret', chart.imagePullSecret.existing)
+      } else if (chart.imagePullSecret.username && chart.imagePullSecret.password) {
+        await this.ui.selectOption('Image Pull Secret', /Create (an|a new) Image Pull Secret/)
+        await this.ui.input('Username').fill(chart.imagePullSecret.username)
+        await this.ui.input('Password').fill(chart.imagePullSecret.password)
+      }
+    }
     await this.nextBtn.click()
 
     // Chart questions
@@ -267,12 +298,6 @@ export class RancherAppsPage extends BasePage {
       // Translate 1.9.3 -> ^\s*1[.]9[.]3\s
       if (typeof v === 'string') v = new RegExp(`^\\s*${v.replace(/[.]/g, '[.]')}\\s`)
       await this.ui.selectOption('Version', v)
-
-      // Wrong registry - https://github.com/rancher/dashboard/issues/10703
-      await expect(this.ui.select('Version')).toBeVisible()
-      if (await this.ui.checkbox('Container Registry').isVisible()) {
-        await this.page.reload()
-      }
     }
     await this.nextBtn.click()
 

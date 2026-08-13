@@ -284,6 +284,8 @@ jobs:
         QASE_TESTOPS_API_TOKEN: ${{ secrets.QASE_APITOKEN }}
         QASE_TESTOPS_RUN_TITLE: "Run[${{github.event_name}}]: UI[${{ env.KUBEWARDEN }}] - MODE[${{ matrix.mode }}] - RANCHER[${{ matrix.rancher }}] "
         QASE_TESTOPS_RUN_DESCRIPTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        APPCO_USERNAME: ${{ secrets.APPCO_USERNAME }}
+        APPCO_PASSWORD: ${{ secrets.APPCO_PASSWORD }}
 
     # ==================================================================================================
     # Artifacts & Summary

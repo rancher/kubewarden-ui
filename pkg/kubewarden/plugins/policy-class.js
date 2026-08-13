@@ -1,6 +1,8 @@
 import semver from 'semver';
 
-import { REPO_TYPE, REPO, CHART, VERSION, NAME, NAMESPACE } from '@shell/config/query-params';
+import {
+  REPO_TYPE, REPO, CHART, VERSION, NAME, NAMESPACE
+} from '@shell/config/query-params';
 import { KUBERNETES, WORKSPACE_ANNOTATION } from '@shell/config/labels-annotations';
 
 import { KUBEWARDEN_ANNOTATIONS, KUBEWARDEN_CHARTS, KUBEWARDEN_PRODUCT_NAME, KUBEWARDEN_NAMESPACE } from '@kubewarden/types';
@@ -71,6 +73,7 @@ export default class PolicyModel extends KubewardenModel {
     const isManagedByHelm = labels?.[KUBERNETES.MANAGED_BY] === 'kubewarden-controller';
     const isKubewardenDefaults = labels?.[KUBERNETES.MANAGED_NAME] === KUBEWARDEN_CHARTS.DEFAULTS;
     const isPartOfKubewarden = labels?.['app.kubernetes.io/part-of'] === KUBEWARDEN_PRODUCT_NAME;
+
     return isManagedByHelm && isKubewardenDefaults && isPartOfKubewarden;
   }
 

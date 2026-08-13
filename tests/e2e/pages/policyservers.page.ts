@@ -3,7 +3,6 @@ import { expect } from '@playwright/test'
 import { TableRow } from '../components/table-row'
 import { step } from '../rancher/rancher-test'
 import { BasePage } from '../rancher/basepage'
-import { RancherAppsPage } from '../rancher/rancher-apps.page'
 
 export interface PolicyServer {
   name     : string
@@ -71,27 +70,5 @@ export class PolicyServersPage extends BasePage {
     await this.goto()
     if (typeof ps === 'string') ps = this.ui.tableRow(ps)
     await ps.delete()
-  }
-
-  async installDefault(options?: { version?: string, recommended?: boolean, mode?: 'monitor' | 'protect' }) {
-    const apps = new RancherAppsPage(this.page)
-    // Use custom version if requested
-    if (options?.version) await apps.swapUrlVersion(options.version)
-    await expect(apps.step1).toBeVisible()
-    await apps.nextBtn.click()
-    await expect(apps.step2).toBeVisible()
-
-    // Handle questions
-    if (options?.recommended) {
-      await this.ui.checkbox('Enable recommended policies').setChecked(options.recommended)
-      await expect(this.ui.select('Execution mode of the recommended policies ')).toContainText('monitor')
-    }
-    if (options?.mode) {
-      await this.ui.selectOption('Execution mode', options.mode)
-    }
-
-    // Install
-    await apps.installBtn.click()
-    await apps.waitHelmSuccess('rancher-kubewarden-defaults')
   }
 }
