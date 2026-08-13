@@ -13,8 +13,8 @@ updates:
     cooldown:
       default-days: 7
     ignore:
+      # malformed version 2.6.3-.beta.1
       - dependency-name: "desktop"
-        versions: ["2.6.3-.beta.1"]
   # Limited to rancher-shell by Giuseppe Leo
   - package-ecosystem: "npm"
     directory: "/"
