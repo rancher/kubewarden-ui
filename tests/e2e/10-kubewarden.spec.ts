@@ -24,8 +24,8 @@ if (conf.ui_from) expect(conf.ui_from).toMatch(/^(source|github|prime)$/)
 if (conf.kw_mode) expect(conf.kw_mode).toMatch(/^(manual|fleet|upgrade)$/)
 if (conf.kw_from) expect(conf.kw_from).toMatch(/^(github|gitlab|prime)$/)
 if (conf.kw_from !== 'github') {
-  expect(process.env.APPCO_USERNAME).toBeDefined()
-  expect(process.env.APPCO_PASSWORD).toBeDefined()
+  expect(process.env.APPCO_USERNAME).toBeTruthy()
+  expect(process.env.APPCO_PASSWORD).toBeTruthy()
 }
 
 // Configure defaults after env is loaded
