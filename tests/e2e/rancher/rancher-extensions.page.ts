@@ -27,7 +27,7 @@ export class RancherExtensionsPage extends BasePage {
 
   // Handle extension repositories dialog
   async selectRepos(options?: { rancher?: boolean, partners?: boolean }) {
-    const rancherRepo = this.ui.checkbox('Official Rancher Extension')
+    const rancherRepo = this.ui.checkbox(/Official Rancher Extension|Rancher Prime Extensions/)
     const partnersRepo = this.ui.checkbox('Partners Extension')
 
     if (options?.rancher !== undefined) await rancherRepo.setChecked(options.rancher)

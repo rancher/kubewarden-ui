@@ -40,7 +40,7 @@ export class RancherUI {
   }
 
   // Labeled Checkbox
-  checkbox(label: string) {
+  checkbox(label: string|RegExp) {
     return this.page.locator('label.checkbox-container')
       .filter({ hasText: label })
       .locator('span.checkbox-custom')
