@@ -56,8 +56,8 @@ test('New resources should be reported', async({ ui, page, nav, shell }) => {
   await expect(reporter.getChip(testNs, 'fail')).toHaveText('1')
 
   await reporter.selectTab('Kubewarden')
-  await expect(reporter.getChip(`clusterwide-${policyLabels}`, 'fail')).toHaveText('1')
-  await expect(reporter.getChip('clusterwide-no-privileged-pod', 'fail')).toHaveText('1')
+  await expect(reporter.getChip(`kw.cap.${policyLabels}`, 'fail')).toHaveText('1')
+  await expect(reporter.getChip('kw.cap.no-privileged-pod', 'fail')).toHaveText('1')
 })
 
 test('Check reports on resources details page', async({ ui, nav }) => {
