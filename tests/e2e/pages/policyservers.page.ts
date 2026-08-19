@@ -3,6 +3,7 @@ import { expect } from '@playwright/test'
 import { TableRow } from '../components/table-row'
 import { step } from '../rancher/rancher-test'
 import { BasePage } from '../rancher/basepage'
+import { conf } from '../../env-config'
 
 export interface PolicyServer {
   name     : string
@@ -41,6 +42,13 @@ export class PolicyServersPage extends BasePage {
     await this.setName(ps.name)
     if (ps.replicas !== undefined) await this.setReplicas(ps.replicas)
     if (ps.image !== undefined) await this.setImage(ps.image)
+    else if (conf.kw_from === 'gitlab') {
+      // dp.apps.rancher.io/containers/kubewarden-policy-server:1.37.2-12.6 (official)
+      // registry.suse.de/devel/jasmine/containers/containers/kubewarden-policy-server:1 (GitLab)
+      // ? (MR)
+      await this.setImage(`${conf.gitlab.reg}/containers/kubewarden-policy-server:${conf.gitlab.tag}`)
+    }
+
     if (ps.settings) {
       await ps.settings()
       await this.ui.openView('Edit YAML')

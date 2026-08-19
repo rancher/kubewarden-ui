@@ -1,5 +1,6 @@
 import type { APIResponse, FullConfig } from '@playwright/test'
 import { expect, request } from '@playwright/test'
+import { Common } from './e2e/components/common'
 
 async function globalSetup(config: FullConfig) {
   let resp: APIResponse
@@ -36,6 +37,15 @@ async function globalSetup(config: FullConfig) {
   const data = await resp.json()
   process.env.RANCHER_VERSION = data.Version
   process.env.RANCHER_PRIME = data.RancherPrime
+
+  // Check for artifact access
+  if (process.env.KW === 'gitlab') {
+    await requestContext.head('https://registry.suse.de')
+    const { chart, reg, tag } = Common.findGitLabRefs()
+    process.env.GL_CHART = chart
+    process.env.GL_REG = reg
+    process.env.GL_TAG = tag
+  }
 
   await requestContext.dispose()
 

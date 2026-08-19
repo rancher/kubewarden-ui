@@ -216,10 +216,10 @@ export class KubewardenPage extends BasePage {
 
   @step
   async installGitlab() {
-    const { mrChart, mrReg, mrTag } = await Common.fetchAppCoMr()
-    test.info().annotations.push({ type: 'INFO', description: `AppCo Chart: ${mrChart}` })
-    test.info().annotations.push({ type: 'INFO', description: `AppCo Registry: ${mrReg}` })
-    test.info().annotations.push({ type: 'INFO', description: `AppCo Tag: ${mrTag}` })
+    const gl = Common.findGitLabRefs()
+    test.info().annotations.push({ type: 'INFO', description: `Chart: ${gl.chart}` })
+    test.info().annotations.push({ type: 'INFO', description: `Reg: ${gl.reg}` })
+    test.info().annotations.push({ type: 'INFO', description: `Tag: ${gl.tag}` })
 
     // Generated pull secret would use wrong domain based on repository url
     const pullSecret: Secret = {
@@ -232,9 +232,10 @@ export class KubewardenPage extends BasePage {
     }
 
     // Repo has fake auth so app-installer would set global.imagePullSecret
+    // Some redirects are based on repo name, it has to match official one
     const repo: Repo = {
-      name      : 'admission-controller-gitlab',
-      url       : mrChart,
+      name      : 'admission-controller-charts',
+      url       : gl.chart,
       skipTLS   : true,
       authSecret: { username: 'fake', password: 'pass' },
     }
@@ -263,13 +264,21 @@ export class KubewardenPage extends BasePage {
       check          : 'suse-security-admission-controller',
       imagePullSecret: { existing: new RegExp(pullSecret.name) }
     }, { navigate : false, yamlPatch: (y) => {
-      // For images that are not part of MR (policy-reporter, ..)
+      // For images that are not part of MR (policy-reporter, policy-reporter-ui)
       // Value is set automatically if Repo has auth & has appco annotation
       // y.global.imagePullSecrets[0] = '...'
       // Point to ephemeral MR registry
-      if (mrReg) y.image.registry = mrReg
-      if (mrReg) y.policyServer.image.registry = mrReg
-      if (mrReg) y.auditScanner.image.registry = mrReg
+      if (gl.reg) {
+        y.image.registry = gl.reg
+        y.policyServer.image.registry = gl.reg
+        y.auditScanner.image.registry = gl.reg
+      }
+      // Override image tag
+      if (gl.tag) {
+        y.image.tag = gl.tag
+        y.policyServer.image.tag = gl.tag
+        y.auditScanner.image.tag = gl.tag
+      }
       // Customize installation
       y.recommendedPolicies.enabled = true
       y.auditScanner.policyReporter = true
