@@ -104,7 +104,8 @@ function statusColor(row: PolicyReportResult) {
 function formattedDisplayName(displayName: string): string {
   return displayName
     .replace(/^clusterwide-/, '') // Remove 'clusterwide-' prefix
-    .replace(/^namespaced-[^-]+-/, ''); // Remove 'namespaced-<namespace>-' prefix
+    .replace(/^namespaced-[^-]+-/, '') // Remove 'namespaced-<namespace>-' prefix
+    .replace(/^kw\.c?ap\./, ''); // Remove 'kw.cap.' & 'kw.ap.' prefix
 };
 
 onMounted(async() => {

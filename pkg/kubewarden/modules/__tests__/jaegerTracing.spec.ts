@@ -11,17 +11,17 @@ function createMockStore() {
 }
 
 describe('jaegerPolicyName', () => {
-  it('returns clusterwide-<name> for a ClusterAdmissionPolicy', () => {
+  it('returns kw.cap.<name> for a ClusterAdmissionPolicy', () => {
     const policy = {
       kind:     'ClusterAdmissionPolicy',
       metadata: { name: 'cap1' }
     };
     const result = jaegerPolicyName(policy);
 
-    expect(result).toBe('clusterwide-cap1');
+    expect(result).toBe('kw.cap.cap1');
   });
 
-  it('returns namespaced-<ns>-<name> for an AdmissionPolicy', () => {
+  it('returns kw.ap.<ns>.<name> for an AdmissionPolicy', () => {
     const policy = {
       kind:     'AdmissionPolicy',
       metadata: {
@@ -31,7 +31,7 @@ describe('jaegerPolicyName', () => {
     };
     const result = jaegerPolicyName(policy);
 
-    expect(result).toBe('namespaced-ns1-ap1');
+    expect(result).toBe('kw.ap.ns1.ap1');
   });
 
   it('returns null if policy kind is unknown', () => {
@@ -133,7 +133,7 @@ describe('jaegerTraces', () => {
               tags:          [
                 {
                   key:   'policy_id',
-                  value: 'clusterwide-cap1'
+                  value: 'kw.cap.cap1'
                 },  // matches 1st policy
                 {
                   key:   'allowed',
@@ -154,7 +154,7 @@ describe('jaegerTraces', () => {
               tags:          [
                 {
                   key:   'policy_id',
-                  value: 'namespaced-ns1-ap1'
+                  value: 'kw.ap.ns1.ap1'
                 }, // matches 2nd policy
                 {
                   key:   'allowed',
@@ -245,7 +245,7 @@ describe('jaegerTraces', () => {
               tags:          [
                 {
                   key:   'policy_id',
-                  value: 'namespaced-ns2-ap2'
+                  value: 'kw.ap.ns2.ap2'
                 },
                 {
                   key:   'allowed',
