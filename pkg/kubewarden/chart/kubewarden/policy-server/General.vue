@@ -146,8 +146,9 @@ watchEffect(() => {
       KUBEWARDEN_REPOS.POLICY_CATALOG_REPO,
       KUBEWARDEN_REPOS.POLICY_CATALOG_REPO_GIT
     ];
+    const JASMINE_CHARTS = 'oci://registry.suse.de/devel/jasmine/charts/';
 
-    kubewardenChartsRepo.value = allRepos.value.find((r) => r.spec?.url && OFFICIAL_CHART_REPOS.includes(r.spec?.url)) || null;
+    kubewardenChartsRepo.value = allRepos.value.find((r) => r.spec?.url && (OFFICIAL_CHART_REPOS.includes(r.spec?.url) || r.spec.url.startsWith(JASMINE_CHARTS))) || null;
     kubewardenPolicyCatalogRepo.value = allRepos.value.find((r) => r.spec?.url && OFFICIAL_CATALOG_REPOS.includes(r.spec?.url)) || null;
   }
 });
