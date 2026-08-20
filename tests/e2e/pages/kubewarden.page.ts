@@ -5,6 +5,7 @@ import { Shell } from '../components/kubectl-shell'
 import { step } from '../rancher/rancher-test'
 import { Common } from '../components/common'
 import { RancherStoragePage, Secret } from '../rancher/rancher-storage.page'
+import { conf } from '../../env-config'
 
 type Pane = 'Policy Servers' | 'Namespaced Policies' | 'Cluster Policies'
 // type PaneFilter = 'Policies' | 'Reports' | string | RegExp
@@ -226,8 +227,8 @@ export class KubewardenPage extends BasePage {
       namespace: 'cattle-kubewarden-system',
       name     : 'appco-auth-image-pull',
       domain   : 'dp.apps.rancher.io',
-      username : process.env.APPCO_USERNAME || '',
-      password : process.env.APPCO_PASSWORD || ''
+      username : conf.auth.appco_user || '',
+      password : conf.auth.appco_pass || ''
     }
 
     // Repo has fake auth so app-installer would set global.imagePullSecret

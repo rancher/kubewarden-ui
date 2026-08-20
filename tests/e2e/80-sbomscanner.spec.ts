@@ -1,27 +1,12 @@
 import { test, expect } from './rancher/rancher-test'
 import { RancherExtensionsPage } from './rancher/rancher-extensions.page'
-import { AppVersion } from './pages/kubewarden.page'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherUI } from './components/rancher-ui'
-import { Common } from './components/common'
-import semver from 'semver'
 import { Registry, SbomScannerPage, VexHub } from './sbomscanner/sbomscanner.page'
 import { ClusterAdmissionPoliciesPage, Policy } from './pages/policies.page'
 import { Deployment, RancherWorkloadsPage } from './rancher/rancher-workloads.page'
 import { PolicyReporterPage } from './pages/policyreporter.page'
-
-const conf = {
-  src_url: 'http://127.0.0.1:4500/sbomscanner-ui-ext-0.0.1/sbomscanner-ui-ext-0.0.1.umd.min.js',
-  // Install UI extension from: source (yarn dev), github (github tag), prime (official)
-  ui_from: (process.env.ORIGIN || undefined) as 'source'|'github'|'prime'|undefined,
-  // How to install Kubewarden: manual (from UI extension), fleet, upgrade (previous version)
-  kw_mode: (process.env.MODE || undefined) as 'manual'|'fleet'|'upgrade'|undefined,
-  // Fetch Kubewarden versions from github for upgrade test
-  upMap  : [] as AppVersion[]
-}
-
-if (conf.ui_from) expect(conf.ui_from).toMatch(/^(source|github|prime)$/)
-if (conf.kw_mode) expect(conf.kw_mode).toMatch(/^(manual|fleet|upgrade)$/)
+import { conf } from '../env-config'
 
 // Configure defaults after env is loaded
 test.beforeAll(async({ request }) => {
@@ -30,19 +15,6 @@ test.beforeAll(async({ request }) => {
   conf.ui_from ||= await request.head(conf.src_url)
     .then(r => r.ok() ? 'source' as const : fallback)
     .catch(() => fallback)
-
-  // Default to manual mode, unless fleet or upgrade is requested
-  conf.kw_mode ||= 'manual'
-
-  if (conf.kw_mode === 'upgrade') {
-    conf.upMap = (await Common.fetchVersionMap()).splice(-3)
-      // Limit because of https://github.com/kubewarden/policy-server/issues/1300
-      .filter(v => semver.gte(v.app.replace(/^v/, ''), '1.29.0'))
-
-    if (conf.upMap.length === 0) {
-      throw new Error('No compatible version was found, check rancher-version annotations')
-    }
-  }
 })
 
 test('Install UI extension', { tag: '@sbom' }, async({ page, ui }) => {
