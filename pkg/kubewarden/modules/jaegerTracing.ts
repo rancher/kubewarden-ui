@@ -54,11 +54,11 @@ export function jaegerPolicyName(policy: any) {
 
   switch (policy?.kind) {
   case 'ClusterAdmissionPolicy':
-    out = `clusterwide-${ policy?.metadata?.name }`;
+    out = `kw.cap.${ policy?.metadata?.name }`;
     break;
 
   case 'AdmissionPolicy':
-    out = `namespaced-${ policy?.metadata?.namespace }-${ policy?.metadata?.name }`;
+    out = `kw.ap.${ policy?.metadata?.namespace }.${ policy?.metadata?.name }`;
     break;
 
   default:
