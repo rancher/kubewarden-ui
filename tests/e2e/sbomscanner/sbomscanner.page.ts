@@ -2,8 +2,7 @@ import { expect } from '@playwright/test'
 import { RancherAppsPage } from '../rancher/rancher-apps.page'
 import { BasePage } from '../rancher/basepage'
 import { step } from '../rancher/rancher-test'
-import { RancherStoragePage, Secret } from '../rancher/rancher-storage.page'
-import { conf } from '../../env-config'
+import { RancherStoragePage } from '../rancher/rancher-storage.page'
 import { RancherUI } from '../components/rancher-ui'
 
 export interface Registry {
@@ -28,13 +27,8 @@ export interface WorkloadScanConfig {
   osFilter?  : Record<string, string>
 }
 
-export const authSecret: Secret = {
-  type     : 'HTTP Basic Auth',
-  namespace: 'cattle-system',
-  name     : 'appco-auth-sbomscanner',
-  username : conf.auth.appco_user || '',
-  password : conf.auth.appco_pass || ''
-}
+// Generated Pull secret has the same name as auth
+export const secretName = 'appco-auth-sbomscanner'
 
 export class SbomScannerPage extends BasePage {
   async goto(): Promise<void> {
@@ -44,6 +38,7 @@ export class SbomScannerPage extends BasePage {
   @step
   async install(options?: { version?: string }) {
     const appsPage = new RancherAppsPage(this.page)
+
     // Requirements Dialog
     const welcomeStep = this.page.getByText('Get a comprehensive view of your container image vulnerabilities and focus on risks that truly matter.')
     const configAuthStep = this.page.getByRole('heading', { name: /^Configure global authentication/ })
@@ -52,7 +47,7 @@ export class SbomScannerPage extends BasePage {
     const installSBOMStep = this.page.getByRole('heading', { name: 'Installation for SUSE Security Vulnerability Scanner', exact: true })
 
     await this.goto()
-    new RancherStoragePage(this.page).createSecretInShell(authSecret)
+    const sec = new RancherStoragePage(this.page).createAppcoAuth(secretName)
 
     // Welcome screen is skipped if kubewarden is already installed
     await this.page.waitForTimeout(2000) // Ignore briefly visible welcome step
@@ -63,7 +58,7 @@ export class SbomScannerPage extends BasePage {
 
     // AppCo Registry Auth
     await expect(configAuthStep).toBeVisible()
-    await this.ui.selectOption('Authentication', new RegExp(`^${authSecret.name}`))
+    await this.ui.selectOption('Authentication', new RegExp(`^${sec.name}`))
     await this.ui.button('Continue').click()
 
     // Add repositories
@@ -75,7 +70,11 @@ export class SbomScannerPage extends BasePage {
     await this.ui.button('Install CloudNativePG').click()
     await appsPage.installChart(
       { title: 'cloudnative-pg', check: 'cloudnative-pg' },
-      { navigate: false })
+      { navigate : false,
+        yamlPatch: (RancherUI.isVersion('<2.14'))
+          ? (y) => { y.global.imagePullSecrets[0] = sec.name }
+          : undefined
+      })
 
     // Install SBOMScanner
     await this.goto()
@@ -85,8 +84,8 @@ export class SbomScannerPage extends BasePage {
       { title: 'SBOMScanner', check: 'suse-security-vulnerability-scanner', version: options?.version },
       { navigate : false,
         yamlPatch: (y) => {
-          // Value is not set automatically in Rancher < 2.14
-          if (RancherUI.isVersion('<2.14')) y.global.imagePullSecrets[0] = authSecret.name
+          // Chart secret UI is not available in Rancher < 2.14
+          if (RancherUI.isVersion('<2.14')) y.global.imagePullSecrets[0] = sec.name
           y.controller.replicas = 1
           y.worker.replicas = 1
           y.storage.replicas = 1

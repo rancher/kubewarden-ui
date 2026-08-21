@@ -2,7 +2,7 @@ import { test, expect } from './rancher/rancher-test'
 import { RancherExtensionsPage } from './rancher/rancher-extensions.page'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherUI } from './components/rancher-ui'
-import { Registry, SbomScannerPage, authSecret } from './sbomscanner/sbomscanner.page'
+import { Registry, SbomScannerPage, secretName } from './sbomscanner/sbomscanner.page'
 import { ClusterAdmissionPoliciesPage, Policy } from './pages/policies.page'
 import { Deployment, RancherWorkloadsPage } from './rancher/rancher-workloads.page'
 import { PolicyReporterPage } from './pages/policyreporter.page'
@@ -72,7 +72,7 @@ test('Scan Admission Controller', { tag: '@scan' }, async({ page, ui, nav }) => 
   await sbomPage.setWorkloadScan({
     enabled   : true,
     skipTLS   : conf.kw_from === 'gitlab' || undefined,
-    authSecret: conf.kw_from === 'prime' ? authSecret.name : undefined,
+    authSecret: conf.kw_from === 'prime' ? secretName : undefined,
     nsFilter  : { 'kubernetes.io/metadata.name': 'cattle-kubewarden-system' },
     osFilter  : { linux: 'amd64' }
   })
