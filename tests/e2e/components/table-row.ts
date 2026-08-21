@@ -5,7 +5,6 @@ import { RancherCommonPage } from '../rancher/rancher-common.page'
 
 export class TableRow {
   readonly row   : Locator
-  readonly name  : Locator
   readonly status: Locator
   readonly strval: string = ''
 
@@ -64,7 +63,6 @@ export class TableRow {
     }
 
     this.row = rows.describe(`TableRow: ${this}`)
-    this.name = this.column('Name')
     this.status = this.column('Status', 'State')
   }
 
@@ -127,7 +125,7 @@ export class TableRow {
     }
   }
 
-  async open() {
-    await this.name.getByRole('link').describe(`TableRow: ${this}`).click()
+  async open(col: string = 'Name') {
+    await this.column(col).getByRole('link').describe(`TableRow: ${this}`).click()
   }
 }
