@@ -4,19 +4,19 @@ import { RancherUI } from './rancher-ui'
 import { RancherCommonPage } from '../rancher/rancher-common.page'
 
 // Explorer navigation
-type ENav = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Admission Policy Management' | 'SBOMScanner'
+type ENav = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Admission Policy Management' | 'Vulnerability Scanner'
 type ENavMap = {
   'Cluster'                    : 'Projects/Namespaces' | 'Nodes' | 'Cluster and Project Members' | 'Events'
   'Workloads'                  : 'CronJobs' | 'DaemonSets' | 'Deployments' | 'Jobs' | 'StatefulSets' | 'Pods'
   'Apps'                       : 'Charts' | 'Installed Apps' | 'Repositories' | 'Recent Operations'
   'Storage'                    : 'PersistentVolumes' | 'StorageClasses' | 'ConfigMaps' | 'PersistentVolumeClaims' | 'Secrets'
   'Admission Policy Management': 'Policy Servers' | 'Cluster Admission Policies' | 'Admission Policies' | 'Policy Reporter'
-  'SBOMScanner'                : 'Images' | 'Advanced'
+  'Vulnerability Scanner'      : 'Images' | 'Advanced'
 }
 // Expandable items in ENavMap that have a third navigation level
 type ENavSubMap = {
-  SBOMScanner: {
-    Advanced: 'Workloads Scan' | 'VEX Management' | 'Registries configuration'
+  'Vulnerability Scanner': {
+    Advanced: 'Workloads Scan' | 'VEX Management' | 'Registries Configuration'
   }
 }
 // Returns valid sub-items for a given group and child
@@ -188,15 +188,15 @@ export class Navigation {
   // SBOMScanner specific helpers
 
   @step
-  async sbomScanner(childName?: ENavMap['SBOMScanner'] | ENavChild<'SBOMScanner', ENavMap['SBOMScanner']>) {
+  async sbomScanner(childName?: ENavMap['Vulnerability Scanner'] | ENavChild<'Vulnerability Scanner', ENavMap['Vulnerability Scanner']>) {
     // Shortcut to Advanced sub-items
-    if (childName === 'VEX Management' || childName === 'Workloads Scan' || childName === 'Registries configuration') {
-      await this.explorer('SBOMScanner', 'Advanced', childName)
+    if (childName === 'VEX Management' || childName === 'Workloads Scan' || childName === 'Registries Configuration') {
+      await this.explorer('Vulnerability Scanner', 'Advanced', childName)
     } else {
-      await this.explorer('SBOMScanner', childName)
+      await this.explorer('Vulnerability Scanner', childName)
     }
 
-    const heading = childName || /^(Dashboard|Install SBOMScanner)/
+    const heading = childName || /^(Dashboard|Install SUSE Security Vulnerability Scanner)/
     const element = this.page.locator('h1.page-title').or(this.page.locator('div.title'))
     await expect(element.getByText(heading)).toBeVisible()
   }
