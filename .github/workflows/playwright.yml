@@ -268,7 +268,8 @@ jobs:
           GREPI="90-.*install: [$ex]"
         fi
 
-        yarn playwright test ${TFILTER:-} ${GREPI:+--grep-invert "$GREPI"} -x
+        yarn playwright test -x ${GREPI:+--grep-invert "$GREPI"} ${TFILTER:-}
+        yarn playwright test -x --grep @scan "\/80"
       env:
         MODE: ${{ matrix.mode }}
         # Override OTEL operator version by github variable
@@ -291,6 +292,18 @@ jobs:
         name: playwright-report-${{ matrix.rancher }}-${{ matrix.mode }}
         path: tests/playwright-report/
         retention-days: 15
+
+    - name: Publish CVE report
+      run: |
+        SHA=$(gh api "repos/$REPO/contents/$FILE?ref=gh-pages" --jq .sha 2>/dev/null) || true
+        gh api "repos/$REPO/contents/$FILE" -X PUT \
+          -f message="Update report" -f branch=gh-pages \
+          -f content="$(base64 -w0 output/index.html)" \
+          ${SHA:+-f sha="$SHA"}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        REPO: ${{ github.repository }}
+        FILE: reports/index.html
 
     - name: Clean Up
       if: always()

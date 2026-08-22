@@ -17,6 +17,13 @@ type Product = 'Admission Controller' | 'Vulnerability Scanner' | 'Runtime Enfor
  * Common helper functions and constants
  */
 export class Common {
+  private static readonly PRODUCT_INFO: Record<Product, { abbr: string, full: string }> = {
+    'Admission Controller' : { abbr: 'AC', full: 'suse-security-admission-controller' },
+    'Vulnerability Scanner': { abbr: 'VS', full: 'suse-security-vulnerability-scanner' },
+    'Runtime Enforcer'     : { abbr: 'RE', full: 'suse-security-runtime-enforcer' },
+    'Network Enforcer'     : { abbr: 'NE', full: 'suse-security-network-enforcer' },
+  }
+
   // Build kubewarden version map for upgrade test
   // { app: 'v1.22.0', controller: '5.0.0', crds: '1.14.0', defaults: '3.0.0' }
   static async fetchVersionMap(): Promise<AppVersion[]> {

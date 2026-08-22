@@ -10,6 +10,16 @@ export const conf = {
 
   // Extra config if kw_from=gitlab
   gitlab: {
+    // ac: {
+    //   chart: process.env.GL_CHART,
+    //   reg  : process.env.GL_REG,
+    //   tag  : process.env.GL_TAG,
+    // },
+    // ss: {
+    //   chart: process.env.GL_CHART,
+    //   reg  : process.env.GL_REG,
+    //   tag  : process.env.GL_TAG,
+    // },
     chart: process.env.GL_CHART,
     reg  : process.env.GL_REG,
     tag  : process.env.GL_TAG,
