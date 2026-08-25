@@ -47,7 +47,7 @@ export class TableRow {
     }
 
     // Row filter by argument
-    let rows = table.locator('tr.main-row')
+    let rows = table.locator('tr.main-row,tr.ss-main-row')
     if (typeof arg === 'number') {
       this.strval = arg.toString()
       rows = rows.nth(arg)
