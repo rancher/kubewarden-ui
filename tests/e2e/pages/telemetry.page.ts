@@ -19,17 +19,20 @@ type ManagedAppList = keyof typeof managedApps
 
 export const managedApps = {
   certManager: {
+    // oci://dp.apps.rancher.io/charts/cert-manager (appco)
     title    : 'cert-manager', name     : 'cert-manager', namespace: 'cert-manager', check    : 'cert-manager',
     repo     : { name: 'jetstack', url: 'https://charts.jetstack.io' },
     yaml     : (y) => { y.crds.enabled = true }
   },
   openTelemetry: {
     // https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/UPGRADING.md
+    // oci://dp.apps.rancher.io/charts/opentelemetry-operator (appco)
     title    : 'opentelemetry-operator', name     : 'opentelemetry-operator', namespace: 'open-telemetry', check    : 'opentelemetry-operator', version  : process.env.OTEL_OPERATOR,
     repo     : { name: 'open-telemetry', url: 'https://open-telemetry.github.io/opentelemetry-helm-charts' },
     yaml     : (y) => { y.manager.collectorImage.repository = 'ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib' }
   },
   jaeger: {
+    // oci://dp.apps.rancher.io/charts/jaeger-operator (appco)
     title    : 'jaeger-operator', name     : 'jaeger-operator', namespace: 'jaeger', check    : 'jaeger-operator',
     repo     : { name: 'jaegertracing', url: 'https://jaegertracing.github.io/helm-charts' },
     yaml     : { 'jaeger.create': true, 'rbac.clusterRole': true }

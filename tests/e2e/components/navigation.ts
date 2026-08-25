@@ -4,7 +4,7 @@ import { RancherUI } from './rancher-ui'
 import { RancherCommonPage } from '../rancher/rancher-common.page'
 
 // Explorer navigation
-type ENav = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Admission Policy Management' | 'Vulnerability Scanner'
+type ENav = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Admission Policy Management' | 'Vulnerability Scanner' | 'Runtime Enforcer'
 type ENavMap = {
   'Cluster'                    : 'Projects/Namespaces' | 'Nodes' | 'Cluster and Project Members' | 'Events'
   'Workloads'                  : 'CronJobs' | 'DaemonSets' | 'Deployments' | 'Jobs' | 'StatefulSets' | 'Pods'
@@ -12,6 +12,7 @@ type ENavMap = {
   'Storage'                    : 'PersistentVolumes' | 'StorageClasses' | 'ConfigMaps' | 'PersistentVolumeClaims' | 'Secrets'
   'Admission Policy Management': 'Policy Servers' | 'Cluster Admission Policies' | 'Admission Policies' | 'Policy Reporter'
   'Vulnerability Scanner'      : 'Images' | 'Advanced'
+  'Runtime Enforcer'           : 'Active Policies' | 'Policy Proposals'
 }
 // Expandable items in ENavMap that have a third navigation level
 type ENavSubMap = {
@@ -197,6 +198,15 @@ export class Navigation {
     }
 
     const heading = childName || /^(Dashboard|Install SUSE Security Vulnerability Scanner)/
+    const element = this.page.locator('h1.page-title').or(this.page.locator('div.title'))
+    await expect(element.getByText(heading)).toBeVisible()
+  }
+
+  @step
+  async runEnforcer(childName?: ENavMap['Runtime Enforcer']) {
+    await this.explorer('Runtime Enforcer', childName)
+
+    const heading = childName || /^\s*Runtime Enforcer/
     const element = this.page.locator('h1.page-title').or(this.page.locator('div.title'))
     await expect(element.getByText(heading)).toBeVisible()
   }

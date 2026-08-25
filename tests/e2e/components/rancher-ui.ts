@@ -240,9 +240,4 @@ export class RancherUI {
     if (!semver.validRange(query)) throw new Error(`Invalid range: ${query}`)
     return semver.satisfies(version, query, { includePrerelease: true })
   }
-
-  static get hasAppCollection(): boolean {
-    // OCI repository support was added in 2.9
-    return this.isPrime && this.isVersion('>=2.9') && false
-  }
 }
