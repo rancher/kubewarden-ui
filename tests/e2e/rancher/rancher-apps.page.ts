@@ -1,48 +1,33 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import { RancherUI, type YAMLPatch } from '../components/rancher-ui'
-import { Shell } from '../components/kubectl-shell'
 import { step } from './rancher-test'
 import { BasePage } from './basepage'
 
 export interface Repo {
   // type: 'http'|'git'|'oci'
-  name       : string
-  url        : string
-  authSecret?: {
-    existing?: string|RegExp
-    username?: string
-    password?: string
-  }
+  name        : string
+  url         : string
   branch?     : string // Git specific
   skipTLS?    : boolean // OCI specific
   annotations?: Record<string, string>
-}
-
-export interface Chart {
-  title           : string // Exact chart title displayed in Rancher
-  check           : string // Used to check for helm success, chart name or tgz
-  name?           : string // Desired chart name
-  version?        : string
-  namespace?      : string
-  project?        : string
-  imagePullSecret?: {
-    existing?: string|RegExp
-    username?: string
-    password?: string
+  authSecret?: string | RegExp | {
+    username: string
+    password: string
   }
 }
 
-const appCoRepo: Repo = {
-  name      : 'application-collection',
-  url       : 'oci://dp.apps.rancher.io/charts',
-  authSecret: (() => {
-    const auth = process.env.APP_COLLECTION_AUTH
-    if (auth) {
-      const [username, password] = auth.split(':')
-      return { username, password }
-    }
-  })()
+export interface Chart {
+  title      : string // Exact chart title displayed in Rancher
+  check      : string // Used to check for helm success, chart name or tgz
+  name?      : string // Desired chart name
+  version?   : string
+  namespace? : string
+  project?   : string
+  pullSecret?: string | RegExp | {
+    username: string
+    password: string
+  }
 }
 
 export class RancherAppsPage extends BasePage {
@@ -89,11 +74,15 @@ export class RancherAppsPage extends BasePage {
    * @param url Git or http(s) url of the repository
    */
   @step
-  async addRepository(repo: Repo) {
+  async addRepository(repo: Repo, options?:{ skipExisting?: boolean }) {
     // Renamed Create -> Add Repository in rancher 2.15
     const createBtn = this.ui.button(/Create|Add Repository/)
 
     await this.nav.explorer('Apps', 'Repositories')
+    if (options?.skipExisting) {
+      await this.ui.tableRow(0).waitFor()
+      if (await this.ui.tableRow(repo.name).row.isVisible()) return
+    }
     await createBtn.click()
 
     await this.ui.input('Name *').fill(repo.name)
@@ -117,9 +106,11 @@ export class RancherAppsPage extends BasePage {
     }
 
     if (repo.authSecret) {
-      if (repo.authSecret.existing) {
-        await this.ui.selectOption('Authentication', repo.authSecret.existing)
-      } else if (repo.authSecret.username && repo.authSecret.password) {
+      if (repo.authSecret instanceof RegExp) {
+        await this.ui.selectOption('Authentication', repo.authSecret)
+      } else if (typeof repo.authSecret == 'string') {
+        await this.ui.selectOption('Authentication', new RegExp(`^${repo.authSecret} `))
+      } else {
         await this.ui.selectOption('Authentication', 'Create an HTTP Basic Auth Secret')
         await this.ui.input('Username').fill(repo.authSecret.username)
         await this.ui.input('Password').fill(repo.authSecret.password)
@@ -186,30 +177,14 @@ export class RancherAppsPage extends BasePage {
     }
   }
 
-  @step
-  async installFromAppCollection(chart: Chart) {
-    const shell = new Shell(this.page)
-    const shellOpts = { inPlace: true, runner: 'rancher' } as const
-    const ns = chart.namespace || 'default'
-
-    // Configure authentification
-    await shell.open()
-    // Secret to pull images from app collection
-    if (ns !== 'default') await shell.run(`kubectl create ns ${ns}`, shellOpts)
-    await shell.run(`kubectl create secret docker-registry application-collection -n ${ns} --docker-server=dp.apps.rancher.io --docker-username=${appCoRepo.authSecret?.username} --docker-password=${appCoRepo.authSecret?.password}`, shellOpts)
-    // Login to app collection to access helm chart
-    await shell.run(`helm registry login ${appCoRepo.url.split('://')[1]} -u ${appCoRepo.authSecret?.username} -p ${appCoRepo.authSecret?.password}`, shellOpts)
-
-    // Chart-specific setup
-    if (chart.name === 'jaeger-operator') {
-      await shell.run(`helm install ${chart.name} ${appCoRepo.url}/jaeger-operator -n ${ns} --set jaeger.create=true --set rbac.clusterRole=true --set image.imagePullSecrets[0]=application-collection`, shellOpts)
-      // Workaround for jaeger issue https://github.com/jaegertracing/helm-charts/issues/581
-      await shell.run('kubectl get clusterrole jaeger-operator -o json | jq \'.rules[] |= (select(.apiGroups | index("networking.k8s.io")).resources += ["ingressclasses"])\' | kubectl apply -f -', shellOpts)
-      // Patch SA to use pull secret for jaeger creation (retry waits for SA creation)
-      await shell.retry(`kubectl patch serviceaccount jaeger-operator-jaeger -n ${ns} -p '{"imagePullSecrets": [{"name": "application-collection"}]}'`, shellOpts)
-    }
-    await shell.close()
-  }
+  //   // Chart-specific setup
+  //   if (chart.name === 'jaeger-operator') {
+  //     await shell.run(`helm install ${chart.name} ${appCoRepo.url}/jaeger-operator -n ${ns} --set jaeger.create=true --set rbac.clusterRole=true --set image.imagePullSecrets[0]=application-collection`, shellOpts)
+  //     // Workaround for jaeger issue https://github.com/jaegertracing/helm-charts/issues/581
+  //     await shell.run('kubectl get clusterrole jaeger-operator -o json | jq \'.rules[] |= (select(.apiGroups | index("networking.k8s.io")).resources += ["ingressclasses"])\' | kubectl apply -f -', shellOpts)
+  //     // Patch SA to use pull secret for jaeger creation (retry waits for SA creation)
+  //     await shell.retry(`kubectl patch serviceaccount jaeger-operator-jaeger -n ${ns} -p '{"imagePullSecrets": [{"name": "application-collection"}]}'`, shellOpts)
+  //   }
 
   @step
   async installChart(chart: Chart, options?: { questions?: () => Promise<void>, yamlPatch?: YAMLPatch, timeout?: number, navigate?: boolean }) {
@@ -255,15 +230,18 @@ export class RancherAppsPage extends BasePage {
     if (chart.project) {
       await this.ui.selectOption('Install into Project', chart.project)
     }
-    if (chart.imagePullSecret) {
+    if (chart.pullSecret) {
       // Alternative: A new Image Pull Secret <name>-image-pull-secret will be generated from the Repository secret <name>
       await this.ui.checkbox('Manually select an Image Pull Secret').check()
-      if (chart.imagePullSecret.existing) {
-        await this.ui.selectOption('Image Pull Secret', chart.imagePullSecret.existing)
-      } else if (chart.imagePullSecret.username && chart.imagePullSecret.password) {
+      if (chart.pullSecret instanceof RegExp) {
+        await this.ui.selectOption('Image Pull Secret', chart.pullSecret)
+      } else if (typeof chart.pullSecret == 'string') {
+        // Secret has additional "(Registry: ...)" text
+        await this.ui.selectOption('Image Pull Secret', new RegExp(`^${chart.pullSecret} `))
+      } else {
         await this.ui.selectOption('Image Pull Secret', /Create (an|a new) Image Pull Secret/)
-        await this.ui.input('Username').fill(chart.imagePullSecret.username)
-        await this.ui.input('Password').fill(chart.imagePullSecret.password)
+        await this.ui.input('Username').fill(chart.pullSecret.username)
+        await this.ui.input('Password').fill(chart.pullSecret.password)
       }
     }
     await this.nextBtn.click()

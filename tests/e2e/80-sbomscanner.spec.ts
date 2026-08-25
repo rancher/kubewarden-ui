@@ -2,7 +2,7 @@ import { test, expect } from './rancher/rancher-test'
 import { RancherExtensionsPage } from './rancher/rancher-extensions.page'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherUI } from './components/rancher-ui'
-import { Registry, SbomScannerPage, secretName } from './sbomscanner/sbomscanner.page'
+import { Registry, VulnerabilityScannerPage, secretName } from './suse-security/vulnerability-scanner.page'
 import { ClusterAdmissionPoliciesPage, Policy } from './pages/policies.page'
 import { Deployment, RancherWorkloadsPage } from './rancher/rancher-workloads.page'
 import { PolicyReporterPage } from './pages/policyreporter.page'
@@ -17,7 +17,7 @@ test.beforeAll(async({ request }) => {
     .catch(() => fallback)
 })
 
-test('Install UI extension', { tag: '@scan' }, async({ page, ui }) => {
+test('Install UI extension', { tag: '@vs' }, async({ page, ui }) => {
   const extensions = new RancherExtensionsPage(page)
   await extensions.goto()
 
@@ -45,31 +45,30 @@ test('Install UI extension', { tag: '@scan' }, async({ page, ui }) => {
     if (conf.ui_from === 'source') {
       await extensions.developerLoad(conf.source.sbomscanner)
     } else {
-      await extensions.install('SBOMScanner', { version: process.env.UIVERSION?.replace(/^sbomscanner-ui-ext-/, '') })
+      await extensions.install('SBOMScanner', { version: process.env.UIVERSION?.replace(/^vulnerability-scanner-/, '') })
     }
   })
 })
 
-test('Install SBOMScanner', { tag: '@scan' }, async({ page, nav, ui }) => {
+test('Install Vulnerability Scanner', { tag: '@vs' }, async({ page, nav, ui }) => {
   // Disable partners repo for cnpg chart - issue#716
   await nav.explorer('Apps', 'Repositories')
   const partners = ui.tableRow('Partners')
-  await partners.action('Disable')
-  await partners.toHaveState('Disabled')
+  await partners.waitFor()
+  if (await partners.status.getByText('Active').isVisible()) {
+    await partners.action('Disable')
+    await partners.toHaveState('Disabled')
+  }
 
-  const sbomPage = new SbomScannerPage(page)
-  await sbomPage.install()
-
-  await nav.explorer('Apps', 'Repositories')
-  await partners.action('Enable')
-  await partners.toHaveState('Active')
+  const vsPage = new VulnerabilityScannerPage(page)
+  await vsPage.installFrom(conf.kw_from)
 })
 
 test('Scan Admission Controller', { tag: '@scan' }, async({ page, ui, nav }) => {
   // Configure Workload Scan
   await nav.sbomScanner('Workloads Scan')
-  const sbomPage = new SbomScannerPage(page)
-  await sbomPage.setWorkloadScan({
+  const vsPage = new VulnerabilityScannerPage(page)
+  await vsPage.setWorkloadScan({
     enabled   : true,
     skipTLS   : conf.kw_from === 'gitlab' || undefined,
     authSecret: conf.kw_from === 'prime' ? secretName : undefined,
@@ -79,17 +78,22 @@ test('Scan Admission Controller', { tag: '@scan' }, async({ page, ui, nav }) => 
 
   // Wait for Workload Scan
   await nav.sbomScanner('Registries Configuration')
-  await ui.tableRow({ Repositories: /kubewarden-controller/ }).toHaveState('Completed', 2 * 60_000)
+  await ui.tableRow({ Repositories: /(kubewarden|sbomscanner|runtime-enforcer)[-/]controller/ }).toHaveState('Completed', 2 * 60_000)
 
   // Check Images
   await nav.sbomScanner('Images')
+  await ui.tableRow(0).waitFor()
+  await vsPage.saveResultTable('cve-report')
+
+  // Check CVEs and display details
   for (const image of ['controller', 'audit-scanner', 'policy-server']) {
     const row = ui.tableRow({ 'Image reference': new RegExp(`kubewarden-${image}`) })
-    await expect(row.column('Affecting CVEs')).toHaveText('00000', { timeout: 5_000 }).catch(async(error) => {
-      await row.open('Image reference')
-      await ui.tableRow({ 'CVE ID': /.*/ }).waitFor()
-      throw error
-    })
+    await expect.soft(row.column('Affecting CVEs')).toHaveText('00000', { timeout: 1000 })
+    // await expect(row.column('Affecting CVEs')).toHaveText('00000', { timeout: 1000 }).catch(async(error) => {
+    //   await row.open('Image reference')
+    //   await ui.tableRow({ 'CVE ID': /.*/ }).waitFor()
+    //   throw error
+    // })
   }
 })
 
@@ -148,7 +152,7 @@ subjects:
   })
 
   test('Create WorkloadScan', async({ page }) => {
-    const sbomPage = new SbomScannerPage(page)
+    const sbomPage = new VulnerabilityScannerPage(page)
     await sbomPage.setWorkloadScan({
       enabled : true,
       nsFilter: { 'kubernetes.io/metadata.name': 'cattle-kubewarden-system' },
@@ -188,7 +192,7 @@ subjects:
 
   test('Teardown', async({ ui, shell }) => {
   // test.skip()
-    const sbomPage = new SbomScannerPage(ui.page)
+    const sbomPage = new VulnerabilityScannerPage(ui.page)
     await sbomPage.deleteVexHub('rancher-vexhub')
     await shell.runBatch(
       'k delete ns workloadscan-ns --ignore-not-found',
@@ -207,7 +211,7 @@ test('Check Rancher VEX Hub', async({ nav, ui }) => {
 })
 
 test('Trigger registry scan', async({ page }) => {
-  const sbomPage = new SbomScannerPage(page)
+  const sbomPage = new VulnerabilityScannerPage(page)
   const registry: Registry = {
     name        : 'test-registry',
     uri         : 'ghcr.io',
