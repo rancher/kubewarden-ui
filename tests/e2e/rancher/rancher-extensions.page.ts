@@ -22,7 +22,7 @@ export class RancherExtensionsPage extends BasePage {
 
   async dotMenu(name: 'Manage Repositories' | 'Add Rancher Repositories' | 'Manage Extension Catalogs' | 'Developer Load') {
     await this.page.getByTestId('extensions-page-menu').click()
-    await this.page.getByText(name).click()
+    await this.page.getByRole('menuitem', { name }).click()
   }
 
   // Handle extension repositories dialog

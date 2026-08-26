@@ -5,6 +5,12 @@ import { AppVersion } from '../pages/kubewarden.page'
 import { RancherUI } from './rancher-ui'
 import { execFileSync } from 'child_process'
 
+interface GitLabRefs {
+  chart: string
+  reg  : string
+  tag  : string
+}
+
 /**
  * Common helper functions and constants
  */
@@ -46,33 +52,41 @@ export class Common {
     ).reverse()
   }
 
-  /**
-   *
-   * @param name Filter MR title by product name
-   * @returns MR chart, registry and tag for the currently open MR
-   */
-  static async fetchAppCoMr() {
-    const title = 'SUSE Security Admission Controller'
-    const chartsRepo = 'oci://registry.suse.de/devel/jasmine/charts/charts/suse-security-admission-controller'
-    const rpmsRepo = 'registry.suse.de/devel/jasmine/containers'
-    return { mrChart: chartsRepo, mrReg: rpmsRepo, undefined }
+  // KW = github / gitlab / prime / mr56:21
+  static findGitLabRefs(): GitLabRefs {
+    // Search only once
+    if (process.env.GL_CHART && process.env.GL_REG && process.env.GL_TAG) {
+      return { chart: process.env.GL_CHART, reg: process.env.GL_REG, tag: process.env.GL_TAG }
+    }
 
-    const firstMr = (repo: string) => JSON.parse(
+    // Defaults without MR
+    const def = {
+      chart: 'oci://registry.suse.de/devel/jasmine/charts/charts/suse-security-admission-controller',
+      reg  : 'registry.suse.de/devel/jasmine/containers',
+      tag  : '1'
+    }
+
+    // Runners without glab for now
+    if (process.env.CI) return def
+
+    const title = 'SUSE Security Admission Controller'
+    const findMr = (repo: string) => JSON.parse(
       execFileSync('glab', ['mr', 'list', '-R', repo, '--search', title, '-F', 'json'], { encoding: 'utf-8' })
     )[0]
 
-    const chartMr = firstMr(chartsRepo)
-    const mrc = chartMr?.iid
-    const mri = firstMr(rpmsRepo)?.iid
+    // Chart
+    // const chartMr = firstMr('https://gitlab.suse.de/orchid/suse-products-recipes/suse-security/charts')
+    const mrc = findMr('https://gitlab.suse.de/orchid/suse-products-recipes/suse-security/charts')?.iid
+    const chart = mrc ? `oci://registry.suse.de/devel/jasmine/charts/suse-security/mr-${mrc}/charts/suse-security-admission-controller` : def.chart
 
-    const mrChart = mrc
-      ? `oci://registry.suse.de/devel/jasmine/charts/suse-security/mr-${mrc}/charts/suse-security-admission-controller`
-      : 'oci://registry.suse.de/devel/jasmine/charts/charts/suse-security-admission-controller'
-    const mrReg = mri
-      ? `registry.suse.de/devel/jasmine/containers/suse-security/mr-${mri}`
-      : 'registry.suse.de/devel/jasmine/containers'
-    const mrTag = chartMr?.title.match(/\d+\.\d+\.\d+/)[0]
+    // Image Registry
+    const mri = findMr('https://gitlab.suse.de/orchid/suse-products-recipes/suse-security/rpms-containers')?.iid
+    const reg = mri ? `registry.suse.de/devel/jasmine/containers/suse-security/mr-${mri}` : def.reg
+    // Tag might not exist without MR (1 = 1.37.2 = 1.37.2-12.6)
+    // const tag = chartMr?.title.match(/\d+\.\d+\.\d+/)[0] || defTag
+    // TODO: Check '1' exists on MR
+    const tag = def.tag
 
-    return { mrChart, mrReg, mrTag }
+    return { chart, reg, tag }
   }
 }

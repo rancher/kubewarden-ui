@@ -3,8 +3,7 @@ import { PolicyServer, PolicyServersPage } from './pages/policyservers.page'
 import { AdmissionPoliciesPage, ClusterAdmissionPoliciesPage, BasePolicyPage, Policy } from './pages/policies.page'
 import { RancherUI } from './components/rancher-ui'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
-
-const MODE = process.env.MODE || 'manual'
+import { conf } from '../env-config'
 
 function isAP(polPage: BasePolicyPage) {
   return polPage instanceof AdmissionPoliciesPage
@@ -211,7 +210,7 @@ test('Check Unofficial policies', async({ page, nav, ui }) => {
 })
 
 test('Recommended policies', async({ page, ui, nav }) => {
-  test.skip(MODE === 'fleet', 'https://github.com/rancher/kubewarden-ui/pull/703')
+  test.skip(conf.kw_mode === 'fleet', 'https://github.com/rancher/kubewarden-ui/pull/703')
 
   await test.step('Edit Recommended policy settings', async() => {
     await nav.capolicies()

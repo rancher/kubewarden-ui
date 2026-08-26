@@ -1,6 +1,7 @@
 import { step } from './rancher-test'
 import { BasePage } from './basepage'
 import { Shell } from '../components/kubectl-shell'
+import { conf } from '../../env-config'
 
 export interface Secret {
   type      : 'Registry' | 'HTTP Basic Auth'
@@ -16,8 +17,8 @@ export class RancherStoragePage extends BasePage {
     await this.nav.explorer('Storage', 'Secrets')
   }
 
-  // Create secrets in nodejs shell to not log creadentials
-  createSecretInShell(secret: Secret) {
+  // Create secrets in nodejs shell to not log credentials
+  createSecretInShell(secret: Secret): Secret {
     const shell = new Shell(this.page)
     shell.runExec(`kubectl get ns ${secret.namespace} || kubectl create ns ${secret.namespace}`)
 
@@ -37,6 +38,7 @@ export class RancherStoragePage extends BasePage {
       default:
         throw new Error(`Unsupported secret type: ${secret.type}`)
     }
+    return secret
   }
 
   @step
@@ -65,5 +67,26 @@ export class RancherStoragePage extends BasePage {
   async deleteSecret(name: string) {
     await this.nav.explorer('Storage', 'Secrets')
     await this.ui.tableRow(name).delete()
+  }
+
+  createAppcoAuth(name: string): Secret {
+    return this.createSecretInShell({
+      type     : 'HTTP Basic Auth',
+      name     : name,
+      namespace: 'cattle-system',
+      username : conf.auth.appco_user || '',
+      password : conf.auth.appco_pass || ''
+    })
+  }
+
+  createAppcoPull(name: string, namespace: string): Secret {
+    return this.createSecretInShell({
+      type     : 'Registry',
+      name     : name,
+      namespace: namespace,
+      domain   : 'dp.apps.rancher.io',
+      username : conf.auth.appco_user || '',
+      password : conf.auth.appco_pass || ''
+    })
   }
 }

@@ -1,4 +1,3 @@
-import semver from 'semver'
 import { test, expect } from './rancher/rancher-test'
 import { PolicyServersPage, PolicyServer } from './pages/policyservers.page'
 import { Policy, AdmissionPoliciesPage, ClusterAdmissionPoliciesPage } from './pages/policies.page'
@@ -38,12 +37,9 @@ test('Policy Servers', async({ page, ui, nav }) => {
     expect(cImg).toEqual(dImg)
     expect(cImg).toContain('policy-server')
 
-    // Validate semver
-    expect(semver.valid(cVer)).not.toBeNull()
-    expect(semver.valid(dVer)).not.toBeNull()
-
-    // Validate version is equal to default
-    expect(semver.eq(cVer, dVer)).toBeTruthy()
+    // Validate Tags
+    expect(cVer).toBeTruthy()
+    expect(cVer).toEqual(dVer)
   })
 
   await test.step('Check Details page', async() => {

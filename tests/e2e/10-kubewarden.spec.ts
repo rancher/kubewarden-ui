@@ -6,47 +6,26 @@ import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherFleetPage } from './rancher/rancher-fleet.page'
 import { RancherUI } from './components/rancher-ui'
 import { Common } from './components/common'
+import { conf } from '../env-config'
 import semver from 'semver'
 
-const conf = {
-  src_url: 'http://127.0.0.1:4500/kubewarden-0.0.1/kubewarden-0.0.1.umd.min.js',
-  // Install UI extension from: source (yarn dev), github (github tag), prime (official)
-  ui_from: (process.env.ORIGIN || undefined) as 'source'|'github'|'prime'|undefined,
-  // Install Kubewarden from: github (community), gitlab (mr), prime (official)
-  kw_from: (process.env.KW || undefined) as 'github'|'gitlab'|'prime'|undefined,
-  // How to install Kubewarden: manual (from UI extension), fleet, upgrade (previous version)
-  kw_mode: (process.env.MODE || undefined) as 'manual'|'fleet'|'upgrade'|undefined,
-  // Fetch Kubewarden versions from github for upgrade test
-  upMap  : [] as AppVersion[]
-}
-
-if (conf.ui_from) expect(conf.ui_from).toMatch(/^(source|github|prime)$/)
-if (conf.kw_mode) expect(conf.kw_mode).toMatch(/^(manual|fleet|upgrade)$/)
-if (conf.kw_from) expect(conf.kw_from).toMatch(/^(github|gitlab|prime)$/)
-if (conf.kw_from !== 'github') {
-  expect(process.env.APPCO_USERNAME).toBeTruthy()
-  expect(process.env.APPCO_PASSWORD).toBeTruthy()
-}
+// Fetch Kubewarden versions from github for upgrade test
+let upMap = [] as AppVersion[]
 
 // Configure defaults after env is loaded
 test.beforeAll(async({ request }) => {
   // Use local build (yarn serve), prime (if available) or github
   const fallback = RancherUI.isPrime ? 'prime' : 'github'
-  conf.ui_from ||= await request.head(conf.src_url)
+  conf.ui_from ||= await request.head(conf.source.kubewarden)
     .then(r => r.ok() ? 'source' as const : fallback)
     .catch(() => fallback)
 
-  // Default to manual mode, unless fleet or upgrade is requested
-  conf.kw_mode ||= 'manual'
-  // Default to installation from GitLab (MR)
-  conf.kw_from ||= 'prime'
-
   if (conf.kw_mode === 'upgrade') {
-    conf.upMap = (await Common.fetchVersionMap()).splice(-3)
+    upMap = (await Common.fetchVersionMap()).splice(-3)
       // Limit because of https://github.com/kubewarden/policy-server/issues/1300
       .filter(v => semver.gte(v.app.replace(/^v/, ''), '1.29.0'))
 
-    if (conf.upMap.length === 0) {
+    if (upMap.length === 0) {
       throw new Error('No compatible version was found, check rancher-version annotations')
     }
   }
@@ -78,7 +57,7 @@ test('Install UI extension', { tag: '@kw' }, async({ page, ui }) => {
   await test.step('Install or developer load extension', async() => {
     await extensions.goto()
     if (conf.ui_from === 'source') {
-      await extensions.developerLoad(conf.src_url)
+      await extensions.developerLoad(conf.source.kubewarden)
     } else {
       await extensions.install(/kubewarden|SUSE Security Admission Controller/, { version: process.env.UIVERSION?.replace(/^kubewarden-/, '') })
     }
@@ -90,7 +69,7 @@ test('Install Kubewarden', { tag: '@kw' }, async({ page, ui, nav }) => {
 
   const kwPage = new KubewardenPage(page)
   if (conf.kw_from == 'github') {
-    await kwPage.installGithub({ version: conf.kw_mode === 'upgrade' ? conf.upMap[0].controller : undefined })
+    await kwPage.installGithub({ version: conf.kw_mode === 'upgrade' ? upMap[0].controller : undefined })
   } else if (conf.kw_from == 'gitlab') {
     await kwPage.installGitlab()
   } else {
@@ -146,16 +125,16 @@ test('Upgrade Kubewarden', async({ page, nav }) => {
   // Check we installed old versions
   await nav.explorer('Apps', 'Installed Apps')
   for (const chart of ['controller', 'crds', 'defaults'] as const) {
-    await apps.checkChart(`rancher-kubewarden-${chart}`, conf.upMap[0][chart])
+    await apps.checkChart(`rancher-kubewarden-${chart}`, upMap[0][chart])
   }
 
   // Keep track of last upgraded version
-  let last: AppVersion = conf.upMap[conf.upMap.length - 1]
+  let last: AppVersion = upMap[upMap.length - 1]
 
   await test.step('Upgrade predefined versions', async() => {
-    for (let i = 0; i < conf.upMap.length - 1; i++) {
+    for (let i = 0; i < upMap.length - 1; i++) {
       await nav.kubewarden()
-      await kwPage.upgrade({ from: conf.upMap[i], to: conf.upMap[i + 1] })
+      await kwPage.upgrade({ from: upMap[i], to: upMap[i + 1] })
     }
   })
 

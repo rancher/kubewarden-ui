@@ -2,6 +2,8 @@ import { expect } from '@playwright/test'
 import { RancherAppsPage } from '../rancher/rancher-apps.page'
 import { BasePage } from '../rancher/basepage'
 import { step } from '../rancher/rancher-test'
+import { RancherStoragePage } from '../rancher/rancher-storage.page'
+import { RancherUI } from '../components/rancher-ui'
 
 export interface Registry {
   name         : string
@@ -18,9 +20,15 @@ export interface VexHub {
 }
 
 export interface WorkloadScanConfig {
-  enabled?: boolean
-  rules?  : { key: string, value: string }[]
+  enabled?   : boolean
+  authSecret?: string|RegExp
+  skipTLS?   : boolean // OCI specific
+  nsFilter?  : Record<string, string>
+  osFilter?  : Record<string, string>
 }
+
+// Generated Pull secret has the same name as auth
+export const secretName = 'appco-auth-sbomscanner'
 
 export class SbomScannerPage extends BasePage {
   async goto(): Promise<void> {
@@ -30,63 +38,73 @@ export class SbomScannerPage extends BasePage {
   @step
   async install(options?: { version?: string }) {
     const appsPage = new RancherAppsPage(this.page)
+
     // Requirements Dialog
     const welcomeStep = this.page.getByText('Get a comprehensive view of your container image vulnerabilities and focus on risks that truly matter.')
-    const addCNPGRepoStep = this.page.getByRole('heading', { name: 'Add the CNPG Helm repository', exact: true })
-    const addSBOMRepoStep = this.page.getByRole('heading', { name: 'Add the SBOMScanner Helm repository', exact: true })
+    const configAuthStep = this.page.getByRole('heading', { name: /^Configure global authentication/ })
+    const addReposStep = this.page.getByRole('heading', { name: 'Add required Helm repositories', exact: true })
     const installCNPGStep = this.page.getByRole('heading', { name: 'Installation for CloudNativePG', exact: true })
-    const installSBOMStep = this.page.getByRole('heading', { name: 'Installation for SBOMScanner', exact: true })
+    const installSBOMStep = this.page.getByRole('heading', { name: 'Installation for SUSE Security Vulnerability Scanner', exact: true })
 
     await this.goto()
+    const sec = new RancherStoragePage(this.page).createAppcoAuth(secretName)
 
-    // We need to skip some steps if kubewarden is already installed
+    // Welcome screen is skipped if kubewarden is already installed
     await this.page.waitForTimeout(2000) // Ignore briefly visible welcome step
-    await expect(welcomeStep.or(addCNPGRepoStep)).toBeVisible()
-    const freshInstall = (await welcomeStep.isVisible())
-
-    // Welcome screen
-    if (freshInstall) {
-      // await expect(welcomeStep).toBeVisible()
+    await expect(welcomeStep.or(configAuthStep)).toBeVisible()
+    if (await welcomeStep.isVisible()) {
       await this.ui.button('Start installation').click()
     }
 
-    // Add CNPG repository
-    await expect(addCNPGRepoStep).toBeVisible()
-    await this.ui.button('Add CNPG repository').click()
+    // AppCo Registry Auth
+    await expect(configAuthStep).toBeVisible()
+    await this.ui.selectOption('Authentication', new RegExp(`^${sec.name}`))
+    await this.ui.button('Continue').click()
 
-    // Add SBOMScanner repository
-    if (freshInstall) {
-      await expect(addSBOMRepoStep).toBeVisible()
-      await this.ui.button('Add SBOMScanner repository').click()
-    }
+    // Add repositories
+    await expect(addReposStep).toBeVisible()
+    await this.ui.button('Add all repositories').click()
 
     // Install CloudNativePG
     await expect(installCNPGStep).toBeVisible()
     await this.ui.button('Install CloudNativePG').click()
     await appsPage.installChart(
-      { title: 'cloudnative-pg', name: 'cnpg', check: 'cloudnative-pg' }, // namespace: 'cnpg-system'
-      { navigate: false })
+      { title: 'cloudnative-pg', check: 'cloudnative-pg' },
+      { navigate : false,
+        yamlPatch: (RancherUI.isVersion('<2.14'))
+          ? (y) => { y.global.imagePullSecrets[0] = sec.name }
+          : undefined
+      })
 
     // Install SBOMScanner
     await this.goto()
     await expect(installSBOMStep).toBeVisible()
-    await this.ui.button('Install SBOMScanner').click()
+    await this.ui.button('Install SUSE Security Vulnerability Scanner').click()
     await appsPage.installChart(
-      { title: 'SBOMScanner', check: 'rancher-sbomscanner', version: options?.version },
+      { title: 'SBOMScanner', check: 'suse-security-vulnerability-scanner', version: options?.version },
       { navigate : false,
-        questions: async() => {
-          await this.ui.input('Controller Replicas').fill('1')
-          await this.ui.tab('Worker').click()
-          await this.ui.input('Worker Replicas').fill('1')
-          await this.ui.tab('Storage').click()
-          await this.ui.input('Storage Replicas').fill('1')
-          await this.ui.input('CNPG Instances').fill('1')
-        } })
+        yamlPatch: (y) => {
+          // Chart secret UI is not available in Rancher < 2.14
+          if (RancherUI.isVersion('<2.14')) y.global.imagePullSecrets[0] = sec.name
+          y.controller.replicas = 1
+          y.worker.replicas = 1
+          y.storage.replicas = 1
+          y.storage.postgres.cnpg.instances = 1
+        }
+        // questions: async() => {
+        //   await this.ui.input('Controller Replicas').fill('1')
+        //   await this.ui.tab('Worker').click()
+        //   await this.ui.input('Worker Replicas').fill('1')
+        //   await this.ui.tab('Storage').click()
+        //   await this.ui.input('Storage Replicas').fill('1')
+        //   await this.ui.input('CNPG Instances').fill('1')
+        // }
+      })
   }
 
   @step
   async addRegistry(reg: Registry) {
-    await this.nav.sbomScanner('Registries configuration')
+    await this.nav.sbomScanner('Registries Configuration')
     await this.ui.button('Create').click()
 
     await this.ui.input('Registry*').fill(reg.name)
@@ -104,7 +122,7 @@ export class SbomScannerPage extends BasePage {
 
   @step
   async deleteRegistry(reg: string) {
-    await this.nav.sbomScanner('Registries configuration')
+    await this.nav.sbomScanner('Registries Configuration')
     await this.ui.tableRow({ Registry: reg }).delete()
   }
 
@@ -136,21 +154,41 @@ export class SbomScannerPage extends BasePage {
 
   @step
   async setWorkloadScan(config: WorkloadScanConfig) {
-    const rules = config?.rules ?? []
     await this.nav.sbomScanner('Workloads Scan')
-    if (config?.enabled !== undefined) {
+
+    if (config.enabled !== undefined) {
       await this.ui.checkbox('Enabled').setChecked(config.enabled)
     }
-    await expect(this.ui.checkbox('Enabled')).toBeChecked() // Default is enabled, so the form is visible
-
-    for (let i = 0; i < rules.length; i++) {
-      await this.ui.button('Add Rule').click()
-      await this.page.locator('div.namespace-selector-row').getByTestId(`input-match-expression-key-control-${i}`).fill(rules[i].key)
-      await this.page.locator('div.namespace-selector-row').getByTestId(`input-match-expression-values-control-${i}`).fill(rules[i].value)
+    if (config.authSecret) {
+      await this.ui.selectOption('Authentication', config.authSecret)
     }
-    await this.ui.button('Add Platform').click()
+    if (config.skipTLS !== undefined) {
+      await this.ui.checkbox('Allow insecure connections').setChecked(config.skipTLS)
+    }
+
+    if (config.nsFilter) {
+      const line = this.page.locator('div.match-expression-row').last()
+      for (const [key, value] of Object.entries(config.nsFilter)) {
+        await this.ui.button('Add Rule').click()
+        await line.getByTestId(/^input-match-expression-key-control-/).fill(key)
+        await line.getByTestId(/^input-match-expression-values-control-/).fill(value)
+      }
+    }
+
+    if (config.osFilter) {
+      const line = this.page.locator('div.row-platforms').last()
+      for (const [os, arch] of Object.entries(config.osFilter)) {
+        await this.ui.button('Add Platform').click()
+        await this.ui.selectOption(line.locator('div.labeled-select').nth(0), os)
+        await this.ui.selectOption(line.locator('div.labeled-select').nth(1), arch)
+      }
+    }
+
     await this.page.waitForTimeout(300)
-    await this.ui.button('Create').click()
-    await expect(this.page.getByRole('heading', { name: /^Workloads Scan.*Active$/ })).toBeVisible()
+    await this.ui.button(/Create|Save/).click()
+
+    if (config.enabled !== undefined) {
+      await expect(this.page.locator('span.badge-state')).toHaveText(config.enabled ? 'Active' : 'Disabled')
+    }
   }
 }

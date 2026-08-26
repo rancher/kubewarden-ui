@@ -4,13 +4,14 @@ import { PolicyServersPage } from './pages/policyservers.page'
 import { managedApps, TelemetryPage } from './pages/telemetry.page'
 import { RancherUI } from './components/rancher-ui'
 import { AdmissionPoliciesPage, Policy } from './pages/policies.page'
+import { conf } from '../env-config'
 
 /**
  * Expect timeout has to be increased after telemetry installation on local cluster
  */
 test.describe('Setup', () => {
   test('Install OpenTelemetry', async({ page, nav }) => {
-    test.skip(process.env.MODE === 'fleet')
+    test.skip(conf.kw_mode === 'fleet')
 
     const telPage = new TelemetryPage(page)
 
@@ -37,7 +38,7 @@ test.describe('Setup', () => {
   test('Create custom PolicyServer & Policy', async({ page }) => {
     const policy: Policy = { name: 'no-privileged-custom', title: 'Pod Privileged Policy', mode: 'Monitor', server: 'custom-ps' }
     await new PolicyServersPage(page).create({ name: 'custom-ps' })
-    await new AdmissionPoliciesPage(page).create(policy, { wait: process.env.MODE == 'fleet' })
+    await new AdmissionPoliciesPage(page).create(policy, { wait: conf.kw_mode == 'fleet' })
   })
 })
 
@@ -52,7 +53,7 @@ test.describe('Tracing', () => {
   })
 
   test('Install Jaeger', async({ nav, ui }) => {
-    test.skip(process.env.MODE === 'fleet')
+    test.skip(conf.kw_mode === 'fleet')
 
     // Jaeger is not installed
     await telPage.toBeIncomplete('jaeger')
@@ -72,7 +73,7 @@ test.describe('Tracing', () => {
   })
 
   test('Configure tracing', async({ shell }) => {
-    test.skip(process.env.MODE === 'fleet')
+    test.skip(conf.kw_mode === 'fleet')
 
     await telPage.toBeIncomplete('config')
     await telPage.configBtn.click()
@@ -125,7 +126,7 @@ test.describe('Tracing', () => {
   })
 
   test('Uninstall tracing', async({ nav, shell }) => {
-    test.skip(process.env.MODE === 'fleet')
+    test.skip(conf.kw_mode === 'fleet')
 
     // Clean up
     await appsPage.updateApp('rancher-admission-controller', {
@@ -151,7 +152,7 @@ test.describe('Tracing', () => {
 })
 
 test.describe('Metrics', () => {
-  test.skip(process.env.MODE === 'fleet')
+  test.skip(conf.kw_mode === 'fleet')
 
   let appsPage: RancherAppsPage
   let telPage: TelemetryPage
@@ -278,7 +279,7 @@ test.describe('Teardown', () => {
   })
 
   test('Uninstall OpenTelemetry', async({ page, nav }) => {
-    test.skip(process.env.MODE === 'fleet')
+    test.skip(conf.kw_mode === 'fleet')
 
     const telPage = new TelemetryPage(page)
     await telPage.removeManaged('openTelemetry')

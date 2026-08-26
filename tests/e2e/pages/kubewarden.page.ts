@@ -4,7 +4,8 @@ import { BasePage } from '../rancher/basepage'
 import { Shell } from '../components/kubectl-shell'
 import { step } from '../rancher/rancher-test'
 import { Common } from '../components/common'
-import { RancherStoragePage, Secret } from '../rancher/rancher-storage.page'
+import { RancherStoragePage } from '../rancher/rancher-storage.page'
+import { RancherUI } from '../components/rancher-ui'
 
 type Pane = 'Policy Servers' | 'Namespaced Policies' | 'Cluster Policies'
 // type PaneFilter = 'Policies' | 'Reports' | string | RegExp
@@ -15,6 +16,9 @@ export interface AppVersion {
   crds?      : string
   defaults?  : string
 }
+
+// Generated Pull secret has the same name as auth
+export const secretName = 'appco-auth-kubewarden'
 
 export class KubewardenPage extends BasePage {
   readonly currentApp  : Locator
@@ -180,21 +184,15 @@ export class KubewardenPage extends BasePage {
 
   @step
   async installAppco() {
-    const authSecret : Secret = {
-      type     : 'HTTP Basic Auth',
-      namespace: 'cattle-system',
-      name     : 'appco-auth-clusterrepo',
-      username : process.env.APPCO_USERNAME || '',
-      password : process.env.APPCO_PASSWORD || ''
-    }
+    const secPage = new RancherStoragePage(this.page)
+    const sec = secPage.createAppcoAuth(secretName)
 
-    // Use Kubewarden installer
-    await this.nav.kubewarden()
+    // Welcome screen
+    await this.goto()
     await this.ui.button('Install SUSE Security Admission Controller').click()
 
     // AppCo Registry Auth
-    new RancherStoragePage(this.page).createSecretInShell(authSecret)
-    await this.ui.selectOption('Authentication', new RegExp(`^${authSecret.name}`))
+    await this.ui.selectOption('Authentication', new RegExp(`^${sec.name}`))
     await this.ui.button('Continue').click()
 
     // Add Repository & start installation
@@ -207,6 +205,8 @@ export class KubewardenPage extends BasePage {
       check: 'suse-security-admission-controller',
       // imagePullSecret: Generated from registry auth by rancher app installer
     }, { navigate : false, yamlPatch: (y) => {
+      // Chart secret UI is not available in Rancher < 2.14
+      if (RancherUI.isVersion('<2.14')) y.global.imagePullSecrets[0] = sec.name
       y.recommendedPolicies.enabled = true
       y.auditScanner.policyReporter = true
       y.auditScanner.cronJob.schedule = '*/1 * * * *'
@@ -215,31 +215,23 @@ export class KubewardenPage extends BasePage {
 
   @step
   async installGitlab() {
-    const { mrChart, mrReg, mrTag } = await Common.fetchAppCoMr()
-    test.info().annotations.push({ type: 'INFO', description: `AppCo Chart: ${mrChart}` })
-    test.info().annotations.push({ type: 'INFO', description: `AppCo Registry: ${mrReg}` })
-    test.info().annotations.push({ type: 'INFO', description: `AppCo Tag: ${mrTag}` })
-
-    // Generated pull secret would use wrong domain based on repository url
-    const pullSecret: Secret = {
-      type     : 'Registry',
-      namespace: 'cattle-kubewarden-system',
-      name     : 'appco-auth-image-pull',
-      domain   : 'dp.apps.rancher.io',
-      username : process.env.APPCO_USERNAME || '',
-      password : process.env.APPCO_PASSWORD || ''
-    }
+    const gl = Common.findGitLabRefs()
+    test.info().annotations.push({ type: 'INFO', description: `Chart: ${gl.chart}` })
+    test.info().annotations.push({ type: 'INFO', description: `Reg: ${gl.reg}` })
+    test.info().annotations.push({ type: 'INFO', description: `Tag: ${gl.tag}` })
 
     // Repo has fake auth so app-installer would set global.imagePullSecret
+    // Some redirects are based on repo name, it has to match official one
     const repo: Repo = {
-      name      : 'admission-controller-gitlab',
-      url       : mrChart,
+      name      : 'admission-controller-charts',
+      url       : gl.chart,
       skipTLS   : true,
       authSecret: { username: 'fake', password: 'pass' },
     }
 
+    // Generated pull secret would use wrong domain based on repository url
     const secPage = new RancherStoragePage(this.page)
-    await secPage.createSecretInShell(pullSecret)
+    const pullSec = secPage.createAppcoPull(secretName, 'cattle-kubewarden-system')
 
     // Add & annotate repository
     const appsPage = new RancherAppsPage(this.page)
@@ -260,19 +252,27 @@ export class KubewardenPage extends BasePage {
     await appsPage.installChart({
       title          : 'suse-security-admission-controller',
       check          : 'suse-security-admission-controller',
-      imagePullSecret: { existing: new RegExp(pullSecret.name) }
+      imagePullSecret: RancherUI.isVersion('>=2.14') ? { existing: new RegExp(`^${pullSec.name}`) } : undefined
     }, { navigate : false, yamlPatch: (y) => {
-      // For images that are not part of MR (policy-reporter, ..)
+      // For images that are not part of MR (policy-reporter, policy-reporter-ui)
       // Value is set automatically if Repo has auth & has appco annotation
-      // y.global.imagePullSecrets[0] = '...'
-      // Point to ephemeral MR registry
-      if (mrReg) y.image.registry = mrReg
-      if (mrReg) y.policyServer.image.registry = mrReg
-      if (mrReg) y.auditScanner.image.registry = mrReg
-      // Customize installation
+      if (RancherUI.isVersion('<2.14')) y.global.imagePullSecrets[0] = pullSec.name
       y.recommendedPolicies.enabled = true
       y.auditScanner.policyReporter = true
       y.auditScanner.cronJob.schedule = '*/1 * * * *'
+
+      // Point to ephemeral MR registry
+      if (gl.reg) {
+        y.image.registry = gl.reg
+        y.policyServer.image.registry = gl.reg
+        y.auditScanner.image.registry = gl.reg
+      }
+      // Override image tag
+      if (gl.tag) {
+        y.image.tag = gl.tag
+        y.policyServer.image.tag = gl.tag
+        y.auditScanner.image.tag = gl.tag
+      }
     } })
   }
 
