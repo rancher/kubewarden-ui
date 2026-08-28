@@ -51,6 +51,7 @@ on:
         - v1.34
         - v1.35
         - v1.36
+        - v1.37
       mode:
         description: Kubewarden install mode
         type: choice
@@ -113,7 +114,7 @@ jobs:
       fail-fast: false
       matrix:
         # Rancher versions for PRs is based on the branch
-        rancher:  ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["p2.11", "p2.12", "p2.13", "p2.14", "p2.15-0"]') || fromJSON(format('["{0}"]', inputs.rancher_text || inputs.rancher )) }}
+        rancher:  ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["p2.11", "p2.12", "p2.13", "p2.14", "p2.15"]') || fromJSON(format('["{0}"]', inputs.rancher_text || inputs.rancher )) }}
         mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["manual", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'manual')) }}
         exclude:
           # Limited support = main test only - https://endoflife.date/rancher
@@ -131,9 +132,9 @@ jobs:
           - rancher: ${{ github.event_name != 'workflow_dispatch' && 'p2.13' }}
             mode: fleet
           # Devel release = main test only
-          - rancher: ${{ github.event_name != 'workflow_dispatch' && 'p2.15-0' }}
+          - rancher: ${{ github.event_name != 'workflow_dispatch' && 'c2.16' }}
             mode: upgrade
-          - rancher: ${{ github.event_name != 'workflow_dispatch' && 'p2.15-0' }}
+          - rancher: ${{ github.event_name != 'workflow_dispatch' && 'c2.16' }}
             mode: fleet
 
 
