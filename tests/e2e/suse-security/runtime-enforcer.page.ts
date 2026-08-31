@@ -70,7 +70,7 @@ export class RuntimeEnforcerPage extends BasePage {
       if (await startBtn.isVisible()) await startBtn.click()
 
       // AppCo Registry Auth
-      await this.ui.selectOption('Authentication', new RegExp(`^${authSec.name} `))
+      await this.ui.selectAuthentication(authSec.name)
       await this.ui.button('Continue').click()
       // Add Repositories
       await this.ui.button('Add all repositories').or(this.ui.button('Action')).click() // 'Action' if sbomscanner UI is not installed
@@ -112,7 +112,7 @@ export class RuntimeEnforcerPage extends BasePage {
     if (await startBtn.isVisible()) await startBtn.click()
 
     // AppCo Registry Auth
-    await this.ui.selectOption('Authentication', new RegExp(`^${authSec.name} `))
+    await this.ui.selectAuthentication(authSec.name)
     await this.ui.button('Continue').click()
 
     // Add Repositories ('Action' if sbomscanner UI is not installed)
