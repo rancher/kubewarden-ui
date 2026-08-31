@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
-import { RancherUI, type YAMLPatch } from '../components/rancher-ui'
+import { RancherUI, type YAMLPatch, type AuthSecret } from '../components/rancher-ui'
 import { step } from './rancher-test'
 import { BasePage } from './basepage'
 
@@ -11,10 +11,7 @@ export interface Repo {
   branch?     : string // Git specific
   skipTLS?    : boolean // OCI specific
   annotations?: Record<string, string>
-  authSecret?: string | RegExp | {
-    username: string
-    password: string
-  }
+  authSecret? : AuthSecret
 }
 
 export interface Chart {
@@ -24,10 +21,7 @@ export interface Chart {
   version?   : string
   namespace? : string
   project?   : string
-  pullSecret?: string | RegExp | {
-    username: string
-    password: string
-  }
+  pullSecret?: AuthSecret
 }
 
 export class RancherAppsPage extends BasePage {
@@ -106,15 +100,7 @@ export class RancherAppsPage extends BasePage {
     }
 
     if (repo.authSecret) {
-      if (repo.authSecret instanceof RegExp) {
-        await this.ui.selectOption('Authentication', repo.authSecret)
-      } else if (typeof repo.authSecret == 'string') {
-        await this.ui.selectOption('Authentication', new RegExp(`^${repo.authSecret} `))
-      } else {
-        await this.ui.selectOption('Authentication', 'Create an HTTP Basic Auth Secret')
-        await this.ui.input('Username').fill(repo.authSecret.username)
-        await this.ui.input('Password').fill(repo.authSecret.password)
-      }
+      await this.ui.selectAuthentication(repo.authSecret)
     }
     if (repo.annotations) {
       for (const [key, value] of Object.entries(repo.annotations)) {
@@ -232,17 +218,7 @@ export class RancherAppsPage extends BasePage {
     }
     if (chart.pullSecret) {
       // Alternative: A new Image Pull Secret <name>-image-pull-secret will be generated from the Repository secret <name>
-      await this.ui.checkbox('Manually select an Image Pull Secret').check()
-      if (chart.pullSecret instanceof RegExp) {
-        await this.ui.selectOption('Image Pull Secret', chart.pullSecret)
-      } else if (typeof chart.pullSecret == 'string') {
-        // Secret has additional "(Registry: ...)" text
-        await this.ui.selectOption('Image Pull Secret', new RegExp(`^${chart.pullSecret} `))
-      } else {
-        await this.ui.selectOption('Image Pull Secret', /Create (an|a new) Image Pull Secret/)
-        await this.ui.input('Username').fill(chart.pullSecret.username)
-        await this.ui.input('Password').fill(chart.pullSecret.password)
-      }
+      await this.ui.selectAuthentication(chart.pullSecret, 'Image Pull Secret')
     }
     await this.nextBtn.click()
 
