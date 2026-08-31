@@ -176,7 +176,7 @@ export class KubewardenPage extends BasePage {
       const authSec = secPage.createAppcoAuth(secretName)
 
       // AppCo Registry Auth
-      await this.ui.selectOption('Authentication', new RegExp(`^${authSec.name} `))
+      await this.ui.selectAuthentication(authSec.name)
       await this.ui.button('Continue').click()
       // Add Repository
       await this.ui.button('Add Admission Controller Repository').click()
