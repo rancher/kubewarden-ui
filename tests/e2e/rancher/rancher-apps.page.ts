@@ -186,7 +186,9 @@ export class RancherAppsPage extends BasePage {
       if (!await card.isVisible()) {
         await this.page.getByTestId('charts-filter-input').fill(chart.title)
       }
-      await card.click()
+      await this.ui.retry(async() => {
+        await card.click()
+      }, 'Chart not showing')
 
       if (chart.version) {
         const versionPane = this.page.getByRole('heading', { name: 'Chart Versions', exact: true }).locator('..')

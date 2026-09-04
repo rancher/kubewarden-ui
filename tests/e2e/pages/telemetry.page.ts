@@ -3,6 +3,7 @@ import { expect } from '@playwright/test'
 import { BasePage } from '../rancher/basepage'
 import { Chart, Repo, RancherAppsPage } from '../rancher/rancher-apps.page'
 import { YAMLPatch } from '../components/rancher-ui'
+import { secretName } from './kubewarden.page'
 
 type ChecklistLine = 'otel' | 'jaeger' | 'monitoring' | 'servicemonitor' | 'configmap' | 'config'
 
@@ -19,23 +20,24 @@ type ManagedAppList = keyof typeof managedApps
 
 export const managedApps = {
   certManager: {
-    // oci://dp.apps.rancher.io/charts/cert-manager (appco)
     title    : 'cert-manager', name     : 'cert-manager', namespace: 'cert-manager', check    : 'cert-manager',
-    repo     : { name: 'jetstack', url: 'https://charts.jetstack.io' },
+    // repo  : { name: 'jetstack', url: 'https://charts.jetstack.io' },
+    repo     : { name: 'jetstack', url: 'oci://dp.apps.rancher.io/charts/cert-manager', authSecret: secretName },
     yaml     : (y) => { y.crds.enabled = true }
   },
-  openTelemetry: {
+  otelOperator: {
     // https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-operator/UPGRADING.md
-    // oci://dp.apps.rancher.io/charts/opentelemetry-operator (appco)
     title    : 'opentelemetry-operator', name     : 'opentelemetry-operator', namespace: 'open-telemetry', check    : 'opentelemetry-operator', version  : process.env.OTEL_OPERATOR,
-    repo     : { name: 'open-telemetry', url: 'https://open-telemetry.github.io/opentelemetry-helm-charts' },
-    yaml     : (y) => { y.manager.collectorImage.repository = 'ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib' }
+    // repo  : { name: 'open-telemetry', url: 'https://open-telemetry.github.io/opentelemetry-helm-charts' },
+    repo     : { name: 'otel-operator', url: 'oci://dp.apps.rancher.io/charts/opentelemetry-operator', authSecret: secretName },
+    // yaml  : (y) => { y.manager.collectorImage.repository = 'ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib' }
+    yaml     : (y) => { y.manager.collectorImage.tag = y.manager.collectorImage.tag.replace('-k8s-', '-contrib-') }
   },
   jaeger: {
-    // oci://dp.apps.rancher.io/charts/jaeger-operator (appco)
     title    : 'jaeger-operator', name     : 'jaeger-operator', namespace: 'jaeger', check    : 'jaeger-operator',
-    repo     : { name: 'jaegertracing', url: 'https://jaegertracing.github.io/helm-charts' },
-    yaml     : { 'jaeger.create': true, 'rbac.clusterRole': true }
+    // repo  : { name: 'jaegertracing', url: 'https://jaegertracing.github.io/helm-charts' },
+    repo     : { name: 'jaegertracing', url: 'oci://dp.apps.rancher.io/charts/jaeger-operator', authSecret: secretName },
+    yaml     : { 'jaeger.create': true, 'jaeger.spec.imagePullSecrets[0].name': `${secretName}-image-pull-secret`, 'rbac.clusterRole': true }
   },
 } satisfies Record<string, ManagedApp>
 
@@ -82,7 +84,15 @@ export class TelemetryPage extends BasePage {
     const app = managedApps[name]
     const appsPage = new RancherAppsPage(this.page)
     await appsPage.addRepository(app.repo)
-    await appsPage.installChart(app, { yamlPatch: app.yaml })
+    if (name == 'jaeger') {
+      // Split into 2 steps because of jaeger race condition during startup when jaeger.create=true
+      // Internal error occurred: failed calling webhook "mjaeger.kb.io": failed to call webhook:
+      // No endpoints available for service "jaeger-operator-webhook-service"
+      await appsPage.installChart(app)
+      await appsPage.updateApp(app.name, { yamlPatch: app.yaml })
+    } else {
+      await appsPage.installChart(app, { yamlPatch: app.yaml })
+    }
   }
 
   async removeManaged(name: ManagedAppList) {

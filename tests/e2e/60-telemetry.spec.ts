@@ -27,7 +27,7 @@ test.describe('Setup', () => {
     }
 
     // Install OpenTelemetry & Check
-    await telPage.addManaged('openTelemetry')
+    await telPage.addManaged('otelOperator')
     for (const tab of ['Tracing', 'Metrics'] as const) {
       await nav.pservers('default', tab)
       await telPage.toBeComplete('otel')
@@ -272,7 +272,7 @@ test.describe('Teardown', () => {
     test.skip(conf.kw_mode === 'fleet')
 
     const telPage = new TelemetryPage(page)
-    await telPage.removeManaged('openTelemetry')
+    await telPage.removeManaged('otelOperator')
     if (nav.testCluster.name !== 'local') {
       await telPage.removeManaged('certManager')
     }
