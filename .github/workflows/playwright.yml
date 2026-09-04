@@ -51,6 +51,7 @@ on:
         - v1.34
         - v1.35
         - v1.36
+        - v1.37
       mode:
         description: Kubewarden install mode
         type: choice
@@ -113,7 +114,7 @@ jobs:
       fail-fast: false
       matrix:
         # Rancher versions for PRs is based on the branch
-        rancher:  ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["p2.11", "p2.12", "p2.13", "p2.14", "p2.15-0"]') || fromJSON(format('["{0}"]', inputs.rancher_text || inputs.rancher )) }}
+        rancher:  ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["p2.11", "p2.12", "p2.13", "p2.14", "p2.15"]') || fromJSON(format('["{0}"]', inputs.rancher_text || inputs.rancher )) }}
         mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["manual", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'manual')) }}
         exclude:
           # Limited support = main test only - https://endoflife.date/rancher
@@ -131,9 +132,9 @@ jobs:
           - rancher: ${{ github.event_name != 'workflow_dispatch' && 'p2.13' }}
             mode: fleet
           # Devel release = main test only
-          - rancher: ${{ github.event_name != 'workflow_dispatch' && 'p2.15-0' }}
+          - rancher: ${{ github.event_name != 'workflow_dispatch' && 'c2.16' }}
             mode: upgrade
-          - rancher: ${{ github.event_name != 'workflow_dispatch' && 'p2.15-0' }}
+          - rancher: ${{ github.event_name != 'workflow_dispatch' && 'c2.16' }}
             mode: fleet
 
 
@@ -267,7 +268,8 @@ jobs:
           GREPI="90-.*install: [$ex]"
         fi
 
-        yarn playwright test ${TFILTER:-} ${GREPI:+--grep-invert "$GREPI"} -x
+        yarn playwright test -x ${GREPI:+--grep-invert "$GREPI"} ${TFILTER:-}
+        yarn playwright test -x --grep @scan "\/80"
       env:
         MODE: ${{ matrix.mode }}
         # Override OTEL operator version by github variable
@@ -290,6 +292,18 @@ jobs:
         name: playwright-report-${{ matrix.rancher }}-${{ matrix.mode }}
         path: tests/playwright-report/
         retention-days: 15
+
+    - name: Publish CVE report
+      run: |
+        SHA=$(gh api "repos/$REPO/contents/$FILE?ref=gh-pages" --jq .sha 2>/dev/null) || true
+        gh api "repos/$REPO/contents/$FILE" -X PUT \
+          -f message="Update report" -f branch=gh-pages \
+          -f content="$(base64 -w0 output/index.html)" \
+          ${SHA:+-f sha="$SHA"}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        REPO: ${{ github.repository }}
+        FILE: reports/index.html
 
     - name: Clean Up
       if: always()

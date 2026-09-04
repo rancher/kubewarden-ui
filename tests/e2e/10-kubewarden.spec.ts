@@ -31,7 +31,7 @@ test.beforeAll(async({ request }) => {
   }
 })
 
-test('Install UI extension', { tag: '@kw' }, async({ page, ui }) => {
+test('Install UI extension', { tag: '@ac' }, async({ page, ui }) => {
   const extensions = new RancherExtensionsPage(page)
   await extensions.goto()
 
@@ -64,16 +64,15 @@ test('Install UI extension', { tag: '@kw' }, async({ page, ui }) => {
   })
 })
 
-test('Install Kubewarden', { tag: '@kw' }, async({ page, ui, nav }) => {
+test('Install Admission Controller', { tag: '@ac' }, async({ page, ui, nav }) => {
   test.skip(conf.kw_mode === 'fleet')
 
   const kwPage = new KubewardenPage(page)
-  if (conf.kw_from == 'github') {
-    await kwPage.installGithub({ version: conf.kw_mode === 'upgrade' ? upMap[0].controller : undefined })
-  } else if (conf.kw_from == 'gitlab') {
-    await kwPage.installGitlab()
+  if (conf.kw_mode === 'upgrade') {
+    // WIP: Install released version & upgrade to MR
+    await kwPage.installFrom('prime', { version: upMap[0].controller })
   } else {
-    await kwPage.installAppco()
+    await kwPage.installFrom(conf.kw_from)
   }
 
   // Check UI is active
@@ -83,7 +82,7 @@ test('Install Kubewarden', { tag: '@kw' }, async({ page, ui, nav }) => {
   }, 'Kubewarden installation not detected')
 })
 
-test('Install Kubewarden by Fleet', { tag: '@kw' }, async({ page }) => {
+test('Install Kubewarden by Fleet', { tag: '@ac' }, async({ page }) => {
   test.skip(conf.kw_mode !== 'fleet')
   test.slow()
 
@@ -97,7 +96,7 @@ test('Install Kubewarden by Fleet', { tag: '@kw' }, async({ page }) => {
   }, { timeout: 4 * 60_000 })
 })
 
-test('Add Policy Catalog Repository', { tag: '@kw' }, async({ page, ui, nav }) => {
+test('Add Policy Catalog Repository', { tag: '@ac' }, async({ page, ui, nav }) => {
   const cap = new ClusterAdmissionPoliciesPage(page)
   await nav.capolicies()
 

@@ -44,9 +44,11 @@ export class PolicyServersPage extends BasePage {
     if (ps.image !== undefined) await this.setImage(ps.image)
     else if (conf.kw_from === 'gitlab') {
       // dp.apps.rancher.io/containers/kubewarden-policy-server:1.37.2-12.6 (official)
-      // registry.suse.de/devel/jasmine/containers/containers/kubewarden-policy-server:1 (GitLab)
+      // registry.suse.de/devel/jasmine/containers/containers/kubewarden-policy-server:1.37.2 (GitLab)
       // ? (MR)
       await this.setImage(`${conf.gitlab.reg}/containers/kubewarden-policy-server:${conf.gitlab.tag}`)
+    } else if (conf.kw_from === 'github') {
+      await this.setImage(`ghcr.io/kubewarden/adm-controller/policy-server:latest`)
     }
 
     if (ps.settings) {

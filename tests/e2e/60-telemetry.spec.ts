@@ -1,8 +1,7 @@
 import { test, expect } from './rancher/rancher-test'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { PolicyServersPage } from './pages/policyservers.page'
-import { managedApps, TelemetryPage } from './pages/telemetry.page'
-import { RancherUI } from './components/rancher-ui'
+import { TelemetryPage } from './pages/telemetry.page'
 import { AdmissionPoliciesPage, Policy } from './pages/policies.page'
 import { conf } from '../env-config'
 
@@ -28,7 +27,7 @@ test.describe('Setup', () => {
     }
 
     // Install OpenTelemetry & Check
-    await telPage.addManaged('openTelemetry')
+    await telPage.addManaged('otelOperator')
     for (const tab of ['Tracing', 'Metrics'] as const) {
       await nav.pservers('default', tab)
       await telPage.toBeComplete('otel')
@@ -58,14 +57,9 @@ test.describe('Tracing', () => {
     // Jaeger is not installed
     await telPage.toBeIncomplete('jaeger')
     await expect(telPage.configBtn).toBeDisabled()
-    // Install Jaeger
-    if (RancherUI.hasAppCollection) {
-      await appsPage.installFromAppCollection(managedApps.jaeger)
-    } else {
-      await telPage.addManaged('jaeger')
-    }
 
-    // Jaeger is installed
+    // Install Jaeger & Check
+    await telPage.addManaged('jaeger')
     await nav.pservers('default', 'Tracing')
     await ui.retry(async() => {
       await telPage.toBeComplete('jaeger')
@@ -136,11 +130,7 @@ test.describe('Tracing', () => {
       //   await ui.checkbox('Enable Tracing').uncheck()
       // }
     })
-    if (RancherUI.hasAppCollection) {
-      await appsPage.deleteApp('jaeger-operator')
-    } else {
-      await telPage.removeManaged('jaeger')
-    }
+    await telPage.removeManaged('jaeger')
     await shell.run('kubectl delete ns jaeger')
 
     // Check
@@ -282,7 +272,7 @@ test.describe('Teardown', () => {
     test.skip(conf.kw_mode === 'fleet')
 
     const telPage = new TelemetryPage(page)
-    await telPage.removeManaged('openTelemetry')
+    await telPage.removeManaged('otelOperator')
     if (nav.testCluster.name !== 'local') {
       await telPage.removeManaged('certManager')
     }
