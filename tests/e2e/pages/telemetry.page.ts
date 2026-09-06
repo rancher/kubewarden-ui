@@ -79,7 +79,15 @@ export class TelemetryPage extends BasePage {
     const app = managedApps[name]
     const appsPage = new RancherAppsPage(this.page)
     await appsPage.addRepository(app.repo)
-    await appsPage.installChart(app, { yamlPatch: app.yaml })
+    if (name == 'jaeger') {
+      // Split into 2 steps because of jaeger race condition during startup when jaeger.create=true
+      // Internal error occurred: failed calling webhook "mjaeger.kb.io": failed to call webhook:
+      // No endpoints available for service "jaeger-operator-webhook-service"
+      await appsPage.installChart(app)
+      await appsPage.updateApp(app.name, { yamlPatch: app.yaml })
+    } else {
+      await appsPage.installChart(app, { yamlPatch: app.yaml })
+    }
   }
 
   async removeManaged(name: ManagedAppList) {
