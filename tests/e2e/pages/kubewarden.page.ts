@@ -207,7 +207,6 @@ export class KubewardenPage extends BasePage {
     const from = options?.from
     const to = options?.to
     const apps = new RancherAppsPage(this.page)
-
     const shell = new Shell(this.page)
 
     // Check versions before upgrade
@@ -218,29 +217,14 @@ export class KubewardenPage extends BasePage {
     if (to?.controller) await expect(this.upController).toContainText(`Controller: ${to.controller}`)
     await this.upController.click()
     if (from?.controller || to?.controller) {
-      await expect(apps.stepTitle).toContainText(`${from?.controller || ''} > ${to?.controller || ''}`)
+      await expect(apps.stepTitle).toContainText(`${to?.controller || ''}`) // ${from?.controller || ''} >
     }
     await apps.updateApp('rancher-admission-controller', { navigate: false, timeout: 4 * 60_000 })
-    // 4.1.0 Error: error while loading policies from "/config/policies.yml": data did not match any variant of untagged enum PolicyOrPolicyGroup
-    // 5.0.0 Probe port change from https to http
-    if (!to?.controller?.startsWith('4.1') && !to?.controller?.startsWith('5.0')) {
-      await shell.waitPods()
-    }
-
-    // Defaults upgrade
-    await this.nav.kubewarden()
-    if (to?.defaults) await expect(this.upDefaults).toContainText(`Defaults: ${to.defaults}`)
-    await this.upDefaults.click()
-    if (from?.defaults || to?.defaults) {
-      await expect(apps.stepTitle).toContainText(`${from?.defaults || ''} > ${to?.defaults || ''}`)
-    }
-    await apps.updateApp('rancher-kubewarden-defaults', { navigate: false })
+    await shell.waitPods()
 
     // Check resources are online
     await this.nav.explorer('Apps', 'Installed Apps')
-    for (const chart of ['controller', 'crds', 'defaults'] as const) {
-      await apps.checkChart(`rancher-kubewarden-${chart}`, to ? to[chart] : undefined)
-    }
+    await apps.checkChart(`rancher-admission-controller`, to ? to.controller : undefined)
     await shell.waitPods()
   }
 }
