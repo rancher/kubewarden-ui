@@ -293,7 +293,9 @@ jobs:
       if: always()
       with:
         name: playwright-report-${{ matrix.rancher }}-${{ matrix.mode }}
-        path: tests/playwright-report/
+        path: |
+          tests/playwright-report/index.html
+          tests/playwright-report/data/*.png
         retention-days: 15
 
     - name: Clean Up
