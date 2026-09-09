@@ -1,6 +1,5 @@
 import type { APIResponse, FullConfig } from '@playwright/test'
 import { expect, request } from '@playwright/test'
-import { Common } from './e2e/components/common'
 
 async function globalSetup(config: FullConfig) {
   let resp: APIResponse
@@ -41,10 +40,6 @@ async function globalSetup(config: FullConfig) {
   // Check for artifact access
   if (process.env.KW === 'gitlab') {
     await requestContext.head('https://registry.suse.de')
-    const { chart, reg, tag } = Common.findGitLabRefs()
-    process.env.GL_CHART = chart
-    process.env.GL_REG = reg
-    process.env.GL_TAG = tag
   }
 
   await requestContext.dispose()
@@ -53,7 +48,7 @@ async function globalSetup(config: FullConfig) {
   // PRs: hardcoded default, github variables are not passed to PRs from forks
   // Fleet: latest released OTEL (*) to check for future failures
   // Other workflows: github action variable or hardcoded default
-  process.env.OTEL_OPERATOR ||= '0.114.1'
+  process.env.OTEL_OPERATOR ||= '0.122.0'
 }
 
 export default globalSetup

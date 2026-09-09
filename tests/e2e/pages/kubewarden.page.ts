@@ -1,4 +1,4 @@
-import { expect, test, Locator, Page } from '@playwright/test'
+import { expect, Locator, Page } from '@playwright/test'
 import { RancherAppsPage, Repo } from '../rancher/rancher-apps.page'
 import { BasePage } from '../rancher/basepage'
 import { Shell } from '../components/kubectl-shell'
@@ -19,6 +19,8 @@ export interface AppVersion {
 
 // Generated Pull secret has the same name as auth
 export const secretName = 'appco-auth-kubewarden'
+// Some redirects are based on repo name, it should match official one
+const acRepo: Repo = { name: 'admission-controller-charts', url: 'oci://registry.suse.de/devel/jasmine/charts/charts/suse-security-admission-controller', skipTLS: true }
 
 export class KubewardenPage extends BasePage {
   readonly currentApp  : Locator
@@ -106,174 +108,98 @@ export class KubewardenPage extends BasePage {
     } else return null
   }
 
-  @step
-  async installGithub(options?: { version?: string }) {
-    // ==================================================================================================
-    // Requirements Dialog
-    const welcomeStep = this.page.getByText('Kubewarden is a policy engine for Kubernetes.')
-    const addRepoStep = this.page.getByRole('heading', { name: 'Repository', exact: true })
-    const appInstallStep = this.page.getByRole('heading', { name: 'Kubewarden App Install', exact: true })
-    const installBtn = this.ui.button('Install Kubewarden')
-    const addRepoBtn = this.ui.button('Add Kubewarden Repository')
-    const failRepo = this.page.getByText('Unable to fetch Kubewarden Helm chart')
-    const failRepoBtn = this.ui.button('Reload')
+  // Hacky unsupported way to install Admission Controller
+  private async installFromGithub(options?: { version?: string }) {
+    const appsPage = new RancherAppsPage(this.page)
+    await appsPage.addRepository({ name: 'admission-controller-charts', url: 'https://charts.kubewarden.io' })
 
-    // Welcome screen
-    await this.ui.retry(async() => {
-      await this.goto()
-    }, 'Kubewarden extension not visible')
+    await appsPage.installChart(
+      { title: 'Admission Controller', check: 'admission-controller', version: options?.version },
+      {
+        questions: async() => {
+          // Rancher Application Values
+          await expect(this.ui.checkbox('Enable Background Audit check ')).toBeChecked()
+          const schedule = this.ui.input('Schedule')
+          await expect(schedule).toHaveValue('0 * * * *')
+          await schedule.fill('*/1 * * * *')
+          await this.ui.checkbox('Enable Policy Reporter').check()
 
-    await expect(welcomeStep).toBeVisible()
-    await installBtn.click()
-
-    // Add repository screen
-    await expect(addRepoStep).toBeVisible()
-    await addRepoBtn.click()
-    // Wait repo state changes between Active / In Progress
-    await this.page.waitForTimeout(5_000)
-
-    // Wait for install button or handle repo failure
-    try {
-      await expect(installBtn).toBeVisible()
-    } catch {
-      test.info().annotations.push({ type: 'BUG', description: 'Failed to add kw repository' })
-      // 2 possible fails
-      await expect(failRepo.or(addRepoBtn)).toBeVisible()
-      if (await failRepo.isVisible()) {
-        await failRepoBtn.click()
-      } else {
-        await this.page.reload()
-      }
-      await expect(welcomeStep).toBeVisible()
-      await installBtn.click()
-    }
-
-    // Redirection to rancher app installer
-    await expect(appInstallStep).toBeVisible()
-    await installBtn.click()
-    await expect(this.page).toHaveURL(/.*\/apps\/charts\/install.*chart=admission-controller/)
-
-    // ==================================================================================================
-    // Rancher Application Metadata
-    const apps = new RancherAppsPage(this.page)
-    // Use custom version if requested
-    if (options?.version) await apps.swapUrlVersion(options.version)
-    await expect(apps.step1).toBeVisible()
-    await apps.nextBtn.click()
-    await expect(apps.step2).toBeVisible()
-
-    // Rancher Application Values
-    await expect(this.ui.checkbox('Enable Background Audit check ')).toBeChecked()
-    const schedule = this.ui.input('Schedule')
-    // Value was fixed in Kubewarden 1.36.0, previous versions (current -3) have old value
-    await expect(schedule).toHaveValue(process.env.MODE == 'upgrade' ? '*/60 * * * *' : '0 * * * *')
-    await schedule.fill('*/1 * * * *')
-    await this.ui.checkbox('Enable Policy Reporter').check()
-
-    // Recommended Policies
-    const enableRP = this.ui.checkbox('Enable recommended policies')
-    await this.ui.tab('Recommended Policies').click()
-    await expect(enableRP).not.toBeChecked()
-    await enableRP.check()
-    await expect(this.ui.select('Execution mode of the recommended policies ')).toContainText('monitor')
-
-    // Start installation
-    await apps.installBtn.click()
-    await apps.waitHelmSuccess('rancher-admission-controller', { timeout: 4 * 60_000 })
+          // Recommended Policies
+          const enableRP = this.ui.checkbox('Enable recommended policies')
+          await this.ui.tab('Recommended Policies').click()
+          await expect(enableRP).not.toBeChecked()
+          await enableRP.check()
+          await expect(this.ui.select('Execution mode of the recommended policies ')).toContainText('monitor')
+        }
+      })
   }
 
   @step
-  async installAppco() {
+  async installFrom(from: 'github'|'gitlab'|'prime', options?: { version?: string }) {
+    if (from == 'github') return await this.installFromGithub()
+
+    const appsPage = new RancherAppsPage(this.page)
     const secPage = new RancherStoragePage(this.page)
-    const sec = secPage.createAppcoAuth(secretName)
+
+    let acPatch: (y: any) => void | undefined
+    if (from == 'gitlab') {
+      const gl = Common.findGitLabRefs('Admission Controller')
+
+      acPatch = (y) => {
+        for (const node of [y.image, y.policyServer.image, y.auditScanner.image]) {
+          node.registry = gl.reg
+          node.tag = node.tag.replace(/-.*/, '')
+        }
+        // Dependencies are not part of MR (enabled by policyReporter=true)
+        y.global.imagePullSecrets[0] = secPage.createAppcoPull(secretName, 'cattle-kubewarden-system').name
+        // y['policy-reporter'].image = {}
+        // y['policy-reporter'].ui.image = {}
+        // y['policy-reporter'].image.registry = gl.reg.replace('jasmine', 'orchid')
+        // y['policy-reporter'].ui.image.registry = gl.reg.replace('jasmine', 'orchid')
+        // y['policy-reporter'].image.tag = 3
+        // y['policy-reporter'].ui.image.tag = 2
+      }
+
+      // Add & annotate repository (annotation is protected in UI)
+      await appsPage.addRepository({ ...acRepo, url: gl.chart })
+      await new Shell(this.page).run(`kubectl annotate clusterrepos.catalog.cattle.io ${acRepo.name} catalog.cattle.io/suse-application-collection=true`)
+
+      // To activate installer buttons
+      await this.page.reload()
+    }
 
     // Welcome screen
     await this.goto()
     await this.ui.button('Install SUSE Security Admission Controller').click()
 
-    // AppCo Registry Auth
-    await this.ui.selectOption('Authentication', new RegExp(`^${sec.name}`))
-    await this.ui.button('Continue').click()
+    if (from == 'prime') {
+      const authSec = secPage.createAppcoAuth(secretName)
 
-    // Add Repository & start installation
-    await this.ui.button('Add Admission Controller Repository').click()
-    await this.ui.button('Install SUSE Security Admission Controller').click()
+      // AppCo Registry Auth
+      await this.ui.selectAuthentication(authSec.name)
+      await this.ui.button('Continue').click()
+      // Add Repository
+      await this.ui.button('Add Admission Controller Repository').click()
 
-    const appsPage = new RancherAppsPage(this.page)
-    await appsPage.installChart({
-      title: 'suse-security-admission-controller',
-      check: 'suse-security-admission-controller',
-      // imagePullSecret: Generated from registry auth by rancher app installer
-    }, { navigate : false, yamlPatch: (y) => {
       // Chart secret UI is not available in Rancher < 2.14
-      if (RancherUI.isVersion('<2.14')) y.global.imagePullSecrets[0] = sec.name
-      y.recommendedPolicies.enabled = true
-      y.auditScanner.policyReporter = true
-      y.auditScanner.cronJob.schedule = '*/1 * * * *'
-    } })
-  }
-
-  @step
-  async installGitlab() {
-    const gl = Common.findGitLabRefs()
-    test.info().annotations.push({ type: 'INFO', description: `Chart: ${gl.chart}` })
-    test.info().annotations.push({ type: 'INFO', description: `Reg: ${gl.reg}` })
-    test.info().annotations.push({ type: 'INFO', description: `Tag: ${gl.tag}` })
-
-    // Repo has fake auth so app-installer would set global.imagePullSecret
-    // Some redirects are based on repo name, it has to match official one
-    const repo: Repo = {
-      name      : 'admission-controller-charts',
-      url       : gl.chart,
-      skipTLS   : true,
-      authSecret: { username: 'fake', password: 'pass' },
+      if (RancherUI.isVersion('<2.14')) {
+        acPatch = (y) => {
+          y.global.imagePullSecrets[0] = authSec.name
+        }
+      }
     }
 
-    // Generated pull secret would use wrong domain based on repository url
-    const secPage = new RancherStoragePage(this.page)
-    const pullSec = secPage.createAppcoPull(secretName, 'cattle-kubewarden-system')
-
-    // Add & annotate repository
-    const appsPage = new RancherAppsPage(this.page)
-    await appsPage.addRepository(repo)
-    await this.page.waitForTimeout(1000) // Prevent "object has been modified" error
-    // Annotation is protected and would be discarded by UI
-    await new Shell(this.page).run(`kubectl annotate clusterrepos.catalog.cattle.io ${repo.name} catalog.cattle.io/suse-application-collection=true`)
-
-    // Start installation (Auth & Repo steps are skipped)
-    await this.nav.kubewarden()
     await this.ui.button('Install SUSE Security Admission Controller').click()
-
-    await this.ui.retry(async() => {
-      await expect(this.page.getByRole('heading', { name: 'SUSE Security Admission Controller App Install', exact: true })).toBeVisible()
-    }, 'Installer does not always detect repository')
-    await this.ui.button('Install SUSE Security Admission Controller').click()
-
-    await appsPage.installChart({
-      title          : 'suse-security-admission-controller',
-      check          : 'suse-security-admission-controller',
-      imagePullSecret: RancherUI.isVersion('>=2.14') ? { existing: new RegExp(`^${pullSec.name}`) } : undefined
-    }, { navigate : false, yamlPatch: (y) => {
-      // For images that are not part of MR (policy-reporter, policy-reporter-ui)
-      // Value is set automatically if Repo has auth & has appco annotation
-      if (RancherUI.isVersion('<2.14')) y.global.imagePullSecrets[0] = pullSec.name
-      y.recommendedPolicies.enabled = true
-      y.auditScanner.policyReporter = true
-      y.auditScanner.cronJob.schedule = '*/1 * * * *'
-
-      // Point to ephemeral MR registry
-      if (gl.reg) {
-        y.image.registry = gl.reg
-        y.policyServer.image.registry = gl.reg
-        y.auditScanner.image.registry = gl.reg
-      }
-      // Override image tag
-      if (gl.tag) {
-        y.image.tag = gl.tag
-        y.policyServer.image.tag = gl.tag
-        y.auditScanner.image.tag = gl.tag
-      }
-    } })
+    await appsPage.installChart(
+      { title: '-', check: 'suse-security-admission-controller', version: options?.version },
+      { navigate : false,
+        yamlPatch: (y) => {
+          y.recommendedPolicies.enabled = true
+          y.auditScanner.policyReporter = true
+          y.auditScanner.cronJob.schedule = '*/1 * * * *'
+          acPatch?.(y)
+        }
+      })
   }
 
   @step
