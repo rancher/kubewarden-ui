@@ -262,8 +262,8 @@ jobs:
       timeout-minutes: 120
       working-directory: tests
       run: |
-        TFILTER="\/00"                                        # Always run installation tests
-        [[ "$TESTBASE" == "true" ]] && TFILTER+=" \/[1-69]"   # Schedule everything as base test
+        TFILTER="\/[01]0"                                     # Always run installation tests
+        [[ "$TESTBASE" == "true" ]] && TFILTER+=" \/[2-69]"   # Schedule everything as base test
 
         # Policy tests are hitting artifacthub rate limits
         # Filter out all policies except those starting with random letter
