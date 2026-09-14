@@ -72,7 +72,7 @@ test('Install Admission Controller', { tag: '@ac' }, async({ page, ui, nav }) =>
   if (conf.kw_mode === 'upgrade') {
     // Install released version & upgrade to MR
     console.log(upMap)
-    await kwPage.installFrom('prime', { version: upMap[0].controller })
+    await kwPage.installFrom('appco', { version: upMap[0].controller })
   } else {
     await kwPage.installFrom(conf.kw_from)
   }

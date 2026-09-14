@@ -71,7 +71,7 @@ test('Scan Admission Controller', { tag: '@scan' }, async({ page, ui, nav }) => 
   await vsPage.setWorkloadScan({
     enabled   : true,
     skipTLS   : conf.kw_from === 'gitlab' || undefined,
-    authSecret: conf.kw_from === 'prime' ? secretName : undefined,
+    authSecret: conf.kw_from === 'appco' ? secretName : undefined,
     nsFilter  : { 'kubernetes.io/metadata.name': 'cattle-kubewarden-system' },
     osFilter  : { linux: 'amd64' }
   })

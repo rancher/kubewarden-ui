@@ -43,7 +43,7 @@ export class PolicyServersPage extends BasePage {
     await this.setName(ps.name)
     if (ps.replicas !== undefined) await this.setReplicas(ps.replicas)
     if (ps.image !== undefined) await this.setImage(ps.image)
-    else if (conf.kw_from !== 'prime') {
+    else if (conf.kw_from !== 'appco') {
       // Correct image is detected only on official AC
       process.env.PSIMG ||= new Shell(this.page).runExecOutput(`kubectl get ps default -o json | jq -re '.spec.image'`).output
       await this.setImage(process.env.PSIMG)

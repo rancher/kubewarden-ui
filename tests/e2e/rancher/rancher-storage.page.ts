@@ -75,8 +75,8 @@ export class RancherStoragePage extends BasePage {
       type     : 'HTTP Basic Auth',
       name     : name,
       namespace: 'cattle-system',
-      username : conf.auth.appco_user || '',
-      password : conf.auth.appco_pass || ''
+      username : conf.appco.user || '',
+      password : conf.appco.pass || ''
     }, { skipExisting: true })
   }
 

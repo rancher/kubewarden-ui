@@ -101,7 +101,7 @@ export class RuntimeEnforcerPage extends BasePage {
 
   // Follow official steps but replace RE repository
   @step
-  async installFrom(from: 'github'|'gitlab'|'prime', options?: { version?: string }) {
+  async installFrom(from: 'github'|'gitlab'|'appco', options?: { version?: string }) {
     const appsPage = new RancherAppsPage(this.page)
     const authSec = new RancherStoragePage(this.page).createAppcoAuth(secretName)
 

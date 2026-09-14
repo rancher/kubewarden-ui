@@ -24,7 +24,7 @@ export class Common {
 
     const response = await fetch(`https://api.apps.rancher.io/v1/components/${slugName}`, {
       method : 'GET',
-      headers: { accept: 'application/json', Authorization: `Basic ${conf.auth.appco_pass}` }
+      headers: { accept: 'application/json', Authorization: `Basic ${conf.appco.pass}` }
     })
     if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`)
 
@@ -90,11 +90,6 @@ export class Common {
   // KW = github / gitlab / appco / mr56:21
   static findGitLabRefs(product: Product, options?: { mrc?: string, mri?: string }): GitLabRefs {
     const slugName = `suse-security-${product.replace(' ', '-').toLowerCase()}`
-
-    // Search only once
-    // if (product == 'Admission Controller' && process.env.GL_CHART && process.env.GL_REG && process.env.GL_TAG) {
-    //   return { chart: process.env.GL_CHART, reg: process.env.GL_REG, tag: process.env.GL_TAG }
-    // }
 
     // Without MR
     const def = {

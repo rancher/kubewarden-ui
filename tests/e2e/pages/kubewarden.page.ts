@@ -5,7 +5,8 @@ import { Shell } from '../components/kubectl-shell'
 import { step } from '../rancher/rancher-test'
 import { Common } from '../components/common'
 import { RancherStoragePage } from '../rancher/rancher-storage.page'
-import { RancherUI } from '../components/rancher-ui'
+import { RancherUI, YAMLPatch } from '../components/rancher-ui'
+import { conf } from '../../env-config'
 
 type Pane = 'Policy Servers' | 'Namespaced Policies' | 'Cluster Policies'
 // type PaneFilter = 'Policies' | 'Reports' | string | RegExp
@@ -135,7 +136,7 @@ export class KubewardenPage extends BasePage {
   }
 
   @step
-  async installFrom(from: 'github'|'gitlab'|'prime', options?: { version?: string }) {
+  async installFrom(from: 'github'|'gitlab'|'appco', options?: { version?: string }) {
     if (from == 'github') return await this.installFromGithub()
 
     const appsPage = new RancherAppsPage(this.page)
@@ -172,7 +173,7 @@ export class KubewardenPage extends BasePage {
     await this.goto()
     await this.ui.button('Install SUSE Security Admission Controller').click()
 
-    if (from == 'prime') {
+    if (from == 'appco') {
       const authSec = secPage.createAppcoAuth(secretName)
 
       // AppCo Registry Auth
