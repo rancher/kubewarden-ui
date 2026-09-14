@@ -86,8 +86,29 @@ export class RancherStoragePage extends BasePage {
       name     : name,
       namespace: namespace,
       domain   : 'dp.apps.rancher.io',
-      username : conf.auth.appco_user || '',
-      password : conf.auth.appco_pass || ''
+      username : conf.appco.user || '',
+      password : conf.appco.pass || ''
+    }, { skipExisting: true })
+  }
+
+  createGithubAuth(name: string): Secret {
+    return this.createSecretInShell({
+      type     : 'HTTP Basic Auth',
+      name     : name,
+      namespace: 'cattle-system',
+      username : conf.github.user || '',
+      password : conf.github.pass || ''
+    }, { skipExisting: true })
+  }
+
+  createGithubPull(name: string, namespace: string): Secret {
+    return this.createSecretInShell({
+      type     : 'Registry',
+      name     : name,
+      namespace: namespace,
+      domain   : 'ghcr.io',
+      username : conf.github.user || '',
+      password : conf.github.pass || ''
     }, { skipExisting: true })
   }
 }

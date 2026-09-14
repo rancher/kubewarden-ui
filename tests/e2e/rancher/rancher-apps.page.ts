@@ -84,6 +84,7 @@ export class RancherAppsPage extends BasePage {
       // Git repository
       await this.setRepoType('Git')
       await this.ui.input('Git Repo URL *').fill(repo.url)
+      if (repo.branch) await this.ui.input('Git Branch').fill(repo.branch)
     } else if (repo.url.startsWith('oci://')) {
       // OCI repository
       await this.setRepoType('OCI')
@@ -142,7 +143,7 @@ export class RancherAppsPage extends BasePage {
     // Can't match ^..$ because output is sometimes mixed up
     const rmMatch = `uninstall.*\\s${text}` // delete app
     const nameMatch = `\\s${text}\\s\\/home` // app upgrades
-    const tarMatch = `helm\\/${text}-[0-9-.]+tgz` // chart installations
+    const tarMatch = `helm\\/${text}-[0-9a-z-.]+tgz` // chart installations
     const regex = new RegExp(`SUCCESS: helm.*(${nameMatch}|${tarMatch}|${rmMatch})`)
 
     const passedMsg = this.page.locator('div.logs-container').locator('span.msg').getByText(regex)

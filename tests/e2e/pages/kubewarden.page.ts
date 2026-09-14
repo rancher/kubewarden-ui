@@ -42,6 +42,19 @@ export class KubewardenPage extends BasePage {
     await this.nav.kubewarden()
   }
 
+  // Create patch from REPO=.. TAG=.. env
+  get envPatch() {
+    const envPatch: YAMLPatch = (y) => {
+      for (const node of [y.image, y.policyServer.image, y.auditScanner.image]) {
+        if (conf.kw.repo)
+          node.repository = node.repository.replace('kubewarden/adm-controller', conf.kw.repo)
+        if (conf.kw.tag)
+          node.tag = conf.kw.tag
+      }
+    }
+    return envPatch
+  }
+
   getPane(name: Pane) {
     return this.page.locator('div.item-card')
       .filter({ has: this.page.getByRole('heading', { name, exact: true }) })
@@ -112,11 +125,34 @@ export class KubewardenPage extends BasePage {
   // Hacky unsupported way to install Admission Controller
   private async installFromGithub(options?: { version?: string }) {
     const appsPage = new RancherAppsPage(this.page)
-    await appsPage.addRepository({ name: 'admission-controller-charts', url: 'https://charts.kubewarden.io' })
+
+    let authPatch: (y: any) => void | undefined
+    if (conf.kw.repo == 'kubewarden/adm-controller-embargoed') {
+      const secPage = new RancherStoragePage(this.page)
+      const authSec = secPage.createGithubAuth('github-auth-kubewarden')
+      const pullSec = secPage.createGithubPull('github-auth-kubewarden', 'cattle-kubewarden-system')
+
+      await appsPage.addRepository({
+        name      : 'admission-controller-embargoed',
+        url       : 'https://github.com/kubewarden/adm-controller-embargoed.git',
+        branch    : 'main',
+        authSecret: authSec.name })
+
+      authPatch = (y) => {
+        y.imagePullSecrets[0] = authSec.name
+        y.policyServer.imagePullSecret = pullSec.name
+      }
+    } else {
+      await appsPage.addRepository({ name: 'admission-controller-charts', url: 'https://charts.kubewarden.io' })
+    }
 
     await appsPage.installChart(
       { title: 'Admission Controller', check: 'admission-controller', version: options?.version },
       {
+        yamlPatch: (y) => {
+          authPatch?.(y)
+          this.envPatch(y)
+        },
         questions: async() => {
           // Rancher Application Values
           await expect(this.ui.checkbox('Enable Background Audit check ')).toBeChecked()
@@ -199,6 +235,7 @@ export class KubewardenPage extends BasePage {
           y.auditScanner.policyReporter = true
           y.auditScanner.cronJob.schedule = '*/1 * * * *'
           acPatch?.(y)
+          this.envPatch(y)
         }
       })
   }
