@@ -11,7 +11,7 @@ import { conf } from '../env-config'
 // Configure defaults after env is loaded
 test.beforeAll(async({ request }) => {
   // Use local build (yarn serve), prime (if available) or github
-  const fallback = RancherUI.isPrime ? 'github' : 'github'
+  const fallback = RancherUI.isPrime ? 'prime' : 'github'
   conf.ui_from ||= await request.head(conf.source.sbomscanner)
     .then(r => r.ok() ? 'source' as const : fallback)
     .catch(() => fallback)
@@ -26,7 +26,7 @@ test('Install UI extension', { tag: '@vs' }, async({ page, ui }) => {
       await extensions.addRancherRepos({ rancher: true, partners: false })
       await ui.retry(async() => {
         await extensions.selectTab('Available')
-        await expect(extensions.getByName('SBOMScanner')).toBeVisible({ timeout: 30_000 })
+        await expect(extensions.getByName('SUSE Security Vulnerability Scanner')).toBeVisible({ timeout: 30_000 })
       }, 'Not showing SBOMScanner extension')
     })
   }
@@ -45,7 +45,7 @@ test('Install UI extension', { tag: '@vs' }, async({ page, ui }) => {
     if (conf.ui_from === 'source') {
       await extensions.developerLoad(conf.source.sbomscanner)
     } else {
-      await extensions.install('SBOMScanner', { version: process.env.UIVERSION?.replace(/^vulnerability-scanner-/, '') })
+      await extensions.install('SUSE Security Vulnerability Scanner', { version: process.env.UIVERSION?.replace(/^vulnerability-scanner-/, '') })
     }
   })
 })

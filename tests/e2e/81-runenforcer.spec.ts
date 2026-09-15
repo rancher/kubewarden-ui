@@ -8,7 +8,7 @@ import { RuntimeEnforcerPage } from './suse-security/runtime-enforcer.page'
 // Configure defaults after env is loaded
 test.beforeAll(async({ request }) => {
   // Use local build (yarn serve), prime (if available) or github
-  const fallback = RancherUI.isPrime ? 'github' : 'github'
+  const fallback = RancherUI.isPrime ? 'prime' : 'github'
   conf.ui_from ||= await request.head(conf.source.runenforcer)
     .then(r => r.ok() ? 'source' as const : fallback)
     .catch(() => fallback)

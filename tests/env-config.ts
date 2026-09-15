@@ -37,7 +37,7 @@ export const conf = {
 }
 
 // https://github.com/kubewarden/adm-controller-embargoed
-if (conf.kw.repo?.includes('kubewarden/adm-controller-embargoed')) {
+if (conf.kw.repo?.includes('embargoed')) {
   conf.kw.repo = 'kubewarden/adm-controller-embargoed'
   conf.kw_from = 'github'
   conf.kw.tag = 'latest'

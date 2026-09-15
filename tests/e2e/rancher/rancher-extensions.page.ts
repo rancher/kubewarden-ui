@@ -25,22 +25,21 @@ export class RancherExtensionsPage extends BasePage {
     await this.page.getByRole('menuitem', { name }).click()
   }
 
-  // Handle extension repositories dialog
-  async selectRepos(options?: { rancher?: boolean, partners?: boolean }) {
+  async addRancherRepos(options?: { rancher?: boolean, partners?: boolean }) {
     const rancherRepo = this.ui.checkbox(/Official Rancher Extension|Rancher Prime Extensions/)
     const partnersRepo = this.ui.checkbox('Partners Extension')
 
-    if (options?.rancher !== undefined) await rancherRepo.setChecked(options.rancher)
-    if (options?.partners !== undefined) await partnersRepo.setChecked(options.partners)
-  }
-
-  // Repositories need to be added since 2.9
-  async addRancherRepos(options?: { rancher?: boolean, partners?: boolean }) {
     await this.dotMenu('Add Rancher Repositories')
     await expect(this.page.getByRole('heading', { name: 'Add Extensions repositories' })).toBeVisible()
 
-    // Select requested repositories
-    await this.selectRepos(options)
+    const setChecked = async(checkBox: Locator, checked?: boolean) => {
+      // CheckBox is disabled if repository already exists
+      if (checked !== undefined && await checkBox.isEnabled()) {
+        await checkBox.setChecked(checked)
+      }
+    }
+    await setChecked(rancherRepo, options?.rancher)
+    await setChecked(partnersRepo, options?.partners)
     await this.ui.button('Add').click()
   }
 
