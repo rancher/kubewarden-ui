@@ -149,7 +149,7 @@ export class Shell {
      * Execute in nodejs shell
      * Could produce differents results from Rancher shell since it's running on host os
      */
-  runExec(cmd: string, options?: { status?: number, timeout?: number }): number {
+  runExecOutput(cmd: string, options?: { status?: number, timeout?: number }): { status: number, output: string } {
     const status = options?.status ?? 0
     const timeout = options?.timeout || 60_000
 
@@ -169,7 +169,11 @@ export class Shell {
     test.info().annotations.push({ type: `runExec [${cmdStatus}]`, description: cmdOutput })
 
     if (isFinite(status)) expect(cmdStatus).toBe(status)
-    return cmdStatus
+    return { status: cmdStatus, output: cmdOutput }
+  }
+
+  runExec(cmd: string, options?: { status?: number, timeout?: number }): number {
+    return this.runExecOutput(cmd, options).status
   }
 
   /**

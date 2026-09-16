@@ -6,7 +6,8 @@ import _ from 'lodash'
 import { step } from '../rancher/rancher-test'
 import { TableRow } from './table-row'
 
-export type YAMLPatch = { [key: string]: unknown } | string | ((patch:any) => void)
+export type YAMLPatch = string | ((patch:any) => void) | { [key: string]: unknown }
+export type AuthSecret = string | RegExp | { username: string, password: string }
 
 /**
  * aria-label is not always filled - we have to use filters to find elements reliably
@@ -100,6 +101,21 @@ export class RancherUI {
       if (await select.getAttribute('aria-expanded') === 'true') {
         await select.click()
       }
+    }
+  }
+
+  // Helper for SelectOrCreateAuthSecret component
+  // Select existing secret or create new based on auth parameter
+  async selectAuthentication(auth: AuthSecret, label: string|Locator = 'Authentication') {
+    if (auth instanceof RegExp) {
+      await this.selectOption(label, auth)
+    } else if (typeof auth == 'string') {
+      // Secrets have additional info in name "HTTP Basic Auth | Registry: ..."
+      await this.selectOption(label, new RegExp(`^${auth}( |$)`))
+    } else {
+      await this.selectOption(label, /^Create /) // (an|a new) (HTTP Basic Auth|Image Pull) Secret
+      await this.input('Username').fill(auth.username)
+      await this.input('Password').fill(auth.password)
     }
   }
 
@@ -239,10 +255,5 @@ export class RancherUI {
     const version = this.requireEnv('RANCHER_VERSION').replace(/-[a-f0-9]{40}/, '.0')
     if (!semver.validRange(query)) throw new Error(`Invalid range: ${query}`)
     return semver.satisfies(version, query, { includePrerelease: true })
-  }
-
-  static get hasAppCollection(): boolean {
-    // OCI repository support was added in 2.9
-    return this.isPrime && this.isVersion('>=2.9') && false
   }
 }

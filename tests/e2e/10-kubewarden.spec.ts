@@ -21,17 +21,18 @@ test.beforeAll(async({ request }) => {
     .catch(() => fallback)
 
   if (conf.kw_mode === 'upgrade') {
-    upMap = (await Common.fetchVersionMap()).splice(-3)
+    upMap = (await Common.fetchVersionMap('Admission Controller')).splice(-2)
       // Limit because of https://github.com/kubewarden/policy-server/issues/1300
-      .filter(v => semver.gte(v.app.replace(/^v/, ''), '1.29.0'))
-
+      .filter(v => semver.gte(v.app.replace(/^v/, ''), '1.37.0'))
     if (upMap.length === 0) {
       throw new Error('No compatible version was found, check rancher-version annotations')
     }
+    // Fake previous major version to test upgrade
+    if (upMap.length === 1) upMap.unshift({ app: '1.37.0', controller: '1.0.0' })
   }
 })
 
-test('Install UI extension', { tag: '@kw' }, async({ page, ui }) => {
+test('Install UI extension', { tag: '@ac' }, async({ page, ui }) => {
   const extensions = new RancherExtensionsPage(page)
   await extensions.goto()
 
@@ -64,16 +65,16 @@ test('Install UI extension', { tag: '@kw' }, async({ page, ui }) => {
   })
 })
 
-test('Install Kubewarden', { tag: '@kw' }, async({ page, ui, nav }) => {
+test('Install Admission Controller', { tag: '@ac' }, async({ page, ui, nav }) => {
   test.skip(conf.kw_mode === 'fleet')
 
   const kwPage = new KubewardenPage(page)
-  if (conf.kw_from == 'github') {
-    await kwPage.installGithub({ version: conf.kw_mode === 'upgrade' ? upMap[0].controller : undefined })
-  } else if (conf.kw_from == 'gitlab') {
-    await kwPage.installGitlab()
+  if (conf.kw_mode === 'upgrade') {
+    // Install released version & upgrade to MR
+    console.log(upMap)
+    await kwPage.installFrom('appco', { version: upMap[0].controller })
   } else {
-    await kwPage.installAppco()
+    await kwPage.installFrom(conf.kw_from)
   }
 
   // Check UI is active
@@ -83,7 +84,7 @@ test('Install Kubewarden', { tag: '@kw' }, async({ page, ui, nav }) => {
   }, 'Kubewarden installation not detected')
 })
 
-test('Install Kubewarden by Fleet', { tag: '@kw' }, async({ page }) => {
+test('Install Kubewarden by Fleet', { tag: '@ac' }, async({ page }) => {
   test.skip(conf.kw_mode !== 'fleet')
   test.slow()
 
@@ -97,7 +98,7 @@ test('Install Kubewarden by Fleet', { tag: '@kw' }, async({ page }) => {
   }, { timeout: 4 * 60_000 })
 })
 
-test('Add Policy Catalog Repository', { tag: '@kw' }, async({ page, ui, nav }) => {
+test('Add Policy Catalog Repository', { tag: '@ac' }, async({ page, ui, nav }) => {
   const cap = new ClusterAdmissionPoliciesPage(page)
   await nav.capolicies()
 
@@ -119,14 +120,12 @@ test('Upgrade Kubewarden', async({ page, nav }) => {
   test.skip(conf.kw_mode !== 'upgrade')
   test.slow()
 
-  const kwPage = new KubewardenPage(page)
+  const acPage = new KubewardenPage(page)
   const apps = new RancherAppsPage(page)
 
   // Check we installed old versions
   await nav.explorer('Apps', 'Installed Apps')
-  for (const chart of ['controller', 'crds', 'defaults'] as const) {
-    await apps.checkChart(`rancher-kubewarden-${chart}`, upMap[0][chart])
-  }
+  await apps.checkChart(`rancher-admission-controller`, upMap[0].controller)
 
   // Keep track of last upgraded version
   let last: AppVersion = upMap[upMap.length - 1]
@@ -134,18 +133,18 @@ test('Upgrade Kubewarden', async({ page, nav }) => {
   await test.step('Upgrade predefined versions', async() => {
     for (let i = 0; i < upMap.length - 1; i++) {
       await nav.kubewarden()
-      await kwPage.upgrade({ from: upMap[i], to: upMap[i + 1] })
+      await acPage.upgrade({ from: upMap[i], to: upMap[i + 1] })
     }
   })
 
   await test.step('Upgrade unknown versions', async() => {
     let next: AppVersion|null
-    while ((next = await kwPage.getUpgrade()) !== null) {
-      await kwPage.upgrade({ from: last, to: next })
+    while ((next = await acPage.getUpgrade()) !== null) {
+      await acPage.upgrade({ from: last, to: next })
       last = next
     }
     // Check there are no more upgrades
-    await expect(kwPage.currentApp).toContainText(`App Version: ${last.app}`)
-    await expect(kwPage.upgradeApp).not.toBeVisible()
+    await expect(acPage.currentApp).toContainText(`App Version: ${last.app}`)
+    await expect(acPage.upgradeApp).not.toBeVisible()
   })
 })

@@ -18,19 +18,20 @@ export class RancherStoragePage extends BasePage {
   }
 
   // Create secrets in nodejs shell to not log credentials
-  createSecretInShell(secret: Secret): Secret {
+  createSecretInShell(secret: Secret, options?:{ skipExisting?: boolean }): Secret {
     const shell = new Shell(this.page)
     shell.runExec(`kubectl get ns ${secret.namespace} || kubectl create ns ${secret.namespace}`)
 
+    const getOr = options?.skipExisting ? `kubectl get secret -n ${secret.namespace} ${secret.name} &> /dev/null ||` : ''
     switch (secret.type) {
       case 'HTTP Basic Auth':
-        shell.runExec(`kubectl create secret generic ${secret.name} -n ${secret.namespace} \
+        shell.runExec(`${getOr} kubectl create secret generic ${secret.name} -n ${secret.namespace} \
             --type=kubernetes.io/basic-auth \
             --from-literal=username=${secret.username} \
             --from-literal=password=${secret.password}`)
         break
       case 'Registry':
-        shell.runExec(`kubectl create secret docker-registry ${secret.name} -n ${secret.namespace} \
+        shell.runExec(`${getOr} kubectl create secret docker-registry ${secret.name} -n ${secret.namespace} \
             --docker-server=${secret.domain} \
             --docker-username=${secret.username} \
             --docker-password=${secret.password}`)
@@ -74,9 +75,9 @@ export class RancherStoragePage extends BasePage {
       type     : 'HTTP Basic Auth',
       name     : name,
       namespace: 'cattle-system',
-      username : conf.auth.appco_user || '',
-      password : conf.auth.appco_pass || ''
-    })
+      username : conf.appco.user || '',
+      password : conf.appco.pass || ''
+    }, { skipExisting: true })
   }
 
   createAppcoPull(name: string, namespace: string): Secret {
@@ -85,8 +86,29 @@ export class RancherStoragePage extends BasePage {
       name     : name,
       namespace: namespace,
       domain   : 'dp.apps.rancher.io',
-      username : conf.auth.appco_user || '',
-      password : conf.auth.appco_pass || ''
-    })
+      username : conf.appco.user || '',
+      password : conf.appco.pass || ''
+    }, { skipExisting: true })
+  }
+
+  createGithubAuth(name: string): Secret {
+    return this.createSecretInShell({
+      type     : 'HTTP Basic Auth',
+      name     : name,
+      namespace: 'cattle-system',
+      username : conf.github.user || '',
+      password : conf.github.pass || ''
+    }, { skipExisting: true })
+  }
+
+  createGithubPull(name: string, namespace: string): Secret {
+    return this.createSecretInShell({
+      type     : 'Registry',
+      name     : name,
+      namespace: namespace,
+      domain   : 'ghcr.io',
+      username : conf.github.user || '',
+      password : conf.github.pass || ''
+    }, { skipExisting: true })
   }
 }
