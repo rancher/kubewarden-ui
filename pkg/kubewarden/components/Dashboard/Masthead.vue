@@ -112,7 +112,13 @@ export default {
         oldPolicyReports: true,
         newPolicyReports:  true
       };
-    }
+    },
+    isDeprecatedController() {
+      return this.controllerApp?.spec?.chart?.metadata?.name !== KUBEWARDEN_CHARTS.CONTROLLER;
+    },
+    deprecatedControllerBannerCopy() {
+      return this.t('kubewarden.dashboard.deprecated.controllerApp', {}, true);
+    },
   },
 
   methods: {
@@ -179,6 +185,16 @@ export default {
         class="mb-20"
         data-testid="kw-dashboard-upgrade-unsatisfied-banner"
       />
+    </div>
+
+    <div v-if="controllerApp && isDeprecatedController">
+      <Banner
+        color="error"
+        class="mb-20"
+        data-testid="kw-dashboard-deprecated-controller-banner"
+      >
+        <span v-clean-html="deprecatedControllerBannerCopy" />
+      </Banner>
     </div>
 
     <div class="head">

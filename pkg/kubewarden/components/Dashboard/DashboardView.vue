@@ -37,7 +37,8 @@ const controllerApp = computed(() => {
     return allApps.value?.find((a: any) => {
       return (
         a.spec?.chart?.metadata?.annotations?.[CATALOG_ANNOTATIONS.RELEASE_NAME] === KUBEWARDEN_APPS.RANCHER_CONTROLLER ||
-        a.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER
+        a.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.CONTROLLER ||
+        a.spec?.chart?.metadata?.name === KUBEWARDEN_CHARTS.DEPRECATED_CONTROLLER
       );
     });
   }

@@ -31,6 +31,8 @@ kubewarden:
       SUSE Security Admission Controller is a policy engine for Kubernetes. It helps with keeping your Kubernetes clusters secure and compliant. Admission policies can be written using regular programming languages or Domain Specific Languages (DSL). Policies are compiled into WebAssembly modules that are then distributed using traditional container registries.
     getStarted: Get Started
     issues: Issues
+    deprecated:
+      controllerApp: 'The Admission Controller chart from github has been deprecated. Please install SUSE Security Admission Controller from SUSE Application Collection. See the <a target="_blank" rel="noopener noreferrer nofollow" href="https://rancher.github.io/kubewarden-product-docs/admission-controller/1.37/en/product-specific/howtos/migration/community136-to-appco137-migration.html">documentation</a> for more information for migration.'
     upgrade:
       appVersion: App Version
       appUpgrade: App Upgrade
