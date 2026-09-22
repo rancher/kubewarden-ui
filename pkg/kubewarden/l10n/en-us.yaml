@@ -32,7 +32,7 @@ kubewarden:
     getStarted: Get Started
     issues: Issues
     deprecated:
-      controllerApp: 'The Admission Controller chart from github has been deprecated. Please install SUSE Security Admission Controller from SUSE Application Collection. See the <a target="_blank" rel="noopener noreferrer nofollow" href="https://rancher.github.io/kubewarden-product-docs/admission-controller/1.37/en/product-specific/howtos/migration/community136-to-appco137-migration.html">documentation</a> for more information for migration.'
+      controllerApp: 'The Kubewarden Admission Controller chart from community is now unsupported in Rancher Prime. Please install SUSE Security Admission Controller from SUSE Application Collection. See the <a target="_blank" rel="noopener noreferrer nofollow" href="https://rancher.github.io/kubewarden-product-docs/admission-controller/1.37/en/product-specific/howtos/migration/community136-to-appco137-migration.html">documentation</a> for more information for migration.'
     upgrade:
       appVersion: App Version
       appUpgrade: App Upgrade
