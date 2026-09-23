@@ -34,6 +34,7 @@ export const KUBEWARDEN_CHARTS = {
   CONTROLLER:        'suse-security-admission-controller',
   DEFAULTS:          'ssac',
   INSTALLATION_NAME: 'rancher-admission-controller',
+  DEPRECATED_CONTROLLER: 'admission-controller'
 };
 
 export const KUBEWARDEN_APPS = {
