@@ -241,7 +241,7 @@ export class KubewardenPage extends BasePage {
   }
 
   @step
-  async upgrade(options?: { from?: AppVersion, to?: AppVersion }) {
+  async upgrade(options?: { from?: AppVersion, to?: AppVersion, patch?: YAMLPatch }) {
     const from = options?.from
     const to = options?.to
     const apps = new RancherAppsPage(this.page)
@@ -257,7 +257,7 @@ export class KubewardenPage extends BasePage {
     if (from?.controller || to?.controller) {
       await expect(apps.stepTitle).toContainText(`${to?.controller || ''}`) // ${from?.controller || ''} >
     }
-    await apps.updateApp('rancher-admission-controller', { navigate: false, timeout: 4 * 60_000 })
+    await apps.updateApp('rancher-admission-controller', { navigate: false, timeout: 4 * 60_000, yamlPatch: options?.patch })
     await shell.waitPods()
 
     // Check resources are online

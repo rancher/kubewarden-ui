@@ -4,7 +4,7 @@ import { AppVersion, KubewardenPage } from './pages/kubewarden.page'
 import { ClusterAdmissionPoliciesPage } from './pages/policies.page'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherFleetPage } from './rancher/rancher-fleet.page'
-import { RancherUI } from './components/rancher-ui'
+import { RancherUI, YAMLPatch } from './components/rancher-ui'
 import { Common } from './components/common'
 import { conf } from '../env-config'
 import semver from 'semver'
@@ -27,8 +27,7 @@ test.beforeAll(async({ request }) => {
     if (upMap.length === 0) {
       throw new Error('No compatible version was found, check rancher-version annotations')
     }
-    // Fake previous major version to test upgrade
-    if (upMap.length === 1) upMap.unshift({ app: '1.37.0', controller: '1.0.0' })
+    console.log(upMap)
   }
 })
 
@@ -68,13 +67,12 @@ test('Install UI extension', { tag: '@ac' }, async({ page, ui }) => {
 test('Install Admission Controller', { tag: '@ac' }, async({ page, ui, nav }) => {
   test.skip(conf.kw_mode === 'fleet')
 
-  const kwPage = new KubewardenPage(page)
+  const acPage = new KubewardenPage(page)
   if (conf.kw_mode === 'upgrade') {
     // Install released version & upgrade to MR
-    console.log(upMap)
-    await kwPage.installFrom('appco', { version: upMap[0].controller })
+    await acPage.installFrom('appco', { version: upMap[0].controller })
   } else {
-    await kwPage.installFrom(conf.kw_from)
+    await acPage.installFrom(conf.kw_from)
   }
 
   // Check UI is active
@@ -116,16 +114,35 @@ test('Add Policy Catalog Repository', { tag: '@ac' }, async({ page, ui, nav }) =
   }, 'No policy repository found. Please add a policy repository to view policies.')
 })
 
-test('Upgrade Kubewarden', async({ page, nav }) => {
+test('Upgrade Kubewarden', async({ page, nav, ui }) => {
   test.skip(conf.kw_mode !== 'upgrade')
   test.slow()
 
   const acPage = new KubewardenPage(page)
   const apps = new RancherAppsPage(page)
 
-  // Check we installed old versions
+  // Check that old version is installed
   await nav.explorer('Apps', 'Installed Apps')
   await apps.checkChart(`rancher-admission-controller`, upMap[0].controller)
+
+  let acPatch: YAMLPatch | undefined
+  if (conf.kw_from === 'gitlab') {
+    const gl = Common.findGitLabRefs('Admission Controller')
+
+    // Replace official repository with GitLab
+    await nav.explorer('Apps', 'Repositories')
+    await ui.tableRow('admission-controller-charts').action('Edit Config')
+    await ui.input('OCI Repository Host URL *').fill(gl.chart)
+    await ui.checkbox('Skip TLS Verifications').check()
+    await ui.button('Save').click()
+
+    acPatch = (y) => {
+      for (const node of [y.image, y.policyServer.image, y.auditScanner.image]) {
+        node.registry = gl.reg
+        node.tag = node.tag.replace(/-.*/, '')
+      }
+    }
+  }
 
   // Keep track of last upgraded version
   let last: AppVersion = upMap[upMap.length - 1]
@@ -133,14 +150,14 @@ test('Upgrade Kubewarden', async({ page, nav }) => {
   await test.step('Upgrade predefined versions', async() => {
     for (let i = 0; i < upMap.length - 1; i++) {
       await nav.kubewarden()
-      await acPage.upgrade({ from: upMap[i], to: upMap[i + 1] })
+      await acPage.upgrade({ from: upMap[i], to: upMap[i + 1], patch: acPatch })
     }
   })
 
   await test.step('Upgrade unknown versions', async() => {
     let next: AppVersion|null
     while ((next = await acPage.getUpgrade()) !== null) {
-      await acPage.upgrade({ from: last, to: next })
+      await acPage.upgrade({ from: last, to: next, patch: acPatch })
       last = next
     }
     // Check there are no more upgrades
