@@ -1,6 +1,6 @@
 product:
   # This is used as the display name of the product in the UI SideNav
-  kubewarden: Admission Policy Management
+  kubewarden: Admission Controller
 
 generic:
   readFromFile: Read from file
@@ -25,7 +25,7 @@ kubewarden:
     install: Install
     notInstalled: SUSE Security Admission Controller is not installed
     button: Install SUSE Security Admission Controller Prerequisites
-    intro: Welcome to Admission Policy Management
+    intro: Welcome to Admission Controller
     blurb: A Dynamic Admission Controller for Kubernetes
     description: |
       SUSE Security Admission Controller is a policy engine for Kubernetes. It helps with keeping your Kubernetes clusters secure and compliant. Admission policies can be written using regular programming languages or Domain Specific Languages (DSL). Policies are compiled into WebAssembly modules that are then distributed using traditional container registries.
@@ -40,8 +40,8 @@ kubewarden:
       defaultsChart: Defaults
       appVersionUnsatisfied: 'The app version of the SUSE Security Admission Controller Defaults ({defaultsAppVersion}) chart does not match the app version of the SUSE Security Admission Controller chart ({controllerAppVersion}). This chart will need to be updated to match the app version of the SUSE Security Admission Controller chart.'
     policyReports:
-      oldPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Admission Policy Management App. Please update to version v1.11.0 or newer.'
-      newPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Admission Policy Management extension. Please update to version 1.4.0 or newer.'
+      oldPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Admission Controller App. Please update to version v1.11.0 or newer.'
+      newPolicyReportsIncompatible: 'Policy Reports are not compatible with the current version of the Admission Controller extension. Please update to version 1.4.0 or newer.'
     headers:
       policyServer:
         title: Policy Servers
@@ -371,7 +371,7 @@ kubewarden:
       label: Context Aware Resources
       description: A list of Kubernetes resources the policy is allowed to access at evaluation time. Access to these resources is done using the ServiceAccount of the PolicyServer the policy is assigned to.
       warning: >-
-        Admission Policy management administrators need to thoroughly examine the types of resources that a policy will access in order to prevent any misuse or abuse of the system. In some cases, it may be necessary to increase the permissions of the ServiceAccount associated with the PolicyServer to enable the policy to retrieve the required information. Although policies are restricted to read-only access to Kubernetes resources, there is a risk that a malicious attacker could exploit an Admission policy to extract sensitive data from the cluster.
+        Admission Controller administrators need to thoroughly examine the types of resources that a policy will access in order to prevent any misuse or abuse of the system. In some cases, it may be necessary to increase the permissions of the ServiceAccount associated with the PolicyServer to enable the policy to retrieve the required information. Although policies are restricted to read-only access to Kubernetes resources, there is a risk that a malicious attacker could exploit an Admission policy to extract sensitive data from the cluster.
       resource:
         add: Add Resource
         remove: Remove Resource

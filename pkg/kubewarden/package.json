@@ -1,11 +1,12 @@
 {
   "name": "kubewarden",
-  "description": "Kubewarden extension for Rancher Manager",
+  "description": "SUSE Security Admission Controller extension for Rancher Manager",
   "icon": "https://raw.githubusercontent.com/rancher/kubewarden-ui/main/pkg/kubewarden/assets/icon-kubewarden.svg",
   "version": "4.2.1",
   "private": false,
   "rancher": {
     "annotations": {
+      "catalog.cattle.io/display-name": "SUSE Security Admission Controller",
       "catalog.cattle.io/kube-version": ">= v1.16.0-0",
       "catalog.cattle.io/rancher-version": ">= 2.11.0-0",
       "catalog.cattle.io/ui-extensions-version": ">= 3.0.0 < 4.0.0"
