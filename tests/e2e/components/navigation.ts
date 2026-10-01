@@ -4,15 +4,15 @@ import { RancherUI } from './rancher-ui'
 import { RancherCommonPage } from '../rancher/rancher-common.page'
 
 // Explorer navigation
-type ENav = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Admission Policy Management' | 'Vulnerability Scanner' | 'Runtime Enforcer'
+type ENav = 'Cluster' | 'Workloads' | 'Apps' | 'Storage' | 'Admission Controller' | 'Vulnerability Scanner' | 'Runtime Enforcer'
 type ENavMap = {
-  'Cluster'                    : 'Projects/Namespaces' | 'Nodes' | 'Cluster and Project Members' | 'Events'
-  'Workloads'                  : 'CronJobs' | 'DaemonSets' | 'Deployments' | 'Jobs' | 'StatefulSets' | 'Pods'
-  'Apps'                       : 'Charts' | 'Installed Apps' | 'Repositories' | 'Recent Operations'
-  'Storage'                    : 'PersistentVolumes' | 'StorageClasses' | 'ConfigMaps' | 'PersistentVolumeClaims' | 'Secrets'
-  'Admission Policy Management': 'Policy Servers' | 'Cluster Admission Policies' | 'Admission Policies' | 'Policy Reporter'
-  'Vulnerability Scanner'      : 'Images' | 'Advanced'
-  'Runtime Enforcer'           : 'Active Policies' | 'Policy Proposals'
+  'Cluster'              : 'Projects/Namespaces' | 'Nodes' | 'Cluster and Project Members' | 'Events'
+  'Workloads'            : 'CronJobs' | 'DaemonSets' | 'Deployments' | 'Jobs' | 'StatefulSets' | 'Pods'
+  'Apps'                 : 'Charts' | 'Installed Apps' | 'Repositories' | 'Recent Operations'
+  'Storage'              : 'PersistentVolumes' | 'StorageClasses' | 'ConfigMaps' | 'PersistentVolumeClaims' | 'Secrets'
+  'Admission Controller' : 'Policy Servers' | 'Cluster Admission Policies' | 'Admission Policies' | 'Policy Reporter'
+  'Vulnerability Scanner': 'Images' | 'Advanced'
+  'Runtime Enforcer'     : 'Active Policies' | 'Policy Proposals'
 }
 // Expandable items in ENavMap that have a third navigation level
 type ENavSubMap = {
@@ -122,8 +122,8 @@ export class Navigation {
     }
 
     // Wait for page before next step
-    if (groupName == 'Admission Policy Management') {
-      const heading = childName || /^(Kubewarden|SUSE Security Admission Controller|Welcome to (Kubewarden|Admission Policy Management))$/
+    if (groupName == 'Admission Controller') {
+      const heading = childName || /^(Kubewarden|SUSE Security Admission Controller|Welcome to (Kubewarden|Admission Controller))$/
       if (childName != 'Policy Reporter') {
         await expect(this.page.getByRole('heading', { name: heading })).toBeVisible()
       }
@@ -157,13 +157,13 @@ export class Navigation {
   // Kubewarden specific helpers
 
   @step // Dashboard
-  async kubewarden(childName?: ENavMap['Admission Policy Management']) {
-    await this.explorer('Admission Policy Management', childName)
+  async kubewarden(childName?: ENavMap['Admission Controller']) {
+    await this.explorer('Admission Controller', childName)
   }
 
   @step // Policy Servers
   async pservers(name?: string, tab?: 'Policies' | 'Metrics' | 'Tracing' | 'Conditions' | 'Recent Events' | 'Related Resources') {
-    await this.explorer('Admission Policy Management', 'Policy Servers')
+    await this.explorer('Admission Controller', 'Policy Servers')
     if (name) {
       await this.ui.tableRow(name).open()
       await expect(this.page.getByRole('heading', { name: new RegExp(`Policy Servers:? ${name}`) })).toBeVisible()
@@ -173,14 +173,14 @@ export class Navigation {
 
   @step // Cluster Admission Policies
   async capolicies(name?: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events' | 'Related Resources') {
-    await this.explorer('Admission Policy Management', 'Cluster Admission Policies')
+    await this.explorer('Admission Controller', 'Cluster Admission Policies')
     if (name) await this.ui.tableRow(name).open()
     if (tab) await this.ui.tab(tab).click()
   }
 
   @step // Admission Policies
   async apolicies(name?: string, tab?: 'Rules' | 'Tracing' | 'Metrics' | 'Conditions' | 'Recent Events') {
-    await this.explorer('Admission Policy Management', 'Admission Policies')
+    await this.explorer('Admission Controller', 'Admission Policies')
     if (name) await this.ui.tableRow(name).open()
     if (tab) await this.ui.tab(tab).click()
   }
