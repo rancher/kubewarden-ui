@@ -30,7 +30,8 @@ export class RancherExtensionsPage extends BasePage {
     const partnersRepo = this.ui.checkbox('Partners Extension')
 
     await this.dotMenu('Add Rancher Repositories')
-    await expect(this.page.getByRole('heading', { name: 'Add Extensions repositories' })).toBeVisible()
+    await expect(this.page.getByRole('dialog').getByText('Add Extensions repositories')).toBeVisible()
+    await this.page.waitForTimeout(300) // Checkboxes are loading state
 
     const setChecked = async(checkBox: Locator, checked?: boolean) => {
       // CheckBox is disabled if repository already exists
@@ -50,7 +51,7 @@ export class RancherExtensionsPage extends BasePage {
      */
   getByName(name: string|RegExp) {
     return RancherUI.isVersion('>=2.13')
-      ? this.page.locator('.item-card', { has: this.page.getByRole('heading', { name, exact: true }) })
+      ? this.page.locator('.item-card', { has: this.ui.heading(name) })
       : this.page.locator('.plugin', { has: this.page.locator('.plugin-name').getByText(name, { exact: true }) })
 
     // Can't filter by repository in case of duplicit plugins - there is race condition in rancher, does not work as expected yet
@@ -100,7 +101,7 @@ export class RancherExtensionsPage extends BasePage {
   async developerLoad(url: string) {
     // Open developer load dialog
     await this.dotMenu('Developer Load')
-    await expect(this.page.getByRole('heading', { name: 'Developer Load Extension' })).toBeVisible()
+    await expect(this.page.getByRole('dialog').getByText('Developer Load Extension')).toBeVisible()
 
     // Load extension
     await this.ui.input('Extension URL').fill(url)

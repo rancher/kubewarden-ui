@@ -34,7 +34,10 @@ export class RancherAppsPage extends BasePage {
 
   constructor(page: Page) {
     super(page)
-    this.step1 = page.getByRole('heading', { name: 'Install: Step 1' }).or(this.page.getByRole('tab', { name: 'Metadata', selected: true })).first()
+    this.step1 = page.getByRole('heading', { name: 'Install: Step 1' })
+      .or(page.getByRole('tab', { name: 'Metadata', selected: true }))
+      .or(page.getByRole('button', { name: 'Metadata' }))
+      .first()
     this.step2 = page.getByRole('heading', { name: 'Install: Step 2' }).or(this.page.getByRole('tab', { name: 'Values', selected: true })).first()
     this.stepTitle = page.locator('div.top.choice-banner>.title,div.chart-title')
     this.nextBtn = this.ui.button('Next')
@@ -56,7 +59,7 @@ export class RancherAppsPage extends BasePage {
   async setRepoType(type: 'Git' | 'OCI' | 'Helm' | 'AppCo') {
     const name = type === 'AppCo' ? 'SUSE App Collection' : type + ' Repository'
     if (RancherUI.isVersion('>=2.14')) {
-      await this.page.getByRole('heading', { name, exact: true }).click()
+      await this.ui.heading(name).click()
     } else {
       await this.page.getByRole('radio', { name: type === 'Helm' ? 'http(s) URL' : name }).check()
     }
@@ -151,7 +154,7 @@ export class RancherAppsPage extends BasePage {
     // Close the window
     if (keepLog === false) {
       const win = this.page.locator('#windowmanager').or(this.page.locator('div#horizontal-window-manager'))
-      await win.locator('div.tab.active').locator('i.closer').click()
+      await win.locator('div.tab.active').locator('i.closer,i.icon-close').click()
     }
   }
 
@@ -177,7 +180,7 @@ export class RancherAppsPage extends BasePage {
   async installChart(chart: Chart, options?: { questions?: () => Promise<void>, yamlPatch?: YAMLPatch, timeout?: number, navigate?: boolean }) {
     // Apps grid was redesigned in Rancher 2.12
     const card = this.page.locator('.grid > .item').or(this.page.locator('.app-chart-cards > .item-card'))
-      .filter({ has: this.page.getByRole('heading', { name: chart.title, exact: true }) })
+      .filter({ has: this.ui.heading(chart.title) })
 
     // Select chart by title
     if (options?.navigate !== false) {
@@ -190,7 +193,9 @@ export class RancherAppsPage extends BasePage {
       await card.click()
 
       if (chart.version) {
-        const versionPane = this.page.getByRole('heading', { name: 'Chart Versions', exact: true }).locator('..')
+        const versionPane = RancherUI.isVersion('>=2.16')
+          ? this.page.locator('div.info-section-title').getByText('Chart Versions', { exact: true }).locator('..')
+          : this.page.getByRole('heading', { name: 'Chart Versions', exact: true }).locator('..')
         const showMore = versionPane.getByText('Show More', { exact: true })
         const chartVersion = versionPane.getByText(chart.version, { exact: true }).first()
 
@@ -214,7 +219,7 @@ export class RancherAppsPage extends BasePage {
     }
     if (chart.namespace) {
       await this.ui.selectOption('Namespace *', /^Create a [nN]ew Namespace$/)
-      await this.ui.input('Namespace').fill(chart.namespace)
+      await this.ui.input(/^Namespace( \*)?$/).fill(chart.namespace)
     }
     if (chart.project) {
       await this.ui.selectOption('Install into Project', chart.project)

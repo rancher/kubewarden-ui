@@ -48,6 +48,16 @@ export class RancherUI {
       .describe(`Checkbox: ${label}`)
   }
 
+  // Return heading or custom header element
+  heading(name: string|RegExp) {
+    const h = this.page.getByRole('heading', { name, exact: true })
+    if (RancherUI.isVersion('>=2.16'))
+      return this.page.locator('div.item-card-header').getByText(name, { exact: true }) // Extension & Chart cards
+        .or(h)
+
+    return h
+  }
+
   // Tab
   tab(name: string|RegExp) {
     // Modify string parameter to handle (N) suffix (UI >= 4.0.4)
@@ -251,8 +261,10 @@ export class RancherUI {
   }
 
   static isVersion(query: string|Range): boolean {
-    // Convert v2.10-6e85a811efd6b831c3d49a7336a6d4b3e96c1a93-head -> v2.10.0-head
-    const version = this.requireEnv('RANCHER_VERSION').replace(/-[a-f0-9]{40}/, '.0')
+    // Convert v2.10(.0)-6e85a811efd6b831c3d49a7336a6d4b3e96c1a93-head -> v2.10.0-head
+    const version = this.requireEnv('RANCHER_VERSION')
+      .replace(/^(v?\d+\.\d+)-/, '$1.0-') // v2.10-<sha>-head -> v2.10.0-<sha>-head
+      .replace(/-[a-f0-9]{40}/, '') // v2.16.0-<sha>-head -> v2.16.0-head
     if (!semver.validRange(query)) throw new Error(`Invalid range: ${query}`)
     return semver.satisfies(version, query, { includePrerelease: true })
   }

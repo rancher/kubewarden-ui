@@ -39,7 +39,7 @@ export class Shell {
 
   // Close terminal
   async close() {
-    await this.win.locator('.tab', { hasText: 'Kubectl:' }).locator('i.closer').click()
+    await this.win.locator('.tab', { hasText: 'Kubectl:' }).locator('i.closer,i.icon-close').click()
   }
 
   /**
