@@ -215,7 +215,9 @@ test.describe('Metrics', () => {
     ]
 
     const checkMetrics = async() => {
-      const frame = page.frameLocator('iframe')
+      // Grafana renders panels lazily, jump to the end to ensure all panels are rendered
+      const frame = page.frameLocator('section#policy-metrics:visible iframe')
+      await frame.owner().evaluate(el => el.scrollIntoView({ block: 'end', behavior: 'instant' }))
 
       for (const metric of metrics) {
         const panel = frame.getByTestId(metric)
