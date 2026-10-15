@@ -56,6 +56,7 @@ describe('component: Question', () => {
   it('renders sequence type when nested within a map subquestion', () => {
     const wrapper = createWrapper(Question, {
       props: {
+        tabbed:          false,
         value:           {
           run_as_user: {
             rule:   'MustRunAs',
