@@ -14,13 +14,11 @@ on:
         default: 'released'
         options:
         - released
-        - 'v2.11'
         - 'v2.12'
         - 'v2.13'
         - 'v2.14'
         - 'v2.15'
         - 'v2.16'
-        - 'v2.11-0 (devel)'
         - 'v2.12-0 (devel)'
         - 'v2.13-0 (devel)'
         - 'v2.14-0 (devel)'
@@ -114,15 +112,11 @@ jobs:
       fail-fast: false
       matrix:
         # Rancher versions for PRs is based on the branch
-        rancher:  ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["p2.11", "p2.12", "p2.13", "p2.14", "p2.15"]') || fromJSON(format('["{0}"]', inputs.rancher_text || inputs.rancher )) }}
+        rancher:  ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["p2.12", "p2.13", "p2.14", "p2.15"]') || fromJSON(format('["{0}"]', inputs.rancher_text || inputs.rancher )) }}
         mode: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_run') && fromJSON('["manual", "upgrade", "fleet"]') || fromJSON(format('["{0}"]', inputs.mode || 'manual')) }}
         exclude:
           # Limited support = main test only - https://endoflife.date/rancher
           # Full support = main & fleet & upgrade tests
-          - rancher: ${{ github.event_name != 'workflow_dispatch' && 'p2.11' }}
-            mode: upgrade
-          - rancher: ${{ github.event_name != 'workflow_dispatch' && 'p2.11' }}
-            mode: fleet
           - rancher: ${{ github.event_name != 'workflow_dispatch' && 'p2.12' }}
             mode: upgrade
           - rancher: ${{ github.event_name != 'workflow_dispatch' && 'p2.12' }}
