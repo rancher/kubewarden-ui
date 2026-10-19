@@ -119,9 +119,19 @@ export class TableRow {
   async delete(options?: { timeout?: number }) {
     await this.action('Delete')
     await this.ui.page.getByTestId('prompt-remove-confirm-button').click()
+
     // Table row stays visible as "Uninstalling"
-    if (this.strval !== 'rancher-monitoring-crd') {
+    if (this.strval === 'rancher-monitoring-crd') return
+
+    try {
       await expect(this.row).not.toBeVisible(options)
+    } catch {
+      // Workaround for row in "Resource scheduled for deletion" state
+      if (await this.row.locator('..').getByText('Resource scheduled for deletion').isVisible()) {
+        await this.ui.page.reload()
+        await this.ui.waitForTable()
+      }
+      await expect(this.row).not.toBeVisible()
     }
   }
 
