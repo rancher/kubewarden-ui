@@ -143,6 +143,14 @@ export class RancherUI {
 
   // ==================================================================================================
   // Table Handler
+
+  // Wait until table loads
+  async waitForTable(options?: { timeout?: number }) {
+    const row0 = this.tableRow(0).row
+    const norows = this.page.locator('table.sortable-table > tbody:visible').getByText('There are no rows to show.')
+    await expect(row0.or(norows)).toBeVisible(options)
+  }
+
   tableRow(arg: number | string | RegExp | { [key: string]: string | RegExp }, options?: { group?: string }): TableRow {
     return new TableRow(this, arg, options)
   }
