@@ -5,6 +5,7 @@ import PolicyReporter from '@kubewarden/components/PolicyReporter/index.vue';
 import mockControllerDeployment from '@/tests/unit/mocks/controllerDeployment';
 import { mockControllerAppLegacy } from '@/tests/unit/mocks/controllerApp';
 import { KUBEWARDEN, OPEN_REPORTS } from '@kubewarden/types';
+import { CATALOG, SERVICE, WORKLOAD_TYPES } from '@shell/config/types';
 
 // Create a mock for the 'cluster/schemaFor' getter that returns different values based on the input.
 const clusterSchemaFor = jest.fn((resourceType) => {
@@ -174,6 +175,87 @@ describe('component: PolicyReporter', () => {
     const banner = wrapper.find('[data-testid="kw-pr-no-crds-banner"]');
 
     expect(banner.exists()).toBe(true);
+  });
+
+  it('Should recognize Fleet admission-controller v1.38.2 and its reporter deployment', () => {
+    const fleetApp = JSON.parse(JSON.stringify(mockControllerAppLegacy));
+
+    fleetApp.id = 'kubewarden/admission-controller';
+    fleetApp.metadata.name = 'admission-controller';
+    fleetApp.metadata.namespace = 'kubewarden';
+    fleetApp.spec.chart.metadata.name = 'admission-controller';
+    fleetApp.spec.chart.metadata.appVersion = 'v1.38.2';
+
+    const reporterDeployment = {
+      metadata: {
+        namespace: 'kubewarden',
+        labels: {
+          'app.kubernetes.io/instance': 'admission-controller',
+          'app.kubernetes.io/name':     'policy-reporter-ui'
+        },
+        state: { name: 'active' }
+      }
+    };
+
+    const dispatch = jest.fn();
+    const wrapper = createWrapper({
+      global: {
+        mocks: {
+          ...commonMocks,
+          $store: {
+            ...commonMocks.$store,
+            getters: {
+              ...commonMocks.$store.getters,
+              'kubewarden/controllerApp': null,
+              'cluster/all':              (type) => type === CATALOG.APP ? [fleetApp] : type === WORKLOAD_TYPES.DEPLOYMENT ? [reporterDeployment] : []
+            },
+            dispatch
+          }
+        },
+        stubs: commonStubs
+      }
+    });
+
+    expect((wrapper.vm as any).controllerApp).toEqual(fleetApp);
+    expect((wrapper.vm as any).controllerNamespace).toBe('kubewarden');
+    expect((wrapper.vm as any).controllerVersion).toBe('v1.38.2');
+    expect((wrapper.vm as any).canShowReporter).toBe(true);
+    expect((wrapper.vm as any).reporterDeployment).toEqual(reporterDeployment);
+    expect(wrapper.find('[data-testid="kw-pr-incompatibile-banner"]').exists()).toBe(false);
+    expect(dispatch).toHaveBeenCalledWith('kubewarden/updateControllerApp', fleetApp);
+
+    const config = (wrapper.vm as any).secondaryResourceDataConfig();
+    const serviceParsers = config.data[SERVICE].applyTo;
+    const reportingService = { metadata: { namespace: 'kubewarden', name: 'policy-reporter', labels: {} } };
+    const uiService = { metadata: { namespace: 'kubewarden', name: 'policy-reporter-ui', labels: {} } };
+    const foreignService = { metadata: { namespace: 'other', name: 'policy-reporter', labels: {} } };
+
+    expect(serviceParsers[1].parsingFunc([foreignService, reportingService])).toBe(reportingService);
+    expect(serviceParsers[2].parsingFunc([uiService])).toBe(uiService);
+  });
+
+  it('Should not accept an unavailable or an outdated controller version', () => {
+    const oldApp = JSON.parse(JSON.stringify(mockControllerAppLegacy));
+
+    oldApp.spec.chart.metadata.appVersion = 'v1.6.0';
+    const wrapper = createWrapper({
+      global: {
+        mocks: {
+          ...commonMocks,
+          $store: {
+            ...commonMocks.$store,
+            getters: {
+              ...commonMocks.$store.getters,
+              'kubewarden/controllerApp': oldApp
+            }
+          }
+        },
+        stubs: commonStubs
+      }
+    });
+
+    expect((wrapper.vm as any).canShowReporter).toBe(false);
+    expect(wrapper.find('[data-testid="kw-pr-incompatibile-banner"]').exists()).toBe(true);
   });
 
   it('Should show Policy Reporter iframe when available', () => {
