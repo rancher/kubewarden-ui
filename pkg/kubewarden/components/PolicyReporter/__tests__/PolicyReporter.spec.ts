@@ -283,3 +283,4 @@ describe('component: PolicyReporter', () => {
     expect(iframe.attributes().src).toStrictEqual(url as string);
   });
 });
+
