@@ -595,3 +595,4 @@ typeLabel:
   policies.kubewarden.io.policyserver: Policy Servers
   policies.kubewarden.io.admissionpolicy: Admission Policies
   policies.kubewarden.io.clusteradmissionpolicy: Cluster Admission Policies
+  
