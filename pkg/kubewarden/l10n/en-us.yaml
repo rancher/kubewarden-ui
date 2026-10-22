@@ -510,7 +510,7 @@ kubewarden:
       banner: 'Your cluster does not support policy reports, upgrade your SUSE Security Admission Controller to version `1.7.0` or greater to add the required crds.'
       current: Current SUSE Security Admission Controller version
       noCrds:
-        banner: 'The CRDs for `wgpolicyk8s.io.clusterpolicyreport` or `wgpolicyk8s.io.policyreport` can not be found. These must be installed to support policy reports.'
+        banner: 'The `clusterreports.openreports.io` or `reports.openreports.io` resource schemas are not available through Rancher. Check the OpenReports CRDs, Rancher API discovery, and access permissions.'
     service:
       main:
         banner:
