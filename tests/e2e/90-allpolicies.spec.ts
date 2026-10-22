@@ -67,6 +67,7 @@ const policySettingsMap: Partial<Record<policyTitle, PolicySettings>> = {
   'User Group PSP'                                                : { settings: setupUserGroupPSP },
   'Verify Image Signatures'                                       : { settings: setupVerifyImageSignatures },
   'volumeMounts'                                                  : { settings: setupVolumeMounts },
+  'Kyverno DSL policy'                                            : { skip: 'https://github.com/kubewarden/policies/issues/991' }
 }
 
 async function generalArray(ui: RancherUI) {
