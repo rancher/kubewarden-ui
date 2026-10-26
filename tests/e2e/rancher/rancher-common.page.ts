@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test'
 import { step } from '../rancher/rancher-test'
 import { BasePage } from './basepage'
+import { RancherUI } from '../components/rancher-ui'
 
 export class RancherCommonPage extends BasePage {
   goto(): Promise<void> {
@@ -39,6 +40,11 @@ export class RancherCommonPage extends BasePage {
     await this.ui.button('Continue').click()
     // User menu should be visible
     await expect(this.page.getByTestId('nav_header_showUserMenu')).toBeVisible()
+    if (RancherUI.isVersion('>=2.16')) {
+      // Close release-notes dialog
+      await expect(this.ui.page.getByTestId('release-welcome')).toBeVisible()
+      await this.ui.button('Close').click()
+    }
   }
 
   /**
