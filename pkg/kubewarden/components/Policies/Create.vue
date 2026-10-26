@@ -361,25 +361,16 @@ export default ({
       try {
         const repoObj = await this.$store.dispatch('cluster/create', {
           type:     CATALOG.CLUSTER_REPO,
-          metadata: { name: 'kubewarden-policy-catalog' },
+          metadata: { name: KUBEWARDEN_REPOS.POLICY_CATALOG_REPO_NAME },
           spec:     { url: KUBEWARDEN_REPOS.POLICY_CATALOG },
         });
 
-        try {
-          await repoObj.save();
-        } catch (e) {
-          handleGrowl({
-            error: e,
-            store: this.$store
-          });
-          btnCb(false);
-
-          return;
-        }
-
-        if (!this.officialKubewardenRepo) {
-          await this.$store.dispatch('catalog/refresh');
-        }
+        await repoObj.save();
+        await repoObj.waitForCondition('Downloaded', 'True', 10000, 200);
+        await this.$store.dispatch('catalog/load', {
+          force:    true,
+          repoKeys: [repoObj._key]
+        });
       } catch (e) {
         handleGrowl({
           error: e,
