@@ -50,16 +50,7 @@ test('Install UI extension', { tag: '@vs' }, async({ page, ui }) => {
   })
 })
 
-test('Install Vulnerability Scanner', { tag: '@vs' }, async({ page, nav, ui }) => {
-  // Disable partners repo for cnpg chart - issue#716
-  await nav.explorer('Apps', 'Repositories')
-  const partners = ui.tableRow('Partners')
-  await partners.waitFor()
-  if (await partners.status.getByText('Active').isVisible()) {
-    await partners.action('Disable')
-    await partners.toHaveState('Disabled')
-  }
-
+test('Install Vulnerability Scanner', { tag: '@vs' }, async({ page }) => {
   const vsPage = new VulnerabilityScannerPage(page)
   await vsPage.installFrom(conf.kw_from)
 })
