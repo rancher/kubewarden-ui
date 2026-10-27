@@ -78,7 +78,7 @@ test('Create with invalid values', async({ page, ui, nav }) => {
 
 test('Create with custom values', async({ page, ui, nav }) => {
   const psPage = new PolicyServersPage(page)
-  const ps = { name: 'test-policyserver', image: 'ghcr.io/kubewarden/policy-server:latest', replicas: 2 }
+  const ps = { name: 'test-policyserver', image: 'ghcr.io/kubewarden/adm-controller/policy-server:latest', replicas: 2 }
   await psPage.create(ps, { wait: false })
 
   await nav.pservers(ps.name)
