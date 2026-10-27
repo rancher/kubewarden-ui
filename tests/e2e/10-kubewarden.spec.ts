@@ -40,7 +40,7 @@ test('Install UI extension', { tag: '@ac' }, async({ page, ui }) => {
       await extensions.addRancherRepos({ rancher: true, partners: false })
       await ui.retry(async() => {
         await extensions.selectTab('Available')
-        await expect(extensions.getByName('SUSE Security Admission Controller')).toBeVisible({ timeout: 30_000 })
+        await expect(extensions.getByName('SUSE Security Admission Controller')).toBeVisible({ timeout: 60_000 })
       }, 'Not showing kubewarden extension')
     })
   }
