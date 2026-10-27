@@ -18,7 +18,7 @@ export class RancherUI {
 
   constructor(page: Page) {
     this.page = page
-    this.codeMirror = page.locator('div.CodeMirror-code')
+    this.codeMirror = page.locator('div.CodeMirror-code').or(page.locator('div.cm-content').first())
   }
 
   // ==================================================================================================
@@ -194,7 +194,14 @@ export class RancherUI {
   async editYaml(patch: YAMLPatch) {
     // Load yaml from code editor
     await expect(this.codeMirror).toBeVisible()
-    const lines = await this.codeMirror.locator('pre.CodeMirror-line').allTextContents()
+
+    // Rancher 2.16 uses CodeMirror 6, UI extension and older Rancher use CodeMirror 5
+    const isCM6 = await this.codeMirror.evaluate(el => el.classList.contains('cm-content'))
+    const lines = isCM6
+      // CodeMirror 6 renders only visible lines, read full document from editor state
+      ? (await this.codeMirror.evaluate((el: any) => el.cmTile.root.view.state.doc.toString())).split('\n')
+      : await this.codeMirror.locator('pre.CodeMirror-line').allTextContents()
+
     const cmText = lines.join('\n')
       .replace(/\u00A0/g, ' ') // replace &nbsp; with space
       .replace(/\u200B/g, '') // remove ZERO WIDTH SPACE last line
