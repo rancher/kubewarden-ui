@@ -187,7 +187,7 @@ export default {
           :initial-yaml-values="originalYamlValues"
           :editor-mode="editorMode"
           :hide-preview-buttons="true"
-          @onChanges="updateYamlValues"
+          @onInput="updateYamlValues"
         />
       </template>
 
