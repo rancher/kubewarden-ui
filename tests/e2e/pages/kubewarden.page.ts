@@ -57,7 +57,7 @@ export class KubewardenPage extends BasePage {
 
   getPane(name: Pane) {
     return this.page.locator('div.item-card')
-      .filter({ has: this.page.getByRole('heading', { name, exact: true }) })
+      .filter({ has: this.ui.heading(name) })
   }
 
   getPolicyServer(name: string|RegExp) {

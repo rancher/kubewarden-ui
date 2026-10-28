@@ -116,7 +116,7 @@ for (const PolicyPage of pageTypes) {
     await test.step('Rules are disabled', async() => {
       await polPage.open(p)
       await polPage.selectTab('Rules')
-      await expect(page.locator('section#rules')).toBeAllEnabled({ enabled: false })
+      await expect(page.getByTestId('tab-panel-rules')).toBeAllEnabled({ enabled: false })
     })
   })
 

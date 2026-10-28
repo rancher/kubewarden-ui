@@ -50,12 +50,8 @@ export class RancherUI {
 
   // Return heading or custom header element
   heading(name: string|RegExp) {
-    const h = this.page.getByRole('heading', { name, exact: true })
-    if (RancherUI.isVersion('>=2.16'))
-      return this.page.locator('div.item-card-header').getByText(name, { exact: true }) // Extension & Chart cards
-        .or(h)
-
-    return h
+    return this.page.getByRole('heading', { name, exact: true })
+      .or(this.page.locator('div.item-card-header').getByText(name, { exact: true }))
   }
 
   // Tab
