@@ -1,10 +1,22 @@
 import { shallowMount } from '@vue/test-utils';
 
-
 import PolicyServer from '@kubewarden/detail/policies.kubewarden.io.policyserver.vue';
 import CountGauge from '@shell/components/CountGauge';
 
 import TraceTestData from '@tests/unit/mocks/policyTraces';
+
+jest.mock('@shell/components/form/ResourceTabs', () => ({
+  __esModule: true,
+  default:    { name: 'ResourceTabs' }
+}));
+jest.mock('@shell/components/ResourceTable', () => ({
+  __esModule: true,
+  default:    { name: 'ResourceTable' }
+}));
+jest.mock('@kubewarden/components/TraceTable', () => ({
+  __esModule: true,
+  default:    { name: 'TraceTable' }
+}));
 
 const policyGauges = {
   Active: {

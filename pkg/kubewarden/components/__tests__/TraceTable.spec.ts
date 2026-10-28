@@ -10,6 +10,11 @@ import mockControllerChart from '@tests/unit/mocks/controllerChart';
 import mockTraces from '@tests/unit/mocks/policyTraces';
 import { mockControllerApp, mockControllerValues } from '@tests/unit/mocks/controllerApp';
 
+jest.mock('@shell/components/SortableTable', () => ({
+  __esModule: true,
+  default:    { name: 'SortableTable' }
+}));
+
 // Create a mock for the 'cluster/all' getter so that it returns different values based on resource type.
 const clusterAllMock = (resourceType: string) => {
   switch (resourceType) {
