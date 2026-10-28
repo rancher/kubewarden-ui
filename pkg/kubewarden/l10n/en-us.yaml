@@ -83,6 +83,12 @@ kubewarden:
           placeholder: "You can enter this manually or import it from a file using the button below."
         insecurePlainHttp: Insecure plain HTTP
         insecureSkipTLSVerify: Skip TLS verification
+        airGapped: Air-gapped environment
+        registryBaseUrl: Registry Base URL
+      airGapped:
+        warning: 'An air-gapped installation has been detected, this will require intervention to enable access to SUSE Security Admission Controller images and policies. It is necessary to make them available from an OCI registry that is accessible to the cluster.'
+        docs: |
+          Follow the documentation to setup an OCI registry for further installation.
       versionError:
         title: Chart Version not found.
         message: Unable to determine the latest stable version of the admission-controller chart. Please make sure the Helm repository is configured correctly.
@@ -124,10 +130,6 @@ kubewarden:
       repository:
         title: Repository
         description: You will need the SUSE Security Admission Controller Helm repository (https://charts.kubewarden.io) to install the `admission-controller` chart.
-      airGapped:
-        warning: 'An air-gapped installation has been detected, this will require intervention to enable access to SUSE Security Admission Controller images and policies. It is necessary to make them available from an OCI registry that is accessible to the cluster.'
-        docs: |
-          Follow the documentation to setup an OCI registry for further installation.
   tabs:
     security-contexts:
       label: Security Contexts

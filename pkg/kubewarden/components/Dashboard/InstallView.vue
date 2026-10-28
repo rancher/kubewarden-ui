@@ -18,17 +18,19 @@ import Loading from '@shell/components/Loading';
 import Markdown from '@shell/components/Markdown';
 import SelectOrCreateAuthSecret from '@shell/components/form/SelectOrCreateAuthSecret';
 import NameNsDescription from '@shell/components/form/NameNsDescription';
-// import { LabeledInput } from '@components/Form/LabeledInput';
-// import { Checkbox } from '@components/Form/Checkbox';
+import { LabeledInput } from '@components/Form/LabeledInput';
+import { Checkbox } from '@components/Form/Checkbox';
 import { AUTH_TYPE, SECRET, NAMESPACE } from '@shell/config/types';
 
 import { KUBEWARDEN_CHARTS, KUBEWARDEN_NAMESPACE, KUBEWARDEN_OCI_REGISTRY, KUBEWARDEN_REPOS } from '@kubewarden/types';
 import { getLatestVersion } from '@kubewarden/plugins/kubewarden-class';
 import { handleGrowl } from '@kubewarden/utils/handle-growl';
 import { refreshCharts } from '@kubewarden/utils/chart';
-// import FileSelector from '@shell/components/form/FileSelector';
+import FormValidation from '@shell/mixins/form-validation';
+import FileSelector from '@shell/components/form/FileSelector';
 
 import InstallWizard from '@kubewarden/components/InstallWizard';
+import { isAirgap } from '@kubewarden/utils/determine-airgap';
 
 export default {
   props: {
@@ -41,17 +43,17 @@ export default {
   components: {
     AsyncButton,
     Banner,
-    // Checkbox,
+    Checkbox,
     InstallWizard,
-    // LabeledInput,
+    LabeledInput,
     Loading,
     Markdown,
     NameNsDescription,
     SelectOrCreateAuthSecret,
-    // FileSelector
+    FileSelector
   },
 
-  mixins: [ResourceFetch],
+  mixins: [ResourceFetch, FormValidation],
 
   async fetch() {
     this.debouncedRefreshCharts = debounce((init = false) => {
@@ -121,6 +123,12 @@ export default {
       repoNamespace:                KUBEWARDEN_NAMESPACE,
       secretCreateHook:             null,
       duplicatedImagePullSecretKey: null,
+      username:                     '',
+      password:                     '',
+      caBundle:                     '',
+      registryUrl:                  KUBEWARDEN_OCI_REGISTRY,
+      insecurePlainHttp:            false,
+      insecureSkipTLSVerify:        false,
     };
   },
 
@@ -135,12 +143,19 @@ export default {
   },
 
   watch: {
+    isAirgap: {
+      immediate: true,
+      handler(value) {
+        this.registryUrl = value ? '' : KUBEWARDEN_OCI_REGISTRY;
+      },
+    },
+
     controllerChart() {
       this.installSteps[0].ready = true;
       this.installSteps[1].ready = true;
 
       this.$refs.wizard?.goToStep(3);
-    }
+    },
   },
 
   computed: {
@@ -183,7 +198,13 @@ export default {
 
     appcoNamespaceValue() {
       return { metadata: { namespace: this.appcoNamespace } };
-    }
+    },
+
+    isContinueDisabled() {
+      return (!this.isAirgap && !this.appcoAuthSecret && (!this.username || !this.password)) ||
+        (this.isAirgap && (!this.registryUrl || (!this.caBundle && !this.insecureSkipTLSVerify && !this.insecurePlainHttp) && !this.appcoAuthSecret && (!this.username || !this.password)));
+    },
+
   },
 
   methods: {
@@ -245,14 +266,11 @@ export default {
       const username = decodeBase64(secret?.data?.username) || secret?.stringData?.username || '';
       const password = decodeBase64(secret?.data?.password) || secret?.stringData?.password || '';
 
-      const registryUrl = KUBEWARDEN_OCI_REGISTRY;
-      const registryHost = registryUrl ? (() => {
-        try {
-          return new URL(registryUrl).host;
-        } catch {
-          return registryUrl;
-        }
-      })() : '';
+      const registryHost = this.registryUrl
+        ? (() => { try { return this.isAirgap
+          ? ( this.insecurePlainHttp ? `http://${ new URL(this.registryUrl).host }` : `https://${ new URL(this.registryUrl).host }` )
+          : new URL(this.registryUrl).host;
+        } catch { return this.registryUrl; } })() : '';
 
       const config = {
         auths: {
@@ -438,6 +456,11 @@ export default {
       return this.getAuthSecretRef(secret);
     },
 
+    onAuthInputChange({ publicKey, privateKey } = {}) {
+      this.username = publicKey || '';
+      this.password = privateKey || '';
+    },
+
     async addRepository(btnCb) {
       try {
         const targetNamespace = this.resolveNamespace(this.appcoNamespace);
@@ -452,11 +475,11 @@ export default {
           type:     CATALOG.CLUSTER_REPO,
           metadata: { name: KUBEWARDEN_REPOS.CHARTS_REPO_NAME },
           spec:     {
-            url:                   KUBEWARDEN_REPOS.SUSE_SECURITY_ADMISSION_CONTROLLER,
+            url:                   `${ this.registryUrl }${KUBEWARDEN_REPOS.SUSE_SECURITY_ADMISSION_CONTROLLER}`,
             clientSecret:          authSecretRef,
-            caBundle:              this.appcoCaBundle || undefined,
-            insecurePlainHttp:     this.appcoInsecurePlainHttp,
-            insecureSkipTLSVerify: this.appcoInsecureSkipTLSVerify,
+            caBundle:              this.caBundle || undefined,
+            insecurePlainHttp:     this.insecurePlainHttp,
+            insecureSkipTLSVerify: this.insecureSkipTLSVerify,
           },
         });
 
@@ -548,7 +571,7 @@ export default {
     },
 
     onFileSelected(value) {
-      this.appcoCaBundle = value;
+      this.caBundle = value;
     },
   }
 };
@@ -576,136 +599,137 @@ export default {
     </div>
 
     <template v-else>
-      <!-- Air-Gapped -->
-      <template v-if="isAirgap">
-        <Banner
-          class="mb-20 mt-20"
-          color="warning"
-        >
-          <span data-testid="kw-install-ag-warning">{{ t('kubewarden.dashboard.prerequisites.airGapped.warning') }}</span>
-        </Banner>
-        <Markdown v-model:value="docs.airgap" />
-      </template>
+      <InstallWizard ref="wizard" style="width: 100%;" :init-step-index="initStepIndex" :steps="installSteps" data-testid="kw-install-wizard">
+        <template #globalRepoAuth>
+          <h2 class="mt-20 mb-10" data-testid="kw-repo-auth-title">
+            {{ t('kubewarden.dashboard.appInstall.auth.title') }}
+          </h2>
+          <p class="mb-20">
+            {{ t('kubewarden.dashboard.appInstall.auth.description') }}
+          </p>
+          <template v-if="isAirgap">
+            <Banner
+              class="mb-20 mt-20"
+              color="warning"
+            >
+              <span data-testid="kw-install-ag-warning">{{ t('kubewarden.dashboard.appInstall.airGapped.warning') }}</span>
+            </Banner>
+            <Markdown v-model:value="docs.airgap" />
 
-      <!-- Non Air-Gapped -->
-      <template v-else>
-        <InstallWizard ref="wizard" style="width: 100%;" :init-step-index="initStepIndex" :steps="installSteps" data-testid="kw-install-wizard">
-          <template #globalRepoAuth>
-            <h2 class="mt-20 mb-10" data-testid="kw-repo-auth-title">
-              {{ t('kubewarden.dashboard.appInstall.auth.title') }}
-            </h2>
-            <p class="mb-20">
-              {{ t('kubewarden.dashboard.appInstall.auth.description') }}
-            </p>
-            <SelectOrCreateAuthSecret
-              class="mt-16 create-secret-banner"
-              v-model:value="appcoAuthSecret"
-              :mode="'create'"
-              data-testid="kw-appco-auth-secret"
-              :register-before-hook="registerBeforeHook"
-              :namespace="'cattle-system'"
-              :pre-select="{ selected: imagePullSecretAuthType }"
-              :limit-to-namespace="false"
-              :in-store="'cluster'"
-              :allow-ssh="false"
-              :allow-none="false"
-              :allow-basic="true"
-              :generate-name="'appco-auth-'"
-              :cache-secrets="true"
-              :fixed-http-basic-auth="true"
-              :filter-basic-auth="'appco-auth-'"
-              @inputauthval="() => {}"
-            />
-
-            <!-- <div class="ca-bundle-section mt-16">
+            <div class="ca-bundle-section mt-16">
               <LabeledInput
-                  v-model:value="appcoCaBundle"
-                  type="multiline"
-                  :label="t('kubewarden.dashboard.appInstall.auth.caBundle.label')"
-                  style="max-height: 110px; overflow-y: auto;"
-                  :placeholder="t('kubewarden.dashboard.appInstall.auth.caBundle.placeholder')"
+                class="mb-16"
+                v-model:value="registryUrl"
+                :label="t('kubewarden.dashboard.appInstall.auth.registryBaseUrl')"
+                placeholder="oci://<private-registry-home>/charts"
+              />
+              <LabeledInput
+                v-model:value="caBundle"
+                type="multiline"
+                :label="t('kubewarden.dashboard.appInstall.auth.caBundle.label')"
+                style="max-height: 110px; overflow-y: auto;"
+                :placeholder="t('kubewarden.dashboard.appInstall.auth.caBundle.placeholder')"
               />
               <div class="mt-16">
                 <FileSelector class="btn btn-sm role-tertiary" :label="t('generic.readFromFile')" @selected="onFileSelected" />
               </div>
-            </div> -->
+            </div>
 
-            <!-- <div class="row create-secret-banner mb-16 mt-20">
+            <div class="row create-secret-banner mb-16 mt-20">
               <Checkbox
-                v-model:value="appcoInsecurePlainHttp"
+                v-model:value="insecurePlainHttp"
                 data-testid="kw-appco-insecure-plain-http"
                 label-key="kubewarden.dashboard.appInstall.auth.insecurePlainHttp"
               />
               <Checkbox
-                v-model:value="appcoInsecureSkipTLSVerify"
+                v-model:value="insecureSkipTLSVerify"
                 data-testid="kw-appco-insecure-skip-tls"
                 label-key="kubewarden.dashboard.appInstall.auth.insecureSkipTLSVerify"
               />
-            </div> -->
-
-            <div class="namespaces-section mt-20 mb-20">
-              <NameNsDescription
-                :value="appcoNamespaceValue"
-                :mode="'create'"
-                data-testid="kw-appco-namespace"
-                :name-hidden="true"
-                :description-hidden="true"
-                @update:value="appcoNamespace = $event?.metadata?.namespace || appcoNamespace"
-              />
             </div>
-
-            <button class="btn role-primary mt-20" data-testid="kw-appco-auth-continue" @click="continueWithGlobalRepoAuth">
-              {{ t('kubewarden.dashboard.appInstall.auth.continue') }}
-            </button>
           </template>
+          <SelectOrCreateAuthSecret
+            class="mt-16 create-secret-banner"
+            v-model:value="appcoAuthSecret"
+            :mode="'create'"
+            data-testid="kw-appco-auth-secret"
+            :register-before-hook="registerBeforeHook"
+            :namespace="'cattle-system'"
+            :pre-select="{ selected: imagePullSecretAuthType }"
+            :limit-to-namespace="false"
+            :in-store="'cluster'"
+            :allow-ssh="false"
+            :allow-none="false"
+            :allow-basic="true"
+            :generate-name="'appco-auth-'"
+            :cache-secrets="true"
+            :fixed-http-basic-auth="true"
+            :filter-basic-auth="'appco-auth-'"
+            @inputauthval="onAuthInputChange"
+          />
 
-          <template #repository>
-            <h2 class="mt-20 mb-10" data-testid="kw-repo-title">
-              {{ t('kubewarden.dashboard.appInstall.repository.title') }}
-            </h2>
-            <p class="mb-20">
-              {{ t('kubewarden.dashboard.appInstall.repository.description') }}
-            </p>
+          <div class="namespaces-section mt-20 mb-20">
+            <NameNsDescription
+              :value="appcoNamespaceValue"
+              :mode="'create'"
+              data-testid="kw-appco-namespace"
+              :name-hidden="true"
+              :description-hidden="true"
+              @update:value="appcoNamespace = $event?.metadata?.namespace || appcoNamespace"
+            />
+          </div>
 
-            <AsyncButton mode="kubewardenRepository" data-testid="kw-repo-add-button" @click="addRepository" />
-          </template>
+          <button :disabled="isContinueDisabled" class="btn role-primary mt-20" data-testid="kw-appco-auth-continue" @click="continueWithGlobalRepoAuth">
+            {{ t('kubewarden.dashboard.appInstall.auth.continue') }}
+          </button>
+        </template>
 
-          <template #install>
-            <h2 class="mt-20 mb-10" data-testid="kw-app-install-title">
-              {{ t("kubewarden.dashboard.appInstall.title") }}
-            </h2>
-            <p class="mb-20">
-              {{ t("kubewarden.dashboard.appInstall.description") }}
-            </p>
+        <template #repository>
+          <h2 class="mt-20 mb-10" data-testid="kw-repo-title">
+            {{ t('kubewarden.dashboard.appInstall.repository.title') }}
+          </h2>
+          <p class="mb-20">
+            {{ t('kubewarden.dashboard.appInstall.repository.description') }}
+          </p>
 
-            <div class="chart-route">
-              <Loading v-if="!controllerChart && !reloadReady" mode="relative" class="mt-20" />
+          <AsyncButton mode="kubewardenRepository" data-testid="kw-repo-add-button" @click="addRepository" />
+        </template>
 
-              <template v-else-if="!controllerChart && reloadReady">
-                <Banner color="warning">
-                  <span class="mb-20">
-                    {{ t('kubewarden.dashboard.appInstall.reload' ) }}
-                  </span>
-                  <button data-testid="kw-app-install-reload" class="ml-10 btn btn-sm role-primary" @click="reload()">
-                    {{ t('generic.reload') }}
-                  </button>
-                </Banner>
-              </template>
+        <template #install>
+          <h2 class="mt-20 mb-10" data-testid="kw-app-install-title">
+            {{ t("kubewarden.dashboard.appInstall.title") }}
+          </h2>
+          <p class="mb-20">
+            {{ t("kubewarden.dashboard.appInstall.description") }}
+          </p>
 
-              <template v-else>
-                <button
-                  data-testid="kw-app-install-button"
-                  class="btn role-primary mt-20"
-                  :disabled="!controllerChart"
-                  @click.prevent="chartRoute"
-                >
-                  {{ t("kubewarden.dashboard.appInstall.button") }}
+          <div class="chart-route">
+            <Loading v-if="!controllerChart && !reloadReady" mode="relative" class="mt-20" />
+
+            <template v-else-if="!controllerChart && reloadReady">
+              <Banner color="warning">
+                <span class="mb-20">
+                  {{ t('kubewarden.dashboard.appInstall.reload' ) }}
+                </span>
+                <button data-testid="kw-app-install-reload" class="ml-10 btn btn-sm role-primary" @click="reload()">
+                  {{ t('generic.reload') }}
                 </button>
-              </template>
-            </div>
-          </template>
-        </InstallWizard>
-      </template>
+              </Banner>
+            </template>
+
+            <template v-else>
+              <button
+                data-testid="kw-app-install-button"
+                class="btn role-primary mt-20"
+                :disabled="!controllerChart"
+                @click.prevent="chartRoute"
+              >
+                {{ t("kubewarden.dashboard.appInstall.button") }}
+              </button>
+            </template>
+          </div>
+        </template>
+      </InstallWizard>
     </template>
   </div>
 </template>

@@ -23,7 +23,7 @@ export const KUBEWARDEN_REPOS = {
   CHARTS_REPO_GIT:                    'https://github.com/kubewarden/helm-charts.git',
   CHARTS_REPO_OCI:                    'oci://dp.apps.rancher.io/charts/suse-security-admission-controller',
   CHARTS_REPO_NAME:                   'admission-controller-charts',
-  SUSE_SECURITY_ADMISSION_CONTROLLER: 'oci://dp.apps.rancher.io/charts/suse-security-admission-controller',
+  SUSE_SECURITY_ADMISSION_CONTROLLER: '/suse-security-admission-controller',
   POLICY_CATALOG:                     'https://kubewarden.github.io/policy-catalog',
   POLICY_CATALOG_REPO:                'https://github.com/kubewarden/policy-catalog',
   POLICY_CATALOG_REPO_GIT:            'https://github.com/kubewarden/policy-catalog.git',
