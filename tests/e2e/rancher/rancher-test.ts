@@ -43,10 +43,12 @@ export const expect = baseExpect.extend({
     let pass: boolean
     const expected = options?.enabled === true ? 'enabled' : 'disabled'
     let matcherResult: any
+    // Skip info tooltip icons, they stay enabled on read-only forms
+    const controls = locator.locator('input, button:not(.rc-icon-tooltip)')
     try {
-      await locator.locator('input,button').first().waitFor({ state: 'attached' })
+      await controls.first().waitFor({ state: 'attached' })
       await test.step(assertionName, async() => {
-        for (const e of await locator.locator('input,button').all()) {
+        for (const e of await controls.all()) {
           await baseExpect(e).toBeEnabled(options)
         }
       })
