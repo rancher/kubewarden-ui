@@ -4,6 +4,11 @@ import { KUBEWARDEN } from '@kubewarden/types';
 import { VALUES_STATE } from '@kubewarden/types';
 import Create from '@kubewarden/components/Policies/Create.vue';
 
+jest.mock('@shell/components/SortableTable', () => ({
+  __esModule: true,
+  default:    { name: 'SortableTable' }
+}));
+
 // A minimal VersionInfo-like object whose parsePolicyModule() returns known values
 const mockVersionInfo = {
   chart:  {

@@ -203,7 +203,7 @@ test.describe('Metrics', () => {
     })
   })
 
-  test('Check metrics are visible', async({ ui, page, nav }) => {
+  test('Check metrics are visible', async({ ui, nav }) => {
     const metrics = [
       /Request accepted with no mutation percentage/,
       /Request rejection percentage/,
@@ -216,7 +216,7 @@ test.describe('Metrics', () => {
 
     const checkMetrics = async() => {
       // Grafana renders panels lazily, jump to the end to ensure all panels are rendered
-      const frame = page.frameLocator('section#policy-metrics:visible iframe')
+      const frame = telPage.metricsTab.locator('iframe').contentFrame()
       await frame.owner().evaluate(el => el.scrollIntoView({ block: 'end', behavior: 'instant' }))
 
       for (const metric of metrics) {

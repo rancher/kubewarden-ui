@@ -9,6 +9,11 @@ import {
   getLinkForPolicy
 } from '@kubewarden/modules/policyReporter';
 
+jest.mock('@shell/components/SortableTable', () => ({
+  __esModule: true,
+  default:    { name: 'SortableTable' }
+}));
+
 jest.mock('@kubewarden/modules/policyReporter', () => ({
   getFilteredReport: jest.fn(),
   getLinkForPolicy:  jest.fn(),
