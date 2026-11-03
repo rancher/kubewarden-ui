@@ -47,8 +47,8 @@ export class TelemetryPage extends BasePage {
 
   constructor(page: Page) {
     super(page)
-    this.tracingTab = page.locator('section#policy-tracing:visible')
-    this.metricsTab = page.locator('section#policy-metrics:visible')
+    this.tracingTab = page.getByTestId('tab-panel-policy-tracing').visible()
+    this.metricsTab = page.getByTestId('tab-panel-policy-metrics').visible()
 
     this.lines = {
       otel          : getLine(page, /^The OpenTelemetry Operator/),
