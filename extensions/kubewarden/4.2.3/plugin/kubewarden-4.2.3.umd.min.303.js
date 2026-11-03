@@ -1,0 +1,2 @@
+"use strict";(("undefined"!==typeof self?self:this)["webpackChunkkubewarden_4_2_3"]=("undefined"!==typeof self?self:this)["webpackChunkkubewarden_4_2_3"]||[]).push([[303],{66303:function(e,n,t){t.r(n),t.d(n,{default:function(){return f}});var r=t(9274);function o(e,n,t,o,u,s){const c=(0,r.resolveComponent)("ResourceDetail");return(0,r.openBlock)(),(0,r.createBlock)(c)}var u=t(57710),s={name:"ClusterResourcedId",components:{ResourceDetail:u.A}},c=t(47433);const a=(0,c.A)(s,[["render",o]]);var f=a}}]);
+//# sourceMappingURL=kubewarden-4.2.3.umd.min.303.js.map
