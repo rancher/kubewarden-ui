@@ -72,7 +72,7 @@ export class Shell {
       await Promise.any(
         names.map(name => expect(this.page).toHaveScreenshot(name, options))
       )
-    } catch (e) {
+    } catch(e) {
       throw (e as AggregateError).errors[0]
     }
   }
@@ -162,7 +162,7 @@ export class Shell {
     let cmdOutput: string
     try {
       cmdOutput = execSync(cmd, { timeout }).toString()
-    } catch (e: any) {
+    } catch(e: any) {
       cmdStatus = e.status
       cmdOutput = e.stderr.toString()
     }
