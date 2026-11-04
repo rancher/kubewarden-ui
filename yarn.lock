@@ -2892,16 +2892,17 @@
     estraverse "^5.3.0"
     picomatch "^4.0.2"
 
-"@stylistic/eslint-plugin@^4.2.0":
-  version "4.4.1"
-  resolved "https://registry.yarnpkg.com/@stylistic/eslint-plugin/-/eslint-plugin-4.4.1.tgz#410ac332887fb3d61cad1df4e6b55ae35d87c632"
-  integrity sha512-CEigAk7eOLyHvdgmpZsKFwtiqS2wFwI1fn4j09IU9GmD4euFM4jEBAViWeCqaNLlbX2k2+A/Fq9cje4HQBXuJQ==
+"@stylistic/eslint-plugin@^5.10.0":
+  version "5.10.0"
+  resolved "https://registry.yarnpkg.com/@stylistic/eslint-plugin/-/eslint-plugin-5.10.0.tgz#471bbd9f7a27ceaac4a217e7f5b3890855e5640c"
+  integrity sha512-nPK52ZHvot8Ju/0A4ucSX1dcPV2/1clx0kLcH5wDmrE4naKso7TUC/voUyU1O9OTKTrR6MYip6LP0ogEMQ9jPQ==
   dependencies:
-    "@typescript-eslint/utils" "^8.32.1"
-    eslint-visitor-keys "^4.2.0"
-    espree "^10.3.0"
+    "@eslint-community/eslint-utils" "^4.9.1"
+    "@typescript-eslint/types" "^8.56.0"
+    eslint-visitor-keys "^4.2.1"
+    espree "^10.4.0"
     estraverse "^5.3.0"
-    picomatch "^4.0.2"
+    picomatch "^4.0.3"
 
 "@tootallnate/once@2":
   version "2.0.1"
@@ -3467,7 +3468,7 @@
   resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-8.70.0.tgz#9ee52888cdeca604fe9436935219b967fa7f6053"
   integrity sha512-asTOIYhDg4zdzOScCyaytrsV3cR6B4ecPQlXw/dJIm7J/MZTtCtfVII9JD8Geh4jTCrK/Xe6cg5UevoleMcoJQ==
 
-"@typescript-eslint/types@8.72.1", "@typescript-eslint/types@^8.62.0", "@typescript-eslint/types@^8.70.0", "@typescript-eslint/types@^8.72.1":
+"@typescript-eslint/types@8.72.1", "@typescript-eslint/types@^8.56.0", "@typescript-eslint/types@^8.62.0", "@typescript-eslint/types@^8.70.0", "@typescript-eslint/types@^8.72.1":
   version "8.72.1"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-8.72.1.tgz#067d8f738c294611e33a1425ae43ac9b9c2f24e3"
   integrity sha512-LmE5IhQet1BWOWEXqBrVtBPsMAOQ6Nzk35d+WLh3mk4EUF33sqlfxjio1MdYeSvKSG5skactKKuixBIKXhL4Rw==
@@ -3527,7 +3528,7 @@
     "@typescript-eslint/types" "8.62.0"
     "@typescript-eslint/typescript-estree" "8.62.0"
 
-"@typescript-eslint/utils@8.72.1", "@typescript-eslint/utils@^8.0.0", "@typescript-eslint/utils@^8.13.0", "@typescript-eslint/utils@^8.32.1", "@typescript-eslint/utils@^8.60.0":
+"@typescript-eslint/utils@8.72.1", "@typescript-eslint/utils@^8.0.0", "@typescript-eslint/utils@^8.13.0", "@typescript-eslint/utils@^8.60.0":
   version "8.72.1"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/utils/-/utils-8.72.1.tgz#f210c1bf4a25aa1306df80c702ed30bbbc9b4d3d"
   integrity sha512-5v5liypurJBFHCBNqh/RjsymAD+VWcE0djuGY/BUqp5fC3Qn+luWDEksjuTtWjPn6i5zQlUtkZCRG/CYG0yCkA==
@@ -10597,7 +10598,7 @@ picomatch@^2.0.4, picomatch@^2.2.1, picomatch@^2.2.3, picomatch@^2.3.1:
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.2.tgz#5a942915e26b372dc0f0e6753149a16e6b1c5601"
   integrity sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA==
 
-picomatch@^4.0.0, picomatch@^4.0.2, picomatch@^4.0.4:
+picomatch@^4.0.0, picomatch@^4.0.2, picomatch@^4.0.3, picomatch@^4.0.4:
   version "4.0.7"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.7.tgz#6313360034ccb36b3dc61ecbdff78121f90fe21f"
   integrity sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==

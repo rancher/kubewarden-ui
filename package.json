@@ -21,7 +21,7 @@
     "@rancher/shell": "^3.0.14"
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin": "^4.2.0",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.16",
     "@vue/eslint-config-prettier": "^10.2.0",
