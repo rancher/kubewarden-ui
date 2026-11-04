@@ -88,16 +88,15 @@ export default {
 
     <div class="spacer"></div>
 
-    <template>
-      <div class="row mb-20">
-        <div class="col span-12">
-          <SourceAuthorities
-            ref="sourceAuthorities"
-            v-model:value="sourceAuthorities"
-            :mode="mode"
-          />
-        </div>
+    <div class="row mb-20">
+      <div class="col span-12">
+        <SourceAuthorities
+          ref="sourceAuthorities"
+          v-model:value="sourceAuthorities"
+          :mode="mode"
+          @update="update('sourceAuthorities')"
+        />
       </div>
-    </template>
+    </div>
   </div>
 </template>

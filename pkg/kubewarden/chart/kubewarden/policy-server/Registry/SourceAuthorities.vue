@@ -57,7 +57,7 @@ export default {
       if (!isEmpty(this.value)) {
         const key = Object.keys(this.value)[index];
 
-        this.$delete(this.value, [key]);
+        delete this.value[key];
       }
     },
 

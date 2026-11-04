@@ -138,24 +138,22 @@ export default {
   <div v-else>
     <template v-if="policyGauges">
       <div class="row">
-        <template>
-          <div class="col span-6">
-            <h3 data-testid="kw-ps-detail-status-title">
-              {{ t('kubewarden.policyServer.policyGauge.byStatus') }}
-            </h3>
-            <div class="gauges mb-20">
-              <CountGauge
-                v-for="(group, key) in policyGauges"
-                :key="key"
-                :total="relatedPoliciesTotal"
-                :useful="group.count || 0"
-                :graphical="false"
-                :primary-color-var="`--sizzle-${group.color}`"
-                :name="key"
-              />
-            </div>
+        <div class="col span-6">
+          <h3 data-testid="kw-ps-detail-status-title">
+            {{ t('kubewarden.policyServer.policyGauge.byStatus') }}
+          </h3>
+          <div class="gauges mb-20">
+            <CountGauge
+              v-for="(group, key) in policyGauges"
+              :key="key"
+              :total="relatedPoliciesTotal"
+              :useful="group.count || 0"
+              :graphical="false"
+              :primary-color-var="`--sizzle-${group.color}`"
+              :name="key"
+            />
           </div>
-        </template>
+        </div>
         <template v-if="!emptyTraces">
           <div class="col span-6">
             <h3>

@@ -77,54 +77,52 @@ export default {
         required
       />
 
-      <template>
-        <template v-for="(cert, cIndex) in chartValues.certs" :key="cIndex">
-          <div class="sources__container__cert">
-            <LabeledInput
-              ref="authorityCert"
-              v-model:value="chartValues.certs[cIndex]"
-              :data-testid="`ps-config-authority-cert-input-${ cIndex }`"
-              type="multiline"
-              :label="t('kubewarden.policyServerConfig.sourceAuthorities.certificate.label')"
-              class="p-10 col span-6"
-              :mode="mode"
+      <template v-for="(cert, cIndex) in chartValues.certs" :key="cIndex">
+        <div class="sources__container__cert">
+          <LabeledInput
+            ref="authorityCert"
+            v-model:value="chartValues.certs[cIndex]"
+            :data-testid="`ps-config-authority-cert-input-${ cIndex }`"
+            type="multiline"
+            :label="t('kubewarden.policyServerConfig.sourceAuthorities.certificate.label')"
+            class="p-10 col span-6"
+            :mode="mode"
+            :disabled="isView"
+            required
+            :placeholder="t('secret.certificate.certificatePlaceholder')"
+          />
+
+          <div class="remove">
+            <button
+              :data-testid="`ps-config-authority-cert-remove-button-${ cIndex }`"
+              type="button"
               :disabled="isView"
-              required
-              :placeholder="t('secret.certificate.certificatePlaceholder')"
-            />
-
-            <div class="remove">
-              <button
-                :data-testid="`ps-config-authority-cert-remove-button-${ cIndex }`"
-                type="button"
-                :disabled="isView"
-                class="btn role-link remove"
-                @click="removeCert(cIndex)"
-              >
-                {{ t('kubewarden.policyServerConfig.sourceAuthorities.certificate.remove') }}
-              </button>
-            </div>
+              class="btn role-link remove"
+              @click="removeCert(cIndex)"
+            >
+              {{ t('kubewarden.policyServerConfig.sourceAuthorities.certificate.remove') }}
+            </button>
           </div>
-        </template>
-
-        <button
-          data-testid="ps-config-authority-cert-add-button"
-          type="button"
-          class="btn role-tertiary add"
-          :disabled="isView"
-          @click="addCertificate()"
-        >
-          {{ t('kubewarden.policyServerConfig.sourceAuthorities.certificate.add') }}
-        </button>
-
-        <FileSelector
-          data-testid="ps-config-authority-select-file"
-          class="btn role-link"
-          :label="t('kubewarden.policyServerConfig.sourceAuthorities.certificate.file')"
-          :disabled="isView"
-          @selected="handleSelectFile($event)"
-        />
+        </div>
       </template>
+
+      <button
+        data-testid="ps-config-authority-cert-add-button"
+        type="button"
+        class="btn role-tertiary add"
+        :disabled="isView"
+        @click="addCertificate()"
+      >
+        {{ t('kubewarden.policyServerConfig.sourceAuthorities.certificate.add') }}
+      </button>
+
+      <FileSelector
+        data-testid="ps-config-authority-select-file"
+        variant="link"
+        :label="t('kubewarden.policyServerConfig.sourceAuthorities.certificate.file')"
+        :disabled="isView"
+        @selected="handleSelectFile($event)"
+      />
     </div>
 
     <slot name="remove"></slot>
