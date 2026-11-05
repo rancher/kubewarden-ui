@@ -61,7 +61,7 @@ const removeRowClickListener = () => {
   listeners.value = [];
 };
 
-watch(() => sortableTable.value?.$props.rows, () => {
+watch(() => sortableTable.value?.pagedRows, () => {
   addRowClickListener();
 });
 
