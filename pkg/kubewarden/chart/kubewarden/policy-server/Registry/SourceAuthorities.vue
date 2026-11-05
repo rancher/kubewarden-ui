@@ -1,8 +1,10 @@
 <script>
 import { _VIEW } from '@shell/config/query-params';
-import { isEmpty } from '@shell/utils/object';
 
 import Authority from './Authority';
+
+// Stable row ids, so v-for does not reuse Authority components by index
+let rowId = 0;
 
 export default {
   props: {
@@ -26,6 +28,7 @@ export default {
     if (this.value) {
       for (const [key, value] of Object.entries(this.value)) {
         this.rows.push({
+          id:           rowId++,
           registryName: key,
           certs:        value
         });
@@ -48,32 +51,27 @@ export default {
   methods: {
     addRegistry() {
       this.rows.push({
+        id:           rowId++,
         registryName: '',
         certs:        []
       });
     },
 
-    deleteAuthority(index) {
-      if (!isEmpty(this.value)) {
-        const key = Object.keys(this.value)[index];
-
-        delete this.value[key];
-      }
-    },
-
     removeRegistry(index) {
       this.rows.splice(index, 1);
-      this.deleteAuthority(index);
+      this.syncValue();
     },
 
-    updateAuthority(event, index) {
-      const { registryName, certs } = event;
+    // Rebuild value from rows in place, the parent keeps a reference to this object
+    syncValue() {
+      Object.keys(this.value).forEach((key) => delete this.value[key]);
 
-      if (!isEmpty(this.value)) {
-        this.deleteAuthority(index);
-      }
+      this.rows.forEach(({ registryName, certs }) => {
+        if (registryName) {
+          this.value[registryName] = certs || [];
+        }
+      });
 
-      this.value[registryName] = certs || [];
       this.$emit('update', this.value);
     }
   },
@@ -86,8 +84,8 @@ export default {
       <h3 data-testid="ps-config-source-authorities-title">
         {{ t('kubewarden.policyServerConfig.sourceAuthorities.title') }}
       </h3>
-      <template v-for="(row, index) in rows" :key="index">
-        <Authority ref="authority" v-model:value="rows[index]" :mode="mode" @update="updateAuthority($event, index)">
+      <template v-for="(row, index) in rows" :key="row.id">
+        <Authority ref="authority" v-model:value="rows[index]" :mode="mode" @update="syncValue">
           <template #remove>
             <button
               :data-testid="`ps-config-authority-remove-button-${ index }`"
