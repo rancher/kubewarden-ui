@@ -21,8 +21,8 @@ type ENavSubMap = {
   }
 }
 // Returns valid sub-items for a given group and child
-type ENavChild<T extends ENav, C extends ENavMap[T]> =
-  T extends keyof ENavSubMap
+type ENavChild<T extends ENav, C extends ENavMap[T]>
+  = T extends keyof ENavSubMap
     ? C extends keyof ENavSubMap[T]
       ? ENavSubMap[T][C]
       : never

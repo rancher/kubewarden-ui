@@ -53,7 +53,7 @@ export const expect = baseExpect.extend({
         }
       })
       pass = true
-    } catch (e: any) {
+    } catch(e: any) {
       matcherResult = e.matcherResult
       pass = false
     }
