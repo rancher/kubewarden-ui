@@ -38,10 +38,9 @@ const addRowClickListener = () => {
 
       table.querySelectorAll('tbody tr').forEach((row, index) => {
         const listener = () => {
-          const rowsProp = (sortableTable.value?.$props as Props).rows || [];
-          const indexFrom = sortableTable.value?.indexFrom || 1;
+          const pagedRows = sortableTable.value?.pagedRows || [];
 
-          emit('selectRow', rowsProp[indexFrom - 1 + index]);
+          emit('selectRow', pagedRows[index]);
         };
 
         row.addEventListener('click', listener);
