@@ -626,7 +626,7 @@ export default {
                   :placeholder="t('kubewarden.dashboard.appInstall.auth.caBundle.placeholder')"
               />
               <div class="mt-16">
-                <FileSelector class="btn btn-sm role-tertiary" :label="t('generic.readFromFile')" @selected="onFileSelected" />
+                <FileSelector variant="tertiary" size="small" :label="t('generic.readFromFile')" @selected="onFileSelected" />
               </div>
             </div> -->
 
