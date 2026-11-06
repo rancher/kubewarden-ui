@@ -249,3 +249,15 @@ test('Match Conditions', async({ page, shell }) => {
   await shell.run(`kubectl delete ns ${matchns}`)
   await polPage.delete(pol.name)
 })
+
+// Open policy from second page to check pagination
+test('Pagination', async({ page, ui, nav }) => {
+  const pol: Policy = { name: 'uss-policy', title: 'Unique service selector' }
+
+  await nav.capolicies()
+  await ui.button('Create').click()
+
+  await page.getByTestId('pagination-next').click()
+  await ui.tableRow(pol.title).row.click()
+  await expect(page.getByTestId('kw-policy-create-wizard').getByRole('heading', { name: pol.title })).toBeVisible()
+})
