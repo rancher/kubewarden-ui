@@ -87,8 +87,19 @@ export default {
     },
 
     controllerDeployments() {
+      // Fleet and community installs use the Helm release name as instance label,
+      // rather than the Rancher/SUSE default release name.
+      const releaseNames = [
+        KUBEWARDEN_APPS.RANCHER_CONTROLLER,
+        KUBEWARDEN_CHARTS.CONTROLLER,
+        KUBEWARDEN_CHARTS.DEPRECATED_CONTROLLER,
+        this.controllerApp?.metadata?.name,
+        this.controllerApp?.spec?.name
+      ].filter(Boolean);
+
       return this.allDeployments?.filter((deploy) => (
-        deploy?.metadata?.labels?.[KUBERNETES.INSTANCE] === KUBEWARDEN_APPS.RANCHER_CONTROLLER
+        deploy?.metadata?.namespace === this.controllerNamespace &&
+        releaseNames.includes(deploy?.metadata?.labels?.[KUBERNETES.INSTANCE])
       ));
     },
 
@@ -123,22 +134,28 @@ export default {
 
     controllerApp() {
       const storedApp = this.$store.getters['kubewarden/controllerApp'];
+      const supportedCharts = [
+        KUBEWARDEN_CHARTS.CONTROLLER,
+        KUBEWARDEN_CHARTS.DEPRECATED_CONTROLLER
+      ];
 
-      if (!storedApp) {
-        const controller = this.allApps?.find((a) => (
-          a?.spec?.chart?.metadata?.name === (KUBEWARDEN_CHARTS.CONTROLLER || KUBEWARDEN_APPS.RANCHER_CONTROLLER)
-        ));
+      // The old `(CONTROLLER || RANCHER_CONTROLLER)` expression always used
+      // CONTROLLER. It never matched the community `admission-controller` chart.
+      const controller = this.allApps?.find((app) =>
+        supportedCharts.includes(app?.spec?.chart?.metadata?.name)
+      );
 
-        if (controller) {
+      if (controller) {
+        if (controller.id !== storedApp?.id) {
           this.$store.dispatch('kubewarden/updateControllerApp', controller);
-
-          return controller;
         }
 
-        return null;
+        return controller;
       }
 
-      return storedApp;
+      // Keep compatibility with existing installations where the controller
+      // has already been discovered and cached by another Kubewarden screen.
+      return storedApp || null;
     },
 
     controllerNamespace() {
@@ -162,7 +179,10 @@ export default {
         return false;
       }
 
-      return semver.satisfies(this.controllerVersion, '>=1.7.0 || >=1.7.0-rc*', { includePrerelease: true });
+      // Helm appVersion commonly has a leading `v` (e.g. `v1.38.2`).
+      const version = this.controllerVersion.replace(/^v/, '');
+
+      return Boolean(semver.valid(version)) && semver.satisfies(version, '>=1.7.0 || >=1.7.0-rc*', { includePrerelease: true });
     }
   },
 
@@ -176,13 +196,22 @@ export default {
               {
                 var:         'reporterReportingService',
                 parsingFunc: (data) => {
-                  return data.find((service) => service?.metadata?.labels?.['app.kubernetes.io/component'] === 'reporting');
+                  return data.find((service) => (
+                    service?.metadata?.namespace === this.controllerNamespace &&
+                    (service?.metadata?.labels?.['app.kubernetes.io/component'] === 'reporting' ||
+                      service?.metadata?.labels?.['app.kubernetes.io/name'] === 'policy-reporter' ||
+                      service?.metadata?.name === 'policy-reporter')
+                  ));
                 }
               },
               {
                 var:         'reporterUIService',
                 parsingFunc: (data) => {
-                  return data.find((service) => ['policy-reporter-ui', 'ui'].includes(service?.metadata?.labels?.['app.kubernetes.io/name']));
+                  return data.find((service) => (
+                    service?.metadata?.namespace === this.controllerNamespace &&
+                    (['policy-reporter-ui', 'ui'].includes(service?.metadata?.labels?.['app.kubernetes.io/name']) ||
+                      service?.metadata?.name === 'policy-reporter-ui')
+                  ));
                 }
               }
             ]
