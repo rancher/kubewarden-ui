@@ -13,6 +13,28 @@ entries:
       catalog.cattle.io/ui-component: plugins
       catalog.cattle.io/ui-extensions-version: '>= 3.0.0 < 4.0.0'
     apiVersion: v2
+    appVersion: 4.2.4
+    created: "2026-11-10T13:35:59.774989349Z"
+    description: SUSE Security Admission Controller extension for Rancher Manager
+    digest: 5d43e270dd5e9a855c3ccac1a383463fb6d899a34ceefc9942a0afaf5fbfcdd9
+    icon: https://raw.githubusercontent.com/rancher/kubewarden-ui/main/pkg/kubewarden/assets/icon-kubewarden.svg
+    name: kubewarden
+    type: application
+    urls:
+    - assets/kubewarden/kubewarden-4.2.4.tgz
+    version: 4.2.4
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: SUSE Security Admission Controller
+      catalog.cattle.io/kube-version: '>= v1.16.0-0'
+      catalog.cattle.io/namespace: cattle-ui-plugin-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/permits-os: linux, windows
+      catalog.cattle.io/rancher-version: '>= 2.11.0-0'
+      catalog.cattle.io/scope: management
+      catalog.cattle.io/ui-component: plugins
+      catalog.cattle.io/ui-extensions-version: '>= 3.0.0 < 4.0.0'
+    apiVersion: v2
     appVersion: 4.2.3
     created: "2026-11-03T10:34:51.300183672Z"
     description: SUSE Security Admission Controller extension for Rancher Manager
@@ -2764,4 +2786,4 @@ entries:
     urls:
     - assets/kubewarden/kubewarden-0.1.0.tgz
     version: 0.1.0
-generated: "2026-11-03T10:34:51.299372323Z"
+generated: "2026-11-10T13:35:59.77453248Z"
