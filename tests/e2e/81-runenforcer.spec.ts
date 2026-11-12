@@ -1,4 +1,4 @@
-import { test, expect } from './rancher/rancher-test'
+import { test } from './rancher/rancher-test'
 import { RancherExtensionsPage } from './rancher/rancher-extensions.page'
 import { RancherAppsPage } from './rancher/rancher-apps.page'
 import { RancherUI } from './components/rancher-ui'
@@ -14,17 +14,14 @@ test.beforeAll(async({ request }) => {
     .catch(() => fallback)
 })
 
-test('Install UI extension', { tag: '@re' }, async({ page, ui }) => {
+test('Install UI extension', { tag: '@re' }, async({ page }) => {
   const extensions = new RancherExtensionsPage(page)
   await extensions.goto()
 
   if (conf.ui_from === 'prime') {
     await test.step('Add official repository', async() => {
       await extensions.addRancherRepos({ rancher: true, partners: false })
-      await ui.retry(async() => {
-        await extensions.selectTab('Available')
-        await expect(extensions.getByName('SUSE Security Runtime Enforcer')).toBeVisible({ timeout: 30_000 })
-      }, 'Not showing Runtime Enforcer extension')
+      await extensions.waitForExtension('SUSE Security Runtime Enforcer')
     })
   }
 

@@ -17,17 +17,14 @@ test.beforeAll(async({ request }) => {
     .catch(() => fallback)
 })
 
-test('Install UI extension', { tag: '@vs' }, async({ page, ui }) => {
+test('Install UI extension', { tag: '@vs' }, async({ page }) => {
   const extensions = new RancherExtensionsPage(page)
   await extensions.goto()
 
   if (conf.ui_from === 'prime') {
     await test.step('Add official repository', async() => {
       await extensions.addRancherRepos({ rancher: true, partners: false })
-      await ui.retry(async() => {
-        await extensions.selectTab('Available')
-        await expect(extensions.getByName('SUSE Security Vulnerability Scanner')).toBeVisible({ timeout: 30_000 })
-      }, 'Not showing SBOMScanner extension')
+      await extensions.waitForExtension('SUSE Security Vulnerability Scanner')
     })
   }
 
