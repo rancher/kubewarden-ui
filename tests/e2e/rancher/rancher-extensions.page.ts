@@ -41,7 +41,19 @@ export class RancherExtensionsPage extends BasePage {
     }
     await setChecked(rancherRepo, options?.rancher)
     await setChecked(partnersRepo, options?.partners)
+    // Add & wait repository request to finish
     await this.ui.button('Add').click()
+    await this.page.waitForTimeout(300)
+  }
+
+  // Repository takes ~1 minute to load - https://github.com/rancher/rancher/issues/58504
+  // Page needs reload to show new extensions - https://github.com/rancher/dashboard/issues/19752
+  async waitForExtension(name: string|RegExp) {
+    await expect(async() => {
+      await this.page.reload()
+      await this.selectTab('Available')
+      await expect(this.getByName(name)).toBeVisible({ timeout: 7_000 })
+    }, 'Loading extensions').toPass({ timeout: 2 * 60_000, intervals: [1_000] })
   }
 
   /**

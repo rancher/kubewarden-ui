@@ -31,17 +31,14 @@ test.beforeAll(async({ request }) => {
   }
 })
 
-test('Install UI extension', { tag: '@ac' }, async({ page, ui }) => {
+test('Install UI extension', { tag: '@ac' }, async({ page }) => {
   const extensions = new RancherExtensionsPage(page)
   await extensions.goto()
 
   if (conf.ui_from === 'prime') {
     await test.step('Add official repository', async() => {
       await extensions.addRancherRepos({ rancher: true, partners: false })
-      await ui.retry(async() => {
-        await extensions.selectTab('Available')
-        await expect(extensions.getByName('SUSE Security Admission Controller')).toBeVisible({ timeout: 60_000 })
-      }, 'Not showing kubewarden extension')
+      await extensions.waitForExtension('SUSE Security Admission Controller')
     })
   }
 
