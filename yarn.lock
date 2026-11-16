@@ -2128,10 +2128,10 @@
   resolved "https://registry.yarnpkg.com/@jsep-plugin/regex/-/regex-1.1.0.tgz#3460b0b84cf3294dbfee86a3928d944589a739b8"
   integrity sha512-2Vkbda+XRjK6VTI6Lrh0sNBuMT8mZ51EhqMvO+V2rSdmqjs7NAGssxPZfkL23EFzYfSrvxyd1ZjOdqPQMM50og==
 
-"@kubernetes/client-node@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@kubernetes/client-node/-/client-node-2.0.1.tgz#bc26e68b8186d98dea73f4cf11dd94e8add37ee6"
-  integrity sha512-evJgmEtgArEYlj6DNkMGjK41IrFK/hEwb5lWVxx0VRBWybQpnvi+2TtA19mLgVfRHfqX5yjHObX6e9W7LEZBjw==
+"@kubernetes/client-node@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@kubernetes/client-node/-/client-node-2.0.2.tgz#da57584d01f513d631931555c89e2f7b167803ee"
+  integrity sha512-AvVq87luFXIoo95dkBsNnzU6pIwKGJM5CZD/iLfxMPXPzVa4w8isIMvXmYly+4TkodQFf3fQzX3KDysVy1OYng==
   dependencies:
     "@types/js-yaml" "^4.0.1"
     "@types/node" "^26.0.0"
