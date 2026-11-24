@@ -186,8 +186,9 @@ export default [
       '@stylistic/space-infix-ops':                 ['error', { "ignoreTypes": true }],
 
       '@stylistic/key-spacing':                     ['error', { align: { mode: 'minimum' }}],
-      '@stylistic/no-multi-spaces':                 ['error', { exceptions: { TSPropertySignature: true, PropertyDefinition: true }}],
+      '@stylistic/no-multi-spaces':                 ['error', { exceptions: { Property: true, TSPropertySignature: true, PropertyDefinition: true }}],
       '@stylistic/type-annotation-spacing':         'off',
+      '@stylistic/list-style':                      'off',
     },
   },
 
